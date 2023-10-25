@@ -1,0 +1,24 @@
+﻿@using Sig.App.Backend.Helpers
+
+@model Sig.App.Backend.EmailTemplates.Models.MarketManagerInviteEmail
+@{ Layout = "_EmailLayout.cshtml"; }
+
+<p>
+    Bonjour,
+</p>
+<p>
+    Nous vous accueillons avec joie en tant que marchand chez @Model.MarketName!
+</p>
+<p>
+    <a href="@Model.BaseUrl/@UrlHelper.RegistrationMarketManager(Model.To, Model.InviteToken)">Ouvrir votre compte</a>
+</p>
+<br />
+<p>
+    Hello,
+</p>
+<p>
+    We gladly welcome you as a merchant at @Model.MarketName!
+</p>
+<p>
+    <a href="@Model.BaseUrl/@UrlHelper.RegistrationMarketManager(Model.To, Model.InviteToken)">Open your account</a>
+</p>

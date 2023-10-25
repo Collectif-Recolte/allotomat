@@ -1,0 +1,12 @@
+{
+  "fr": {
+    "authentication-login-error": "Un problème est survenu lors de la connexion.",
+    "authentication-login-bad-credentials": "Le mot de passe ou le courriel n'est pas valide.",
+    "authentication-login-unconfirmed": "Votre adresse courriel n'est pas confirmée."
+  },
+  "en": {
+    "authentication-login-error": "An error occured while trying to log you in.",
+    "authentication-login-bad-credentials": "Invalid email or password.",
+    "authentication-login-unconfirmed": "Your e-mail address has not yet been confirmed."
+  }
+}

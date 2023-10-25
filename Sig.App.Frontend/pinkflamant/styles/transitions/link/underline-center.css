@@ -1,0 +1,35 @@
+@layer components {
+  /*! purgecss start ignore */
+  .pf-transition-link-underline-center {
+    & {
+      @apply no-underline
+    text-primary-500
+    hover:text-primary-500
+    focus:text-primary-500;
+    }
+
+    &::before {
+      content: "";
+      height: 2px;
+      @apply absolute 
+      block 
+      w-full
+      -bottom-1.5 
+      left-0 
+      bg-current 
+      transform 
+      scale-x-0 
+      transition-transform 
+      ease-in-out 
+      duration-300;
+    }
+
+    &:hover {
+      &::before {
+        @apply transform
+        scale-x-100;
+      }
+    }
+  }
+  /*! purgecss end ignore */
+}

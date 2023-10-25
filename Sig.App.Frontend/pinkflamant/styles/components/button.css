@@ -1,0 +1,146 @@
+@layer components {
+  .pf-button {
+    @apply inline-flex
+        items-center
+        justify-center
+        border-0
+        border-transparent
+        bg-transparent
+        text-center
+        text-p1
+        font-semibold
+        leading-none
+        rounded-lg
+        relative     
+        transition
+        duration-200
+        ease-in-out
+        ring-offset-2
+        outline-0
+        focus-visible:ring-2;
+
+    &[disabled],
+    &[readonly],
+    fieldset[disabled] & {
+      @apply cursor-not-allowed;
+    }
+
+    &,
+    .pf-transition__content {
+      @apply px-5 min-w-11 min-h-11;
+    }
+
+    &--sm,
+    &--sm .pf-transition__content {
+      @apply px-4
+            min-h-10
+            min-w-10
+            text-p2;
+    }
+
+    &--lg,
+    &--lg .pf-transition__content {
+      @apply px-8
+            min-w-12
+            min-h-12;
+    }
+
+    &--icon {
+      @apply p-2;
+    }
+
+    &--grouped {
+      @apply rounded-none;
+    }
+
+    &--primary {
+      @apply text-white
+            bg-primary-700
+            hover:bg-primary-900
+            ring-primary-900;
+
+      &[disabled],
+      &[readonly] {
+        @apply bg-grey-400 
+        hover:bg-grey-400         
+        ring-grey-600;
+      }
+    }
+
+    &--secondary {
+      @apply text-white
+      bg-tertiary-500
+      hover:bg-tertiary-800
+      ring-tertiary-800;
+
+      &[disabled],
+      &[readonly] {
+        @apply bg-grey-400
+        hover:bg-grey-400         
+        ring-grey-600;
+      }
+    }
+
+    &--outline {
+      @apply border
+            text-primary-700
+            border-primary-700
+            hover:bg-primary-100
+            ring-primary-700;
+
+      &[disabled],
+      &[readonly] {
+        @apply text-grey-600
+        border-transparent
+        bg-grey-100
+        hover:bg-grey-100
+        ring-grey-600;
+      }
+    }
+
+    &--dash {
+      @apply border
+            border-dashed
+            text-primary-500
+            border-primary-700
+            hover:bg-primary-100
+            ring-primary-700;
+
+      &[disabled],
+      &[readonly] {
+        @apply text-grey-600
+        border-transparent
+        bg-grey-100
+        hover:bg-grey-100
+        ring-grey-600;
+      }
+    }
+
+    &--link {
+      @apply p-0
+            min-h-0
+            underline
+            text-primary-700
+            ring-primary-700
+            hover:text-tertiary-500;
+
+      &:after {
+        @apply absolute
+                block
+                top-1/2
+                left-1/2;
+        content: "";
+        transform: translate(-50%, -50%);
+        width: calc(100% + theme("spacing.4") * 2);
+        height: calc(100% + theme("spacing.2") * 2);
+      }
+
+      &[disabled],
+      &[readonly] {
+        @apply text-grey-400
+              ring-grey-600
+              hover:text-grey-400;
+      }
+    }
+  }
+}

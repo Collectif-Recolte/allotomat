@@ -1,0 +1,13 @@
+/* Pour que les utilitaires override les styles de base,
+l'ordre d'importation est important. */
+
+@import "tailwindcss/base";
+@import "./base/_base.css";
+
+@import "tailwindcss/components";
+@import "../../../pinkflamant/styles/components/_components.css";
+@import "../../../pinkflamant/styles/helpers/_helpers.css";
+@import "../../../pinkflamant/styles/animations/_animations.css";
+@import "../../../pinkflamant/styles/transitions/_transitions.css";
+
+@import "tailwindcss/utilities";

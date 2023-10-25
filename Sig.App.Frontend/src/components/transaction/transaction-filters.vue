@@ -1,0 +1,328 @@
+<i18n>
+{
+	"en": {
+    "date-selector-from": "Interval from",
+    "date-selector-to": "to",
+    "date-start-label": "Start date of transactions",
+    "date-end-label": "End date of transactions",
+    "organizations": "Organizations",
+		"beneficiary-type": "Categories",
+    "subscription": "Subscriptions",
+    "without-subscription-option": "None",
+    "transaction-log-types": "Transaction types",
+    "transaction-log-type-expired": "Funds expired",
+    "transaction-log-type-loyalty": "Gift Card",
+    "transaction-log-type-manually": "Fund added manually",
+    "transaction-log-type-off-platform": "Adding Fund (Off-Platform Participant)",
+    "transaction-log-type-subscription": "Subscription",
+    "transaction-log-type-payment": "Payment",
+    "transaction-log-type-transfer": "Fund transferred",
+    "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Budget allowance refund from unassigned card",
+    "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Budget allowances refund from participant having no cards",
+    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Budget allowance refund from participant removed from subscription"
+	},
+	"fr": {
+    "date-selector-from": "Intervalle du",
+    "date-selector-to": "au",
+    "date-start-label": "Date de début des transactions",
+    "date-end-label": "Date de fin des transactions",
+    "organizations": "Organisations",
+		"beneficiary-type": "Catégories",
+    "subscription": "Abonnements",
+    "without-subscription-option": "Aucun",
+    "transaction-log-types": "Types de transactions",
+    "transaction-log-type-expired": "Expiration des fonds",
+    "transaction-log-type-loyalty": "Carte-cadeau",
+    "transaction-log-type-manually": "Fond ajouté manuellement",
+    "transaction-log-type-off-platform": "Ajout de fond (participant hors plateforme)",
+    "transaction-log-type-subscription": "Abonnement",
+    "transaction-log-type-payment": "Paiement",
+    "transaction-log-type-transfer": "Fond transféré",
+    "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Enveloppes remboursées après la désassignation d'une carte",
+    "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Enveloppes remboursées en raison d'un participant sans carte",
+    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppes remboursée après avoir retiré un participant d'un abonnement"
+	}
+}
+</i18n>
+
+<template>
+  <UiFilter
+    :model-value="modelValue"
+    has-search
+    has-filters
+    items-can-wrap
+    :has-active-filters="hasActiveFilters"
+    :active-filters-count="activeFiltersCount"
+    @resetFilters="onResetFilters"
+    @search="onSearch"
+    @update:modelValue="(e) => emit('update:modelValue', e)">
+    <template #prependElements>
+      <div class="text-right mb-2 w-full xs:flex xs:gap-x-4 xs:justify-end sm:mb-0 xl:w-auto">
+        <div class="flex items-center justify-end gap-x-4 mb-2 xs:mb-0">
+          <span class="text-sm text-primary-700">{{ t("date-selector-from") }}</span>
+          <UiDatePicker
+            id="datefrom"
+            :value="dateFrom"
+            class="sm:col-span-6"
+            :label="t('date-start-label')"
+            has-hidden-label
+            @update:modelValue="(e) => emit('dateFromUpdated', e)" />
+        </div>
+        <div class="flex items-center justify-end gap-x-4">
+          <span class="text-sm text-primary-700">{{ t("date-selector-to") }}</span>
+          <UiDatePicker
+            id="dateTo"
+            :value="dateTo"
+            :min-date="dateFrom"
+            class="sm:col-span-6"
+            :label="t('date-end-label')"
+            has-hidden-label
+            @update:modelValue="(e) => emit('dateToUpdated', e)" />
+        </div>
+      </div>
+    </template>
+    <PfFormInputCheckboxGroup
+      v-if="availableOrganizations.length > 0"
+      id="organizations"
+      is-filter
+      :value="selectedOrganizations"
+      :label="t('organizations')"
+      :options="availableOrganizations"
+      @input="onOrganizationsChecked" />
+    <PfFormInputCheckboxGroup
+      v-if="availableBeneficiaryTypes.length > 0"
+      id="beneficiary-types"
+      class="mt-3"
+      is-filter
+      :value="selectedBeneficiaryTypes"
+      :label="t('beneficiary-type')"
+      :options="availableBeneficiaryTypes"
+      @input="onBeneficiaryTypesChecked" />
+    <PfFormInputCheckboxGroup
+      v-if="availableSubscriptions.length > 0"
+      id="subscriptions"
+      class="mt-3"
+      is-filter
+      :value="selectedSubscriptions"
+      :label="t('subscription')"
+      :options="availableSubscriptions"
+      @input="onSubscriptionsChecked" />
+    <PfFormInputCheckboxGroup
+      v-if="availableTransactionTypes.length > 0"
+      id="transactionTypes"
+      class="mt-3"
+      is-filter
+      :value="selectedTransactionTypes"
+      :label="t('transaction-log-types')"
+      :options="availableTransactionTypes"
+      @input="onTransactionTypesChecked" />
+  </UiFilter>
+</template>
+
+<script setup>
+import { defineProps, defineEmits, computed } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
+
+const emit = defineEmits([
+  "organizationsChecked",
+  "organizationsUnchecked",
+  "subscriptionsChecked",
+  "subscriptionsUnchecked",
+  "beneficiaryTypesChecked",
+  "beneficiaryTypesUnchecked",
+  "resetFilters",
+  "search",
+  "update:modelValue",
+  "transactionTypesChecked",
+  "transactionTypesUnchecked",
+  "dateFromUpdated",
+  "dateToUpdated"
+]);
+
+const props = defineProps({
+  availableOrganizations: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
+  selectedOrganizations: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
+  availableBeneficiaryTypes: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
+  selectedBeneficiaryTypes: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
+  availableSubscriptions: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
+  selectedSubscriptions: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
+  selectedTransactionTypes: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
+  withoutSubscriptionId: {
+    type: String,
+    default: ""
+  },
+  beneficiaryStatusActive: {
+    type: String,
+    default: ""
+  },
+  beneficiaryStatusInactive: {
+    type: String,
+    default: ""
+  },
+  modelValue: {
+    type: String,
+    default: ""
+  },
+  searchFilter: {
+    type: String,
+    default: ""
+  },
+  dateFrom: {
+    type: Date,
+    default: undefined
+  },
+  dateTo: {
+    type: Date,
+    default: undefined
+  },
+  administrationSubscriptionsOffPlatform: {
+    type: Boolean,
+    default: false
+  }
+});
+
+const hasActiveFilters = computed(() => {
+  return (
+    props.selectedOrganizations?.length > 0 ||
+    props.selectedBeneficiaryTypes?.length > 0 ||
+    props.selectedSubscriptions?.length > 0 ||
+    props.selectedTransactionTypes?.length > 0 ||
+    !!props.searchFilter
+  );
+});
+
+const activeFiltersCount = computed(() => {
+  const selectedOrganizationsCount = props.selectedOrganizations?.length ?? 0;
+  const selectedBeneficiariesCount = props.selectedBeneficiaryTypes?.length ?? 0;
+  const selectedSubscritionsCount = props.selectedSubscriptions?.length ?? 0;
+  const selectedTransactionTypesCount = props.selectedTransactionTypes?.length ?? 0;
+  return selectedOrganizationsCount + selectedBeneficiariesCount + selectedSubscritionsCount + selectedTransactionTypesCount;
+});
+
+const availableOrganizations = computed(() => {
+  if (!props.availableOrganizations || props.availableOrganizations?.length <= 0) return [];
+  return props.availableOrganizations.map((x) => ({ value: x.id, label: x.name }));
+});
+
+const availableBeneficiaryTypes = computed(() => {
+  if (!props.availableBeneficiaryTypes || props.availableBeneficiaryTypes?.length <= 0) return [];
+  return props.availableBeneficiaryTypes.map((x) => ({ value: x.id, label: x.name }));
+});
+
+const availableSubscriptions = computed(() => {
+  if (props.administrationSubscriptionsOffPlatform) {
+    return [];
+  }
+  let subscriptions = [];
+  if (props.availableSubscriptions && props.availableSubscriptions?.length > 0) {
+    subscriptions = props.availableSubscriptions.map((x) => ({ value: x.id, label: x.name }));
+  }
+
+  if (props.withoutSubscriptionId !== "") {
+    subscriptions.push({ value: props.withoutSubscriptionId, label: t("without-subscription-option") });
+  }
+
+  return subscriptions;
+});
+
+const availableTransactionTypes = computed(() => {
+  return [
+    { value: "ExpireFundTransactionLog", label: t("transaction-log-type-expired") },
+    { value: "LoyaltyAddingFundTransactionLog", label: t("transaction-log-type-loyalty") },
+    { value: "ManuallyAddingFundTransactionLog", label: t("transaction-log-type-manually") },
+    { value: "OffPlatformAddingFundTransactionLog", label: t("transaction-log-type-off-platform") },
+    { value: "SubscriptionAddingFundTransactionLog", label: t("transaction-log-type-subscription") },
+    { value: "PaymentTransactionLog", label: t("transaction-log-type-payment") },
+    { value: "TransferFundTransactionLog", label: t("transaction-log-type-transfer") },
+    {
+      value: "RefundBudgetAllowanceFromUnassignedCardTransactionLog",
+      label: t("transaction-log-type-refund-budget-allowance-from-unassigned-card")
+    },
+    {
+      value: "RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog",
+      label: t("transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund")
+    },
+    {
+      value: "RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog",
+      label: t("transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription")
+    }
+  ];
+});
+
+function onOrganizationsChecked(input) {
+  if (input.isChecked) {
+    emit("organizationsChecked", input.value);
+  } else {
+    emit("organizationsUnchecked", input.value);
+  }
+}
+
+function onSubscriptionsChecked(input) {
+  if (input.isChecked) {
+    emit("subscriptionsChecked", input.value);
+  } else {
+    emit("subscriptionsUnchecked", input.value);
+  }
+}
+
+function onBeneficiaryTypesChecked(input) {
+  if (input.isChecked) {
+    emit("beneficiaryTypesChecked", input.value);
+  } else {
+    emit("beneficiaryTypesUnchecked", input.value);
+  }
+}
+
+function onTransactionTypesChecked(input) {
+  if (input.isChecked) {
+    emit("transactionTypesChecked", input.value);
+  } else {
+    emit("transactionTypesUnchecked", input.value);
+  }
+}
+
+function onResetFilters() {
+  emit("resetFilters");
+}
+
+function onSearch() {
+  emit("search");
+}
+</script>

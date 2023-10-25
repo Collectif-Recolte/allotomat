@@ -1,0 +1,375 @@
+@import "./webfonts.css";
+
+@layer base {
+  :root {
+    /*  Define custom grid-gap for grid-tiles components
+        To be used with Tailwind custom margin utility 'm*-grid-gap' */
+    --pf-grid-gap: theme("spacing.4");
+    /*  Define horizontal padding for uiBlock component
+        To be used with Tailwind custom width utility 'width-{screen}' */
+    --pf-section-padding: theme("spacing.5");
+
+    @media screen("xs") {
+      --pf-section-padding: theme("spacing.12");
+    }
+
+    @media screen("md") {
+      --pf-grid-gap: theme("spacing.8");
+    }
+  }
+
+  *,
+  *::before,
+  *::after {
+    @apply box-border;
+  }
+
+  ::selection {
+    @apply bg-primary-500 
+    text-white;
+  }
+
+  ::-moz-selection {
+    @apply bg-primary-500
+    text-white;
+  }
+
+  html {
+    @apply font-sans;
+    font-size: 14px; /* Important for scaling TailwindCSS REM unit */
+    scroll-behavior: smooth;
+    -ms-overflow-style: scrollbar;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+    @screen xs {
+      font-size: 15px;
+    }
+
+    @screen sm {
+      font-size: 16px;
+    }
+
+    @screen lg {
+      font-size: 17px;
+    }
+
+    @screen xl {
+      font-size: 18px;
+    }
+  }
+
+  body {
+    @apply bg-white
+        text-black
+        font-sans
+        font-normal
+        leading-normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    @apply font-family-inherit
+        leading-inherit
+        text-size-inherit;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  img {
+    @apply align-middle;
+  }
+
+  /* Empêche les images imprévues de petter le site, 
+    // si une balise image n'a pas d'attribut de classe. */
+  img:not([class]) {
+    @apply h-auto 
+        max-w-full;
+  }
+
+  a {
+    @apply text-primary-500
+    hover:text-primary-500
+    focus:text-primary-500;
+
+    &[href^="tel:"] {
+      @apply text-current
+      cursor-text
+      no-underline;
+    }
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-black
+    font-family-inherit
+    font-bold
+    leading-tight;
+  }
+
+  h1 {
+    @apply text-h1
+    font-extrabold
+    mb-8 
+    mt-12
+    leading-none;
+  }
+
+  h2 {
+    @apply text-h2
+    font-extrabold
+    mb-6 
+    mt-10
+    leading-none;
+  }
+
+  h3 {
+    @apply text-h3
+    mb-6 
+    mt-10;
+  }
+
+  h4 {
+    @apply text-h4
+    mb-4 
+    mt-8;
+  }
+
+  h5 {
+    @apply text-h5
+    mb-4 
+    mt-8;
+  }
+
+  h6 {
+    @apply text-h6 
+    mb-4 
+    mt-6;
+  }
+
+  hr {
+    @apply bg-grey-300 
+    border-0 
+    h-0 
+    p-0 
+    pt-px;
+  }
+
+  blockquote,
+  pre {
+    @apply my-6;
+  }
+
+  p,
+  ol,
+  ul,
+  dl {
+    @apply mb-4 
+      mt-0;
+  }
+
+  ol,
+  ul {
+    @apply list-none
+      p-0;
+  }
+
+  ol ol,
+  ul ul,
+  ol ul,
+  ul ol {
+    @apply list-none
+      mb-0
+      p-0;
+  }
+
+  table {
+    @apply border-collapse;
+  }
+
+  th {
+    @apply text-left;
+  }
+
+  a,
+  area,
+  button,
+  input,
+  label,
+  select,
+  summary,
+  textarea {
+    @media screen {
+      touch-action: manipulation;
+    }
+  }
+
+  ul:not([class]),
+  ol:not([class]) {
+    @apply list-none
+      overflow-hidden /* Solve problem with float element */
+      pl-0;
+
+    & > li {
+      @apply mt-2.5
+        pl-12
+        relative;
+
+      &::before {
+        @apply bg-grey-200
+          left-0
+          absolute;
+      }
+
+      &:first-child {
+        @apply mt-0;
+      }
+    }
+
+    li > & {
+      @apply mt-2.5;
+    }
+  }
+
+  ul:not([class]) {
+    & > li::before {
+      @apply bg-grey-300
+        w-8
+        block
+        absolute;
+      content: "";
+      height: 2px;
+      top: calc(theme("lineHeight.normal") * 0.5em - 1px);
+    }
+  }
+
+  ol:not([class]) {
+    counter-reset: section;
+
+    & > li::before {
+      @apply font-semibold
+        bg-transparent
+        text-p4
+        w-8
+        absolute
+        block
+        -top-px
+        left-0;
+      counter-increment: section;
+      content: counter(section);
+      counter-increment: section;
+    }
+
+    & > li::after {
+      @apply bg-grey-300
+      block
+      absolute
+      left-5
+      w-4;
+      height: 2px;
+      top: calc(theme("lineHeight.normal") * 0.5em - 1px);
+      content: "";
+    }
+  }
+
+  small {
+    @apply text-p4;
+  }
+
+  @media print {
+    @page {
+      margin: 2cm;
+    }
+
+    body {
+      /* @apply not allowed in @media  rule */
+      color: theme("colors.black");
+      font-family: theme("fontFamily.sans");
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    img {
+      max-width: 100% !important;
+    }
+
+    h1 {
+      font-size: 24pt;
+    }
+
+    h2 {
+      font-size: 14pt;
+      margin-top: 25px;
+    }
+
+    p {
+      orphans: 3;
+      widows: 3;
+    }
+
+    a,
+    a:visited {
+      text-decoration: underline;
+    }
+
+    a:not([class])[href]:after {
+      content: " (" attr(href) ")";
+    }
+
+    a[href^="#"]:after,
+    a[href^="tel"]:after {
+      content: "";
+    }
+
+    a {
+      word-wrap: break-word;
+    }
+
+    a {
+      page-break-inside: avoid;
+    }
+
+    blockquote {
+      page-break-inside: avoid;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      page-break-after: avoid;
+      page-break-inside: avoid;
+    }
+
+    img {
+      page-break-inside: avoid;
+      page-break-after: avoid;
+    }
+
+    table,
+    pre,
+    tr {
+      page-break-inside: avoid;
+    }
+
+    ul,
+    ol,
+    dl {
+      page-break-before: avoid;
+    }
+  }
+}

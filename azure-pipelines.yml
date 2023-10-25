@@ -1,0 +1,110 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - master
+      - release/*
+      - uat
+
+variables:
+  BuildConfiguration: Release
+  NUGET_PACKAGES: $(Build.SourcesDirectory)/packages
+
+jobs:
+  - job: frontend
+    pool:
+      vmImage: 'ubuntu-latest'
+    displayName: Build Frontend
+    steps:
+      - checkout: self
+        submodules: true
+
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '14.17.x'
+        displayName: 'Install Node.js'
+
+      - script: |
+          npm install
+        displayName: 'install'
+        workingDirectory: "Sig.App.Frontend/"
+
+      - script: |
+          npm run build
+        displayName: 'build'
+        workingDirectory: "Sig.App.Frontend/"
+
+      - script: "npm run test:unit -- --ci --reporters=jest-junit --reporters=default"
+        displayName: "Run unit tests"
+        workingDirectory: "Sig.App.Frontend/"
+
+      - task: PublishTestResults@2
+        condition: succeededOrFailed()
+        inputs:
+          testResultsFiles: "Sig.App.Frontend/junit.xml"
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathtoPublish: "Sig.App.Frontend/dist"
+          artifactName: frontend
+
+  - job: api
+    pool:
+      vmImage: 'ubuntu-latest'
+    displayName: Build API
+    dependsOn: frontend
+    steps:
+      - checkout: self
+        fetchDepth: 0
+        
+      - task: UseDotNet@2
+        displayName: Install .net core tools
+        inputs:
+          packageType: sdk
+          version: 6.0.x
+
+      - task: DotNetCoreCLI@2
+        displayName: Restore
+        inputs:
+          command: restore
+          projects: "**/*.csproj"
+        condition: ne(variables['CacheRestored'], 'true')
+
+      - task: DownloadBuildArtifacts@0
+        displayName: Download frontend build
+        inputs:
+          buildType: current
+          downloadType: single
+          artifactName: frontend
+          downloadPath: "./artifacts"
+          
+      - task: CopyFiles@2
+        displayName: Copy frontend build to proper folder
+        inputs:
+          sourceFolder: "./artifacts/frontend"
+          targetFolder: "./Sig.App.Backend/ClientApp"
+
+      - task: DotNetCoreCLI@2
+        displayName: Build
+        inputs:
+          projects: "**/*.csproj"
+          arguments: "--configuration $(BuildConfiguration)"
+
+      - task: DotNetCoreCLI@2
+        displayName: Test
+        inputs:
+          command: test
+          projects: "Sig.App.BackendTests/*.csproj"
+          arguments: "--configuration $(BuildConfiguration)"
+
+      - task: DotNetCoreCLI@2
+        displayName: Publish
+        inputs:
+          command: publish
+          arguments: "--configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)"
+          zipAfterPublish: True
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathtoPublish: "$(build.artifactstagingdirectory)"
+          artifactName: api

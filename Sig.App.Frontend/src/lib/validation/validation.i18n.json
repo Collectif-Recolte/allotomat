@@ -1,0 +1,102 @@
+{
+  "fr": {
+    "validator-mixed-default": "Le champ «\u202f{label}\u202f» est invalide",
+    "validator-mixed-required": "Le champ «\u202f{label}\u202f» est obligatoire",
+    "validator-mixed-defined": "Le «\u202f{label}\u202f» doit être défini",
+    "validator-mixed-notNull": "Le «\u202f{label}\u202f» ne peut pas être nul",
+    "validator-mixed-oneOf": "Le «\u202f{label}\u202f» doit être l'une des valeurs suivantes : {values}",
+    "validator-mixed-notOneOf": "Le «\u202f{label}\u202f» ne doit pas être l'une des valeurs suivantes : {values}",
+    "validator-mixed-notType-castMsg": " (converti à partir de la valeur {value}).",
+    "validator-mixed-notType-isNotMixed": "Le «\u202f{label}\u202f» doit être un type {type}, mais la valeur finale était : {value}{castMsg}",
+    "validator-mixed-notType-isMixed": "Le «\u202f{label}\u202f» doit correspondre au type configuré. La valeur validée était : {value}{castMsg}",
+
+    "validator-string-length": "Le champ «\u202f{label}\u202f» doit contenir exactement {length} caractères",
+    "validator-string-min": "Le champ «\u202f{label}\u202f» doit comporter au moins {min} caractères",
+    "validator-string-max": "Le champ «\u202f{label}\u202f» doit contenir au plus {max} caractères",
+    "validator-string-matches": "Le champ «\u202f{label}\u202f» doit correspondre aux éléments suivants : \"{regex}\"",
+    "validator-string-email": "Le champ «\u202f{label}\u202f» doit être une adresse e-mail valide",
+    "validator-string-url": "Le champ «\u202f{label}\u202f» doit être une URL valide",
+    "validator-string-uuid": "Le champ «\u202f{label}\u202f» doit être un UUID valide",
+    "validator-string-trim": "Le champ «\u202f{label}\u202f» ne doit pas contenir d'espace au début ni à la fin du texte",
+    "validator-string-lowercase": "Le champ «\u202f{label}\u202f» doit contenir uniquement des caractères minuscule",
+    "validator-string-uppercase": "Le champ «\u202f{label}\u202f» doit contenir uniquement des caractères majuscule",
+    "validator-string-isPassword": "Le mot de passe n'est pas valide.",
+    "validator-string-samePassword": "Le mot de passe et sa confirmation doivent correspondre.",
+    "validator-string-requiredHtml": "Le champ «\u202f{label}\u202f» est obligatoire",
+    "validator-string-sameValue": "Le champ «\u202f{label}\u202f» doit correspondre à la valeur attendue",
+
+    "validator-number-min": "Le champ «\u202f{label}\u202f» doit être supérieur ou égal à {min}",
+    "validator-number-max": "Le champ «\u202f{label}\u202f» doit être inférieur ou égal à {max}",
+    "validator-number-lessThan": "Le champ «\u202f{label}\u202f» doit être inférieur à {less}",
+    "validator-number-moreThan": "Le champ «\u202f{label}\u202f» doit être supérieur à {more}",
+    "validator-number-positive": "Le champ «\u202f{label}\u202f» doit être un nombre positif",
+    "validator-number-negative": "Le champ «\u202f{label}\u202f» doit être un nombre négatif",
+    "validator-number-integer": "Le champ «\u202f{label}\u202f» doit être un entier",
+    "validator-number-between": "Le champ «\u202f{label}\u202f» doit être compris entre {min} et {max}",
+
+    "validator-date-min": "Le champ «\u202f{label}\u202f» le champ doit être supérieur à {min}",
+    "validator-date-max": "Le champ «\u202f{label}\u202f» le champ doit être antérieur à {max}",
+
+    "validator-boolean-isValue": "Le champ «\u202f{label}\u202f» le champ doit être {value}",
+
+    "validator-object-noUnknown": "Le champ «\u202f{label}\u202f» le champ a des clés non spécifiées : {unknown}",
+    "validator-object-isImage": "Le fichier choisi doit être une image (jpg|svg|jpeg|png|bmp|gif|webp)",
+
+    "validator-array-min": "Le champ «\u202f{label}\u202f» le champ doit contenir au moins {min} éléments",
+    "validator-array-max": "Le champ «\u202f{label}\u202f» le champ doit avoir moins ou égal à {max} éléments",
+    "validator-array-length": "Le champ «\u202f{label}\u202f» doit avoir {length} éléments",
+
+    "validator-tuple-notEnoughtItem": "Le champ «\u202f{label}\u202f» la valeur de tuple a trop peu d'éléments, une longueur de {expectedLength} était attendue, mais une longueur de {length} a été soumis pour la valeur : {value}",
+    "validator-tuple-tooMuchItem": "Le champ «\u202f{label}\u202f» la valeur de tuple a trop d'éléments, une longueur de {expectedLength} était attendue, mais une longueur de {length} a été soumis pour la valeur : {value}"
+  },
+  "en": {
+    "validator-mixed-default": "The \"{label}\" field is not valid",
+    "validator-mixed-required": "The \"{label}\" field is required",
+    "validator-mixed-defined": "The \"{label}\" must be defined",
+    "validator-mixed-notNull": "The \"{label}\" cannot be null",
+    "validator-mixed-oneOf": "The \"{label}\" must be one of the following values: {values}",
+    "validator-mixed-notOneOf": "The \"{label}\" must not be one of the following values: {values}",
+    "validator-mixed-notType-castMsg": " (cast from the value {value}).",
+    "validator-mixed-notType-isNotMixed": "The \"{label}\" must be a {type} type, but the final value was: {value}{castMsg}",
+    "validator-mixed-notType-isMixed": "The \"{label}\" must match the configured type. The validated value was: {value}{castMsg}",
+
+    "validator-string-length": "The \"{label}\" must be exactly {length} characters",
+    "validator-string-min": "The \"{label}\" must be at least {min} characters",
+    "validator-string-max": "The \"{label}\" must be at most {max} characters",
+    "validator-string-matches": "The \"{label}\" must match the following: \"{regex}\"",
+    "validator-string-email": "The \"{label}\" field must be a valid email",
+    "validator-string-url": "The \"{label}\" must be a valid URL",
+    "validator-string-uuid": "The \"{label}\" must be a valid UUID",
+    "validator-string-trim": "The \"{label}\" must be a trimmed string",
+    "validator-string-lowercase": "The \"{label}\" must be a lowercase string",
+    "validator-string-uppercase": "The \"{label}\" must be a upper case string",
+    "validator-string-isPassword": "The password is invalid.",
+    "validator-string-samePassword": "The passwords must be the same.",
+    "validator-string-requiredHtml": "The \"{label}\" field is required",
+    "validator-string-sameValue": "The \"{label}\" field should match the expected value",
+
+    "validator-number-min": "The \"{label}\" must be greater than or equal to {min}",
+    "validator-number-max": "The \"{label}\" must be less than or equal to {max}",
+    "validator-number-lessThan": "The \"{label}\" must be less than {less}",
+    "validator-number-moreThan": "The \"{label}\" must be greater than {more}",
+    "validator-number-positive": "The \"{label}\" must be a positive number",
+    "validator-number-negative": "The \"{label}\" must be a negative number",
+    "validator-number-integer": "The \"{label}\" must be an integer",
+    "validator-number-between": "The \"{label}\" field must be between {min} and {max}",
+
+    "validator-date-min": "The \"{label}\" field must be later than {min}",
+    "validator-date-max": "The \"{label}\" field must be at earlier than {max}",
+
+    "validator-boolean-isValue": "The \"{label}\" field must be {value}",
+
+    "validator-object-noUnknown": "The \"{label}\" field has unspecified keys: {unknown}",
+    "validator-object-isImage": "The chosen file must be an image (jpg|svg|jpeg|png|bmp|gif|webp)",
+
+    "validator-array-min": "The \"{label}\" field must have at least {min} items",
+    "validator-array-max": "The \"{label}\" field must have less than or equal to {max} items",
+    "validator-array-length": "The \"{label}\" must have {length} items",
+
+    "validator-tuple-notEnoughtItem": "The \"{label}\" tuple value has too few items, expected a length of {expectedLength} but got {length} for value: {value}",
+    "validator-tuple-tooMuchItem": "The \"{label}\" tuple value has too many items, expected a length of {expectedLength} but got {length} for value: {value}"
+  }
+}

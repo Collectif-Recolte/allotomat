@@ -1,0 +1,22 @@
+@layer components {
+  /*! purgecss start ignore */
+  .h-extend-cursor-area {
+    &:after {
+      @apply absolute
+      block
+      top-1/2
+      left-1/2;
+      content: "";
+      transform: translate(-50%, -50%);
+      width: calc(100% + theme("spacing.4") * 2);
+      height: calc(100% + theme("spacing.2") * 2);
+    }
+
+    &--lg {
+      &:after {
+        height: calc(100% + theme("spacing.6") * 2);
+      }
+    }
+  }
+  /*! purgecss end ignore */
+}

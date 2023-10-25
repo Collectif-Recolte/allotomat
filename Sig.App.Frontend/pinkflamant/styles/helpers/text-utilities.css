@@ -1,0 +1,32 @@
+@layer components {
+  /* Display1 */
+  .h-font-display1 {
+    @apply text-h1 
+    xs:text-d1
+    font-extralight
+    mb-8
+    mt-12;
+  }
+
+  /* Display2 */
+  .h-font-display2 {
+    @apply text-h3
+    xs:text-d2
+    font-normal
+    uppercase
+    tracking-wide
+    mb-8
+    mt-12;
+  }
+
+  /* Lead1 */
+  .h-lead {
+    @apply text-p1
+    font-light;
+  }
+
+  /* Body2 */
+  .h-small {
+    @apply text-p4;
+  }
+}

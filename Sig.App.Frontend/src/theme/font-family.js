@@ -1,0 +1,33 @@
+module.exports = {
+  "family-inherit": "inherit", // Class: .font-family-inherit
+  sans: [
+    "BlinkMacSystemFont",
+    "-apple-system",
+    "Segoe UI",
+    "Roboto",
+    "Oxygen",
+    "Ubuntu",
+    "Cantarell",
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
+    "Helvetica",
+    "Arial",
+    "sans-serif",
+  ],
+  display: [
+    "BlinkMacSystemFont",
+    "-apple-system",
+    "Segoe UI",
+    "Roboto",
+    "Oxygen",
+    "Ubuntu",
+    "Cantarell",
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
+    "Helvetica",
+    "Arial",
+    "sans-serif",
+  ],
+};

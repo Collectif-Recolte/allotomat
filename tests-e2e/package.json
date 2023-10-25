@@ -1,0 +1,18 @@
+{
+  "name": "sig-app-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "playwright install",
+    "test:chromium": "playwright test --project=chromium",
+    "test:debug": "playwright test --project=chromium --debug",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.16.3",
+    "prettier": "^2.4.1"
+  },
+  "volta": {
+    "node": "14.17.5"
+  }
+}

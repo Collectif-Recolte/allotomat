@@ -1,0 +1,419 @@
+/* eslint-disable @intlify/vue-i18n/no-unused-keys */
+<i18n>
+{
+	"en": {
+		"amount-label": "{productGroupName}",
+    "amount-after-label": "Balance: {amountAvailable}",
+    "confirmation-amount-label": "{productGroupName}",
+    "amount-validation-label": "Amount",
+		"amount-placeholder": "Ex. {amount}",
+		"cancel": "Cancel",
+    "product-groups": "Product groups",
+		"product-group-fund-not-enought": "The product group does not have enough funds",
+		"card-selected": "Card #{cardProgramCardId}",
+		"create-transaction": "Pay",
+		"title": "Transaction",
+    "title-confirm": "Confirmation",
+    "amount-charged": "The card will be charged ",
+    "confirm": "Confirm",
+    "edit": "Revise",
+    "gift-card": "Gift card",
+    "no-product-group-transaction":"At least one product group must have an amount to create a transaction.",
+    "no-funds-message": "There are no available funds on this card."
+	},
+	"fr": {
+		"amount-label": "{productGroupName}",
+    "amount-after-label": "Solde: {amountAvailable}",
+    "confirmation-amount-label": "{productGroupName}",
+    "amount-validation-label": "Solde",
+		"amount-placeholder": "Ex. {amount}",
+		"cancel": "Annuler",
+    "product-groups": "Groupes de produits",
+		"product-group-fund-not-enought": "Le groupe de produits ne possède pas assez de fonds",
+		"card-selected": "Carte #{cardProgramCardId}",
+		"create-transaction": "Payer",
+		"title": "Transaction",
+    "title-confirm": "Confirmation",
+    "amount-charged": "La carte sera débitée de ",
+    "confirm": "Confirmer",
+    "edit": "Réviser",
+    "gift-card": "Carte-cadeau",
+    "no-product-group-transaction":"Au minimum un groupe de produit doit avoir un montant pour créer une transaction.",
+    "no-funds-message": "Il n'y a pas de fonds disponibles sur cette carte."
+	}
+}
+</i18n>
+
+<template>
+  <div class="py-5 px-4 xs:px-8">
+    <div class="bg-white rounded-2xl pt-6 pb-3 px-3 xs:p-6 h-remove-margin">
+      <h1 class="font-semibold mb-2">{{ currentStep === 0 ? t("title") : t("title-confirm") }}</h1>
+      <p v-if="card" class="text-p3">
+        {{
+          t("card-selected", {
+            cardProgramCardId: card.programCardId
+          })
+        }}
+      </p>
+      <Form
+        v-if="funds"
+        v-slot="{ isSubmitting, errors: formErrors }"
+        :initial-values="initialValues"
+        :validation-schema="currentSchema"
+        keep-values
+        @submit="nextStep">
+        <div v-if="funds.length > 0">
+          <PfForm
+            v-if="currentStep === 0"
+            has-footer
+            footer-alt-style
+            can-cancel
+            :disable-submit="Object.keys(formErrors).length > 0"
+            :submit-label="t('create-transaction')"
+            :cancel-label="t('cancel')"
+            :processing="isSubmitting"
+            @cancel="goToAdminTransaction">
+            <PfFormSection>
+              <FieldArray v-slot="{ fields }" key-path="id" name="funds">
+                <div
+                  v-for="(field, idx) in fields"
+                  :key="field.key"
+                  :class="getIsGiftCard(funds[idx].fund.productGroup.name) ? 'pt-6 border-t border-grey-100' : ''">
+                  <div
+                    class="p-4 pt-2.5 rounded-lg"
+                    :class="[
+                      getColorBgClass(funds[idx].fund.productGroup.color),
+                      getIsGiftCard(funds[idx].fund.productGroup.name) ? 'bg-diagonal-pattern' : 'dark'
+                    ]">
+                    <Field
+                      :id="`funds[${idx}].amount`"
+                      v-slot="{ field: inputField, errors: fieldErrors }"
+                      :name="`funds[${idx}].amount`">
+                      <PfFormInputText
+                        :id="`funds[${idx}].amount`"
+                        class="grow"
+                        v-bind="inputField"
+                        :label="fundLabel(funds[idx].fund, 'amount-label')"
+                        :after-label="fundAfterLabel(funds[idx].fund, 'amount-after-label')"
+                        :placeholder="t('amount-placeholder', { amount: 18.43 })"
+                        :errors="fieldErrors"
+                        input-mode="decimal">
+                        <template #trailingIcon>
+                          <UiDollarSign :errors="fieldErrors" />
+                        </template>
+                      </PfFormInputText>
+                    </Field>
+                  </div>
+                </div>
+              </FieldArray>
+            </PfFormSection>
+          </PfForm>
+          <PfForm
+            v-else
+            has-footer
+            footer-alt-style
+            :submit-label="t('confirm')"
+            :cancel-label="t('edit')"
+            can-cancel
+            :processing="isSubmitting"
+            @cancel="prevStep">
+            <PfFormSection>
+              <p class="text-h1 font-bold text-primary-700 mb-0">
+                {{ t("amount-charged") }}
+                <!-- eslint-disable-next-line  @intlify/vue-i18n/no-raw-text -->
+                <span class="text-primary-500">{{ getTotalTransactionAmount() }}.</span>
+              </p>
+              <div>
+                <p class="mb-2 text-p3">{{ t("product-groups") }}</p>
+                <ul class="mb-0 w-full">
+                  <li
+                    v-for="item in funds"
+                    :key="item.id"
+                    class="mb-2 last:mb-0 text-p2"
+                    :class="getIsGiftCard(item.fund.productGroup.name) ? 'mt-6 pt-4 border-t border-grey-100' : 'dark'">
+                    <div
+                      class="flex items-center w-full rounded-md py-1 px-2 text-primary-900 dark:text-white"
+                      :class="[
+                        getColorBgClass(item.fund.productGroup.color),
+                        getIsGiftCard(item.fund.productGroup.name) ? 'bg-diagonal-pattern' : ''
+                      ]">
+                      <span class="w-1/2 font-bold">
+                        {{ fundLabel(item.fund, "confirmation-amount-label") }}
+                      </span>
+                      <span class="w-1/2 text-right">
+                        <span class="ml-2">{{ getMoneyFormat(-Math.abs(item.amount)) }}</span>
+                      </span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </PfFormSection>
+          </PfForm>
+        </div>
+        <div v-else>
+          <PfForm
+            can-cancel
+            :disable-submit="true"
+            has-footer
+            footer-alt-style
+            :submit-label="t('create-transaction')"
+            :cancel-label="t('cancel')"
+            @cancel="goToAdminTransaction">
+            <div>{{ t("no-funds-message") }}</div>
+          </PfForm>
+        </div>
+      </Form>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { defineProps, defineEmits, ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
+import gql from "graphql-tag";
+import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
+import { number, object, lazy, array, string } from "yup";
+import { FieldArray } from "vee-validate";
+
+import { PRODUCT_GROUP_LOYALTY, TRANSACTION_STEPS_START, TRANSACTION_STEPS_COMPLETE } from "@/lib/consts/enums";
+import { getMoneyFormat } from "@/lib/helpers/money";
+import { usePageTitle } from "@/lib/helpers/page-title";
+import { getColorBgClass } from "@/lib/helpers/products-color";
+import { useNotificationsStore } from "@/lib/store/notifications";
+
+const { t } = useI18n();
+const { addError } = useNotificationsStore();
+
+const audio = new Audio(require("@/assets/audio/confirmation.mp3"));
+usePageTitle(t("title"));
+const currentStep = ref(0);
+
+const props = defineProps({
+  cardId: {
+    type: String,
+    required: true
+  }
+});
+
+const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState"]);
+
+const { result } = useQuery(
+  gql`
+    query Card($id: ID!) {
+      card(id: $id) {
+        id
+        totalFund
+        programCardId
+        beneficiary {
+          id
+          firstname
+          lastname
+        }
+        funds {
+          id
+          amount
+          productGroup {
+            id
+            name
+            orderOfAppearance
+            color
+          }
+        }
+        loyaltyFund {
+          id
+          amount
+          productGroup {
+            id
+            name
+            orderOfAppearance
+            color
+          }
+        }
+      }
+    }
+  `,
+  {
+    id: props.cardId
+  }
+);
+const card = useResult(result);
+
+const funds = useResult(result, null, (data) => {
+  var results = data.card.funds.map((x) => {
+    return {
+      amount: 0,
+      id: x.id,
+      fund: x
+    };
+  });
+
+  if (data.card.loyaltyFund !== null) {
+    results.push({
+      amount: 0,
+      id: data.card.loyaltyFund.id,
+      fund: data.card.loyaltyFund
+    });
+  }
+
+  initialValues.funds = results.map((x) => ({ amount: "", fundId: x.id }));
+
+  return results;
+});
+
+const { result: resultMarkets } = useQuery(
+  gql`
+    query Markets {
+      markets {
+        id
+        name
+      }
+    }
+  `
+);
+const myMarket = useResult(resultMarkets, null, (data) => data.markets[0]);
+
+const { mutate: createTransaction } = useMutation(
+  gql`
+    mutation CreateTransaction($input: CreateTransactionInput!) {
+      createTransaction(input: $input) {
+        transaction {
+          id
+          amount
+          transactionByProductGroups {
+            id
+            amount
+            productGroup {
+              id
+              name
+              color
+              orderOfAppearance
+            }
+          }
+        }
+      }
+    }
+  `
+);
+
+const initialValues = {
+  funds: []
+};
+
+// Form validation & steps management
+const validationSchemas = computed(() => {
+  return [
+    object({
+      funds: array().of(
+        object({
+          amount: lazy((value) => {
+            if (value === undefined || value === "" || value === null) return string().notRequired();
+            return number()
+              .label(t("amount-validation-label"))
+              .transform((_, value) => {
+                return +value.toString().replace(/,/, ".");
+              })
+              .test({
+                name: "maxProductGroupAmount",
+                exclusive: false,
+                params: {},
+                message: t("product-group-fund-not-enought"),
+                test: function (value, context) {
+                  var fundId = context.parent.fundId;
+                  var fund = funds.value.find((x) => x.id === fundId).fund;
+                  if (fund) return value <= parseFloat(fund.amount);
+                  return false;
+                }
+              })
+              .min(0.01)
+              .required();
+          })
+        })
+      )
+    })
+  ];
+});
+
+const currentSchema = computed(() => {
+  return validationSchemas.value[currentStep.value];
+});
+
+function fundLabel(fund, key) {
+  let productGroupName = fund.productGroup.name;
+  if (productGroupName === PRODUCT_GROUP_LOYALTY) {
+    productGroupName = t("gift-card");
+  }
+
+  return t(key, { productGroupName });
+}
+
+function fundAfterLabel(fund, key) {
+  return t(key, { amountAvailable: getMoneyFormat(fund.amount) });
+}
+
+function getTotalTransactionAmount() {
+  let result = 0;
+  for (var i = 0; i < funds.value.length; i++) {
+    result += parseFloat(funds.value[i].amount);
+  }
+
+  return getMoneyFormat(result);
+}
+
+function getIsGiftCard(productGroupName) {
+  if (productGroupName === PRODUCT_GROUP_LOYALTY) return true;
+  else return false;
+}
+
+function nextStep(values) {
+  let haveAtLeastOneProductGroup = false;
+  for (var i = 0; i < values.funds.length; i++) {
+    const amount = values.funds[i].amount;
+    if (amount !== undefined && amount !== null && amount !== "") {
+      haveAtLeastOneProductGroup = true;
+      // Convert numbers with comma as decimal separator
+      funds.value[i].amount = amount.replace(/,/, ".");
+    }
+  }
+
+  if (!haveAtLeastOneProductGroup) {
+    addError(t("no-product-group-transaction"));
+    return;
+  }
+
+  if (currentStep.value === 1) {
+    onSubmit(values);
+    return;
+  }
+  currentStep.value++;
+}
+
+function prevStep() {
+  if (currentStep.value <= 0) {
+    return;
+  }
+
+  currentStep.value--;
+}
+
+async function onSubmit() {
+  emit("onUpdateLoadingState", true);
+  var result = await createTransaction({
+    input: {
+      transactions: funds.value
+        .filter((x) => parseFloat(x.amount) > 0)
+        .map((x) => ({ amount: parseFloat(x.amount), productGroupId: x.fund.productGroup.id })),
+      cardId: props.cardId,
+      marketId: myMarket.value.id
+    }
+  });
+
+  audio.play();
+  setTimeout(() => {
+    emit("onUpdateStep", TRANSACTION_STEPS_COMPLETE, props.cardId, result.data.createTransaction.transaction.id);
+  }, 200);
+}
+
+const goToAdminTransaction = () => {
+  emit("onUpdateStep", TRANSACTION_STEPS_START);
+};
+</script>

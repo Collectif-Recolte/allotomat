@@ -1,0 +1,61 @@
+﻿@model Sig.App.Backend.PdfTemplates.CardModel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <style>
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font: 16px/1.4 Sans-Serif;
+            margin: 0;
+        }
+
+        .recto {
+            background-image: url(data:image/png;base64,@Html.Raw(Model.ProjectCardImageUrl));
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center center;
+            width: 100%;
+            height: 75mm;
+        }
+
+        .print-container {
+            width: 100%;
+            position: relative;
+            padding: 3mm;
+            page-break-after: always;
+        }
+        .card-container {
+            text-align: center;
+        }
+        .id-number {
+            font-size: 16pt;
+            font-weight: bold;
+            line-height: 1;
+            padding-bottom: 4.5mm;
+            margin: 0;
+        }
+        .qrCode-container {
+            padding-top: 3mm;
+        }
+    </style>
+</head>
+<body>
+    <div class="recto"></div>
+    @foreach (var card in Model.Items)
+    {
+        <div class="print-container">
+            <div class="card-container">
+                <div class="qrCode-container">
+                    @Html.Raw(@card.QrCodeImage())
+                </div>
+                <p class="id-number">@card.Id</p>
+            </div>
+        </div>
+    }
+</body>
+</html>

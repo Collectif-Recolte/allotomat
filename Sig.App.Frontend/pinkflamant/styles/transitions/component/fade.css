@@ -1,0 +1,11 @@
+/*! purgecss start ignore */
+.fade-enter-active,
+.fade-leave-active {
+  @apply transition
+  duration-300
+  ease-in-out;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  @apply opacity-0;
+}
+/*! purgecss end ignore */

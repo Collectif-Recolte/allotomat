@@ -1,0 +1,12 @@
+@layer components {
+  /*! purgecss start ignore */
+  .h-include-margin {
+    &::before,
+    &::after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+  }
+  /*! purgecss end ignore */
+}

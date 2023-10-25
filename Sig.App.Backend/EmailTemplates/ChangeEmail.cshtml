@@ -1,0 +1,24 @@
+﻿@using Sig.App.Backend.Helpers
+
+@model Sig.App.Backend.EmailTemplates.Models.ChangeEmailEmail
+@{ Layout = "_EmailLayout.cshtml"; }
+
+<p>
+    Bonjour @Model.FirstName,
+</p>
+<p>
+    Vous devez cliquer sur le lien ci-dessous afin de confirmer votre changement d'adresse courriel.
+</p>
+<p>
+    <a href="@Model.BaseUrl/@UrlHelper.ConfirmChangeEmail(Model.To, Model.Token)">Confirmer le changement</a>
+</p>
+<br />
+<p>
+    Hello @Model.FirstName,
+</p>
+<p>
+    You must click on the link below to confirm your change of email address.
+</p>
+<p>
+    <a href="@Model.BaseUrl/@UrlHelper.ConfirmChangeEmail(Model.To, Model.Token)">Confirm change</a>
+</p>

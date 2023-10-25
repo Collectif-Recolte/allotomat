@@ -1,0 +1,462 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "secret-seed": {
+            "type": "securestring"
+        },
+
+        "sql-server-name": {
+            "type": "string",
+            "defaultValue": "collectif-recolte-sql"
+        },
+        "sql-server-firewall-rules": {
+            "type": "array",
+            "defaultValue": []
+        },
+        "sql-admin-username": {
+            "type": "string",
+            "defaultValue": "collectif-recolte-sql-admin"
+        },
+        "sql-admin-password": {
+            "type": "securestring"
+        },
+        "sql-pool-name": {
+            "type": "string",
+            "defaultValue": "collectif-recolte-pool"
+        },
+        "sql-pool-capacity": {
+            "type": "int",
+            "defaultValue": 50
+        },
+        "sql-db-name-prefix": {
+            "type": "string",
+            "defaultValue": "collectif-recolte-db"
+        },
+
+        "storage-account-name-prefix": {
+            "type": "string",
+            "defaultValue": "collectif-recoltesa"
+        },
+
+        "plan-name": {
+            "type": "string",
+            "defaultValue": "collectif-recolte-plan"
+        },
+        "plan-sku": {
+            "type": "string",
+            "defaultValue": "P1V2"
+        },
+        "app-name-prefix": {
+            "type": "string",
+            "defaultValue": "collectif-recolte-app"
+        },
+
+        "smtp-server": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "smtp-port": {
+            "type": "int",
+            "defaultValue": 0
+        },
+        "smtp-username": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "smtp-password": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "smtp-use-ssl": {
+            "type": "bool",
+            "defaultValue": false
+        },
+
+        "default-admin-email": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "default-admin-password": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+
+        "environments": {
+            "type": "array",
+            "defaultValue": [
+                {
+                    "name": "prod",
+                    "kind": "prod",
+                    "url": "https://recolte-app.azurewebsites.net/"
+                },
+                {
+                    "name": "uat",
+                    "kind": "test",
+                    "url": "https://recolte-app-uat.azurewebsites.net/"
+                },
+                {
+                    "name": "qa",
+                    "kind": "test",
+                    "url": "https://recolte-app-qa.azurewebsites.net/"
+                }
+            ]
+        }
+    },
+    "variables": {
+        "web-app-properties": {
+            "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('plan-name'))]",
+            "clientAffinityEnabled": false,
+            "siteConfig": {
+                "alwaysOn": true,
+                "http20Enabled": true,
+                "metadata": [{
+                    "name": "CURRENT_STACK",
+                    "value": "dotnet"
+                }],
+                "linuxFxVersion": "DOTNETCORE|6.0"
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Sql/servers",
+            "apiVersion": "2019-06-01-preview",
+            "name": "[parameters('sql-server-name')]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "SQL Server"
+            },
+            "properties": {
+                "administratorLogin": "[parameters('sql-admin-username')]",
+                "administratorLoginPassword": "[parameters('sql-admin-password')]",
+                "version": "12.0"
+            },
+            "resources": [
+                {
+                    "type": "elasticPools",
+                    "apiVersion": "2020-08-01-preview",
+                    "name": "[parameters('sql-pool-name')]",
+                    "location": "[resourceGroup().location]",
+                    "tags": {
+                        "displayName": "Elastic Pool"
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers', parameters('sql-server-name'))]"
+                    ],
+                    "sku": {
+                        "name": "StandardPool",
+                        "capacity": "[parameters('sql-pool-capacity')]"
+                    },
+                    "properties": {
+
+                    }
+                },
+                {
+                    "type": "firewallRules",
+                    "apiVersion": "2014-04-01",
+                    "location": "[resourceGroup().location]",
+                    "name": "AllowAllWindowsAzureIps",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers', parameters('sql-server-name'))]"
+                    ],
+                    "properties": {
+                        "startIpAddress": "0.0.0.0",
+                        "endIpAddress": "0.0.0.0"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.Sql/servers/firewallRules",
+            "apiVersion": "2014-04-01",
+            "copy": {
+                "name": "rule",
+                "count": "[length(parameters('sql-server-firewall-rules'))]"
+            },
+            "name": "[concat(parameters('sql-server-name'), '/', parameters('sql-server-firewall-rules')[copyIndex('rule')].name)]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('sql-server-name'))]"
+            ],
+            "properties": {
+                "startIpAddress": "[parameters('sql-server-firewall-rules')[copyIndex('rule')].ip]",
+                "endIpAddress": "[parameters('sql-server-firewall-rules')[copyIndex('rule')].ip]"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "apiVersion": "2020-08-01-preview",
+            "copy": {
+                "name": "environment",
+                "count": "[length(parameters('environments'))]"
+            },
+            "name": "[concat(parameters('sql-server-name'), '/', parameters('sql-db-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name)]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "Database for each environment"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/elasticPools', parameters('sql-server-name'), parameters('sql-pool-name'))]"
+            ],
+            "properties": {
+                "elasticPoolId": "[resourceId('Microsoft.Sql/servers/elasticPools', parameters('sql-server-name'), parameters('sql-pool-name'))]"
+            },
+            "resources": [
+                {
+                    "type": "transparentDataEncryption",
+                    "apiVersion": "2014-04-01",
+                    "name": "current",
+                    "tags": {
+                        "displayName": "Encryption"
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers/databases', parameters('sql-server-name'), concat(parameters('sql-db-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name))]"
+                    ],
+                    "properties": {
+                        "status": "Enabled"
+                    }
+                },
+                {
+                    "type": "backupShortTermRetentionPolicies",
+                    "apiVersion": "2017-10-01-preview",
+                    "name": "default",
+                    "tags": {
+                        "displayName": "Point-in-Time Restore"
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers/databases', parameters('sql-server-name'), concat(parameters('sql-db-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name))]",
+                        "[resourceId('Microsoft.Sql/servers/databases/transparentDataEncryption', parameters('sql-server-name'), concat(parameters('sql-db-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name), 'current')]"
+                    ],
+                    "properties": {
+                        "retentionDays": "[if(equals('prod', parameters('environments')[copyIndex('environment')].kind), 35, 7)]"
+                    }
+                },
+                {
+                    "type": "backupLongTermRetentionPolicies",
+                    "apiVersion": "2017-03-01-preview",
+                    "name": "default",
+                    "tags": {
+                        "displayName": "Long-Term Backups (prod)"
+                    },
+                    "condition": "[equals('prod', parameters('environments')[copyIndex('environment')].kind)]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Sql/servers/databases', parameters('sql-server-name'), concat(parameters('sql-db-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name))]",
+                        "[resourceId('Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies', parameters('sql-server-name'), concat(parameters('sql-db-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name), 'default')]"
+                    ],
+                    "properties": {
+                        "weeklyRetention": "P1M",
+                        "monthlyRetention": "P1Y"
+                    }
+                }
+            ]
+        },
+
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2020-08-01-preview",
+            "copy": {
+                "name": "environment",
+                "count": "[length(parameters('environments'))]"
+            },
+            "name": "[concat(parameters('storage-account-name-prefix'), parameters('environments')[copyIndex('environment')].name)]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "Storage Account for each environment"
+            },
+            "kind": "Storage",
+            "sku": {
+                "name": "[if(equals('prod', parameters('environments')[copyIndex('environment')].kind), 'Standard_GRS', 'Standard_LRS')]",
+                "tier": "Standard"
+            },
+            "resources": [
+                {
+                    "type": "blobServices",
+                    "apiVersion": "2018-07-01",
+                    "name": "default",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', concat(parameters('storage-account-name-prefix'), parameters('environments')[copyIndex('environment')].name))]"
+                    ],
+                    "properties": {
+                        "deleteRetentionPolicy": {
+                            "enabled": true,
+                            "days": 14
+                        }
+                    },
+                    "resources": [
+                        {
+                            "type": "containers",
+                            "apiVersion": "2018-07-01",
+                            "name": "images",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', concat(parameters('storage-account-name-prefix'), parameters('environments')[copyIndex('environment')].name), 'default')]"
+                            ],
+                            "properties": {
+                                "publicAccess": "Blob"
+                            }
+                        },
+                        {
+                            "type": "containers",
+                            "apiVersion": "2018-07-01",
+                            "name": "images-cache",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', concat(parameters('storage-account-name-prefix'), parameters('environments')[copyIndex('environment')].name), 'default')]"
+                            ],
+                            "properties": {
+                                "publicAccess": "Blob"
+                            }
+                        },
+                        {
+                            "type": "containers",
+                            "apiVersion": "2018-07-01",
+                            "name": "temp-files",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', concat(parameters('storage-account-name-prefix'), parameters('environments')[copyIndex('environment')].name), 'default')]"
+                            ],
+                            "properties": {
+                                "publicAccess": "Blob"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2018-02-01",
+            "name": "[parameters('plan-name')]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "App Service Plan"
+            },
+            "sku": {
+                "name": "[parameters('plan-sku')]"
+            },
+            "kind": "linux",
+            "properties": {
+                "reserved": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "copy": {
+                "name": "environment",
+                "count": "[length(parameters('environments'))]"
+            },
+            "name": "[concat(parameters('app-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name)]",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "displayName": "App Service for each environment"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('plan-name'))]"
+            ],
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": "[variables('web-app-properties')]",
+            "resources": [
+                {
+                    "type": "config",
+                    "apiVersion": "2018-11-01",
+                    "name": "appsettings",
+                    "tags":{
+                        "displayName": "Main slot config"
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites', concat(parameters('app-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name))]"
+                    ],
+                    "properties": "[union(
+                        createObject(
+                            'ConnectionStrings__AppDbContext', concat('server=', parameters('sql-server-name'), '.database.windows.net;database=', concat(parameters('sql-db-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name), ';user id=', parameters('sql-admin-username'), ';password=', parameters('sql-admin-password')),
+                            'Stackify__Enabled', 'true',
+                            'Stackify__Environment', parameters('environments')[copyIndex('environment')].name,
+                            'hmac__secret', guid('hmac', parameters('secret-seed'),  resourceGroup().id, parameters('environments')[copyIndex('environment')].name),
+                            'qrcode__secret', guid('qrcode', parameters('secret-seed'),  resourceGroup().id, parameters('environments')[copyIndex('environment')].name),
+                            'Mailer__BaseUrl', parameters('environments')[copyIndex('environment')].url,
+                            'files__type', 'azureStorage',
+                            'files__azureStorage__connectionString', concat('DefaultEndpointsProtocol=https;AccountName=', concat(parameters('storage-account-name-prefix'), parameters('environments')[copyIndex('environment')].name), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', concat(parameters('storage-account-name-prefix'), parameters('environments')[copyIndex('environment')].name)), '2019-04-01').keys[0].value),
+                            'defaultAdmin__email', parameters('default-admin-email'),
+                            'defaultAdmin__password', parameters('default-admin-password')
+                        ),
+                        if(
+                            equals('prod', parameters('environments')[copyIndex('environment')].kind),
+                            createObject(
+                                'Mailer__SmtpHost', parameters('smtp-server'),
+                                'Mailer__SmtpPort', parameters('smtp-port'),
+                                'Mailer__SmtpUsername', parameters('smtp-username'),
+                                'Mailer__SmtpPassword', parameters('smtp-password'),
+                                'Mailer__SmtpSsl', parameters('smtp-use-ssl')
+                            ),
+                            createObject()
+                        )
+                    )]"
+                },
+                {
+                    "type": "config",
+                    "apiVersion": "2018-11-01",
+                    "name": "slotConfigNames",
+                    "tags": {
+                        "displayName": "Pinned slot setting names"
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites', concat(parameters('app-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name))]",
+                        "[resourceId('Microsoft.Web/sites/config', concat(parameters('app-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name), 'appsettings')]"
+                    ],
+                    "properties": {
+                        "appSettingNames": [
+                            "Mailer__SmtpHost",
+                            "Mailer__SmtpPort",
+                            "Mailer__SmtpUsername",
+                            "Mailer__SmtpPassword",
+                            "Mailer__SmtpSsl"
+                        ]
+                    }
+                },
+
+                {
+                    "type": "slots",
+                    "apiVersion": "2018-11-01",
+                    "name": "staging",
+                    "location": "[resourceGroup().location]",
+                    "tags": {
+                        "displayName": "Staging Slot"
+                    },
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/sites', concat(parameters('app-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name))]"
+                    ],
+                    "identity": {
+                        "type": "SystemAssigned"
+                    },
+                    "properties": "[variables('web-app-properties')]",
+                    "resources": [
+                        {
+                            "type": "config",
+                            "apiVersion": "2018-11-01",
+                            "name": "appsettings",
+                            "tags":{
+                                "displayName": "Staging slot config"
+                            },
+                            "dependsOn": [
+                                "[resourceId('Microsoft.Web/sites/slots', concat(parameters('app-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name), 'staging')]"
+                            ],
+                            "properties": {
+                                "ConnectionStrings__AppDbContext": "[concat('server=', parameters('sql-server-name'), '.database.windows.net;database=', concat(parameters('sql-db-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name), ';user id=', parameters('sql-admin-username'), ';password=', parameters('sql-admin-password'))]",
+                                "Stackify__Enabled": "true",
+                                "Stackify__Environment": "[parameters('environments')[copyIndex('environment')].name]",
+                                "hmac__secret": "[guid('hmac', resourceGroup().id, parameters('environments')[copyIndex('environment')].name)]",
+                                "qrcode__secret": "[guid('qrcode', resourceGroup().id, parameters('environments')[copyIndex('environment')].name)]",
+                                "Mailer__BaseUrl": "[parameters('environments')[copyIndex('environment')].url]",
+                                "files__type": "azureStorage",
+                                "files__azureStorage__connectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', concat(parameters('storage-account-name-prefix'), parameters('environments')[copyIndex('environment')].name), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', concat(parameters('storage-account-name-prefix'), parameters('environments')[copyIndex('environment')].name)), '2019-04-01').keys[0].value)]",
+                                "defaultAdmin__email": "[parameters('default-admin-email')]",
+                                "defaultAdmin__password": "[parameters('default-admin-password')]"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,386 @@
+{
+  "name": "Release",
+  "releaseNameFormat": "Release-$(rev:r)",
+  "variables": {
+    "appService": {
+      "value": "collectif-recolte-app-prod"
+    },
+    "resourceGroup": {
+      "value": "collectif-recolte"
+    },
+    "subscription": {
+      "value": ""
+    }
+  },
+  "variableGroups": [],
+  "environments": [
+    {
+      "name": "Staging",
+      "rank": 1,
+      "deployStep": {
+        "id": 1
+      },
+      "deployPhases": [
+        {
+          "deploymentInput": {
+            "parallelExecution": {
+              "parallelExecutionType": 0
+            },
+            "agentSpecification": {
+              "identifier": "vs2017-win2016"
+            },
+            "skipArtifactsDownload": false,
+            "artifactsDownloadInput": {
+              "downloadInputs": []
+            },
+            "demands": [],
+            "enableAccessToken": false,
+            "timeoutInMinutes": 0,
+            "jobCancelTimeoutInMinutes": 1,
+            "condition": "succeeded()",
+            "overrideInputs": {}
+          },
+          "rank": 1,
+          "phaseType": 1,
+          "name": "Agent job",
+          "refName": null,
+          "workflowTasks": [
+            {
+              "environment": {},
+              "taskId": "f045e430-8704-11e6-968f-e717e6411619",
+              "version": "0.*",
+              "name": "Stop staging",
+              "refName": "",
+              "enabled": true,
+              "alwaysRun": false,
+              "continueOnError": false,
+              "timeoutInMinutes": 0,
+              "definitionType": "task",
+              "overrideInputs": {},
+              "condition": "succeeded()",
+              "inputs": {
+                "ConnectedServiceName": "$(subscription)",
+                "Action": "Stop Azure App Service",
+                "WebAppName": "$(appService)",
+                "SpecifySlot": "true",
+                "ResourceGroupName": "$(resourceGroup)",
+                "SourceSlot": "",
+                "SwapWithProduction": "true",
+                "TargetSlot": "",
+                "PreserveVnet": "false",
+                "Slot": "staging",
+                "ExtensionsList": "",
+                "OutputVariable": "",
+                "AppInsightsResourceGroupName": "",
+                "ApplicationInsightsResourceName": "",
+                "ApplicationInsightsWebTestName": ""
+              }
+            },
+            {
+              "environment": {},
+              "taskId": "497d490f-eea7-4f2b-ab94-48d9c1acdcb1",
+              "version": "4.*",
+              "name": "Deploy to staging",
+              "refName": "",
+              "enabled": true,
+              "alwaysRun": false,
+              "continueOnError": false,
+              "timeoutInMinutes": 0,
+              "definitionType": "task",
+              "overrideInputs": {},
+              "condition": "succeeded()",
+              "inputs": {
+                "ConnectionType": "AzureRM",
+                "ConnectedServiceName": "$(subscription)",
+                "PublishProfilePath": "$(System.DefaultWorkingDirectory)/**/*.pubxml",
+                "PublishProfilePassword": "",
+                "WebAppKind": "webAppLinux",
+                "WebAppName": "$(appService)",
+                "DeployToSlotOrASEFlag": "true",
+                "ResourceGroupName": "$(resourceGroup)",
+                "SlotName": "staging",
+                "DockerNamespace": "",
+                "DockerRepository": "",
+                "DockerImageTag": "",
+                "VirtualApplication": "",
+                "Package": "$(System.DefaultWorkingDirectory)/**/*.zip",
+                "RuntimeStack": "",
+                "RuntimeStackFunction": "",
+                "StartupCommand": "",
+                "ScriptType": "",
+                "InlineScript": ":: You can provide your deployment commands here. One command per line.",
+                "ScriptPath": "",
+                "WebConfigParameters": "",
+                "AppSettings": "",
+                "ConfigurationSettings": "",
+                "UseWebDeploy": "false",
+                "DeploymentType": "webDeploy",
+                "TakeAppOfflineFlag": "true",
+                "SetParametersFile": "",
+                "RemoveAdditionalFilesFlag": "false",
+                "ExcludeFilesFromAppDataFlag": "true",
+                "AdditionalArguments": "-retryAttempts:6 -retryInterval:10000",
+                "RenameFilesFlag": "true",
+                "XmlTransformation": "false",
+                "XmlVariableSubstitution": "false",
+                "JSONFiles": ""
+              }
+            },
+            {
+              "environment": {},
+              "taskId": "f045e430-8704-11e6-968f-e717e6411619",
+              "version": "0.*",
+              "name": "Start staging",
+              "refName": "",
+              "enabled": true,
+              "alwaysRun": false,
+              "continueOnError": false,
+              "timeoutInMinutes": 0,
+              "definitionType": "task",
+              "overrideInputs": {},
+              "condition": "succeeded()",
+              "inputs": {
+                "ConnectedServiceName": "$(subscription)",
+                "Action": "Start Azure App Service",
+                "WebAppName": "$(appService)",
+                "SpecifySlot": "true",
+                "ResourceGroupName": "$(resourceGroup)",
+                "SourceSlot": "",
+                "SwapWithProduction": "true",
+                "TargetSlot": "",
+                "PreserveVnet": "false",
+                "Slot": "staging",
+                "ExtensionsList": "",
+                "OutputVariable": "",
+                "AppInsightsResourceGroupName": "",
+                "ApplicationInsightsResourceName": "",
+                "ApplicationInsightsWebTestName": ""
+              }
+            }
+          ]
+        }
+      ],
+      "environmentOptions": {
+        "emailNotificationType": "OnlyOnFailure",
+        "emailRecipients": "release.environment.owner;release.creator",
+        "skipArtifactsDownload": false,
+        "timeoutInMinutes": 0,
+        "enableAccessToken": false,
+        "publishDeploymentStatus": true,
+        "badgeEnabled": false,
+        "autoLinkWorkItems": false,
+        "pullRequestDeploymentEnabled": false
+      },
+      "demands": [],
+      "conditions": [
+        {
+          "name": "ReleaseStarted",
+          "conditionType": 1,
+          "value": ""
+        }
+      ],
+      "executionPolicy": {
+        "concurrencyCount": 1,
+        "queueDepthCount": 0
+      },
+      "retentionPolicy": {
+        "daysToKeep": 30,
+        "releasesToKeep": 3,
+        "retainBuild": true
+      },
+      "preDeployApprovals": {
+        "approvals": [
+          {
+            "rank": 1,
+            "isAutomated": true,
+            "isNotificationOn": false
+          }
+        ],
+        "approvalOptions": {
+          "requiredApproverCount": null,
+          "releaseCreatorCanBeApprover": false,
+          "autoTriggeredAndPreviousEnvironmentApprovedCanBeSkipped": false,
+          "enforceIdentityRevalidation": false,
+          "timeoutInMinutes": 0,
+          "executionOrder": 1
+        }
+      },
+      "postDeployApprovals": {
+        "approvals": [
+          {
+            "rank": 1,
+            "isAutomated": true,
+            "isNotificationOn": false
+          }
+        ],
+        "approvalOptions": {
+          "requiredApproverCount": null,
+          "releaseCreatorCanBeApprover": false,
+          "autoTriggeredAndPreviousEnvironmentApprovedCanBeSkipped": false,
+          "enforceIdentityRevalidation": false,
+          "timeoutInMinutes": 0,
+          "executionOrder": 2
+        }
+      }
+    },
+    {
+      "name": "Swap",
+      "rank": 2,
+      "deployStep": {
+        "id": 2
+      },
+      "deployPhases": [
+        {
+          "deploymentInput": {
+            "parallelExecution": {
+              "parallelExecutionType": 0
+            },
+            "agentSpecification": {
+              "identifier": "vs2017-win2016"
+            },
+            "skipArtifactsDownload": false,
+            "artifactsDownloadInput": {
+              "downloadInputs": []
+            },
+            "demands": [],
+            "enableAccessToken": false,
+            "timeoutInMinutes": 0,
+            "jobCancelTimeoutInMinutes": 1,
+            "condition": "succeeded()",
+            "overrideInputs": {}
+          },
+          "rank": 1,
+          "phaseType": 1,
+          "name": "Agent job",
+          "refName": null,
+          "workflowTasks": [
+            {
+              "environment": {},
+              "taskId": "f045e430-8704-11e6-968f-e717e6411619",
+              "version": "0.*",
+              "name": "Swap staging to production",
+              "refName": "",
+              "enabled": true,
+              "alwaysRun": false,
+              "continueOnError": false,
+              "timeoutInMinutes": 0,
+              "definitionType": "task",
+              "overrideInputs": {},
+              "condition": "succeeded()",
+              "inputs": {
+                "ConnectedServiceName": "$(subscription)",
+                "Action": "Swap Slots",
+                "WebAppName": "$(appService)",
+                "SpecifySlot": "false",
+                "ResourceGroupName": "$(resourceGroup)",
+                "SourceSlot": "staging",
+                "SwapWithProduction": "true",
+                "TargetSlot": "",
+                "PreserveVnet": "false",
+                "Slot": "production",
+                "ExtensionsList": "",
+                "OutputVariable": "",
+                "AppInsightsResourceGroupName": "",
+                "ApplicationInsightsResourceName": "",
+                "ApplicationInsightsWebTestName": ""
+              }
+            },
+            {
+              "environment": {},
+              "taskId": "f045e430-8704-11e6-968f-e717e6411619",
+              "version": "0.*",
+              "name": "Stop staging",
+              "refName": "",
+              "enabled": true,
+              "alwaysRun": false,
+              "continueOnError": false,
+              "timeoutInMinutes": 0,
+              "definitionType": "task",
+              "overrideInputs": {},
+              "condition": "succeeded()",
+              "inputs": {
+                "ConnectedServiceName": "$(subscription)",
+                "Action": "Stop Azure App Service",
+                "WebAppName": "$(appService)",
+                "SpecifySlot": "true",
+                "ResourceGroupName": "$(resourceGroup)",
+                "SourceSlot": "staging",
+                "SwapWithProduction": "true",
+                "TargetSlot": "",
+                "PreserveVnet": "false",
+                "Slot": "staging",
+                "ExtensionsList": "",
+                "OutputVariable": "",
+                "AppInsightsResourceGroupName": "",
+                "ApplicationInsightsResourceName": "",
+                "ApplicationInsightsWebTestName": ""
+              }
+            }
+          ]
+        }
+      ],
+      "environmentOptions": {
+        "emailNotificationType": "OnlyOnFailure",
+        "emailRecipients": "release.environment.owner;release.creator",
+        "skipArtifactsDownload": false,
+        "timeoutInMinutes": 0,
+        "enableAccessToken": false,
+        "publishDeploymentStatus": true,
+        "badgeEnabled": false,
+        "autoLinkWorkItems": false,
+        "pullRequestDeploymentEnabled": false
+      },
+      "demands": [],
+      "conditions": [
+        {
+          "name": "Staging",
+          "conditionType": 2,
+          "value": "1"
+        }
+      ],
+      "executionPolicy": {
+        "concurrencyCount": 1,
+        "queueDepthCount": 0
+      },
+      "retentionPolicy": {
+        "daysToKeep": 30,
+        "releasesToKeep": 3,
+        "retainBuild": true
+      },
+      "preDeployApprovals": {
+        "approvals": [
+          {
+            "rank": 1,
+            "isAutomated": true,
+            "isNotificationOn": false
+          }
+        ],
+        "approvalOptions": {
+          "requiredApproverCount": null,
+          "releaseCreatorCanBeApprover": false,
+          "autoTriggeredAndPreviousEnvironmentApprovedCanBeSkipped": false,
+          "enforceIdentityRevalidation": false,
+          "timeoutInMinutes": 0,
+          "executionOrder": 1
+        }
+      },
+      "postDeployApprovals": {
+        "approvals": [
+          {
+            "rank": 1,
+            "isAutomated": true,
+            "isNotificationOn": false
+          }
+        ],
+        "approvalOptions": {
+          "requiredApproverCount": null,
+          "releaseCreatorCanBeApprover": false,
+          "autoTriggeredAndPreviousEnvironmentApprovedCanBeSkipped": false,
+          "enforceIdentityRevalidation": false,
+          "timeoutInMinutes": 0,
+          "executionOrder": 2
+        }
+      }
+    }
+  ]
+}

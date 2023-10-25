@@ -1,0 +1,57 @@
+@layer components {
+  /*! purgecss start ignore */
+  .pf-transition-btn-pan {
+    @apply overflow-hidden 
+        transition-colors 
+        duration-300;
+    transition-timing-function: cubic-bezier(0.7, 0, 0.2, 1);
+
+    &--primary {
+      @apply bg-primary-700 
+            hover:bg-primary-700;
+
+      &::before {
+        @apply bg-primary-500;
+      }
+    }
+
+    &--secondary {
+      @apply bg-secondary-800 
+            hover:bg-secondary-800;
+
+      &::before {
+        @apply bg-secondary-500;
+      }
+    }
+
+    &--transparent {
+      @apply bg-transparent 
+            hover:bg-transparent;
+
+      &::before {
+        @apply bg-secondary-500;
+      }
+    }
+
+    &::before {
+      content: "";
+      @apply absolute 
+            inset-0
+            translate-y-full 
+            transition-transform 
+            duration-300;
+      transition-timing-function: cubic-bezier(0.7, 0, 0.2, 1);
+      width: 105%;
+      height: 105%;
+    }
+
+    &:hover {
+      @apply text-white;
+
+      &::before {
+        @apply translate-y-0;
+      }
+    }
+  }
+  /*! purgecss end ignore */
+}

@@ -1,0 +1,17 @@
+@layer components {
+  .pf-table {
+    @apply text-p2;
+
+    td {
+      @apply px-6 
+      first:pl-0
+      last:pr-0
+      whitespace-nowrap 
+      last:text-right;
+    }
+
+    td:not([class]) {
+      @apply py-2;
+    }
+  }
+}

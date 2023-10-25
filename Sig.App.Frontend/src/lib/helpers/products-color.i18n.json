@@ -1,0 +1,28 @@
+{
+  "fr": {
+    "COLOR_0": "Beige",
+    "COLOR_1": "Rouge",
+    "COLOR_2": "Orange",
+    "COLOR_3": "Jaune",
+    "COLOR_4": "Vert",
+    "COLOR_5": "Sarcelle",
+    "COLOR_6": "Cyan",
+    "COLOR_7": "Bleu",
+    "COLOR_8": "Indigo",
+    "COLOR_9": "Mauve",
+    "COLOR_10": "Magenta"
+  },
+  "en": {
+    "COLOR_0": "Beige",
+    "COLOR_1": "Red",
+    "COLOR_2": "Orange",
+    "COLOR_3": "Yellow",
+    "COLOR_4": "Green",
+    "COLOR_5": "Teal",
+    "COLOR_6": "Cyan",
+    "COLOR_7": "Blue",
+    "COLOR_8": "Indigo",
+    "COLOR_9": "Purple",
+    "COLOR_10": "Magenta"
+  }
+}

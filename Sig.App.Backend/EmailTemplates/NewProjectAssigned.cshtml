@@ -1,0 +1,24 @@
+﻿@using Sig.App.Backend.Helpers
+
+@model Sig.App.Backend.EmailTemplates.Models.NewProjectAssignedEmail
+@{ Layout = "_EmailLayout.cshtml"; }
+
+<p>
+    Bonjour,
+</p>
+<p>
+    Nous vous accueillons avec joie en tant que gestionnaire chez @Model.ProjectName!
+</p>
+<p>
+    <a href="@Model.BaseUrl">Accéder à votre compte Tomat</a>
+</p>
+<br />
+<p>
+    Hello,
+</p>
+<p>
+    We gladly welcome you as a manager at @Model.ProjectName!
+</p>
+<p>
+    <a href="@Model.BaseUrl">Access your Tomat account</a>
+</p>

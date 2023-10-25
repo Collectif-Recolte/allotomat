@@ -1,0 +1,20 @@
+﻿@using Sig.App.Backend.Helpers
+
+@model Sig.App.Backend.EmailTemplates.Models.AdminInviteEmail
+@{ Layout = "_EmailLayout.cshtml"; }
+
+<p>Bonjour @Model.FirstName</p>
+<p>
+    Vous avez été invité comme administrateur.
+</p>
+<p>
+    <a href="@Model.BaseUrl/@UrlHelper.RegistrationAdmin(Model.To, Model.InviteToken)">Créez votre compte</a>.
+</p>
+<br />
+<p>Hello @Model.FirstName</p>
+<p>
+    You have been invited as an administrator.
+</p>
+<p>
+    <a href="@Model.BaseUrl/@UrlHelper.RegistrationAdmin(Model.To, Model.InviteToken)">Create your account</a>.
+</p>

@@ -1,0 +1,13 @@
+@layer components {
+  /*! purgecss start ignore */
+  .h-remove-margin {
+    & > :first-child {
+      @apply mt-0;
+    }
+
+    & > :last-child {
+      @apply mb-0;
+    }
+  }
+  /*! purgecss end ignore */
+}

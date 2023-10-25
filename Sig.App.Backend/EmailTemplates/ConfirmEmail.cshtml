@@ -1,0 +1,34 @@
+﻿@using Sig.App.Backend.Helpers
+
+@model Sig.App.Backend.EmailTemplates.Models.ConfirmEmailEmail
+@{ Layout = "_EmailLayout.cshtml"; }
+
+<p>
+    Bonjour @Model.FirstName,
+</p>
+<p>
+    Veuillez confirmer votre adresse courriel en cliquant sur le lien suivant.
+</p>
+<p>
+    <a href="@Model.BaseUrl/@UrlHelper.ConfirmEmail(Model.To, Model.Token)">
+        Ceci est le lien sur lequel vous devez cliquer pour activer votre compte.
+    </a>
+</p>
+<p>
+    Merci
+</p>
+<br />
+<p>
+    Hello @Model.FirstName,
+</p>
+<p>
+    Please confirm your email address by clicking on the following link.
+</p>
+<p>
+    <a href="@Model.BaseUrl/@UrlHelper.ConfirmEmail(Model.To, Model.Token)">
+        This is the link you need to click to activate your account.
+    </a>
+</p>
+<p>
+    Thanks
+</p>

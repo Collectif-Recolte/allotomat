@@ -1,0 +1,6 @@
+{
+  "trailingComma": "none",
+  "printWidth": 130,
+  "arrowParens": "always",
+  "endOfLine": "crlf"
+}

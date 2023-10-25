@@ -1,0 +1,99 @@
+/*! purgecss start ignore */
+.pf-grid {
+    &--small-gap {
+      /* Overwrite grid-gap defined in base.css */
+      --pf-grid-gap: theme("spacing.3");
+    }
+  
+    &__col {
+      @apply w-full;
+    
+      &--col-5,
+      &--col-6,
+      &--col-7 {
+        width: calc(theme("width.1/2") - var(--pf-grid-gap) * 2);
+      }
+    }
+  }
+  
+  @screen xs {
+    .pf-grid { 
+      &__col {
+        &--col-2,
+        &--col-3,
+        &--col-4 {
+            width: calc(theme("width.1/2") - var(--pf-grid-gap) * 2);
+        }
+        
+        &--col-5,
+        &--col-6,
+        &--col-7 {
+            width: calc(theme("width.1/3") - var(--pf-grid-gap) * 2);
+        }
+      }
+    }
+  }
+  
+  @screen sm {
+    .pf-grid {
+      &__col {
+        &--col-4 {
+          width: calc(theme("width.1/3") - var(--pf-grid-gap) * 2);
+        
+        }
+        &--col-5,
+        &--col-6,
+        &--col-7 {
+            width: calc(theme("width.1/4") - var(--pf-grid-gap) * 2);
+        }
+      }
+    }
+  }
+  
+  @screen md {
+    .pf-grid {
+      &--small-gap {
+          --pf-grid-gap: theme("spacing.4");
+      }
+  
+      &__col {
+        &--col-3 {
+          width: calc(theme("width.1/3") - var(--pf-grid-gap) * 2);
+        }
+  
+        &--col-4 {
+            width: calc(theme("width.1/4") - var(--pf-grid-gap) * 2);
+        }
+  
+        &--col-7 {
+            width: calc(theme("width.1/5") - var(--pf-grid-gap) * 2);
+        }
+      }
+    }
+  }
+  
+  @screen lg {
+    .pf-grid {
+      &__col {
+        &--col-5 {
+            width: calc(theme("width.1/5") - var(--pf-grid-gap) * 2);
+        }
+        &--col-6,
+        &--col-7 {
+            width: calc(theme("width.1/6") - var(--pf-grid-gap) * 2);
+        }
+      }
+    }
+  }
+  
+  @screen xl {
+    .pf-grid {
+      &__col {
+        &--col-7 {
+          width: calc(theme("width.1/7") - var(--pf-grid-gap) * 2);
+        }
+      }
+    }
+  }
+  
+  /*! purgecss end ignore */

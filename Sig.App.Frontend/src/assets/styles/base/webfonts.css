@@ -1,0 +1,9 @@
+@layer base {
+  /* Inclure les fonts ici
+    @font-face {
+        font-family: Proxima Nova;
+        font-weight: 400;
+        src: url(/fonts/proxima-nova/400-regular.woff) format("woff");
+      }
+    */
+}

@@ -1,0 +1,24 @@
+@layer components {
+  /*! purgecss start ignore */
+  .h-dark-theme {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span:not(.pf-button__content) {
+      @apply text-white;
+    }
+
+    a:not([class]) {
+      @apply text-white;
+
+      &::after {
+        @apply bg-white;
+      }
+    }
+  }
+  /*! purgecss end ignore */
+}

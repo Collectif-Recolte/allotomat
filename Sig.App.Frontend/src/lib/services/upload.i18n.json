@@ -1,0 +1,8 @@
+{
+  "fr": {
+    "file-upload-error": "Une erreur s'est produite pendant le transfert du fichier"
+  },
+  "en": {
+    "file-upload-error": "An error occured while transfering the file"
+  }
+}

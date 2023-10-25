@@ -1,0 +1,36 @@
+﻿@using Sig.App.Backend.Helpers
+@using System.Globalization
+@using Sig.App.Backend.Constants
+
+@model Sig.App.Backend.EmailTemplates.Models.MonthlyBalanceReportEmail
+@{ Layout = "_EmailLayout.cshtml"; }
+
+<p>
+    Bonjour,
+    Voici le rapport mensuel de transaction pour le programme @Model.Project.Name
+</p>
+
+@foreach (var report in Model.Reports) {
+    <h1>@(report.Market.IsArchived ? "[Archivé] " : "")@report.Market.Name</h1>
+    <p>Montant total des transactions du dernier mois : @report.Total.ToString("C", CultureInfo.CreateSpecificCulture("fr-CA"))</p>
+    <h3>Liste des transactions</h3>
+    @foreach (var transaction in report.Transactions)
+    {
+        <p>@(transaction.Beneficiary == null ? "[Anonyme]" : $"{transaction.Beneficiary.Firstname} {transaction.Beneficiary.Lastname}") - @transaction.Amount.ToString("C", CultureInfo.CreateSpecificCulture("fr-CA")) - @transaction.CreatedAtUtc.ToString(DateFormats.Regular, CultureInfo.InvariantCulture)</p>
+    }
+}
+<br />
+<p>
+    Hello,
+    Here is the monthly transaction report for the @Model.Project.Name program
+</p>
+
+@foreach (var report in Model.Reports) {
+    <h1>@(report.Market.IsArchived ? "[Archive] " : "")@report.Market.Name</h1>
+    <p>Total amount of transactions in the last month : @report.Total.ToString("C", CultureInfo.CreateSpecificCulture("en-CA"))</p>
+    <h3>List of transactions</h3>
+    @foreach (var transaction in report.Transactions)
+    {
+        <p>@(transaction.Beneficiary == null ? "[Anonymous]" : $"{transaction.Beneficiary.Firstname} {transaction.Beneficiary.Lastname}") - @transaction.Amount.ToString("C", CultureInfo.CreateSpecificCulture("en-CA")) - @transaction.CreatedAtUtc.ToString(DateFormats.Regular, CultureInfo.InvariantCulture)</p>
+    }
+}

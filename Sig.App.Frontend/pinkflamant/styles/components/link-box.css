@@ -1,0 +1,12 @@
+@layer components {
+  .pf-link-box {
+    &:before {
+      height: calc(100% + theme("spacing.px") * 2);
+    }
+  }
+  .pf-link-box--bleed {
+    &:before {
+      width: calc(100% + theme("spacing.4") * 2);
+    }
+  }
+}

@@ -1,0 +1,15 @@
+@layer components {
+  .pf-select {
+    &:invalid {
+      @apply text-grey-500;
+    }
+
+    option {
+      @apply text-black;
+
+      &:disabled {
+        @apply text-grey-500;
+      }
+    }
+  }
+}
