@@ -42,8 +42,8 @@
     "validator-object-noUnknown": "Le champ «\u202f{label}\u202f» le champ a des clés non spécifiées : {unknown}",
     "validator-object-isImage": "Le fichier choisi doit être une image (jpg|svg|jpeg|png|bmp|gif|webp)",
 
-    "validator-array-min": "Le champ «\u202f{label}\u202f» le champ doit contenir au moins {min} éléments",
-    "validator-array-max": "Le champ «\u202f{label}\u202f» le champ doit avoir moins ou égal à {max} éléments",
+    "validator-array-min": "Le champ «\u202f{label}\u202f» doit contenir au moins {min} élément | Le champ «\u202f{label}\u202f» doit contenir au moins {min} éléments",
+    "validator-array-max": "Le champ «\u202f{label}\u202f» doit avoir moins ou égal à {max} élément | Le champ «\u202f{label}\u202f» doit avoir moins ou égal à {max} éléments",
     "validator-array-length": "Le champ «\u202f{label}\u202f» doit avoir {length} éléments",
 
     "validator-tuple-notEnoughtItem": "Le champ «\u202f{label}\u202f» la valeur de tuple a trop peu d'éléments, une longueur de {expectedLength} était attendue, mais une longueur de {length} a été soumis pour la valeur : {value}",

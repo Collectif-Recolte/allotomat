@@ -1,0 +1,201 @@
+<i18n>
+  {
+    "en": {
+      "beneficiary-edit": "Edit details",
+      "beneficiary-add-remove-funds": "Add or withdraw funds",
+      "beneficiary-display-qrcode": "Show QR code",
+      "beneficiary-lost-card": "Lost card",
+      "beneficiary-assign-card": "Assign a card",
+      "beneficiary-unassign-card": "Unassign card",
+      "beneficiary-delete": "Delete {firstname}",
+      "beneficiary-edit-disabled": "You don't have the permission to edit this beneficiary",
+      "beneficiary-add-remove-funds-disabled": "You can't add or withdraw funds if the beneficiary doesn't have a card",
+      "beneficiary-display-qrcode-disabled": "You can't display a QR code if the beneficiary doesn't have a card",
+      "beneficiary-lost-card-disabled": "You can't declare a card lost if the beneficiary doesn't have a card",
+      "beneficiary-delete-disabled": "You can't delete a beneficiary with a card assigned",
+      "beneficiary-delete-disabled-anonymous": "You can't delete an anonymous beneficiary",
+      "beneficiary-add-remove-funds-disabled-anonymous": "You can't add or withdraw funds if the beneficiary is anonymous"
+    },
+    "fr": {
+      "beneficiary-edit": "Modifier les détails",
+      "beneficiary-add-remove-funds": "Ajouter ou retirer des fonds",
+      "beneficiary-display-qrcode": "Afficher le code QR",
+      "beneficiary-lost-card": "Carte perdue",
+      "beneficiary-assign-card": "Assigner une carte",
+      "beneficiary-unassign-card": "Désassigner la carte",
+      "beneficiary-delete": "Supprimer {firstname}",
+      "beneficiary-edit-disabled": "Vous n'avez pas la permission de modifier ce participant-e-",
+      "beneficiary-add-remove-funds-disabled": "Vous ne pouvez pas ajouter ou retirer des fonds si le participant-e-s n'a pas de carte",
+      "beneficiary-display-qrcode-disabled": "Vous ne pouvez pas afficher un code QR si le participant-e-s n'a pas de carte",
+      "beneficiary-lost-card-disabled": "Vous ne pouvez pas déclarer une carte perdue si le participant-e-s n'a pas de carte",
+      "beneficiary-delete-disabled": "Vous ne pouvez pas supprimer un participant-e-s avec une carte assignée",
+      "beneficiary-delete-disabled-anonymous": "Vous ne pouvez pas supprimer un participant-e-s anonyme",
+      "beneficiary-add-remove-funds-disabled-anonymous": "Vous ne pouvez pas ajouter ou retirer des fonds si le participant-e-s est anonyme"
+    }
+  }
+  </i18n>
+
+<template>
+  <UiButtonGroup :items="items" />
+</template>
+
+<script setup>
+import { defineProps, ref } from "vue";
+import { useI18n } from "vue-i18n";
+
+import { canEditBeneficiary } from "@/lib/helpers/beneficiary";
+
+import ICON_PENCIL from "@/lib/icons/pencil.json";
+import ICON_ADD_CASH from "@/lib/icons/add-cash.json";
+import ICON_QR_CODE from "@/lib/icons/qrcode.json";
+import ICON_CARD_LOST from "@/lib/icons/card-lost.json";
+import ICON_MINUS from "@/lib/icons/minus.json";
+import ICON_TRASH from "@/lib/icons/trash.json";
+import ICON_CARD_LINK from "@/lib/icons/card-link.json";
+
+import {
+  URL_BENEFICIARY_EDIT,
+  URL_BENEFICIARY_MANUALLY_ADD_FUND,
+  URL_BENEFICIARY_QRCODE_PREVIEW,
+  URL_BENEFICIARY_CARD_LOST,
+  URL_BENEFICIARY_CARD_UNASSIGN,
+  URL_BENEFICIARY_DELETE,
+  URL_BENEFICIARY_CARD_ASSIGN
+} from "@/lib/consts/urls";
+
+const { t } = useI18n();
+
+const items = ref([
+  {
+    isExtra: true,
+    icon: ICON_PENCIL,
+    label: t("beneficiary-edit"),
+    route: { name: URL_BENEFICIARY_EDIT, params: { beneficiaryId: props.beneficiary.id } },
+    disabled: !canEditBeneficiary() || props.beneficiariesAreAnonymous,
+    reason: t("beneficiary-edit-disabled")
+  },
+  {
+    isExtra: true,
+    icon: ICON_ADD_CASH,
+    label: t("beneficiary-add-remove-funds"),
+    route: { name: URL_BENEFICIARY_MANUALLY_ADD_FUND, params: { beneficiaryId: props.beneficiary.id } },
+    disabled: !haveCard() || props.beneficiariesAreAnonymous,
+    reason: !haveCard() ? t("beneficiary-add-remove-funds-disabled") : t("beneficiary-add-remove-funds-disabled-anonymous")
+  },
+  {
+    isExtra: true,
+    icon: ICON_QR_CODE,
+    label: t("beneficiary-display-qrcode"),
+    route: qrCodeLink(),
+    disabled: !haveCard(),
+    reason: t("beneficiary-display-qrcode-disabled")
+  },
+  {
+    isExtra: true,
+    icon: ICON_CARD_LOST,
+    label: t("beneficiary-lost-card"),
+    route: lostCardLink(),
+    disabled: !haveCard(),
+    reason: t("beneficiary-lost-card-disabled")
+  },
+  {
+    isExtra: true,
+    icon: ICON_CARD_LINK,
+    label: t("beneficiary-assign-card"),
+    route: { name: URL_BENEFICIARY_CARD_ASSIGN, params: { beneficiaryId: props.beneficiary.id } },
+    if: !haveCard()
+  },
+  {
+    isExtra: true,
+    icon: ICON_MINUS,
+    label: t("beneficiary-unassign-card"),
+    route: unassignCardLink(),
+    if: haveCard()
+  },
+  {
+    isExtra: true,
+    icon: ICON_TRASH,
+    label: t("beneficiary-delete", { firstname: props.beneficiary.firstname }),
+    route: { name: URL_BENEFICIARY_DELETE, params: { beneficiaryId: props.beneficiary.id } },
+    disabled: haveCard() || props.beneficiariesAreAnonymous,
+    reason: haveCard() ? t("beneficiary-delete-disabled") : t("beneficiary-delete-disabled-anonymous")
+  }
+]);
+
+const props = defineProps({
+  beneficiary: {
+    type: Object,
+    required: true
+  },
+  beneficiariesAreAnonymous: {
+    type: Boolean,
+    default: false
+  }
+});
+
+function haveCard() {
+  return props.beneficiary.card !== null;
+}
+
+function qrCodeLink() {
+  if (haveCard()) {
+    return {
+      name: URL_BENEFICIARY_QRCODE_PREVIEW,
+      params: {
+        cardId: props.beneficiary.card.id
+      }
+    };
+  }
+  return {
+    name: URL_BENEFICIARY_QRCODE_PREVIEW,
+    params: {
+      cardId: 0
+    }
+  };
+}
+
+function lostCardLink() {
+  if (haveCard()) {
+    return {
+      name: URL_BENEFICIARY_CARD_LOST,
+      params: {
+        beneficiaryId: props.beneficiary.id,
+        cardId: props.beneficiary.card.id
+      }
+    };
+  }
+  return {
+    name: URL_BENEFICIARY_CARD_LOST,
+    params: {
+      beneficiaryId: props.beneficiary.id,
+      cardId: 0
+    }
+  };
+}
+
+function unassignCardLink() {
+  if (haveCard()) {
+    return {
+      name: URL_BENEFICIARY_CARD_UNASSIGN,
+      params: {
+        beneficiaryId: props.beneficiary.id,
+        cardId: props.beneficiary.card.id
+      }
+    };
+  }
+  return {
+    name: URL_BENEFICIARY_CARD_UNASSIGN,
+    params: {
+      beneficiaryId: props.beneficiary.id,
+      cardId: 0
+    }
+  };
+}
+</script>
+
+<style scoped>
+.disable_link {
+  pointer-events: none;
+  opacity: 0.5;
+}
+</style>

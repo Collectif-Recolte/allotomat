@@ -1,25 +1,27 @@
 <i18n>
 {
 	"en": {
-		"create-transaction": "Create a transaction",
-		"manage-beneficiaries": "Participants",
+    "create-transaction": "Create a transaction",
+    "manage-beneficiaries": "Participants",
     "manage-cards": "Cards",
-		"manage-markets": "Markets",
-		"manage-organizations": "Organizations",
-		"manage-programs": "Programs",
-		"manage-subscriptions": "Subscriptions",
-		"primary-menu": "Main",
+    "manage-markets": "Markets",
+    "manage-organizations": "Organizations",
+    "manage-programs": "Programs",
+    "manage-subscriptions": "Subscriptions",
+    "dashboard": "Dashboard",
+    "primary-menu": "Main",
     "check-balance": "Scan a card",
     "manage-transactions": "Transactions"
 	},
 	"fr": {
-		"create-transaction": "Créer une transaction",
-		"manage-beneficiaries": "Participant-e-s",
+    "create-transaction": "Créer une transaction",
+    "manage-beneficiaries": "Participant-e-s",
     "manage-cards": "Cartes",
-		"manage-markets": "Commerces",
-		"manage-organizations": "Organismes",
-		"manage-programs": "Programmes",
-		"manage-subscriptions": "Abonnements",
+    "manage-markets": "Commerces",
+    "manage-organizations": "Organismes",
+    "manage-programs": "Programmes",
+    "manage-subscriptions": "Abonnements",
+    "dashboard": "Tableau de bord",
     "primary-menu": "Principal",
     "check-balance": "Scanner une carte",
     "manage-transactions": "Transactions"
@@ -39,6 +41,11 @@
       :router-link="{ name: $consts.urls.URL_MARKET_ADMIN }"
       :label="t('manage-markets')"
       :icon="OFFICE_BUILDING" />
+    <MenuItem
+      v-if="manageOrganizations"
+      :router-link="{ name: $consts.urls.URL_PROJECT_ADMIN_DASHBOARD }"
+      :label="t('dashboard')"
+      :icon="DASHBOARD" />
     <MenuItem
       v-if="manageOrganizations"
       :router-link="{ name: $consts.urls.URL_ORGANIZATION_ADMIN }"
@@ -118,6 +125,7 @@ import RECEIPT_TAX from "@/lib/icons/receipt-tax.json";
 import QRCODE from "@/lib/icons/qrcode.json";
 import USER_GROUP from "@/lib/icons/user-group.json";
 import CLOCK from "@/lib/icons/clock.json";
+import DASHBOARD from "@/lib/icons/dashboard.json";
 
 const { getGlobalPermissions } = storeToRefs(useAuthStore());
 

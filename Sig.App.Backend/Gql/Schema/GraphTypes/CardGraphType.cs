@@ -20,6 +20,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public Id Id => card.GetIdentifier();
         public CardStatus Status => card.Status;
         public long ProgramCardId => card.ProgramCardId;
+        public string CardNumber => card.CardNumber;
 
         public CardGraphType(Card card)
         {

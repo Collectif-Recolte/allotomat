@@ -50,25 +50,21 @@
 
 html {
   @apply font-sans;
-  font-size: 16px; /* Important for scaling TailwindCSS REM unit */
+  font-size: 13px; /* Important for scaling TailwindCSS REM unit */
   scroll-behavior: smooth;
   -ms-overflow-style: scrollbar;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
   @screen xs {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   @screen sm {
-    font-size: 17px;
+    font-size: 15px;
   }
 
   @screen lg {
-    font-size: 18px;
-  }
-
-  @screen xl {
-    font-size: 19px;
+    font-size: 16px;
   }
 }
 

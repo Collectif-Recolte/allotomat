@@ -64,6 +64,8 @@
         has-footer
         :disable-submit="!forecast || Object.keys(formErrors).length > 0"
         :submit-label="t('assign-subscriptions')"
+        :cancel-label="t('edit')"
+        can-cancel
         :warning-message="randomAttribution ? t('warning-message-random') : t('warning-message')"
         @cancel="closeModal">
         <PfFormSection is-grid>
@@ -167,7 +169,13 @@ import { useNotificationsStore } from "@/lib/store/notifications";
 import { useOrganizationStore } from "@/lib/store/organization";
 import { getShortMoneyFormat } from "@/lib/helpers/money";
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
-import { WITHOUT_SUBSCRIPTION, SORT_DEFAULT, SORT_RANDOM } from "@/lib/consts/enums";
+import {
+  WITHOUT_SUBSCRIPTION,
+  SORT_DEFAULT,
+  SORT_RANDOM,
+  BENEFICIARY_WITH_CARD,
+  BENEFICIARY_WITHOUT_CARD
+} from "@/lib/consts/enums";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -244,6 +252,15 @@ const withoutSubscription = computed(() => {
   return route.query.subscriptions.includes(WITHOUT_SUBSCRIPTION);
 });
 
+const withCard = computed(() => {
+  if (!route.query.cardStatus) return null;
+  return route.query.cardStatus.includes(BENEFICIARY_WITH_CARD) && !route.query.cardStatus.includes(BENEFICIARY_WITHOUT_CARD)
+    ? true
+    : route.query.cardStatus.includes(BENEFICIARY_WITH_CARD) && route.query.cardStatus.includes(BENEFICIARY_WITHOUT_CARD)
+    ? null
+    : false;
+});
+
 // Find list of categories' filtered ids
 const filteredCategoryIds = computed(() => {
   if (!route.query.beneficiaryTypes) return [];
@@ -300,6 +317,7 @@ const { result: resultForecast } = useQuery(
       $withCategories: [ID!]
       $withoutSubscription: Boolean!
       $withSubscriptions: [ID!]
+      $withCard: Boolean
       $searchText: String!
     ) {
       forecastAssignBeneficiariesToSubscription(
@@ -309,6 +327,7 @@ const { result: resultForecast } = useQuery(
         withCategories: $withCategories
         withoutSubscription: $withoutSubscription
         withSubscriptions: $withSubscriptions
+        withCard: $withCard
         searchText: $searchText
       ) {
         beneficiariesWhoGetSubscriptions
@@ -329,6 +348,7 @@ function forecastVariables() {
     withCategories: filteredCategoryIds.value,
     withSubscriptions: filteredSubscriptionIds.value,
     withoutSubscription: withoutSubscription.value,
+    withCard: withCard.value,
     searchText: searchText.value
   };
 }

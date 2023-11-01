@@ -19,7 +19,7 @@
                   :key="index"
                   scope="col"
                   class="px-6 py-4 group-one first:pl-0 last:pr-0 text-p2 font-semibold text-primary-900 dark:text-grey-300 relative"
-                  :class="[col.hasHiddenLabel ? 'sr-only' : '', col.isRight ? 'text-right' : 'text-left']">
+                  :class="[col.hasHiddenLabel ? 'opacity-0' : '', col.isRight ? 'text-right' : 'text-left']">
                   <div
                     class="hidden group-one-first:block bg-grey-50 absolute inset-y-0 -left-section right-full md:-left-8"></div>
                   {{ col.label }}
@@ -31,6 +31,21 @@
                 <slot :item="item" />
               </tr>
             </tbody>
+            <tfoot v-if="props.footers.length > 0" class="sticky z-10 bottom-0 bg-grey-50">
+              <tr
+                class="relative after:absolute after:left-full after:-right-section md:after:-right-8 after:inset-y-0 after:bg-grey-50">
+                <th
+                  v-for="(footer, index) in props.footers"
+                  :key="index"
+                  scope="col"
+                  class="px-6 py-4 group-one first:pl-0 last:pr-0 text-p2 font-semibold text-primary-900 dark:text-grey-300 relative"
+                  :class="[footer.hasHiddenLabel ? 'sr-only' : '', footer.isRight ? 'text-right' : 'text-left']">
+                  <div
+                    class="hidden group-one-first:block bg-grey-50 absolute inset-y-0 -left-section right-full md:-left-8"></div>
+                  {{ footer.value }}
+                </th>
+              </tr>
+            </tfoot>
           </table>
         </div>
       </div>
@@ -59,6 +74,12 @@ const props = defineProps({
     }
   },
   items: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
+  footers: {
     type: Array,
     default() {
       return [];

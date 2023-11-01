@@ -21,7 +21,7 @@
 
 <template>
   <UiDialogDeleteModal
-    :return-route="{ name: URL_CARDS_SUMMARY }"
+    :return-route="returnRoute()"
     :title="t('title', { beneficiaryName: getBeneficiaryName() })"
     :description="t('description', { beneficiaryName: getBeneficiaryName() })"
     :validation-text="getBeneficiaryName()"
@@ -38,7 +38,7 @@ import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
-import { URL_CARDS_SUMMARY } from "@/lib/consts/urls";
+import { URL_CARDS_SUMMARY, URL_BENEFICIARY_ADMIN, URL_CARDS_UNASSIGN } from "@/lib/consts/urls";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -88,6 +88,11 @@ async function unassignCard() {
   addSuccess(
     t("unassign-card-success-notification", { beneficiaryName: `${beneficiary.value.firstname} ${beneficiary.value.lastname}` })
   );
-  router.push({ name: URL_CARDS_SUMMARY });
+  router.push(returnRoute());
+}
+
+function returnRoute() {
+  if (route.name === URL_CARDS_UNASSIGN) return { name: URL_CARDS_SUMMARY };
+  else return { name: URL_BENEFICIARY_ADMIN };
 }
 </script>

@@ -420,11 +420,13 @@ const validationSchemas = computed(() => {
     }),
     object({
       productGroupSubscriptionTypes: array()
+        .label(t("product-group-select"))
         .min(1)
         .of(
           object({
             productGroupId: string().label(t("product-group-select")).required(),
             types: array()
+              .label(t("subscription-type-category"))
               .min(1)
               .of(
                 object({

@@ -5,10 +5,11 @@
       "beneficiary-contact-information": "Contact information",
       "beneficiary-notes": "Notes",
       "beneficiary-category": "Category",
-      "beneficiary-id1": "Unique Identifier 1",
-      "beneficiary-id2": "Unique Identifier 2",
+      "beneficiary-id1": "ID 1",
+      "beneficiary-id2": "ID 2",
       "beneficiary-subscription": "Subscription",
       "beneficiary-none-subscription": "None",
+      "actions": "Actions",
       "delete-beneficiary": "Delete",
       "edit-beneficiary": "Edit",
       "add-manually-money": "Manually add funds"
@@ -18,10 +19,11 @@
       "beneficiary-contact-information": "Coordonnées",
       "beneficiary-notes": "Notes",
       "beneficiary-category": "Catégorie",
-      "beneficiary-id1": "Identifiant unique 1",
-      "beneficiary-id2": "Identifiant unique 2",
+      "beneficiary-id1": "ID 1",
+      "beneficiary-id2": "ID 2",
       "beneficiary-subscription": "Abonnement",
       "beneficiary-none-subscription": "Aucun",
+      "actions": "Actions",
       "delete-beneficiary": "Supprimer",
       "edit-beneficiary": "Modifier",
       "add-manually-money": "Ajouter manuellement des fonds"
@@ -35,7 +37,7 @@
       <td>
         {{ getBeneficiaryId1(slotProps.item) }}
       </td>
-      <td>
+      <td class="min-w-20">
         {{ getBeneficiaryId2(slotProps.item) }}
       </td>
       <td v-if="!beneficiariesAreAnonymous">
@@ -64,10 +66,12 @@
       </td>
       <UiTableContactCell v-if="!beneficiariesAreAnonymous" :person="slotProps.item" />
       <td v-if="!beneficiariesAreAnonymous" class="text-p4 py-2">
-        {{ getBeneficiaryNotes(slotProps.item) }}
+        <p class="mb-0">
+          {{ getBeneficiaryNotes(slotProps.item) }}
+        </p>
       </td>
-      <td>
-        <UiButtonGroup v-if="!beneficiariesAreAnonymous" :items="getBtnGroup(slotProps.item)" tooltip-position="left" />
+      <td v-if="!beneficiariesAreAnonymous">
+        <UiButtonGroup :items="getBtnGroup(slotProps.item)" tooltip-position="left" />
       </td>
     </template>
     <template #floatingActions>
@@ -93,13 +97,10 @@ import {
   URL_BENEFICIARY_MANUALLY_ADD_FUND
 } from "@/lib/consts/urls";
 
-import { GLOBAL_MANAGE_BENEFICIARIES } from "@/lib/consts/permissions";
-
-import { useAuthStore } from "@/lib/store/auth";
+import { canEditBeneficiary } from "@/lib/helpers/beneficiary";
 
 const { t } = useI18n();
 const router = useRouter();
-const auth = useAuthStore();
 
 const props = defineProps({
   beneficiaries: { type: Object, default: null },
@@ -127,7 +128,7 @@ const cols = computed(() => {
     cols.push({ label: t("beneficiary-contact-information") });
     cols.push({ label: t("beneficiary-notes") });
     cols.push({
-      label: "",
+      label: t("actions"),
       hasHiddenLabel: true
     });
   }
@@ -207,9 +208,5 @@ function canDelete(beneficiary) {
 
 function haveCard(beneficiary) {
   return beneficiary.card !== null;
-}
-
-function canEditBeneficiary() {
-  return auth.getGlobalPermissions.includes(GLOBAL_MANAGE_BENEFICIARIES);
 }
 </script>

@@ -85,7 +85,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             {
                 var addingFundTransactions = card.Transactions.OfType<AddingFundTransaction>()
                     .Where(x => x is not LoyaltyAddingFundTransaction)
-                    .Where(x => x.Status != FundTransactionStatus.Expired && x.AvailableFund > 0).ToList();
+                    .Where(x => x.Status == FundTransactionStatus.Actived && x.AvailableFund > 0).ToList();
 
                 var addingFundTransactionsBySubscriptionId =
                     await TransactionHelper.GroupAddingFundTransactionsBySubscriptionId(db, addingFundTransactions,
@@ -101,7 +101,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
                 {
                     if (transaction is IExpiringFundTransaction eft and not LoyaltyAddingFundTransaction)
                     {
-                        eft.Status = FundTransactionStatus.Expired;
+                        eft.Status = FundTransactionStatus.Unassigned;
                     }
 
                     transaction.Card = null;

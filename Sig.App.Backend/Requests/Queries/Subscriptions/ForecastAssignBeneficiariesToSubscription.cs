@@ -79,6 +79,18 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Subscriptions
                 }
             }
 
+            if (request.WithCard.HasValue)
+            {
+                if (request.WithCard.Value)
+                {
+                    query = query.Where(x => x.CardId != null);
+                }
+                else
+                {
+                    query = query.Where(x => x.CardId == null);
+                }
+            }
+
             // Exclude beneficiary that already got this subscription
             query = query.Where(x => !x.Subscriptions.Any(y => y.SubscriptionId == subscriptionId));
 
@@ -137,6 +149,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Subscriptions
             public Id[] WithSubscriptions { get; set; }
             public Id[] WithCategories { get; set; }
             public string SearchText { get; set; }
+            public bool? WithCard { get; set; }
         }
 
         public class Payload

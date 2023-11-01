@@ -406,6 +406,7 @@ public class DevDataSeeder : IDataSeeder
 
         var transaction = new SubscriptionAddingFundTransaction()
         {
+            TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(),
             Amount = 70,
             Beneficiary = beneficiary,
             Organization = beneficiary.Organization,
@@ -431,6 +432,7 @@ public class DevDataSeeder : IDataSeeder
         
         db.TransactionLogs.Add(new TransactionLog()
         {
+            TransactionUniqueId = transaction.TransactionUniqueId,
             Discriminator = TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog,
             TotalAmount = transaction.Amount,
             BeneficiaryId = beneficiary.Id,
@@ -483,7 +485,7 @@ public class DevDataSeeder : IDataSeeder
             return;
         }
 
-        var transaction1 = new PaymentTransaction() { Amount = 25.75m, CreatedAtUtc = DateTime.Now.AddMonths(-1), Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>() };
+        var transaction1 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 25.75m, CreatedAtUtc = DateTime.Now.AddMonths(-1), Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>() };
         transaction1.TransactionByProductGroups = new List<PaymentTransactionProductGroup>() { new PaymentTransactionProductGroup() { Amount = 25.75m, ProductGroup = productGroup, PaymentTransaction = transaction1 } };
         addingFundsTransaction.AvailableFund -= transaction1.Amount;
         var fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroup.Id);
@@ -505,6 +507,7 @@ public class DevDataSeeder : IDataSeeder
         
         await db.TransactionLogs.AddAsync(new TransactionLog()
         {
+            TransactionUniqueId = transaction1.TransactionUniqueId,
             Discriminator = TransactionLogDiscriminator.PaymentTransactionLog,
             TotalAmount = transaction1.Amount,
             BeneficiaryId = beneficiary.Id,
@@ -529,7 +532,7 @@ public class DevDataSeeder : IDataSeeder
             TransactionLogProductGroups = transactionLogProductGroups
         });
         
-        var transaction2 = new PaymentTransaction() { Amount = 32.33m, CreatedAtUtc = DateTime.Now, Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>() };
+        var transaction2 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 32.33m, CreatedAtUtc = DateTime.Now, Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>() };
         transaction2.TransactionByProductGroups = new List<PaymentTransactionProductGroup>() { new PaymentTransactionProductGroup() { Amount = 32.33m, ProductGroup = productGroup, PaymentTransaction = transaction1 } };
         addingFundsTransaction.AvailableFund -= transaction2.Amount;
         fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroup.Id);
@@ -551,6 +554,7 @@ public class DevDataSeeder : IDataSeeder
         
         await db.TransactionLogs.AddAsync(new TransactionLog()
         {
+            TransactionUniqueId = transaction2.TransactionUniqueId,
             Discriminator = TransactionLogDiscriminator.PaymentTransactionLog,
             TotalAmount = transaction2.Amount,
             BeneficiaryId = beneficiary.Id,

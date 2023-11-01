@@ -75,7 +75,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             var addingFundTransactionsBySubscriptionId =
                 await TransactionHelper.GroupAddingFundTransactionsBySubscriptionId(db,
-                    originalCard.Transactions.OfType<AddingFundTransaction>().Where(x => x.Status != FundTransactionStatus.Expired && x.AvailableFund > 0).ToList(), cancellationToken);
+                    originalCard.Transactions.OfType<AddingFundTransaction>().Where(x => x.Status == FundTransactionStatus.Actived && x.AvailableFund > 0).ToList(), cancellationToken);
 
             var subscriptions = await db.Subscriptions
                 .Where(x => addingFundTransactionsBySubscriptionId.Select(y => y.Key).Contains(x.Id))
