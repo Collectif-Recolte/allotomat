@@ -166,7 +166,6 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
                 .ToDateTimeUtc();
 
             return string.Join(";", subscriptions.Select(x => x.Subscription.Name).ToArray());
-            //return string.Join(";", subscriptions.Where(x => x.Subscription.EndDate >= today).Select(x => x.Subscription.Name).ToArray());
         }
 
         public class Input : IRequest<string>
