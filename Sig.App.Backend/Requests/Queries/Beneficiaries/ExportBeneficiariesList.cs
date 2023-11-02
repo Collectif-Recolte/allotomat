@@ -127,7 +127,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
             });
             dataWorksheet.Column("ID carte/Card ID", x => x.Card != null ? x.Card.ProgramCardId : "");
             dataWorksheet.Column("Numéro carte/Card Number", x => x.Card != null ? x.Card.CardNumber : "");
-            dataWorksheet.Column("Abonnements actifs/Active subscriptions", x => GetActiveSubscriptions(x.Subscriptions));
+            dataWorksheet.Column("Abonnements/Subscriptions", x => GetActiveSubscriptions(x.Subscriptions));
             dataWorksheet.Column("Organisme/Organization", x => x.Organization != null ? x.Organization.Name : "");
             dataWorksheet.Column("Dernier usage/Last use", x =>
             {
@@ -165,7 +165,8 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
                 .GetCurrentInstant()
                 .ToDateTimeUtc();
 
-            return string.Join(";", subscriptions.Where(x => x.Subscription.EndDate >= today).Select(x => x.Subscription.Name).ToArray());
+            return string.Join(";", subscriptions.Select(x => x.Subscription.Name).ToArray());
+            //return string.Join(";", subscriptions.Where(x => x.Subscription.EndDate >= today).Select(x => x.Subscription.Name).ToArray());
         }
 
         public class Input : IRequest<string>
