@@ -75,7 +75,7 @@
               btn-type="submit"
               class="px-8"
               size="sm"
-              :is-disabled="isFormDisabled || disableSubmit || processing"
+              :is-disabled="disableSubmit || processing"
               :label="submitLabel" />
             <div class="absolute -translate-y-1/2 top-1/2 right-1">
               <PfSpinner v-if="processing" text-color-class="text-white" :loading-label="loadingLabel" is-small />
@@ -91,7 +91,6 @@
 import { defineProps, defineEmits, ref, computed } from "vue";
 import { object, string, number } from "yup";
 import { useI18n } from "vue-i18n";
-import { useIsFormDirty, useIsFormValid } from "vee-validate";
 
 import ICON_TRASH from "@/lib/icons/trash.json";
 import ICON_PENCIL from "@/lib/icons/pencil.json";
@@ -192,11 +191,5 @@ const organizationsList = computed(() => {
   }
 
   return props.organizations;
-});
-
-const isFormDisabled = computed(() => {
-  const isDirty = useIsFormDirty();
-  const isValid = useIsFormValid();
-  return !isDirty.value || !isValid.value;
 });
 </script>
