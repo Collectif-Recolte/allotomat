@@ -10,7 +10,7 @@
 </i18n>
 
 <template>
-  <div class="flex flex-col relative mb-8">
+  <div class="flex flex-col relative mb-6">
     <BeneficiaryWithDetail
       v-for="beneficiary in props.beneficiariesPagination.items"
       :key="beneficiary.id"
@@ -18,7 +18,7 @@
       :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous" />
     <div
       v-if="!administrationSubscriptionsOffPlatform"
-      class="absolute bottom-0 right-0 before:block before:absolute before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
+      class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
       <PfButtonLink
         tag="routerLink"
         :to="{ name: URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS, query: props.filteredQuery }"
