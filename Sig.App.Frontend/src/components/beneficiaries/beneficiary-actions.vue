@@ -25,12 +25,12 @@
       "beneficiary-unassign-card": "Désassigner la carte",
       "beneficiary-delete": "Supprimer {firstname}",
       "beneficiary-edit-disabled": "Vous n'avez pas la permission de modifier ce participant-e-",
-      "beneficiary-add-funds-disabled": "Vous ne pouvez pas ajouter des fonds si le participant-e-s n'a pas de carte",
-      "beneficiary-display-qrcode-disabled": "Vous ne pouvez pas afficher un code QR si le participant-e-s n'a pas de carte",
-      "beneficiary-lost-card-disabled": "Vous ne pouvez pas déclarer une carte perdue si le participant-e-s n'a pas de carte",
-      "beneficiary-delete-disabled": "Vous ne pouvez pas supprimer un participant-e-s avec une carte assignée",
-      "beneficiary-delete-disabled-anonymous": "Vous ne pouvez pas supprimer un participant-e-s anonyme",
-      "beneficiary-add-funds-disabled-anonymous": "Vous ne pouvez pas ajouter des fonds si le participant-e-s est anonyme"
+      "beneficiary-add-funds-disabled": "Vous ne pouvez pas ajouter des fonds si le participant-e n'a pas de carte",
+      "beneficiary-display-qrcode-disabled": "Vous ne pouvez pas afficher un code QR si le participant-e n'a pas de carte",
+      "beneficiary-lost-card-disabled": "Vous ne pouvez pas déclarer une carte perdue si le participant-e n'a pas de carte",
+      "beneficiary-delete-disabled": "Vous ne pouvez pas supprimer un participant-e avec une carte assignée",
+      "beneficiary-delete-disabled-anonymous": "Vous ne pouvez pas supprimer un participant-e anonyme",
+      "beneficiary-add-funds-disabled-anonymous": "Vous ne pouvez pas ajouter des fonds si le participant-e est anonyme"
     }
   }
   </i18n>
