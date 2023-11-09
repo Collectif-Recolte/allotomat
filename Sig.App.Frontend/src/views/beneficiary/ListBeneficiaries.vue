@@ -559,6 +559,7 @@ function onSubscriptionsUnchecked(value) {
 function onResetFilters() {
   subscriptions.value = [];
   beneficiaryTypes.value = [];
+  cardStatus.value = [];
   onResetSearch();
   updateUrl();
 }
