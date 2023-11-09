@@ -115,7 +115,7 @@
               </UiSwitch> -->
 
               <BeneficiaryFilters
-                v-if="selectedOrganization !== '' && beneficiariesPagination.items.length > 0"
+                v-if="selectedOrganization !== ''"
                 v-model="searchInput"
                 :available-beneficiary-types="availableBeneficiaryTypes"
                 :available-subscriptions="availableSubscriptions"
