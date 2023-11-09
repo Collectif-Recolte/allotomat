@@ -11,7 +11,7 @@
     "error-row": "Row {row}:",
     "mandatory-field": "Field {fieldName} is mandatory.",
     "invalid-email": "Email ({email}) is invalid.",
-    "beneficiary-type-not-found": "Import did not work. One or more categories is missing in the platform.",
+    "beneficiary-type-not-found": "Import did not work. One or more categories are missing in the platform.",
     "invalid-postal-code": "Postal code ({postalCode}) is invalid."
 	},
 	"fr": {
