@@ -169,13 +169,19 @@ const props = defineProps({
 });
 
 const hasActiveFilters = computed(() => {
-  return props.selectedBeneficiaryTypes?.length > 0 || props.selectedSubscriptions?.length > 0 || !!props.searchFilter;
+  return (
+    props.selectedBeneficiaryTypes?.length > 0 ||
+    props.selectedSubscriptions?.length > 0 ||
+    !!props.searchFilter ||
+    props.selectedCardStatus?.length > 0
+  );
 });
 
 const activeFiltersCount = computed(() => {
   const selectedBeneficiariesCount = props.selectedBeneficiaryTypes?.length ?? 0;
   const selectedSubscritionsCount = props.selectedSubscriptions?.length ?? 0;
-  return selectedBeneficiariesCount + selectedSubscritionsCount;
+  const selectedCardStatusCount = props.selectedCardStatus?.length ?? 0;
+  return selectedBeneficiariesCount + selectedSubscritionsCount + selectedCardStatusCount;
 });
 
 const availableBeneficiaryTypes = computed(() => {
