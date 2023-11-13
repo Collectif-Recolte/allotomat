@@ -102,7 +102,7 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
                 var organizationSubscriptionTransactions = subscriptionTransactions.Where(x => x.OrganizationId == organization.Id).ToList();
                 var organizationExpiredTransactions = expiredTransactions.Where(x => x.OrganizationId == organization.Id).ToList();
 
-                var totalActiveSubscriptionsEnvelopes = organization.BudgetAllowances.Where(x => x.Subscription.FundsExpirationDate >= today).Sum(x => x.OriginalFund);
+                var totalActiveSubscriptionsEnvelopes = organization.BudgetAllowances.Where(x => x.Subscription.FundsExpirationDate >= today || !x.Subscription.IsFundsAccumulable).Sum(x => x.OriginalFund);
 
                 payload.Items.Add(new PayloadItem()
                 {
