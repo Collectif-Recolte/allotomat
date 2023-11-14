@@ -11,7 +11,7 @@
 
 <template>
   <TransitionRoot as="template" :show="isOpen">
-    <Dialog as="div" class="fixed z-20 inset-0 overflow-y-auto" @close="closeModal">
+    <Dialog as="div" class="fixed z-40 inset-0 overflow-y-auto" @close="closeModal">
       <div class="flex items-center justify-center min-h-screen py-4 px-4 text-center sm:block sm:p-0">
         <TransitionChild as="template" v-bind="overlayTransition">
           <DialogOverlay class="transition-opacity fixed inset-0 bg-primary-700/80" />
