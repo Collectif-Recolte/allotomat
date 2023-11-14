@@ -44,7 +44,11 @@
     <div v-if="organizationsStats">
       <UiTableHeader :title="t('organization-list-stats')">
         <template #right>
-          <UiFilter has-filters>
+          <UiFilter
+            has-filters
+            :has-active-filters="hasActiveFilters"
+            :active-filters-count="activeFiltersCount"
+            @resetFilters="onResetFilters">
             <PfFormInputCheckboxGroup
               v-if="availableSubscriptions.length > 0"
               class="mt-3"
@@ -70,7 +74,7 @@
 import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult } from "@vue/apollo-composable";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
 
@@ -132,6 +136,18 @@ const availableSubscriptions = useResult(resultProjects, null, (data) => {
     };
   });
 });
+
+const hasActiveFilters = computed(() => {
+  return selectedSubscriptions.value.length > 0;
+});
+
+const activeFiltersCount = computed(() => {
+  return selectedSubscriptions.value.length;
+});
+
+function onResetFilters() {
+  selectedSubscriptions.value = [];
+}
 
 function projectsStatsVariables() {
   return {
