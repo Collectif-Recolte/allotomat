@@ -12,7 +12,7 @@
 </i18n>
 
 <template>
-  <div class="sticky top-0 z-20 bg-primary-700">
+  <div class="sticky top-0 z-30 bg-primary-700">
     <div class="flex h-16 shrink-0">
       <button
         type="button"
