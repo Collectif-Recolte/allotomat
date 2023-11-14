@@ -43,7 +43,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
                 {
                     BeneficiaryCount = x.Value.Organizations.SelectMany(y => y.Beneficiaries).Count(),
                     UnspentLoyaltyFund = x.Value.Organizations.Sum(o => o.Beneficiaries.Where(b => b.Card != null).Sum(b => b.Card.Funds.Where(f => f.ProductGroup.Name == ProductGroupType.LOYALTY).Sum(f => f.Amount))),
-                    TotalActiveSubscriptionsEnvelopes = x.Value.Subscriptions.Where(x => x.FundsExpirationDate >= today).Sum(y => y.BudgetAllowances.Sum(z => z.OriginalFund)),
+                    TotalActiveSubscriptionsEnvelopes = x.Value.Subscriptions.Where(x => x.FundsExpirationDate >= today || !x.IsFundsAccumulable).Sum(y => y.BudgetAllowances.Sum(z => z.OriginalFund)),
                 };
             });
         }
