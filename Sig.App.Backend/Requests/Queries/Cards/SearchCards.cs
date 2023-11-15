@@ -25,10 +25,10 @@ namespace Sig.App.Backend.Requests.Queries.Cards
 
         public async Task<Pagination<Card>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var projectId = request.ProjectId.Value;
+            var projectId = request.ProjectId;
             IQueryable<Card> query = db.Cards.Include(x => x.Beneficiary).ThenInclude(x => x.Organization).Where(x => x.ProjectId == projectId);
 
-            if (request.Status != null)
+            if (request.Status != null && request.Status.Count() > 0)
             {
                 query = query.Where(x => request.Status.Contains(x.Status));
             }
@@ -40,7 +40,7 @@ namespace Sig.App.Backend.Requests.Queries.Cards
         public class Query : IRequest<Pagination<Card>>
         {
             public Page Page { get; set; }
-            public Maybe<long> ProjectId { get; set; }
+            public long ProjectId { get; set; }
             public IEnumerable<CardStatus> Status { get; set; }
         }
 

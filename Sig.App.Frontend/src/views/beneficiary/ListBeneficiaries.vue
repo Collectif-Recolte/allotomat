@@ -323,6 +323,10 @@ if (route.query.cardStatus) {
   cardStatus.value = route.query.cardStatus.split(",");
 }
 
+if (route.query.text) {
+  searchText.value = route.query.text;
+}
+
 const { result, loading: projectsLoading } = useQuery(
   gql`
     query Projects {
