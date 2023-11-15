@@ -108,7 +108,7 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
                 {
                     Organization = organization,
                     TotalActiveSubscriptionsEnvelopes = totalActiveSubscriptionsEnvelopes,
-                    RemainingPerEnvelope = organization.BudgetAllowances.Sum(x => x.AvailableFund),
+                    RemainingPerEnvelope = organization.BudgetAllowances.Where(x => x.Subscription.FundsExpirationDate >= today || !x.Subscription.IsFundsAccumulable).Sum(x => x.AvailableFund),
                     BalanceOnCards = GetBalanceOnCards(organizationManuallyAddingTransactions, organizationSubscriptionTransactions),
                     CardSpendingAmounts = GetCardSpendingAmounts(organizationManuallyAddingTransactions, organizationSubscriptionTransactions),
                     TotalAllocatedOnCards = GetTotalAllocatedOnCardsAmounts(organizationManuallyAddingTransactions, organizationSubscriptionTransactions),
