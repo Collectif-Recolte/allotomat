@@ -60,6 +60,7 @@ function getTransactionDate(transaction) {
 }
 
 function getCardNo(transaction) {
+  if (transaction.card === null) return "-";
   return `${transaction.card?.programCardId}`;
 }
 

@@ -10,5 +10,8 @@ namespace Sig.App.Backend.DbModel.Entities.Transactions
         public IList<PaymentTransaction> Transactions { get; set; }
         public decimal AvailableFund { get; set; }
         public FundTransactionStatus Status { get; set; }
+
+        public long? ExpireFundTransactionId { get; set; }
+        public ExpireFundTransaction ExpireFundTransaction { get; set; }
     }
 }

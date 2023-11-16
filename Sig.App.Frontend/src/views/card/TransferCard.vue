@@ -34,7 +34,7 @@
   </i18n>
 
 <template>
-  <UiDialogModal v-if="isInEdition" :return-route="{ name: URL_CARDS_SUMMARY }" :title="t('title')" :has-footer="false">
+  <UiDialogModal v-if="isInEdition" :return-route="returnRoute()" :title="t('title')" :has-footer="false">
     <template #default="{ closeModal }">
       <Form v-slot="{ isSubmitting }" :validation-schema="validationSchema" @submit="onSubmit">
         <PfForm
@@ -76,7 +76,7 @@
     :title="t('confirm-title')"
     :description="t('confirm-desc', { cardNumber: newCardAssignedNumber })"
     :confirm-button-label="t('close')"
-    :confirm-route="{ name: URL_CARDS_SUMMARY }" />
+    :confirm-route="returnRoute()" />
 </template>
 
 <script setup>
@@ -88,7 +88,7 @@ import { useRoute } from "vue-router";
 import { useMutation, useResult, useQuery } from "@vue/apollo-composable";
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 
-import { URL_CARDS_SUMMARY } from "@/lib/consts/urls";
+import { URL_CARDS_SUMMARY, URL_BENEFICIARY_ADMIN, URL_CARDS_LOST } from "@/lib/consts/urls";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -157,5 +157,10 @@ async function onSubmit({ newCardNumber }) {
 
   newCardAssignedNumber.value = result.data.transfertCard.card.programCardId;
   isInEdition.value = false;
+}
+
+function returnRoute() {
+  if (route.name === URL_CARDS_LOST) return { name: URL_CARDS_SUMMARY };
+  else return { name: URL_BENEFICIARY_ADMIN };
 }
 </script>

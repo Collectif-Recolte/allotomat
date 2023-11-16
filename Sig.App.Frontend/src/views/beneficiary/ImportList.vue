@@ -11,7 +11,8 @@
     "error-row": "Row {row}:",
     "mandatory-field": "Field {fieldName} is mandatory.",
     "invalid-email": "Email ({email}) is invalid.",
-    "beneficiary-type-not-found": "Import did not work. One or more categories is missing in the platform."
+    "beneficiary-type-not-found": "Import did not work. One or more categories are missing in the platform.",
+    "invalid-postal-code": "Postal code ({postalCode}) is invalid."
 	},
 	"fr": {
 		"title": "Importer des participant-e-s",
@@ -24,7 +25,8 @@
     "error-row": "Ligne {row}:",
     "mandatory-field": "Le champ {fieldName} est obligatoire.",
     "invalid-email": "Le courriel ({email}) est invalide.",
-    "beneficiary-type-not-found": "L'importation n'a pu être complétée. Une ou plusieurs catégories sont manquantes dans la plateforme."
+    "beneficiary-type-not-found": "L'importation n'a pu être complétée. Une ou plusieurs catégories sont manquantes dans la plateforme.",
+    "invalid-postal-code": "Le code postal ({postalCode}) est invalide."
 	}
 }
 </i18n>
@@ -150,6 +152,7 @@ function onFileUploaded({ handle }) {
         validateMandatoryField(lastname, i + 2, LASTNAME_KEY);
         validateMandatoryField(key, i + 2, CATEGORY_KEY);
         validateEmailAddress(email, i + 2);
+        validatePostalCode(postalCode, i + 2);
 
         if (id1 && firstname && lastname && key) {
           items.push({
@@ -210,6 +213,18 @@ const validateEmailAddress = (email, rowNumber) => {
     errors.value.push({
       rowNumber,
       errorType: t("invalid-email", { email: email })
+    });
+  }
+};
+
+const validatePostalCode = (postalCode, rowNumber) => {
+  const postalCodeIsSet = postalCode !== null && postalCode !== undefined && postalCode !== "";
+  const validPostalCode =
+    !postalCodeIsSet || /^[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTV-Z][ -]?\d[ABCEGHJ-NPRSTV-Z]\d$/i.test(postalCode);
+  if (!validPostalCode) {
+    errors.value.push({
+      rowNumber,
+      errorType: t("invalid-postal-code", { postalCode: postalCode })
     });
   }
 };

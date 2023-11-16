@@ -90,7 +90,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var organizationId = beneficiary?.OrganizationId;
             var loyaltyFundTransactions = card.Transactions
                 .OfType<LoyaltyAddingFundTransaction>()
-                .Where(x => x.Status != FundTransactionStatus.Expired && x.AvailableFund > 0)
+                .Where(x => x.Status == FundTransactionStatus.Actived && x.AvailableFund > 0)
                 .ToList();
 
             var transactionByProductGroups = new List<PaymentTransactionProductGroup>();
@@ -126,7 +126,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     var addingFundTransactions = card.Transactions
                         .Where(x => x is SubscriptionAddingFundTransaction or ManuallyAddingFundTransaction)
                         .OfType<AddingFundTransaction>()
-                        .Where(x => x.Status != FundTransactionStatus.Expired && x.AvailableFund > 0 && x.ProductGroupId == productGroupId)
+                        .Where(x => x.Status == FundTransactionStatus.Actived && x.AvailableFund > 0 && x.ProductGroupId == productGroupId)
                         .ToList();
 
                     var fundToRemove = Math.Min(fund.Amount, amount);

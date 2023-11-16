@@ -16,7 +16,7 @@
     :tooltip-position="tooltipPosition"
     :btn-custom-classes="btnCustomClasses">
     <template v-if="dropdownItems && dropdownItems.length > 0">
-      <Menu v-slot="{ open }" as="div" class="group relative -ml-px first:ml-0 first:rounded-l-md last:rounded-r-md">
+      <Menu as="div" class="group relative -ml-px first:ml-0 first:rounded-l-md last:rounded-r-md">
         <div>
           <MenuButton class="main-dropdown-btn">
             <span class="sr-only">
@@ -24,15 +24,14 @@
             </span>
             <PfIcon
               class="shrink-0 transition-transform ease duration-300 motion-reduce:transition-none"
-              :class="open ? 'rotate-180' : 'rotate-0'"
               size="sm"
-              :icon="CHEVRON_ICON"
+              :icon="ICON_DOTS"
               aria-hidden="true" />
           </MenuButton>
         </div>
         <Transition v-bind="dropdownMenuTransition">
           <MenuItems
-            class="origin-top-right absolute z-20 right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white dark:bg-grey-800 focus:outline-none">
+            class="origin-top-right absolute z-20 right-0 mt-2 w-56 rounded-md shadow-lg py-1 bg-white border border-primary-900 focus:outline-none">
             <MenuItem
               v-for="(item, index) in dropdownItems"
               :key="index"
@@ -53,7 +52,7 @@ import { computed, defineProps } from "vue";
 
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/vue";
 import SubmenuItem from "./submenu-item";
-import CHEVRON_ICON from "@/lib/icons/chevron-down.json";
+import ICON_DOTS from "@/lib/icons/dots-vertical.json";
 
 const { t } = useI18n();
 
@@ -103,7 +102,7 @@ const dropdownMenuTransition = {
 
 <style lang="postcss" scoped>
 .main-dropdown-btn {
-  @apply p-2.5 
+  @apply p-1
   group-first:rounded-l-md group-last:rounded-r-md 
   transition-colors duration-200 ease-in-out 
   border border-primary-500 

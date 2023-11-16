@@ -261,7 +261,7 @@ namespace Sig.App.Backend.Gql.Schema
             return ctx.DataLoader.LoadBeneficiaryType(id.LongIdentifierForType<BeneficiaryType>());
         }
 
-        public async Task<ForecastAssignBeneficiariesToSubscription.Payload> ForecastAssignBeneficiariesToSubscription(Id organizationId, Id subscriptionId, int amount, bool withoutSubscription, Id[] withSubscriptions, Id[] withCategories, string searchText, [Inject] IMediator mediator)
+        public async Task<ForecastAssignBeneficiariesToSubscription.Payload> ForecastAssignBeneficiariesToSubscription(Id organizationId, Id subscriptionId, int amount, bool withoutSubscription, Id[] withSubscriptions, Id[] withCategories, string searchText, bool? withCard, [Inject] IMediator mediator)
         {
             return await mediator.Send(new ForecastAssignBeneficiariesToSubscription.Input()
             {
@@ -271,6 +271,7 @@ namespace Sig.App.Backend.Gql.Schema
                 WithCategories = withCategories,
                 WithoutSubscription = withoutSubscription,
                 WithSubscriptions = withSubscriptions,
+                WithCard = withCard,
                 SearchText = searchText
             });
         }

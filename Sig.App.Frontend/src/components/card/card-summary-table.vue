@@ -12,8 +12,6 @@
     "gift-card-label": "Gift card",
     "lost-card-label": "Lost card",
     "card-last-transaction-date": "Last use",
-    "total": "Total",
-    "open-product-group": "See balance by product group",
     "off-platform-beneficiary-active": "Active",
     "off-platform-beneficiary-inactive": "Inactive"
 	},
@@ -29,8 +27,6 @@
     "gift-card-label": "Carte-cadeau",
     "lost-card-label": "Carte perdue",
     "card-last-transaction-date": "Dernier usage",
-    "total": "Total",
-    "open-product-group": "Voir le solde par groupe de produits",
     "off-platform-beneficiary-active": "Actif",
     "off-platform-beneficiary-inactive": "Inactif"
   }
@@ -50,36 +46,7 @@
         {{ getBeneficiaryName(slotProps.item) }}
       </td>
       <td class="text-right" :class="CELL_CLASSES" :style="slotProps.item.rowPaddingBottom">
-        <div class="relative">
-          <div class="flex items-center w-36 ml-auto">
-            <div class="w-7/12 text-right">
-              <PfTag
-                v-if="slotProps.item.card.funds?.length > 0"
-                class="uppercase"
-                :label="t('total')"
-                border-color-class="border-primary-900"
-                is-squared />
-            </div>
-            <div class="w-5/12 text-right">
-              <div class="ml-2">{{ getCardFund(slotProps.item) }}</div>
-            </div>
-            <div v-if="slotProps.item.card.funds?.length > 0" class="absolute -top-0.5 -right-9">
-              <button class="pf-button pf-button--outline min-h-7 min-w-7 p-0" @click="() => toggleDropdown(slotProps.item.id)">
-                <span class="sr-only">{{ t("open-product-group") }}</span>
-                <PfIcon :class="slotProps.item.dropdownIsOpen ? 'rotate-180' : 'rotate-0'" :icon="ICON_CHEVRON" size="sm" />
-              </button>
-            </div>
-          </div>
-          <div
-            v-if="slotProps.item.card.funds?.length > 0"
-            :style="slotProps.item.dropdownIsOpen ? { maxHeight: `${slotProps.item.dropdownMaxHeight}px` } : null"
-            class="absolute -bottom-1 translate-y-full right-0 overflow-hidden transition-max-height ease-in-out duration-300"
-            :class="slotProps.item.dropdownIsOpen ? 'max-h-full' : 'max-h-0'">
-            <div class="h-full">
-              <ProductGroupFundList :product-groups="getProductGroups(slotProps.item)" />
-            </div>
-          </div>
-        </div>
+        <UiGenericCardBalance :beneficiary="slotProps.item" show-total />
       </td>
       <td class="text-right" :class="CELL_CLASSES" :style="slotProps.item.rowPaddingBottom">
         {{ getCardLoyaltyFund(slotProps.item) }}
@@ -140,24 +107,9 @@ import { getMoneyFormat } from "@/lib/helpers/money";
 
 import { CARD_STATUS_LOST } from "@/lib/consts/enums";
 
-import ICON_CHEVRON from "@/lib/icons/chevron-down.json";
-import ProductGroupFundList from "@/components/product-groups/product-group-fund-list";
-
 const { t } = useI18n();
 
 const CELL_CLASSES = "py-1 transition-padding ease-in-out duration-300";
-
-const getProductGroups = (beneficiary) => {
-  const productGroups = [];
-  for (let fund of beneficiary.card.funds) {
-    productGroups.push({
-      color: fund.productGroup.color,
-      label: fund.productGroup.name,
-      fund: fund.amount
-    });
-  }
-  return productGroups;
-};
 
 const props = defineProps({
   selectedOrganization: {
@@ -211,29 +163,6 @@ watch(
   }
 );
 
-function toggleDropdown(itemId) {
-  const item = tableItems.value.find((x) => x.id === itemId);
-  item.dropdownIsOpen = !item.dropdownIsOpen;
-  if (item.dropdownIsOpen) {
-    item.dropdownMaxHeight = getDropdownMaxHeight(item);
-    item.rowPaddingBottom = getRowPaddingBottom(item);
-  } else {
-    item.dropdownMaxHeight = null;
-    item.rowPaddingBottom = null;
-  }
-}
-
-const elInsideDropdownHeight = 30;
-
-const getDropdownMaxHeight = (item) => {
-  const productGroupNb = item.card.funds.length;
-  return productGroupNb * elInsideDropdownHeight;
-};
-
-const getRowPaddingBottom = (item) => {
-  return item.dropdownIsOpen ? { paddingBottom: `${item.dropdownMaxHeight}px` } : null;
-};
-
 const cols = computed(() => {
   const cols = [];
 
@@ -268,10 +197,6 @@ function getCardId(beneficiary) {
 
 function getBeneficiaryName(beneficiary) {
   return `${beneficiary.firstname} ${beneficiary.lastname}`;
-}
-
-function getCardFund(beneficiary) {
-  return beneficiary.card ? getMoneyFormat(beneficiary.card.totalFund) : "";
 }
 
 function haveLoyaltyFund(beneficiary) {

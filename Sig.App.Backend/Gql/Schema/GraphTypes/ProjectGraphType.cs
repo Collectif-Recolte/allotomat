@@ -1,10 +1,14 @@
 ﻿using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using MediatR;
+using Sig.App.Backend.Authorization;
 using Sig.App.Backend.DbModel.Entities.Projects;
+using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Requests.Queries.Organizations;
 using Sig.App.Backend.Requests.Queries.Projects;
+using Sig.App.Backend.Services.Permission.Enums;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -67,6 +71,33 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<IEnumerable<ProductGroupGraphType>> ProductGroups(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadProjectProductGroups(Id.LongIdentifierForType<Project>());
+        }
+
+        [RequirePermission(GlobalPermission.ManageSpecificProject)]
+        public IDataLoaderResult<ProjectStatsGraphType> ProjectStats(IAppUserContext ctx)
+        {
+            return ctx.DataLoader.LoadProjectStats(Id.LongIdentifierForType<Project>());
+        }
+
+        public async Task<IEnumerable<OrganizationStatsGraphType>> OrganizationsStats([Inject] IMediator mediator,
+            [Description("If specified, only organization with one of those subscription are returned.")] Id[] subscriptions = null)
+        {
+            var result = await mediator.Send(new GetOrganizationsStats.Input()
+            {
+                ProjectId = Id,
+                Subscriptions = subscriptions?.Select(y => y.LongIdentifierForType<Subscription>())
+            });
+
+            return result.Items.Select(x => new OrganizationStatsGraphType()
+            {
+                Organization = new OrganizationGraphType(x.Organization),
+                TotalActiveSubscriptionsEnvelopes = x.TotalActiveSubscriptionsEnvelopes,
+                TotalAllocatedOnCards = x.TotalAllocatedOnCards,
+                RemainingPerEnvelope = x.RemainingPerEnvelope,
+                BalanceOnCards = x.BalanceOnCards,
+                CardSpendingAmounts = x.CardSpendingAmounts,
+                ExpiredAmounts = x.ExpiredAmounts
+            });
         }
     }
 }

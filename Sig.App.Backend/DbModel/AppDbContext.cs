@@ -241,7 +241,11 @@ namespace Sig.App.Backend.DbModel
 
                 _.HasOne(x => x.Organization);
 
+                _.HasOne(x => x.ExpiredSubscription).WithMany().OnDelete(DeleteBehavior.NoAction);
+
                 _.HasOne(x => x.ProductGroup).WithMany().OnDelete(DeleteBehavior.NoAction);
+
+                _.HasOne(x => x.AddingFundTransaction).WithOne(x => x.ExpireFundTransaction).HasForeignKey<AddingFundTransaction>(x => x.ExpireFundTransactionId).OnDelete(DeleteBehavior.NoAction);
             });
 
             Configure<OffPlatformAddingFundTransaction>(_ => {

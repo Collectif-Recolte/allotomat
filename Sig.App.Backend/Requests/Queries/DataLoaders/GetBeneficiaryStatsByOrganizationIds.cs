@@ -27,6 +27,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
                 .Include(x => x.Beneficiaries)
                 .ThenInclude(x => x.Subscriptions)
                 .Where(x => request.Ids.Contains(x.Id))
+                .AsNoTracking()
                 .ToDictionaryAsync(x => x.Id);
 
             return results.ToDictionary(x => x.Key, x =>

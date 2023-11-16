@@ -37,7 +37,7 @@
   <div v-if="beneficiaries">
     <RouterView v-slot="{ Component }">
       <div v-if="canManageOrganizations" class="flex flex-col gap-6 xs:flex-row mt-4 mb-12">
-        <UiCardStat
+        <UiStat
           class="xs:w-1/2"
           :stat="project?.cardStats.cardsUnassigned"
           :label="t('available-card-count')"
@@ -45,7 +45,7 @@
           :primary-btn-label="t('generate-cards')"
           :secondary-btn-route="showCreateGiftCardBtn"
           :secondary-btn-label="t('create-gift-card')" />
-        <UiCardStat
+        <UiStat
           class="xs:w-1/2"
           :stat="beneficiaryStats?.beneficiariesWithoutCard"
           :label="t('participants-without-card')"

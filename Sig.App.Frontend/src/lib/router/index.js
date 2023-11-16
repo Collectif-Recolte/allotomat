@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import {
   URL_ACCOUNT_LOGIN,
   URL_PROJECT_ADMIN,
-  URL_ORGANIZATION_ADMIN,
+  URL_PROJECT_ADMIN_DASHBOARD,
   URL_BENEFICIARY_ADMIN,
   URL_TRANSACTION,
   URL_ROOT
@@ -71,7 +71,7 @@ router.beforeEach(async (to, from, next) => {
       userType === USER_TYPE_PCAADMIN
         ? URL_PROJECT_ADMIN
         : userType === USER_TYPE_PROJECTMANAGER
-        ? URL_ORGANIZATION_ADMIN
+        ? URL_PROJECT_ADMIN_DASHBOARD
         : userType === USER_TYPE_ORGANIZATIONMANAGER
         ? URL_BENEFICIARY_ADMIN
         : userType === USER_TYPE_MERCHANT

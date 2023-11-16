@@ -3,18 +3,24 @@
 	"en": {
 		"beneficiary-type": "Categories",
     "subscription": "Subscriptions",
+    "cards": "Card",
     "without-subscription-option": "None",
     "status": "Status",
     "status-active": "Active",
-    "status-inactive": "Inactive"
+    "status-inactive": "Inactive",
+    "with-card": "With card",
+    "without-card": "Without card",
 	},
 	"fr": {
 		"beneficiary-type": "Catégories",
     "subscription": "Abonnements",
+    "cards": "Carte",
     "without-subscription-option": "Aucun",
     "status": "État",
     "status-active": "Actif",
-    "status-inactive": "Inactif"
+    "status-inactive": "Inactif",
+    "with-card": "Avec carte",
+    "without-card": "Sans carte",
 	}
 }
 </i18n>
@@ -56,11 +62,19 @@
       :label="t('status')"
       :options="availableStatus"
       @input="onStatusChecked" />
+    <PfFormInputCheckboxGroup
+      id="cardStatus"
+      class="mt-3"
+      is-filter
+      :value="selectedCardStatus"
+      :label="t('cards')"
+      :options="cardStatus"
+      @input="onCardStatusChecked" />
   </UiFilter>
 </template>
 
 <script setup>
-import { defineProps, defineEmits, computed } from "vue";
+import { defineProps, defineEmits, computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
@@ -74,7 +88,9 @@ const emit = defineEmits([
   "search",
   "update:modelValue",
   "statusChecked",
-  "statusUnchecked"
+  "statusUnchecked",
+  "cardStatusChecked",
+  "cardStatusUnchecked"
 ]);
 
 const props = defineProps({
@@ -108,6 +124,12 @@ const props = defineProps({
       return [];
     }
   },
+  selectedCardStatus: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
   withoutSubscriptionId: {
     type: String,
     default: ""
@@ -135,17 +157,31 @@ const props = defineProps({
   beneficiariesAreAnonymous: {
     type: Boolean,
     default: false
+  },
+  cardStatusWith: {
+    type: String,
+    default: ""
+  },
+  cardStatusWithout: {
+    type: String,
+    default: ""
   }
 });
 
 const hasActiveFilters = computed(() => {
-  return props.selectedBeneficiaryTypes?.length > 0 || props.selectedSubscriptions?.length > 0 || !!props.searchFilter;
+  return (
+    props.selectedBeneficiaryTypes?.length > 0 ||
+    props.selectedSubscriptions?.length > 0 ||
+    !!props.searchFilter ||
+    props.selectedCardStatus?.length > 0
+  );
 });
 
 const activeFiltersCount = computed(() => {
   const selectedBeneficiariesCount = props.selectedBeneficiaryTypes?.length ?? 0;
   const selectedSubscritionsCount = props.selectedSubscriptions?.length ?? 0;
-  return selectedBeneficiariesCount + selectedSubscritionsCount;
+  const selectedCardStatusCount = props.selectedCardStatus?.length ?? 0;
+  return selectedBeneficiariesCount + selectedSubscritionsCount + selectedCardStatusCount;
 });
 
 const availableBeneficiaryTypes = computed(() => {
@@ -179,6 +215,11 @@ const availableStatus = computed(() => {
   return [];
 });
 
+const cardStatus = ref([
+  { value: props.cardStatusWith, label: t("with-card") },
+  { value: props.cardStatusWithout, label: t("without-card") }
+]);
+
 function onSubscriptionsChecked(input) {
   if (input.isChecked) {
     emit("subscriptionsChecked", input.value);
@@ -200,6 +241,14 @@ function onStatusChecked(input) {
     emit("statusChecked", input.value);
   } else {
     emit("statusUnchecked", input.value);
+  }
+}
+
+function onCardStatusChecked(input) {
+  if (input.isChecked) {
+    emit("cardStatusChecked", input.value);
+  } else {
+    emit("cardStatusUnchecked", input.value);
   }
 }
 
