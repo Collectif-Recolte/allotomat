@@ -3,7 +3,7 @@
 	"en": {
     "card-status": "Status",
     "qr-code": "QR",
-    "card": "Id",
+    "card": "ID",
     "gift-card-label": "Gift card",
     "lost-card-label": "Lost card",
     "card-beneficiary-organization": "Organization",
@@ -15,7 +15,7 @@
 	"fr": {
     "card-status": "Statut",
     "qr-code": "QR",
-    "card": "Id",
+    "card": "ID",
     "gift-card-label": "Carte cadeau",
     "lost-card-label": "Carte perdue",
     "card-beneficiary-organization": "Organisme",
@@ -50,7 +50,10 @@
           btn-style="link"
           tag="routerLink"
           :label="getBeneficiaryName(slotProps.item)"
-          :to="{ name: URL_BENEFICIARY_ADMIN, query: { text: getBeneficiaryID1(slotProps.item) } }" />
+          :to="{
+            name: URL_BENEFICIARY_ADMIN,
+            query: { text: getBeneficiaryID1(slotProps.item), organizationId: getBeneficiaryOrganizationId(slotProps.item) }
+          }" />
       </td>
       <td :class="CELL_CLASSES" :style="slotProps.item.rowPaddingBottom">
         {{ getBeneficiaryOrganization(slotProps.item) }}
@@ -194,6 +197,13 @@ function getBeneficiaryName(card) {
 function getBeneficiaryID1(card) {
   if (card.beneficiary !== null) {
     return `${card.beneficiary.id1}`;
+  }
+  return "";
+}
+
+function getBeneficiaryOrganizationId(card) {
+  if (card.beneficiary !== null) {
+    return `${card.beneficiary.organization.id}`;
   }
   return "";
 }

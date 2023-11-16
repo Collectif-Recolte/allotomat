@@ -22,7 +22,9 @@
     :label="t('label')"
     :value="modelValue"
     has-hidden-label
-    :placeholder="!beneficiariesAreAnonymous ? t('placeholder') : t('placeholder-anonymous')"
+    :placeholder="
+      props.placeholder !== null ? props.placeholder : !beneficiariesAreAnonymous ? t('placeholder') : t('placeholder-anonymous')
+    "
     @input="(e) => emit('update:modelValue', e)"
     @keyup.enter="() => emit('search')">
     <template #trailingIcon>
@@ -62,6 +64,10 @@ const props = defineProps({
   beneficiariesAreAnonymous: {
     type: Boolean,
     default: false
+  },
+  placeholder: {
+    type: String,
+    default: null
   }
 });
 </script>

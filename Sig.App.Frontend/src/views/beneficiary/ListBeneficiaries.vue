@@ -327,6 +327,10 @@ if (route.query.text) {
   searchText.value = route.query.text;
 }
 
+if (route.query.organizationId) {
+  selectedOrganization.value = route.query.organizationId;
+}
+
 const { result, loading: projectsLoading } = useQuery(
   gql`
     query Projects {

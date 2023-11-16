@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Sig.App.Backend.Utilities.Sorting;
 using System;
+using Sig.App.Backend.Extensions;
 
 namespace Sig.App.Backend.Requests.Queries.Cards
 {
@@ -33,6 +34,16 @@ namespace Sig.App.Backend.Requests.Queries.Cards
                 query = query.Where(x => request.Status.Contains(x.Status));
             }
 
+            if (request.SearchText.IsSet() && !string.IsNullOrEmpty(request.SearchText.Value))
+            {
+                var searchText = request.SearchText.Value.Split(' ').AsEnumerable();
+
+                foreach (var text in searchText)
+                {
+                    query = query.Where(x => x.ProgramCardId.ToString().Contains(text) || x.CardNumber.Contains(text));
+                }
+            }
+
             var sorted = Sort(query, CardSort.Default, SortOrder.Asc);
             return await Pagination.For(sorted, request.Page);
         }
@@ -42,6 +53,7 @@ namespace Sig.App.Backend.Requests.Queries.Cards
             public Page Page { get; set; }
             public long ProjectId { get; set; }
             public IEnumerable<CardStatus> Status { get; set; }
+            public Maybe<string> SearchText { get; set; }
         }
 
         private static IOrderedQueryable<Card> Sort(IQueryable<Card> query, CardSort sort, SortOrder order)
