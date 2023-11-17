@@ -22,7 +22,7 @@
     :label="t('label')"
     :value="modelValue"
     has-hidden-label
-    :placeholder="!beneficiariesAreAnonymous ? t('placeholder') : t('placeholder-anonymous')"
+    :placeholder="getPlaceholder"
     @input="(e) => emit('update:modelValue', e)"
     @keyup.enter="() => emit('search')">
     <template #trailingIcon>
@@ -41,7 +41,7 @@
 </template>
 
 <script setup>
-import { defineEmits, defineProps } from "vue";
+import { defineEmits, defineProps, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 import ICON_SEARCH from "@/lib/icons/search.json";
@@ -49,6 +49,14 @@ import ICON_SEARCH from "@/lib/icons/search.json";
 const { t } = useI18n();
 
 const emit = defineEmits(["search", "update:modelValue"]);
+
+const getPlaceholder = computed(() => {
+  return props.placeholder !== null
+    ? props.placeholder
+    : !props.beneficiariesAreAnonymous
+    ? t("placeholder")
+    : t("placeholder-anonymous");
+});
 
 const props = defineProps({
   id: {
@@ -62,6 +70,10 @@ const props = defineProps({
   beneficiariesAreAnonymous: {
     type: Boolean,
     default: false
+  },
+  placeholder: {
+    type: String,
+    default: null
   }
 });
 </script>

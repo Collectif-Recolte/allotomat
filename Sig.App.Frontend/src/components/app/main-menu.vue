@@ -61,11 +61,7 @@
       :router-link="{ name: $consts.urls.URL_BENEFICIARY_ADMIN }"
       :label="t('manage-beneficiaries')"
       :icon="USER_GROUP" />
-    <MenuItem
-      v-if="manageCards"
-      :router-link="{ name: $consts.urls.URL_CARDS_SUMMARY }"
-      :label="t('manage-cards')"
-      :icon="CREDIT_CARD" />
+    <MenuItem v-if="manageCards" :router-link="{ name: $consts.urls.URL_CARDS }" :label="t('manage-cards')" :icon="CREDIT_CARD" />
     <MenuItem
       v-if="canCreateTransaction"
       :router-link="{ name: $consts.urls.URL_TRANSACTION }"

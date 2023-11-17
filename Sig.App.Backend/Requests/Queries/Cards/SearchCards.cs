@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Sig.App.Backend.Utilities.Sorting;
 using System;
+using Sig.App.Backend.Extensions;
 
 namespace Sig.App.Backend.Requests.Queries.Cards
 {
@@ -25,12 +26,22 @@ namespace Sig.App.Backend.Requests.Queries.Cards
 
         public async Task<Pagination<Card>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var projectId = request.ProjectId.Value;
+            var projectId = request.ProjectId;
             IQueryable<Card> query = db.Cards.Include(x => x.Beneficiary).ThenInclude(x => x.Organization).Where(x => x.ProjectId == projectId);
 
-            if (request.Status != null)
+            if (request.Status != null && request.Status.Count() > 0)
             {
                 query = query.Where(x => request.Status.Contains(x.Status));
+            }
+
+            if (request.SearchText.IsSet() && !string.IsNullOrEmpty(request.SearchText.Value))
+            {
+                var searchText = request.SearchText.Value.Split(' ').AsEnumerable();
+
+                foreach (var text in searchText)
+                {
+                    query = query.Where(x => x.ProgramCardId.ToString().Contains(text) || x.CardNumber.Contains(text));
+                }
             }
 
             var sorted = Sort(query, CardSort.Default, SortOrder.Asc);
@@ -40,8 +51,9 @@ namespace Sig.App.Backend.Requests.Queries.Cards
         public class Query : IRequest<Pagination<Card>>
         {
             public Page Page { get; set; }
-            public Maybe<long> ProjectId { get; set; }
+            public long ProjectId { get; set; }
             public IEnumerable<CardStatus> Status { get; set; }
+            public Maybe<string> SearchText { get; set; }
         }
 
         private static IOrderedQueryable<Card> Sort(IQueryable<Card> query, CardSort sort, SortOrder order)

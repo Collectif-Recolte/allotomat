@@ -32,7 +32,7 @@
 </i18n>
 
 <template>
-  <UiDialogModal v-slot="{ closeModal }" :return-route="{ name: URL_CARDS_SUMMARY }" :title="t('title')" :has-footer="false">
+  <UiDialogModal v-slot="{ closeModal }" :return-route="{ name: URL_CARDS }" :title="t('title')" :has-footer="false">
     <Form v-if="project" v-slot="{ isSubmitting, setFieldValue }" :validation-schema="validationSchema" @submit="onSubmit">
       <PfForm
         has-footer
@@ -88,7 +88,7 @@ import { useI18n } from "vue-i18n";
 import { string, number, object, lazy } from "yup";
 import { useRoute, useRouter } from "vue-router";
 
-import { URL_CARDS_SUMMARY } from "@/lib/consts/urls";
+import { URL_CARDS } from "@/lib/consts/urls";
 
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 import { getMoneyFormat } from "@/lib/helpers/money";
@@ -179,6 +179,6 @@ async function onSubmit({ amount, existingCardId }) {
   });
 
   addSuccess(t("gift-card-fund-sucessfully-added", { amount: getMoneyFormat(parseFloat(amount)), cardId: existingCardId }));
-  router.push({ name: URL_CARDS_SUMMARY });
+  router.push({ name: URL_CARDS });
 }
 </script>
