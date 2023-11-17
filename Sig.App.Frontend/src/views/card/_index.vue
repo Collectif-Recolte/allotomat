@@ -1,76 +1,138 @@
 <i18n>
 {
 	"en": {
-    "manage-cards": "Card management",
-    "cards-summary": "Dashboard",
 		"generate-cards": "Generate new cards",
 		"title": "Cards",
-    "selected-organization": "Organization",
-    "empty-list": "You haven't generated any cards yet.",
-    "empty-list-organisation":"No organization is associated with the program.",
-    "add-organization": "Add an organization",
-    "empty-card-list": "The program has not generated any cards yet."
+    "empty-card-list": "The program has not generated any cards yet.",
+    "create-gift-card": "Create a gift card",
+    "available-card": "{n} available",
+    "total-card-count": "{n} program cards",
+    "display-qr-code": "View QR code",
+    "remove-card": "Unassign",
+    "lost-card": "Lost card",
+    "no-results": "Your search yields no results",
+    "reset-search": "Reset search",
+    "card-status": "Status",
+    "gift-card-label": "Gift card",
+    "lost-card-label": "Lost card",
+    "card-assigned": "Assigned",
+    "card-unassigned": "Unassigned",
+    "card-deactivated": "Deactivated",
+    "search-placeholder": "Search by ID or card number"
 	},
 	"fr": {
-		"manage-cards": "Gérer des cartes",
-    "cards-summary": "Tableau de bord",
 		"generate-cards": "Générer de nouvelles cartes",
 		"title": "Cartes",
-    "selected-organization": "Organisme",
-    "empty-list": "Vous n'avez pas encore généré de cartes.",
-    "empty-list-organisation": "Aucun organisme n'est associé au programme.",
-    "add-organization": "Ajouter un organisme",
-    "empty-card-list": "Le programme n'a pas encore généré de cartes."
+    "empty-card-list": "Le programme n'a pas encore généré de cartes.",
+    "create-gift-card": "Créer une carte-cadeau",
+    "available-card": "{n} disponibles",
+    "total-card-count":"{n} cartes du programme",
+    "display-qr-code": "Voir le code QR",
+    "remove-card": "Désassigner",
+    "lost-card": "Carte perdue",
+    "no-results": "Votre recherche ne donne aucun résultat",
+    "reset-search": "Réinitialiser la recherche",
+    "card-status": "Statut",
+    "gift-card-label": "Carte cadeau",
+    "lost-card-label": "Carte perdue",
+    "card-assigned": "Assignée",
+    "card-unassigned": "Non assignée",
+    "card-deactivated": "Désactivée",
+    "search-placeholder": "Chercher par ID ou n° de carte"
 	}
 }
 </i18n>
 
 <template>
   <RouterView v-slot="{ Component }">
-    <AppShell :loading="loadingOrganizations || loadingProjects">
+    <AppShell :loading="loadingProjects">
       <template #title>
-        <Title :title="t('title')" :subpages="subpages">
-          <template v-if="canManageOrganizations && organizations && organizations.length > 0" #right>
-            <div class="flex items-center gap-x-4">
-              <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-organization") }}</span>
-              <PfFormInputSelect
-                id="selectedOrganization"
-                has-hidden-label
-                :label="t('selected-organization')"
-                :value="selectedOrganization"
-                :options="organizations"
-                col-span-class="sm:col-span-3"
-                @input="onOrganizationSelected" />
+        <Title :title="t('title')">
+          <template v-if="project" #bottom>
+            <div class="flex flex-col gap-y-4 sm:flex-row sm:gap-x-4 sm:justify-between sm:items-center">
+              <div class="flex flex-wrap gap-x-4">
+                <h2 class="my-0">{{ t("total-card-count", project.cards.totalCount) }}</h2>
+                <p class="my-1">{{ t("available-card", project.cardStats.cardsUnassigned) }}</p>
+              </div>
+              <div class="flex flex-wrap gap-x-4 gap-y-3">
+                <PfButtonLink
+                  v-if="project"
+                  btn-style="outline"
+                  tag="routerLink"
+                  :label="t('create-gift-card')"
+                  :to="showCreateGiftCardBtn" />
+                <PfButtonLink
+                  v-if="project"
+                  tag="routerLink"
+                  :label="t('generate-cards')"
+                  :to="{ name: URL_CARDS_ADD, query: { projectId: project.id } }" />
+              </div>
             </div>
-          </template>
-          <template v-if="canManageOrganizations && projects" #subpagesCta>
-            <PfButtonLink
-              v-if="project"
-              tag="routerLink"
-              :label="t('generate-cards')"
-              :to="{ name: URL_CARDS_ADD, query: { projectId: project.id } }" />
           </template>
         </Title>
       </template>
-      <Component :is="Component" v-if="showContent" :selected-organization="selectedOrganization" />
-      <UiEmptyPage v-else-if="organizations && organizations.length === 0">
-        <UiCta
-          :img-src="require('@/assets/img/organismes.jpg')"
-          :description="t('empty-list-organisation')"
-          :primary-btn-label="t('add-organization')"
-          :primary-btn-route="addOrganizationRoute">
-        </UiCta>
-      </UiEmptyPage>
-      <UiEmptyPage v-else-if="canManageOrganizations && organizations && project">
-        <UiCta
-          :img-src="require('@/assets/img/cards.jpg')"
-          :description="t('empty-list')"
-          :primary-btn-label="t('generate-cards')"
-          :primary-btn-route="{ name: URL_CARDS_ADD, query: { projectId: project.id } }" />
-      </UiEmptyPage>
-      <UiEmptyPage v-else-if="!canManageOrganizations && organizations && project">
-        <UiCta :img-src="require('@/assets/img/cards.jpg')" :description="t('empty-card-list')" />
-      </UiEmptyPage>
+      <div v-if="cards && cardsPagination">
+        <UiTableHeader>
+          <template #right>
+            <UiFilter
+              v-model="searchInput"
+              has-search
+              has-filters
+              :placeholder="t('search-placeholder')"
+              :has-active-filters="!!searchText || activeFiltersCount > 0"
+              :active-filters-count="activeFiltersCount"
+              :beneficiaries-are-anonymous="beneficiariesAreAnonymous && canManageOrganizations"
+              @resetFilters="resetSearch"
+              @search="onSearch">
+              <PfFormInputCheckboxGroup
+                v-if="availableCardStatus.length > 0"
+                id="card-status"
+                is-filter
+                :value="selectedCardStatus"
+                :label="t('card-status')"
+                :options="availableCardStatus"
+                @input="onCardStatusChecked" />
+            </UiFilter>
+          </template>
+        </UiTableHeader>
+        <UiEmptyPage v-if="cardsPagination.totalCount === 0 && activeFiltersCount === 0">
+          <UiCta
+            :img-src="require('@/assets/img/cards.jpg')"
+            :description="t('empty-card-list')"
+            :primary-btn-label="t('generate-cards')"
+            :primary-btn-route="{ name: URL_CARDS_ADD, query: { projectId: project.id } }"
+            @onPrimaryBtnClick="resetSearch">
+          </UiCta>
+        </UiEmptyPage>
+        <UiEmptyPage v-else-if="cardsPagination.totalCount === 0">
+          <UiCta
+            :img-src="require('@/assets/img/cards.jpg')"
+            :description="t('no-results')"
+            :primary-btn-label="t('reset-search')"
+            primary-btn-is-action
+            @onPrimaryBtnClick="resetSearch">
+          </UiCta>
+        </UiEmptyPage>
+        <div v-else>
+          <CardSummaryTable
+            :cards="cards"
+            :beneficiaries-are-anonymous="beneficiariesAreAnonymous && canManageOrganizations"
+            :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform">
+            <template #beforeActions="{ card }">
+              <UiButtonGroup :items="getBeforeBtnGroup(card)" tooltip-position="right" />
+            </template>
+            <template #afterActions="{ card }">
+              <UiButtonGroup :items="getAfterBtnGroup(card)" tooltip-position="left" />
+            </template>
+          </CardSummaryTable>
+          <UiPagination
+            v-if="cardsPagination && cardsPagination.totalPages > 1"
+            v-model:page="page"
+            :total-pages="cardsPagination.totalPages">
+          </UiPagination>
+        </div>
+        <Component :is="Component" />
+      </div>
     </AppShell>
   </RouterView>
 </template>
@@ -80,137 +142,178 @@ import gql from "graphql-tag";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult } from "@vue/apollo-composable";
-import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
-import { onBeforeRouteUpdate } from "vue-router";
 
-import { useOrganizationStore } from "@/lib/store/organization";
 import { usePageTitle } from "@/lib/helpers/page-title";
 import { useAuthStore } from "@/lib/store/auth";
 
-import { URL_CARDS_ADD, URL_CARDS_ASSIGNATION, URL_CARDS_SUMMARY, URL_ORGANIZATION_ADD } from "@/lib/consts/urls";
+import {
+  URL_CARDS_ADD,
+  URL_GIFT_CARD_ADD,
+  URL_CARDS_QRCODE_PREVIEW,
+  URL_CARDS_UNASSIGN,
+  URL_CARDS_LOST
+} from "@/lib/consts/urls";
 import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
+import {
+  CARD_STATUS_ASSIGNED,
+  CARD_STATUS_UNASSIGNED,
+  CARD_STATUS_DEACTIVATED,
+  CARD_STATUS_LOST,
+  CARD_STATUS_GIFT
+} from "@/lib/consts/enums";
 
 import Title from "@/components/app/title";
+import CardSummaryTable from "@/components/card/card-summary-table.vue";
+
+import ICON_CARD_LOST from "@/lib/icons/card-lost.json";
+import ICON_QR_CODE from "@/lib/icons/qrcode.json";
+import ICON_MINUS from "@/lib/icons/minus.json";
 
 const { getGlobalPermissions } = storeToRefs(useAuthStore());
 const { t } = useI18n();
 
-const selectedOrganization = ref("");
-const project = ref(undefined);
-const route = useRoute();
-const { currentOrganization, changeOrganization } = useOrganizationStore();
+const page = ref(1);
+const searchInput = ref("");
+const searchText = ref("");
+const selectedCardStatus = ref([]);
+
+const availableCardStatus = [
+  { value: CARD_STATUS_ASSIGNED, label: t("card-assigned") },
+  { value: CARD_STATUS_UNASSIGNED, label: t("card-unassigned") },
+  { value: CARD_STATUS_DEACTIVATED, label: t("card-deactivated") },
+  { value: CARD_STATUS_LOST, label: t("lost-card-label") },
+  { value: CARD_STATUS_GIFT, label: t("gift-card-label") }
+];
 
 usePageTitle(t("title"));
 
-const { result: resultOrganizations, loading: loadingOrganizations } = useQuery(
+const canManageOrganizations = () => {
+  return getGlobalPermissions.value.includes(GLOBAL_MANAGE_ORGANIZATIONS);
+};
+
+const { result: resultProjects, loading: loadingProjects } = useQuery(
   gql`
-    query Organizations {
-      organizations {
+    query Projects($page: Int!, $status: [CardStatus!], $searchText: String) {
+      projects {
         id
         name
-        project {
-          id
-          cardStats {
-            cardsAssigned
-            cardsUnassigned
+        beneficiariesAreAnonymous
+        administrationSubscriptionsOffPlatform
+        cardStats {
+          cardsUnassigned
+        }
+        cards(page: $page, limit: 30, status: $status, searchText: $searchText) {
+          pageNumber
+          pageSize
+          totalCount
+          totalPages
+          items {
+            id
+            programCardId
+            cardNumber
+            status
+            beneficiary {
+              id
+              id1
+              firstname
+              lastname
+              organization {
+                id
+                name
+              }
+            }
           }
         }
       }
     }
-  `
-);
-const organizations = useResult(resultOrganizations, null, (data) => {
-  if (data.organizations.length > 0) {
-    const organisation = data.organizations.find((x) => x.id === currentOrganization) ?? data.organizations[0];
-    selectedOrganization.value = `${organisation.id}`;
-    changeOrganization(organisation.id);
-    if (project.value === undefined) {
-      project.value = organisation.project;
-    }
-    return data.organizations.map((x) => ({
-      label: x.name,
-      value: `${x.id}`
-    }));
-  } else {
-    return [];
-  }
-});
-
-const canManageOrganizations = computed(() => {
-  return getGlobalPermissions.value.includes(GLOBAL_MANAGE_ORGANIZATIONS);
-});
-
-const {
-  result: resultProjects,
-  loading: loadingProjects,
-  refetch: refetchProjects
-} = useQuery(
-  gql`
-    query Projects {
-      projects {
-        id
-        cardStats {
-          cardsAssigned
-          cardsUnassigned
-        }
-      }
-    }
   `,
-  null,
+  projectsVariables,
   {
     enabled: canManageOrganizations
   }
 );
-const projects = useResult(resultProjects, null, (data) => {
-  project.value = data.projects[0];
-  return data.projects;
-});
 
-const hasCards = computed(
-  () => project.value && project.value.cardStats.cardsAssigned + project.value.cardStats.cardsUnassigned > 0
-);
-
-const showContent = computed(() => hasCards.value || route.name == URL_CARDS_ADD);
-
-const subpages = computed(() =>
-  project.value !== undefined
-    ? [
-        {
-          route: { name: URL_CARDS_SUMMARY, query: { projectId: project.value.id } },
-          label: t("cards-summary"),
-          isActive: true
-        },
-        {
-          route: {
-            name: URL_CARDS_ASSIGNATION,
-            query: { projectId: project.value.id }
-          },
-          label: t("manage-cards"),
-          isActive: false
-        }
-      ]
-    : []
-);
-
-function onOrganizationSelected(e) {
-  selectedOrganization.value = e;
-  changeOrganization(e);
+function projectsVariables() {
+  return {
+    page: page.value,
+    status: selectedCardStatus.value,
+    searchText: searchText.value
+  };
 }
 
-onBeforeRouteUpdate((to) => {
-  if (to.name === URL_CARDS_SUMMARY || to.name === URL_CARDS_ASSIGNATION) {
-    refetchProjects();
-  }
+const project = useResult(resultProjects, null, (data) => {
+  return data.projects[0];
 });
 
-const addOrganizationRoute = computed(() => {
-  if (projects.value) {
-    return {
-      name: URL_ORGANIZATION_ADD,
-      query: { projectId: projects.value[0].id }
-    };
+const cardsPagination = useResult(resultProjects, null, (data) => {
+  return data.projects[0]?.cards;
+});
+
+const cards = useResult(resultProjects, null, (data) => {
+  return data.projects[0]?.cards.items;
+});
+
+const showCreateGiftCardBtn = computed(() => {
+  return project.value ? { name: URL_GIFT_CARD_ADD, query: { projectId: project.value.id } } : null;
+});
+
+const getBeforeBtnGroup = (card) => [
+  {
+    label: t("display-qr-code"),
+    icon: ICON_QR_CODE,
+    route: {
+      name: URL_CARDS_QRCODE_PREVIEW,
+      params: { cardId: card.id }
+    }
   }
-  return "";
+];
+
+const getAfterBtnGroup = (card) => {
+  if (card.beneficiary !== null) {
+    return [
+      {
+        label: t("lost-card"),
+        icon: ICON_CARD_LOST,
+        route: {
+          name: URL_CARDS_LOST,
+          params: { beneficiaryId: card.beneficiary.id, cardId: card.id }
+        }
+      },
+      {
+        label: t("remove-card"),
+        icon: ICON_MINUS,
+        route: {
+          name: URL_CARDS_UNASSIGN,
+          params: { beneficiaryId: card.beneficiary.id, cardId: card.id }
+        }
+      }
+    ];
+  }
+  return [];
+};
+
+function onSearch() {
+  page.value = 1;
+  searchText.value = searchInput.value;
+}
+
+function resetSearch() {
+  page.value = 1;
+  searchText.value = "";
+  searchInput.value = "";
+  selectedCardStatus.value = [];
+}
+
+function onCardStatusChecked(input) {
+  if (input.isChecked) {
+    selectedCardStatus.value.push(input.value);
+  } else {
+    selectedCardStatus.value = selectedCardStatus.value.filter((x) => x !== input.value);
+  }
+}
+
+const activeFiltersCount = computed(() => {
+  return selectedCardStatus.value.length;
 });
 </script>
