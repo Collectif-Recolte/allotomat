@@ -69,6 +69,15 @@ const props = defineProps({
 const elInsideDropdownHeight = 30;
 const getProductGroups = () => {
   const productGroups = [];
+
+  if (props.beneficiary.card.loyaltyFund !== null) {
+    productGroups.push({
+      color: props.beneficiary.card.loyaltyFund.productGroup.color,
+      label: props.beneficiary.card.loyaltyFund.productGroup.name,
+      fund: props.beneficiary.card.loyaltyFund.amount
+    });
+  }
+
   for (let fund of props.beneficiary.card.funds) {
     productGroups.push({
       color: fund.productGroup.color,
@@ -76,11 +85,15 @@ const getProductGroups = () => {
       fund: fund.amount
     });
   }
+
   return productGroups;
 };
 
 const getDropdownMaxHeight = () => {
-  const productGroupNb = props.beneficiary.card.funds.length;
+  let productGroupNb = props.beneficiary.card.funds.length;
+  if (props.beneficiary.card.loyaltyFund !== null) {
+    productGroupNb++;
+  }
   return productGroupNb * elInsideDropdownHeight;
 };
 
@@ -105,6 +118,12 @@ function toggleDropdown() {
 }
 
 function getCardFund() {
-  return props.beneficiary.card ? getMoneyFormat(props.beneficiary.card.totalFund) : "";
+  let fund = props.beneficiary.card.totalFund;
+
+  if (props.beneficiary.card.loyaltyFund !== null) {
+    fund += props.beneficiary.card.loyaltyFund.amount;
+  }
+
+  return props.beneficiary.card ? getMoneyFormat(fund) : "";
 }
 </script>
