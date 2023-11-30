@@ -566,6 +566,9 @@ export default [
     name: urls.URL_CARDS,
     path: "/cards",
     component: () => import("@/views/card/_index.vue"),
+    meta: {
+      claim: GLOBAL_MANAGE_CARDS
+    },
     children: [
       {
         name: urls.URL_CARDS_QRCODE_PREVIEW,
