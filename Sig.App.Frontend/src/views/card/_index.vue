@@ -6,7 +6,7 @@
     "empty-card-list": "The program has not generated any cards yet.",
     "create-gift-card": "Create a gift card",
     "available-card": "{count} available",
-    "total-card-count": "{count} program card | {count} program card | {count} program cards",
+    "total-card-count": "{count} program cards | {count} program card | {count} program cards",
     "display-qr-code": "View QR code",
     "remove-card": "Unassign",
     "lost-card": "Lost card",
