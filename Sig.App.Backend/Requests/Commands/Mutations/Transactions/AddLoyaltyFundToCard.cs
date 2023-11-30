@@ -49,7 +49,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     cancellationToken);
 
             if (card == null) throw new CardNotFoundException();
-            
+
+            if (card.Status == CardStatus.Lost) throw new CardLostException();
+
             var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             var currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
@@ -152,5 +154,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         }
 
         public class CardNotFoundException : RequestValidationException { }
+        public class CardLostException : RequestValidationException { }
     }
 }
