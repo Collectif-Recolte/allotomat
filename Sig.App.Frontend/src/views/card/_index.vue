@@ -141,6 +141,7 @@
 import gql from "graphql-tag";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { onBeforeRouteUpdate } from "vue-router";
 import { useQuery, useResult } from "@vue/apollo-composable";
 import { storeToRefs } from "pinia";
 
@@ -148,6 +149,7 @@ import { usePageTitle } from "@/lib/helpers/page-title";
 import { useAuthStore } from "@/lib/store/auth";
 
 import {
+  URL_CARDS,
   URL_CARDS_ADD,
   URL_GIFT_CARD_ADD,
   URL_CARDS_QRCODE_PREVIEW,
@@ -192,7 +194,11 @@ const canManageOrganizations = () => {
   return getGlobalPermissions.value.includes(GLOBAL_MANAGE_ORGANIZATIONS);
 };
 
-const { result: resultProjects, loading: loadingProjects } = useQuery(
+const {
+  result: resultProjects,
+  loading: loadingProjects,
+  refetch: refetchCards
+} = useQuery(
   gql`
     query Projects($page: Int!, $status: [CardStatus!], $searchText: String) {
       projects {
@@ -315,5 +321,11 @@ function onCardStatusChecked(input) {
 
 const activeFiltersCount = computed(() => {
   return selectedCardStatus.value.length;
+});
+
+onBeforeRouteUpdate((to) => {
+  if (to.name === URL_CARDS) {
+    refetchCards();
+  }
 });
 </script>
