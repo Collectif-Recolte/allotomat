@@ -1,6 +1,7 @@
 ﻿using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
+using System;
 using System.Collections.Generic;
 
 namespace Sig.App.Backend.DbModel.Entities.Beneficiaries
@@ -31,5 +32,7 @@ namespace Sig.App.Backend.DbModel.Entities.Beneficiaries
         public IList<SubscriptionBeneficiary> Subscriptions { get; set; }
 
         public long SortOrder { get; set; }
+
+        public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     }
 }
