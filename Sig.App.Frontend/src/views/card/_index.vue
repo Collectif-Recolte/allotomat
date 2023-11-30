@@ -95,7 +95,7 @@
             </UiFilter>
           </template>
         </UiTableHeader>
-        <UiEmptyPage v-if="cardsPagination.totalCount === 0 && activeFiltersCount === 0">
+        <UiEmptyPage v-if="cardsPagination.totalCount === 0 && activeFiltersCount === 0 && searchText === ''">
           <UiCta
             :img-src="require('@/assets/img/cards.jpg')"
             :description="t('empty-card-list')"
