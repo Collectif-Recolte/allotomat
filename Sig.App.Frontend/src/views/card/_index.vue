@@ -5,8 +5,8 @@
 		"title": "Cards",
     "empty-card-list": "The program has not generated any cards yet.",
     "create-gift-card": "Create a gift card",
-    "available-card": "{n} available",
-    "total-card-count": "{n} program cards",
+    "available-card": "{count} available",
+    "total-card-count": "{count} program cards | {count} program card | {count} program cards",
     "display-qr-code": "View QR code",
     "remove-card": "Unassign",
     "lost-card": "Lost card",
@@ -25,8 +25,8 @@
 		"title": "Cartes",
     "empty-card-list": "Le programme n'a pas encore généré de cartes.",
     "create-gift-card": "Créer une carte-cadeau",
-    "available-card": "{n} disponibles",
-    "total-card-count":"{n} cartes du programme",
+    "available-card": "{count} disponible | {count} disponible | {count} disponibles",
+    "total-card-count":"{count} carte du programme | {count} carte du programme | {count} cartes du programme",
     "display-qr-code": "Voir le code QR",
     "remove-card": "Désassigner",
     "lost-card": "Carte perdue",
@@ -51,8 +51,8 @@
           <template v-if="project" #bottom>
             <div class="flex flex-col gap-y-4 sm:flex-row sm:gap-x-4 sm:justify-between sm:items-center">
               <div class="flex flex-wrap gap-x-4">
-                <h2 class="my-0">{{ t("total-card-count", project.cards.totalCount) }}</h2>
-                <p class="my-1">{{ t("available-card", project.cardStats.cardsUnassigned) }}</p>
+                <h2 class="my-0">{{ t("total-card-count", { count: project.cards.totalCount }) }}</h2>
+                <p class="my-1">{{ t("available-card", { count: project.cardStats.cardsUnassigned }) }}</p>
               </div>
               <div class="flex flex-wrap gap-x-4 gap-y-3">
                 <PfButtonLink
