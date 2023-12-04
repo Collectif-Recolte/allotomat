@@ -17,6 +17,7 @@ module.exports = {
     minWidth: require("./spacing"),
     margin: require("./margin"),
     transitionProperty: require("./transition-property"),
-    width: require("./width")
+    width: require("./width"),
+    zIndex: require("./z-index")
   }
 };
