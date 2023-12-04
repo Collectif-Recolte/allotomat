@@ -19,6 +19,8 @@ using Sig.App.Backend.Constants;
 using NodaTime;
 using System.Linq;
 using System;
+using Sig.App.Backend.DbModel.Entities.Beneficiaries;
+using Sig.App.Backend.DbModel.Entities.Transactions;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 {
@@ -46,6 +48,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects
                 .Include(x => x.Markets)
+                .Include(x => x.BeneficiaryTypes)
                 .Include(x => x.ProductGroups).ThenInclude(x => x.Types)
                 .Include(x => x.Subscriptions).ThenInclude(x => x.Beneficiaries)
                 .Include(x => x.Organizations).ThenInclude(x => x.Beneficiaries)
@@ -71,17 +74,35 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                     await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.ProjectManagerOf, projectId.ToString()));
                 }
             }
+            var beneficiaries = project.Organizations.SelectMany(x => x.Beneficiaries).ToList();
+            var transactions = project.Cards.SelectMany(x => x.Transactions).ToList();
 
-            db.Transactions.RemoveRange(project.Cards.SelectMany(x => x.Transactions));
+            //db.PaymentTransactionProductGroups
+
+            //db.TransactionLogs
+            //db.TransactionLogProductGroups
+
+            db.Transactions.RemoveRange(transactions);
             db.Cards.RemoveRange(project.Cards);
             db.SubscriptionBeneficiaries.RemoveRange(project.Subscriptions.SelectMany(x => x.Beneficiaries));
-            db.Beneficiaries.RemoveRange(project.Organizations.SelectMany(x => x.Beneficiaries));
+            
+            //Added
+            db.PaymentFunds.RemoveRange(db.PaymentFunds.ToList().Where(x => beneficiaries.Any(y => y.Id == x.BeneficiaryId)));
+
+            db.Beneficiaries.RemoveRange(beneficiaries);
             db.SubscriptionTypes.RemoveRange(project.ProductGroups.SelectMany(x => x.Types));
             db.Funds.RemoveRange(project.Cards.SelectMany(x => x.Funds));
             db.ProductGroups.RemoveRange(project.ProductGroups);
+
+            //Added
+            db.BudgetAllowances.RemoveRange(db.BudgetAllowances.ToList().Where(x => project.Organizations.Any(y => y.Id == x.OrganizationId)));
+
             db.Subscriptions.RemoveRange(project.Subscriptions);
             db.ProjectMarkets.RemoveRange(project.Markets);
             db.Organizations.RemoveRange(project.Organizations);
+
+            //Added
+            db.BeneficiaryTypes.RemoveRange(project.BeneficiaryTypes);
 
             db.Projects.Remove(project);
 
