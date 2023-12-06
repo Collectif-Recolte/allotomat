@@ -105,7 +105,8 @@ namespace Sig.App.Backend.Services.Permission
         private static readonly MarketPermission[] MarketManagerMarketPermission = new[]
         {
             MarketPermission.ManageMarket,
-            MarketPermission.CreateTransaction
+            MarketPermission.CreateTransaction,
+            MarketPermission.RefundTransaction
         };
 
         private static readonly OrganizationPermission[] ProjectManagerOrganizationPermission = new[]

@@ -22,7 +22,7 @@ namespace Sig.App.Backend.Gql
         {
             this.scopeFactory = scopeFactory;
         }
-        
+
         public IDataLoaderResult<UserGraphType> LoadUser(string id) =>
             LoadOne<GetUsersByIds.Query, UserGraphType, string>(id);
 
@@ -85,6 +85,9 @@ namespace Sig.App.Backend.Gql
 
         public IDataLoaderResult<PaymentTransactionGraphType> LoadPaymentTransactionById(long paymentTransactionId) =>
             LoadOne<GetPaymentTransactionById.Query, PaymentTransactionGraphType, long>(paymentTransactionId);
+
+        public IDataLoaderResult<RefundTransactionGraphType> LoadRefundTransactionById(long refundTransactionId) =>
+            LoadOne<GetRefundTransactionById.Query, RefundTransactionGraphType, long>(refundTransactionId);
 
         public IDataLoaderResult<FundGraphType> LoadLoyaltyCardFund(long? cardId) =>
             LoadOne<GetLoyaltyFundByCardId.Query, FundGraphType, long?>(cardId);
@@ -155,9 +158,12 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<IEnumerable<SubscriptionTypeGraphType>> LoadProductGroupSubscriptionType(long productGroupId) =>
             LoadCollection<GetSubscriptionTypeByProductGroupId.Query, SubscriptionTypeGraphType, long>(productGroupId);
 
-        public IDataLoaderResult<IEnumerable<PaymentTransactionProductGroupGraphType>> LoadPaymentTransactionProductGroupByTransactionId(long paymentTransactionId) =>
+        public IDataLoaderResult<IEnumerable<PaymentTransactionProductGroupGraphType>> LoadPaymentTransactionsProductGroupByTransactionId(long paymentTransactionId) =>
             LoadCollection<GetPaymentTransactionProductGroupByTransactionId.Query, PaymentTransactionProductGroupGraphType, long>(paymentTransactionId);
-        
+
+        public IDataLoaderResult<IEnumerable<RefundTransactionProductGroupGraphType>> LoadRefundTransactionsProductGroupByTransactionId(long refundTransactionId) =>
+            LoadCollection<GetRefundTransactionProductGroupByTransactionId.Query, RefundTransactionProductGroupGraphType, long>(refundTransactionId);
+
         public IDataLoaderResult<IEnumerable<TransactionLogProductGroupGraphType>> LoadTransactionLogProductGroupByTransactionLogId(long transactionLogId) =>
             LoadCollection<GetTransactionLogProductGroupByTransactionLogId.Query, TransactionLogProductGroupGraphType, long>(transactionLogId);
 
