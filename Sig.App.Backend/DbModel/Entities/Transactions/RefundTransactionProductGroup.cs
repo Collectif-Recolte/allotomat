@@ -13,6 +13,7 @@ namespace Sig.App.Backend.DbModel.Entities.Transactions
         public PaymentTransactionProductGroup PaymentTransactionProductGroup { get; set; }
 
         public decimal Amount { get; set; }
+        public decimal AmountRefunded { get; set; }
 
         public long ProductGroupId { get;set; }
         public ProductGroup ProductGroup { get; set; }

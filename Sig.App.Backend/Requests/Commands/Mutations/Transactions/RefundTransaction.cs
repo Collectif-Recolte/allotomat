@@ -132,19 +132,21 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                 if (paymentTransactionProductGroup.Amount - paymentTransactionProductGroup.RefundAmount < refund.Amount) throw new TooMuchRefundException();
 
-                refundTransaction.RefundByProductGroups.Add(new RefundTransactionProductGroup()
+                var refundTransactionProductGroup = new RefundTransactionProductGroup()
                 {
                     Amount = refund.Amount,
                     ProductGroupId = paymentTransactionProductGroup.ProductGroupId,
                     RefundTransaction = refundTransaction,
                     PaymentTransactionProductGroup = paymentTransactionProductGroup
-                });
+                };
+                refundTransaction.RefundByProductGroups.Add(refundTransactionProductGroup);
 
                 paymentTransactionProductGroup.RefundAmount += refund.Amount;
                 if (addingFundTransaction.Status == FundTransactionStatus.Actived)
                 {
                     addingFundTransaction.AvailableFund += refund.Amount;
                     fund.Amount += refund.Amount;
+                    refundTransactionProductGroup.AmountRefunded += refund.Amount;
                 }
 
                 baseTransactionLog.TotalAmount += refund.Amount;
