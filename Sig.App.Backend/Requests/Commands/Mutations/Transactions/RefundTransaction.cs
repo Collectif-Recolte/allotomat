@@ -70,9 +70,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .Include(x => x.Transactions)
                 .FirstOrDefaultAsync(x => x.Id == initialTransactionId, cancellationToken);
 
-            if (!initialTransaction.Market.VerifyPassword(request.Password.IsSet() ? request.Password.Value : "")) throw new WrongPasswordException();
-
             if (initialTransaction == null) throw new InitialTransactionNotFoundException();
+
+            if (!initialTransaction.Market.VerifyPassword(request.Password.IsSet() ? request.Password.Value : "")) throw new WrongPasswordException();
 
             var refundTransaction = new DbModel.Entities.Transactions.RefundTransaction()
             {
