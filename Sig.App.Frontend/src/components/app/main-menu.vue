@@ -62,8 +62,8 @@
       :label="t('manage-beneficiaries')"
       :icon="USER_GROUP" />
     <MenuItem
-      v-if="manageCards"
-      :router-link="{ name: $consts.urls.URL_CARDS_SUMMARY }"
+      v-if="manageCards && isProjectManager"
+      :router-link="{ name: $consts.urls.URL_CARDS }"
       :label="t('manage-cards')"
       :icon="CREDIT_CARD" />
     <MenuItem
@@ -116,6 +116,8 @@ import {
   GLOBAL_CREATE_TRANSACTION
 } from "@/lib/consts/permissions";
 
+import { USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
+
 import BRIEFCASE from "@/lib/icons/briefcase.json";
 import CREDIT_CARD from "@/lib/icons/credit-card.json";
 import IDENTIFICATION from "@/lib/icons/identification.json";
@@ -127,7 +129,7 @@ import USER_GROUP from "@/lib/icons/user-group.json";
 import CLOCK from "@/lib/icons/clock.json";
 import DASHBOARD from "@/lib/icons/dashboard.json";
 
-const { getGlobalPermissions } = storeToRefs(useAuthStore());
+const { getGlobalPermissions, userType } = storeToRefs(useAuthStore());
 
 const route = useRoute();
 
@@ -153,6 +155,10 @@ const manageSubscriptions = computed(() => {
 
 const manageCards = computed(() => {
   return getGlobalPermissions.value.includes(GLOBAL_MANAGE_CARDS);
+});
+
+const isProjectManager = computed(() => {
+  return userType.value === USER_TYPE_PROJECTMANAGER;
 });
 
 const manageTransactions = computed(() => {

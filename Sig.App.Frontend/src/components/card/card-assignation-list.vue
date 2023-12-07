@@ -56,7 +56,7 @@
         :primary-btn-label="t('reset-search')"
         primary-btn-is-action
         :secondary-btn-label="t('switch-view')"
-        :secondary-btn-route="{ name: URL_CARDS_SUMMARY }"
+        :secondary-btn-route="{ name: URL_CARDS }"
         @onPrimaryBtnClick="onResetSearch">
       </UiCta>
       <UiCta v-else :img-src="require('@/assets/img/cards.jpg')" :description="t('empty-list')" />
@@ -72,7 +72,7 @@ import { useQuery, useResult } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { storeToRefs } from "pinia";
 
-import { URL_CARDS_SUMMARY } from "@/lib/consts/urls";
+import { URL_CARDS } from "@/lib/consts/urls";
 import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
 import { BENEFICIARY_STATUS_ACTIVE } from "@/lib/consts/enums";
 

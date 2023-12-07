@@ -81,10 +81,7 @@ export const URL_ORGANIZATION_MANAGER_ADMIN = "organization-manager-list-url";
 export const URL_ORGANIZATION_MANAGER_ADD = "organization-manager-add-url";
 
 export const URL_CARDS = "cards-list-url";
-export const URL_CARDS_SUMMARY = "cards-list-summary-url";
-export const URL_CARDS_ASSIGNATION = "cards-assignation-url";
 export const URL_CARDS_ADD = "cards-add-url";
-export const URL_CARD_ASSIGN = "card-assign-url";
 export const URL_CARDS_LOST = "cards-lost-url";
 export const URL_CARDS_QRCODE_PREVIEW = "cards-qrcode-preview-url";
 export const URL_CARDS_UNASSIGN = "cards-unassign-url";

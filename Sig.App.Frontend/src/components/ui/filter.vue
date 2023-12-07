@@ -33,6 +33,7 @@
         class="mb-2 sm:mb-0"
         :model-value="modelValue"
         :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous"
+        :placeholder="props.placeholder"
         @search="onSearch"
         @update:modelValue="(e) => emit('update:modelValue', e)" />
       <div
@@ -86,7 +87,11 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  itemsCanWrap: Boolean
+  itemsCanWrap: Boolean,
+  placeholder: {
+    type: String,
+    default: null
+  }
 });
 
 const { t } = useI18n();
