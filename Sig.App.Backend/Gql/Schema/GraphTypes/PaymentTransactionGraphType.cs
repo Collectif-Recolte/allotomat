@@ -48,6 +48,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public Id Id => transaction.GetIdentifier();
         public decimal Amount => transaction.Amount;
+        public decimal RefundAmount => transaction.RefundAmount;
 
         public PaymentTransactionProductGroupGraphType(PaymentTransactionProductGroup transaction)
         {

@@ -26,6 +26,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return null;
         }
 
+        public IDataLoaderResult<PaymentTransactionGraphType> InitialTransaction(IAppUserContext ctx)
+        {
+            return ctx.DataLoader.LoadPaymentTransactionById(transaction.InitialTransactionId);
+        }
+
         public OffsetDateTime CreatedAt()
         {
             return transaction.CreatedAtUtc.FromUtcToOffsetDateTime();

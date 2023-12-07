@@ -19,7 +19,8 @@
     "transaction-log-type-transfer": "Fund transferred",
     "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Budget allowance refund from unassigned card",
     "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Budget allowances refund from participant having no cards",
-    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Budget allowance refund from participant removed from subscription"
+    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Budget allowance refund from participant removed from subscription",
+    "transaction-log-type-refund-payment": "Payment refund"
 	},
 	"fr": {
     "date-selector-from": "Intervalle du",
@@ -40,7 +41,8 @@
     "transaction-log-type-transfer": "Fond transféré",
     "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Enveloppes remboursées après la désassignation d'une carte",
     "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Enveloppes remboursées en raison d'un participant sans carte",
-    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppes remboursée après avoir retiré un participant d'un abonnement"
+    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppes remboursée après avoir retiré un participant d'un abonnement",
+    "transaction-log-type-refund-payment": "Remboursement d'un paiement"
 	}
 }
 </i18n>
@@ -282,7 +284,8 @@ const availableTransactionTypes = computed(() => {
     {
       value: "RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog",
       label: t("transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription")
-    }
+    },
+    { value: "RefundPaymentTransactionLog", label: t("transaction-log-type-refund-payment") }
   ];
 });
 

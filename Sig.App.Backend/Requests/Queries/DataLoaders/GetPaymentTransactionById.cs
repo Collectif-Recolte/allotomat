@@ -22,13 +22,12 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
 
         public override async Task<IDictionary<long, PaymentTransactionGraphType>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var budgetAllowances = await db.Transactions
-                .Where(c => c.GetType() == typeof(PaymentTransaction))
+            var transactions = await db.Transactions
+                .OfType<PaymentTransaction>()
                 .Where(c => request.Ids.Contains(c.Id))
-                .Select(c => c as PaymentTransaction)
                 .ToListAsync(cancellationToken);
 
-            return budgetAllowances.ToDictionary(x => x.Id, x => new PaymentTransactionGraphType(x));
+            return transactions.ToDictionary(x => x.Id, x => new PaymentTransactionGraphType(x));
         }
     }
 }
