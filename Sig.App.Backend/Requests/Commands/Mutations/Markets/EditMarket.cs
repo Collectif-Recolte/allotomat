@@ -35,6 +35,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             if (market == null) throw new MarketNotFoundException();
 
             request.Name.IfSet(v => market.Name = v.Trim());
+            request.RefundTransactionPassword.IfSet(v => market.SetRefundTransactionPassword(v.Trim()));
 
             await db.SaveChangesAsync(cancellationToken);
 
@@ -51,6 +52,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
         {
             public Id MarketId { get; set; }
             public Maybe<NonNull<string>> Name { get; set; }
+            public Maybe<NonNull<string>> RefundTransactionPassword { get; set; }
         }
 
         [MutationPayload]

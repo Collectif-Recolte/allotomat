@@ -24,6 +24,7 @@ using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Schema.Types;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 {
@@ -68,6 +69,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .Include(x => x.Organization)
                 .Include(x => x.Transactions)
                 .FirstOrDefaultAsync(x => x.Id == initialTransactionId, cancellationToken);
+
+            if (!initialTransaction.Market.VerifyPassword(request.Password.IsSet() ? request.Password.Value : "")) throw new WrongPasswordException();
 
             if (initialTransaction == null) throw new InitialTransactionNotFoundException();
 
@@ -194,6 +197,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         [MutationInput]
         public class Input : IRequest<Payload>, IHaveInitialTransactionId
         {
+            public Maybe<NonNull<string>> Password { get; set; }
             public Id InitialTransactionId { get; set; }
             public List<RefundTransactionsInput> Transactions { get; set; }
         }
