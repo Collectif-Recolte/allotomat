@@ -19,6 +19,7 @@ using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Cards;
 using Microsoft.EntityFrameworkCore;
+using Sig.App.Backend.DbModel.Entities.Transactions;
 
 namespace Sig.App.Backend.Authorization
 {
@@ -137,6 +138,11 @@ namespace Sig.App.Backend.Authorization
 
         private string GetMarketIdFromInput(object input)
         {
+            if (input is IHaveInitialTransactionId hiti)
+            {
+                var transaction = db.Transactions.OfType<PaymentTransaction>().Include(x => x.Market).Where(x => x.Id == (input as IHaveInitialTransactionId).InitialTransactionId.LongIdentifierForType<PaymentTransaction>()).FirstOrDefault();
+                return transaction.Market.GetIdentifier().IdentifierForType<Market>();
+            }
             if (input is IHaveMarketId hmi)
             {
                 return hmi.MarketId.IdentifierForType<Market>();

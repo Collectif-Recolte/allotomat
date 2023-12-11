@@ -115,7 +115,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                 var amount = decimal.Round(transactionInput.Amount, 2);
 
-                if (productGroup != null)
+                if (productGroup != null && productGroup.Name != ProductGroupType.LOYALTY)
                 {
                     var fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroupId);
 
@@ -200,20 +200,30 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 {
                     foreach (var loyaltyFundTransaction in loyaltyFundTransactions)
                     {
+                        decimal fundToRemove;
                         if (loyaltyFundToRemove > loyaltyFundTransaction.AvailableFund)
                         {
+                            fundToRemove = loyaltyFundTransaction.AvailableFund;
                             loyaltyFundToRemove -= loyaltyFundTransaction.AvailableFund;
                             loyaltyFund.Amount -= loyaltyFundTransaction.AvailableFund;
                             loyaltyFundTransaction.AvailableFund = 0;
                         }
                         else
                         {
+                            fundToRemove = loyaltyFundToRemove;
                             loyaltyFundTransaction.AvailableFund -= loyaltyFundToRemove;
                             loyaltyFund.Amount -= loyaltyFundToRemove;
                             loyaltyFundToRemove = 0;
                         }
 
                         affectedAddingFundTransactions.Add(loyaltyFundTransaction);
+
+                        transactionByProductGroups.Add(new PaymentTransactionProductGroup()
+                        {
+                            Amount = fundToRemove,
+                            ProductGroup = loyaltyFund.ProductGroup,
+                            PaymentTransaction = transaction
+                        });
 
                         if (loyaltyFundToRemove == 0)
                         {

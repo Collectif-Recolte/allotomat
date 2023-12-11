@@ -94,6 +94,8 @@ export const URL_CARD_ERROR = "card-error-url";
 export const URL_TRANSACTION = "transaction-url";
 export const URL_TRANSACTION_ERROR = "transaction-error-url";
 export const URL_TRANSACTION_LIST = "market-transaction-list-url";
+export const URL_TRANSACTION_REFUND = "transaction-refund-url";
+export const URL_TRANSACTION_ADMIN = "transaction-list-url";
 
 export const URL_CATEGORY_ADMIN = "category-list-url";
 export const URL_CATEGORY_ADD = "category-add-url";
@@ -104,5 +106,3 @@ export const URL_PRODUCT_GROUP_ADMIN = "productgroup-list-url";
 export const URL_PRODUCT_GROUP_ADD = "productgroup-add-url";
 export const URL_PRODUCT_GROUP_EDIT = "productgroup-edit-url";
 export const URL_PRODUCT_GROUP_DELETE = "productgroup-delete-url";
-
-export const URL_TRANSACTION_ADMIN = "transaction-list-url";

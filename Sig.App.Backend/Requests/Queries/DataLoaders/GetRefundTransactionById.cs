@@ -9,25 +9,25 @@ using Sig.App.Backend.Gql.Schema.GraphTypes;
 
 namespace Sig.App.Backend.Requests.Queries.DataLoaders
 {
-    public class GetPaymentTransactionById : BatchQuery<GetPaymentTransactionById.Query, long, PaymentTransactionGraphType>
+    public class GetRefundTransactionById : BatchQuery<GetRefundTransactionById.Query, long, RefundTransactionGraphType>
     {
         public class Query : BaseQuery { }
 
         private readonly AppDbContext db;
 
-        public GetPaymentTransactionById(AppDbContext db)
+        public GetRefundTransactionById(AppDbContext db)
         {
             this.db = db;
         }
 
-        public override async Task<IDictionary<long, PaymentTransactionGraphType>> Handle(Query request, CancellationToken cancellationToken)
+        public override async Task<IDictionary<long, RefundTransactionGraphType>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var transactions = await db.Transactions
-                .OfType<PaymentTransaction>()
+            var budgetAllowances = await db.Transactions
+                .OfType<RefundTransaction>()
                 .Where(c => request.Ids.Contains(c.Id))
                 .ToListAsync(cancellationToken);
 
-            return transactions.ToDictionary(x => x.Id, x => new PaymentTransactionGraphType(x));
+            return budgetAllowances.ToDictionary(x => x.Id, x => new RefundTransactionGraphType(x));
         }
     }
 }

@@ -25,6 +25,9 @@
       <td>
         {{ getTransactionAmount(slotProps.item) }}
       </td>
+      <td>
+        <UiButtonGroup :items="getBtnGroup(slotProps.item)" />
+      </td>
     </template>
   </UiTable>
 </template>
@@ -32,6 +35,10 @@
 <script setup>
 import { defineProps, computed } from "vue";
 import { useI18n } from "vue-i18n";
+
+import ICON_RESET from "@/lib/icons/reset.json";
+
+import { URL_TRANSACTION_REFUND } from "@/lib/consts/urls";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { formatDate, textualWithTimeFormat } from "@/lib/helpers/date";
@@ -50,9 +57,9 @@ const cols = computed(() => [
     label: t("transaction-card-no")
   },
   {
-    label: t("transaction-amount"),
-    isRight: true
-  }
+    label: t("transaction-amount")
+  },
+  { label: "" }
 ]);
 
 function getTransactionDate(transaction) {
@@ -66,5 +73,16 @@ function getCardNo(transaction) {
 
 function getTransactionAmount(transaction) {
   return getMoneyFormat(parseFloat(transaction.amount));
+}
+
+function getBtnGroup(transaction) {
+  return [
+    {
+      isExtra: true,
+      icon: ICON_RESET,
+      label: t("transaction-refund"),
+      route: { name: URL_TRANSACTION_REFUND, params: { transactionId: transaction.id } }
+    }
+  ];
 }
 </script>

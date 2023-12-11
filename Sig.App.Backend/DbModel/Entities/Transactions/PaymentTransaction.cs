@@ -7,7 +7,9 @@ namespace Sig.App.Backend.DbModel.Entities.Transactions
     {
         public long MarketId { get; set; }
         public Market Market { get; set; }
+        
         public List<AddingFundTransaction> Transactions { get; set; }
+        public List<RefundTransaction> RefundTransactions { get; set; }
 
         public List<PaymentTransactionProductGroup> TransactionByProductGroups { get; set; }
     }

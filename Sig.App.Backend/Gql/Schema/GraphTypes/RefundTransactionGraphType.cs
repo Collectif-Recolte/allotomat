@@ -8,14 +8,14 @@ using System.Collections.Generic;
 
 namespace Sig.App.Backend.Gql.Schema.GraphTypes
 {
-    public class PaymentTransactionGraphType : ITransactionGraphType
+    public class RefundTransactionGraphType : ITransactionGraphType
     {
-        private readonly PaymentTransaction transaction;
+        private readonly RefundTransaction transaction;
 
         public Id Id => transaction.GetIdentifier();
         public decimal Amount => transaction.Amount;
 
-        public PaymentTransactionGraphType(PaymentTransaction transaction)
+        public RefundTransactionGraphType(RefundTransaction transaction)
         {
             this.transaction = transaction;
         }
@@ -26,9 +26,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return null;
         }
 
-        public IDataLoaderResult<MarketGraphType> Market(IAppUserContext ctx)
+        public IDataLoaderResult<PaymentTransactionGraphType> InitialTransaction(IAppUserContext ctx)
         {
-            return ctx.DataLoader.LoadMarket(transaction.MarketId);
+            return ctx.DataLoader.LoadPaymentTransactionById(transaction.InitialTransactionId);
         }
 
         public OffsetDateTime CreatedAt()
@@ -36,28 +36,27 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return transaction.CreatedAtUtc.FromUtcToOffsetDateTime();
         }
 
-        public IDataLoaderResult<IEnumerable<PaymentTransactionProductGroupGraphType>> TransactionByProductGroups(IAppUserContext ctx)
+        public IDataLoaderResult<IEnumerable<RefundTransactionProductGroupGraphType>> TransactionByProductGroups(IAppUserContext ctx)
         {
-            return ctx.DataLoader.LoadPaymentTransactionsProductGroupByTransactionId(transaction.Id);
+            return ctx.DataLoader.LoadRefundTransactionsProductGroupByTransactionId(transaction.Id);
         }
     }
 
-    public class PaymentTransactionProductGroupGraphType
+    public class RefundTransactionProductGroupGraphType
     {
-        private readonly PaymentTransactionProductGroup transaction;
+        private readonly RefundTransactionProductGroup transaction;
 
         public Id Id => transaction.GetIdentifier();
         public decimal Amount => transaction.Amount;
-        public decimal RefundAmount => transaction.RefundAmount;
 
-        public PaymentTransactionProductGroupGraphType(PaymentTransactionProductGroup transaction)
+        public RefundTransactionProductGroupGraphType(RefundTransactionProductGroup transaction)
         {
             this.transaction = transaction;
         }
 
-        public IDataLoaderResult<PaymentTransactionGraphType> Transaction(IAppUserContext ctx)
+        public IDataLoaderResult<RefundTransactionGraphType> Transaction(IAppUserContext ctx)
         {
-            return ctx.DataLoader.LoadPaymentTransactionById(transaction.PaymentTransactionId);
+            return ctx.DataLoader.LoadRefundTransactionById(transaction.RefundTransactionId);
         }
 
         public IDataLoaderResult<ProductGroupGraphType> ProductGroup(IAppUserContext ctx)

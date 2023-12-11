@@ -347,6 +347,12 @@ namespace Sig.App.Backend.Gql.Schema
                 OrganizationId = organizationId
             });
         }
+        
+        public async Task<RefundTransactionGraphType> RefundTransaction(Id id, [Inject] AppDbContext db)
+        {
+            var transaction = await db.Transactions.OfType<RefundTransaction>().Where(x => x.Id == id.LongIdentifierForType<RefundTransaction>()).FirstOrDefaultAsync();
+            return new RefundTransactionGraphType(transaction);
+        }
 
         public async Task<ITransactionGraphType> Transaction(Id id, [Inject] AppDbContext db)
         {
