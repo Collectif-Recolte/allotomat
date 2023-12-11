@@ -3,12 +3,14 @@
     "en": {
       "transaction-date-hour": "Date and hour",
       "transaction-card-no": "Card number",
-      "transaction-amount": "Amount"
+      "transaction-amount": "Amount",
+      "transaction-refund": "Refund"
     },
     "fr": {
       "transaction-date-hour": "Date et heure",
       "transaction-card-no": "No de carte",
-      "transaction-amount": "Montant"
+      "transaction-amount": "Montant",
+      "transaction-refund"": "Remboursement"
     }
   }
   </i18n>
