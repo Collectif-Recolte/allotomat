@@ -57,19 +57,6 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
                 Sort = sort
             });
 
-            var test = results.Map(x =>
-            {
-                switch (x)
-                {
-                    case null:
-                        return null as IBeneficiaryGraphType;
-                    case OffPlatformBeneficiary opb:
-                        return new OffPlatformBeneficiaryGraphType(opb);
-                    default:
-                        return new BeneficiaryGraphType(x);
-                }
-            });
-
             return results.Map(x =>
             {
                 switch (x)
