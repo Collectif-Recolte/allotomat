@@ -39,9 +39,9 @@
     "transaction-log-type-subscription": "Abonnement",
     "transaction-log-type-payment": "Paiement",
     "transaction-log-type-transfer": "Fond transféré",
-    "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Enveloppes remboursées après la désassignation d'une carte",
-    "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Enveloppes remboursées en raison d'un participant sans carte",
-    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppes remboursée après avoir retiré un participant d'un abonnement",
+    "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Enveloppe remboursées après la désassignation d'une carte",
+    "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Enveloppe remboursée en raison d'un participant sans carte",
+    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppe remboursée après avoir retiré un participant d'un abonnement",
     "transaction-log-type-refund-payment": "Remboursement d'un paiement"
 	}
 }

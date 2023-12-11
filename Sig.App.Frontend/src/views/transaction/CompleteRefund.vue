@@ -11,7 +11,7 @@
 		"card-description": "Solde",
 		"create-new-transaction-btn": "Terminer",
 		"payment-description": "Remboursement",
-		"title": "Remboursement complétée",
+		"title": "Remboursement complété",
     "gift-card": "Carte-cadeau"
 	}
 }
@@ -211,8 +211,7 @@ function getAvailableFundByProductGroupId(productGroupId) {
 }
 
 function getIsGiftCard(productGroupName) {
-  if (productGroupName === PRODUCT_GROUP_LOYALTY) return true;
-  else return false;
+  return productGroupName === PRODUCT_GROUP_LOYALTY;
 }
 
 const goToTransactionList = () => {
