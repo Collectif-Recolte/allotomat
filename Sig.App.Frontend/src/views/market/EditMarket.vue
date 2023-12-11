@@ -69,12 +69,16 @@ const { mutate: editMarket } = useMutation(
 );
 
 async function onSubmit(values) {
-  await editMarket({
-    input: {
-      marketId: route.params.marketId,
-      name: { value: values.marketName }
-    }
-  });
+  let input = {
+    marketId: route.params.marketId,
+    name: { value: values.marketName }
+  };
+
+  if (values.password !== "" && values.password !== undefined && values.password !== null) {
+    input.refundTransactionPassword = { value: values.password };
+  }
+
+  await editMarket({ input });
   router.push({ name: URL_MARKET_ADMIN });
   addSuccess(t("edit-market-success-notification", { marketName: values.marketName }));
 }

@@ -239,9 +239,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
                 InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
-                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionInput>()
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>()
             };
-            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionInput()
+            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
             {
                 Amount = 10,
                 ProductGroupId = productGroup.GetIdentifier()
@@ -293,9 +293,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
                 InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
-                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionInput>()
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>()
             };
-            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionInput()
+            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
             {
                 Amount = 10,
                 ProductGroupId = productGroup.GetIdentifier()
@@ -343,9 +343,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
                 InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
-                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionInput>()
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>()
             };
-            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionInput()
+            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
             {
                 Amount = 10,
                 ProductGroupId = loyaltyProductgroup.GetIdentifier()
@@ -393,9 +393,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
                 InitialTransactionId = Id.New<PaymentTransaction>(123456),
-                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionInput>()
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>()
             };
-            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionInput()
+            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
             {
                 Amount = 30,
                 ProductGroupId = productGroup.GetIdentifier()
@@ -411,9 +411,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
                 InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
-                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionInput>()
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>()
             };
-            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionInput()
+            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
             {
                 Amount = 30,
                 ProductGroupId = Id.New<ProductGroup>(123456),
@@ -429,9 +429,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
                 InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
-                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionInput>()
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>()
             };
-            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionInput()
+            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
             {
                 Amount = 30,
                 ProductGroupId = productGroup.GetIdentifier()

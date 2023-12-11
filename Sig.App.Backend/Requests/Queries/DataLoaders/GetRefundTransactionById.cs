@@ -23,9 +23,8 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
         public override async Task<IDictionary<long, RefundTransactionGraphType>> Handle(Query request, CancellationToken cancellationToken)
         {
             var budgetAllowances = await db.Transactions
-                .Where(c => c.GetType() == typeof(RefundTransaction))
+                .OfType<RefundTransaction>()
                 .Where(c => request.Ids.Contains(c.Id))
-                .Select(c => c as RefundTransaction)
                 .ToListAsync(cancellationToken);
 
             return budgetAllowances.ToDictionary(x => x.Id, x => new RefundTransactionGraphType(x));

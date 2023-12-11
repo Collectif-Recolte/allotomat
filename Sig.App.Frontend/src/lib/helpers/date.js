@@ -48,7 +48,6 @@ function formatDate(date, formatId) {
   var lang = i18n.global.locale.value === LANG_FR ? frCA : i18n.global.locale.value === LANG_EN ? enCA : null;
 
   const tokens = getFormat(formatId, lang);
-
   return format(date, tokens, { locale: lang });
 }
 

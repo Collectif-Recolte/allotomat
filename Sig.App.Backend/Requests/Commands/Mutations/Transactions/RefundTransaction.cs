@@ -23,6 +23,8 @@ using Sig.App.Backend.Helpers;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
+using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Schema.Types;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 {
@@ -58,16 +60,19 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             var initialTransactionId = request.InitialTransactionId.LongIdentifierForType<PaymentTransaction>();
             var initialTransaction = await db.Transactions.OfType<PaymentTransaction>()
-                .Include(x => x.Card).ThenInclude(x => x.Funds)
+                .Include(x => x.Card).ThenInclude(x => x.Funds).ThenInclude(x => x.ProductGroup)
                 .Include(x => x.Card).ThenInclude(x => x.Project)
                 .Include(x => x.Beneficiary)
                 .Include(x => x.Market)
                 .Include(x => x.TransactionByProductGroups)
                 .Include(x => x.RefundTransactions)
                 .Include(x => x.Organization)
+                .Include(x => x.Transactions)
                 .FirstOrDefaultAsync(x => x.Id == initialTransactionId, cancellationToken);
 
             if (initialTransaction == null) throw new InitialTransactionNotFoundException();
+
+            if (!initialTransaction.Market.VerifyPassword(request.Password.IsSet() ? request.Password.Value : "")) throw new WrongPasswordException();
 
             var refundTransaction = new DbModel.Entities.Transactions.RefundTransaction()
             {
@@ -130,19 +135,21 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                 if (paymentTransactionProductGroup.Amount - paymentTransactionProductGroup.RefundAmount < refund.Amount) throw new TooMuchRefundException();
 
-                refundTransaction.RefundByProductGroups.Add(new RefundTransactionProductGroup()
+                var refundTransactionProductGroup = new RefundTransactionProductGroup()
                 {
                     Amount = refund.Amount,
                     ProductGroupId = paymentTransactionProductGroup.ProductGroupId,
                     RefundTransaction = refundTransaction,
                     PaymentTransactionProductGroup = paymentTransactionProductGroup
-                });
+                };
+                refundTransaction.RefundByProductGroups.Add(refundTransactionProductGroup);
 
                 paymentTransactionProductGroup.RefundAmount += refund.Amount;
                 if (addingFundTransaction.Status == FundTransactionStatus.Actived)
                 {
                     addingFundTransaction.AvailableFund += refund.Amount;
                     fund.Amount += refund.Amount;
+                    refundTransactionProductGroup.AmountRefunded += refund.Amount;
                 }
 
                 baseTransactionLog.TotalAmount += refund.Amount;
@@ -188,14 +195,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>
+        public class Input : IRequest<Payload>, IHaveInitialTransactionId
         {
+            public Maybe<NonNull<string>> Password { get; set; }
             public Id InitialTransactionId { get; set; }
-            public List<RefundTransactionInput> Transactions { get; set; }
+            public List<RefundTransactionsInput> Transactions { get; set; }
         }
 
         [InputType]
-        public class RefundTransactionInput
+        public class RefundTransactionsInput
         {
             public decimal Amount { get; set; }
             public Id ProductGroupId { get; set; }
