@@ -53,6 +53,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             if (originalCard.Status != CardStatus.Assigned) throw new OriginalCardNotAssignException();
             if (newCard.Status == CardStatus.Assigned) throw new NewCardAlreadyAssignException();
+            if (newCard.Status == CardStatus.GiftCard) throw new NewCardAlreadyGiftCardException();
+            if (newCard.Status == CardStatus.Lost) throw new NewCardAlreadyLostException();
 
             if (originalCard.ProjectId != newCard.ProjectId) throw new NewCardNotInProjectException();
             
@@ -164,6 +166,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
         public class NewCardNotFoundException : RequestValidationException { }
         public class OriginalCardNotAssignException : RequestValidationException { }
         public class NewCardAlreadyAssignException : RequestValidationException { }
+        public class NewCardAlreadyGiftCardException : RequestValidationException { }
+        public class NewCardAlreadyLostException : RequestValidationException { }
         public class NewCardNotInProjectException : RequestValidationException { }
     }
 }
