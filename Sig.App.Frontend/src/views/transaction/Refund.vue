@@ -8,7 +8,10 @@
     "available-refund": "Available for refund: {amountAvailable}",
     "amount-validation-label": "Refund amount",
     "product-group-refund-too-much": "Refund amount cannot be greater than available amount.",
-    "gift-card": "Gift card"
+    "gift-card": "Gift card",
+    "password": "Password",
+    "no-amount-to-refund": "No amount to refund.",
+    "wrong-password-error-notification": "The password is invalid."
 	},
 	"fr": {
 		"title": "Remboursement",
@@ -18,7 +21,10 @@
     "available-refund": "Disponible au remboursement : {amountAvailable}",
     "amount-validation-label": "Montant de remboursement",
     "product-group-refund-too-much": "Le montant de remboursement ne peut pas être supérieur au montant disponible.",
-    "gift-card": "Carte-cadeau"
+    "gift-card": "Carte-cadeau",
+    "password": "Mot de passe",
+    "no-amount-to-refund": "Aucun montant à rembourser.",
+    "wrong-password-error-notification": "Le mot de passe est invalide."
 	}
 }
 </i18n>
@@ -84,6 +90,14 @@
                     </div>
                   </div>
                 </FieldArray>
+                <Field v-slot="{ field, errors }" name="password">
+                  <PfFormInputText
+                    id="password"
+                    v-bind="field"
+                    :label="t('password')"
+                    :errors="errors"
+                    input-type="password"></PfFormInputText>
+                </Field>
               </PfFormSection>
             </PfForm>
           </div>
@@ -111,22 +125,33 @@ import { FieldArray } from "vee-validate";
 import { number, object, lazy, array, string } from "yup";
 
 import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
+import { URL_TRANSACTION_LIST } from "@/lib/consts/urls";
 
+import { useNotificationsStore } from "@/lib/store/notifications";
+
+import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 import { formatDate, textualFormat } from "@/lib/helpers/date";
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { usePageTitle } from "@/lib/helpers/page-title";
 import { getColorBgClass } from "@/lib/helpers/products-color";
-import { URL_TRANSACTION_LIST } from "@/lib/consts/urls";
 
 import CompleteRefundTransaction from "@/views/transaction/CompleteRefund";
 
 const audio = new Audio(require("@/assets/audio/confirmation.mp3"));
 
+const { addWarning } = useNotificationsStore();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 
 usePageTitle(t("title"));
+
+useGraphQLErrorMessages({
+  // Ce code est lancé quand le mot de passe est invalid
+  WRONG_PASSWORD: () => {
+    return t("wrong-password-error-notification");
+  }
+});
 
 const refundTransactionId = ref(null);
 
@@ -250,12 +275,19 @@ const goToTransactionList = () => {
   router.push({ name: URL_TRANSACTION_LIST });
 };
 
-async function onSubmit({ productGroups }) {
+async function onSubmit({ productGroups, password }) {
+  const transactions = productGroups
+    .filter((x) => parseFloat(x.amount) > 0)
+    .map((x) => ({ amount: parseFloat(x.amount), productGroupId: x.productGroupId }));
+
+  if (transactions.length === 0) {
+    addWarning(t("no-amount-to-refund"));
+    return;
+  }
   const result = await refundTransaction({
     input: {
-      transactions: productGroups
-        .filter((x) => parseFloat(x.amount) > 0)
-        .map((x) => ({ amount: parseFloat(x.amount), productGroupId: x.productGroupId })),
+      password: { value: password ?? "" },
+      transactions,
       initialTransactionId: route.params.transactionId
     }
   });
