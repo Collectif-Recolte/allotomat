@@ -125,7 +125,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 Funds = new List<Fund>(),
                 Status = CardStatus.Assigned,
                 Project = project,
-                Beneficiary = beneficiary
+                Beneficiary = beneficiary,
+                CardNumber = "1234-5678-9012-3456"
             };
 
             offPlatformCard = new Card()
@@ -321,7 +322,42 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             initialTransaction.Amount.Should().Be(20);
             initialTransaction.Transactions.Count.Should().Be(1);
         }
-        
+
+        [Fact]
+        public async Task CreateTransactionWithCardNumber()
+        {
+            SetupRequestHandler(new VerifyCardCanBeUsedInMarket(DbContext));
+
+            var input = new CreateTransaction.Input()
+            {
+                MarketId = market.GetIdentifier(),
+                Transactions = new List<CreateTransaction.TransactionInput>(),
+                CardNumber = card.CardNumber
+            };
+            input.Transactions.Add(new CreateTransaction.TransactionInput()
+            {
+                Amount = 10,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transaction = await DbContext.Transactions.FirstAsync();
+
+            transaction.CardId.Should().Be(card.Id);
+            transaction.Amount.Should().Be(10);
+
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync();
+            transactionLog.TransactionUniqueId.Should().Be(transaction.TransactionUniqueId);
+
+            card.Funds.First().Amount.Should().Be(10);
+
+            var initialTransaction = await DbContext.Transactions.OfType<ManuallyAddingFundTransaction>().FirstAsync(x => x.TransactionUniqueId == "initialTransaction1");
+            initialTransaction.AvailableFund.Should().Be(10);
+            initialTransaction.Amount.Should().Be(20);
+            initialTransaction.Transactions.Count.Should().Be(1);
+        }
+
         [Fact]
         public async Task CreateOffPlatformTransactionCreatesLog()
         {
@@ -457,6 +493,25 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 MarketId = market.GetIdentifier(),
                 Transactions = new List<CreateTransaction.TransactionInput>(),
                 CardId = Id.New<Card>(123456)
+            };
+            input.Transactions.Add(new CreateTransaction.TransactionInput()
+            {
+                Amount = 30,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<CreateTransaction.CardNotFoundException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfCardNumberNotFound()
+        {
+            var input = new CreateTransaction.Input()
+            {
+                MarketId = market.GetIdentifier(),
+                Transactions = new List<CreateTransaction.TransactionInput>(),
+                CardNumber = "123456789"
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
