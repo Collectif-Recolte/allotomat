@@ -10,7 +10,7 @@
       "transaction-date-hour": "Date et heure",
       "transaction-card-no": "No de carte",
       "transaction-amount": "Montant",
-      "transaction-refund"": "Remboursement"
+      "transaction-refund": "Remboursement"
     }
   }
   </i18n>
