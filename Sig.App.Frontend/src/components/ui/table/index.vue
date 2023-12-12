@@ -2,7 +2,7 @@
   <div class="pf-table flex flex-col relative">
     <div class="pf-table__overflowing-content overflow-auto -mx-section md:-mx-8 max-h-simple-table-height">
       <div class="pb-2 align-middle inline-block min-w-full px-section md:px-8">
-        <div class="" :class="{ 'pb-12': slots.floatingActions }">
+        <div class="" :class="{ 'pb-12': slots.floatingActions || hasBottomPadding }">
           <table class="min-w-full divide-y-2 divide-primary-900 dark:divide-grey-700">
             <slot name="caption">
               <caption v-if="props.caption">
@@ -84,7 +84,8 @@ const props = defineProps({
     default() {
       return [];
     }
-  }
+  },
+  hasBottomPadding: Boolean
 });
 
 const slots = useSlots();

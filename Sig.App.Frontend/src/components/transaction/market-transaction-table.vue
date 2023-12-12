@@ -16,7 +16,7 @@
   </i18n>
 
 <template>
-  <UiTable :items="props.transactions" :cols="cols">
+  <UiTable :items="props.transactions" :cols="cols" has-bottom-padding>
     <template #default="slotProps">
       <td>
         {{ getTransactionDate(slotProps.item) }}
