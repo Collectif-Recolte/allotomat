@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Drawing;
-using GraphQL.Conventions;
+﻿using GraphQL.Conventions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -57,7 +56,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
-            var cardId = request.CardId.LongIdentifierForType<Card>();
+            long cardId = -1;
+            if (request.CardId.HasValue)
+            {
+                cardId = request.CardId.Value.LongIdentifierForType<Card>();
+            }
+            else if (!string.IsNullOrEmpty(request.CardNumber))
+            {
+                cardId = await db.Cards.Where(x => x.CardNumber == request.CardNumber).Select(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+            }
+
             var card = await db.Cards.Include(x => x.Project).Include(x => x.Beneficiary)
                 .ThenInclude(x => x.Organization).Include(x => x.Transactions).Include(x => x.Funds)
                 .ThenInclude(x => x.ProductGroup).FirstOrDefaultAsync(x => x.Id == cardId, cancellationToken);
@@ -72,7 +80,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var cardCanBeUsedInMarket = await mediator.Send(new VerifyCardCanBeUsedInMarket.Input
             {
                 MarketId = request.MarketId,
-                CardId = request.CardId
+                CardId = card.GetIdentifier()
             }, cancellationToken);
 
             if (!cardCanBeUsedInMarket) throw new CardCantBeUsedInMarketException();
@@ -326,9 +334,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveCardId, IHaveMarketId
+        public class Input : IRequest<Payload>, IHaveCardIdOrCardNumber, IHaveMarketId
         {
-            public Id CardId { get; set; }
+            public Id? CardId { get; set; }
+            public string CardNumber { get; set; }
             public Id MarketId { get; set; }
             public List<TransactionInput> Transactions { get; set; }
         }
