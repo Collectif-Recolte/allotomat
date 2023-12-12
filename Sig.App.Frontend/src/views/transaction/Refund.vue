@@ -37,7 +37,7 @@
           {{
             t("subtitle", {
               date: getTransactionDate(),
-              cardLongId: transaction.card.cardNumber
+              cardLongId: getLast4Digit(transaction.card.cardNumber)
             })
           }}
         </p>
@@ -247,6 +247,13 @@ function getTransactionDate() {
     return null;
   }
   return formatDate(new Date(transaction.value.createdAt), textualFormat);
+}
+
+function getLast4Digit(cardNumber) {
+  if (cardNumber === undefined || cardNumber === null) {
+    return null;
+  }
+  return `****-****-****-${cardNumber.slice(-4)}`;
 }
 
 const productGroups = computed(() => {
