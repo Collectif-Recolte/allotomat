@@ -278,6 +278,9 @@ namespace Sig.App.Backend.Migrations
                     b.Property<long?>("CardId")
                         .HasColumnType("bigint");
 
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Discriminator")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -933,12 +936,19 @@ namespace Sig.App.Backend.Migrations
                     b.Property<DateTime>("ExpirationDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<long?>("ExpireFundTransactionId")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("ProductGroupId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.HasIndex("ExpireFundTransactionId")
+                        .IsUnique()
+                        .HasFilter("[ExpireFundTransactionId] IS NOT NULL");
 
                     b.HasIndex("ProductGroupId");
 
@@ -949,9 +959,17 @@ namespace Sig.App.Backend.Migrations
                 {
                     b.HasBaseType("Sig.App.Backend.DbModel.Entities.Transactions.Transaction");
 
+                    b.Property<long>("AddingFundTransactionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ExpiredSubscriptionId")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("ProductGroupId")
                         .ValueGeneratedOnUpdateSometimes()
                         .HasColumnType("bigint");
+
+                    b.HasIndex("ExpiredSubscriptionId");
 
                     b.HasIndex("ProductGroupId");
 
@@ -1350,22 +1368,37 @@ namespace Sig.App.Backend.Migrations
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.AddingFundTransaction", b =>
                 {
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.Transactions.ExpireFundTransaction", "ExpireFundTransaction")
+                        .WithOne("AddingFundTransaction")
+                        .HasForeignKey("Sig.App.Backend.DbModel.Entities.Transactions.AddingFundTransaction", "ExpireFundTransactionId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("Sig.App.Backend.DbModel.Entities.ProductGroups.ProductGroup", "ProductGroup")
                         .WithMany()
                         .HasForeignKey("ProductGroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("ExpireFundTransaction");
 
                     b.Navigation("ProductGroup");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.ExpireFundTransaction", b =>
                 {
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.Subscriptions.Subscription", "ExpiredSubscription")
+                        .WithMany()
+                        .HasForeignKey("ExpiredSubscriptionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("Sig.App.Backend.DbModel.Entities.ProductGroups.ProductGroup", "ProductGroup")
                         .WithMany()
                         .HasForeignKey("ProductGroupId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("ExpiredSubscription");
 
                     b.Navigation("ProductGroup");
                 });
@@ -1483,6 +1516,11 @@ namespace Sig.App.Backend.Migrations
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Beneficiaries.OffPlatformBeneficiary", b =>
                 {
                     b.Navigation("PaymentFunds");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.ExpireFundTransaction", b =>
+                {
+                    b.Navigation("AddingFundTransaction");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.PaymentTransaction", b =>

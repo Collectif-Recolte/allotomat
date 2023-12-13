@@ -1,7 +1,6 @@
 <i18n>
   {
     "en": {
-      "assign-subscription-btn": "Assign subscriptions",
       "import-beneficiaries-list": "Import a list",
       "selected-organization": "Organization",
       "title": "Participants",
@@ -15,9 +14,10 @@
       "reset-search": "Reset search",
       "empty-organizations-list": "No organization is associated with the program.",
       "add-organization": "Add an organization",
+      "detailed-view": "Detailed view",
+      "toggle-view": "Change display type"
     },
     "fr": {
-      "assign-subscription-btn": "Attribuer des abonnements",
       "import-beneficiaries-list": "Importer une liste",
       "selected-organization": "Organisme",
       "title": "Participant-e-s",
@@ -31,6 +31,8 @@
       "reset-search": "Réinitialiser la recherche",
       "empty-organizations-list": "Aucun organisme n'est associé au programme.",
       "add-organization": "Ajouter un organisme",
+      "detailed-view": "Affichage détaillé",
+      "toggle-view": "Changer le type d'affichage"
     }
   }
 </i18n>
@@ -95,61 +97,69 @@
       </template>
       <div v-if="beneficiariesPagination">
         <UiTableHeader :title="t('participant-count', { count: beneficiariesPagination.totalCount })">
-          <template v-if="selectedOrganization !== '' && beneficiariesPagination.items.length > 0" #right>
-            <BeneficiaryFilters
-              v-model="searchInput"
-              :available-beneficiary-types="availableBeneficiaryTypes"
-              :available-subscriptions="availableSubscriptions"
-              :selected-beneficiary-types="beneficiaryTypes"
-              :selected-subscriptions="subscriptions"
-              :selected-status="status"
-              :without-subscription-id="WITHOUT_SUBSCRIPTION"
-              :beneficiary-status-inactive="BENEFICIARY_STATUS_INACTIVE"
-              :beneficiary-status-active="BENEFICIARY_STATUS_ACTIVE"
-              :search-filter="searchText"
-              :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
-              :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
-              @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
-              @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
-              @subscriptionsUnchecked="onSubscriptionsUnchecked"
-              @subscriptionsChecked="onSubscriptionsChecked"
-              @statusChecked="onStatusChecked"
-              @statusUnchecked="onStatusUnchecked"
-              @resetFilters="onResetFilters"
-              @search="onSearch" />
+          <template #right>
+            <div class="lg:flex lg:items-center">
+              <!-- Intégration de la switch pour la vue en tableau, TODO: CRCL-1513
+              <UiSwitch
+                v-model="displayBeneficiariesListWithDetailed"
+                class="justify-end mb-2.5 lg:mb-0"
+                :label="t('toggle-view')"
+                change-color>
+                <template #right>
+                  <span
+                    class="ml-2 text-p3 font-semibold transition-colors duration-300 ease-in-out"
+                    :class="displayBeneficiariesListWithDetailed ? 'text-green-300' : 'text-grey-500'"
+                    >{{ t("detailed-view") }}</span
+                  >
+                </template>
+              </UiSwitch> -->
+
+              <BeneficiaryFilters
+                v-if="selectedOrganization !== ''"
+                v-model="searchInput"
+                :available-beneficiary-types="availableBeneficiaryTypes"
+                :available-subscriptions="availableSubscriptions"
+                :selected-beneficiary-types="beneficiaryTypes"
+                :selected-subscriptions="subscriptions"
+                :selected-status="status"
+                :selected-card-status="cardStatus"
+                :without-subscription-id="WITHOUT_SUBSCRIPTION"
+                :beneficiary-status-inactive="BENEFICIARY_STATUS_INACTIVE"
+                :beneficiary-status-active="BENEFICIARY_STATUS_ACTIVE"
+                :card-status-with="BENEFICIARY_WITH_CARD"
+                :card-status-without="BENEFICIARY_WITHOUT_CARD"
+                :search-filter="searchText"
+                :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
+                :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
+                @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
+                @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
+                @subscriptionsUnchecked="onSubscriptionsUnchecked"
+                @subscriptionsChecked="onSubscriptionsChecked"
+                @statusChecked="onStatusChecked"
+                @statusUnchecked="onStatusUnchecked"
+                @cardStatusChecked="onCardStatusChecked"
+                @cardStatusUnchecked="onCardStatusUnchecked"
+                @resetFilters="onResetFilters"
+                @search="onSearch" />
+            </div>
           </template>
         </UiTableHeader>
 
         <template v-if="selectedOrganization !== '' && beneficiariesPagination.items.length > 0">
-          <BeneficiaryTable
-            v-if="!administrationSubscriptionsOffPlatform"
-            :beneficiaries="beneficiariesPagination.items"
-            :selected-organization="selectedOrganization"
-            :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
-            show-associated-card>
-            <template #floatingActions>
-              <PfButtonLink
-                tag="routerLink"
-                :to="{ name: URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS, query: filteredQuery }"
-                btn-style="secondary"
-                class="rounded-full">
-                <span class="inline-flex items-center">
-                  {{ t("assign-subscription-btn") }}
-                  <span
-                    class="bg-primary-700 w-6 h-6 flex items-center justify-center rounded-full text-p3 leading-none ml-2 -mr-2"
-                    >{{ beneficiariesPagination.totalCount }}</span
-                  >
-                </span>
-              </PfButtonLink>
-            </template>
-          </BeneficiaryTable>
-          <OffPlatformBeneficiaryTable
-            v-else
-            :beneficiaries="beneficiariesPagination.items"
-            :selected-organization="selectedOrganization"
-            :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
+          <ListBeneficiariesWithDetailed
+            v-if="displayBeneficiariesListWithDetailed"
             :product-groups="productGroups"
-            show-associated-card />
+            :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
+            :beneficiaries-pagination="beneficiariesPagination"
+            :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
+            :filtered-query="filteredQuery" />
+          <ListBeneficiariesWithoutDetailed
+            v-else
+            :product-groups="productGroups"
+            :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
+            :beneficiaries-pagination="beneficiariesPagination"
+            :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
+            :filtered-query="filteredQuery" />
           <UiPagination
             v-if="beneficiariesPagination.totalPages > 1"
             v-model:page="page"
@@ -220,7 +230,6 @@ import { getShortMoneyFormat } from "@/lib/helpers/money";
 import {
   URL_BENEFICIARY_ADMIN,
   URL_BENEFICIARY_IMPORT_LIST,
-  URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS,
   URL_BENEFICIARY_OFF_PLATFORM_IMPORT_LIST,
   URL_ORGANIZATION_ADD
 } from "@/lib/consts/urls";
@@ -229,7 +238,9 @@ import {
   WITHOUT_SUBSCRIPTION,
   USER_TYPE_PROJECTMANAGER,
   BENEFICIARY_STATUS_INACTIVE,
-  BENEFICIARY_STATUS_ACTIVE
+  BENEFICIARY_STATUS_ACTIVE,
+  BENEFICIARY_WITH_CARD,
+  BENEFICIARY_WITHOUT_CARD
 } from "@/lib/consts/enums";
 import ICON_UPLOAD from "@/lib/icons/upload-file.json";
 import ICON_TABLE from "@/lib/icons/table.json";
@@ -237,9 +248,9 @@ import ICON_DOWNLOAD from "@/lib/icons/download.json";
 import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
 
 import Title from "@/components/app/title";
-import BeneficiaryTable from "@/components/beneficiaries/beneficiary-table";
-import OffPlatformBeneficiaryTable from "@/components/beneficiaries/off-platform-beneficiary-table";
 import BeneficiaryFilters from "@/components/beneficiaries/beneficiary-filters";
+import ListBeneficiariesWithoutDetailed from "@/components/beneficiaries/list-beneficiaries-without-detailed";
+import ListBeneficiariesWithDetailed from "@/components/beneficiaries/list-beneficiaries-detailed";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -281,9 +292,11 @@ const page = ref(1);
 const beneficiaryTypes = ref([]);
 const subscriptions = ref([]);
 const status = ref([]);
+const cardStatus = ref([]);
 const selectedOrganization = ref(currentOrganization);
 const searchInput = ref("");
 const searchText = ref("");
+const displayBeneficiariesListWithDetailed = ref(true);
 
 const filteredQuery = computed(() => {
   return {
@@ -291,6 +304,7 @@ const filteredQuery = computed(() => {
     subscriptions: subscriptions.value.length > 0 ? subscriptions.value.toString() : undefined,
     beneficiaryTypes: beneficiaryTypes.value.length > 0 ? beneficiaryTypes.value.toString() : undefined,
     status: status.value.length > 0 ? status.value.toString() : undefined,
+    cardStatus: cardStatus.value.length > 0 ? cardStatus.value.toString() : undefined,
     text: searchText.value ? searchText.value : undefined
   };
 });
@@ -303,6 +317,18 @@ if (route.query.subscriptions) {
 }
 if (route.query.status) {
   status.value = route.query.status.split(",");
+}
+
+if (route.query.cardStatus) {
+  cardStatus.value = route.query.cardStatus.split(",");
+}
+
+if (route.query.text) {
+  searchText.value = route.query.text;
+}
+
+if (route.query.organizationId) {
+  selectedOrganization.value = route.query.organizationId;
 }
 
 const { result, loading: projectsLoading } = useQuery(
@@ -392,6 +418,7 @@ const {
       $status: [BeneficiaryStatus!]
       $withoutSubscription: Boolean
       $searchText: String
+      $withCard: Boolean
     ) {
       organization(id: $id) {
         id
@@ -403,6 +430,7 @@ const {
           status: $status
           limit: 30
           searchText: $searchText
+          withCard: $withCard
         ) {
           totalCount
           totalPages
@@ -419,6 +447,30 @@ const {
             id2
             card {
               id
+              cardNumber
+              programCardId
+              funds {
+                id
+                amount
+                productGroup {
+                  id
+                  name
+                  orderOfAppearance
+                  color
+                }
+              }
+              loyaltyFund {
+                id
+                amount
+                productGroup {
+                  id
+                  name
+                  orderOfAppearance
+                  color
+                }
+              }
+              totalFund
+              lastTransactionDate
             }
             ... on BeneficiaryGraphType {
               beneficiaryType {
@@ -497,6 +549,16 @@ function onStatusUnchecked(value) {
   updateUrl();
 }
 
+function onCardStatusChecked(value) {
+  cardStatus.value.push(value);
+  updateUrl();
+}
+
+function onCardStatusUnchecked(value) {
+  cardStatus.value = cardStatus.value.filter((x) => x !== value);
+  updateUrl();
+}
+
 function onSubscriptionsUnchecked(value) {
   subscriptions.value = subscriptions.value.filter((x) => x !== value);
   updateUrl();
@@ -505,6 +567,7 @@ function onSubscriptionsUnchecked(value) {
 function onResetFilters() {
   subscriptions.value = [];
   beneficiaryTypes.value = [];
+  cardStatus.value = [];
   onResetSearch();
   updateUrl();
 }
@@ -524,6 +587,7 @@ function beneficiariesVariables() {
     withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
     categories: beneficiaryTypes.value.length > 0 ? beneficiaryTypes.value : null,
     status: status.value.length > 0 ? status.value : null,
+    withCard: cardStatus.value.length === 1 ? cardStatus.value.indexOf(BENEFICIARY_WITH_CARD) !== -1 : null,
     searchText: searchText.value
   };
 }

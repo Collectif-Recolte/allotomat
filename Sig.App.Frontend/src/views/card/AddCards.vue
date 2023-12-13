@@ -25,7 +25,7 @@
 
 <template>
   <UiDialogModal
-    :return-route="{ name: URL_CARDS_SUMMARY }"
+    :return-route="{ name: URL_CARDS }"
     :title="t('title')"
     :has-footer="createCardSuccess"
     can-cancel
@@ -76,7 +76,7 @@ import { object, number, lazy, string } from "yup";
 import { useRoute } from "vue-router";
 import { useMutation } from "@vue/apollo-composable";
 
-import { URL_CARDS_SUMMARY } from "@/lib/consts/urls";
+import { URL_CARDS } from "@/lib/consts/urls";
 
 const { t } = useI18n();
 const route = useRoute();

@@ -44,7 +44,7 @@
 <template>
   <UiDialogModal
     v-slot="{ closeModal }"
-    :return-route="{ name: URL_CARDS_ASSIGNATION }"
+    :return-route="{ name: URL_BENEFICIARY_ADMIN }"
     :title="t('title', { beneficiaryName: getBeneficiaryName })"
     :has-footer="cardAssignSuccess">
     <template v-if="cardAssignSuccess">
@@ -138,7 +138,7 @@ import { storeToRefs } from "pinia";
 
 import QRCodeScanner from "@/components/transaction/qr-code-scanner.vue";
 
-import { URL_CARDS_ASSIGNATION, URL_CARD_ERROR } from "@/lib/consts/urls";
+import { URL_CARD_ERROR, URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
 import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
 
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";

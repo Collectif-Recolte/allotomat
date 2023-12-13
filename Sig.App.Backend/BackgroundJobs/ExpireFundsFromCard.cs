@@ -109,14 +109,19 @@ namespace Sig.App.Backend.BackgroundJobs
                         TransactionLogProductGroups = transactionLogProductGroups
                     });
                     
-                    transaction.Card.Transactions.Add(new ExpireFundTransaction()
+                    var expireFundTransaction = new ExpireFundTransaction()
                     {
                         TransactionUniqueId = transactionUniqueId,
                         Amount = transaction.AvailableFund,
                         Card = transaction.Card,
                         CreatedAtUtc = today,
-                        ProductGroupId = transactionProductGroupId
-                    });
+                        ProductGroupId = transactionProductGroupId,
+                        ExpiredSubscription = subscription,
+                        OrganizationId = transaction.OrganizationId,
+                    };
+                    transaction.Card.Transactions.Add(expireFundTransaction);
+                    transaction.ExpireFundTransaction = expireFundTransaction;
+
                     transaction.AvailableFund = 0;
                     transaction.Status = FundTransactionStatus.Expired;
                 }

@@ -3,6 +3,7 @@
     public enum FundTransactionStatus
     {
         Actived,
-        Expired
+        Expired,
+        Unassigned
     }
 }

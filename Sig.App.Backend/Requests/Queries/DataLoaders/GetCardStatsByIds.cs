@@ -24,6 +24,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
         {
             var results = await db.Projects.Include(x => x.Cards)
                 .Where(c => request.Ids.Contains(c.Id))
+                .AsNoTracking()
                 .ToDictionaryAsync(x => x.Id, x => x.Cards);
 
             return results.ToDictionary(x => x.Key, x =>

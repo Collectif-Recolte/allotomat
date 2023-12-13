@@ -1,7 +1,7 @@
 <template>
-  <div class="border-primary-300 border rounded-2xl p-6 h-remove-margin flex flex-col xs:min-h-56">
-    <p v-if="label" class="text-h3 mb-1 font-bold">{{ props.label }}</p>
-    <span class="text-d1 font-bold text-primary-900">{{ props.stat }}</span>
+  <div class="border-primary-300 border rounded-2xl p-5 h-remove-margin flex flex-col sm:min-h-52">
+    <p v-if="label" class="text-d7 mb-2 font-bold">{{ props.label }}</p>
+    <span class="text-d2 xl:text-d1 font-bold text-primary-900">{{ props.stat }}</span>
     <div
       class="mt-4 xs:mt-auto mb-0 flex items-end space-y-2 flex-col sm:space-y-0 sm:flex-row sm:justify-between sm:items-center sm:min-h-10">
       <PfButtonLink

@@ -28,7 +28,7 @@
               btn-type="submit"
               class="px-8"
               size="sm"
-              :is-disabled="disableSubmit || processing"
+              :is-disabled="disableSubmit || processing || isFormDisabled"
               :label="submitLabel" />
             <div class="absolute -translate-y-1/2 top-1/2 right-1">
               <PfSpinner v-if="processing" text-color-class="text-white" :loading-label="loadingLabel" is-small />
@@ -41,6 +41,8 @@
 </template>
 
 <script>
+import { useIsFormDirty, useIsFormValid } from "vee-validate";
+
 export default {
   props: {
     submitLabel: {
@@ -60,6 +62,13 @@ export default {
     processing: Boolean,
     isDisabled: Boolean
   },
-  emits: ["cancel"]
+  emits: ["cancel"],
+  computed: {
+    isFormDisabled() {
+      const isDirty = useIsFormDirty();
+      const isValid = useIsFormValid();
+      return !isDirty.value || !isValid.value;
+    }
+  }
 };
 </script>

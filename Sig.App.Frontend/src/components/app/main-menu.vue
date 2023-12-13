@@ -1,25 +1,27 @@
 <i18n>
 {
 	"en": {
-		"create-transaction": "Create a transaction",
-		"manage-beneficiaries": "Participants",
+    "create-transaction": "Create a transaction",
+    "manage-beneficiaries": "Participants",
     "manage-cards": "Cards",
-		"manage-markets": "Markets",
-		"manage-organizations": "Organizations",
-		"manage-programs": "Programs",
-		"manage-subscriptions": "Subscriptions",
-		"primary-menu": "Main",
+    "manage-markets": "Markets",
+    "manage-organizations": "Organizations",
+    "manage-programs": "Programs",
+    "manage-subscriptions": "Subscriptions",
+    "dashboard": "Dashboard",
+    "primary-menu": "Main",
     "check-balance": "Scan a card",
     "manage-transactions": "Transactions"
 	},
 	"fr": {
-		"create-transaction": "Créer une transaction",
-		"manage-beneficiaries": "Participant-e-s",
+    "create-transaction": "Créer une transaction",
+    "manage-beneficiaries": "Participant-e-s",
     "manage-cards": "Cartes",
-		"manage-markets": "Commerces",
-		"manage-organizations": "Organismes",
-		"manage-programs": "Programmes",
-		"manage-subscriptions": "Abonnements",
+    "manage-markets": "Commerces",
+    "manage-organizations": "Organismes",
+    "manage-programs": "Programmes",
+    "manage-subscriptions": "Abonnements",
+    "dashboard": "Tableau de bord",
     "primary-menu": "Principal",
     "check-balance": "Scanner une carte",
     "manage-transactions": "Transactions"
@@ -41,6 +43,11 @@
       :icon="OFFICE_BUILDING" />
     <MenuItem
       v-if="manageOrganizations"
+      :router-link="{ name: $consts.urls.URL_PROJECT_ADMIN_DASHBOARD }"
+      :label="t('dashboard')"
+      :icon="DASHBOARD" />
+    <MenuItem
+      v-if="manageOrganizations"
       :router-link="{ name: $consts.urls.URL_ORGANIZATION_ADMIN }"
       :label="t('manage-organizations')"
       :icon="BRIEFCASE" />
@@ -55,8 +62,8 @@
       :label="t('manage-beneficiaries')"
       :icon="USER_GROUP" />
     <MenuItem
-      v-if="manageCards"
-      :router-link="{ name: $consts.urls.URL_CARDS_SUMMARY }"
+      v-if="manageCards && isProjectManager"
+      :router-link="{ name: $consts.urls.URL_CARDS }"
       :label="t('manage-cards')"
       :icon="CREDIT_CARD" />
     <MenuItem
@@ -109,6 +116,8 @@ import {
   GLOBAL_CREATE_TRANSACTION
 } from "@/lib/consts/permissions";
 
+import { USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
+
 import BRIEFCASE from "@/lib/icons/briefcase.json";
 import CREDIT_CARD from "@/lib/icons/credit-card.json";
 import IDENTIFICATION from "@/lib/icons/identification.json";
@@ -118,8 +127,9 @@ import RECEIPT_TAX from "@/lib/icons/receipt-tax.json";
 import QRCODE from "@/lib/icons/qrcode.json";
 import USER_GROUP from "@/lib/icons/user-group.json";
 import CLOCK from "@/lib/icons/clock.json";
+import DASHBOARD from "@/lib/icons/dashboard.json";
 
-const { getGlobalPermissions } = storeToRefs(useAuthStore());
+const { getGlobalPermissions, userType } = storeToRefs(useAuthStore());
 
 const route = useRoute();
 
@@ -145,6 +155,10 @@ const manageSubscriptions = computed(() => {
 
 const manageCards = computed(() => {
   return getGlobalPermissions.value.includes(GLOBAL_MANAGE_CARDS);
+});
+
+const isProjectManager = computed(() => {
+  return userType.value === USER_TYPE_PROJECTMANAGER;
 });
 
 const manageTransactions = computed(() => {

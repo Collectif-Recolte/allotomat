@@ -237,7 +237,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                     foreach (var transaction in addingFundTransactions)
                     {
                         var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
-                        db.Transactions.Add(new ExpireFundTransaction()
+
+                        var expireFundTransaction = new ExpireFundTransaction()
                         {
                             TransactionUniqueId = transactionUniqueId,
                             Beneficiary = beneficiary,
@@ -246,7 +247,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                             Card = transaction.Card,
                             CreatedAtUtc = today,
                             ProductGroupId = transaction.ProductGroupId
-                        });
+                        };
+                        db.Transactions.Add(expireFundTransaction);
+                        transaction.ExpireFundTransaction = expireFundTransaction;
+
                         transaction.AvailableFund = 0;
                         transaction.Status = FundTransactionStatus.Expired;
                         

@@ -171,6 +171,14 @@ export default [
     ]
   },
   {
+    name: urls.URL_PROJECT_ADMIN_DASHBOARD,
+    path: "/dashboard",
+    component: () => import("@/views/dashboard/Dashboard.vue"),
+    meta: {
+      claim: GLOBAL_MANAGE_ORGANIZATIONS
+    }
+  },
+  {
     name: urls.URL_PROJECT_ADMIN,
     path: "/programs",
     component: () => import("@/views/project/ListProjects.vue"),
@@ -449,6 +457,38 @@ export default [
     },
     children: [
       {
+        name: urls.URL_BENEFICIARY_CARD_ASSIGN,
+        path: ":beneficiaryId/assign",
+        component: () => import("@/views/card/AssignCard.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_BENEFICIARY_CARD_UNASSIGN,
+        path: ":beneficiaryId/unassign/:cardId",
+        component: () => import("@/views/card/UnassignCard.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_BENEFICIARY_CARD_LOST,
+        path: ":beneficiaryId/lost-card/:cardId",
+        component: () => import("@/views/card/TransferCard.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_BENEFICIARY_QRCODE_PREVIEW,
+        path: ":cardId/preview",
+        component: () => import("@/views/card/PreviewQRCode.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
         name: urls.URL_BENEFICIARY_REMOVE_SUBSCRIPTION,
         path: ":beneficiaryId/:subscriptionId/remove",
         component: () => import("@/views/beneficiary/RemoveSubscriptionFromBeneficiary.vue"),
@@ -526,59 +566,33 @@ export default [
     name: urls.URL_CARDS,
     path: "/cards",
     component: () => import("@/views/card/_index.vue"),
-    redirect: { name: urls.URL_CARDS_SUMMARY },
+    meta: {
+      claim: GLOBAL_MANAGE_CARDS
+    },
     children: [
       {
-        name: urls.URL_CARDS_SUMMARY,
-        path: "summary",
-        component: () => import("@/views/card/CardSummary.vue"),
+        name: urls.URL_CARDS_QRCODE_PREVIEW,
+        path: ":cardId/preview",
+        component: () => import("@/views/card/PreviewQRCode.vue"),
         meta: {
           claim: GLOBAL_MANAGE_CARDS
-        },
-        children: [
-          {
-            name: urls.URL_CARDS_QRCODE_PREVIEW,
-            path: ":cardId/preview",
-            component: () => import("@/views/card/PreviewQRCode.vue"),
-            meta: {
-              claim: GLOBAL_MANAGE_CARDS
-            }
-          },
-          {
-            name: urls.URL_CARDS_UNASSIGN,
-            path: ":beneficiaryId/unassign/:cardId",
-            component: () => import("@/views/card/UnassignCard.vue"),
-            meta: {
-              claim: GLOBAL_MANAGE_CARDS
-            }
-          },
-          {
-            name: urls.URL_CARDS_LOST,
-            path: ":beneficiaryId/lost-card/:cardId",
-            component: () => import("@/views/card/TransferCard.vue"),
-            meta: {
-              claim: GLOBAL_MANAGE_CARDS
-            }
-          }
-        ]
+        }
       },
       {
-        name: urls.URL_CARDS_ASSIGNATION,
-        path: "assignation",
-        component: () => import("@/views/card/CardAssignation.vue"),
+        name: urls.URL_CARDS_UNASSIGN,
+        path: ":beneficiaryId/unassign/:cardId",
+        component: () => import("@/views/card/UnassignCard.vue"),
         meta: {
           claim: GLOBAL_MANAGE_CARDS
-        },
-        children: [
-          {
-            name: urls.URL_CARD_ASSIGN,
-            path: ":beneficiaryId/assign",
-            component: () => import("@/views/card/AssignCard.vue"),
-            meta: {
-              claim: GLOBAL_MANAGE_CARDS
-            }
-          }
-        ]
+        }
+      },
+      {
+        name: urls.URL_CARDS_LOST,
+        path: ":beneficiaryId/lost-card/:cardId",
+        component: () => import("@/views/card/TransferCard.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
       },
       {
         name: urls.URL_CARDS_ADD,

@@ -20,6 +20,7 @@
       v-slot="{ tooltipId }"
       :label="props.item.reason"
       :hide-tooltip="!props.item.disabled || !!props.item.reason === false"
+      position="left"
       class="pf-transition-visibility-container relative">
       <button
         v-if="props.item.onClick"
@@ -36,10 +37,10 @@
         :is="props.item.disabled ? 'span' : 'RouterLink'"
         v-else
         v-bind="$attrs"
-        class="flex items-center text-grey-700 dark:text-grey-300 text-sm leading-tight px-3 py-2 transition-colors ease-in-out duration-200 hover:text-black focus:text-black"
+        class="flex grow items-center text-sm leading-tight px-3 py-1.5 transition-colors ease-in-out duration-200"
         :class="[
           { 'bg-primary-50 text-black dark:bg-primary-700 dark:text-white': props.active },
-          props.item.disabled ? 'cursor-not-allowed' : 'hover:bg-primary-50 focus:bg-primary-50'
+          props.item.disabled ? 'cursor-not-allowed text-grey-500' : 'text-primary-900 hover:bg-primary-50 focus:bg-primary-50'
         ]"
         :to="props.item.route"
         :aria-describedby="tooltipId">

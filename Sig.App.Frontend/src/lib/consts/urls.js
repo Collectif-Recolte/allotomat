@@ -34,6 +34,7 @@ export const URL_PROJECT_MANAGE_MERCHANTS = "project-manage-merchants-url";
 export const URL_PROJECT_MANAGE_MANAGERS = "project-manage-managers-url";
 export const URL_PROJECT_MANAGER_REMOVE = "project-manage-managers-remove-url";
 export const URL_REMOVE_MERCHANTS_FROM_PROJECT = "project-remove-market";
+export const URL_PROJECT_ADMIN_DASHBOARD = "project-admin-dashboard-url";
 
 export const URL_MARKET_ADMIN = "market-list-url";
 export const URL_MARKET_ADD = "market-add-url";
@@ -67,6 +68,10 @@ export const URL_BENEFICIARY_IMPORT_LIST = "beneficiary-import-list-url";
 export const URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS = "beneficiary-assign-subscriptions";
 export const URL_BENEFICIARY_MANUALLY_ADD_FUND = "beneficiary-manually-add-fund";
 export const URL_BENEFICIARY_OFF_PLATFORM_IMPORT_LIST = "beneficiary-off-platform-import-list-url";
+export const URL_BENEFICIARY_QRCODE_PREVIEW = "beneficiary-qrcode-preview-url";
+export const URL_BENEFICIARY_CARD_LOST = "beneficiary-card-lost-url";
+export const URL_BENEFICIARY_CARD_UNASSIGN = "beneficiary-card-unassign-url";
+export const URL_BENEFICIARY_CARD_ASSIGN = "beneficiary-card-assign-url";
 
 export const URL_PROJECT_MANAGER_ADMIN = "project-manager-list-url";
 export const URL_PROJECT_MANAGER_ADD = "project-manager-add-url";
@@ -76,10 +81,7 @@ export const URL_ORGANIZATION_MANAGER_ADMIN = "organization-manager-list-url";
 export const URL_ORGANIZATION_MANAGER_ADD = "organization-manager-add-url";
 
 export const URL_CARDS = "cards-list-url";
-export const URL_CARDS_SUMMARY = "cards-list-summary-url";
-export const URL_CARDS_ASSIGNATION = "cards-assignation-url";
 export const URL_CARDS_ADD = "cards-add-url";
-export const URL_CARD_ASSIGN = "card-assign-url";
 export const URL_CARDS_LOST = "cards-lost-url";
 export const URL_CARDS_QRCODE_PREVIEW = "cards-qrcode-preview-url";
 export const URL_CARDS_UNASSIGN = "cards-unassign-url";

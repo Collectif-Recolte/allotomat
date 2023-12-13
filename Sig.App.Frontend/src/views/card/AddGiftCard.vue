@@ -5,6 +5,7 @@
 		"auto-assign-card": "Automatically assign to an ID",
 		"cancel": "Cancel",
 		"card-not-found": "Card ID does not exist.",
+    "card-lost": "The card you are trying to use is lost",
 		"existing-card-id": "ID of an existing card",
 		"existing-card-id-placeholder": "Ex. 98671",
 		"title": "Creation of a gift card",
@@ -19,6 +20,7 @@
 		"auto-assign-card": "Assigner automatiquement à un ID",
 		"cancel": "Annuler",
 		"card-not-found": "L'ID de la carte n'existe pas.",
+    "card-lost": "La carte que vous tentez d'utiliser est perdue.",
 		"existing-card-id": "ID d'une carte existante",
 		"existing-card-id-placeholder": "Ex. 98671",
 		"title": "Création d'une carte-cadeau",
@@ -32,7 +34,7 @@
 </i18n>
 
 <template>
-  <UiDialogModal v-slot="{ closeModal }" :return-route="{ name: URL_CARDS_SUMMARY }" :title="t('title')" :has-footer="false">
+  <UiDialogModal v-slot="{ closeModal }" :return-route="{ name: URL_CARDS }" :title="t('title')" :has-footer="false">
     <Form v-if="project" v-slot="{ isSubmitting, setFieldValue }" :validation-schema="validationSchema" @submit="onSubmit">
       <PfForm
         has-footer
@@ -88,7 +90,7 @@ import { useI18n } from "vue-i18n";
 import { string, number, object, lazy } from "yup";
 import { useRoute, useRouter } from "vue-router";
 
-import { URL_CARDS_SUMMARY } from "@/lib/consts/urls";
+import { URL_CARDS } from "@/lib/consts/urls";
 
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 import { getMoneyFormat } from "@/lib/helpers/money";
@@ -119,6 +121,9 @@ useGraphQLErrorMessages({
   },
   NULL_REFERENCE: () => {
     return t("card-not-found");
+  },
+  CARD_LOST: () => {
+    return t("card-lost");
   }
 });
 
@@ -179,6 +184,6 @@ async function onSubmit({ amount, existingCardId }) {
   });
 
   addSuccess(t("gift-card-fund-sucessfully-added", { amount: getMoneyFormat(parseFloat(amount)), cardId: existingCardId }));
-  router.push({ name: URL_CARDS_SUMMARY });
+  router.push({ name: URL_CARDS });
 }
 </script>

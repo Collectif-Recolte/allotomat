@@ -121,7 +121,7 @@ setLocale({
     noUnknown: ({ label, unknown }) => i18n.global.t("validator-object-noUnknown", { label, unknown })
   },
   array: {
-    min: ({ label, min }) => i18n.global.t("validator-array-min", { label, min }),
+    min: ({ label, min }) => i18n.global.t("validator-array-min", { label, min }, min),
     max: ({ label, max }) => i18n.global.t("validator-array-max", { label, max }),
     length: ({ label, length }) => i18n.global.t("validator-array-length", { label, length })
   }
