@@ -57,7 +57,7 @@
     class="w-full"
     btn-style="secondary"
     :label="t('create-new-transaction-btn')"
-    @click="emit('onUpdateStep', TRANSACTION_FINISH)" />
+    @click="emit('onUpdateStep', TRANSACTION_FINISH, {})" />
 </template>
 
 <script setup>

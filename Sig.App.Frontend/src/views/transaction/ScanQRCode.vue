@@ -16,7 +16,7 @@
       :error-url-const="URL_TRANSACTION_ERROR"
       @triggerError="isScanning = false"
       @checkQRCode="checkQRCode"
-      @cancel="$emit('onUpdateStep', TRANSACTION_STEPS_START)" />
+      @cancel="$emit('onUpdateStep', TRANSACTION_STEPS_START, {})" />
   </div>
 </template>
 
@@ -73,10 +73,10 @@ async function checkQRCode(result) {
 
     if (canBeUsedInMarket.data.verifyCardCanBeUsedInMarket) {
       audio.play();
-      setTimeout(() => emit("onUpdateStep", TRANSACTION_STEPS_ADD, result), 200);
+      setTimeout(() => emit("onUpdateStep", TRANSACTION_STEPS_ADD, { cardId: result }), 200);
     }
   } catch (exception) {
-    emit("onUpdateStep", TRANSACTION_STEPS_START, result);
+    emit("onUpdateStep", TRANSACTION_STEPS_START, {});
     if (exception.message.indexOf(CARD_CANT_BE_USED_IN_MARKET) !== -1) {
       router.push({ name: URL_TRANSACTION_ERROR, query: { error: CARD_CANT_BE_USED_IN_MARKET, returnRoute: URL_TRANSACTION } });
     } else if (exception.message.indexOf(CARD_NOT_FOUND) !== -1) {

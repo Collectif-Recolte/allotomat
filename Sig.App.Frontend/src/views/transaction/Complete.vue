@@ -13,10 +13,23 @@
       <UiIconComplete />
       <CompleteTransaction
         :transactionId="props.transactionId"
-        @updateStep="(e) => emit('onUpdateStep', e)"
-        @updateLoadingState="(e) => emit('onUpdateLoadingState', e)" />
+        @onUpdateStep="(stepName, values) => emit('onUpdateStep', stepName, values)"
+        @onUpdateLoadingState="(e) => emit('onUpdateLoadingState', e)" />
     </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { defineEmits, defineProps } from "vue";
+
+import CompleteTransaction from "@/components/transaction/complete-transaction";
+
+const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState"]);
+
+const props = defineProps({
+  transactionId: {
+    type: String,
+    required: true
+  }
+});
+</script>

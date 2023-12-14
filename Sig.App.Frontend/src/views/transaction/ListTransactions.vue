@@ -74,7 +74,7 @@ import { ref, computed } from "vue";
 import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult, useApolloClient } from "@vue/apollo-composable";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter, useRoute, onBeforeRouteUpdate } from "vue-router";
 
 import Title from "@/components/app/title";
 import TransactionFilters from "@/components/transaction/transaction-filters";
@@ -203,7 +203,11 @@ const projectsOrOrganizationLoaded = computed(() => {
   );
 });
 
-const { result: resultTransactionLogs, loading } = useQuery(
+const {
+  result: resultTransactionLogs,
+  loading,
+  refetch: refetchTransactions
+} = useQuery(
   gql`
     query TransactionLogs(
       $projectId: ID!
@@ -389,4 +393,10 @@ async function onExportReport() {
 
   window.open(result.data.generateTransactionsReport, "_blank");
 }
+
+onBeforeRouteUpdate((to) => {
+  if (to.name === URL_TRANSACTION_ADMIN) {
+    refetchTransactions();
+  }
+});
 </script>
