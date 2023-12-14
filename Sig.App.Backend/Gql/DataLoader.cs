@@ -56,6 +56,9 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<CardGraphType> LoadCardById(long cardId) =>
             LoadOne<GetCardByIds.Query, CardGraphType, long>(cardId);
 
+        public IDataLoaderResult<CardGraphType> LoadCardByCardNumber(string cardNumber) =>
+            LoadOne<GetCardByCardNumbers.Query, CardGraphType, string>(cardNumber);
+
         public IDataLoaderResult<CardGraphType> LoadBeneficiaryCard(long beneficiaryId) =>
             LoadOne<GetCardByBeneficiaryIds.Query, CardGraphType, long>(beneficiaryId);
 

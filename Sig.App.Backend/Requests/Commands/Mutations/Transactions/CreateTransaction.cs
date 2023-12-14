@@ -113,7 +113,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 Beneficiary = beneficiary,
                 OrganizationId = organizationId,
                 Market = market,
-                CreatedAtUtc = today
+                CreatedAtUtc = today,
+                InitiatedByProject = currentUser.Type == UserType.ProjectManager
             };
 
             foreach (var transactionInput in request.Transactions)

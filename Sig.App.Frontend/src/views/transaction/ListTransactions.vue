@@ -3,57 +3,70 @@
     "en": {
       "title": "Transaction history",
       "transaction-count": "No transaction | {count} transaction | {count} transactions",   
-      "export-btn": "Export report"
+      "export-btn": "Export report",
+      "create-transaction": "New transaction"
     },
     "fr": {
       "title": "Historique des transactions",
       "transaction-count": "Aucune transaction | {count} transaction | {count} transactions",
-      "export-btn": "Exporter un rapport"
+      "export-btn": "Exporter un rapport",
+      "create-transaction": "Nouvelle transaction"
     }
   }
 </i18n>
 
 <template>
-  <AppShell :loading="loading">
-    <template #title>
-      <Title :title="t('title')">
-        <template #subpagesCta>
-          <div class="text-right">
-            <TransactionFilters
-              v-model="searchInput"
-              :available-organizations="availableOrganizations"
-              :available-beneficiary-types="availableBeneficiaryTypes"
-              :available-subscriptions="availableSubscriptions"
-              :selected-organizations="organizations"
-              :selected-beneficiary-types="beneficiaryTypes"
-              :selected-subscriptions="subscriptions"
-              :selected-transaction-types="transactionTypes"
-              :without-subscription-id="WITHOUT_SUBSCRIPTION"
-              :date-from="dateFrom"
-              :date-to="dateTo"
-              :search-filter="searchText"
-              :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
-              @organizationsChecked="onOrganizationsChecked"
-              @organizationsUnchecked="onOrganizationsUnchecked"
-              @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
-              @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
-              @subscriptionsUnchecked="onSubscriptionsUnchecked"
-              @subscriptionsChecked="onSubscriptionsChecked"
-              @transactionTypesChecked="onTransactionTypesChecked"
-              @transactionTypesUnchecked="onTransactionTypesUnchecked"
-              @dateFromUpdated="onDateFromUpdated"
-              @dateToUpdated="onDateToUpdated"
-              @resetFilters="onResetFilters"
-              @update:modelValue="onSearchTextUpdated" />
-            <PfButtonAction class="mt-2" :label="t('export-btn')" :icon="ICON_DOWNLOAD" has-icon-left @click="onExportReport" />
-          </div>
-        </template>
-      </Title>
-    </template>
-    <div v-if="transactionLogs">
-      <UiTableHeader :title="t('transaction-count', transactionLogs.totalCount)" />
-    </div>
-  </AppShell>
+  <RouterView v-slot="{ Component }">
+    <AppShell :loading="loading">
+      <template #title>
+        <Title :title="t('title')">
+          <template #subpagesCta>
+            <div class="text-right">
+              <TransactionFilters
+                v-model="searchInput"
+                :available-organizations="availableOrganizations"
+                :available-beneficiary-types="availableBeneficiaryTypes"
+                :available-subscriptions="availableSubscriptions"
+                :selected-organizations="organizations"
+                :selected-beneficiary-types="beneficiaryTypes"
+                :selected-subscriptions="subscriptions"
+                :selected-transaction-types="transactionTypes"
+                :without-subscription-id="WITHOUT_SUBSCRIPTION"
+                :date-from="dateFrom"
+                :date-to="dateTo"
+                :search-filter="searchText"
+                :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
+                @organizationsChecked="onOrganizationsChecked"
+                @organizationsUnchecked="onOrganizationsUnchecked"
+                @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
+                @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
+                @subscriptionsUnchecked="onSubscriptionsUnchecked"
+                @subscriptionsChecked="onSubscriptionsChecked"
+                @transactionTypesChecked="onTransactionTypesChecked"
+                @transactionTypesUnchecked="onTransactionTypesUnchecked"
+                @dateFromUpdated="onDateFromUpdated"
+                @dateToUpdated="onDateToUpdated"
+                @resetFilters="onResetFilters"
+                @update:modelValue="onSearchTextUpdated" />
+              <PfButtonAction class="mt-2" :label="t('export-btn')" :icon="ICON_DOWNLOAD" has-icon-left @click="onExportReport" />
+            </div>
+          </template>
+        </Title>
+      </template>
+      <div v-if="transactionLogs">
+        <UiTableHeader :title="t('transaction-count', transactionLogs.totalCount)" />
+        <div
+          class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
+          <PfButtonLink tag="routerLink" :to="{ name: URL_TRANSACTION_ADD }" btn-style="secondary" class="rounded-full">
+            <span class="inline-flex items-center">
+              {{ t("create-transaction") }}
+            </span>
+          </PfButtonLink>
+        </div>
+      </div>
+      <Component :is="Component" />
+    </AppShell>
+  </RouterView>
 </template>
 
 <script setup>
@@ -66,6 +79,7 @@ import { useRouter, useRoute } from "vue-router";
 import Title from "@/components/app/title";
 import TransactionFilters from "@/components/transaction/transaction-filters";
 
+import { URL_TRANSACTION_ADD } from "@/lib/consts/urls";
 import { WITHOUT_SUBSCRIPTION } from "@/lib/consts/enums";
 import ICON_DOWNLOAD from "@/lib/icons/download.json";
 
