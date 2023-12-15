@@ -114,7 +114,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 OrganizationId = organizationId,
                 Market = market,
                 CreatedAtUtc = today,
-                InitiatedByProject = currentUser.Type == UserType.ProjectManager
+                InitiatedByProject = currentUser?.Type == UserType.ProjectManager
             };
 
             foreach (var transactionInput in request.Transactions)
