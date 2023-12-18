@@ -29,7 +29,7 @@
                 <div v-if="props.icon" class="mx-auto flex items-center justify-center text-grey-500 mb-3 sm:mb-5">
                   <PfIcon size="2xl" fill-class="" stroke-class="stroke-current" :icon="props.icon" aria-hidden="true" />
                 </div>
-                <DialogTitle as="h2" class="text-2xl leading-6 font-semibold text-gray-900 mt-0 mb-6">
+                <DialogTitle :has-title="hasTitle" as="h2" class="text-2xl leading-6 font-semibold text-gray-900 mt-0 mb-6">
                   <slot name="title" :closeModal="closeModal">
                     {{ props.title }}
                   </slot>
@@ -71,6 +71,7 @@ const props = defineProps({
   title: { type: String, default: null },
   description: { type: String, default: null },
   icon: { type: Object, default: null },
+  hasTitle: { type: Boolean, default: true },
   hasFooter: { type: Boolean, default: true },
   closeLabel: { type: String, default: "" },
   returnRoute: { type: Object, default: null },
