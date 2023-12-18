@@ -19,7 +19,8 @@
     "edit": "Revise",
     "gift-card": "Gift card",
     "no-product-group-transaction":"At least one product group must have an amount to create a transaction.",
-    "no-funds-message": "There are no available funds on this card."
+    "no-funds-message": "There are no available funds on this card.",
+    "product-group-amount-isnan": "The amount must be a number."
 	},
 	"fr": {
 		"amount-label": "{productGroupName}",
@@ -39,7 +40,8 @@
     "edit": "Réviser",
     "gift-card": "Carte-cadeau",
     "no-product-group-transaction":"Au minimum un groupe de produit doit avoir un montant pour créer une transaction.",
-    "no-funds-message": "Il n'y a pas de fonds disponibles sur cette carte."
+    "no-funds-message": "Il n'y a pas de fonds disponibles sur cette carte.",
+    "product-group-amount-isnan": "Le montant doit être un nombre."
 	}
 }
 </i18n>
@@ -313,6 +315,17 @@ const validationSchemas = computed(() => {
         object({
           amount: lazy((value) => {
             if (value === undefined || value === "" || value === null) return string().notRequired();
+            if (isNaN(value)) {
+              return string().test({
+                name: "productGroupAmountMustBeNumber",
+                exclusive: false,
+                params: {},
+                message: t("product-group-amount-isnan"),
+                test: function () {
+                  return false;
+                }
+              });
+            }
             return number()
               .label(t("amount-validation-label"))
               .transform((_, value) => {

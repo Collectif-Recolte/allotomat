@@ -8,6 +8,7 @@
     "available-refund": "Available for refund: {amountAvailable}",
     "amount-validation-label": "Refund amount",
     "product-group-refund-too-much": "Refund amount cannot be greater than available amount.",
+    "product-group-refund-amount-isnan": "Refund amount must be a number.",
     "gift-card": "Gift card",
     "password": "Password",
     "no-amount-to-refund": "No amount to refund.",
@@ -21,6 +22,7 @@
     "available-refund": "Disponible au remboursement : {amountAvailable}",
     "amount-validation-label": "Montant de remboursement",
     "product-group-refund-too-much": "Le montant de remboursement ne peut pas être supérieur au montant disponible.",
+    "product-group-refund-amount-isnan": "Le montant de remboursement doit être un nombre.",
     "gift-card": "Carte-cadeau",
     "password": "Mot de passe",
     "no-amount-to-refund": "Aucun montant à rembourser.",
@@ -216,6 +218,17 @@ const validationSchema = object({
     object({
       amount: lazy((value) => {
         if (value === undefined || value === "" || value === null) return string().notRequired();
+        if (isNaN(value)) {
+          return string().test({
+            name: "productGroupAmountMustBeNumber",
+            exclusive: false,
+            params: {},
+            message: t("product-group-refund-amount-isnan"),
+            test: function () {
+              return false;
+            }
+          });
+        }
         return number()
           .label(t("amount-validation-label"))
           .transform((_, value) => {
