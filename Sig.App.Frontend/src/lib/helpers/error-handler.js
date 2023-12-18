@@ -14,10 +14,11 @@ export function VueErrorHandler(err, vm, info) {
   if (!err.__handled) {
     logError(err, vm, info);
 
-    if (process.env.NODE_ENV === "development") {
+    console.error("Unhandled error", { err, vm, info });
+    /*if (process.env.NODE_ENV === "development") {
       // eslint-disable-next-line no-console
       console.error("Unhandled error", { err, vm, info });
-    }
+    }*/
   }
 }
 
