@@ -294,7 +294,17 @@ export default [
     component: () => import("@/views/transaction/ListTransactions.vue"),
     meta: {
       claim: GLOBAL_MANAGE_TRANSACTIONS
-    }
+    },
+    children: [
+      {
+        name: urls.URL_TRANSACTION_ADD,
+        path: "add",
+        component: () => import("@/views/transaction/AddTransaction.vue"),
+        meta: {
+          claim: GLOBAL_CREATE_TRANSACTION
+        }
+      }
+    ]
   },
   {
     name: urls.URL_MARKET_OVERVIEW,

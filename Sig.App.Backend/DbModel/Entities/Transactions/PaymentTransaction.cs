@@ -12,5 +12,7 @@ namespace Sig.App.Backend.DbModel.Entities.Transactions
         public List<RefundTransaction> RefundTransactions { get; set; }
 
         public List<PaymentTransactionProductGroup> TransactionByProductGroups { get; set; }
+
+        public bool InitiatedByProject { get; set; } = false;
     }
 }

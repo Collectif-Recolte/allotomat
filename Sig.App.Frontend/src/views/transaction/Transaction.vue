@@ -14,6 +14,9 @@
     <AppShell :class="appShellClass" no-padding :is-dark="isDark" :loading="loading">
       <NewScan v-if="activeStep === TRANSACTION_STEPS_START" @onUpdateStep="updateStep" />
       <ScanQRCode v-else-if="activeStep === TRANSACTION_STEPS_SCAN" @onUpdateStep="updateStep" />
+      <ManuallyEnterCardNumber
+        v-else-if="activeStep === TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER"
+        @onUpdateStep="updateStep" />
       <AddTransaction
         v-else-if="activeStep === TRANSACTION_STEPS_ADD"
         :card-id="cardId"
@@ -32,17 +35,20 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRoute, onBeforeRouteUpdate } from "vue-router";
+import { useRoute } from "vue-router";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
 import {
   TRANSACTION_STEPS_START,
   TRANSACTION_STEPS_SCAN,
   TRANSACTION_STEPS_ADD,
-  TRANSACTION_STEPS_COMPLETE
+  TRANSACTION_STEPS_COMPLETE,
+  TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER,
+  TRANSACTION_FINISH
 } from "@/lib/consts/enums";
 
 import ScanQRCode from "@/views/transaction/ScanQRCode";
+import ManuallyEnterCardNumber from "@/views/transaction/ManuallyEnterCardNumber";
 import AddTransaction from "@/views/transaction/Add";
 import CompleteTransaction from "@/views/transaction/Complete";
 import NewScan from "@/views/transaction/NewScan";
@@ -67,20 +73,20 @@ const appShellClass = computed(() => {
   return "bg-primary-100 md:bg-white";
 });
 
-const updateStep = (stepName, cardIdString, transactionIdString) => {
+const updateStep = (stepName, values) => {
   activeStep.value = stepName;
-  if (cardIdString) cardId.value = cardIdString;
-  if (transactionIdString) transactionId.value = transactionIdString;
+  if (values.cardId) cardId.value = values.cardId;
+  if (values.transactionId) transactionId.value = values.transactionId;
   if (stepName === TRANSACTION_STEPS_COMPLETE) loading.value = false;
+  if (stepName === TRANSACTION_FINISH) {
+    activeStep.value = TRANSACTION_STEPS_START;
+    cardId.value = "";
+    transactionId.value = "";
+    loading.value = false;
+  }
 };
 
 const updateLoadingState = (state) => {
   loading.value = state;
 };
-
-onBeforeRouteUpdate((to) => {
-  if (to.query.isScan) {
-    activeStep.value = TRANSACTION_STEPS_SCAN;
-  }
-});
 </script>

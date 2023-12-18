@@ -208,7 +208,6 @@ namespace Sig.App.Backend.Gql.Schema
             }
         }
 
-        [RequirePermission(MarketPermission.ManageMarket)]
         public IDataLoaderResult<MarketGraphType> Market(IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadMarket(id.LongIdentifierForType<Market>());
@@ -233,6 +232,11 @@ namespace Sig.App.Backend.Gql.Schema
         public IDataLoaderResult<CardGraphType> Card(IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadCardById(id.LongIdentifierForType<Card>());
+        }
+
+        public IDataLoaderResult<CardGraphType> CardByNumber(IAppUserContext ctx, string cardNumber)
+        {
+            return ctx.DataLoader.LoadCardByCardNumber(cardNumber);
         }
 
         public IDataLoaderResult<SubscriptionGraphType> Subscription(IAppUserContext ctx, Id id)
