@@ -47,7 +47,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 .Include(x => x.ProductGroup)
                 .Include(x => x.Card).ThenInclude(x => x.Funds)
                 .Include(x => x.Beneficiary).ThenInclude(x => x.Organization)
-                .Where(x => x.Status == FundTransactionStatus.Actived && x.ExpirationDate <= today).ToListAsync();
+                .Where(x => x.Status == FundTransactionStatus.Actived && x.ExpirationDate <= today && x.AvailableFund > 0).ToListAsync();
 
             var transactions = dbTransactions.Where(x =>
                 x is ManuallyAddingFundTransaction or SubscriptionAddingFundTransaction
@@ -61,6 +61,10 @@ namespace Sig.App.Backend.BackgroundJobs
                     .Contains(x.Id)).ToListAsync();
             foreach (var transaction in transactions)
             {
+                if (transaction.AvailableFund <= 0)
+                {
+                    continue;
+                }
                 var transactionProductGroupId = (transaction as IHaveProductGroup).ProductGroupId;
                 var fund = transaction.Card.Funds.FirstOrDefault(x => x.ProductGroupId == transactionProductGroupId);
                 if (fund != null)
