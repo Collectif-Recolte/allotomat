@@ -27,13 +27,11 @@
       :marketId="marketId"
       :cardId="cardId"
       @onUpdateStep="updateStep"
-      @onCloseModal="closeModal"
-      @onUpdateLoadingState="updateLoadingState" />
+      @onCloseModal="closeModal" />
     <CompleteTransaction
       v-else-if="activeStep === TRANSACTION_STEPS_COMPLETE"
       :transactionId="transactionId"
-      @onUpdateStep="updateStep"
-      @onUpdateLoadingState="updateLoadingState" />
+      @onUpdateStep="updateStep" />
   </UiDialogModal>
 </template>
 
@@ -64,7 +62,6 @@ const cardId = ref("");
 const cardNumber = ref("");
 const transactionId = ref("");
 const marketId = ref("");
-const loading = ref(false);
 
 usePageTitle(title);
 
@@ -97,8 +94,4 @@ const title = computed(() => {
 const hasTitle = computed(() => {
   return activeStep.value !== TRANSACTION_STEPS_COMPLETE;
 });
-
-const updateLoadingState = (state) => {
-  loading.value = state;
-};
 </script>
