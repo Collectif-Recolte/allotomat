@@ -63,6 +63,16 @@ const cardNumber = ref("");
 const transactionId = ref("");
 const marketId = ref("");
 
+const title = computed(() => {
+  if (activeStep.value === TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER) return t("title-new-transaction");
+  if (activeStep.value === TRANSACTION_STEPS_ADD) return t("title-add-transaction");
+  return "";
+});
+
+const hasTitle = computed(() => {
+  return activeStep.value !== TRANSACTION_STEPS_COMPLETE;
+});
+
 usePageTitle(title);
 
 const updateStep = (currentStep, values) => {
@@ -84,14 +94,4 @@ const updateStep = (currentStep, values) => {
       break;
   }
 };
-
-const title = computed(() => {
-  if (activeStep.value === TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER) return t("title-new-transaction");
-  if (activeStep.value === TRANSACTION_STEPS_ADD) return t("title-add-transaction");
-  return "";
-});
-
-const hasTitle = computed(() => {
-  return activeStep.value !== TRANSACTION_STEPS_COMPLETE;
-});
 </script>
