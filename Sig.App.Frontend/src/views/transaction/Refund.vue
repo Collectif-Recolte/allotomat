@@ -304,12 +304,7 @@ function onProductGroupAmountInput(idx, value) {
 function haveRefundAmount() {
   for (var prop in productGroupsValue.value) {
     if (Object.prototype.hasOwnProperty.call(productGroupsValue.value, prop)) {
-      if (
-        productGroupsValue.value[prop] === undefined ||
-        productGroupsValue.value[prop] === null ||
-        productGroupsValue.value[prop] === ""
-      )
-        continue;
+      if (productGroupsValue.value[prop] === null || productGroupsValue.value[prop] === "") continue;
       if (isNaN(productGroupsValue.value[prop])) {
         return false;
       }
