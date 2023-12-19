@@ -55,7 +55,7 @@
               has-footer
               footer-alt-style
               can-cancel
-              :disable-submit="Object.keys(formErrors).length > 0"
+              :disable-submit="!haveRefundAmount() || Object.keys(formErrors).length > 0"
               :submit-label="t('refund-transaction')"
               :cancel-label="t('cancel')"
               :processing="isSubmitting"
@@ -83,7 +83,8 @@
                           :label="productGroupLabel(productGroups[idx].productGroup)"
                           :after-label="availableAmountLabel(productGroups[idx], 'available-refund')"
                           :errors="fieldErrors"
-                          input-mode="decimal">
+                          input-mode="decimal"
+                          @input="(value) => onProductGroupAmountInput(idx, value)">
                           <template #trailingIcon>
                             <UiDollarSign :errors="fieldErrors" />
                           </template>
@@ -159,6 +160,7 @@ useGraphQLErrorMessages({
 });
 
 const refundTransactionId = ref(null);
+const productGroupsValue = ref({});
 
 const { result, loading } = useQuery(
   gql`
@@ -298,6 +300,24 @@ const goToTransactionList = () => {
   if (userType.value === USER_TYPE_PROJECTMANAGER) router.push({ name: URL_TRANSACTION_ADMIN });
   else router.push({ name: URL_TRANSACTION_LIST });
 };
+
+function onProductGroupAmountInput(idx, value) {
+  productGroupsValue.value[idx] = value;
+}
+
+function haveRefundAmount() {
+  for (var prop in productGroupsValue.value) {
+    if (Object.prototype.hasOwnProperty.call(productGroupsValue.value, prop)) {
+      if (productGroupsValue.value[prop] === null || productGroupsValue.value[prop] === "") continue;
+      if (isNaN(productGroupsValue.value[prop])) {
+        return false;
+      }
+      if (parseFloat(productGroupsValue.value[prop]) > 0) {
+        return true;
+      }
+    }
+  }
+}
 
 async function onSubmit({ productGroups, password }) {
   const transactions = productGroups
