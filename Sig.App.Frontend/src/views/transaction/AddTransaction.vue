@@ -64,6 +64,8 @@ const transactionId = ref("");
 const marketId = ref("");
 
 const title = computed(() => {
+  console.log(activeStep.value);
+  console.log(t("title-new-transaction"));
   if (activeStep.value === TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER) return t("title-new-transaction");
   if (activeStep.value === TRANSACTION_STEPS_ADD) return t("title-add-transaction");
   return "";
