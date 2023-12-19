@@ -132,7 +132,10 @@ function getTransactionDate(transaction) {
 }
 
 function getBeneficiaryName(transaction) {
-  return `${transaction.beneficiaryFirstname} ${transaction.beneficiaryLastname}`;
+  if (transaction.beneficiaryFirstname !== null && transaction.beneficiaryLastname !== null) {
+    return `${transaction.beneficiaryFirstname} ${transaction.beneficiaryLastname}`;
+  }
+  return `-`;
 }
 
 function getOperationName(transaction) {
