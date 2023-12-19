@@ -587,6 +587,12 @@ namespace Sig.App.Backend.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("RefundTransactionPassword")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RefundTransactionPasswordSalt")
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<string>("Url")
                         .HasColumnType("nvarchar(max)");
 

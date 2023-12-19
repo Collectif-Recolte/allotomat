@@ -72,7 +72,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             if (initialTransaction == null) throw new InitialTransactionNotFoundException();
 
-            if (!initialTransaction.Market.VerifyPassword(request.Password.IsSet() ? request.Password.Value : "")) throw new WrongPasswordException();
+            var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
+            currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
+
+            if (currentUser?.Type == UserType.ProjectManager)
+            {
+                if (!initialTransaction.Card.Project.VerifyPassword(request.Password.IsSet() ? request.Password.Value : "")) throw new WrongPasswordException();
+            }
+            else
+            {
+                if (!initialTransaction.Market.VerifyPassword(request.Password.IsSet() ? request.Password.Value : "")) throw new WrongPasswordException();
+            }
 
             var refundTransaction = new DbModel.Entities.Transactions.RefundTransaction()
             {
@@ -85,9 +95,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 Amount = request.Transactions.Sum(x => x.Amount),
                 RefundByProductGroups = new List<RefundTransactionProductGroup>()
             };
-
-            var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
-            currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
 
             var beneficiary = initialTransaction.Beneficiary;
             var cardName = beneficiary != null ? $"{beneficiary.Firstname} {beneficiary.Lastname}" : initialTransaction.CardId.ToString();
