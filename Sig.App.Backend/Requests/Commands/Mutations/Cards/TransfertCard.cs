@@ -44,7 +44,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             var currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
             
             var originalCardId = request.OriginalCardId.LongIdentifierForType<Card>();
-            var originalCard = await db.Cards.Include(x => x.Beneficiary).ThenInclude(x => x.Organization).Include(x => x.Transactions).Include(x => x.Funds).FirstOrDefaultAsync(x => x.Id == originalCardId, cancellationToken);
+            var originalCard = await db.Cards.Include(x => x.Beneficiary).ThenInclude(x => x.Organization).Include(x => x.Transactions).Include(x => x.Funds).Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == originalCardId, cancellationToken);
 
             if (originalCard == null) throw new OriginalCardNotFoundException();
 
@@ -126,6 +126,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
                     SubscriptionId = subscription?.Id,
                     SubscriptionName = subscription?.Name,
                     ProjectId = newCard.Beneficiary.Organization.ProjectId,
+                    ProjectName = originalCard.Project.Name,
                     TransactionLogProductGroups = transactionLogProductGroups,
                     TransactionInitiatorId = currentUserId,
                     TransactionInitiatorFirstname = currentUser?.Profile.FirstName,

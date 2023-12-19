@@ -47,7 +47,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             if (subscription == null) throw new SubscriptionNotFoundException();
 
             var beneficiaryId = request.BeneficiaryId.LongIdentifierForType<Beneficiary>();
-            var beneficiary = await db.Beneficiaries.Include(x => x.Organization).Include(x => x.Card)
+            var beneficiary = await db.Beneficiaries.Include(x => x.Organization).ThenInclude(x => x.Project).Include(x => x.Card)
                 .FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
             if (beneficiary == null) throw new BeneficiaryNotFoundException();
@@ -100,6 +100,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 SubscriptionId = subscription?.Id,
                 SubscriptionName = subscription?.Name,
                 ProjectId = beneficiary.Organization.ProjectId,
+                ProjectName = beneficiary.Organization.Project.Name,
                 TransactionLogProductGroups = transactionLogProductGroups,
                 TransactionInitiatorId = currentUserId,
                 TransactionInitiatorFirstname = currentUser?.Profile.FirstName,

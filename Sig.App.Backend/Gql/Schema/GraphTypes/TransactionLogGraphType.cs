@@ -39,6 +39,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public string TransactionInitiatorFirstname => transactionLog.TransactionInitiatorFirstname;
         public string TransactionInitiatorLastname => transactionLog.TransactionInitiatorLastname;
         public string TransactionInitiatorEmail => transactionLog.TransactionInitiatorEmail;
+        public long ProjectId => transactionLog.ProjectId;
+        public string ProjectName => transactionLog.ProjectName;
+        public bool InitiatedByProject => transactionLog.InitiatedByProject;
 
         public TransactionLogGraphType(TransactionLog transactionLog)
         {
@@ -53,6 +56,13 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<IEnumerable<TransactionLogProductGroupGraphType>> TransactionLogByProductGroups(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadTransactionLogProductGroupByTransactionLogId(transactionLog.Id);
+        }
+
+        public IDataLoaderResult<TransactionGraphType> Transaction(IAppUserContext ctx)
+        {
+            if (transactionLog.TransactionUniqueId == null)
+                return null;
+            return ctx.DataLoader.LoadTransactionByUniqueId(transactionLog.TransactionUniqueId);
         }
     }
     

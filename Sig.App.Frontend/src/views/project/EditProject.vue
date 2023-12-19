@@ -3,12 +3,14 @@
 	"en": {
 		"edit-project": "Edit",
 		"edit-project-success-notification": "Editing project {projectName} was successful.",
-		"title": "Edit a project"
+		"title": "Edit a project",
+    "edit-password-project-success-notification": "The password of project {projectName} was reset.",
 	},
 	"fr": {
 		"edit-project": "Modifier",
 		"edit-project-success-notification": "L’édition du programme {projectName} a été un succès.",
-		"title": "Modifier un programme"
+		"title": "Modifier un programme",
+    "edit-password-project-success-notification": "Le mot de passe du programme {projectName} a été réinitialisé.",
 	}
 }
 </i18n>
@@ -24,7 +26,8 @@
       :beneficiaries-are-anonymous="project.beneficiariesAreAnonymous"
       :administration-subscriptions-off-platform="project.administrationSubscriptionsOffPlatform"
       @closeModal="closeModal"
-      @submit="onSubmit" />
+      @submit="onSubmit"
+      @resetPassword="onResetPassword" />
   </UiDialogModal>
 </template>
 
@@ -80,18 +83,34 @@ const { mutate: editProject } = useMutation(
   `
 );
 
-async function onSubmit({ name, url, allowOrganizationsAssignCards, beneficiariesAreAnonymous }) {
+async function onSubmit({ name, url, allowOrganizationsAssignCards, beneficiariesAreAnonymous, password }) {
+  let input = {
+    projectId: route.params.projectId,
+    name: { value: name },
+    url: { value: url },
+    allowOrganizationsAssignCards: { value: allowOrganizationsAssignCards },
+    beneficiariesAreAnonymous: { value: beneficiariesAreAnonymous }
+  };
+
+  if (password !== "" && password !== undefined && password !== null) {
+    input.refundTransactionPassword = { value: password };
+  }
+
   await editProject({
-    input: {
-      projectId: route.params.projectId,
-      name: { value: name },
-      url: { value: url },
-      allowOrganizationsAssignCards: { value: allowOrganizationsAssignCards },
-      beneficiariesAreAnonymous: { value: beneficiariesAreAnonymous }
-    }
+    input
   });
+
   router.push({ name: URL_PROJECT_ADMIN });
   addSuccess(t("edit-project-success-notification", { projectName: name }));
+}
+
+async function onResetPassword() {
+  let input = {
+    projectId: route.params.projectId
+  };
+  input.refundTransactionPassword = { value: "" };
+  await editProject({ input });
+  addSuccess(t("edit-password-project-success-notification", { projectName: project.name }));
 }
 
 function projectUrl(project) {

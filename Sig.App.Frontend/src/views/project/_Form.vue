@@ -8,7 +8,11 @@
     "project-url-description": "Ex. https://carteproximite.org/",
     "project-allow-organizations-assign-cards": "Allow organizations to assign cards",
     "project-beneficiaries-are-anonymous": "Anonymous beneficiaries",
-    "project-administration-subscriptions-off-platform": "The administration of participants is done off-platform"
+    "project-administration-subscriptions-off-platform": "The administration of participants is done off-platform",
+    "password": "Password for transaction refund",
+		"password-confirmation": "Re-enter password",
+		"password-rules": "The password must contain a minimum of 10 characters, 1 capital letter, a number and a special character (for example: %, {'@'}, #, $ and &).",
+    "reset-password-btn": "Reset password"
 	},
 	"fr": {
 		"cancel": "Annuler",
@@ -18,7 +22,11 @@
     "project-url-description": "Ex. https://carteproximite.org/",
     "project-allow-organizations-assign-cards": "Permettre aux organismes d’assigner des cartes",
     "project-beneficiaries-are-anonymous": "Participant-e-s anonymes",
-    "project-administration-subscriptions-off-platform": "L'administration des participant-e-s se fait hors plateforme"
+    "project-administration-subscriptions-off-platform": "L'administration des participant-e-s se fait hors plateforme",
+    "password": "Mot de passe pour remboursement des transactions",
+		"password-confirmation": "Confirmation du mot de passe",
+		"password-rules": "Le mot de passe doit contenir un minimum de 10 caractères, une majuscule, un chiffre et un caractère spécial (par exemple: %, {'@'}, #, $ et &).",
+    "reset-password-btn": "Réinitialiser le mot de passe"
   }
 }
 </i18n>
@@ -83,7 +91,28 @@
             :checked="field.value"
             col-span-class="sm:col-span-4" />
         </Field>
+        <Field v-slot="{ field, errors }" name="password">
+          <PfFormInputText
+            id="password"
+            v-bind="field"
+            :label="t('password')"
+            :errors="errors"
+            input-type="password"
+            :description="t('password-rules')"
+            col-span-class="sm:col-span-4" />
+        </Field>
+
+        <Field v-slot="{ field, errors }" name="passwordConfirmation">
+          <PfFormInputText
+            id="passwordConfirmation"
+            v-bind="field"
+            :label="t('password-confirmation')"
+            :errors="errors"
+            input-type="password"
+            col-span-class="sm:col-span-4" />
+        </Field>
       </PfFormSection>
+      <PfButtonAction v-if="!isNew" class="pf-button mt-8" :label="t('reset-password-btn')" @click="resetPassword" />
       <slot></slot>
     </PfForm>
   </Form>
@@ -92,10 +121,10 @@
 <script setup>
 import { defineEmits, defineProps, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { string, object } from "yup";
+import { string, object, lazy, mixed, ref as yupRef } from "yup";
 
 const { t } = useI18n();
-const emit = defineEmits(["submit", "closeModal"]);
+const emit = defineEmits(["submit", "closeModal", "reset-password"]);
 
 const props = defineProps({
   title: {
@@ -137,6 +166,10 @@ const props = defineProps({
   isNewProject: {
     type: Boolean,
     default: false
+  },
+  isNew: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -151,7 +184,29 @@ const baseInitialValues = {
 const baseValidationSchema = computed(() =>
   object({
     name: string().label(t("project-name")).required(),
-    url: string().label(t("project-url")).url()
+    url: string().label(t("project-url")).url(),
+    password: lazy((value) => {
+      if (value !== "" && value !== undefined) {
+        return string().label(t("password")).required().password();
+      } else {
+        return mixed().test({
+          test: function () {
+            return true;
+          }
+        });
+      }
+    }),
+    passwordConfirmation: lazy((value) => {
+      if (value !== "" && value !== undefined) {
+        return string().label(t("password-confirmation")).samePassword(yupRef("password"));
+      } else {
+        return mixed().test({
+          test: function () {
+            return true;
+          }
+        });
+      }
+    })
   })
 );
 
@@ -161,5 +216,9 @@ function closeModal() {
 
 async function onSubmit(values) {
   emit("submit", values);
+}
+
+function resetPassword() {
+  emit("reset-password");
 }
 </script>

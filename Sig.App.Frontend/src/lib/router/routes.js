@@ -303,6 +303,14 @@ export default [
         meta: {
           claim: GLOBAL_CREATE_TRANSACTION
         }
+      },
+      {
+        name: urls.URL_TRANSACTION_ADMIN_REFUND,
+        path: ":transactionId/refund",
+        component: () => import("@/views/transaction/Refund.vue"),
+        meta: {
+          claim: GLOBAL_CREATE_TRANSACTION
+        }
       }
     ]
   },
