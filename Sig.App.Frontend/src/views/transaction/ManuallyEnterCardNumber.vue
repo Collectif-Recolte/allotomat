@@ -19,7 +19,7 @@
       "choose-market": "Sélectionner",
       "next-step": "Suivant",
       "cancel": "Annuler",
-      "card-number-invalid": "Le numéro de carte ne correspond à aucune carte relié au programme.",
+      "card-number-invalid": "Le numéro de carte ne correspond à aucune carte reliée au programme.",
       "transaction-in-program-name": "Achat au nom du programme"
     }
   }
