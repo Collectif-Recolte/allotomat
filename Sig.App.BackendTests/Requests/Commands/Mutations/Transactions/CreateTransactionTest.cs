@@ -139,7 +139,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             card.Funds.Add(new Fund()
             {
-                Amount = 20,
+                Amount = 40,
                 Card = card,
                 ProductGroup = productGroup
             });
@@ -315,7 +315,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var transactionLog = await DbContext.TransactionLogs.FirstAsync();
             transactionLog.TransactionUniqueId.Should().Be(transaction.TransactionUniqueId);
 
-            card.Funds.First().Amount.Should().Be(10);
+            card.Funds.First().Amount.Should().Be(30);
 
             var initialTransaction = await DbContext.Transactions.OfType<ManuallyAddingFundTransaction>().FirstAsync(x => x.TransactionUniqueId == "initialTransaction1");
             initialTransaction.AvailableFund.Should().Be(10);
@@ -350,7 +350,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var transactionLog = await DbContext.TransactionLogs.FirstAsync();
             transactionLog.TransactionUniqueId.Should().Be(transaction.TransactionUniqueId);
 
-            card.Funds.First().Amount.Should().Be(10);
+            card.Funds.First().Amount.Should().Be(30);
 
             var initialTransaction = await DbContext.Transactions.OfType<ManuallyAddingFundTransaction>().FirstAsync(x => x.TransactionUniqueId == "initialTransaction1");
             initialTransaction.AvailableFund.Should().Be(10);
@@ -439,7 +439,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             transaction.CardId.Should().Be(card.Id);
             transaction.Amount.Should().Be(10);
 
-            card.Funds.First().Amount.Should().Be(10);
+            card.Funds.First().Amount.Should().Be(30);
 
             var initialTransaction = await DbContext.Transactions.OfType<ManuallyAddingFundTransaction>().FirstAsync(x => x.TransactionUniqueId == "initialTransaction1");
             initialTransaction.AvailableFund.Should().Be(10);
@@ -460,7 +460,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
-                Amount = 30,
+                Amount = 50,
                 ProductGroupId = productGroup.GetIdentifier()
             });
 
@@ -469,7 +469,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var transaction = await DbContext.Transactions.FirstAsync();
 
             transaction.CardId.Should().Be(card.Id);
-            transaction.Amount.Should().Be(30);
+            transaction.Amount.Should().Be(50);
 
             card.Funds.First().Amount.Should().Be(0);
             card.Funds.First(x => x.ProductGroup.Name == ProductGroupType.LOYALTY).Amount.Should().Be(10);
@@ -581,7 +581,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
-                Amount = 50,
+                Amount = 70,
                 ProductGroupId = productGroup.GetIdentifier()
             });
 

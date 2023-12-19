@@ -102,7 +102,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .ToList();
 
             var transactionByProductGroups = new List<PaymentTransactionProductGroup>();
-            decimal loyaltyFundToRemove = 0;
+            decimal loyaltyFundToRemove = request.Transactions.Sum(x => x.Amount);
 
             var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
             var transaction = new PaymentTransaction()
@@ -139,7 +139,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                         .ToList();
 
                     var fundToRemove = Math.Min(fund.Amount, amount);
-                    loyaltyFundToRemove += amount - fundToRemove;
                     
                     if (addingFundTransactions.Any())
                     {
@@ -163,6 +162,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                                 AddAmountToTransactionLog(transaction, card, market, subscription, productGroup,
                                     addingFundTransaction.AvailableFund);
                                 tempAmount -= addingFundTransaction.AvailableFund;
+                                loyaltyFundToRemove -= addingFundTransaction.AvailableFund;
                                 addingFundTransaction.AvailableFund = 0;
                             }
                             else
@@ -170,6 +170,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                                 AddAmountToTransactionLog(transaction, card, market, subscription, productGroup,
                                     tempAmount);
                                 addingFundTransaction.AvailableFund -= tempAmount;
+                                loyaltyFundToRemove -= tempAmount;
                                 tempAmount = 0;
                             }
 
@@ -185,6 +186,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     {
                         // Beneficiary is off platform
                         AddAmountToTransactionLog(transaction, card, market, null, productGroup, fundToRemove);
+                        loyaltyFundToRemove -= fundToRemove;
                     }
 
                     transactionByProductGroups.Add(new PaymentTransactionProductGroup()
@@ -195,10 +197,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     });
 
                     fund.Amount -= fundToRemove;
-                }
-                else
-                {
-                    loyaltyFundToRemove += amount;
                 }
             }
 
