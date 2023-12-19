@@ -3,11 +3,13 @@
 	"en": {
 		"edit-market": "Edit",
 		"edit-market-success-notification": "Editing market {marketName} was successful.",
+    "edit-password-market-success-notification": "The password of market {marketName} was reset.",
 		"title": "Edit a market"
 	},
 	"fr": {
 		"edit-market": "Modifier",
 		"edit-market-success-notification": "L’édition du commerce {marketName} a été un succès.",
+    "edit-password-market-success-notification": "Le mot de passe du commerce {marketName} a été réinitialisé.",
 		"title": "Modifier un commerce"
 	}
 }
@@ -20,7 +22,8 @@
       :submit-btn="t('edit-market')"
       :market-name="market.name"
       @closeModal="closeModal"
-      @submit="onSubmit" />
+      @submit="onSubmit"
+      @resetPassword="onResetPassword" />
   </UiDialogModal>
 </template>
 
@@ -81,5 +84,16 @@ async function onSubmit(values) {
   await editMarket({ input });
   router.push({ name: URL_MARKET_ADMIN });
   addSuccess(t("edit-market-success-notification", { marketName: values.marketName }));
+}
+
+async function onResetPassword() {
+  let input = {
+    marketId: route.params.marketId
+  };
+
+  input.refundTransactionPassword = { value: "" };
+
+  await editMarket({ input });
+  addSuccess(t("edit-password-market-success-notification", { marketName: market.name }));
 }
 </script>
