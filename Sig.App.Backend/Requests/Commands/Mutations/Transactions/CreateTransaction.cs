@@ -234,6 +234,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                             PaymentTransaction = transaction
                         });
 
+                        AddAmountToTransactionLog(transaction, card, market, null, loyaltyFund.ProductGroup, fundToRemove);
+
                         if (loyaltyFundToRemove == 0)
                         {
                             break;
