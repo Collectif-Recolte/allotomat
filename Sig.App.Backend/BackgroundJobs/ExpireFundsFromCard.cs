@@ -46,7 +46,7 @@ namespace Sig.App.Backend.BackgroundJobs
             var dbTransactions = await db.Transactions.OfType<AddingFundTransaction>()
                 .Include(x => x.ProductGroup)
                 .Include(x => x.Card).ThenInclude(x => x.Funds)
-                .Include(x => x.Beneficiary).ThenInclude(x => x.Organization)
+                .Include(x => x.Beneficiary).ThenInclude(x => x.Organization).ThenInclude(x => x.Project)
                 .Where(x => x.Status == FundTransactionStatus.Actived && x.ExpirationDate <= today && x.AvailableFund > 0).ToListAsync();
 
             var transactions = dbTransactions.Where(x =>
@@ -110,6 +110,7 @@ namespace Sig.App.Backend.BackgroundJobs
                         SubscriptionId = subscription?.Id,
                         SubscriptionName = subscription?.Name,
                         ProjectId = transaction.Beneficiary.Organization.ProjectId,
+                        ProjectName = transaction.Beneficiary.Organization.Project.Name,
                         TransactionLogProductGroups = transactionLogProductGroups
                     });
                     

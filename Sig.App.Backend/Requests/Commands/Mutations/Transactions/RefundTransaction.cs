@@ -116,11 +116,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 OrganizationId = card.Beneficiary?.OrganizationId,
                 OrganizationName = card.Beneficiary?.Organization?.Name,
                 ProjectId = card.ProjectId,
+                ProjectName = card.Project.Name,
                 TransactionInitiatorId = currentUser?.Id,
                 TransactionInitiatorFirstname = currentUser?.Profile.FirstName,
                 TransactionInitiatorLastname = currentUser?.Profile.LastName,
                 TransactionInitiatorEmail = currentUser?.Email,
-                TransactionLogProductGroups = new List<TransactionLogProductGroup>()
+                TransactionLogProductGroups = new List<TransactionLogProductGroup>(),
+                InitiatedByProject = currentUser?.Type == UserType.ProjectManager
             };
             transactionLogs.Add(baseTransactionLog);
 

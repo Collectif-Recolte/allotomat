@@ -101,6 +101,9 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<ProjectStatsGraphType> LoadProjectStats(long projectId) =>
             LoadOne<GetProjectStatsByIds.Query, ProjectStatsGraphType, long>(projectId);
 
+        public IDataLoaderResult<TransactionGraphType> LoadTransactionByUniqueId(string transactionUniqueId) =>
+            LoadOne<GetTransactionByUniqueId.Query, TransactionGraphType, string>(transactionUniqueId);
+
         public IDataLoaderResult<IEnumerable<ProjectGraphType>> LoadProjectOwnedByUser(string userId) =>
             LoadCollection<GetProjectOwnedByUserId.Query, ProjectGraphType, string>(userId);
 

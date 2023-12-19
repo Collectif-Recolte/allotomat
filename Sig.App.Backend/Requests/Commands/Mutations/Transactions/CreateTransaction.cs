@@ -307,11 +307,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     SubscriptionId = subscription?.Id,
                     SubscriptionName = subscription?.Name,
                     ProjectId = card.ProjectId,
+                    ProjectName = card.Project.Name,
                     TransactionInitiatorId = currentUser?.Id,
                     TransactionInitiatorFirstname = currentUser?.Profile.FirstName,
                     TransactionInitiatorLastname = currentUser?.Profile.LastName,
                     TransactionInitiatorEmail = currentUser?.Email,
-                    TransactionLogProductGroups = new List<TransactionLogProductGroup>()
+                    TransactionLogProductGroups = new List<TransactionLogProductGroup>(),
+                    InitiatedByProject = currentUser?.Type == UserType.ProjectManager
                 };
                 transactionLogs.Add(transactionLog);
             }

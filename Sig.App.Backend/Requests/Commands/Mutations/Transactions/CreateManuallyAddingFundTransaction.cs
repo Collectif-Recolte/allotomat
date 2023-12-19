@@ -67,7 +67,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var beneficiary = await db.Beneficiaries
                 .Include(x => x.Card).ThenInclude(x => x.Transactions)
                 .Include(x => x.Card).ThenInclude(x => x.Funds)
-                .Include(x => x.Organization)
+                .Include(x => x.Organization).ThenInclude(x => x.Project)
                 .FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
             if (beneficiary == null) throw new BeneficiaryNotFoundException();
@@ -181,6 +181,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 SubscriptionId = currentSubscription?.Id,
                 SubscriptionName = currentSubscription?.Name,
                 ProjectId = card.Beneficiary.Organization.ProjectId,
+                ProjectName = card.Beneficiary.Organization.Project.Name,
                 TransactionInitiatorId = currentUserId,
                 TransactionInitiatorFirstname = currentUser?.Profile.FirstName,
                 TransactionInitiatorLastname = currentUser?.Profile.LastName,

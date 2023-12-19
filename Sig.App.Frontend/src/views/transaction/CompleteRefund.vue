@@ -74,9 +74,12 @@ import { useI18n } from "vue-i18n";
 import { computed, defineProps } from "vue";
 import { useQuery, useResult } from "@vue/apollo-composable";
 import { useRouter } from "vue-router";
+import { storeToRefs } from "pinia";
 
-import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
-import { URL_TRANSACTION_LIST } from "@/lib/consts/urls";
+import { PRODUCT_GROUP_LOYALTY, USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
+import { URL_TRANSACTION_LIST, URL_TRANSACTION_ADMIN } from "@/lib/consts/urls";
+
+import { useAuthStore } from "@/lib/store/auth";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { getColorBgClass } from "@/lib/helpers/products-color";
@@ -84,6 +87,7 @@ import { usePageTitle } from "@/lib/helpers/page-title";
 
 const { t } = useI18n();
 const router = useRouter();
+const { userType } = storeToRefs(useAuthStore());
 
 usePageTitle(t("title"));
 
@@ -215,6 +219,7 @@ function getIsGiftCard(productGroupName) {
 }
 
 const goToTransactionList = () => {
-  router.push({ name: URL_TRANSACTION_LIST });
+  if (userType.value === USER_TYPE_PROJECTMANAGER) router.push({ name: URL_TRANSACTION_ADMIN });
+  else router.push({ name: URL_TRANSACTION_LIST });
 };
 </script>

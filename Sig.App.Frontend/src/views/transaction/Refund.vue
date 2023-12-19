@@ -125,11 +125,13 @@ import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
 import { FieldArray } from "vee-validate";
 import { number, object, lazy, array, string } from "yup";
+import { storeToRefs } from "pinia";
 
-import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
-import { URL_TRANSACTION_LIST } from "@/lib/consts/urls";
+import { PRODUCT_GROUP_LOYALTY, USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
+import { URL_TRANSACTION_LIST, URL_TRANSACTION_ADMIN } from "@/lib/consts/urls";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
+import { useAuthStore } from "@/lib/store/auth";
 
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 import { formatDate, textualFormat } from "@/lib/helpers/date";
@@ -145,6 +147,7 @@ const { addWarning } = useNotificationsStore();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
+const { userType } = storeToRefs(useAuthStore());
 
 usePageTitle(t("title"));
 
@@ -292,7 +295,8 @@ function availableAmountLabel(productGroup, key) {
 }
 
 const goToTransactionList = () => {
-  router.push({ name: URL_TRANSACTION_LIST });
+  if (userType.value === USER_TYPE_PROJECTMANAGER) router.push({ name: URL_TRANSACTION_ADMIN });
+  else router.push({ name: URL_TRANSACTION_LIST });
 };
 
 async function onSubmit({ productGroups, password }) {
