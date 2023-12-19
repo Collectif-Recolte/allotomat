@@ -27,6 +27,7 @@
       :submit-btn="t('add-market')"
       :initial-values="initialValues"
       :validation-schema="validationSchema"
+      is-new
       @closeModal="closeModal"
       @submit="onSubmit">
       <FormSectionManagers />

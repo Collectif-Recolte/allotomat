@@ -25,8 +25,16 @@ namespace Sig.App.Backend.DbModel.Entities.Markets
 
         public void SetRefundTransactionPassword(string password)
         {
-            RefundTransactionPassword = HashPasword(password, out var salt);
-            RefundTransactionPasswordSalt = salt;
+            if (password == "")
+            {
+                RefundTransactionPassword = null;
+                RefundTransactionPasswordSalt = null;
+            }
+            else
+            {
+                RefundTransactionPassword = HashPasword(password, out var salt);
+                RefundTransactionPasswordSalt = salt;
+            }
         }
 
         public bool VerifyPassword(string password)
