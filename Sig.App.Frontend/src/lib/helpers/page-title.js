@@ -10,7 +10,6 @@ function getCurrentTitle() {
 }
 
 export function usePageTitle(title) {
-  console.log(typeof title);
   const originalTitle = getCurrentTitle();
 
   onMounted(() => {
