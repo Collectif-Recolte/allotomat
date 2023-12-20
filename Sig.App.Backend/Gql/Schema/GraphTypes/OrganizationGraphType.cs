@@ -8,7 +8,6 @@ using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Requests.Queries.Beneficiaries;
-using Sig.App.Backend.Requests.Queries.Markets;
 using Sig.App.Backend.Requests.Queries.Organizations;
 using Sig.App.Backend.Utilities;
 using Sig.App.Backend.Utilities.Sorting;
@@ -35,12 +34,13 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return ctx.DataLoader.LoadProject(organization.ProjectId);
         }
 
-        public async Task<Pagination<IBeneficiaryGraphType>> Beneficiaries([Inject] IMediator mediator, int page, int limit,
+        public async Task<PaymentConflictPagination<IBeneficiaryGraphType>> Beneficiaries([Inject] IMediator mediator, int page, int limit,
             [Description("If specified, only beneficiaries without or with a subscription are returned.")] bool? withoutSubscription = null,
             [Description("If specified, only beneficiaries with one of those subscription are returned.")] Id[] subscriptions = null,
             [Description("If specified, only beneficiaries with one of those category are returned")] Id[] categories = null,
             [Description("If specified, only beneficiaries active/inactive are returned")] BeneficiaryStatus[] status = null,
             [Description("If specified, only beneficiaries with or without card is returned.")] bool? withCard = null,
+            [Description("If specified, only beneficiaries with or without payment conflict is retuner.")] bool? withConflictPayment = null,
             [Description("If specified, only that match text is returned.")] string? searchText = "",
             Sort<BeneficiarySort> sort = null)
         {
@@ -53,6 +53,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
                 Categories = categories?.Select(y => y.LongIdentifierForType<BeneficiaryType>()),
                 Status = status,
                 WithCard = withCard,
+                WithConflictPayment = withConflictPayment,
                 SearchText = searchText,
                 Sort = sort
             });

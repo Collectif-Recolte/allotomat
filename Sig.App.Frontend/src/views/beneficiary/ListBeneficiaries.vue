@@ -15,7 +15,8 @@
       "empty-organizations-list": "No organization is associated with the program.",
       "add-organization": "Add an organization",
       "detailed-view": "Detailed view",
-      "toggle-view": "Change display type"
+      "toggle-view": "Change display type",
+      "payment-conflicts-alert": "{count} payment conflicts"
     },
     "fr": {
       "import-beneficiaries-list": "Importer une liste",
@@ -32,7 +33,8 @@
       "empty-organizations-list": "Aucun organisme n'est associé au programme.",
       "add-organization": "Ajouter un organisme",
       "detailed-view": "Affichage détaillé",
-      "toggle-view": "Changer le type d'affichage"
+      "toggle-view": "Changer le type d'affichage",
+      "payment-conflicts-alert":"{count} conflits de versements"
     }
   }
 </i18n>
@@ -96,10 +98,26 @@
         </Title>
       </template>
       <div v-if="beneficiariesPagination">
-        <UiTableHeader :title="t('participant-count', { count: beneficiariesPagination.totalCount })">
-          <template #right>
-            <div class="lg:flex lg:items-center">
-              <!-- Intégration de la switch pour la vue en tableau, TODO: CRCL-1513
+        <div class="flex flex-col gap-y-4 sm:flex-row sm:gap-x-4 sm:justify-between sm:items-center pb-5">
+          <div class="flex flex-wrap gap-x-4">
+            <h2 class="my-0">{{ t("participant-count", { count: beneficiariesPagination.totalCount }) }}</h2>
+            <PfButtonLink
+              v-if="beneficiariesPagination.conflictPaymentCount > 0"
+              class="ml-2 text-red-500"
+              btn-style="link"
+              tag="routerLink"
+              :to="{
+                name: URL_BENEFICIARY_ADMIN,
+                query: { paymentConflict: BENEFICIARY_WITH_PAYMENT_CONFLICT }
+              }">
+              <span class="inline-flex items-center underline mt-1">
+                <PfIcon :icon="ICON_INFO" class="shrink-0 mr-1" size="xs" />
+                {{ t("payment-conflicts-alert", { count: beneficiariesPagination.conflictPaymentCount }) }}
+              </span>
+            </PfButtonLink>
+          </div>
+          <div class="lg:flex lg:items-center">
+            <!-- Intégration de la switch pour la vue en tableau, TODO: CRCL-1513
               <UiSwitch
                 v-model="displayBeneficiariesListWithDetailed"
                 class="justify-end mb-2.5 lg:mb-0"
@@ -114,36 +132,40 @@
                 </template>
               </UiSwitch> -->
 
-              <BeneficiaryFilters
-                v-if="selectedOrganization !== ''"
-                v-model="searchInput"
-                :available-beneficiary-types="availableBeneficiaryTypes"
-                :available-subscriptions="availableSubscriptions"
-                :selected-beneficiary-types="beneficiaryTypes"
-                :selected-subscriptions="subscriptions"
-                :selected-status="status"
-                :selected-card-status="cardStatus"
-                :without-subscription-id="WITHOUT_SUBSCRIPTION"
-                :beneficiary-status-inactive="BENEFICIARY_STATUS_INACTIVE"
-                :beneficiary-status-active="BENEFICIARY_STATUS_ACTIVE"
-                :card-status-with="BENEFICIARY_WITH_CARD"
-                :card-status-without="BENEFICIARY_WITHOUT_CARD"
-                :search-filter="searchText"
-                :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
-                :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
-                @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
-                @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
-                @subscriptionsUnchecked="onSubscriptionsUnchecked"
-                @subscriptionsChecked="onSubscriptionsChecked"
-                @statusChecked="onStatusChecked"
-                @statusUnchecked="onStatusUnchecked"
-                @cardStatusChecked="onCardStatusChecked"
-                @cardStatusUnchecked="onCardStatusUnchecked"
-                @resetFilters="onResetFilters"
-                @search="onSearch" />
-            </div>
-          </template>
-        </UiTableHeader>
+            <BeneficiaryFilters
+              v-if="selectedOrganization !== ''"
+              v-model="searchInput"
+              :available-beneficiary-types="availableBeneficiaryTypes"
+              :available-subscriptions="availableSubscriptions"
+              :selected-beneficiary-types="beneficiaryTypes"
+              :selected-subscriptions="subscriptions"
+              :selected-status="status"
+              :selected-card-status="cardStatus"
+              :selected-payment-conflict-status="conflictPaymentStatus"
+              :without-subscription-id="WITHOUT_SUBSCRIPTION"
+              :beneficiary-status-inactive="BENEFICIARY_STATUS_INACTIVE"
+              :beneficiary-status-active="BENEFICIARY_STATUS_ACTIVE"
+              :card-status-with="BENEFICIARY_WITH_CARD"
+              :card-status-without="BENEFICIARY_WITHOUT_CARD"
+              :payment-conflict-status-with="BENEFICIARY_WITH_PAYMENT_CONFLICT"
+              :payment-conflict-status-without="BENEFICIARY_WITHOUT_PAYMENT_CONFLICT"
+              :search-filter="searchText"
+              :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
+              :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
+              @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
+              @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
+              @subscriptionsUnchecked="onSubscriptionsUnchecked"
+              @subscriptionsChecked="onSubscriptionsChecked"
+              @statusChecked="onStatusChecked"
+              @statusUnchecked="onStatusUnchecked"
+              @cardStatusChecked="onCardStatusChecked"
+              @cardStatusUnchecked="onCardStatusUnchecked"
+              @paymentConflictStatusChecked="onPaymentConflictStatusChecked"
+              @paymentConflictStatusUnchecked="onPaymentConflictStatusUnchecked"
+              @resetFilters="onResetFilters"
+              @search="onSearch" />
+          </div>
+        </div>
 
         <template v-if="selectedOrganization !== '' && beneficiariesPagination.items.length > 0">
           <ListBeneficiariesWithDetailed
@@ -240,12 +262,16 @@ import {
   BENEFICIARY_STATUS_INACTIVE,
   BENEFICIARY_STATUS_ACTIVE,
   BENEFICIARY_WITH_CARD,
-  BENEFICIARY_WITHOUT_CARD
+  BENEFICIARY_WITHOUT_CARD,
+  BENEFICIARY_WITH_PAYMENT_CONFLICT,
+  BENEFICIARY_WITHOUT_PAYMENT_CONFLICT
 } from "@/lib/consts/enums";
+import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
+
 import ICON_UPLOAD from "@/lib/icons/upload-file.json";
 import ICON_TABLE from "@/lib/icons/table.json";
 import ICON_DOWNLOAD from "@/lib/icons/download.json";
-import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
+import ICON_INFO from "@/lib/icons/info.json";
 
 import Title from "@/components/app/title";
 import BeneficiaryFilters from "@/components/beneficiaries/beneficiary-filters";
@@ -293,6 +319,7 @@ const beneficiaryTypes = ref([]);
 const subscriptions = ref([]);
 const status = ref([]);
 const cardStatus = ref([]);
+const conflictPaymentStatus = ref([]);
 const selectedOrganization = ref(currentOrganization);
 const searchInput = ref("");
 const searchText = ref("");
@@ -305,6 +332,7 @@ const filteredQuery = computed(() => {
     beneficiaryTypes: beneficiaryTypes.value.length > 0 ? beneficiaryTypes.value.toString() : undefined,
     status: status.value.length > 0 ? status.value.toString() : undefined,
     cardStatus: cardStatus.value.length > 0 ? cardStatus.value.toString() : undefined,
+    paymentConflict: conflictPaymentStatus.value.length > 0 ? conflictPaymentStatus.value.toString() : undefined,
     text: searchText.value ? searchText.value : undefined
   };
 });
@@ -321,6 +349,10 @@ if (route.query.status) {
 
 if (route.query.cardStatus) {
   cardStatus.value = route.query.cardStatus.split(",");
+}
+
+if (route.query.paymentConflict) {
+  conflictPaymentStatus.value = route.query.paymentConflict.split(",");
 }
 
 if (route.query.text) {
@@ -419,6 +451,7 @@ const {
       $withoutSubscription: Boolean
       $searchText: String
       $withCard: Boolean
+      $withConflictPayment: Boolean
     ) {
       organization(id: $id) {
         id
@@ -431,7 +464,9 @@ const {
           limit: 30
           searchText: $searchText
           withCard: $withCard
+          withConflictPayment: $withConflictPayment
         ) {
+          conflictPaymentCount
           totalCount
           totalPages
           items {
@@ -480,6 +515,12 @@ const {
               subscriptions {
                 id
                 name
+                types {
+                  id
+                  beneficiaryType {
+                    id
+                  }
+                }
               }
             }
             ... on OffPlatformBeneficiaryGraphType {
@@ -559,6 +600,16 @@ function onCardStatusUnchecked(value) {
   updateUrl();
 }
 
+function onPaymentConflictStatusChecked(value) {
+  conflictPaymentStatus.value.push(value);
+  updateUrl();
+}
+
+function onPaymentConflictStatusUnchecked(value) {
+  conflictPaymentStatus.value = conflictPaymentStatus.value.filter((x) => x !== value);
+  updateUrl();
+}
+
 function onSubscriptionsUnchecked(value) {
   subscriptions.value = subscriptions.value.filter((x) => x !== value);
   updateUrl();
@@ -568,6 +619,7 @@ function onResetFilters() {
   subscriptions.value = [];
   beneficiaryTypes.value = [];
   cardStatus.value = [];
+  conflictPaymentStatus.value = [];
   onResetSearch();
   updateUrl();
 }
@@ -588,6 +640,10 @@ function beneficiariesVariables() {
     categories: beneficiaryTypes.value.length > 0 ? beneficiaryTypes.value : null,
     status: status.value.length > 0 ? status.value : null,
     withCard: cardStatus.value.length === 1 ? cardStatus.value.indexOf(BENEFICIARY_WITH_CARD) !== -1 : null,
+    withConflictPayment:
+      conflictPaymentStatus.value.length === 1
+        ? conflictPaymentStatus.value.indexOf(BENEFICIARY_WITH_PAYMENT_CONFLICT) !== -1
+        : null,
     searchText: searchText.value
   };
 }
@@ -652,6 +708,28 @@ async function onDownloadTemplateFile() {
 
 onBeforeRouteUpdate((to) => {
   if (to.name === URL_BENEFICIARY_ADMIN) {
+    if (to.query.beneficiaryTypes) {
+      beneficiaryTypes.value = to.query.beneficiaryTypes.split(",");
+    }
+    if (to.query.subscriptions) {
+      subscriptions.value = to.query.subscriptions.split(",");
+    }
+    if (to.query.status) {
+      status.value = to.query.status.split(",");
+    }
+    if (to.query.cardStatus) {
+      cardStatus.value = to.query.cardStatus.split(",");
+    }
+    if (to.query.paymentConflict) {
+      conflictPaymentStatus.value = to.query.paymentConflict.split(",");
+    }
+    if (to.query.text) {
+      searchText.value = to.query.text;
+    }
+    if (to.query.organizationId) {
+      selectedOrganization.value = to.query.organizationId;
+    }
+
     refetchBeneficiaries();
     refetchOrganizations();
   }

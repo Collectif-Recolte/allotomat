@@ -13,10 +13,11 @@ using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Services.Beneficiaries;
+using Sig.App.Backend.Gql.Schema.GraphTypes;
 
 namespace Sig.App.Backend.Requests.Queries.Beneficiaries
 {
-    public class SearchBeneficiaries : IRequestHandler<SearchBeneficiaries.Query, Pagination<Beneficiary>>
+    public class SearchBeneficiaries : IRequestHandler<SearchBeneficiaries.Query, PaymentConflictPagination<Beneficiary>>
     {
         private readonly AppDbContext db;
         private readonly IBeneficiaryService beneficiaryService;
@@ -27,9 +28,9 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
             this.beneficiaryService = beneficiaryService;
         }
 
-        public async Task<Pagination<Beneficiary>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<PaymentConflictPagination<Beneficiary>> Handle(Query request, CancellationToken cancellationToken)
         {
-            IQueryable<Beneficiary> query = db.Beneficiaries.Include(x => x.Card.Funds).ThenInclude(x => x.ProductGroup);
+            IQueryable<Beneficiary> query = db.Beneficiaries.Include(x => x.Card.Funds).ThenInclude(x => x.ProductGroup).Include(x => x.Subscriptions).ThenInclude(x => x.BeneficiaryType);
 
             if (request.OrganizationId.IsSet())
             {
@@ -71,6 +72,18 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
                 }
             }
 
+            if (request.WithConflictPayment.IsSet())
+            {
+                if (request.WithConflictPayment.Value)
+                {
+                    query = query.Where(x => x.Subscriptions.Any(y => y.BeneficiaryType != x.BeneficiaryType));
+                }
+                else
+                {
+                    query = query.Where(x => !x.Subscriptions.Any(y => y.BeneficiaryType != x.BeneficiaryType));
+                }
+            }
+
             if (request.Status != null)
             {
                 var isActive = request.Status.Contains(BeneficiaryStatus.Active);
@@ -97,11 +110,13 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
                 }
             }
 
+            var conflictPaymentCount = await query.Where(x => x.Subscriptions.Any(y => y.BeneficiaryType != x.BeneficiaryType)).CountAsync();
+
             var sorted = Sort(query, request.Sort?.Field ?? BeneficiarySort.Default, request.Sort?.Order ?? SortOrder.Asc);
-            return await Pagination.For(sorted, request.Page);
+            return await PaymentConflictPagination.For(sorted, request.Page, conflictPaymentCount);
         }
 
-        public class Query : IRequest<Pagination<Beneficiary>>
+        public class Query : IRequest<PaymentConflictPagination<Beneficiary>>
         {
             public Page Page { get; set; }
             public Sort<BeneficiarySort> Sort { get; set; }
@@ -111,6 +126,7 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
             public IEnumerable<long> Categories { get; set; }
             public IEnumerable<BeneficiaryStatus> Status { get; set; }
             public Maybe<bool> WithCard { get; set; }
+            public Maybe<bool> WithConflictPayment { get; set; }
             public Maybe<string> SearchText { get; set; }
         }
 
