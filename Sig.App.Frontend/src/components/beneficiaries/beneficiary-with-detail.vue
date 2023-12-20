@@ -38,8 +38,19 @@
             <dd :class="ddClasses">{{ beneficiary.id2 ?? "‒" }}</dd>
           </div>
           <div :class="dlGroupClasses" class="w-full">
-            <dt :class="isBeneficiaryPaymentConflict() ? dtClassesError : dtClasses">{{ t("beneficiary-category") }}</dt>
-            <dd :class="isBeneficiaryPaymentConflict() ? ddClassesError : ddClasses">{{ getBeneficiaryCategory() }}</dd>
+            <dt :class="isBeneficiaryPaymentConflict() ? dtClassesError : dtClasses">
+              {{ t("beneficiary-category") }}
+            </dt>
+            <dd :class="isBeneficiaryPaymentConflict() ? ddClassesError : ddClasses">
+              <div class="flex">
+                <span>{{ getBeneficiaryCategory() }}</span>
+                <PfIcon
+                  v-if="isBeneficiaryPaymentConflict()"
+                  :icon="ICON_INFO"
+                  class="text-red-500 shrink-0 mt-1 ml-1"
+                  size="xs" />
+              </div>
+            </dd>
           </div>
         </dl>
         <template v-if="haveAnySubscriptions()">
