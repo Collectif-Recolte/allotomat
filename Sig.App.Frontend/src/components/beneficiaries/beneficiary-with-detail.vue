@@ -38,8 +38,19 @@
             <dd :class="ddClasses">{{ beneficiary.id2 ?? "‒" }}</dd>
           </div>
           <div :class="dlGroupClasses" class="w-full">
-            <dt :class="dtClasses">{{ t("beneficiary-category") }}</dt>
-            <dd :class="ddClasses">{{ getBeneficiaryCategory() }}</dd>
+            <dt :class="isBeneficiaryPaymentConflict() ? dtClassesError : dtClasses">
+              {{ t("beneficiary-category") }}
+            </dt>
+            <dd :class="isBeneficiaryPaymentConflict() ? ddClassesError : ddClasses">
+              <div class="flex">
+                <span>{{ getBeneficiaryCategory() }}</span>
+                <PfIcon
+                  v-if="isBeneficiaryPaymentConflict()"
+                  :icon="ICON_INFO"
+                  class="text-red-500 shrink-0 mt-1 ml-1"
+                  size="xs" />
+              </div>
+            </dd>
           </div>
         </dl>
         <template v-if="haveAnySubscriptions()">
@@ -48,7 +59,7 @@
               <PfTag
                 :label="item.name"
                 is-dark-theme
-                bg-color-class="bg-primary-700"
+                :bg-color-class="isSubscriptionPaymentConflict(item) ? 'bg-red-500' : 'bg-primary-700'"
                 can-dismiss
                 @dismiss="removeSubscription(beneficiary, item)" />
             </li>
@@ -129,7 +140,9 @@ const beneficiary = ref(null);
 
 const dlGroupClasses = "flex items-start gap-x-3";
 const dtClasses = "text-primary-500 text-p4 uppercase font-semibold tracking-tight mt-px sm:mt-[3px]";
+const dtClassesError = "text-red-500 text-p4 uppercase font-semibold tracking-tight mt-px sm:mt-[3px]";
 const ddClasses = "text-primary-900 text-p2";
+const ddClassesError = "text-red-500 text-p2";
 
 onMounted(() => {
   beneficiary.value = {
@@ -163,12 +176,32 @@ const props = defineProps({
   }
 });
 
+function isBeneficiaryPaymentConflict() {
+  for (var i = 0; i < beneficiary.value.subscriptions.length; i++) {
+    for (var j = 0; j < beneficiary.value.subscriptions[i].types.length; j++) {
+      if (beneficiary.value.subscriptions[i].types[j].beneficiaryType.id !== beneficiary.value.beneficiaryType.id) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 function getBeneficiaryCategory() {
   return beneficiary.value.beneficiaryType ? beneficiary.value.beneficiaryType.name : "";
 }
 
 function getBeneficiarySubscriptions() {
   return beneficiary.value.subscriptions;
+}
+
+function isSubscriptionPaymentConflict(subscription) {
+  for (var j = 0; j < subscription.types.length; j++) {
+    if (subscription.types[j].beneficiaryType.id !== beneficiary.value.beneficiaryType.id) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function haveAnySubscriptions() {
