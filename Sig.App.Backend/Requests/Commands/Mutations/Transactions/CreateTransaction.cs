@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Drawing;
-using GraphQL.Conventions;
+﻿using GraphQL.Conventions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -57,7 +56,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
-            var cardId = request.CardId.LongIdentifierForType<Card>();
+            long cardId = -1;
+            if (request.CardId.HasValue)
+            {
+                cardId = request.CardId.Value.LongIdentifierForType<Card>();
+            }
+            else if (!string.IsNullOrEmpty(request.CardNumber))
+            {
+                cardId = await db.Cards.Where(x => x.CardNumber == request.CardNumber).Select(x => x.Id).FirstOrDefaultAsync(cancellationToken);
+            }
+
             var card = await db.Cards.Include(x => x.Project).Include(x => x.Beneficiary)
                 .ThenInclude(x => x.Organization).Include(x => x.Transactions).Include(x => x.Funds)
                 .ThenInclude(x => x.ProductGroup).FirstOrDefaultAsync(x => x.Id == cardId, cancellationToken);
@@ -72,7 +80,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var cardCanBeUsedInMarket = await mediator.Send(new VerifyCardCanBeUsedInMarket.Input
             {
                 MarketId = request.MarketId,
-                CardId = request.CardId
+                CardId = card.GetIdentifier()
             }, cancellationToken);
 
             if (!cardCanBeUsedInMarket) throw new CardCantBeUsedInMarketException();
@@ -94,7 +102,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .ToList();
 
             var transactionByProductGroups = new List<PaymentTransactionProductGroup>();
-            decimal loyaltyFundToRemove = 0;
+            decimal loyaltyFundToRemove = request.Transactions.Sum(x => x.Amount);
 
             var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
             var transaction = new PaymentTransaction()
@@ -105,7 +113,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 Beneficiary = beneficiary,
                 OrganizationId = organizationId,
                 Market = market,
-                CreatedAtUtc = today
+                CreatedAtUtc = today,
+                InitiatedByProject = currentUser?.Type == UserType.ProjectManager
             };
 
             foreach (var transactionInput in request.Transactions)
@@ -115,7 +124,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                 var amount = decimal.Round(transactionInput.Amount, 2);
 
-                if (productGroup != null)
+                if (productGroup != null && productGroup.Name != ProductGroupType.LOYALTY)
                 {
                     var fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroupId);
 
@@ -130,7 +139,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                         .ToList();
 
                     var fundToRemove = Math.Min(fund.Amount, amount);
-                    loyaltyFundToRemove += amount - fundToRemove;
                     
                     if (addingFundTransactions.Any())
                     {
@@ -154,6 +162,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                                 AddAmountToTransactionLog(transaction, card, market, subscription, productGroup,
                                     addingFundTransaction.AvailableFund);
                                 tempAmount -= addingFundTransaction.AvailableFund;
+                                loyaltyFundToRemove -= addingFundTransaction.AvailableFund;
                                 addingFundTransaction.AvailableFund = 0;
                             }
                             else
@@ -161,6 +170,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                                 AddAmountToTransactionLog(transaction, card, market, subscription, productGroup,
                                     tempAmount);
                                 addingFundTransaction.AvailableFund -= tempAmount;
+                                loyaltyFundToRemove -= tempAmount;
                                 tempAmount = 0;
                             }
 
@@ -176,6 +186,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     {
                         // Beneficiary is off platform
                         AddAmountToTransactionLog(transaction, card, market, null, productGroup, fundToRemove);
+                        loyaltyFundToRemove -= fundToRemove;
                     }
 
                     transactionByProductGroups.Add(new PaymentTransactionProductGroup()
@@ -187,10 +198,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                     fund.Amount -= fundToRemove;
                 }
-                else
-                {
-                    loyaltyFundToRemove += amount;
-                }
             }
 
             if (loyaltyFundToRemove > 0)
@@ -200,20 +207,32 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 {
                     foreach (var loyaltyFundTransaction in loyaltyFundTransactions)
                     {
+                        decimal fundToRemove;
                         if (loyaltyFundToRemove > loyaltyFundTransaction.AvailableFund)
                         {
+                            fundToRemove = loyaltyFundTransaction.AvailableFund;
                             loyaltyFundToRemove -= loyaltyFundTransaction.AvailableFund;
                             loyaltyFund.Amount -= loyaltyFundTransaction.AvailableFund;
                             loyaltyFundTransaction.AvailableFund = 0;
                         }
                         else
                         {
+                            fundToRemove = loyaltyFundToRemove;
                             loyaltyFundTransaction.AvailableFund -= loyaltyFundToRemove;
                             loyaltyFund.Amount -= loyaltyFundToRemove;
                             loyaltyFundToRemove = 0;
                         }
 
                         affectedAddingFundTransactions.Add(loyaltyFundTransaction);
+
+                        transactionByProductGroups.Add(new PaymentTransactionProductGroup()
+                        {
+                            Amount = fundToRemove,
+                            ProductGroup = loyaltyFund.ProductGroup,
+                            PaymentTransaction = transaction
+                        });
+
+                        AddAmountToTransactionLog(transaction, card, market, null, loyaltyFund.ProductGroup, fundToRemove);
 
                         if (loyaltyFundToRemove == 0)
                         {
@@ -288,11 +307,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     SubscriptionId = subscription?.Id,
                     SubscriptionName = subscription?.Name,
                     ProjectId = card.ProjectId,
+                    ProjectName = card.Project.Name,
                     TransactionInitiatorId = currentUser?.Id,
                     TransactionInitiatorFirstname = currentUser?.Profile.FirstName,
                     TransactionInitiatorLastname = currentUser?.Profile.LastName,
                     TransactionInitiatorEmail = currentUser?.Email,
-                    TransactionLogProductGroups = new List<TransactionLogProductGroup>()
+                    TransactionLogProductGroups = new List<TransactionLogProductGroup>(),
+                    InitiatedByProject = currentUser?.Type == UserType.ProjectManager
                 };
                 transactionLogs.Add(transactionLog);
             }
@@ -316,9 +337,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveCardId, IHaveMarketId
+        public class Input : IRequest<Payload>, IHaveCardIdOrCardNumber, IHaveMarketId
         {
-            public Id CardId { get; set; }
+            public Id? CardId { get; set; }
+            public string CardNumber { get; set; }
             public Id MarketId { get; set; }
             public List<TransactionInput> Transactions { get; set; }
         }

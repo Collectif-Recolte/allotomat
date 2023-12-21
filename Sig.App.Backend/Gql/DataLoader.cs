@@ -22,7 +22,7 @@ namespace Sig.App.Backend.Gql
         {
             this.scopeFactory = scopeFactory;
         }
-        
+
         public IDataLoaderResult<UserGraphType> LoadUser(string id) =>
             LoadOne<GetUsersByIds.Query, UserGraphType, string>(id);
 
@@ -56,6 +56,9 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<CardGraphType> LoadCardById(long cardId) =>
             LoadOne<GetCardByIds.Query, CardGraphType, long>(cardId);
 
+        public IDataLoaderResult<CardGraphType> LoadCardByCardNumber(string cardNumber) =>
+            LoadOne<GetCardByCardNumbers.Query, CardGraphType, string>(cardNumber);
+
         public IDataLoaderResult<CardGraphType> LoadBeneficiaryCard(long beneficiaryId) =>
             LoadOne<GetCardByBeneficiaryIds.Query, CardGraphType, long>(beneficiaryId);
 
@@ -86,6 +89,9 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<PaymentTransactionGraphType> LoadPaymentTransactionById(long paymentTransactionId) =>
             LoadOne<GetPaymentTransactionById.Query, PaymentTransactionGraphType, long>(paymentTransactionId);
 
+        public IDataLoaderResult<RefundTransactionGraphType> LoadRefundTransactionById(long refundTransactionId) =>
+            LoadOne<GetRefundTransactionById.Query, RefundTransactionGraphType, long>(refundTransactionId);
+
         public IDataLoaderResult<FundGraphType> LoadLoyaltyCardFund(long? cardId) =>
             LoadOne<GetLoyaltyFundByCardId.Query, FundGraphType, long?>(cardId);
         
@@ -94,6 +100,9 @@ namespace Sig.App.Backend.Gql
 
         public IDataLoaderResult<ProjectStatsGraphType> LoadProjectStats(long projectId) =>
             LoadOne<GetProjectStatsByIds.Query, ProjectStatsGraphType, long>(projectId);
+
+        public IDataLoaderResult<TransactionGraphType> LoadTransactionByUniqueId(string transactionUniqueId) =>
+            LoadOne<GetTransactionByUniqueId.Query, TransactionGraphType, string>(transactionUniqueId);
 
         public IDataLoaderResult<IEnumerable<ProjectGraphType>> LoadProjectOwnedByUser(string userId) =>
             LoadCollection<GetProjectOwnedByUserId.Query, ProjectGraphType, string>(userId);
@@ -155,9 +164,12 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<IEnumerable<SubscriptionTypeGraphType>> LoadProductGroupSubscriptionType(long productGroupId) =>
             LoadCollection<GetSubscriptionTypeByProductGroupId.Query, SubscriptionTypeGraphType, long>(productGroupId);
 
-        public IDataLoaderResult<IEnumerable<PaymentTransactionProductGroupGraphType>> LoadPaymentTransactionProductGroupByTransactionId(long paymentTransactionId) =>
+        public IDataLoaderResult<IEnumerable<PaymentTransactionProductGroupGraphType>> LoadPaymentTransactionsProductGroupByTransactionId(long paymentTransactionId) =>
             LoadCollection<GetPaymentTransactionProductGroupByTransactionId.Query, PaymentTransactionProductGroupGraphType, long>(paymentTransactionId);
-        
+
+        public IDataLoaderResult<IEnumerable<RefundTransactionProductGroupGraphType>> LoadRefundTransactionsProductGroupByTransactionId(long refundTransactionId) =>
+            LoadCollection<GetRefundTransactionProductGroupByTransactionId.Query, RefundTransactionProductGroupGraphType, long>(refundTransactionId);
+
         public IDataLoaderResult<IEnumerable<TransactionLogProductGroupGraphType>> LoadTransactionLogProductGroupByTransactionLogId(long transactionLogId) =>
             LoadCollection<GetTransactionLogProductGroupByTransactionLogId.Query, TransactionLogProductGroupGraphType, long>(transactionLogId);
 

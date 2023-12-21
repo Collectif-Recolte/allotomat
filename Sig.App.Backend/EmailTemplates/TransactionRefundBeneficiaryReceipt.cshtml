@@ -1,0 +1,54 @@
+﻿@using Sig.App.Backend.Helpers
+
+@model Sig.App.Backend.EmailTemplates.Models.TransactionRefundBeneficiaryReceiptEmail
+@{ Layout = "_EmailLayout.cshtml"; }
+
+<p>
+    Reçu de remboursement
+</p>
+<p>
+    <b>Un remboursement de @MoneyHelper.GetMoneyFormat(Model.Amount, MoneyHelper.FR) a été complété entre vous et le commerce @Model.MarketName.</b><br />
+    <b>Votre solde est maintenant @MoneyHelper.GetMoneyFormat(Model.TotalFund, MoneyHelper.FR), réparti dans les groupes de produits suivants:</b>
+</p>
+<p>
+    @{
+        foreach (var item in Model.ProductGroupAvailableFunds)
+        {
+            <b>@item.Name - @MoneyHelper.GetMoneyFormat(item.Fund, MoneyHelper.FR)</b><br />
+        }
+    }
+</p>
+@{
+    if (Model.ProjectUrl != "" && Model.ProjectUrl != null)
+    {
+        <p>
+            En savoir plus sur le programme:<br />
+            <a href="@Model.ProjectUrl">@Model.ProjectName</a>
+        </p>
+    }
+}
+<br />
+<p>
+    Transaction receipt
+</p>
+<p>
+    <b>A refund of @MoneyHelper.GetMoneyFormat(Model.Amount, MoneyHelper.EN) has been completed between you and @Model.MarketName.</b><br />
+    <b>Your balance is now @MoneyHelper.GetMoneyFormat(Model.TotalFund, MoneyHelper.EN), divided into the following product groups:</b>
+</p>
+<p>
+    @{
+        foreach (var item in Model.ProductGroupAvailableFunds)
+        {
+            <b>@item.Name - @MoneyHelper.GetMoneyFormat(item.Fund, MoneyHelper.EN)</b><br />
+        }
+    }
+</p>
+@{
+    if (Model.ProjectUrl != "" && Model.ProjectUrl != null)
+    {
+        <p>
+            Learn more about the program:<br />
+            <a href="@Model.ProjectUrl">@Model.ProjectName</a>
+        </p>
+    }
+}

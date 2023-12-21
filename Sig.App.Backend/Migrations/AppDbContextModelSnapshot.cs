@@ -476,6 +476,12 @@ namespace Sig.App.Backend.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("RefundTransactionPassword")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RefundTransactionPasswordSalt")
+                        .HasColumnType("varbinary(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Markets");
@@ -580,6 +586,12 @@ namespace Sig.App.Backend.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RefundTransactionPassword")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RefundTransactionPasswordSalt")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Url")
                         .HasColumnType("nvarchar(max)");
@@ -749,6 +761,9 @@ namespace Sig.App.Backend.Migrations
                     b.Property<long?>("FundTransferredFromProgramCardId")
                         .HasColumnType("bigint");
 
+                    b.Property<bool>("InitiatedByProject")
+                        .HasColumnType("bit");
+
                     b.Property<long?>("MarketId")
                         .HasColumnType("bigint");
 
@@ -763,6 +778,9 @@ namespace Sig.App.Backend.Migrations
 
                     b.Property<long>("ProjectId")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("ProjectName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("SubscriptionId")
                         .HasColumnType("bigint");
@@ -855,6 +873,9 @@ namespace Sig.App.Backend.Migrations
                     b.Property<long>("ProductGroupId")
                         .HasColumnType("bigint");
 
+                    b.Property<decimal>("RefundAmount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PaymentTransactionId");
@@ -862,6 +883,40 @@ namespace Sig.App.Backend.Migrations
                     b.HasIndex("ProductGroupId");
 
                     b.ToTable("PaymentTransactionProductGroups");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.RefundTransactionProductGroup", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("AmountRefunded")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<long>("PaymentTransactionProductGroupId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ProductGroupId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("RefundTransactionId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentTransactionProductGroupId");
+
+                    b.HasIndex("ProductGroupId");
+
+                    b.HasIndex("RefundTransactionId");
+
+                    b.ToTable("RefundTransactionProductGroups");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.Transaction", b =>
@@ -980,12 +1035,31 @@ namespace Sig.App.Backend.Migrations
                 {
                     b.HasBaseType("Sig.App.Backend.DbModel.Entities.Transactions.Transaction");
 
+                    b.Property<bool>("InitiatedByProject")
+                        .HasColumnType("bit")
+                        .HasColumnName("PaymentTransaction_InitiatedByProject");
+
                     b.Property<long>("MarketId")
                         .HasColumnType("bigint");
 
                     b.HasIndex("MarketId");
 
                     b.HasDiscriminator().HasValue("PaymentTransaction");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.RefundTransaction", b =>
+                {
+                    b.HasBaseType("Sig.App.Backend.DbModel.Entities.Transactions.Transaction");
+
+                    b.Property<long>("InitialTransactionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("InitiatedByProject")
+                        .HasColumnType("bit");
+
+                    b.HasIndex("InitialTransactionId");
+
+                    b.HasDiscriminator().HasValue("RefundTransaction");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.LoyaltyAddingFundTransaction", b =>
@@ -1344,6 +1418,33 @@ namespace Sig.App.Backend.Migrations
                     b.Navigation("ProductGroup");
                 });
 
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.RefundTransactionProductGroup", b =>
+                {
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.Transactions.PaymentTransactionProductGroup", "PaymentTransactionProductGroup")
+                        .WithMany("RefundTransactionsProductGroup")
+                        .HasForeignKey("PaymentTransactionProductGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.ProductGroups.ProductGroup", "ProductGroup")
+                        .WithMany()
+                        .HasForeignKey("ProductGroupId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.Transactions.RefundTransaction", "RefundTransaction")
+                        .WithMany("RefundByProductGroups")
+                        .HasForeignKey("RefundTransactionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("PaymentTransactionProductGroup");
+
+                    b.Navigation("ProductGroup");
+
+                    b.Navigation("RefundTransaction");
+                });
+
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.Transaction", b =>
                 {
                     b.HasOne("Sig.App.Backend.DbModel.Entities.Beneficiaries.Beneficiary", "Beneficiary")
@@ -1412,6 +1513,17 @@ namespace Sig.App.Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Market");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.RefundTransaction", b =>
+                {
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.Transactions.PaymentTransaction", "InitialTransaction")
+                        .WithMany("RefundTransactions")
+                        .HasForeignKey("InitialTransactionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("InitialTransaction");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.ManuallyAddingFundTransaction", b =>
@@ -1513,6 +1625,11 @@ namespace Sig.App.Backend.Migrations
                     b.Navigation("TransactionLogProductGroups");
                 });
 
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.PaymentTransactionProductGroup", b =>
+                {
+                    b.Navigation("RefundTransactionsProductGroup");
+                });
+
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Beneficiaries.OffPlatformBeneficiary", b =>
                 {
                     b.Navigation("PaymentFunds");
@@ -1525,7 +1642,14 @@ namespace Sig.App.Backend.Migrations
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.PaymentTransaction", b =>
                 {
+                    b.Navigation("RefundTransactions");
+
                     b.Navigation("TransactionByProductGroups");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.RefundTransaction", b =>
+                {
+                    b.Navigation("RefundByProductGroups");
                 });
 #pragma warning restore 612, 618
         }

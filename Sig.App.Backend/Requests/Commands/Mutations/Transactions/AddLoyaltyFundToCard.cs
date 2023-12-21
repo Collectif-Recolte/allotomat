@@ -44,7 +44,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         {
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var card = await db.Cards.Include(x => x.Beneficiary).ThenInclude(x => x.Organization).Include(x => x.Transactions).Include(x => x.Funds)
-                .ThenInclude(x => x.ProductGroup)
+                .ThenInclude(x => x.ProductGroup).Include(x => x.Project)
                 .FirstOrDefaultAsync(x => x.ProgramCardId == request.CardId && x.ProjectId == projectId,
                     cancellationToken);
 
@@ -106,6 +106,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 TransactionInitiatorLastname = currentUser?.Profile.LastName,
                 TransactionInitiatorEmail = currentUser?.Email,
                 ProjectId = card.ProjectId,
+                ProjectName = card.Project.Name,
                 TransactionLogProductGroups = transactionLogProductGroups
             });
 

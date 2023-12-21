@@ -13,7 +13,9 @@
       "original-card-not-found": "The lost card was not assigned to a participant.",
       "original-card-not-assign": "Lost card ID does not exist.",
       "new-card-not-found": "New card ID does not exist.",
-      "new-card-already-assign": "The card you are trying to assign is already assigned to another participant."
+      "new-card-already-assign": "The card you are trying to assign is already assigned to another participant.",
+      "new-card-already-lost": "The card you are trying to assign is already lost or damaged.",
+      "new-card-already-gift-card": "The card you are trying to assign is a gift card."
     },
     "fr": {
       "title": "Transférer une carte perdue ou endommagée",
@@ -28,7 +30,9 @@
       "original-card-not-found": "L'ID de la carte perdue n'existe pas.",
       "original-card-not-assign": "La carte perdue n'est pas assignée à un-e participant-e.",
       "new-card-not-found": "L'ID de la nouvelle carte n'existe pas.",
-      "new-card-already-assign": "La carte que vous essayez d'assigner est déjà assignée à un-e autre participant-e."
+      "new-card-already-assign": "La carte que vous essayez d'assigner est déjà assignée à un-e autre participant-e.",
+      "new-card-already-lost": "La carte que vous essayez d'assigner est déjà perdue ou endommagée.",
+      "new-card-already-gift-card": "La carte que vous essayez d'assigner est une carte-cadeau."
     }
   }
   </i18n>
@@ -107,6 +111,12 @@ useGraphQLErrorMessages({
   },
   NEW_CARD_ALREADY_ASSIGN: () => {
     return t("new-card-already-assign");
+  },
+  NEW_CARD_ALREADY_GIFT_CARD: () => {
+    return t("new-card-already-gift-card");
+  },
+  NEW_CARD_ALREADY_LOST: () => {
+    return t("new-card-already-lost");
   }
 });
 

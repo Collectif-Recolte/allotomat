@@ -20,6 +20,8 @@ using System.Security.Claims;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.DbModel.Entities.Profiles;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
+using GraphQL.Conventions;
+using Sig.App.Backend.Gql.Schema.Types;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 {
@@ -51,6 +53,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 AdministrationSubscriptionsOffPlatform = request.AdministrationSubscriptionsOffPlatform
             };
             var managers = new List<AppUser>();
+
+            if (request.RefundTransactionPassword.IsSet())
+            {
+                project.SetRefundTransactionPassword(request.RefundTransactionPassword.Value.Trim());
+            }
 
             db.Projects.Add(project);
             await db.SaveChangesAsync(cancellationToken);
@@ -190,6 +197,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             public bool AllowOrganizationsAssignCards { get; set; }
             public bool BeneficiariesAreAnonymous { get; set; }
             public bool AdministrationSubscriptionsOffPlatform { get; set; }
+            public Maybe<NonNull<string>> RefundTransactionPassword { get; set; }
         }
 
         [MutationPayload]

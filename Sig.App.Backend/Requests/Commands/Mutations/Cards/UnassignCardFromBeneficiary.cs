@@ -49,7 +49,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             {
                 beneficiaryId = request.BeneficiaryId.LongIdentifierForType<OffPlatformBeneficiary>();
             }
-            var beneficiary = await db.Beneficiaries.FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
+            var beneficiary = await db.Beneficiaries.Include(x => x.Organization).ThenInclude(x => x.Project).FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
             if (beneficiary == null) throw new BeneficiaryNotFoundException();
 
@@ -153,6 +153,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
                             SubscriptionId = subscription?.Id,
                             SubscriptionName = subscription?.Name,
                             ProjectId = beneficiary.Organization.ProjectId,
+                            ProjectName = beneficiary.Organization.Project.Name,
                             TransactionLogProductGroups = transactionLogProductGroups,
                             TransactionInitiatorId = currentUserId,
                             TransactionInitiatorFirstname = currentUser?.Profile.FirstName,

@@ -19,12 +19,15 @@ using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Xunit;
+using Sig.App.Backend.DbModel.Entities.Projects;
 
 namespace Sig.App.BackendTests.Requests.Commands.Mutations.Cards
 {
     public class UnassignCardToBeneficiaryTest : TestBase
     {
         private readonly UnassignCardFromBeneficiary handler;
+
+        private readonly Project project;
         private readonly Organization organization;
         private readonly ProductGroup productGroup;
         private readonly Subscription subscription1;
@@ -37,7 +40,14 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Cards
 
         public UnassignCardToBeneficiaryTest()
         {
-            organization = new Organization();
+            project = new Project()
+            {
+                Name = "Project1"
+            };
+            organization = new Organization()
+            {
+                Project = project
+            };
 
             budgetAllowance1 = new BudgetAllowance()
             {

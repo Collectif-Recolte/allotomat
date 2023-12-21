@@ -7,6 +7,7 @@
         DeleteMarket,
         ArchiveMarket,
         ManageAllMarkets,
-        CreateTransaction
+        CreateTransaction,
+        RefundTransaction
     }
 }

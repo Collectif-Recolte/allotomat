@@ -14,6 +14,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public Id Id => transaction.GetIdentifier();
         public decimal Amount => transaction.Amount;
+        public bool InitiatedByProject => transaction.InitiatedByProject;
 
         public PaymentTransactionGraphType(PaymentTransaction transaction)
         {
@@ -38,7 +39,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public IDataLoaderResult<IEnumerable<PaymentTransactionProductGroupGraphType>> TransactionByProductGroups(IAppUserContext ctx)
         {
-            return ctx.DataLoader.LoadPaymentTransactionProductGroupByTransactionId(transaction.Id);
+            return ctx.DataLoader.LoadPaymentTransactionsProductGroupByTransactionId(transaction.Id);
         }
     }
 
@@ -48,6 +49,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public Id Id => transaction.GetIdentifier();
         public decimal Amount => transaction.Amount;
+        public decimal RefundAmount => transaction.RefundAmount;
 
         public PaymentTransactionProductGroupGraphType(PaymentTransactionProductGroup transaction)
         {

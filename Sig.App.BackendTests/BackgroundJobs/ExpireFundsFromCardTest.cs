@@ -76,7 +76,7 @@ namespace Sig.App.BackendTests.BackgroundJobs
                     new ManuallyAddingFundTransaction()
                     {
                         Amount = 30,
-                        AvailableFund = 0,
+                        AvailableFund = 1,
                         Status = FundTransactionStatus.Actived,
                         ExpirationDate = new DateTime(today.Year - 1, today.Month, today.Day),
                         ProductGroup = productGroup,
@@ -135,14 +135,14 @@ namespace Sig.App.BackendTests.BackgroundJobs
             await job.Run();
 
             var card = DbContext.Cards.Include(x => x.Funds).First();
-            card.Funds.First().Amount.Should().Be(20);
+            card.Funds.First().Amount.Should().Be(19);
             card.Transactions.Where(x => x.GetType() == typeof(SubscriptionAddingFundTransaction) && (x as SubscriptionAddingFundTransaction).Status == FundTransactionStatus.Expired).Should().HaveCount(2);
             card.Transactions.Where(x => x.GetType() == typeof(ManuallyAddingFundTransaction) && (x as ManuallyAddingFundTransaction).Status == FundTransactionStatus.Expired).Should().HaveCount(1);
 
             var transactionLogCreated = await DbContext.TransactionLogs.Where(x => x.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog).ToListAsync();
             transactionLogCreated.Count.Should().Be(2);
             transactionLogCreated.Any(x => x.TotalAmount == 10).Should().BeTrue();
-            transactionLogCreated.Any(x => x.TotalAmount == 0).Should().BeTrue();
+            transactionLogCreated.Any(x => x.TotalAmount == 1).Should().BeTrue();
         }
     }
 }

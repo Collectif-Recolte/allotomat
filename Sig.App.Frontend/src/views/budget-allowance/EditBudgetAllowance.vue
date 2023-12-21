@@ -37,7 +37,7 @@
           @delete="deleteBudgetAllowance"
           @save="saveBudgetAllowance" />
       </template>
-      <div v-if="availableOrganizations.length > 0" class="mt-6 pb-6 border-b border-grey-200">
+      <div v-if="availableOrganizations.length > 0 && canAddBudgetAllowance" class="mt-6 pb-6 border-b border-grey-200">
         <PfButtonAction
           type="button"
           btn-style="dash"
@@ -171,6 +171,10 @@ const availableOrganizations = computed(() => {
   }
 
   return organizations.value.filter((x) => budgetAllowances.value.find((y) => y.organization === x.value) === undefined);
+});
+
+const canAddBudgetAllowance = computed(() => {
+  return !budgetAllowances.value.some((x) => x.isNew);
 });
 
 async function saveBudgetAllowance(input) {

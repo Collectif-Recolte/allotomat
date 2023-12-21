@@ -4,23 +4,29 @@
 		"beneficiary-type": "Categories",
     "subscription": "Subscriptions",
     "cards": "Card",
+    "payment-conflicts": "Payment conflicts",
     "without-subscription-option": "None",
     "status": "Status",
     "status-active": "Active",
     "status-inactive": "Inactive",
     "with-card": "With card",
     "without-card": "Without card",
+    "with-payment-conflict": "With payment conflict",
+    "without-payment-conflict": "Without payment conflict",
 	},
 	"fr": {
 		"beneficiary-type": "Catégories",
     "subscription": "Abonnements",
     "cards": "Carte",
+    "payment-conflicts": "Conflits de versement",
     "without-subscription-option": "Aucun",
     "status": "État",
     "status-active": "Actif",
     "status-inactive": "Inactif",
     "with-card": "Avec carte",
     "without-card": "Sans carte",
+    "with-payment-conflict": "Avec conflit de versement",
+    "without-payment-conflict": "Sans conflit de versement",
 	}
 }
 </i18n>
@@ -70,6 +76,14 @@
       :label="t('cards')"
       :options="cardStatus"
       @input="onCardStatusChecked" />
+    <PfFormInputCheckboxGroup
+      id="paymentConflictStatus"
+      class="mt-3"
+      is-filter
+      :value="selectedPaymentConflictStatus"
+      :label="t('payment-conflicts')"
+      :options="paymentConflictStatus"
+      @input="onPaymentConflictStatusChecked" />
   </UiFilter>
 </template>
 
@@ -90,7 +104,9 @@ const emit = defineEmits([
   "statusChecked",
   "statusUnchecked",
   "cardStatusChecked",
-  "cardStatusUnchecked"
+  "cardStatusUnchecked",
+  "paymentConflictStatusChecked",
+  "paymentConflictStatusUnchecked"
 ]);
 
 const props = defineProps({
@@ -165,6 +181,20 @@ const props = defineProps({
   cardStatusWithout: {
     type: String,
     default: ""
+  },
+  paymentConflictStatusWith: {
+    type: String,
+    default: ""
+  },
+  paymentConflictStatusWithout: {
+    type: String,
+    default: ""
+  },
+  selectedPaymentConflictStatus: {
+    type: Array,
+    default() {
+      return [];
+    }
   }
 });
 
@@ -173,7 +203,8 @@ const hasActiveFilters = computed(() => {
     props.selectedBeneficiaryTypes?.length > 0 ||
     props.selectedSubscriptions?.length > 0 ||
     !!props.searchFilter ||
-    props.selectedCardStatus?.length > 0
+    props.selectedCardStatus?.length > 0 ||
+    props.selectedPaymentConflictStatus?.length > 0
   );
 });
 
@@ -181,7 +212,8 @@ const activeFiltersCount = computed(() => {
   const selectedBeneficiariesCount = props.selectedBeneficiaryTypes?.length ?? 0;
   const selectedSubscritionsCount = props.selectedSubscriptions?.length ?? 0;
   const selectedCardStatusCount = props.selectedCardStatus?.length ?? 0;
-  return selectedBeneficiariesCount + selectedSubscritionsCount + selectedCardStatusCount;
+  const selectedPaymentConflictStatusCount = props.selectedPaymentConflictStatus?.length ?? 0;
+  return selectedBeneficiariesCount + selectedSubscritionsCount + selectedCardStatusCount + selectedPaymentConflictStatusCount;
 });
 
 const availableBeneficiaryTypes = computed(() => {
@@ -220,6 +252,11 @@ const cardStatus = ref([
   { value: props.cardStatusWithout, label: t("without-card") }
 ]);
 
+const paymentConflictStatus = ref([
+  { value: props.paymentConflictStatusWith, label: t("with-payment-conflict") },
+  { value: props.paymentConflictStatusWithout, label: t("without-payment-conflict") }
+]);
+
 function onSubscriptionsChecked(input) {
   if (input.isChecked) {
     emit("subscriptionsChecked", input.value);
@@ -249,6 +286,14 @@ function onCardStatusChecked(input) {
     emit("cardStatusChecked", input.value);
   } else {
     emit("cardStatusUnchecked", input.value);
+  }
+}
+
+function onPaymentConflictStatusChecked(input) {
+  if (input.isChecked) {
+    emit("paymentConflictStatusChecked", input.value);
+  } else {
+    emit("paymentConflictStatusUnchecked", input.value);
   }
 }
 

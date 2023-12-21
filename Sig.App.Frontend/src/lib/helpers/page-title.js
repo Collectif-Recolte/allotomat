@@ -15,6 +15,8 @@ export function usePageTitle(title) {
   onMounted(() => {
     if (typeof title === "function") {
       watchEffect(() => setTitle(title()));
+    } else if (typeof title === "object") {
+      watchEffect(() => setTitle(title.value));
     } else {
       setTitle(title);
     }

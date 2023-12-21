@@ -53,7 +53,8 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             var endDate = new DateTime(request.EndDate.Year, request.EndDate.Month, request.EndDate.Day, 23, 59, 59);
 
             IQueryable<TransactionLog> query = db.TransactionLogs.Include(x => x.TransactionLogProductGroups).Where(x =>
-                x.CreatedAtUtc > startDate && x.CreatedAtUtc < endDate && x.ProjectId == longProjectId);
+                x.CreatedAtUtc > startDate && x.CreatedAtUtc < endDate && x.ProjectId == longProjectId)
+                .Where(x => x.Discriminator != TransactionLogDiscriminator.ExpireFundTransactionLog || (x.TotalAmount > 0));
 
             if(!globalPermissions.Contains(GlobalPermission.ManageOrganizations))
             {
