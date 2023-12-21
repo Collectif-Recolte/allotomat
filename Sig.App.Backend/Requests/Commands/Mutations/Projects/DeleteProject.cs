@@ -101,7 +101,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 var type = transaction.GetType();
                 if (type == typeof(PaymentTransaction))
                 {
-                    var paymentTransaction = db.Transactions.OfType<PaymentTransaction>().Include(x => x.TransactionByProductGroups).ThenInclude(x => x.RefundTransactionsProductGroup).Where(x => x.Id == transaction.Id).First();
+                    var paymentTransaction = db.Transactions.OfType<PaymentTransaction>().Include(x => x.TransactionByProductGroups).ThenInclude(x => x.RefundTransactionsProductGroup).First(x => x.Id == transaction.Id);
                     paymentTransaction.Card = null;
                     paymentTransaction.RefundTransactions = null;
                     paymentTransaction.Beneficiary = null;
