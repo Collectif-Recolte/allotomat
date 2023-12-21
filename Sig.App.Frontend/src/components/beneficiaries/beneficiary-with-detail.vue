@@ -178,10 +178,8 @@ const props = defineProps({
 
 function isBeneficiaryPaymentConflict() {
   for (var i = 0; i < beneficiary.value.subscriptions.length; i++) {
-    for (var j = 0; j < beneficiary.value.subscriptions[i].types.length; j++) {
-      if (beneficiary.value.subscriptions[i].types[j].beneficiaryType.id !== beneficiary.value.beneficiaryType.id) {
-        return true;
-      }
+    if (isSubscriptionPaymentConflict(beneficiary.value.subscriptions[i])) {
+      return true;
     }
   }
   return false;
@@ -197,11 +195,11 @@ function getBeneficiarySubscriptions() {
 
 function isSubscriptionPaymentConflict(subscription) {
   for (var j = 0; j < subscription.types.length; j++) {
-    if (subscription.types[j].beneficiaryType.id !== beneficiary.value.beneficiaryType.id) {
-      return true;
+    if (subscription.types[j].beneficiaryType.id === beneficiary.value.beneficiaryType.id) {
+      return false;
     }
   }
-  return false;
+  return true;
 }
 
 function haveAnySubscriptions() {
