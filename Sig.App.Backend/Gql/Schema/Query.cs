@@ -36,7 +36,6 @@ using Sig.App.Backend.Requests.Commands.Queries.Cards;
 using Sig.App.Backend.Requests.Commands.Queries.Transactions;
 using Sig.App.Backend.Requests.Queries.Transactions;
 using Sig.App.Backend.Requests.Commands.Queries.Beneficiaries;
-using NodaTime;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Requests.Queries.Beneficiaries;
@@ -56,11 +55,13 @@ namespace Sig.App.Backend.Gql.Schema
         [Description("All users")]
         public async Task<Pagination<UserGraphType>> Users(
             [Inject] IMediator mediator,
-            int page, int limit)
+            int page, int limit, string? searchText, UserType[] userTypes = null)
         {
             var results = await mediator.Send(new SearchUsers.Query
             {
                 Page = new Page(page, limit),
+                SearchText = searchText,
+                UserTypes = userTypes
             });
 
             return results.Map(x => new UserGraphType(x));
