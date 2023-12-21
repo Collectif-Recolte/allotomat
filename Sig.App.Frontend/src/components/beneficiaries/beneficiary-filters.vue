@@ -18,15 +18,15 @@
 		"beneficiary-type": "Catégories",
     "subscription": "Abonnements",
     "cards": "Carte",
-    "payment-conflicts": "Conflits de paiement",
+    "payment-conflicts": "Conflits de versement",
     "without-subscription-option": "Aucun",
     "status": "État",
     "status-active": "Actif",
     "status-inactive": "Inactif",
     "with-card": "Avec carte",
     "without-card": "Sans carte",
-    "with-payment-conflict": "Avec conflit de paiement",
-    "without-payment-conflict": "Sans conflit de paiement",
+    "with-payment-conflict": "Avec conflit de versement",
+    "without-payment-conflict": "Sans conflit de versement",
 	}
 }
 </i18n>

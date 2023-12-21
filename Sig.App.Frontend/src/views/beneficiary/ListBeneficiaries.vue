@@ -34,7 +34,7 @@
       "add-organization": "Ajouter un organisme",
       "detailed-view": "Affichage détaillé",
       "toggle-view": "Changer le type d'affichage",
-      "payment-conflicts-alert":"{count} conflits de versements"
+      "payment-conflicts-alert":"{count} conflit de versement | {count} conflits de versements"
     }
   }
 </i18n>
