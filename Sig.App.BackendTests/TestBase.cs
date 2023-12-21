@@ -60,6 +60,7 @@ namespace Sig.App.BackendTests
                     // In memory db does not support transactions. Disable the warning about this.
                     x.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning);
                 })*/
+                .EnableDetailedErrors()
                 .Options;
 
             return new AppDbContext(options);

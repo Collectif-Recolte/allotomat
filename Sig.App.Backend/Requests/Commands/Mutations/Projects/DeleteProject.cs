@@ -19,6 +19,9 @@ using Sig.App.Backend.Constants;
 using NodaTime;
 using System.Linq;
 using System;
+using Sig.App.Backend.DbModel.Entities.Transactions;
+using System.Collections.Generic;
+using Sig.App.Backend.Requests.Queries.Organizations;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 {
@@ -45,9 +48,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
         {
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects
-                .Include(x => x.Markets)
+                .Include(x => x.Markets).ThenInclude(x => x.Market)
                 .Include(x => x.ProductGroups).ThenInclude(x => x.Types)
                 .Include(x => x.Subscriptions).ThenInclude(x => x.Beneficiaries)
+                .Include(x => x.Subscriptions).ThenInclude(x => x.BudgetAllowances)
                 .Include(x => x.Organizations).ThenInclude(x => x.Beneficiaries)
                 .Include(x => x.Cards).ThenInclude(x => x.Transactions)
                 .Include(x => x.Cards).ThenInclude(x => x.Funds)
@@ -69,30 +73,132 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 foreach (var manager in projectManagers)
                 {
                     await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.ProjectManagerOf, projectId.ToString()));
+                    await userManager.DeleteAsync(manager);
                 }
             }
 
-            db.Transactions.RemoveRange(project.Cards.SelectMany(x => x.Transactions));
+            foreach (var organization in project.Organizations)
+            {
+                var organizationManagers = await mediator.Send(new GetOrganizationManagers.Query
+                {
+                    OrganizationId = organization.Id
+                });
+
+                if (organizationManagers != null)
+                {
+                    foreach (var manager in organizationManagers)
+                    {
+                        await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.OrganizationManagerOf, organization.Id.ToString()));
+                        await userManager.DeleteAsync(manager);
+                    }
+                }
+            }
+
+            var refundTransactionsProductGroup = new List<RefundTransactionProductGroup>();
+            var paymentTransactionsProductGroup = new List<PaymentTransactionProductGroup>();
+            foreach (var transaction in project.Cards.SelectMany(x => x.Transactions))
+            {
+                var type = transaction.GetType();
+                if (type == typeof(PaymentTransaction))
+                {
+                    var paymentTransaction = db.Transactions.OfType<PaymentTransaction>().Include(x => x.TransactionByProductGroups).ThenInclude(x => x.RefundTransactionsProductGroup).Where(x => x.Id == transaction.Id).First();
+                    paymentTransaction.Card = null;
+                    paymentTransaction.RefundTransactions = null;
+                    paymentTransaction.Beneficiary = null;
+                    paymentTransaction.Market = null;
+                    paymentTransaction.Organization = null;
+                    paymentTransaction.Transactions = null;
+                    foreach (var transactionProductGroup in paymentTransaction.TransactionByProductGroups)
+                    {
+                        paymentTransactionsProductGroup.Add(transactionProductGroup);
+                        transactionProductGroup.ProductGroup = null;
+                        transactionProductGroup.PaymentTransaction = null;
+                        foreach (var refundTransactionProductGroup in transactionProductGroup.RefundTransactionsProductGroup)
+                        {
+                            refundTransactionsProductGroup.Add(refundTransactionProductGroup);
+                            refundTransactionProductGroup.ProductGroup = null;
+                            refundTransactionProductGroup.PaymentTransactionProductGroup = null;
+                            refundTransactionProductGroup.RefundTransaction = null;
+                        }
+                        transactionProductGroup.RefundTransactionsProductGroup = null;
+                    }
+                    paymentTransaction.TransactionByProductGroups = null;
+                }
+                else if (type == typeof(SubscriptionAddingFundTransaction))
+                {
+                    var subscriptionAddingFundTransaction = transaction as SubscriptionAddingFundTransaction;
+                    subscriptionAddingFundTransaction.ProductGroup = null;
+                    subscriptionAddingFundTransaction.Card = null;
+                    subscriptionAddingFundTransaction.Beneficiary = null;
+                    subscriptionAddingFundTransaction.ExpireFundTransaction = null;
+                    subscriptionAddingFundTransaction.Organization = null;
+                    subscriptionAddingFundTransaction.SubscriptionType = null;
+                    subscriptionAddingFundTransaction.Transactions = null;
+                }
+                else if (type == typeof(RefundTransaction))
+                {
+                    var refundTransaction = transaction as RefundTransaction;
+                    refundTransaction.InitialTransaction = null;
+                    refundTransaction.Organization = null;
+                    refundTransaction.Beneficiary = null;
+                    refundTransaction.Card = null;
+                    refundTransaction.RefundByProductGroups = null;
+                }
+                else if(type == typeof(OffPlatformAddingFundTransaction) || type == typeof(LoyaltyAddingFundTransaction))
+                {
+                    var addingFundTransaction = transaction as AddingFundTransaction;
+                    addingFundTransaction.Card = null;
+                    addingFundTransaction.ProductGroup = null;
+                    addingFundTransaction.Beneficiary = null;
+                    addingFundTransaction.ExpireFundTransaction = null;
+                    addingFundTransaction.Organization = null;
+                    addingFundTransaction.Transactions = null;
+                }
+                else if (type == typeof(ManuallyAddingFundTransaction))
+                {
+                    var manuallyAddingFundTransaction = transaction as ManuallyAddingFundTransaction;
+                    manuallyAddingFundTransaction.Card = null;
+                    manuallyAddingFundTransaction.ProductGroup = null;
+                    manuallyAddingFundTransaction.Beneficiary = null;
+                    manuallyAddingFundTransaction.ExpireFundTransaction = null;
+                    manuallyAddingFundTransaction.Organization = null;
+                    manuallyAddingFundTransaction.Transactions = null;
+                    manuallyAddingFundTransaction.Subscription = null;
+                }
+                else if (type == typeof(ExpireFundTransaction))
+                {
+                    var expireFundTransaction = transaction as ExpireFundTransaction;
+                    expireFundTransaction.Card = null;
+                    expireFundTransaction.ProductGroup = null;
+                    expireFundTransaction.AddingFundTransaction = null;
+                    expireFundTransaction.Beneficiary = null;
+                    expireFundTransaction.ExpiredSubscription = null;
+                    expireFundTransaction.Organization = null;
+                }
+            }
+
+            var transactions = project.Cards.SelectMany(x => x.Transactions).ToList();
+            var transactionLogs = db.TransactionLogs.Include(x => x.TransactionLogProductGroups).Where(x => x.ProjectId == projectId);
+            db.TransactionLogProductGroups.RemoveRange(transactionLogs.SelectMany(x => x.TransactionLogProductGroups));
+            db.TransactionLogs.RemoveRange(transactionLogs);
+            db.Transactions.RemoveRange(transactions);
+            db.RefundTransactionProductGroups.RemoveRange(refundTransactionsProductGroup);
+            db.PaymentTransactionProductGroups.RemoveRange(paymentTransactionsProductGroup);
             db.Cards.RemoveRange(project.Cards);
             db.SubscriptionBeneficiaries.RemoveRange(project.Subscriptions.SelectMany(x => x.Beneficiaries));
             db.Beneficiaries.RemoveRange(project.Organizations.SelectMany(x => x.Beneficiaries));
             db.SubscriptionTypes.RemoveRange(project.ProductGroups.SelectMany(x => x.Types));
             db.Funds.RemoveRange(project.Cards.SelectMany(x => x.Funds));
             db.ProductGroups.RemoveRange(project.ProductGroups);
+            db.BudgetAllowances.RemoveRange(project.Subscriptions.SelectMany(x => x.BudgetAllowances));
             db.Subscriptions.RemoveRange(project.Subscriptions);
             db.ProjectMarkets.RemoveRange(project.Markets);
             db.Organizations.RemoveRange(project.Organizations);
 
             db.Projects.Remove(project);
 
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (Exception error)
-            {
-                var test = 0;
-            }
+            await db.SaveChangesAsync();
+
             logger.LogInformation($"Project deleted ({projectId}, {project.Name})");
         }
 
