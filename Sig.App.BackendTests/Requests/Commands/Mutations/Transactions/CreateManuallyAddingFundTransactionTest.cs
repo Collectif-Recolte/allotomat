@@ -127,6 +127,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             beneficiary.Organization = organization;
             beneficiary.Card = card;
+            beneficiary.Subscriptions = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription, BeneficiaryType = beneficiary.BeneficiaryType, BudgetAllowance = budgetAllowance } };
 
             project.Subscriptions = new List<Subscription>() { subscription };
             project.Organizations = new List<Organization>() { organization };
@@ -201,8 +202,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 OrganizationId = organization2.Id,
                 SortOrder = 0,
                 IsActive = true,
-                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
             };
+            beneficiary2.Subscriptions = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary2, Subscription = subscription, BeneficiaryType = beneficiary.BeneficiaryType } };
 
             var productGroup2 = new ProductGroup()
             {
@@ -345,6 +347,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 IsFundsAccumulable = true
             };
 
+            beneficiary.Subscriptions.Add(new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription2, BeneficiaryType = beneficiary.BeneficiaryType });
             DbContext.Subscriptions.Add(subscription2);
             DbContext.SaveChanges();
 
@@ -402,6 +405,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 OriginalFund = 100
             };
 
+            beneficiary.Subscriptions.Add(new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription2, BudgetAllowance = budgetAllowance2, BeneficiaryType = beneficiary.BeneficiaryType });
+            
             DbContext.Subscriptions.Add(subscription2);
             DbContext.BudgetAllowances.Add(budgetAllowance2);
             DbContext.SaveChanges();
@@ -453,6 +458,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(1),
             };
 
+            beneficiary.Subscriptions.Add(new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription2, BeneficiaryType = beneficiary.BeneficiaryType });
             DbContext.Subscriptions.Add(subscription2);
             DbContext.SaveChanges();
 
