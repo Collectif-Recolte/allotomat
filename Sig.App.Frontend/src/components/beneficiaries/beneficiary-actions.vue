@@ -14,7 +14,8 @@
       "beneficiary-lost-card-disabled": "You can't declare a card lost if the beneficiary doesn't have a card",
       "beneficiary-delete-disabled": "You can't delete a beneficiary with a card assigned",
       "beneficiary-delete-disabled-anonymous": "You can't delete an anonymous beneficiary",
-      "beneficiary-add-funds-disabled-anonymous": "You can't add funds if the beneficiary is anonymous"
+      "beneficiary-add-funds-disabled-anonymous": "You can't add funds if the beneficiary is anonymous",
+      "beneficiary-add-funds-disabled-no-subscription": "You can't add funds if the beneficiary doesn't have a subscription"
     },
     "fr": {
       "beneficiary-edit": "Modifier les détails",
@@ -30,7 +31,8 @@
       "beneficiary-lost-card-disabled": "Vous ne pouvez pas déclarer une carte perdue si le participant-e n'a pas de carte",
       "beneficiary-delete-disabled": "Vous ne pouvez pas supprimer un participant-e avec une carte assignée",
       "beneficiary-delete-disabled-anonymous": "Vous ne pouvez pas supprimer un participant-e anonyme",
-      "beneficiary-add-funds-disabled-anonymous": "Vous ne pouvez pas ajouter des fonds si le participant-e est anonyme"
+      "beneficiary-add-funds-disabled-anonymous": "Vous ne pouvez pas ajouter des fonds si le participant-e est anonyme",
+      "beneficiary-add-funds-disabled-no-subscription": "Vous ne pouvez pas ajouter des fonds si le participant-e n'a pas d'abonnement"
     }
   }
   </i18n>
@@ -93,8 +95,12 @@ function updateItems() {
       icon: ICON_ADD_CASH,
       label: t("beneficiary-add-funds"),
       route: { name: URL_BENEFICIARY_MANUALLY_ADD_FUND, params: { beneficiaryId: props.beneficiary.id } },
-      disabled: !haveCard() || props.beneficiariesAreAnonymous,
-      reason: !haveCard() ? t("beneficiary-add-funds-disabled") : t("beneficiary-add-funds-disabled-anonymous")
+      disabled: !haveCard() || props.beneficiariesAreAnonymous || !haveSubscriptions(),
+      reason: !haveCard()
+        ? t("beneficiary-add-funds-disabled")
+        : !haveSubscriptions()
+        ? t("beneficiary-add-funds-disabled-no-subscription")
+        : t("beneficiary-add-funds-disabled-anonymous")
     },
     {
       isExtra: true,
@@ -150,6 +156,10 @@ const props = defineProps({
 
 function haveCard() {
   return props.beneficiary.card !== null;
+}
+
+function haveSubscriptions() {
+  return props.beneficiary.subscriptions.length > 0;
 }
 
 function qrCodeLink() {
