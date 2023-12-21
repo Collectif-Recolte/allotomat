@@ -71,8 +71,7 @@ namespace Sig.App.Backend.BackgroundJobs
                     marketBalanceReports.Add(new MarketBalanceReport()
                     {
                         Market = market,
-                        Total = groupByMarket.Sum(x => x.Amount),
-                        Transactions = groupByMarket.ToList()
+                        Total = groupByMarket.Sum(x => x.Amount)
                     });
                 }
 
