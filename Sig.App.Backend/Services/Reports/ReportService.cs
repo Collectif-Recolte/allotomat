@@ -48,6 +48,10 @@ namespace Sig.App.Backend.Services.Reports
             var startDate = new DateTime(request.StartDate.Year, request.StartDate.Month, request.StartDate.Day, 0, 0, 0);
             var endDate = new DateTime(request.EndDate.Year, request.EndDate.Month, request.EndDate.Day, 23, 59, 59);
 
+            var timeZone = TimeZoneInfo.FindSystemTimeZoneById(request.TimeZoneId);
+            startDate = TimeZoneInfo.ConvertTime(startDate, timeZone, TimeZoneInfo.Utc);
+            endDate = TimeZoneInfo.ConvertTime(endDate, timeZone, TimeZoneInfo.Utc);
+
             IQueryable<TransactionLog> query = db.TransactionLogs.Include(x => x.TransactionLogProductGroups).Where(x =>
                 x.CreatedAtUtc > startDate && x.CreatedAtUtc < endDate && x.ProjectId == longProjectId);
 

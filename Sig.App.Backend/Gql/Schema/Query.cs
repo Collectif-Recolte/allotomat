@@ -309,7 +309,7 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        public async Task<string> GenerateTransactionsReport(Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText, string timeZoneId, [Inject] IMediator mediator)
+        public async Task<string> GenerateTransactionsReport(Id projectId, LocalDate startDate, LocalDate endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText, string timeZoneId, [Inject] IMediator mediator)
         {
             return await mediator.Send(new GenerateTransactionsReport.Input()
             {
@@ -382,7 +382,7 @@ namespace Sig.App.Backend.Gql.Schema
         [RequirePermission(GlobalPermission.ManageTransactions)]
         [Description("All transactions")]
         public async Task<Pagination<TransactionLogGraphType>> TransactionLogs([Inject] IMediator mediator,
-            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText)
+            int page, int limit, Id projectId, LocalDate startDate, LocalDate endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText, string timeZoneId)
         {
             var results = await mediator.Send(new SearchTransactionLogs.Query
             {
@@ -395,6 +395,7 @@ namespace Sig.App.Backend.Gql.Schema
                 WithoutSubscription = withoutSubscription,
                 Categories = categories,
                 TransactionTypes = transactionTypes,
+                TimeZoneId = timeZoneId,
                 SearchText = searchText
             });
 

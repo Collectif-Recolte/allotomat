@@ -93,6 +93,7 @@ import ICON_DOWNLOAD from "@/lib/icons/download.json";
 import { URL_TRANSACTION_ADMIN } from "@/lib/consts/urls";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
+import { formatDate, serverFormat } from "@/lib/helpers/date";
 
 const route = useRoute();
 const router = useRouter();
@@ -220,14 +221,15 @@ const {
     query TransactionLogs(
       $page: Int!
       $projectId: ID!
-      $startDate: DateTime!
-      $endDate: DateTime!
+      $startDate: LocalDate!
+      $endDate: LocalDate!
       $organizations: [ID!]
       $categories: [ID!]
       $subscriptions: [ID!]
       $withoutSubscription: Boolean
       $transactionTypes: [String]
       $searchText: String
+      $timeZoneId: String!
     ) {
       transactionLogs(
         page: $page
@@ -241,6 +243,7 @@ const {
         withoutSubscription: $withoutSubscription
         transactionTypes: $transactionTypes
         searchText: $searchText
+        timeZoneId: $timeZoneId
       ) {
         totalCount
         pageNumber
@@ -266,14 +269,15 @@ const {
   () => ({
     page: page.value,
     projectId: projectId.value,
-    startDate: dateFrom.value,
-    endDate: dateTo.value,
+    startDate: formatDate(dateFrom.value, serverFormat),
+    endDate: formatDate(dateTo.value, serverFormat),
     organizations: organizations.value,
     subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
     withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
     categories: beneficiaryTypes.value,
     transactionTypes: transactionTypes.value,
-    searchText: searchText.value
+    searchText: searchText.value,
+    timeZoneId: Intl.DateTimeFormat().resolvedOptions().timeZone
   }),
   {
     enabled: projectsOrOrganizationLoaded
@@ -395,8 +399,8 @@ async function onExportReport() {
     query: gql`
       query GenerateTransactionsReports(
         $projectId: ID!
-        $startDate: DateTime!
-        $endDate: DateTime!
+        $startDate: LocalDate!
+        $endDate: LocalDate!
         $timeZoneId: String!
         $organizations: [ID!]
         $categories: [ID!]
@@ -421,8 +425,8 @@ async function onExportReport() {
     `,
     variables: {
       projectId: projectId.value,
-      startDate: dateFrom.value,
-      endDate: dateTo.value,
+      startDate: formatDate(dateFrom.value, serverFormat),
+      endDate: formatDate(dateTo.value, serverFormat),
       timeZoneId: timeZone,
       organizations: organizations.value,
       subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,

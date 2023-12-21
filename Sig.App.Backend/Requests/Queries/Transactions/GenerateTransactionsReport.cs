@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Sig.App.Backend.DbModel.Enums;
+using NodaTime;
 
 namespace Sig.App.Backend.Requests.Commands.Queries.Transactions
 {
@@ -43,8 +43,8 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Transactions
         public class Input : IRequest<string>, IReportInput
         {
             public Id ProjectId { get; set; }
-            public DateTime StartDate { get; set; }
-            public DateTime EndDate { get; set; }
+            public LocalDate StartDate { get; set; }
+            public LocalDate EndDate { get; set; }
             public IEnumerable<Id> Organizations { get; set; }
             public IEnumerable<Id> Subscriptions { get; set; }
             public Maybe<bool> WithoutSubscription { get; set; }

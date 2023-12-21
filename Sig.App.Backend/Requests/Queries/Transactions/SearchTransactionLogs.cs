@@ -24,6 +24,7 @@ using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
+using NodaTime;
 
 namespace Sig.App.Backend.Requests.Queries.Transactions
 {
@@ -51,6 +52,10 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             var longProjectId = request.ProjectId.LongIdentifierForType<Project>();
             var startDate = new DateTime(request.StartDate.Year, request.StartDate.Month, request.StartDate.Day, 0, 0, 0);
             var endDate = new DateTime(request.EndDate.Year, request.EndDate.Month, request.EndDate.Day, 23, 59, 59);
+
+            var timeZone = TimeZoneInfo.FindSystemTimeZoneById(request.TimeZoneId);
+            startDate = TimeZoneInfo.ConvertTime(startDate, timeZone, TimeZoneInfo.Utc);
+            endDate = TimeZoneInfo.ConvertTime(endDate, timeZone, TimeZoneInfo.Utc);
 
             IQueryable<TransactionLog> query = db.TransactionLogs.Include(x => x.TransactionLogProductGroups).Where(x =>
                 x.CreatedAtUtc > startDate && x.CreatedAtUtc < endDate && x.ProjectId == longProjectId)
@@ -123,14 +128,15 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
         {
             public Page Page { get; set; }
             public Id ProjectId { get; set; }
-            public DateTime StartDate { get; set; }
-            public DateTime EndDate { get; set; }
+            public LocalDate StartDate { get; set; }
+            public LocalDate EndDate { get; set; }
             public IEnumerable<Id> Organizations { get; set; }
             public IEnumerable<Id> Subscriptions { get; set; }
             public Maybe<bool> WithoutSubscription { get; set; }
             public IEnumerable<Id> Categories { get; set; }
             public IEnumerable<string> TransactionTypes { get; set; }
             public Maybe<string> SearchText { get; set; }
+            public string TimeZoneId { get; set; }
         }
 
         private static IOrderedQueryable<TransactionLog> Sort(IQueryable<TransactionLog> query, TransactionLogSort sort, SortOrder order)

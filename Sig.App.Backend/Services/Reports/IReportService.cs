@@ -1,6 +1,6 @@
 ﻿using GraphQL.Conventions;
+using NodaTime;
 using Sig.App.Backend.Gql.Schema.Types;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -15,8 +15,8 @@ namespace Sig.App.Backend.Services.Reports
     public interface IReportInput
     {
         public Id ProjectId { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public LocalDate StartDate { get; set; }
+        public LocalDate EndDate { get; set; }
         public IEnumerable<Id> Organizations { get; set; }
         public IEnumerable<Id> Subscriptions { get; set; }
         public Maybe<bool> WithoutSubscription { get; set; }
