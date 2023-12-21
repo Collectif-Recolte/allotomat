@@ -33,7 +33,7 @@
 
 <template>
   <div v-if="!loading">
-    <UiDialogModal v-if="refundTransactionId === null" :title="t('title')" hide-main-btn="false">
+    <UiDialogModal v-if="refundTransactionId === null" :title="t('title')" hide-main-btn="false" :return-route="returnRoute()">
       <div>
         <p>
           {{
@@ -340,5 +340,10 @@ async function onSubmit({ productGroups, password }) {
   setTimeout(() => {
     refundTransactionId.value = result.data.refundTransaction.transaction.id;
   }, 200);
+}
+
+function returnRoute() {
+  if (userType.value === USER_TYPE_PROJECTMANAGER) return { name: URL_TRANSACTION_ADMIN };
+  else return { name: URL_TRANSACTION_LIST };
 }
 </script>

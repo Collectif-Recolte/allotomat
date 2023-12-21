@@ -290,7 +290,6 @@ function onCardStatusChecked(input) {
 }
 
 function onPaymentConflictStatusChecked(input) {
-  console.log(input.isChecked);
   if (input.isChecked) {
     emit("paymentConflictStatusChecked", input.value);
   } else {
