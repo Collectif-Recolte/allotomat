@@ -408,7 +408,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Queries.Subscriptions
         public async Task ThrowsIfSubscriptionAlreadyExpiredException()
         {
             var today = Clock.GetCurrentInstant().ToDateTimeUtc();
-            subscription1.EndDate = new DateTime(today.Year, today.Month - 1, today.Day);
+            subscription1.EndDate = today.Month > 1 ? new DateTime(today.Year, today.Month - 1, today.Day) : new DateTime(today.Year - 1, 12, today.Day);
             DbContext.SaveChanges();
 
             var input = new ForecastAssignBeneficiariesToSubscription.Input()
