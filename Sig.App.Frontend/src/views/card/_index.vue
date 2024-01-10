@@ -81,7 +81,7 @@
               :placeholder="t('search-placeholder')"
               :has-active-filters="!!searchText || activeFiltersCount > 0"
               :active-filters-count="activeFiltersCount"
-              :beneficiaries-are-anonymous="beneficiariesAreAnonymous && canManageOrganizations"
+              :beneficiaries-are-anonymous="project.beneficiariesAreAnonymous && canManageOrganizations"
               @resetFilters="resetSearch"
               @search="onSearch">
               <PfFormInputCheckboxGroup
@@ -116,7 +116,7 @@
         <div v-else>
           <CardSummaryTable
             :cards="cards"
-            :beneficiaries-are-anonymous="beneficiariesAreAnonymous && canManageOrganizations"
+            :beneficiaries-are-anonymous="project.beneficiariesAreAnonymous && canManageOrganizations"
             :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform">
             <template #beforeActions="{ card }">
               <UiButtonGroup :items="getBeforeBtnGroup(card)" tooltip-position="right" />

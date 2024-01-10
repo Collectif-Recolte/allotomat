@@ -45,7 +45,7 @@
           :is-dark-theme="isCardTagDarkTheme(slotProps.item)"
           :bg-color-class="getCardTagBgColor(slotProps.item)" />
         <PfButtonLink
-          v-if="haveBeneficiary(slotProps.item)"
+          v-if="!beneficiariesAreAnonymous && haveBeneficiary(slotProps.item)"
           class="ml-2"
           btn-style="link"
           tag="routerLink"
