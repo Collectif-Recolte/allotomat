@@ -49,7 +49,7 @@
           <PfIcon :icon="ICON_ARROW_BOTTOM" size="xxs" :class="activeFiltersCount > 0 ? 'ml-2' : 'ml-12'" />
         </button>
         <div
-          class="text-left absolute z-50 bottom-1 right-0 translate-y-full min-w-48 bg-white rounded-md border rounded-tr-none border-primary-700 px-4 py-3 transition ease-in-out duration-300 pf-transition-visibility__content h-remove-margin">
+          class="text-left absolute z-50 bottom-1 right-0 translate-y-full min-w-64 max-h-60 overflow-auto bg-white rounded-md border rounded-tr-none border-primary-700 px-4 py-3 transition ease-in-out duration-300 pf-transition-visibility__content h-remove-margin">
           <slot></slot>
         </div>
       </div>
