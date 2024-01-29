@@ -50,9 +50,14 @@ namespace Sig.App.Backend.BackgroundJobs
                 .ToDateTimeUtc()
                 .AddMonths(-1);
 
-            var transactions = await db.Transactions.Include(x => x.Organization).Include(x => x.Beneficiary).Where(x => x.CreatedAtUtc.Month == lastMonth.Month && x.CreatedAtUtc.Year == lastMonth.Year).ToListAsync();
+            var transactions = await db.Transactions
+                .OfType<PaymentTransaction>()
+                .Include(x => x.Organization)
+                .Include(x => x.Beneficiary)
+                .Include(x => x.RefundTransactions)
+                .Where(x => x.CreatedAtUtc.Month == lastMonth.Month && x.CreatedAtUtc.Year == lastMonth.Year).ToListAsync();
 
-            var paymentTransactionGroupByProject = transactions.Where(x => x.GetType() == typeof(PaymentTransaction) && x.Organization != null).Select(x => x as PaymentTransaction).GroupBy(x => x.Organization.ProjectId).ToList();
+            var paymentTransactionGroupByProject = transactions.Where(x => x.Organization != null).GroupBy(x => x.Organization.ProjectId).ToList();
 
             foreach (var groupByProject in paymentTransactionGroupByProject)
             {
@@ -71,7 +76,7 @@ namespace Sig.App.Backend.BackgroundJobs
                     marketBalanceReports.Add(new MarketBalanceReport()
                     {
                         Market = market,
-                        Total = groupByMarket.Sum(x => x.Amount),
+                        Total = groupByMarket.Sum(x => x.Amount - x.RefundTransactions.Sum(x => x.Amount)),
                         Transactions = groupByMarket.ToList()
                     });
                 }
