@@ -100,10 +100,6 @@ async function onSubmit(values) {
     managerEmails: values.managers.map((x) => x.email)
   };
 
-  if (values.password !== "" && values.password !== undefined && values.password !== null) {
-    input.refundTransactionPassword = { value: values.password };
-  }
-
   await createMarket({ input });
   router.push({ name: URL_MARKET_ADMIN });
   addSuccess(t("add-market-success-notification", { ...values.marketName }));

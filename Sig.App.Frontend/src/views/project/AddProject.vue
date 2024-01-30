@@ -106,8 +106,7 @@ async function onSubmit({
   allowOrganizationsAssignCards,
   managers,
   beneficiariesAreAnonymous,
-  administrationSubscriptionsOffPlatform,
-  password
+  administrationSubscriptionsOffPlatform
 }) {
   let input = {
     name,
@@ -118,10 +117,6 @@ async function onSubmit({
     administrationSubscriptionsOffPlatform:
       administrationSubscriptionsOffPlatform !== undefined ? administrationSubscriptionsOffPlatform : false
   };
-
-  if (password !== "" && password !== undefined && password !== null) {
-    input.refundTransactionPassword = { value: password };
-  }
 
   await createProject({ input });
   router.push({ name: URL_PROJECT_ADMIN });

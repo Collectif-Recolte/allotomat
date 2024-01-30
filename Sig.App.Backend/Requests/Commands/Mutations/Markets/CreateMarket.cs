@@ -46,11 +46,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 Name = request.Name
             };
 
-            if (request.RefundTransactionPassword.IsSet())
-            {
-                market.SetRefundTransactionPassword(request.RefundTransactionPassword.Value.Trim());
-            }
-
             var managers = new List<AppUser>();
 
             db.Markets.Add(market);
@@ -128,7 +123,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
         {
             public string Name { get; set; }
             public IEnumerable<string> ManagerEmails { get; set; }
-            public Maybe<NonNull<string>> RefundTransactionPassword { get; set; }
         }
 
         [MutationPayload]

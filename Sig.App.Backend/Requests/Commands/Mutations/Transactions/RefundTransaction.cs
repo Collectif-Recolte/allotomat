@@ -24,7 +24,7 @@ using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.Gql.Interfaces;
-using Sig.App.Backend.Gql.Schema.Types;
+using Microsoft.AspNetCore.Identity;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 {
@@ -35,19 +35,21 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         private readonly IMailer mailer;
         private readonly IClock clock;
         private readonly IHttpContextAccessor httpContextAccessor;
-        
+        private readonly UserManager<AppUser> userManager;
+
         private AppUser currentUser;
         private DateTime today;
         private List<TransactionLog> transactionLogs;
         private TransactionLog baseTransactionLog;
 
-        public RefundTransaction(ILogger<RefundTransaction> logger, AppDbContext db, IMailer mailer, IClock clock, IHttpContextAccessor httpContextAccessor)
+        public RefundTransaction(ILogger<RefundTransaction> logger, AppDbContext db, IMailer mailer, IClock clock, IHttpContextAccessor httpContextAccessor, UserManager<AppUser> userManager)
         {
             this.logger = logger;
             this.db = db;
             this.mailer = mailer;
             this.clock = clock;
             this.httpContextAccessor = httpContextAccessor;
+            this.userManager = userManager;
             transactionLogs = new List<TransactionLog>();
         }
 
@@ -75,14 +77,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
 
-            if (currentUser?.Type == UserType.ProjectManager)
-            {
-                if (!initialTransaction.Card.Project.VerifyPassword(request.Password.IsSet() ? request.Password.Value : "")) throw new WrongPasswordException();
-            }
-            else
-            {
-                if (!initialTransaction.Market.VerifyPassword(request.Password.IsSet() ? request.Password.Value : "")) throw new WrongPasswordException();
-            }
+            var isValid = await userManager.CheckPasswordAsync(currentUser, request.Password);
+            if (!isValid) throw new WrongPasswordException();
 
             var refundTransaction = new DbModel.Entities.Transactions.RefundTransaction()
             {
@@ -207,7 +203,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         [MutationInput]
         public class Input : IRequest<Payload>, IHaveInitialTransactionId
         {
-            public Maybe<NonNull<string>> Password { get; set; }
+            public string Password { get; set; }
             public Id InitialTransactionId { get; set; }
             public List<RefundTransactionsInput> Transactions { get; set; }
         }

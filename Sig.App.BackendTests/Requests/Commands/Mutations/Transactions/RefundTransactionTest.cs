@@ -230,7 +230,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             DbContext.SaveChanges();
 
-            handler = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction(NullLogger<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction>.Instance, DbContext, mailer.Object, Clock, HttpContextAccessor);
+            handler = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction(NullLogger<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction>.Instance, DbContext, mailer.Object, Clock, HttpContextAccessor, UserManager);
         }
 
         [Fact]
