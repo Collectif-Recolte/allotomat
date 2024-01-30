@@ -39,7 +39,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             request.CardImageFileId.IfSet(v => project.CardImageFileId = v);
             request.AllowOrganizationsAssignCards.IfSet(v => project.AllowOrganizationsAssignCards = v);
             request.BeneficiariesAreAnonymous.IfSet(v => project.BeneficiariesAreAnonymous = v);
-            request.RefundTransactionPassword.IfSet(v => project.SetRefundTransactionPassword(v.Trim()));
 
             await db.SaveChangesAsync(cancellationToken);
 
@@ -60,7 +59,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             public Maybe<NonNull<string>> CardImageFileId { get; set; }
             public Maybe<bool> AllowOrganizationsAssignCards { get; set; }
             public Maybe<bool> BeneficiariesAreAnonymous { get; set; }
-            public Maybe<NonNull<string>> RefundTransactionPassword { get; set; }
         }
 
         [MutationPayload]

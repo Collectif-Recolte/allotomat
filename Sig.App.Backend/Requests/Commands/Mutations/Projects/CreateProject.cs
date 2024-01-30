@@ -54,11 +54,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             };
             var managers = new List<AppUser>();
 
-            if (request.RefundTransactionPassword.IsSet())
-            {
-                project.SetRefundTransactionPassword(request.RefundTransactionPassword.Value.Trim());
-            }
-
             db.Projects.Add(project);
             await db.SaveChangesAsync(cancellationToken);
 
@@ -197,7 +192,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             public bool AllowOrganizationsAssignCards { get; set; }
             public bool BeneficiariesAreAnonymous { get; set; }
             public bool AdministrationSubscriptionsOffPlatform { get; set; }
-            public Maybe<NonNull<string>> RefundTransactionPassword { get; set; }
         }
 
         [MutationPayload]

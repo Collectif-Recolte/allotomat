@@ -330,7 +330,7 @@ async function onSubmit({ productGroups, password }) {
   }
   const result = await refundTransaction({
     input: {
-      password: { value: password ?? "" },
+      password: password ?? "",
       transactions,
       initialTransactionId: route.params.transactionId
     }
