@@ -166,6 +166,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 {
                     Amount = refund.Amount,
                     ProductGroupId = paymentTransactionProductGroup.ProductGroupId,
+                    ProductGroupName = paymentTransactionProductGroup.ProductGroup.Name,
                     TransactionLog = baseTransactionLog
                 });
             }
