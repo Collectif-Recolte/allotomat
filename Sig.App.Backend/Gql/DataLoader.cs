@@ -152,8 +152,8 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<IEnumerable<BudgetAllowanceGraphType>> LoadSubscriptionBudgetAllowance(long subscriptionId) =>
             LoadCollection<GetBudgetAllowanceBySubscriptionId.Query, BudgetAllowanceGraphType, long>(subscriptionId);
 
-        public IDataLoaderResult<IEnumerable<PaymentTransactionGraphType>> LoadMarketTransactions(long marketId) =>
-            LoadCollection<GetMarketTransactions.Query, PaymentTransactionGraphType, long>(marketId);
+        public IDataLoaderResult<IEnumerable<ITransactionGraphType>> LoadMarketTransactions(long marketId) =>
+            LoadCollection<GetMarketTransactions.Query, ITransactionGraphType, long>(marketId);
 
         public IDataLoaderResult<IEnumerable<ProductGroupGraphType>> LoadProjectProductGroups(long projectId) =>
             LoadCollection<GetProductGroupsByProjectId.Query, ProductGroupGraphType, long>(projectId);

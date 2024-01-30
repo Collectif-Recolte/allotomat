@@ -375,6 +375,10 @@ namespace Sig.App.Backend.Gql.Schema
                     return new ManuallyAddingFundTransactionGraphType(maft);
                 case LoyaltyAddingFundTransaction laft:
                     return new LoyaltyAddingFundTransactionGraphType(laft);
+                case RefundTransaction rft:
+                    return new RefundTransactionGraphType(rft);
+                case OffPlatformAddingFundTransaction opaft:
+                    return new OffPlatformAddingFundTransactionGraphType(opaft);
             }
 
             return null;

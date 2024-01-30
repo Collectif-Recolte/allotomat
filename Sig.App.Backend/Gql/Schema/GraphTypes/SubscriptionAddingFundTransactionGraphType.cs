@@ -39,5 +39,10 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         {
             return transaction.ExpirationDate.FromUtcToOffsetDateTime();
         }
+
+        public OffsetDateTime CreatedAt()
+        {
+            return transaction.CreatedAtUtc.FromUtcToOffsetDateTime();
+        }
     }
 }

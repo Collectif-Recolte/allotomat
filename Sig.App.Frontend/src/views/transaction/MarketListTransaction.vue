@@ -74,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult } from "@vue/apollo-composable";
 import gql from "graphql-tag";
@@ -91,6 +91,13 @@ const dateTo = ref(new Date(Date.now()));
 const { t } = useI18n();
 
 usePageTitle(t("title"));
+
+const dateFromStartOfDay = computed(
+  () => new Date(dateFrom.value.getFullYear(), dateFrom.value.getMonth(), dateFrom.value.getDate(), 0, 0, 0, 0)
+);
+const dateToEndOfDay = computed(
+  () => new Date(dateTo.value.getFullYear(), dateTo.value.getMonth(), dateTo.value.getDate(), 23, 59, 59, 999)
+);
 
 const { result, loading } = useQuery(
   gql`
@@ -110,10 +117,10 @@ const { result, loading } = useQuery(
       }
     }
   `,
-  {
-    startDate: dateFrom,
-    endDate: dateTo
-  }
+  () => ({
+    startDate: dateFromStartOfDay.value,
+    endDate: dateToEndOfDay.value
+  })
 );
 const markets = useResult(result);
 
@@ -121,7 +128,11 @@ function getTotalTransactionAmount(transactions) {
   var amount = 0;
 
   for (var i = 0; i < transactions.length; i++) {
-    amount += transactions[i].amount;
+    if (transactions[i].__typename === "RefundTransactionGraphType") {
+      amount -= transactions[i].amount;
+    } else {
+      amount += transactions[i].amount;
+    }
   }
 
   return getMoneyFormat(parseFloat(amount));

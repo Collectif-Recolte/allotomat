@@ -1,5 +1,6 @@
 ﻿using GraphQL.Conventions;
 using GraphQL.DataLoader;
+using NodaTime;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Interfaces;
@@ -27,6 +28,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<ProductGroupGraphType> ProductGroup(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadProductGroup(transaction.ProductGroupId);
+        }
+
+        public OffsetDateTime CreatedAt()
+        {
+            return transaction.CreatedAtUtc.FromUtcToOffsetDateTime();
         }
     }
 }

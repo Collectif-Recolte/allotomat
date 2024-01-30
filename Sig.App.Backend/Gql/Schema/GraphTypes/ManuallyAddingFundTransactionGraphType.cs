@@ -34,5 +34,10 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         {
             return ctx.DataLoader.LoadProductGroup(transaction.ProductGroupId);
         }
+
+        public OffsetDateTime CreatedAt()
+        {
+            return transaction.CreatedAtUtc.FromUtcToOffsetDateTime();
+        }
     }
 }

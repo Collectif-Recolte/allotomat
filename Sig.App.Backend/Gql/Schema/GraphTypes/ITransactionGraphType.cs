@@ -1,5 +1,6 @@
 ﻿using GraphQL.Conventions;
 using GraphQL.DataLoader;
+using NodaTime;
 using Sig.App.Backend.Gql.Interfaces;
 
 namespace Sig.App.Backend.Gql.Schema.GraphTypes
@@ -8,6 +9,8 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
     {
         Id Id { get; }
         decimal Amount {get;}
+
         IDataLoaderResult<CardGraphType> Card(IAppUserContext ctx);
+        OffsetDateTime CreatedAt();
     }
 }
