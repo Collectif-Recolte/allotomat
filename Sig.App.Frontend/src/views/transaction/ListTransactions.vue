@@ -259,6 +259,7 @@ const {
           transaction {
             id
           }
+          subscriptionName
         }
       }
     }
