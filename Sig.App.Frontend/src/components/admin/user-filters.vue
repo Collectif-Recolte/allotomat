@@ -62,11 +62,15 @@ const props = defineProps({
     default() {
       return [];
     }
+  },
+  searchFilter: {
+    type: String,
+    default: ""
   }
 });
 
 const hasActiveFilters = computed(() => {
-  return props.selectedUserTypes?.length > 0;
+  return props.selectedUserTypes?.length > 0 || props.searchFilter !== "";
 });
 
 const activeFiltersCount = computed(() => {
