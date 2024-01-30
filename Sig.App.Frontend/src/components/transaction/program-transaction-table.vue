@@ -13,7 +13,7 @@
       "operation-transaction-manually-adding-fund-desc": "Manually",
       "operation-transaction-off-platform-adding-fund-title": "Adding fund",
       "operation-transaction-off-platform-adding-fund-desc": "Off platform user",
-      "operation-transaction-payment-title": "Payment",
+      "operation-transaction-payment-title": "Payment - {subscriptionName}",
       "operation-transaction-payment-desc": "By: {x}",
       "operation-transaction-refund-budget-allowance-from-no-card-when-adding-fund-title": "Refund budget allowance from no card when adding fund",
       "operation-transaction-refund-budget-allowance-from-no-card-when-adding-fund-desc": "Refund budget allowance from no card when adding fund",
@@ -40,7 +40,7 @@
       "operation-transaction-manually-adding-fund-desc": "Manuellement",
       "operation-transaction-off-platform-adding-fund-title": "Ajout de fonds",
       "operation-transaction-off-platform-adding-fund-desc": "Utilisateur hors plateforme",
-      "operation-transaction-payment-title": "Paiement",
+      "operation-transaction-payment-title": "Paiement - {subscriptionName}",
       "operation-transaction-payment-desc": "Par: {x}",
       "operation-transaction-refund-budget-allowance-from-no-card-when-adding-fund-title": "Remboursement",
       "operation-transaction-refund-budget-allowance-from-no-card-when-adding-fund-desc": "Allocation budgétaire sans carte lors d'un ajout de fonds",
@@ -149,7 +149,12 @@ function getOperationName(transaction) {
     case OFF_PLATFORM_ADDING_FUND_TRANSACTION_LOG:
       return t("operation-transaction-off-platform-adding-fund-title");
     case PAYMENT_TRANSACTION_LOG:
-      return t("operation-transaction-payment-title");
+      return t("operation-transaction-payment-title", {
+        subscriptionName:
+          transaction.subscriptionName !== null
+            ? transaction.subscriptionName
+            : t("operation-transaction-loyalty-adding-fund-desc")
+      });
     case REFUND_BUDGET_ALLOWANCE_FROM_NO_CARD_WHEN_ADDING_FUND_TRANSACTION_LOG:
       return t("operation-transaction-refund-budget-allowance-from-no-card-when-adding-fund-title");
     case REFUND_BUDGET_ALLOWANCE_FROM_REMOVED_BENEFICIARY_FROM_SUBSCRIPTION_TRANSACTION_LOG:
