@@ -74,10 +74,16 @@ function getCardNo(transaction) {
 }
 
 function getTransactionAmount(transaction) {
+  if (transaction.__typename === "RefundTransactionGraphType") {
+    return getMoneyFormat(parseFloat(-transaction.amount));
+  }
   return getMoneyFormat(parseFloat(transaction.amount));
 }
 
 function getBtnGroup(transaction) {
+  if (transaction.__typename === "RefundTransactionGraphType") {
+    return [];
+  }
   return [
     {
       isExtra: true,
