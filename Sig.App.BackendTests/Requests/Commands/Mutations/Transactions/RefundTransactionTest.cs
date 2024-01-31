@@ -22,6 +22,8 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.Requests.Queries.Cards;
 using System.Linq;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
+using Sig.App.Backend.DbModel.Entities.Profiles;
 
 namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 {
@@ -45,6 +47,16 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
         public RefundTransactionTest()
         {
+            var user = AddUser("test@example.com", UserType.PCAAdmin, password: "Abcd1234!!");
+            user.Profile = new UserProfile()
+            {
+                FirstName = "Test",
+                LastName = "Example"
+            };
+            DbContext.SaveChanges();
+
+            SetLoggedInUser(user);
+
             mailer = new Mock<IMailer>();
 
             project = new Project()
@@ -77,7 +89,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 Organization = organization,
                 BeneficiaryType = beneficiaryType
             };
-
+            ;
             productGroup = new ProductGroup()
             {
                 Project = project,
@@ -239,7 +251,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
                 InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
-                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>()
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
+                Password = "Abcd1234!!"
             };
             input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
             {
@@ -293,7 +306,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
                 InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
-                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>()
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
+                Password = "Abcd1234!!"
             };
             input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
             {
@@ -343,7 +357,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
                 InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
-                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>()
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
+                Password = "Abcd1234!!"
             };
             input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
             {
@@ -393,7 +408,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
                 InitialTransactionId = Id.New<PaymentTransaction>(123456),
-                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>()
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
+                Password = "Abcd1234!!"
             };
             input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
             {
@@ -411,7 +427,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
                 InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
-                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>()
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
+                Password = "Abcd1234!!"
             };
             input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
             {
@@ -429,7 +446,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
                 InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
-                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>()
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
+                Password = "Abcd1234!!"
             };
             input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
             {
