@@ -536,6 +536,10 @@ const {
               }
               isActive
               monthlyPaymentMoment
+              subscriptions {
+                id
+                name
+              }
             }
           }
         }

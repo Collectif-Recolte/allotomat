@@ -75,9 +75,9 @@ namespace Sig.App.Backend.BackgroundJobs
 
                 var refundGroupByProject = refundTransactionGroupByProject.FirstOrDefault(x => x.Key == groupByProject.Key);
                 var paymentTransactionGroupByMarket = groupByProject.Where(x => x.GetType() == typeof(PaymentTransaction)).Select(x => x as PaymentTransaction).GroupBy(x => x.MarketId).ToList();
-                
+
                 if (paymentTransactionGroupByMarket.Any())
-                { 
+                {
                     foreach (var groupByMarket in paymentTransactionGroupByMarket)
                     {
                         var market = await db.Markets.Where(x => x.Id == groupByMarket.Key).FirstAsync();
@@ -93,7 +93,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 if (refundGroupByProject != null)
                 {
                     var refundTransactionGroupByMarket = refundGroupByProject.GroupBy(x => x.InitialTransaction.MarketId).ToList();
-                    
+
                     foreach (var refundGroupByMarket in refundTransactionGroupByMarket)
                     {
                         var market = await db.Markets.Where(x => x.Id == refundGroupByMarket.Key).FirstAsync();
@@ -101,7 +101,7 @@ namespace Sig.App.Backend.BackgroundJobs
                         var report = marketBalanceReports.FirstOrDefault(x => x.Market.Id == market.Id);
                         if (report != null) {
                             report.Total -= refundGroupByMarket.Sum(x => x.Amount);
-                        } 
+                        }
                         else
                         {
                             marketBalanceReports.Add(new MarketBalanceReport()
@@ -113,7 +113,7 @@ namespace Sig.App.Backend.BackgroundJobs
                     }
                 }
 
-                if(projectManagers.Any())
+                if (projectManagers.Any())
                 {
                     var email = new MonthlyBalanceReportEmail(string.Join(";", projectManagers.Select(x => x.Email)), marketBalanceReports, project);
 
