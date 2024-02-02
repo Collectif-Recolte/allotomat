@@ -13,7 +13,9 @@ namespace Sig.App.Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20230406173641_project-anonymous-beneficiaries")]
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
     partial class projectanonymousbeneficiaries
+#pragma warning restore CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

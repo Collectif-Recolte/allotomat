@@ -55,7 +55,9 @@ namespace Sig.App.Backend.Gql.Schema
         [Description("All users")]
         public async Task<Pagination<UserGraphType>> Users(
             [Inject] IMediator mediator,
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
             int page, int limit, string? searchText, UserType[] userTypes = null)
+#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         {
             var results = await mediator.Send(new SearchUsers.Query
             {

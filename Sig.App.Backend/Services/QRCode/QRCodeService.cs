@@ -81,7 +81,7 @@ namespace Sig.App.Backend.Services.QRCode
                     }
                 }
             }
-            catch (Exception error)
+            catch
             {
                 return "";
             }

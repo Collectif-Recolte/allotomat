@@ -113,9 +113,5 @@ namespace Sig.App.Backend.Extensions
         public IdentityResultException(string message, Exception inner) : base(message, inner)
         {
         }
-
-        protected IdentityResultException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

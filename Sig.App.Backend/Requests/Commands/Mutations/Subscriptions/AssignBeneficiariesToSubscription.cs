@@ -111,8 +111,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 beneficiariesWhoGetSubscriptions = beneficiaries.Length;
                 foreach (var beneficiary in beneficiaries)
                 {
-                    var amount = 0;
-                    
                     subscription.Beneficiaries.Add(new SubscriptionBeneficiary()
                     {
                         BeneficiaryId = beneficiary.Id,

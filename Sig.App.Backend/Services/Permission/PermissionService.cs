@@ -291,7 +291,7 @@ namespace Sig.App.Backend.Services.Permission
             try {
                 beneficiaryLongId = Id.New<Beneficiary>(beneficiaryId).LongIdentifierForType<Beneficiary>();
             }
-            catch (Exception error)
+            catch
             {
                 beneficiaryLongId = Id.New<OffPlatformBeneficiary>(beneficiaryId).LongIdentifierForType<OffPlatformBeneficiary>();
             }
