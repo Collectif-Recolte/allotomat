@@ -4,6 +4,7 @@ using ClosedXML.Excel;
 using FluentAssertions;
 using Xunit;
 using Sig.App.Backend.Helpers;
+using GraphQL.NewtonsoftJson;
 
 namespace Sig.App.BackendTests.Helpers
 {
@@ -23,10 +24,11 @@ namespace Sig.App.BackendTests.Helpers
 
             xl.Worksheets.Count.Should().Be(2);
             xl.Worksheet("Items").RowsUsed().Count().Should().Be(6); // 1 heading row + 4 data rows + 1 footer row
-            xl.Worksheet("Items").Cell(3, 4).Value.Should().Be("The second item");
+            xl.Worksheet("Items").Cell(3, 4).Value.GetText().Should().Be("The second item");
             xl.Worksheet("Items").Cell(1, 3).Style.Fill.BackgroundColor.Should().Be(XLColor.Red);
-            xl.Worksheet("Items").Cell(6, 2).Value.Should().Be(10); // 1+2+3+4
-            xl.Worksheet("Custom worksheet").Cell(2, 2).Value.Should().Be("This is a custom worksheet!");
+            var test = xl.Worksheet("Items").Cell(6, 2).Value;
+            xl.Worksheet("Items").Cell(6, 2).Value.GetNumber().Should().Be(10); // 1+2+3+4
+            xl.Worksheet("Custom worksheet").Cell(2, 2).Value.GetText().Should().Be("This is a custom worksheet!");
         }
 
         [Fact]
@@ -41,8 +43,8 @@ namespace Sig.App.BackendTests.Helpers
             var xl = new XLWorkbook(finalDocument);
 
             xl.Worksheets.Count.Should().Be(2);
-            xl.Worksheet("Items").Cell(2, 1).Value.Should().Be("Item 1");
-            xl.Worksheet("Test").Cell(1, 1).Value.Should().Be("Test");
+            xl.Worksheet("Items").Cell(2, 1).Value.GetText().Should().Be("Item 1");
+            xl.Worksheet("Test").Cell(1, 1).Value.GetText().Should().Be("Test");
         }
 
         private static Stream GenerateSimpleDocument()

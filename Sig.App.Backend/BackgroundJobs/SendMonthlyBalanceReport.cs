@@ -37,10 +37,10 @@ namespace Sig.App.Backend.BackgroundJobs
         }
         public static void RegisterJob(IConfiguration config)
         {
-            RecurringJob.AddOrUpdate<SendMonthlyBalanceReport>(
+            RecurringJob.AddOrUpdate<SendMonthlyBalanceReport>("SendMonthlyBalanceReport",
                 x => x.Run(),
                 Cron.Monthly(),
-                TimeZoneInfo.FindSystemTimeZoneById(config["systemLocalTimezone"]));
+                new RecurringJobOptions() { TimeZone = TimeZoneInfo.FindSystemTimeZoneById(config["systemLocalTimezone"]) });
         }
 
         public async Task Run()
