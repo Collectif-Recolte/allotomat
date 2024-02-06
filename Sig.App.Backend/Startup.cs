@@ -148,7 +148,10 @@ namespace Sig.App.Backend
 
             // MediatR
 
-            services.AddMediatR(typeof(Startup).Assembly);
+            services.AddMediatR(config =>
+            {
+                config.RegisterServicesFromAssembly(typeof(Program).Assembly);
+            });
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ConcurrencyHandlingBehavior<,>));
 

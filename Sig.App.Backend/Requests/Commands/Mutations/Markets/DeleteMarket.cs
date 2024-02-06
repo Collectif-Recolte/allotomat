@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.Plugins.MediatR;
-using Sig.App.Backend.Gql.Interfaces;
-using GraphQL.Conventions;
 using Sig.App.Backend.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -17,10 +15,11 @@ using System.Linq;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.Requests.Queries.Markets;
 using Sig.App.Backend.DbModel.Entities.Transactions;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 {
-    public class DeleteMarket : AsyncRequestHandler<DeleteMarket.Input>
+    public class DeleteMarket : IRequestHandler<DeleteMarket.Input>
     {
         private readonly ILogger<DeleteMarket> logger;
         private readonly UserManager<AppUser> userManager;
@@ -35,7 +34,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             this.mediator = mediator;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
             var marketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets
@@ -71,12 +70,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             await db.SaveChangesAsync();
             logger.LogInformation($"Market deleted ({marketId}, {market.Name})");
         }
-        
+
         [MutationInput]
-        public class Input : IRequest, IHaveMarketId
-        {
-            public Id MarketId { get; set; }
-        }
+        public class Input : HaveMarketId, IRequest {}
 
         public class MarketNotFoundException : RequestValidationException { }
     }

@@ -17,7 +17,7 @@ using System;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 {
-    public class ResendConfirmationEmail : AsyncRequestHandler<ResendConfirmationEmail.Input>
+    public class ResendConfirmationEmail : IRequestHandler<ResendConfirmationEmail.Input>
     {
         private readonly AppDbContext db;
         private readonly UserManager<AppUser> userManager;
@@ -32,7 +32,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             this.logger = logger;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
             var user = await db.Users
                 .Include(x => x.Profile)

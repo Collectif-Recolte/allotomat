@@ -5,17 +5,16 @@ using Sig.App.Backend.Plugins.GraphQL;
 using System.Threading;
 using System.Threading.Tasks;
 using Sig.App.Backend.Plugins.MediatR;
-using Sig.App.Backend.Gql.Interfaces;
-using GraphQL.Conventions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 {
-    public class DeleteSubscription : AsyncRequestHandler<DeleteSubscription.Input>
+    public class DeleteSubscription : IRequestHandler<DeleteSubscription.Input>
     {
         private readonly ILogger<DeleteSubscription> logger;
         private readonly AppDbContext db;
@@ -26,7 +25,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             this.db = db;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
             var subscription = await db.Subscriptions.Include(x => x.Types).Include(x => x.Beneficiaries).Include(x=> x.BudgetAllowances).FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
@@ -61,10 +60,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         }
 
         [MutationInput]
-        public class Input : IRequest, IHaveSubscriptionId
-        {
-            public Id SubscriptionId { get; set; }
-        }
+        public class Input : HaveSubscriptionId, IRequest {}
 
         public class SubscriptionNotFoundException : RequestValidationException { }
         public class CantDeleteSubscriptionWithBeneficiaries : RequestValidationException { }

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.Extensions;
 using GraphQL.Conventions;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
-using Sig.App.Backend.Gql.Interfaces;
 using System.Linq;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 {
@@ -59,9 +59,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveProjectId
+        public class Input : HaveProjectId, IRequest<Payload>
         {
-            public Id ProjectId { get; set; }
             public string Name { get; set; }
             public string[] Keys { get; set; }
         }

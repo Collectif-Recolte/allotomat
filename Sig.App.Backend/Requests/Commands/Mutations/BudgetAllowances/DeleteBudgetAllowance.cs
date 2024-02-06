@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
 {
-    public class DeleteBudgetAllowance : AsyncRequestHandler<DeleteBudgetAllowance.Input>
+    public class DeleteBudgetAllowance : IRequestHandler<DeleteBudgetAllowance.Input>
     {
         private readonly ILogger<DeleteBudgetAllowance> logger;
         private readonly AppDbContext db;
@@ -24,7 +24,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
             this.db = db;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
             var budgetAllowanceId = request.BudgetAllowanceId.LongIdentifierForType<BudgetAllowance>();
             var budgetAllowance = await db.BudgetAllowances.Include(x => x.Beneficiaries).FirstOrDefaultAsync(x => x.Id == budgetAllowanceId, cancellationToken);

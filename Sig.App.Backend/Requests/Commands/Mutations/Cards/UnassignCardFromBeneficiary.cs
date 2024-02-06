@@ -9,7 +9,6 @@ using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -20,6 +19,7 @@ using Microsoft.AspNetCore.Http;
 using NodaTime;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.Helpers;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 {
@@ -178,11 +178,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveBeneficiaryId, IHaveCardId
-        {
-            public Id BeneficiaryId { get; set; }
-            public Id CardId { get; set; }
-        }
+        public class Input : HaveBeneficiaryIdAndCardId, IRequest<Payload> {}
 
         [MutationPayload]
         public class Payload

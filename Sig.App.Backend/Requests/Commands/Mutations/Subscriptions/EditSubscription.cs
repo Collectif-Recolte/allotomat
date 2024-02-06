@@ -9,7 +9,7 @@ using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Plugins.GraphQL;
@@ -79,9 +79,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveSubscriptionId
+        public class Input : HaveSubscriptionId, IRequest<Payload>
         {
-            public Id SubscriptionId { get; set; }
             public string Name { get; set; }
             public SubscriptionMonthlyPaymentMoment MonthlyPaymentMoment { get; set; }
             public LocalDate StartDate { get; set; }

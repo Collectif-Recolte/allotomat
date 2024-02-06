@@ -1,69 +1,68 @@
-﻿using MediatR;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Threading;
+using MediatR;
+using Microsoft.Extensions.Logging;
 using Sig.App.Backend.Extensions;
 
-namespace Sig.App.Backend.Plugins.MediatR
+namespace Sig.App.Backend.Plugins.MediatR;
+
+public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
 {
-    public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+    private readonly ILogger<LoggingBehavior<TRequest, TResponse>> logger;
+
+    public LoggingBehavior(ILogger<LoggingBehavior<TRequest, TResponse>> logger)
     {
-        private readonly ILogger<LoggingBehavior<TRequest, TResponse>> logger;
+        this.logger = logger;
+    }
 
-        public LoggingBehavior(ILogger<LoggingBehavior<TRequest, TResponse>> logger)
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    {
+        var requestName = GetRequestName();
+
+        logger.LogTrace("Handling {RequestName}", requestName);
+
+        var sw = Stopwatch.StartNew();
+
+        try
         {
-            this.logger = logger;
+            var response = await next();
+            sw.Stop();
+            logger.LogTrace("Handled {RequestName} in {Millis}ms", requestName, sw.ElapsedMilliseconds);
+
+            return response;
         }
-
-        public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken,
-            RequestHandlerDelegate<TResponse> next)
+        catch (Exception ex)
         {
-            var requestName = GetRequestName();
+            sw.Stop();
 
-            logger.LogTrace($"Handling {requestName}");
-
-            var sw = Stopwatch.StartNew();
-
-            try
+            switch (ex)
             {
-                var response = await next();
-                sw.Stop();
-                logger.LogTrace($"Handled {requestName} in {sw.ElapsedMilliseconds}ms");
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                sw.Stop();
-
-                switch (ex)
-                {
-                    case RequestValidationException _:
-                    case IdentityResultException ire when ire.IsExpected():
-                        logger.LogWarning(ex,
-                            $"{requestName} failed with expected error after {sw.ElapsedMilliseconds}ms");
-                        throw;
-                    default:
-                        logger.LogError(ex, $"{requestName} failed after {sw.ElapsedMilliseconds}ms");
-                        throw;
-                }
+                case RequestValidationException _:
+                case IdentityResultException ire when ire.IsExpected():
+                    logger.LogWarning(ex, "{RequestName} failed with expected error after {Millis}ms", requestName, sw.ElapsedMilliseconds);
+                    throw;
+                default:
+                    logger.LogError(ex, "{RequestName} failed after {Millis}ms", requestName, sw.ElapsedMilliseconds);
+                    throw;
             }
         }
+    }
 
-        private static string GetRequestName()
+    private static string GetRequestName()
+    {
+        var requestType = typeof(TRequest);
+        var requestName = requestType.Name;
+
+        while (requestType.IsNested)
         {
-            var requestType = typeof(TRequest);
-            var requestName = requestType.Name;
+            requestType = requestType.DeclaringType;
+            if (requestType == null) break;
 
-            while (requestType.IsNested)
-            {
-                requestType = requestType.DeclaringType;
-                requestName = $"{requestType.Name}/{requestName}";
-            }
-
-            return requestName;
+            requestName = $"{requestType.Name}/{requestName}";
         }
+
+        return requestName;
     }
 }

@@ -20,11 +20,13 @@ using Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances;
 
 namespace Sig.App.Backend.Gql.Schema
 {
-    public class Mutation
+    [SchemaExtension]
+    public static class Mutation
     {
         [RequirePermission(GlobalPermission.ManageAllUsers)]
         [AnnotateErrorCodes(typeof(CreateAdminAccount))]
-        public Task<CreateAdminAccount.Payload> CreateAdminAccount(
+        public static Task<CreateAdminAccount.Payload> CreateAdminAccount(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<CreateAdminAccount.Input> input)
         {
@@ -32,16 +34,18 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         [AnnotateErrorCodes(typeof(CompleteUserRegistration))]
-        public Task<CompleteUserRegistration.Payload> CompleteUserRegistration(
+        public static Task<CompleteUserRegistration.Payload> CompleteUserRegistration(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<CompleteUserRegistration.Input> input)
         {
             return mediator.Send(input.Value);
         }
-        
+
         [ApplyPolicy(AuthorizationPolicies.ManageUser)]
         [AnnotateErrorCodes(typeof(UpdateUserProfile))]
-        public Task<UpdateUserProfile.Payload> UpdateUserProfile(
+        public static Task<UpdateUserProfile.Payload> UpdateUserProfile(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<UpdateUserProfile.Input> input)
         {
@@ -49,7 +53,8 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         [AnnotateErrorCodes(typeof(ResendConfirmationEmail))]
-        public async Task<bool> ResendConfirmationEmail(
+        public static async Task<bool> ResendConfirmationEmail(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<ResendConfirmationEmail.Input> input)
         {
@@ -58,7 +63,8 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         [AnnotateErrorCodes(typeof(ConfirmEmail))]
-        public async Task<bool> ConfirmEmail(
+        public static async Task<bool> ConfirmEmail(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<ConfirmEmail.Input> input)
         {
@@ -68,7 +74,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [Description("Sends a password-reset email to the specified user, if it exists. Always returns `true`, even if the email was unknown.")]
         [AnnotateErrorCodes(typeof(SendPasswordReset))]
-        public async Task<bool> SendPasswordReset(
+        public static async Task<bool> SendPasswordReset(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<SendPasswordReset.Input> input)
         {
@@ -78,7 +85,8 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         [AnnotateErrorCodes(typeof(ResetPassword))]
-        public Task<ResetPassword.Payload> ResetPassword(
+        public static Task<ResetPassword.Payload> ResetPassword(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<ResetPassword.Input> input)
         {
@@ -87,7 +95,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [ApplyPolicy(AuthorizationPolicies.LoggedIn)]
         [AnnotateErrorCodes(typeof(ChangePassword))]
-        public Task<ChangePassword.Payload> ChangePassword(
+        public static Task<ChangePassword.Payload> ChangePassword(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<ChangePassword.Input> input)
         {
@@ -96,7 +105,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [ApplyPolicy(AuthorizationPolicies.LoggedIn)]
         [AnnotateErrorCodes(typeof(ChangeEmail))]
-        public async Task<bool> ChangeEmail(
+        public static async Task<bool> ChangeEmail(
+            this GqlMutation _,
              [Inject] IMediator mediator,
              NonNull<ChangeEmail.Input> input)
         {
@@ -106,7 +116,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [ApplyPolicy(AuthorizationPolicies.LoggedIn)]
         [AnnotateErrorCodes(typeof(ConfirmChangeEmail))]
-        public Task<ConfirmChangeEmail.Payload> ConfirmChangeEmail(
+        public static Task<ConfirmChangeEmail.Payload> ConfirmChangeEmail(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<ConfirmChangeEmail.Input> input)
         {
@@ -115,7 +126,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(ProjectPermission.CreateProject)]
         [AnnotateErrorCodes(typeof(CreateProject))]
-        public Task<CreateProject.Payload> CreateProject(
+        public static Task<CreateProject.Payload> CreateProject(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<CreateProject.Input> input
             )
@@ -125,7 +137,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(ProjectPermission.ManageProject)]
         [AnnotateErrorCodes(typeof(EditProject))]
-        public Task<EditProject.Payload> EditProject(
+        public static Task<EditProject.Payload> EditProject(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<EditProject.Input> input
             )
@@ -135,7 +148,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(ProjectPermission.DeleteProject)]
         [AnnotateErrorCodes(typeof(DeleteProject))]
-        public async Task<bool> DeleteProject(
+        public static async Task<bool> DeleteProject(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<DeleteProject.Input> input
             )
@@ -147,7 +161,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(ProjectPermission.ManageProject)]
         [AnnotateErrorCodes(typeof(AddManagerToProject))]
-        public Task<AddManagerToProject.Payload> AddManagerToProject(
+        public static Task<AddManagerToProject.Payload> AddManagerToProject(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<AddManagerToProject.Input> input
             )
@@ -157,7 +172,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(ProjectPermission.ManageProject)]
         [AnnotateErrorCodes(typeof(RemoveManagerFromProject))]
-        public Task<RemoveManagerFromProject.Payload> RemoveManagerFromProject(
+        public static Task<RemoveManagerFromProject.Payload> RemoveManagerFromProject(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<RemoveManagerFromProject.Input> input
             )
@@ -167,7 +183,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(MarketPermission.CreateMarket)]
         [AnnotateErrorCodes(typeof(CreateMarket))]
-        public Task<CreateMarket.Payload> CreateMarket(
+        public static Task<CreateMarket.Payload> CreateMarket(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<CreateMarket.Input> input
             )
@@ -177,7 +194,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(MarketPermission.ManageMarket)]
         [AnnotateErrorCodes(typeof(EditMarket))]
-        public Task<EditMarket.Payload> EditMarket(
+        public static Task<EditMarket.Payload> EditMarket(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<EditMarket.Input> input
             )
@@ -185,10 +203,10 @@ namespace Sig.App.Backend.Gql.Schema
             return mediator.Send(input.Value);
         }
 
-
         [RequirePermission(MarketPermission.DeleteMarket)]
         [AnnotateErrorCodes(typeof(DeleteMarket))]
-        public async Task<bool> DeleteMarket(
+        public static async Task<bool> DeleteMarket(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<DeleteMarket.Input> input
             )
@@ -200,7 +218,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(MarketPermission.ArchiveMarket)]
         [AnnotateErrorCodes(typeof(ArchiveMarket))]
-        public async Task<bool> ArchiveMarket(
+        public static async Task<bool> ArchiveMarket(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<ArchiveMarket.Input> input
             )
@@ -212,7 +231,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(MarketPermission.ManageMarket)]
         [AnnotateErrorCodes(typeof(AddManagerToMarket))]
-        public Task<AddManagerToMarket.Payload> AddManagerToMarket(
+        public static Task<AddManagerToMarket.Payload> AddManagerToMarket(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<AddManagerToMarket.Input> input
             )
@@ -222,7 +242,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(MarketPermission.ManageMarket)]
         [AnnotateErrorCodes(typeof(RemoveManagerFromMarket))]
-        public Task<RemoveManagerFromMarket.Payload> RemoveManagerFromMarket(
+        public static Task<RemoveManagerFromMarket.Payload> RemoveManagerFromMarket(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<RemoveManagerFromMarket.Input> input
             )
@@ -232,7 +253,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(MarketPermission.ManageAllMarkets)]
         [AnnotateErrorCodes(typeof(AddMarketToProject))]
-        public Task<AddMarketToProject.Payload> AddMarketToProject(
+        public static Task<AddMarketToProject.Payload> AddMarketToProject(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<AddMarketToProject.Input> input
             )
@@ -242,7 +264,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(MarketPermission.ManageAllMarkets)]
         [AnnotateErrorCodes(typeof(RemoveMarketFromProject))]
-        public Task<RemoveMarketFromProject.Payload> RemoveMarketFromProject(
+        public static Task<RemoveMarketFromProject.Payload> RemoveMarketFromProject(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<RemoveMarketFromProject.Input> input
             )
@@ -252,7 +275,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(ProjectPermission.ManageProject)]
         [AnnotateErrorCodes(typeof(CreateOrganizationInProject))]
-        public Task<CreateOrganizationInProject.Payload> CreateOrganizationInProject(
+        public static Task<CreateOrganizationInProject.Payload> CreateOrganizationInProject(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<CreateOrganizationInProject.Input> input
             )
@@ -262,7 +286,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(OrganizationPermission.ManageOrganization)]
         [AnnotateErrorCodes(typeof(AddManagerToOrganization))]
-        public Task<AddManagerToOrganization.Payload> AddManagerToOrganization(
+        public static Task<AddManagerToOrganization.Payload> AddManagerToOrganization(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<AddManagerToOrganization.Input> input
             )
@@ -272,7 +297,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(OrganizationPermission.ManageOrganization)]
         [AnnotateErrorCodes(typeof(RemoveManagerFromOrganization))]
-        public Task<RemoveManagerFromOrganization.Payload> RemoveManagerFromOrganization(
+        public static Task<RemoveManagerFromOrganization.Payload> RemoveManagerFromOrganization(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<RemoveManagerFromOrganization.Input> input
             )
@@ -282,7 +308,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(OrganizationPermission.ManageOrganization)]
         [AnnotateErrorCodes(typeof(EditOrganization))]
-        public Task<EditOrganization.Payload> EditOrganization(
+        public static Task<EditOrganization.Payload> EditOrganization(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<EditOrganization.Input> input
             )
@@ -292,7 +319,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(OrganizationPermission.DeleteOrganization)]
         [AnnotateErrorCodes(typeof(DeleteOrganization))]
-        public async Task<bool> DeleteOrganization(
+        public static async Task<bool> DeleteOrganization(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<DeleteOrganization.Input> input
             )
@@ -304,7 +332,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(ProjectPermission.ManageProject)]
         [AnnotateErrorCodes(typeof(CreateSubscriptionInProject))]
-        public Task<CreateSubscriptionInProject.Payload> CreateSubscriptionInProject(
+        public static Task<CreateSubscriptionInProject.Payload> CreateSubscriptionInProject(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<CreateSubscriptionInProject.Input> input
             )
@@ -314,7 +343,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(SubscriptionPermission.EditSubscription)]
         [AnnotateErrorCodes(typeof(EditSubscription))]
-        public Task<EditSubscription.Payload> EditSubscription(
+        public static Task<EditSubscription.Payload> EditSubscription(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<EditSubscription.Input> input
             )
@@ -324,7 +354,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(SubscriptionPermission.DeleteSubscription)]
         [AnnotateErrorCodes(typeof(DeleteSubscription))]
-        public async Task<bool> DeleteSubscription(
+        public static async Task<bool> DeleteSubscription(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<DeleteSubscription.Input> input
             )
@@ -336,7 +367,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(OrganizationPermission.ManageOrganization)]
         [AnnotateErrorCodes(typeof(CreateBeneficiaryInOrganization))]
-        public Task<CreateBeneficiaryInOrganization.Payload> CreateBeneficiaryInOrganization(
+        public static Task<CreateBeneficiaryInOrganization.Payload> CreateBeneficiaryInOrganization(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<CreateBeneficiaryInOrganization.Input> input
             )
@@ -346,7 +378,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(OrganizationPermission.ManageOrganization)]
         [AnnotateErrorCodes(typeof(ImportBeneficiariesListInOrganization))]
-        public Task<ImportBeneficiariesListInOrganization.Payload> ImportBeneficiariesListInOrganization(
+        public static Task<ImportBeneficiariesListInOrganization.Payload> ImportBeneficiariesListInOrganization(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<ImportBeneficiariesListInOrganization.Input> input
             )
@@ -356,7 +389,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(OrganizationPermission.ManageOrganization)]
         [AnnotateErrorCodes(typeof(ImportOffPlatformBeneficiariesListInOrganization))]
-        public Task<ImportOffPlatformBeneficiariesListInOrganization.Payload> ImportOffPlatformBeneficiariesListInOrganization(
+        public static Task<ImportOffPlatformBeneficiariesListInOrganization.Payload> ImportOffPlatformBeneficiariesListInOrganization(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<ImportOffPlatformBeneficiariesListInOrganization.Input> input
             )
@@ -366,7 +400,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(BeneficiaryPermission.ManageBeneficiary)]
         [AnnotateErrorCodes(typeof(RemoveBeneficiaryFromSubscription))]
-        public async Task<bool> RemoveBeneficiaryFromSubscription(
+        public static async Task<bool> RemoveBeneficiaryFromSubscription(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<RemoveBeneficiaryFromSubscription.Input> input)
         {
@@ -377,7 +412,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(BeneficiaryPermission.ManageBeneficiary)]
         [AnnotateErrorCodes(typeof(EditBeneficiary))]
-        public Task<EditBeneficiary.Payload> EditBeneficiary(
+        public static Task<EditBeneficiary.Payload> EditBeneficiary(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<EditBeneficiary.Input> input
             )
@@ -387,7 +423,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(BeneficiaryPermission.DeleteBeneficiary)]
         [AnnotateErrorCodes(typeof(DeleteBeneficiary))]
-        public async Task<bool> DeleteBeneficiary(
+        public static async Task<bool> DeleteBeneficiary(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<DeleteBeneficiary.Input> input
             )
@@ -399,7 +436,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(ProjectPermission.CreateCard)]
         [AnnotateErrorCodes(typeof(CreateCards))]
-        public Task<CreateCards.Payload> CreateCards(
+        public static Task<CreateCards.Payload> CreateCards(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<CreateCards.Input> input)
         {
@@ -408,7 +446,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(BeneficiaryPermission.AssignCard)]
         [AnnotateErrorCodes(typeof(AssignCardToBeneficiary))]
-        public Task<AssignCardToBeneficiary.Payload> AssignCardToBeneficiary(
+        public static Task<AssignCardToBeneficiary.Payload> AssignCardToBeneficiary(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<AssignCardToBeneficiary.Input> input)
         {
@@ -417,7 +456,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(BeneficiaryPermission.AssignCard)]
         [AnnotateErrorCodes(typeof(TransfertCard))]
-        public Task<TransfertCard.Payload> TransfertCard(
+        public static Task<TransfertCard.Payload> TransfertCard(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<TransfertCard.Input> input)
         {
@@ -426,7 +466,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(BeneficiaryPermission.AssignCard)]
         [AnnotateErrorCodes(typeof(AssignUnassignedCardToBeneficiary))]
-        public Task<AssignUnassignedCardToBeneficiary.Payload> AssignUnassignedCardToBeneficiary(
+        public static Task<AssignUnassignedCardToBeneficiary.Payload> AssignUnassignedCardToBeneficiary(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<AssignUnassignedCardToBeneficiary.Input> input)
         {
@@ -435,7 +476,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(BeneficiaryPermission.AssignCard)]
         [AnnotateErrorCodes(typeof(UnassignCardFromBeneficiary))]
-        public Task<UnassignCardFromBeneficiary.Payload> UnassignCardFromBeneficiary(
+        public static Task<UnassignCardFromBeneficiary.Payload> UnassignCardFromBeneficiary(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<UnassignCardFromBeneficiary.Input> input)
         {
@@ -444,7 +486,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(MarketPermission.CreateTransaction)]
         [AnnotateErrorCodes(typeof(CreateTransaction))]
-        public Task<CreateTransaction.Payload> CreateTransaction(
+        public static Task<CreateTransaction.Payload> CreateTransaction(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<CreateTransaction.Input> input)
         {
@@ -453,7 +496,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(MarketPermission.RefundTransaction)]
         [AnnotateErrorCodes(typeof(RefundTransaction))]
-        public Task<RefundTransaction.Payload> RefundTransaction(
+        public static Task<RefundTransaction.Payload> RefundTransaction(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<RefundTransaction.Input> input)
         {
@@ -462,7 +506,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(BeneficiaryPermission.ManuallyAddingFund)]
         [AnnotateErrorCodes(typeof(CreateManuallyAddingFundTransaction))]
-        public Task<CreateManuallyAddingFundTransaction.Payload> CreateManuallyAddingFundTransaction(
+        public static Task<CreateManuallyAddingFundTransaction.Payload> CreateManuallyAddingFundTransaction(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<CreateManuallyAddingFundTransaction.Input> input)
         {
@@ -471,7 +516,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(ProjectPermission.AddLoyaltyFundToCard)]
         [AnnotateErrorCodes(typeof(AddLoyaltyFundToCard))]
-        public Task<AddLoyaltyFundToCard.Payload> AddLoyaltyFundToCard(
+        public static Task<AddLoyaltyFundToCard.Payload> AddLoyaltyFundToCard(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<AddLoyaltyFundToCard.Input> input)
         {
@@ -480,7 +526,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(ProjectPermission.ManageProject)]
         [AnnotateErrorCodes(typeof(AddBeneficiaryTypeInProject))]
-        public Task<AddBeneficiaryTypeInProject.Payload> AddBeneficiaryTypeInProject(
+        public static Task<AddBeneficiaryTypeInProject.Payload> AddBeneficiaryTypeInProject(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<AddBeneficiaryTypeInProject.Input> input)
         {
@@ -489,7 +536,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(BeneficiaryTypePermission.EditBeneficiaryType)]
         [AnnotateErrorCodes(typeof(EditBeneficiaryType))]
-        public Task<EditBeneficiaryType.Payload> EditBeneficiaryType(
+        public static Task<EditBeneficiaryType.Payload> EditBeneficiaryType(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<EditBeneficiaryType.Input> input)
         {
@@ -498,7 +546,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(BeneficiaryTypePermission.DeleteBeneficiaryType)]
         [AnnotateErrorCodes(typeof(DeleteBeneficiaryType))]
-        public async Task<bool> DeleteBeneficiaryType(
+        public static async Task<bool> DeleteBeneficiaryType(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<DeleteBeneficiaryType.Input> input
             )
@@ -510,7 +559,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(GlobalPermission.ManageBudgetAllowance)]
         [AnnotateErrorCodes(typeof(CreateBudgetAllowance))]
-        public Task<CreateBudgetAllowance.Payload> CreateBudgetAllowance(
+        public static Task<CreateBudgetAllowance.Payload> CreateBudgetAllowance(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<CreateBudgetAllowance.Input> input)
         {
@@ -519,7 +569,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(GlobalPermission.ManageBudgetAllowance)]
         [AnnotateErrorCodes(typeof(EditBudgetAllowance))]
-        public Task<EditBudgetAllowance.Payload> EditBudgetAllowance(
+        public static Task<EditBudgetAllowance.Payload> EditBudgetAllowance(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<EditBudgetAllowance.Input> input)
         {
@@ -528,7 +579,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(GlobalPermission.ManageBudgetAllowance)]
         [AnnotateErrorCodes(typeof(DeleteBudgetAllowance))]
-        public async Task<bool> DeleteBudgetAllowance(
+        public static async Task<bool> DeleteBudgetAllowance(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<DeleteBudgetAllowance.Input> input
             )
@@ -540,7 +592,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(OrganizationPermission.ManageOrganization)]
         [AnnotateErrorCodes(typeof(AssignBeneficiariesToSubscription))]
-        public Task<AssignBeneficiariesToSubscription.Payload> AssignBeneficiariesToSubscription(
+        public static Task<AssignBeneficiariesToSubscription.Payload> AssignBeneficiariesToSubscription(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<AssignBeneficiariesToSubscription.Input> input)
         {
@@ -548,7 +601,8 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         [AnnotateErrorCodes(typeof(ExampleFormError))]
-        public Task<ExampleFormError.Payload> ExampleFormError(
+        public static Task<ExampleFormError.Payload> ExampleFormError(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<ExampleFormError.Input> input)
         {
@@ -557,7 +611,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(GlobalPermission.ManageProductGroup)]
         [AnnotateErrorCodes(typeof(CreateProductGroup))]
-        public Task<CreateProductGroup.Payload> CreateProductGroup(
+        public static Task<CreateProductGroup.Payload> CreateProductGroup(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<CreateProductGroup.Input> input)
         {
@@ -566,7 +621,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(GlobalPermission.ManageProductGroup)]
         [AnnotateErrorCodes(typeof(EditProductGroup))]
-        public Task<EditProductGroup.Payload> EditProductGroup(
+        public static Task<EditProductGroup.Payload> EditProductGroup(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<EditProductGroup.Input> input)
         {
@@ -575,7 +631,8 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(GlobalPermission.ManageProductGroup)]
         [AnnotateErrorCodes(typeof(DeleteProductGroup))]
-        public async Task<bool> DeleteProductGroup(
+        public static async Task<bool> DeleteProductGroup(
+            this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<DeleteProductGroup.Input> input
             )

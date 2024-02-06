@@ -8,7 +8,7 @@ using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -184,9 +184,8 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
             return transactions.Sum(x => x.Amount);
         }
 
-        public class Input : IRequest<Payload>, IHaveProjectId
+        public class Input : HaveProjectId, IRequest<Payload>
         {
-            public Id ProjectId { get; set; }
             public IEnumerable<long> Subscriptions { get; set; }
         }
 

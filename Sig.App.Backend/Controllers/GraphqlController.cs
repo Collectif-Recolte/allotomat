@@ -1,7 +1,6 @@
 ﻿using GraphQL;
 using GraphQL.Conventions;
 using GraphQL.Conventions.Execution;
-using GraphQL.Language.AST;
 using GraphQL.Validation;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +16,7 @@ using Microsoft.Extensions.Hosting;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
+using GraphQLParser.AST;
 
 namespace Sig.App.Backend.Controllers
 {
@@ -60,7 +60,7 @@ namespace Sig.App.Backend.Controllers
                 var executionResult = await executor.ExecuteAsync();
                 sw.Stop();
 
-                var result = Content(await engine.SerializeResultAsync(executionResult), "application/json");
+                var result = Content(engine.SerializeResult(executionResult), "application/json");
                 result.StatusCode = StatusCodes.Status200OK;
 
                 LogExecutionOutcome(executionResult, requestBody, sw);
@@ -86,10 +86,10 @@ namespace Sig.App.Backend.Controllers
             LogExecutionErrors(executionResult.Errors);
         }
 
-        private static string GetOperationDescription(Operation op, string requestBody)
+        private static string GetOperationDescription(GraphQLOperationDefinition op, string requestBody)
         {
             if (op != null)
-                return $"GQL {op.OperationType} {(string.IsNullOrWhiteSpace(op.Name) ? "(anonymous)" : op.Name)}";
+                return $"GQL {op.Operation} {(string.IsNullOrWhiteSpace(op.Name.StringValue) ? "(anonymous)" : op.Name)}";
 
             try
             {

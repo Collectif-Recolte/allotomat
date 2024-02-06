@@ -8,7 +8,6 @@ using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Plugins.GraphQL;
@@ -18,6 +17,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 {
@@ -167,10 +167,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveSubscriptionId, IHaveOrganizationId
+        public class Input : HaveOrganizationIdAndSubscriptionId, IRequest<Payload>
         {
-            public Id OrganizationId { get; set; }
-            public Id SubscriptionId { get; set; }
             public decimal Amount { get; set; }
 
             //Filters

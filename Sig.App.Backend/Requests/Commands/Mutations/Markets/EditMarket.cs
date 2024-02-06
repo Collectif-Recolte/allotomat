@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Plugins.GraphQL;
@@ -47,9 +47,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveMarketId
+        public class Input : HaveMarketId, IRequest<Payload>
         {
-            public Id MarketId { get; set; }
             public Maybe<NonNull<string>> Name { get; set; }
         }
 

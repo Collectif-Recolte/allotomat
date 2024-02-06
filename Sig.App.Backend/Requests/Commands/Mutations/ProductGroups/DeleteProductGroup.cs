@@ -11,11 +11,10 @@ using Sig.App.Backend.Plugins.MediatR;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static Sig.App.Backend.Requests.Commands.Mutations.ProductGroups.EditProductGroup;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
 {
-    public class DeleteProductGroup : AsyncRequestHandler<DeleteProductGroup.Input>
+    public class DeleteProductGroup : IRequestHandler<DeleteProductGroup.Input>
     {
         private readonly ILogger<DeleteProductGroup> logger;
         private readonly AppDbContext db;
@@ -26,7 +25,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
             this.db = db;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
             var productGroupId = request.ProductGroupId.LongIdentifierForType<ProductGroup>();
             var productGroup = await db.ProductGroups.Include(x => x.Types).FirstOrDefaultAsync(x => x.Id == productGroupId, cancellationToken);

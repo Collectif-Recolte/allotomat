@@ -5,7 +5,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Plugins.MediatR;
 using System.Linq;
 using System.Threading;
@@ -41,11 +41,7 @@ namespace Sig.App.Backend.Requests.Queries.Cards
             throw new CardCantBeUsedInMarketException();
         }
 
-        public class Input : IRequest<bool>, IHaveMarketId, IHaveCardId
-        {
-            public Id CardId { get; set; }
-            public Id MarketId { get; set; }
-        }
+        public class Input : HaveMarketIdAndCardId, IRequest<bool> { }
 
         public class CardNotFoundException : RequestValidationException { }
         public class CardDeactivatedException : RequestValidationException { }

@@ -7,18 +7,17 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.Plugins.MediatR;
-using Sig.App.Backend.Gql.Interfaces;
-using GraphQL.Conventions;
 using Sig.App.Backend.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.Requests.Queries.Markets;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 {
-    public class ArchiveMarket : AsyncRequestHandler<ArchiveMarket.Input>
+    public class ArchiveMarket : IRequestHandler<ArchiveMarket.Input>
     {
         private readonly ILogger<ArchiveMarket> logger;
         private readonly UserManager<AppUser> userManager;
@@ -33,7 +32,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             this.mediator = mediator;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
             var marketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets
@@ -61,12 +60,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             await db.SaveChangesAsync();
             logger.LogInformation($"Market archive ({marketId}, {market.Name})");
         }
-        
+
         [MutationInput]
-        public class Input : IRequest, IHaveMarketId
-        {
-            public Id MarketId { get; set; }
-        }
+        public class Input : HaveMarketId, IRequest {}
 
         public class MarketNotFoundException : RequestValidationException { }
     }

@@ -11,7 +11,7 @@ using Sig.App.Backend.DbModel.Entities.Profiles;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -117,9 +117,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
         public class ExistingUserNotMarketManagerException : RequestValidationException { }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveMarketId
+        public class Input : HaveMarketId, IRequest<Payload>
         {
-            public Id MarketId { get; set; }
             public IEnumerable<string> ManagerEmails { get; set; }
         }
 

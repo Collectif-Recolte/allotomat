@@ -6,7 +6,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -62,11 +62,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
         public class MarketAlreadyInProjectException : RequestValidationException { }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveProjectId, IHaveMarketId
-        {
-            public Id ProjectId { get; set; }
-            public Id MarketId { get; set; }
-        }
+        public class Input : HaveProjectIdAndMarketId, IRequest<Payload> {}
 
         [MutationPayload]
         public class Payload

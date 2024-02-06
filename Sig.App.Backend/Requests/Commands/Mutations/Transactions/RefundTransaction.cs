@@ -23,8 +23,8 @@ using Sig.App.Backend.Helpers;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
-using Sig.App.Backend.Gql.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 {
@@ -201,10 +201,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveInitialTransactionId
+        public class Input : HaveInitialTransactionId, IRequest<Payload>
         {
             public string Password { get; set; }
-            public Id InitialTransactionId { get; set; }
             public List<RefundTransactionsInput> Transactions { get; set; }
         }
 

@@ -13,7 +13,7 @@ using Sig.App.Backend.Extensions;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 {
-    public class ChangeEmail : AsyncRequestHandler<ChangeEmail.Input>
+    public class ChangeEmail : IRequestHandler<ChangeEmail.Input>
     {
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly UserManager<AppUser> userManager;
@@ -28,7 +28,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             this.logger = logger;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
             if (request.NewEmail == "") throw new EmailEmptyException();
 

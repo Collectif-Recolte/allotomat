@@ -5,17 +5,16 @@ using Sig.App.Backend.Plugins.GraphQL;
 using System.Threading;
 using System.Threading.Tasks;
 using Sig.App.Backend.Plugins.MediatR;
-using Sig.App.Backend.Gql.Interfaces;
-using GraphQL.Conventions;
 using Sig.App.Backend.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using NodaTime;
 using System.Linq;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 {
-    public class DeleteBeneficiary : AsyncRequestHandler<DeleteBeneficiary.Input>
+    public class DeleteBeneficiary : IRequestHandler<DeleteBeneficiary.Input>
     {
         private readonly ILogger<DeleteBeneficiary> logger;
         private readonly AppDbContext db;
@@ -28,7 +27,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             this.clock = clock;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
             var beneficiaryId = request.BeneficiaryId.LongIdentifierForType<Beneficiary>();
             var beneficiary = await db.Beneficiaries
@@ -75,10 +74,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
         }
 
         [MutationInput]
-        public class Input : IRequest, IHaveBeneficiaryId
-        {
-            public Id BeneficiaryId { get; set; }
-        }
+        public class Input : HaveBeneficiaryId, IRequest {}
 
         public class BeneficiaryNotFoundException : RequestValidationException { }
         public class BeneficiaryCantHaveActiveSubscriptionException : RequestValidationException { }

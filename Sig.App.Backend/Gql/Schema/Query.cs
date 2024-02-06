@@ -42,18 +42,20 @@ using Sig.App.Backend.Requests.Queries.Beneficiaries;
 
 namespace Sig.App.Backend.Gql.Schema
 {
-    public class Query
+    [SchemaExtension]
+    public static class Query
     {
         [ApplyPolicy(AuthorizationPolicies.LoggedIn)]
         [Description("The currently authenticated user.")]
-        public IDataLoaderResult<UserGraphType> Me(IAppUserContext ctx)
+        public static IDataLoaderResult<UserGraphType> Me(this GqlQuery _, IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadUser(ctx.CurrentUserId);
         }
 
         [RequirePermission(GlobalPermission.ManageAllUsers)]
         [Description("All users")]
-        public async Task<Pagination<UserGraphType>> Users(
+        public static async Task<Pagination<UserGraphType>> Users(
+            this GqlQuery _,
             [Inject] IMediator mediator,
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
             int page, int limit, string? searchText, UserType[] userTypes = null)
@@ -69,13 +71,14 @@ namespace Sig.App.Backend.Gql.Schema
             return results.Map(x => new UserGraphType(x));
         }
         
-        public IDataLoaderResult<UserGraphType> User(IAppUserContext ctx, Id id)
+        public static IDataLoaderResult<UserGraphType> User(this GqlQuery _, IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadUser(id.IdentifierForType<AppUser>());
         }
 
         [RequirePermission(GlobalPermission.ManageAllUsers)]
-        public async Task<UserGraphType> UserByEmail(
+        public static async Task<UserGraphType> UserByEmail(
+            this GqlQuery _,
             [Inject] AppDbContext db,
             string email)
         {
@@ -85,7 +88,8 @@ namespace Sig.App.Backend.Gql.Schema
                 : new UserGraphType(user);
         }
 
-        public async Task<VerifyTokenPayload> VerifyToken(
+        public static async Task<VerifyTokenPayload> VerifyToken(
+            this GqlQuery _,
             [Inject] UserManager<AppUser> userManager,
             [Inject] IOptions<IdentityOptions> identityOptions,
             string email, string token, TokenType type)
@@ -140,7 +144,7 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(GlobalPermission.ManageProjects, GlobalPermission.ManageSpecificProject)]
         [Description("All projects manageable by current user")]
-        public async Task<IEnumerable<ProjectGraphType>> Projects(IAppUserContext ctx, [Inject] AppDbContext db, [Inject] PermissionService permissionService)
+        public static async Task<IEnumerable<ProjectGraphType>> Projects(this GqlQuery _, IAppUserContext ctx, [Inject] AppDbContext db, [Inject] PermissionService permissionService)
         {
             var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
             if (globalPermissions.Contains(GlobalPermission.ManageProjects))
@@ -158,14 +162,14 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         [RequirePermission(ProjectPermission.ManageProject)]
-        public IDataLoaderResult<ProjectGraphType> Project(IAppUserContext ctx, Id id)
+        public static IDataLoaderResult<ProjectGraphType> Project(this GqlQuery _, IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadProject(id.LongIdentifierForType<Project>());
         }
 
         [RequirePermission(GlobalPermission.ManageSpecificOrganization)]
         [Description("All organizations manageable by current user")]
-        public async Task<IEnumerable<OrganizationGraphType>> Organizations(IAppUserContext ctx, [Inject] AppDbContext db, [Inject] PermissionService permissionService)
+        public static async Task<IEnumerable<OrganizationGraphType>> Organizations(this GqlQuery _, IAppUserContext ctx, [Inject] AppDbContext db, [Inject] PermissionService permissionService)
         {
             var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
             if (globalPermissions.Contains(GlobalPermission.ManageSpecificOrganization))
@@ -179,7 +183,7 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         [RequirePermission(OrganizationPermission.ManageOrganization)]
-        public async Task<IDataLoaderResult<OrganizationGraphType>> Organization(IAppUserContext ctx, Id id, [Inject] PermissionService permissionService)
+        public static async Task<IDataLoaderResult<OrganizationGraphType>> Organization(this GqlQuery _, IAppUserContext ctx, Id id, [Inject] PermissionService permissionService)
         {
             var organizationPermissions = await permissionService.GetOrganizationPermissions(ctx.CurrentUser, id.IdentifierForType<Organization>());
             if (organizationPermissions.Contains(OrganizationPermission.ManageOrganization))
@@ -194,7 +198,7 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(GlobalPermission.ManageMarkets, GlobalPermission.ManageSpecificMarket)]
         [Description("All markets manageable by current user")]
-        public async Task<IEnumerable<MarketGraphType>> Markets(IAppUserContext ctx, [Inject] AppDbContext db, [Inject] PermissionService permissionService)
+        public static async Task<IEnumerable<MarketGraphType>> Markets(this GqlQuery _, IAppUserContext ctx, [Inject] AppDbContext db, [Inject] PermissionService permissionService)
         {
             var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
             if (globalPermissions.Contains(GlobalPermission.ManageMarkets))
@@ -211,13 +215,13 @@ namespace Sig.App.Backend.Gql.Schema
             }
         }
 
-        public IDataLoaderResult<MarketGraphType> Market(IAppUserContext ctx, Id id)
+        public static IDataLoaderResult<MarketGraphType> Market(this GqlQuery _, IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadMarket(id.LongIdentifierForType<Market>());
         }
 
         [RequirePermission(BeneficiaryPermission.ManageBeneficiary)]
-        public IDataLoaderResult<IBeneficiaryGraphType> Beneficiary(IAppUserContext ctx, Id id)
+        public static IDataLoaderResult<IBeneficiaryGraphType> Beneficiary(this GqlQuery _, IAppUserContext ctx, Id id)
         {
             long longId;
             if (id.IsIdentifierForType<Beneficiary>())
@@ -232,43 +236,43 @@ namespace Sig.App.Backend.Gql.Schema
             return ctx.DataLoader.LoadBeneficiary(longId);
         }
         
-        public IDataLoaderResult<CardGraphType> Card(IAppUserContext ctx, Id id)
+        public static IDataLoaderResult<CardGraphType> Card(this GqlQuery _, IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadCardById(id.LongIdentifierForType<Card>());
         }
 
-        public IDataLoaderResult<CardGraphType> CardByNumber(IAppUserContext ctx, string cardNumber)
+        public static IDataLoaderResult<CardGraphType> CardByNumber(this GqlQuery _, IAppUserContext ctx, string cardNumber)
         {
             return ctx.DataLoader.LoadCardByCardNumber(cardNumber);
         }
 
-        public IDataLoaderResult<SubscriptionGraphType> Subscription(IAppUserContext ctx, Id id)
+        public static IDataLoaderResult<SubscriptionGraphType> Subscription(this GqlQuery _, IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadSubscriptionById(id.LongIdentifierForType<Subscription>());
         }
 
-        public IDataLoaderResult<BudgetAllowanceGraphType> BudgetAllowance(IAppUserContext ctx, Id id)
+        public static IDataLoaderResult<BudgetAllowanceGraphType> BudgetAllowance(this GqlQuery _, IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadBudgetAllowance(id.LongIdentifierForType<BudgetAllowance>());
         }
 
-        public IDataLoaderResult<ProductGroupGraphType> ProductGroup(IAppUserContext ctx, Id id)
+        public static IDataLoaderResult<ProductGroupGraphType> ProductGroup(this GqlQuery _, IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadProductGroup(id.LongIdentifierForType<ProductGroup>());
         }
 
         [AnnotateErrorCodes(typeof(VerifyCardCanBeUsedInMarket))]
-        public async Task<bool> VerifyCardCanBeUsedInMarket(Id cardId, Id marketId, [Inject] IMediator mediator)
+        public static async Task<bool> VerifyCardCanBeUsedInMarket(this GqlQuery _, Id cardId, Id marketId, [Inject] IMediator mediator)
         {
             return await mediator.Send(new VerifyCardCanBeUsedInMarket.Input() { CardId = cardId, MarketId = marketId});
         }
 
-        public IDataLoaderResult<BeneficiaryTypeGraphType> BeneficiaryType(IAppUserContext ctx, Id id)
+        public static IDataLoaderResult<BeneficiaryTypeGraphType> BeneficiaryType(this GqlQuery _, IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadBeneficiaryType(id.LongIdentifierForType<BeneficiaryType>());
         }
 
-        public async Task<ForecastAssignBeneficiariesToSubscription.Payload> ForecastAssignBeneficiariesToSubscription(Id organizationId, Id subscriptionId, int amount, bool withoutSubscription, Id[] withSubscriptions, Id[] withCategories, string searchText, bool? withCard, [Inject] IMediator mediator)
+        public static async Task<ForecastAssignBeneficiariesToSubscription.Payload> ForecastAssignBeneficiariesToSubscription(this GqlQuery _, Id organizationId, Id subscriptionId, int amount, bool withoutSubscription, Id[] withSubscriptions, Id[] withCategories, string searchText, bool? withCard, [Inject] IMediator mediator)
         {
             return await mediator.Send(new ForecastAssignBeneficiariesToSubscription.Input()
             {
@@ -283,7 +287,7 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        public async Task<long> ForecastNextUnassignedCard(Id projectId, [Inject] IMediator mediator)
+        public static async Task<long> ForecastNextUnassignedCard(this GqlQuery _, Id projectId, [Inject] IMediator mediator)
         {
             return await mediator.Send(new ForecastNextUnassignedCard.Input()
             {
@@ -291,7 +295,7 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        public async Task<ForecastImportOffPlatformBeneficiariesListInOrganization.ImportOffPlatformBeneficiariesListPayload> ForecastImportOffPlatformBeneficiariesListInOrganization(Id organizationId, string[] ids1, DateTime[] endDates, [Inject] IMediator mediator)
+        public static async Task<ForecastImportOffPlatformBeneficiariesListInOrganization.ImportOffPlatformBeneficiariesListPayload> ForecastImportOffPlatformBeneficiariesListInOrganization(this GqlQuery _, Id organizationId, string[] ids1, DateTime[] endDates, [Inject] IMediator mediator)
         {
             if (ids1.Length != endDates.Length) return null;
 
@@ -312,7 +316,7 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        public async Task<string> GenerateTransactionsReport(Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText, string timeZoneId, [Inject] IMediator mediator)
+        public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText, string timeZoneId, [Inject] IMediator mediator)
         {
             return await mediator.Send(new GenerateTransactionsReport.Input()
             {
@@ -329,7 +333,7 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        public async Task<string> ExportBeneficiariesList(Id id, string timeZoneId, [Inject] IMediator mediator)
+        public static async Task<string> ExportBeneficiariesList(this GqlQuery _, Id id, string timeZoneId, [Inject] IMediator mediator)
         {
             return await mediator.Send(new ExportBeneficiariesList.Input()
             {
@@ -338,7 +342,7 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        public async Task<string> ExportOffPlatformBeneficiariesList(Id id, string timeZoneId, [Inject] IMediator mediator)
+        public static async Task<string> ExportOffPlatformBeneficiariesList(this GqlQuery _, Id id, string timeZoneId, [Inject] IMediator mediator)
         {
             return await mediator.Send(new ExportOffPlatformBeneficiariesList.Input()
             {
@@ -347,7 +351,7 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        public async Task<string> DownloadBeneficiariesTemplateFile(Id organizationId, [Inject] IMediator mediator)
+        public static async Task<string> DownloadBeneficiariesTemplateFile(this GqlQuery _, Id organizationId, [Inject] IMediator mediator)
         {
             return await mediator.Send(new DownloadBeneficiariesTemplateFile.Input()
             {
@@ -355,13 +359,13 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
         
-        public async Task<RefundTransactionGraphType> RefundTransaction(Id id, [Inject] AppDbContext db)
+        public static async Task<RefundTransactionGraphType> RefundTransaction(this GqlQuery _, Id id, [Inject] AppDbContext db)
         {
             var transaction = await db.Transactions.OfType<RefundTransaction>().Where(x => x.Id == id.LongIdentifierForType<RefundTransaction>()).FirstOrDefaultAsync();
             return new RefundTransactionGraphType(transaction);
         }
 
-        public async Task<ITransactionGraphType> Transaction(Id id, [Inject] AppDbContext db)
+        public static async Task<ITransactionGraphType> Transaction(this GqlQuery _, Id id, [Inject] AppDbContext db)
         {
             var transaction = await db.Transactions.Where(x => x.Id == id.LongIdentifierForType<PaymentTransaction>()).FirstOrDefaultAsync();
 
@@ -388,7 +392,7 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(GlobalPermission.ManageTransactions)]
         [Description("All transactions")]
-        public async Task<Pagination<TransactionLogGraphType>> TransactionLogs([Inject] IMediator mediator,
+        public static async Task<Pagination<TransactionLogGraphType>> TransactionLogs(this GqlQuery _, [Inject] IMediator mediator,
             int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText)
         {
             var results = await mediator.Send(new SearchTransactionLogs.Query

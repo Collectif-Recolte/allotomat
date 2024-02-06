@@ -83,10 +83,13 @@
 <script setup>
 import { defineProps, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { storeToRefs } from "pinia";
 
 import ICON_RESET from "@/lib/icons/reset.json";
 
 import { URL_TRANSACTION_ADMIN_REFUND } from "@/lib/consts/urls";
+
+import { useAuthStore } from "@/lib/store/auth";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { formatDate, textualWithTimeFormat } from "@/lib/helpers/date";
@@ -105,7 +108,10 @@ import {
   TRANSFER_FUND_TRANSACTION_LOG
 } from "@/lib/consts/enums";
 
+import { GLOBAL_CREATE_TRANSACTION } from "@/lib/consts/permissions";
+
 const { t } = useI18n();
+const { getGlobalPermissions } = storeToRefs(useAuthStore());
 
 const props = defineProps({
   transactions: { type: Array, required: true }
@@ -126,6 +132,10 @@ const cols = computed(() => [
   },
   { label: "" }
 ]);
+
+const canCreateTransaction = computed(() => {
+  return getGlobalPermissions.value.includes(GLOBAL_CREATE_TRANSACTION);
+});
 
 function getTransactionDate(transaction) {
   return formatDate(new Date(transaction.createdAt), textualWithTimeFormat);
@@ -206,7 +216,7 @@ function getTransactionAmount(transaction) {
 }
 
 function getBtnGroup(item) {
-  if (item.discriminator !== PAYMENT_TRANSACTION_LOG) {
+  if (item.discriminator !== PAYMENT_TRANSACTION_LOG || !canCreateTransaction.value) {
     return [];
   }
   return [

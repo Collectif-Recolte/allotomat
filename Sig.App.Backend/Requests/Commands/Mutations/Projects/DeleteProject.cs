@@ -8,8 +8,6 @@ using Sig.App.Backend.Services.Mailer;
 using Microsoft.AspNetCore.Identity;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.Plugins.MediatR;
-using Sig.App.Backend.Gql.Interfaces;
-using GraphQL.Conventions;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Microsoft.EntityFrameworkCore;
@@ -18,14 +16,14 @@ using System.Security.Claims;
 using Sig.App.Backend.Constants;
 using NodaTime;
 using System.Linq;
-using System;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using System.Collections.Generic;
 using Sig.App.Backend.Requests.Queries.Organizations;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 {
-    public class DeleteProject : AsyncRequestHandler<DeleteProject.Input>
+    public class DeleteProject : IRequestHandler<DeleteProject.Input>
     {
         private readonly ILogger<DeleteProject> logger;
         private readonly IMailer mailer;
@@ -44,7 +42,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             this.clock = clock;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects
@@ -221,10 +219,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
         }
 
         [MutationInput]
-        public class Input : IRequest, IHaveProjectId
-        {
-            public Id ProjectId { get; set; }
-        }
+        public class Input : HaveProjectId, IRequest {}
 
         public class ProjectNotFoundException : RequestValidationException { }
         public class ProjectCantHaveActiveSubscription : RequestValidationException { }

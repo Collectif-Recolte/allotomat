@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using GraphQL.Conventions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -8,7 +7,6 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -18,10 +16,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 {
-    public class RemoveBeneficiaryFromSubscription : AsyncRequestHandler<RemoveBeneficiaryFromSubscription.Input>
+    public class RemoveBeneficiaryFromSubscription : IRequestHandler<RemoveBeneficiaryFromSubscription.Input>
     {
         private readonly ILogger<RemoveBeneficiaryFromSubscription> logger;
         private readonly AppDbContext db;
@@ -36,7 +35,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             this.httpContextAccessor = httpContextAccessor;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
             var subscription = await db.Subscriptions.Include(x => x.Types).ThenInclude(x => x.ProductGroup)
@@ -118,10 +117,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         public class BeneficiaryNotInSubscriptionException : RequestValidationException { }
 
         [MutationInput]
-        public class Input : IRequest, IHaveSubscriptionId, IHaveBeneficiaryId
-        {
-            public Id BeneficiaryId { get; set; }
-            public Id SubscriptionId { get; set; }
-        }
+        public class Input : HaveSubscriptionIdAndBeneficiaryId, IRequest { }
     }
 }

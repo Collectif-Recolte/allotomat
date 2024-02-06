@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Entities.Profiles;
-using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Profiles
 {
@@ -91,10 +91,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Profiles
         public class UserNotFoundException : UpdateProfileException { }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveUserId
+        public class Input : HaveUserId, IRequest<Payload>
         {
-            public Id UserId { get; set; }
-
             public Maybe<NonNull<string>> FirstName { get; set; }
             public Maybe<NonNull<string>> LastName { get; set; }
         }
