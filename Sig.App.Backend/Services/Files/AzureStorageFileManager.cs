@@ -15,6 +15,7 @@ namespace Sig.App.Backend.Services.Files
     {
         private readonly ILogger<AzureStorageFileManager> logger;
         private readonly CloudStorageAccount account;
+        private string originalFileName;
 
         public AzureStorageFileManager(IOptions<AzureStorageFileManagerOptions> options, ILogger<AzureStorageFileManager> logger)
         {
@@ -71,10 +72,15 @@ namespace Sig.App.Backend.Services.Files
             await blob.DownloadToStreamAsync(stream);
             stream.Position = 0;
 
-            var originalFileName = blob.Metadata.GetValueOrDefault("OriginalFileNameB64")?.Base64Decode();
+            string originalFileName;
+            blob.Metadata.TryGetValue("OriginalFileNameB64", out originalFileName);
+            originalFileName = originalFileName?.Base64Decode();
+
+            string contentType;
+            blob.Metadata.TryGetValue("ContentType", out contentType);
 
             return new FileInfos {
-                ContentType = blob.Metadata.GetValueOrDefault("ContentType"),
+                ContentType = contentType,
                 FileName = originalFileName,
                 Content = stream,
                 Metadata = blob.Metadata
