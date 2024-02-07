@@ -15,7 +15,6 @@ namespace Sig.App.Backend.Services.Files
     {
         private readonly ILogger<AzureStorageFileManager> logger;
         private readonly CloudStorageAccount account;
-        private string originalFileName;
 
         public AzureStorageFileManager(IOptions<AzureStorageFileManagerOptions> options, ILogger<AzureStorageFileManager> logger)
         {
