@@ -182,7 +182,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                             }
                         }
                     }
-                    else
+                    else if (card.Project.AdministrationSubscriptionsOffPlatform)
                     {
                         // Beneficiary is off platform
                         AddAmountToTransactionLog(transaction, card, market, null, productGroup, fundToRemove);
