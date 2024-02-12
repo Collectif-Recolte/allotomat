@@ -30,22 +30,23 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
                 .GetCurrentInstant()
                 .ToDateTimeUtc();
 
-            var results = await db.Projects
-                .Include(x => x.Organizations).ThenInclude(x => x.Beneficiaries).ThenInclude(x => x.Card).ThenInclude(x => x.Funds).ThenInclude(x => x.ProductGroup)
-                .Include(x => x.Subscriptions).ThenInclude(x => x.BudgetAllowances)
-                .Where(c => request.Ids.Contains(c.Id))
-                .AsNoTracking()
-                .ToDictionaryAsync(x => x.Id, x => x);
+            var results = new Dictionary<long, ProjectStatsGraphType>();
 
-            return results.ToDictionary(x => x.Key, x =>
+            foreach (var id in request.Ids)
             {
-                return new ProjectStatsGraphType()
+                var beneficiaryCount = await db.Beneficiaries.Where(x => id == x.Organization.ProjectId).AsNoTracking().CountAsync();
+                var unspentLoyaltyFund = await db.Funds.Where(x => id == x.Card.ProjectId && x.ProductGroup.Name == ProductGroupType.LOYALTY).AsNoTracking().SumAsync(x => x.Amount);
+                var subscriptions = await db.Subscriptions.Include(x => x.BudgetAllowances).Where(x => id == x.ProjectId).AsNoTracking().ToListAsync();
+                var totalActiveSubscriptionsEnvelopes = subscriptions.Where(x => (x.FundsExpirationDate >= today || !x.IsFundsAccumulable)).Sum(x => x.BudgetAllowances.Sum(y => y.OriginalFund));
+                results.Add(id, new ProjectStatsGraphType()
                 {
-                    BeneficiaryCount = x.Value.Organizations.SelectMany(y => y.Beneficiaries).Count(),
-                    UnspentLoyaltyFund = x.Value.Organizations.Sum(o => o.Beneficiaries.Where(b => b.Card != null).Sum(b => b.Card.Funds.Where(f => f.ProductGroup.Name == ProductGroupType.LOYALTY).Sum(f => f.Amount))),
-                    TotalActiveSubscriptionsEnvelopes = x.Value.Subscriptions.Where(x => x.FundsExpirationDate >= today || !x.IsFundsAccumulable).Sum(y => y.BudgetAllowances.Sum(z => z.OriginalFund)),
-                };
-            });
+                    BeneficiaryCount = beneficiaryCount,
+                    UnspentLoyaltyFund = unspentLoyaltyFund,
+                    TotalActiveSubscriptionsEnvelopes = totalActiveSubscriptionsEnvelopes
+                });
+            }
+
+            return results;
         }
     }
 }
