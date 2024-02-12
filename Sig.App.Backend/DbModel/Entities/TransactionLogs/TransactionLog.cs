@@ -40,6 +40,8 @@ public class TransactionLog : IHaveLongIdentifier
     public long? SubscriptionId { get; set; }
     public string SubscriptionName { get; set; }
     public long ProjectId { get; set; }
+    public string ProjectName { get; set; }
+    public bool InitiatedByProject { get; set; }
 
     public List<TransactionLogProductGroup> TransactionLogProductGroups { get; set; }
 }

@@ -81,15 +81,18 @@ const { mutate: editProject } = useMutation(
 );
 
 async function onSubmit({ name, url, allowOrganizationsAssignCards, beneficiariesAreAnonymous }) {
+  let input = {
+    projectId: route.params.projectId,
+    name: { value: name },
+    url: { value: url },
+    allowOrganizationsAssignCards: { value: allowOrganizationsAssignCards },
+    beneficiariesAreAnonymous: { value: beneficiariesAreAnonymous }
+  };
+
   await editProject({
-    input: {
-      projectId: route.params.projectId,
-      name: { value: name },
-      url: { value: url },
-      allowOrganizationsAssignCards: { value: allowOrganizationsAssignCards },
-      beneficiariesAreAnonymous: { value: beneficiariesAreAnonymous }
-    }
+    input
   });
+
   router.push({ name: URL_PROJECT_ADMIN });
   addSuccess(t("edit-project-success-notification", { projectName: name }));
 }

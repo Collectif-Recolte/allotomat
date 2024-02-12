@@ -67,12 +67,12 @@
       :label="t('manage-cards')"
       :icon="CREDIT_CARD" />
     <MenuItem
-      v-if="canCreateTransaction"
+      v-if="canCreateTransaction && !isProjectManager"
       :router-link="{ name: $consts.urls.URL_TRANSACTION }"
       :label="t('create-transaction')"
       :icon="QRCODE" />
     <MenuItem
-      v-if="canCreateTransaction"
+      v-if="canCreateTransaction && !isProjectManager"
       :router-link="{ name: $consts.urls.URL_TRANSACTION_LIST }"
       :label="t('manage-transactions')"
       :icon="CLOCK" />

@@ -1,6 +1,7 @@
 ﻿using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using MediatR;
+using NodaTime.Extensions;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Interfaces;
@@ -41,10 +42,23 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         }
 
         [Description("The list of transactions for this market by date.")]
-        public async Task<IEnumerable<PaymentTransactionGraphType>> Transactions(DateTime startDate, DateTime endDate, IAppUserContext ctx)
+        public async Task<IEnumerable<ITransactionGraphType>> Transactions(DateTime startDate, DateTime endDate, IAppUserContext ctx)
         {
+            if (startDate > endDate)
+            {
+                return new List<ITransactionGraphType>();
+            }
+
             var transactions = await ctx.DataLoader.LoadMarketTransactions(Id.LongIdentifierForType<Market>()).GetResultAsync();
-            return transactions.Where(x => x.CreatedAt().DayOfYear >= startDate.DayOfYear && x.CreatedAt().Year >= startDate.Year && x.CreatedAt().DayOfYear <= endDate.DayOfYear && x.CreatedAt().Year <= endDate.Year);
+
+            return transactions.Where(x => IsTransactionBetweenDate(x, startDate, endDate));
+        }
+
+        private bool IsTransactionBetweenDate(ITransactionGraphType x, DateTime startDate, DateTime endDate)
+        {
+            var createdAtInstant = x.CreatedAt().ToInstant();
+
+            return startDate.ToInstant() <= createdAtInstant && createdAtInstant < endDate.ToInstant();
         }
     }
 }

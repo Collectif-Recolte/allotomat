@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
+using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
@@ -41,7 +42,8 @@ namespace Sig.App.Backend.Services.Permission
             GlobalPermission.ManageTransactions,
             GlobalPermission.ManageCategories,
             GlobalPermission.ManageBudgetAllowance,
-            GlobalPermission.ManageProductGroup
+            GlobalPermission.ManageProductGroup,
+            GlobalPermission.CreateTransaction
         };
 
         private static GlobalPermission[] ProjectManagerSubscriptionsOffPlatformGlobalPermissions = new[]
@@ -54,7 +56,8 @@ namespace Sig.App.Backend.Services.Permission
             GlobalPermission.ManageCards,
             GlobalPermission.ManageTransactions,
             GlobalPermission.ManageBudgetAllowance,
-            GlobalPermission.ManageProductGroup
+            GlobalPermission.ManageProductGroup,
+            GlobalPermission.CreateTransaction
         };
 
         private static GlobalPermission[] OrganizationManagerGlobalPermissions = new[]
@@ -105,7 +108,14 @@ namespace Sig.App.Backend.Services.Permission
         private static readonly MarketPermission[] MarketManagerMarketPermission = new[]
         {
             MarketPermission.ManageMarket,
-            MarketPermission.CreateTransaction
+            MarketPermission.CreateTransaction,
+            MarketPermission.RefundTransaction
+        };
+        
+        private static readonly MarketPermission[] ProjectManagerMarketPermission = new[]
+        {
+            MarketPermission.CreateTransaction,
+            MarketPermission.RefundTransaction
         };
 
         private static readonly OrganizationPermission[] ProjectManagerOrganizationPermission = new[]
@@ -237,6 +247,20 @@ namespace Sig.App.Backend.Services.Permission
             if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.Merchant.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.MarketManagerOf, marketId))
             {
                 return Task.FromResult(MarketManagerMarketPermission);
+            }
+
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()))
+            {
+                var marketLongId = Id.New<Market>(marketId).LongIdentifierForType<Market>();
+                var projectMarkets = db.ProjectMarkets.Where(x => x.MarketId == marketLongId).ToList();
+
+                foreach (var projectMarket in projectMarkets)
+                {
+                    if (claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectMarket.ProjectId.ToString()))
+                    {
+                        return Task.FromResult(ProjectManagerMarketPermission);
+                    }
+                }
             }
 
             return Task.FromResult(Array.Empty<MarketPermission>());

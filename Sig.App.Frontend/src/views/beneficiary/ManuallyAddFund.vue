@@ -131,6 +131,16 @@ const { result: resultBeneficiary } = useQuery(
           id
           totalFund
         }
+        ... on BeneficiaryGraphType {
+          subscriptions {
+            id
+          }
+        }
+        ... on OffPlatformBeneficiaryGraphType {
+          subscriptions {
+            id
+          }
+        }
       }
     }
   `,
@@ -191,8 +201,13 @@ const project = useResult(resultOrganization, null, (data) => {
 });
 
 const subscriptionOptions = useResult(resultOrganization, null, (data) => {
+  const availableSubscriptionIds = beneficiary.value.subscriptions.map((x) => x.id);
   return data.organization.budgetAllowances
-    .filter((x) => !x.subscription.isFundsAccumulable || dateUtc(x.subscription.fundsExpirationDate) > Date.now())
+    .filter(
+      (x) =>
+        availableSubscriptionIds.includes(x.subscription.id) &&
+        (!x.subscription.isFundsAccumulable || dateUtc(x.subscription.fundsExpirationDate) > Date.now())
+    )
     .map((x) => {
       let label = "";
 

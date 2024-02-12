@@ -181,6 +181,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         [Fact]
         public async Task ThrowsIfBeneficiaryNotInSubscription()
         {
+            var localProject = new Project();
             var localBeneficiary = new Beneficiary()
             {
                 Firstname = "Jane",
@@ -189,6 +190,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 Email = "john.doe@example.com",
                 Phone = "555-555-1234",
                 Organization = new Organization()
+                {
+                    Project = localProject
+                }
             };
             DbContext.Beneficiaries.Add(localBeneficiary);
             DbContext.SaveChanges();

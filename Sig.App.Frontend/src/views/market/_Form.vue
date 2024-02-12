@@ -8,7 +8,7 @@
 	"fr": {
 		"cancel": "Annuler",
 		"market-name": "Nom du commerce",
-		"market-name-placeholder": "Ex. Marché centrale"
+		"market-name-placeholder": "Ex. Marché centrale",
 	}
 }
 </i18n>
@@ -68,6 +68,10 @@ const props = defineProps({
   validationSchema: {
     type: Object,
     default: null
+  },
+  isNew: {
+    type: Boolean,
+    default: false
   }
 });
 

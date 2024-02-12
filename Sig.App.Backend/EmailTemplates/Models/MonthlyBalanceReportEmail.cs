@@ -23,7 +23,6 @@ namespace Sig.App.Backend.EmailTemplates.Models
         {
             public Market Market { get; set; }
             public decimal Total { get; set; }
-            public List<PaymentTransaction> Transactions { get; set; }
         }
     }
 }

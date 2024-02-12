@@ -50,33 +50,70 @@ namespace Sig.App.Backend.BackgroundJobs
                 .ToDateTimeUtc()
                 .AddMonths(-1);
 
-            var transactions = await db.Transactions.Include(x => x.Organization).Include(x => x.Beneficiary).Where(x => x.CreatedAtUtc.Month == lastMonth.Month && x.CreatedAtUtc.Year == lastMonth.Year).ToListAsync();
+            var transactions = await db.Transactions
+                .Include(x => x.Organization)
+                .Where(x => x.CreatedAtUtc.Month == lastMonth.Month && x.CreatedAtUtc.Year == lastMonth.Year).ToListAsync();
 
-            var paymentTransactionGroupByProject = transactions.Where(x => x.GetType() == typeof(PaymentTransaction) && x.Organization != null).Select(x => x as PaymentTransaction).GroupBy(x => x.Organization.ProjectId).ToList();
+            var refundTransactions = await db.Transactions
+                .OfType<RefundTransaction>()
+                .Include(x => x.Organization)
+                .Include(x => x.InitialTransaction)
+                .Where(x => x.CreatedAtUtc.Month == lastMonth.Month && x.CreatedAtUtc.Year == lastMonth.Year).ToListAsync();
 
-            foreach (var groupByProject in paymentTransactionGroupByProject)
+            var transactionGroupByProject = transactions.Where(x => x.Organization != null).GroupBy(x => x.Organization.ProjectId).ToList();
+            var refundTransactionGroupByProject = refundTransactions.Where(x => x.Organization != null).GroupBy(x => x.Organization.ProjectId).ToList();
+
+            foreach (var groupByProject in transactionGroupByProject)
             {
                 var marketBalanceReports = new List<MarketBalanceReport>();
-                var paymentTransactionGroupByMarket = groupByProject.GroupBy(x => x.MarketId).ToList();
+
                 var project = await db.Projects.Where(x => x.Id == groupByProject.Key).FirstAsync();
                 var projectManagers = await mediator.Send(new GetProjectProjectManagers.Query
                 {
                     ProjectId = project.Id
                 });
 
-                foreach (var groupByMarket in paymentTransactionGroupByMarket)
-                {
-                    var market = await db.Markets.Where(x => x.Id == groupByMarket.Key).FirstAsync();
+                var refundGroupByProject = refundTransactionGroupByProject.FirstOrDefault(x => x.Key == groupByProject.Key);
+                var paymentTransactionGroupByMarket = groupByProject.Where(x => x.GetType() == typeof(PaymentTransaction)).Select(x => x as PaymentTransaction).GroupBy(x => x.MarketId).ToList();
 
-                    marketBalanceReports.Add(new MarketBalanceReport()
+                if (paymentTransactionGroupByMarket.Any())
+                {
+                    foreach (var groupByMarket in paymentTransactionGroupByMarket)
                     {
-                        Market = market,
-                        Total = groupByMarket.Sum(x => x.Amount),
-                        Transactions = groupByMarket.ToList()
-                    });
+                        var market = await db.Markets.Where(x => x.Id == groupByMarket.Key).FirstAsync();
+
+                        marketBalanceReports.Add(new MarketBalanceReport()
+                        {
+                            Market = market,
+                            Total = groupByMarket.Sum(x => x.Amount)
+                        });
+                    }
                 }
 
-                if(projectManagers.Any())
+                if (refundGroupByProject != null)
+                {
+                    var refundTransactionGroupByMarket = refundGroupByProject.GroupBy(x => x.InitialTransaction.MarketId).ToList();
+
+                    foreach (var refundGroupByMarket in refundTransactionGroupByMarket)
+                    {
+                        var market = await db.Markets.Where(x => x.Id == refundGroupByMarket.Key).FirstAsync();
+
+                        var report = marketBalanceReports.FirstOrDefault(x => x.Market.Id == market.Id);
+                        if (report != null) {
+                            report.Total -= refundGroupByMarket.Sum(x => x.Amount);
+                        }
+                        else
+                        {
+                            marketBalanceReports.Add(new MarketBalanceReport()
+                            {
+                                Market = market,
+                                Total = -refundGroupByMarket.Sum(x => x.Amount)
+                            });
+                        }
+                    }
+                }
+
+                if (projectManagers.Any())
                 {
                     var email = new MonthlyBalanceReportEmail(string.Join(";", projectManagers.Select(x => x.Email)), marketBalanceReports, project);
 

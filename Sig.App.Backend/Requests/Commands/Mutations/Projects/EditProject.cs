@@ -39,7 +39,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             request.CardImageFileId.IfSet(v => project.CardImageFileId = v);
             request.AllowOrganizationsAssignCards.IfSet(v => project.AllowOrganizationsAssignCards = v);
             request.BeneficiariesAreAnonymous.IfSet(v => project.BeneficiariesAreAnonymous = v);
-            
+
             await db.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation($"Project edited {project.Name} ({project.Id})");

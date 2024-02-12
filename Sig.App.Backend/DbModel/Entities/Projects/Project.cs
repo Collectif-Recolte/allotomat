@@ -24,6 +24,5 @@ namespace Sig.App.Backend.DbModel.Entities.Projects
         public bool AllowOrganizationsAssignCards { get; set; } = false;
         public bool BeneficiariesAreAnonymous { get; set; } = false;
         public bool AdministrationSubscriptionsOffPlatform { get; set; } = false;
-
     }
 }

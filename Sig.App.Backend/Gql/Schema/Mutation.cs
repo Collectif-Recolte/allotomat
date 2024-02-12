@@ -451,6 +451,15 @@ namespace Sig.App.Backend.Gql.Schema
             return mediator.Send(input.Value);
         }
 
+        [RequirePermission(MarketPermission.RefundTransaction)]
+        [AnnotateErrorCodes(typeof(RefundTransaction))]
+        public Task<RefundTransaction.Payload> RefundTransaction(
+            [Inject] IMediator mediator,
+            NonNull<RefundTransaction.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
+
         [RequirePermission(BeneficiaryPermission.ManuallyAddingFund)]
         [AnnotateErrorCodes(typeof(CreateManuallyAddingFundTransaction))]
         public Task<CreateManuallyAddingFundTransaction.Payload> CreateManuallyAddingFundTransaction(

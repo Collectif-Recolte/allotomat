@@ -20,7 +20,7 @@
   }
 
   @media screen("sm") {
-    --pf-table-header-height: 5.5rem;
+    --pf-table-header-height: 18.5rem;
   }
 
   @media screen("md") {

@@ -60,7 +60,7 @@ namespace Sig.App.Backend.BackgroundJobs
             var activeSubscriptions = await db.Subscriptions
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary).ThenInclude(x => x.Card).ThenInclude(x => x.Transactions)
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary).ThenInclude(x => x.Card).ThenInclude(x => x.Funds)
-                .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary).ThenInclude(x => x.Organization)
+                .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary).ThenInclude(x => x.Organization).ThenInclude(x => x.Project)
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.BeneficiaryType)
                 .Include(x => x.BudgetAllowances)
                 .AsSplitQuery().Include(x => x.Types).ThenInclude(x => x.ProductGroup)
@@ -126,6 +126,7 @@ namespace Sig.App.Backend.BackgroundJobs
                                 SubscriptionId = subscription.Id,
                                 SubscriptionName = subscription.Name,
                                 ProjectId = beneficiary.Organization.ProjectId,
+                                ProjectName = beneficiary.Organization.Project.Name,
                                 TransactionLogProductGroups = transactionLogProductGroups
                             });
 
@@ -187,6 +188,7 @@ namespace Sig.App.Backend.BackgroundJobs
                             SubscriptionId = subscription.Id,
                             SubscriptionName = subscription.Name,
                             ProjectId = beneficiary.Organization.ProjectId,
+                            ProjectName = beneficiary.Organization.Project.Name,
                             TransactionLogProductGroups = transactionLogProductGroups
                         });
                     }
@@ -196,7 +198,7 @@ namespace Sig.App.Backend.BackgroundJobs
             var activeBeneficiaries = await db.Beneficiaries
                 .Include(x => x.Card).ThenInclude(x => x.Funds)
                 .Include(x => (x as OffPlatformBeneficiary).PaymentFunds).ThenInclude(x => x.ProductGroup)
-                .Include(x => x.Organization)
+                .Include(x => x.Organization).ThenInclude(x => x.Project)
                 .OfType<OffPlatformBeneficiary>()
                 .Where(x => x.IsActive)
                 .Where(x => x.StartDate <= today && x.EndDate >= today && monthlyPaymentMoment.Contains(x.MonthlyPaymentMoment.Value))
@@ -253,6 +255,7 @@ namespace Sig.App.Backend.BackgroundJobs
                             OrganizationId = beneficiary.OrganizationId,
                             OrganizationName = beneficiary.Organization.Name,
                             ProjectId = beneficiary.Organization.ProjectId,
+                            ProjectName = beneficiary.Organization.Project.Name,
                             TransactionLogProductGroups = transactionLogProductGroups
                         });
 

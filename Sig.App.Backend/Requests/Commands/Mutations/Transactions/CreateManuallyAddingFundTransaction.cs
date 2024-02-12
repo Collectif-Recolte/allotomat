@@ -67,7 +67,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var beneficiary = await db.Beneficiaries
                 .Include(x => x.Card).ThenInclude(x => x.Transactions)
                 .Include(x => x.Card).ThenInclude(x => x.Funds)
-                .Include(x => x.Organization)
+                .Include(x => x.Organization).ThenInclude(x => x.Project)
+                .Include(x => x.Subscriptions)
                 .FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
             if (beneficiary == null) throw new BeneficiaryNotFoundException();
@@ -104,6 +105,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 var subscription = await db.Subscriptions.Include(x => x.Types).ThenInclude(x => x.ProductGroup).FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
                 if (subscription == null) throw new SubscriptionNotFoundException();
+
+                if (!beneficiary.Subscriptions.Any(x => x.SubscriptionId == subscriptionId)) throw new BeneficiaryDontHaveThisSubscriptionException();
 
                 if (subscription.IsFundsAccumulable && subscription.FundsExpirationDate < today) throw new SubscriptionExpiredException();
 
@@ -181,6 +184,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 SubscriptionId = currentSubscription?.Id,
                 SubscriptionName = currentSubscription?.Name,
                 ProjectId = card.Beneficiary.Organization.ProjectId,
+                ProjectName = card.Beneficiary.Organization.Project.Name,
                 TransactionInitiatorId = currentUserId,
                 TransactionInitiatorFirstname = currentUser?.Profile.FirstName,
                 TransactionInitiatorLastname = currentUser?.Profile.LastName,
@@ -224,6 +228,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         public class AvailableFundCantBeLessThanZero : RequestValidationException { }
         public class BeneficiaryNotFoundException : RequestValidationException { }
         public class BeneficiaryDontHaveCardException : RequestValidationException { }
+        public class BeneficiaryDontHaveThisSubscriptionException : RequestValidationException { }
         public class SubscriptionNotFoundException : RequestValidationException { }
         public class SubscriptionExpiredException : RequestValidationException { }
         public class SubscriptionDontHaveBudgetAllowance : RequestValidationException { }

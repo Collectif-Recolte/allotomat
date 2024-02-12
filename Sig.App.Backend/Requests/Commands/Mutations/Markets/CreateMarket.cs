@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using GraphQL.Conventions;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,6 +12,7 @@ using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
+using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
 using Sig.App.Backend.Services.Mailer;
@@ -43,6 +45,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             {
                 Name = request.Name
             };
+
             var managers = new List<AppUser>();
 
             db.Markets.Add(market);

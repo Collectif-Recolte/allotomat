@@ -3,57 +3,76 @@
     "en": {
       "title": "Transaction history",
       "transaction-count": "No transaction | {count} transaction | {count} transactions",   
-      "export-btn": "Export report"
+      "export-btn": "Export report",
+      "create-transaction": "New transaction"
     },
     "fr": {
       "title": "Historique des transactions",
       "transaction-count": "Aucune transaction | {count} transaction | {count} transactions",
-      "export-btn": "Exporter un rapport"
+      "export-btn": "Exporter un rapport",
+      "create-transaction": "Nouvelle transaction"
     }
   }
 </i18n>
 
 <template>
-  <AppShell :loading="loading">
-    <template #title>
-      <Title :title="t('title')">
-        <template #subpagesCta>
-          <div class="text-right">
-            <TransactionFilters
-              v-model="searchInput"
-              :available-organizations="availableOrganizations"
-              :available-beneficiary-types="availableBeneficiaryTypes"
-              :available-subscriptions="availableSubscriptions"
-              :selected-organizations="organizations"
-              :selected-beneficiary-types="beneficiaryTypes"
-              :selected-subscriptions="subscriptions"
-              :selected-transaction-types="transactionTypes"
-              :without-subscription-id="WITHOUT_SUBSCRIPTION"
-              :date-from="dateFrom"
-              :date-to="dateTo"
-              :search-filter="searchText"
-              :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
-              @organizationsChecked="onOrganizationsChecked"
-              @organizationsUnchecked="onOrganizationsUnchecked"
-              @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
-              @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
-              @subscriptionsUnchecked="onSubscriptionsUnchecked"
-              @subscriptionsChecked="onSubscriptionsChecked"
-              @transactionTypesChecked="onTransactionTypesChecked"
-              @transactionTypesUnchecked="onTransactionTypesUnchecked"
-              @dateFromUpdated="onDateFromUpdated"
-              @dateToUpdated="onDateToUpdated"
-              @resetFilters="onResetFilters"
-              @update:modelValue="onSearchTextUpdated" />
-            <PfButtonAction class="mt-2" :label="t('export-btn')" :icon="ICON_DOWNLOAD" has-icon-left @click="onExportReport" />
-          </div>
-        </template>
-      </Title>
-    </template>
-    <div v-if="transactionLogs">
-      <UiTableHeader :title="t('transaction-count', transactionLogs.totalCount)" />
-    </div>
-  </AppShell>
+  <RouterView v-slot="{ Component }">
+    <AppShell :loading="loading">
+      <template #title>
+        <Title :title="t('title')">
+          <template #subpagesCta>
+            <div class="text-right">
+              <TransactionFilters
+                v-model="searchInput"
+                :available-organizations="availableOrganizations"
+                :available-beneficiary-types="availableBeneficiaryTypes"
+                :available-subscriptions="availableSubscriptions"
+                :selected-organizations="organizations"
+                :selected-beneficiary-types="beneficiaryTypes"
+                :selected-subscriptions="subscriptions"
+                :selected-transaction-types="transactionTypes"
+                :without-subscription-id="WITHOUT_SUBSCRIPTION"
+                :date-from="dateFrom"
+                :date-to="dateTo"
+                :search-filter="searchText"
+                :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
+                @organizationsChecked="onOrganizationsChecked"
+                @organizationsUnchecked="onOrganizationsUnchecked"
+                @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
+                @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
+                @subscriptionsUnchecked="onSubscriptionsUnchecked"
+                @subscriptionsChecked="onSubscriptionsChecked"
+                @transactionTypesChecked="onTransactionTypesChecked"
+                @transactionTypesUnchecked="onTransactionTypesUnchecked"
+                @dateFromUpdated="onDateFromUpdated"
+                @dateToUpdated="onDateToUpdated"
+                @resetFilters="onResetFilters"
+                @update:modelValue="onSearchTextUpdated" />
+              <PfButtonAction class="mt-2" :label="t('export-btn')" :icon="ICON_DOWNLOAD" has-icon-left @click="onExportReport" />
+            </div>
+          </template>
+        </Title>
+      </template>
+      <div v-if="transactionLogs">
+        <UiTableHeader :title="t('transaction-count', transactionLogs.totalCount)" />
+        <ProgramTransactionTable :transactions="transactions" />
+        <UiPagination
+          v-if="transactionLogs && transactionLogs.totalPages > 1"
+          v-model:page="page"
+          class="mb-6"
+          :total-pages="transactionLogs.totalPages" />
+        <div
+          class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
+          <PfButtonLink tag="routerLink" :to="{ name: URL_TRANSACTION_ADD }" btn-style="secondary" class="rounded-full">
+            <span class="inline-flex items-center">
+              {{ t("create-transaction") }}
+            </span>
+          </PfButtonLink>
+        </div>
+      </div>
+      <Component :is="Component" />
+    </AppShell>
+  </RouterView>
 </template>
 
 <script setup>
@@ -61,11 +80,13 @@ import { ref, computed } from "vue";
 import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult, useApolloClient } from "@vue/apollo-composable";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter, useRoute, onBeforeRouteUpdate } from "vue-router";
 
 import Title from "@/components/app/title";
 import TransactionFilters from "@/components/transaction/transaction-filters";
+import ProgramTransactionTable from "@/components/transaction/program-transaction-table";
 
+import { URL_TRANSACTION_ADD } from "@/lib/consts/urls";
 import { WITHOUT_SUBSCRIPTION } from "@/lib/consts/enums";
 import ICON_DOWNLOAD from "@/lib/icons/download.json";
 
@@ -87,6 +108,7 @@ const subscriptions = ref([]);
 const transactionTypes = ref([]);
 const searchInput = ref("");
 const searchText = ref("");
+const page = ref(1);
 
 if (route.query.organizations) {
   organizations.value = route.query.organizations.split(",");
@@ -189,9 +211,14 @@ const projectsOrOrganizationLoaded = computed(() => {
   );
 });
 
-const { result: resultTransactionLogs, loading } = useQuery(
+const {
+  result: resultTransactionLogs,
+  loading,
+  refetch: refetchTransactions
+} = useQuery(
   gql`
     query TransactionLogs(
+      $page: Int!
       $projectId: ID!
       $startDate: DateTime!
       $endDate: DateTime!
@@ -203,8 +230,8 @@ const { result: resultTransactionLogs, loading } = useQuery(
       $searchText: String
     ) {
       transactionLogs(
-        page: 1
-        limit: 10
+        page: $page
+        limit: 30
         projectId: $projectId
         startDate: $startDate
         endDate: $endDate
@@ -216,10 +243,29 @@ const { result: resultTransactionLogs, loading } = useQuery(
         searchText: $searchText
       ) {
         totalCount
+        pageNumber
+        pageSize
+        totalPages
+        items {
+          id
+          beneficiaryFirstname
+          beneficiaryLastname
+          createdAt
+          discriminator
+          marketName
+          projectName
+          initiatedByProject
+          totalAmount
+          transaction {
+            id
+          }
+          subscriptionName
+        }
       }
     }
   `,
   () => ({
+    page: page.value,
     projectId: projectId.value,
     startDate: dateFrom.value,
     endDate: dateTo.value,
@@ -235,6 +281,9 @@ const { result: resultTransactionLogs, loading } = useQuery(
   }
 );
 const transactionLogs = useResult(resultTransactionLogs);
+const transactions = useResult(resultTransactionLogs, null, (data) => {
+  return data.transactionLogs.items;
+});
 
 const filteredQuery = computed(() => {
   return {
@@ -265,58 +314,70 @@ let administrationSubscriptionsOffPlatform = computed(() => {
 });
 
 function onOrganizationsChecked(value) {
+  page.value = 1;
   organizations.value.push(value);
 }
 
 function onOrganizationsUnchecked(value) {
+  page.value = 1;
   organizations.value = organizations.value.filter((x) => x !== value);
 }
 
 function onBeneficiaryTypesChecked(value) {
+  page.value = 1;
   beneficiaryTypes.value.push(value);
 }
 
 function onBeneficiaryTypesUnchecked(value) {
+  page.value = 1;
   beneficiaryTypes.value = beneficiaryTypes.value.filter((x) => x !== value);
 }
 
 function onSubscriptionsChecked(value) {
+  page.value = 1;
   subscriptions.value.push(value);
 }
 
 function onSubscriptionsUnchecked(value) {
+  page.value = 1;
   subscriptions.value = subscriptions.value.filter((x) => x !== value);
 }
 
 function onTransactionTypesChecked(value) {
+  page.value = 1;
   transactionTypes.value.push(value);
 }
 
 function onTransactionTypesUnchecked(value) {
+  page.value = 1;
   transactionTypes.value = transactionTypes.value.filter((x) => x !== value);
 }
 
 function onDateFromUpdated(value) {
+  page.value = 1;
   dateFrom.value = value;
 }
 
 function onDateToUpdated(value) {
+  page.value = 1;
   dateTo.value = value;
 }
 
 function onSearchTextUpdated(value) {
+  page.value = 1;
   searchText.value = value;
 }
 
 function onResetFilters() {
+  page.value = 1;
   organizations.value = [];
   subscriptions.value = [];
   beneficiaryTypes.value = [];
   transactionTypes.value = [];
   searchText.value = "";
   searchInput.value = "";
-  dateFrom.value = undefined;
-  dateTo.value = undefined;
+  dateFrom.value = previousMonth;
+  dateTo.value = new Date(Date.now());
   updateUrl();
 }
 
@@ -375,4 +436,10 @@ async function onExportReport() {
 
   window.open(result.data.generateTransactionsReport, "_blank");
 }
+
+onBeforeRouteUpdate((to) => {
+  if (to.name === URL_TRANSACTION_ADMIN) {
+    refetchTransactions();
+  }
+});
 </script>

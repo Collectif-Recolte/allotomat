@@ -137,6 +137,10 @@ const props = defineProps({
   isNewProject: {
     type: Boolean,
     default: false
+  },
+  isNew: {
+    type: Boolean,
+    default: false
   }
 });
 

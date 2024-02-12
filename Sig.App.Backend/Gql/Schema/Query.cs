@@ -36,7 +36,6 @@ using Sig.App.Backend.Requests.Commands.Queries.Cards;
 using Sig.App.Backend.Requests.Commands.Queries.Transactions;
 using Sig.App.Backend.Requests.Queries.Transactions;
 using Sig.App.Backend.Requests.Commands.Queries.Beneficiaries;
-using NodaTime;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Requests.Queries.Beneficiaries;
@@ -56,11 +55,13 @@ namespace Sig.App.Backend.Gql.Schema
         [Description("All users")]
         public async Task<Pagination<UserGraphType>> Users(
             [Inject] IMediator mediator,
-            int page, int limit)
+            int page, int limit, string? searchText, UserType[] userTypes = null)
         {
             var results = await mediator.Send(new SearchUsers.Query
             {
                 Page = new Page(page, limit),
+                SearchText = searchText,
+                UserTypes = userTypes
             });
 
             return results.Map(x => new UserGraphType(x));
@@ -208,7 +209,6 @@ namespace Sig.App.Backend.Gql.Schema
             }
         }
 
-        [RequirePermission(MarketPermission.ManageMarket)]
         public IDataLoaderResult<MarketGraphType> Market(IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadMarket(id.LongIdentifierForType<Market>());
@@ -233,6 +233,11 @@ namespace Sig.App.Backend.Gql.Schema
         public IDataLoaderResult<CardGraphType> Card(IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadCardById(id.LongIdentifierForType<Card>());
+        }
+
+        public IDataLoaderResult<CardGraphType> CardByNumber(IAppUserContext ctx, string cardNumber)
+        {
+            return ctx.DataLoader.LoadCardByCardNumber(cardNumber);
         }
 
         public IDataLoaderResult<SubscriptionGraphType> Subscription(IAppUserContext ctx, Id id)
@@ -347,6 +352,12 @@ namespace Sig.App.Backend.Gql.Schema
                 OrganizationId = organizationId
             });
         }
+        
+        public async Task<RefundTransactionGraphType> RefundTransaction(Id id, [Inject] AppDbContext db)
+        {
+            var transaction = await db.Transactions.OfType<RefundTransaction>().Where(x => x.Id == id.LongIdentifierForType<RefundTransaction>()).FirstOrDefaultAsync();
+            return new RefundTransactionGraphType(transaction);
+        }
 
         public async Task<ITransactionGraphType> Transaction(Id id, [Inject] AppDbContext db)
         {
@@ -364,6 +375,10 @@ namespace Sig.App.Backend.Gql.Schema
                     return new ManuallyAddingFundTransactionGraphType(maft);
                 case LoyaltyAddingFundTransaction laft:
                     return new LoyaltyAddingFundTransactionGraphType(laft);
+                case RefundTransaction rft:
+                    return new RefundTransactionGraphType(rft);
+                case OffPlatformAddingFundTransaction opaft:
+                    return new OffPlatformAddingFundTransactionGraphType(opaft);
             }
 
             return null;

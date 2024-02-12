@@ -17,7 +17,7 @@
       :img-src="require('@/assets/img/scan-marchand.jpg')"
       :primary-btn-label="t('start-transaction')"
       primary-btn-is-action
-      @onPrimaryBtnClick="emit('onUpdateStep', TRANSACTION_STEPS_SCAN)" />
+      @onPrimaryBtnClick="emit('onUpdateStep', TRANSACTION_STEPS_SCAN, {})" />
   </UiEmptyPage>
 </template>
 

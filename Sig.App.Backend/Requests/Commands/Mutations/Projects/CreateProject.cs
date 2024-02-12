@@ -20,6 +20,8 @@ using System.Security.Claims;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.DbModel.Entities.Profiles;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
+using GraphQL.Conventions;
+using Sig.App.Backend.Gql.Schema.Types;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 {

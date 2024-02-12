@@ -11,6 +11,7 @@
     "error-row": "Row {row}:",
     "mandatory-field": "Field {fieldName} is mandatory.",
     "invalid-email": "Email ({email}) is invalid.",
+    "invalid-beneficiary-category": "Category ('{category}') is invalid.",
     "beneficiary-type-not-found": "Import did not work. One or more categories are missing in the platform.",
     "invalid-postal-code": "Postal code ({postalCode}) is invalid."
 	},
@@ -25,6 +26,7 @@
     "error-row": "Ligne {row}:",
     "mandatory-field": "Le champ {fieldName} est obligatoire.",
     "invalid-email": "Le courriel ({email}) est invalide.",
+    "invalid-beneficiary-category": "La catégorie ('{category}') est invalide.",
     "beneficiary-type-not-found": "L'importation n'a pu être complétée. Une ou plusieurs catégories sont manquantes dans la plateforme.",
     "invalid-postal-code": "Le code postal ({postalCode}) est invalide."
 	}
@@ -63,7 +65,7 @@ import gql from "graphql-tag";
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
-import { useMutation } from "@vue/apollo-composable";
+import { useMutation, useQuery, useResult } from "@vue/apollo-composable";
 
 import { useOrganizationStore } from "@/lib/store/organization";
 import { useNotificationsStore } from "@/lib/store/notifications";
@@ -126,6 +128,27 @@ const { mutate: importBeneficiariesListInOrganization } = useMutation(
   `
 );
 
+const { result } = useQuery(
+  gql`
+    query Organization($id: ID!) {
+      organization(id: $id) {
+        id
+        project {
+          id
+          beneficiaryTypes {
+            id
+            keys
+          }
+        }
+      }
+    }
+  `,
+  {
+    id: currentOrganization
+  }
+);
+const organization = useResult(result);
+
 function onFileUploaded({ handle }) {
   errors.value = [];
 
@@ -151,6 +174,7 @@ function onFileUploaded({ handle }) {
         validateMandatoryField(firstname, i + 2, FIRSTNAME_KEY);
         validateMandatoryField(lastname, i + 2, LASTNAME_KEY);
         validateMandatoryField(key, i + 2, CATEGORY_KEY);
+        validateCategoryField(key, i + 2);
         validateEmailAddress(email, i + 2);
         validatePostalCode(postalCode, i + 2);
 
@@ -225,6 +249,17 @@ const validatePostalCode = (postalCode, rowNumber) => {
     errors.value.push({
       rowNumber,
       errorType: t("invalid-postal-code", { postalCode: postalCode })
+    });
+  }
+};
+
+const validateCategoryField = (key, rowNumber) => {
+  const categoryIsSet = key !== null && key !== undefined && key !== "";
+  const validCategory = !categoryIsSet || organization.value.project.beneficiaryTypes.some((type) => type.keys.includes(key));
+  if (!validCategory) {
+    errors.value.push({
+      rowNumber,
+      errorType: t("invalid-beneficiary-category", { category: key })
     });
   }
 };

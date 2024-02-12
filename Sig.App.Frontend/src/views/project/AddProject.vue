@@ -108,17 +108,17 @@ async function onSubmit({
   beneficiariesAreAnonymous,
   administrationSubscriptionsOffPlatform
 }) {
-  await createProject({
-    input: {
-      name,
-      url,
-      managerEmails: managers.map((x) => x.email),
-      allowOrganizationsAssignCards: allowOrganizationsAssignCards !== undefined ? allowOrganizationsAssignCards : false,
-      beneficiariesAreAnonymous: beneficiariesAreAnonymous !== undefined ? beneficiariesAreAnonymous : false,
-      administrationSubscriptionsOffPlatform:
-        administrationSubscriptionsOffPlatform !== undefined ? administrationSubscriptionsOffPlatform : false
-    }
-  });
+  let input = {
+    name,
+    url,
+    managerEmails: managers.map((x) => x.email),
+    allowOrganizationsAssignCards: allowOrganizationsAssignCards !== undefined ? allowOrganizationsAssignCards : false,
+    beneficiariesAreAnonymous: beneficiariesAreAnonymous !== undefined ? beneficiariesAreAnonymous : false,
+    administrationSubscriptionsOffPlatform:
+      administrationSubscriptionsOffPlatform !== undefined ? administrationSubscriptionsOffPlatform : false
+  };
+
+  await createProject({ input });
   router.push({ name: URL_PROJECT_ADMIN });
   addSuccess(t("add-project-success-notification", { projectName: name }));
 }
