@@ -281,7 +281,8 @@ const validationSchema = computed(() =>
           return regex.test(value);
         }
       }),
-    beneficiaryTypeId: string().label(t("beneficiary-category")).required()
+    beneficiaryTypeId: string().label(t("beneficiary-category")).required(),
+    id1: string().label(t("unique-id-id1")).required()
   })
 );
 
