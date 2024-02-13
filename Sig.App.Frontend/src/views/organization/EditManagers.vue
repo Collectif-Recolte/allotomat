@@ -61,7 +61,10 @@ const { result, refetch } = useQuery(
   `,
   {
     id: route.params.organizationId
-  }
+  },
+  () => ({
+    enabled: route.params.organizationId !== null
+  })
 );
 const organization = useResult(result);
 

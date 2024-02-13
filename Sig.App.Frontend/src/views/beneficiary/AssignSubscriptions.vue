@@ -223,7 +223,10 @@ const { result: resultSubscriptions } = useQuery(
   `,
   {
     id: organizationId
-  }
+  },
+  () => ({
+    enabled: organizationId !== null
+  })
 );
 
 let subscriptions = useResult(resultSubscriptions, null, (data) => {
@@ -337,7 +340,14 @@ const { result: resultForecast } = useQuery(
       }
     }
   `,
-  forecastVariables
+  forecastVariables,
+  () => ({
+    enabled:
+      activeSubscription.value.id !== "" &&
+      activeSubscription.value.id !== null &&
+      organizationId !== null &&
+      organizationId !== ""
+  })
 );
 
 function forecastVariables() {
