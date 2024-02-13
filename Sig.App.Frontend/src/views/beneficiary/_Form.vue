@@ -254,7 +254,10 @@ const { result } = useQuery(
   `,
   {
     id: props.organizationId
-  }
+  },
+  () => ({
+    enabled: props.organizationId !== null
+  })
 );
 const beneficiaryTypes = useResult(result, null, (data) => {
   return data.organization.project.beneficiaryTypes.map((x) => ({ label: x.name, value: x.id }));

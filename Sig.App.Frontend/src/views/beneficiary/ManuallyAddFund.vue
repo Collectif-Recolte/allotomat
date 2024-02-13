@@ -189,7 +189,10 @@ const { result: resultOrganization, loading } = useQuery(
   `,
   {
     id: currentOrganization
-  }
+  },
+  () => ({
+    enabled: currentOrganization !== null
+  })
 );
 
 const budgetAllowances = useResult(resultOrganization, null, (data) => {
