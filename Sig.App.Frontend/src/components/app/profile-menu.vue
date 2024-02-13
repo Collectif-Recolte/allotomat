@@ -110,7 +110,8 @@ function getUserProfile() {
     `,
     null,
     () => ({
-      enabled: isLoggedIn.value
+      enabled: isLoggedIn.value,
+      fetchPolicy: "cache-first"
     })
   );
 
