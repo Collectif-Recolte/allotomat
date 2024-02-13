@@ -100,7 +100,10 @@ const { result: resultOrganization } = useQuery(
   `,
   {
     id: currentOrganization
-  }
+  },
+  () => ({
+    enabled: currentOrganization !== null
+  })
 );
 
 const subscriptionOptions = useResult(resultOrganization, null, (data) => {

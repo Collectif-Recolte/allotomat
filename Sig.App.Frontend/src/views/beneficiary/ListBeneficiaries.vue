@@ -546,7 +546,10 @@ const {
       }
     }
   `,
-  beneficiariesVariables
+  beneficiariesVariables,
+  () => ({
+    enabled: selectedOrganization.value !== null
+  })
 );
 
 let beneficiariesPagination = useResult(resultBeneficiaries, null, (data) => {
