@@ -49,7 +49,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             if (marketManagers != null) {
                 foreach (var manager in marketManagers)
                 {
-                    await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.MarketManagerOf, marketId.ToString()));
+                    await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.MarketManagerOf, market.Id.ToString()));
                 }
             }
 
