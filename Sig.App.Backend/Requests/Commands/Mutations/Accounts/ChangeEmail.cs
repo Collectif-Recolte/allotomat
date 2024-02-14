@@ -30,6 +30,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 
         public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] ChangeEmail({request.NewEmail})");
             if (request.NewEmail == "") throw new EmailEmptyException();
 
             var user = await userManager.FindByIdAsync(httpContextAccessor.HttpContext.User.GetUserId()); 

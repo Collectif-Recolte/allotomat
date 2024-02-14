@@ -43,6 +43,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] ImportOffPlatformBeneficiariesListInOrganization({request.Items.Length})");
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             var currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
             var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();

@@ -34,6 +34,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CompleteUserRegistration({request.UserId}, {request.FirstName}, {request.LastName}, {request.EmailAddress})");
             var userType = request.TokenType == TokenType.AdminInvitation ? UserType.PCAAdmin :
                 request.TokenType == TokenType.ProjectManagerInvitation ? UserType.ProjectManager :
                 request.TokenType == TokenType.MerchantInvitation ? UserType.Merchant : UserType.OrganizationManager;

@@ -44,6 +44,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
         public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] DeleteProject({request.ProjectId})");
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects
                 .Include(x => x.Markets).ThenInclude(x => x.Market)

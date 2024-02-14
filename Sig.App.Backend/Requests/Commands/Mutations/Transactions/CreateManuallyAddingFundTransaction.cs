@@ -44,6 +44,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateManuallyAddingFundTransaction({request.SubscriptionId}, {request.Amount}, {request.ProductGroupId})");
             var today = clock
                 .GetCurrentInstant()
                 .InUtc()

@@ -34,6 +34,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 
         public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] ArchiveMarket({request.MarketId})");
             var marketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets
                 .Include(x => x.Projects)

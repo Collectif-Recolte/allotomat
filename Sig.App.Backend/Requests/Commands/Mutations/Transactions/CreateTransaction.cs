@@ -56,6 +56,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateTransaction({request.CardId}, {request.CardNumber}, {request.Transactions})");
             long cardId = -1;
             if (request.CardId.HasValue)
             {
@@ -349,6 +350,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         {
             public decimal Amount { get; set; }
             public Id ProductGroupId { get; set; }
+
+            public override string ToString()
+            {
+                return $"{Amount}, {ProductGroupId}";
+            }
         }
 
         [MutationPayload]

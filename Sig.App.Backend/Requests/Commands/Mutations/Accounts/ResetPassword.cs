@@ -24,6 +24,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] ResetPassword({request.EmailAddress})");
             var user = await userManager.FindByEmailAsync(request.EmailAddress);
 
             // Fail with InvalidToken error to not leak info about email validity

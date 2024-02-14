@@ -26,6 +26,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
         public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] DeleteBeneficiaryType({request.BeneficiaryTypeId})");
             var beneficiaryTypeId = request.BeneficiaryTypeId.LongIdentifierForType<BeneficiaryType>();
             var beneficiaryType = await db.BeneficiaryTypes
                 .Include(x => x.Beneficiaries)

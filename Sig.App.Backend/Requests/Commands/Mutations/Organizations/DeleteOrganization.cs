@@ -35,6 +35,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
 
         public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] DeleteOrganization({request.OrganizationId})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Subscriptions)

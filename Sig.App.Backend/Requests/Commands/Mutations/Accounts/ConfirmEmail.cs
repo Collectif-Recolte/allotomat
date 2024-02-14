@@ -23,6 +23,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 
         public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] ConfirmEmail({request.Email})");
             var user = await userManager.FindByEmailAsync(request.Email);
             if (user == null || user.EmailConfirmed) throw new NoNeedToConfirmException();
 

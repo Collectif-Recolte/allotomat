@@ -28,6 +28,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 
         public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] SendPasswordReset({request.Email})");
             var user = await userManager.FindByEmailAsync(request.Email);
             if (user == null) return;
 

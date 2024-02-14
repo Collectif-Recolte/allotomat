@@ -41,6 +41,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] AddManagerToMarket({request.MarketId}, {request.ManagerEmails})");
             var marketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 

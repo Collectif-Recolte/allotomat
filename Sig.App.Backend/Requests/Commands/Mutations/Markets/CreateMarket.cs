@@ -41,6 +41,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateMarket({request.Name}, {request.ManagerEmails})");
             var market = new Market()
             {
                 Name = request.Name
