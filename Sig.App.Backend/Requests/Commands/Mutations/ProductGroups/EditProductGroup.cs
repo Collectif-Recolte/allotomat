@@ -29,6 +29,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] EditProductGroup({request.ProductGroupId}, {request.Name}, {request.Color}, {request.OrderOfAppearance})");
             var productGroupId = request.ProductGroupId.LongIdentifierForType<ProductGroup>();
             var productGroup = await db.ProductGroups.FirstOrDefaultAsync(x => x.Id == productGroupId, cancellationToken);
 

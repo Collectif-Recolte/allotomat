@@ -26,6 +26,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] ConfirmChangeEmail({request.NewEmail})");
             var userId = httpContextAccessor.HttpContext.User.GetUserId();
             var user = await userManager.FindByIdAsync(userId);
             var previousEmail = user.Email;

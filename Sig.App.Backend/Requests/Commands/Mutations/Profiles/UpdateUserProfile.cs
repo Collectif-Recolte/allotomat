@@ -33,6 +33,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Profiles
 
         public async Task<UpdateUserProfile.Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] UpdateUserProfile({request.UserId}, {request.FirstName}, {request.LastName})");
             var userId = request.UserId.IdentifierForType<AppUser>();
             var profile = await GetProfileWithUser(userId, cancellationToken);
 

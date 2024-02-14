@@ -34,6 +34,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 
         public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] ResendConfirmationEmail({request.Email})");
             var user = await db.Users
                 .Include(x => x.Profile)
                 .FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);

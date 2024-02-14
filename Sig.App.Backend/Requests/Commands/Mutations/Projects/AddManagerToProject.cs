@@ -41,6 +41,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] AddManagerToProject({request.ProjectId}, {request.ManagerEmails})");
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 

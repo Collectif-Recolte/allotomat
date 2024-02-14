@@ -32,6 +32,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] ImportBeneficiariesListInOrganization({request.Items.Count})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 

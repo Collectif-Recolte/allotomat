@@ -48,6 +48,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateCards({request.ProjectId}, {request.Count})");
             if (request.Count <= 0) throw new CountMustBeHigherThanZeroException();
 
             var projectId = request.ProjectId.LongIdentifierForType<Project>();

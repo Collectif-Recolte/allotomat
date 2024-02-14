@@ -42,6 +42,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] AddLoyaltyFundToCard({request.ProjectId}, {request.CardId}, {request.Amount})");
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var card = await db.Cards.Include(x => x.Beneficiary).ThenInclude(x => x.Organization).Include(x => x.Transactions).Include(x => x.Funds)
                 .ThenInclude(x => x.ProductGroup).Include(x => x.Project)

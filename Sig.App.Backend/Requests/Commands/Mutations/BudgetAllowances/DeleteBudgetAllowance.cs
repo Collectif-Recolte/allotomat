@@ -26,6 +26,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
 
         public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] DeleteBudgetAllowance({request.BudgetAllowanceId})");
             var budgetAllowanceId = request.BudgetAllowanceId.LongIdentifierForType<BudgetAllowance>();
             var budgetAllowance = await db.BudgetAllowances.Include(x => x.Beneficiaries).FirstOrDefaultAsync(x => x.Id == budgetAllowanceId, cancellationToken);
 

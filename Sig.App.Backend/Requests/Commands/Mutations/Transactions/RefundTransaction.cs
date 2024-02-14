@@ -55,6 +55,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] RefundTransaction({request.InitialTransactionId}, {request.Transactions})");
             today = clock
                 .GetCurrentInstant()
                 .InUtc()
@@ -212,6 +213,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         {
             public decimal Amount { get; set; }
             public Id ProductGroupId { get; set; }
+
+            public override string ToString()
+            {
+                return $"{Amount}, {ProductGroupId}";
+            }
         }
 
         [MutationPayload]

@@ -27,6 +27,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
 
         public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] DeleteProductGroup({request.ProductGroupId})");
             var productGroupId = request.ProductGroupId.LongIdentifierForType<ProductGroup>();
             var productGroup = await db.ProductGroups.Include(x => x.Types).FirstOrDefaultAsync(x => x.Id == productGroupId, cancellationToken);
 

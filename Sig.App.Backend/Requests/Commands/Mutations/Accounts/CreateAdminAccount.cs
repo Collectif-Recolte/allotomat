@@ -12,6 +12,7 @@ using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Services.Mailer;
+using Newtonsoft.Json;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 {
@@ -30,6 +31,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateAdminAccount({request.FirstName}, {request.LastName}, {request.Email})");
             var user = new AppUser(request.Email?.Trim())
             {
                 Type = UserType.PCAAdmin,

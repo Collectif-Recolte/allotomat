@@ -41,6 +41,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] AddManagerToOrganization({request.OrganizationId}, {request.ManagerEmails})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 

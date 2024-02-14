@@ -1,4 +1,5 @@
-﻿using GraphQL.Conventions;
+﻿using DocumentFormat.OpenXml.Presentation;
+using GraphQL.Conventions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -35,6 +36,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateSubscriptionInProject({request.ProjectId}, {request.Name}, {request.MonthlyPaymentMoment}, {request.StartDate}, {request.EndDate}, {request.FundsExpirationDate}, {request.Types}, {request.IsFundsAccumulable})");
             if (request.StartDate > request.EndDate) throw new EndDateMustBeAfterStartDateException();
 
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
@@ -117,6 +119,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             public Id ProductGroupId { get; set; }
             public decimal Amount { get; set; }
             public Id BeneficiaryTypeId { get; set; }
+
+            public override string ToString()
+            {
+                return $"{ProductGroupId}, {Amount}, {BeneficiaryTypeId}";
+            }
         }
 
         public class ProjectNotFoundException : RequestValidationException { }

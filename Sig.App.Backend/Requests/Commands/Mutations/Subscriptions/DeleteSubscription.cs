@@ -27,6 +27,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
         public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] DeleteSubscription({request.SubscriptionId})");
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
             var subscription = await db.Subscriptions.Include(x => x.Types).Include(x => x.Beneficiaries).Include(x=> x.BudgetAllowances).FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 

@@ -29,6 +29,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateProductGroup({request.ProjectId}, {request.Name}, {request.Color}, {request.OrderOfAppearance})");
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.Include(x => x.ProductGroups).FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 

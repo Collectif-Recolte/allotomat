@@ -30,6 +30,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateBudgetAllowance({request.OrganizationId}, {request.SubscriptionId}, {request.Amount})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.Include(x => x.BudgetAllowances).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 

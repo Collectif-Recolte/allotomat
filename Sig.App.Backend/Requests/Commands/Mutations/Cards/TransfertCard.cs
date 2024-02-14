@@ -40,6 +40,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] TransfertCard({request.OriginalCardId}, {request.NewCardId})");
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             var currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
             

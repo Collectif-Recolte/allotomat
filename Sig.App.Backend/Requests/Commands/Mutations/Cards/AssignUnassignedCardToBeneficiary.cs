@@ -28,6 +28,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] AssignUnassignedCardToBeneficiary({request.BeneficiaryId})");
             long beneficiaryId;
             if (request.BeneficiaryId.IsIdentifierForType(typeof(Beneficiary)))
             {
