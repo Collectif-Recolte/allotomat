@@ -73,13 +73,21 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .Include(x => x.Transactions)
                 .FirstOrDefaultAsync(x => x.Id == initialTransactionId, cancellationToken);
 
-            if (initialTransaction == null) throw new InitialTransactionNotFoundException();
+            if (initialTransaction == null)
+            {
+                logger.LogWarning("[Mutation] RefundTransaction - InitialTransactionNotFoundException");
+                throw new InitialTransactionNotFoundException();
+            }
 
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
 
             var isValid = await userManager.CheckPasswordAsync(currentUser, request.Password);
-            if (!isValid) throw new WrongPasswordException();
+            if (!isValid)
+            {
+                logger.LogWarning("[Mutation] RefundTransaction - WrongPasswordException");
+                throw new WrongPasswordException();
+            }
 
             var refundTransaction = new DbModel.Entities.Transactions.RefundTransaction()
             {
@@ -137,9 +145,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 var fund = initialTransaction.Card.Funds.Where(x => x.ProductGroupId == productGroupId).FirstOrDefault();
                 var addingFundTransaction = initialTransaction.Transactions.Where(x => x.ProductGroupId == productGroupId).FirstOrDefault();
 
-                if (paymentTransactionProductGroup == null) throw new ProductGroupNotFoundException();
+                if (paymentTransactionProductGroup == null)
+                {
+                    logger.LogWarning("[Mutation] RefundTransaction - ProductGroupNotFoundException");
+                    throw new ProductGroupNotFoundException();
+                }
 
-                if (paymentTransactionProductGroup.Amount - paymentTransactionProductGroup.RefundAmount < refund.Amount) throw new TooMuchRefundException();
+                if (paymentTransactionProductGroup.Amount - paymentTransactionProductGroup.RefundAmount < refund.Amount)
+                {
+                    logger.LogWarning("[Mutation] RefundTransaction - TooMuchRefundException");
+                    throw new TooMuchRefundException();
+                }
 
                 var refundTransactionProductGroup = new RefundTransactionProductGroup()
                 {

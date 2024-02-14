@@ -40,12 +40,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.Include(x => x.BudgetAllowances).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] AssignBeneficiariesToSubscription - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
 
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
             var subscription = await db.Subscriptions.Include(x => x.Types).Include(x => x.Beneficiaries).FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
-            if (subscription == null) throw new SubscriptionNotFoundException();
+            if (subscription == null)
+            {
+                logger.LogWarning("[Mutation] AssignBeneficiariesToSubscription - SubscriptionNotFoundException");
+                throw new SubscriptionNotFoundException();
+            }
 
             var today = clock
                 .GetCurrentInstant()
@@ -53,12 +61,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             if (subscription.GetLastDateToAssignBeneficiary() < today)
             {
+                logger.LogWarning("[Mutation] AssignBeneficiariesToSubscription - SubscriptionAlreadyExpiredException");
                 throw new SubscriptionAlreadyExpiredException();
             }
 
             var budgetAllowance = organization.BudgetAllowances.FirstOrDefault(x => x.SubscriptionId == subscriptionId);
 
-            if (budgetAllowance == null) throw new MissingBudgetAllowanceException();
+            if (budgetAllowance == null)
+            {
+                logger.LogWarning("[Mutation] AssignBeneficiariesToSubscription - MissingBudgetAllowanceException");
+                throw new MissingBudgetAllowanceException();
+            }
 
             IQueryable<Beneficiary> query = db.Beneficiaries.Include(x => x.BeneficiaryType).Where(x => x.OrganizationId == organizationId);
 

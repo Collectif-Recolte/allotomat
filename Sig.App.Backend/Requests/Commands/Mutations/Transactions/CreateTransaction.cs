@@ -71,12 +71,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .ThenInclude(x => x.Organization).Include(x => x.Transactions).Include(x => x.Funds)
                 .ThenInclude(x => x.ProductGroup).FirstOrDefaultAsync(x => x.Id == cardId, cancellationToken);
 
-            if (card == null) throw new CardNotFoundException();
+            if (card == null)
+            {
+                logger.LogWarning("[Mutation] CreateTransaction - CardNotFoundException");
+                throw new CardNotFoundException();
+            }
 
             var martketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == martketId, cancellationToken);
 
-            if (market == null) throw new MarketNotFoundException();
+            if (market == null)
+            {
+                logger.LogWarning("[Mutation] CreateTransaction - MarketNotFoundException");
+                throw new MarketNotFoundException();
+            }
 
             var cardCanBeUsedInMarket = await mediator.Send(new VerifyCardCanBeUsedInMarket.Input
             {
@@ -84,7 +92,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 CardId = card.GetIdentifier()
             }, cancellationToken);
 
-            if (!cardCanBeUsedInMarket) throw new CardCantBeUsedInMarketException();
+            if (!cardCanBeUsedInMarket)
+            {
+                logger.LogWarning("[Mutation] CreateTransaction - CardCantBeUsedInMarketException");
+                throw new CardCantBeUsedInMarketException();
+            }
             
             today = clock
                 .GetCurrentInstant()
@@ -129,9 +141,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 {
                     var fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroupId);
 
-                    if (fund == null) throw new CardDontHaveFundType();
+                    if (fund == null)
+                    {
+                        logger.LogWarning("[Mutation] CreateTransaction - CardDontHaveFundType");
+                        throw new CardDontHaveFundType();
+                    }
 
-                    if (fund.Amount + card.LoyaltyFund() < transactionInput.Amount) throw new NotEnoughtFundException();
+                    if (fund.Amount + card.LoyaltyFund() < transactionInput.Amount)
+                    {
+                        logger.LogWarning("[Mutation] CreateTransaction - NotEnoughtFundException");
+                        throw new NotEnoughtFundException();
+                    }
 
                     var addingFundTransactions = card.Transactions
                         .Where(x => x is SubscriptionAddingFundTransaction or ManuallyAddingFundTransaction)
@@ -243,7 +263,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 }
             }
 
-            if (loyaltyFundToRemove > 0) throw new NotEnoughtFundException();
+            if (loyaltyFundToRemove > 0)
+            {
+                logger.LogWarning("[Mutation] CreateTransaction - NotEnoughtFundException");
+                throw new NotEnoughtFundException();
+            }
 
             transaction.Transactions = affectedAddingFundTransactions;
             transaction.TransactionByProductGroups = transactionByProductGroups;

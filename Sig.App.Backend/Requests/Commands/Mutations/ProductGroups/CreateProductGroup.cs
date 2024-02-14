@@ -33,9 +33,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.Include(x => x.ProductGroups).FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] CreateProductGroup - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
-            if (request.Name == ProductGroupType.LOYALTY) throw new CantCreateProductGroupWithLoyaltyDefaultName();
+            if (request.Name == ProductGroupType.LOYALTY)
+            {
+                logger.LogWarning("[Mutation] CreateProductGroup - CantCreateProductGroupWithLoyaltyDefaultName");
+                throw new CantCreateProductGroupWithLoyaltyDefaultName();
+            }
 
             var productGroup = new ProductGroup()
             {

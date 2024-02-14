@@ -37,11 +37,19 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] RemoveManagerFromOrganization - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
             
             var manager = await db.Users.FirstOrDefaultAsync(x => x.Id == request.ManagerId.IdentifierForType<AppUser>());
 
-            if (manager == null) throw new ManagerNotFoundException();
+            if (manager == null)
+            {
+                logger.LogWarning("[Mutation] RemoveManagerFromOrganization - ManagerNotFoundException");
+                throw new ManagerNotFoundException();
+            }
 
             await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.OrganizationManagerOf, organization.Id.ToString()));
 

@@ -34,16 +34,32 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.Include(x => x.BudgetAllowances).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] CreateBudgetAllowance - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
 
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
             var subscription = await db.Subscriptions.FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
-            if (subscription == null) throw new SubscriptionNotFoundException();
+            if (subscription == null)
+            {
+                logger.LogWarning("[Mutation] CreateBudgetAllowance - SubscriptionNotFoundException");
+                throw new SubscriptionNotFoundException();
+            }
 
-            if (subscription.ProjectId != organization.ProjectId) throw new OrganizationAndSubscriptionNotRelated();
+            if (subscription.ProjectId != organization.ProjectId)
+            {
+                logger.LogWarning("[Mutation] CreateBudgetAllowance - OrganizationAndSubscriptionNotRelated");
+                throw new OrganizationAndSubscriptionNotRelated();
+            }
 
-            if (organization.BudgetAllowances.Any(x => x.SubscriptionId == subscriptionId)) throw new OrganizationAlreadyHaveBudgetForSubscriptionException();
+            if (organization.BudgetAllowances.Any(x => x.SubscriptionId == subscriptionId))
+            {
+                logger.LogWarning("[Mutation] CreateBudgetAllowance - OrganizationAlreadyHaveBudgetForSubscriptionException");
+                throw new OrganizationAlreadyHaveBudgetForSubscriptionException();
+            }
 
             var budgetAllowance = new BudgetAllowance()
             {

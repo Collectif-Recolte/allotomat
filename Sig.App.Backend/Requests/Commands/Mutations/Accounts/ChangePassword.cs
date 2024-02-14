@@ -30,8 +30,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
         {
             var user = await userManager.FindByIdAsync(httpContextAccessor.HttpContext.User.GetUserId());
 
-            if (!await userManager.CheckPasswordAsync(user, request.CurrentPassword)) throw new WrongPasswordException();
-            
+            if (!await userManager.CheckPasswordAsync(user, request.CurrentPassword))
+            {
+                logger.LogWarning("[Mutation] ChangePassword - WrongPasswordException");
+                throw new WrongPasswordException();
+            }
+
             var result = await userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
             result.AssertSuccess();
 

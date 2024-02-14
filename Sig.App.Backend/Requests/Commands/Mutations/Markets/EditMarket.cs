@@ -33,7 +33,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             var marketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
-            if (market == null) throw new MarketNotFoundException();
+            if (market == null)
+            {
+                logger.LogWarning("[Mutation] EditMarket - MarketNotFoundException");
+                throw new MarketNotFoundException();
+            }
 
             request.Name.IfSet(v => market.Name = v.Trim());
 

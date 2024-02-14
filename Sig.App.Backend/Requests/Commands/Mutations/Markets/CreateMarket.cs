@@ -56,7 +56,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 var (manager, isNew) = await GetOrCreateMarketManager(email);
                 var existingClaims = await userManager.GetClaimsAsync(manager);
                 if (existingClaims.Any(c => c.Type == AppClaimTypes.MarketManagerOf))
+                {
+                    logger.LogWarning($"[Mutation] CreateMarket - MarketNotFoundException ({email})");
                     throw new UserAlreadyManagerException();
+                }
 
                 await userManager.AddClaimAsync(manager, new Claim(AppClaimTypes.MarketManagerOf, market.Id.ToString()));
 
@@ -99,6 +102,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                     case UserType.Merchant:
                         return (user, false);
                     default:
+                        logger.LogWarning($"[Mutation] CreateMarket - ExistingUserNotMerchantException ({email})");
                         throw new ExistingUserNotMerchantException();
                 }
             }

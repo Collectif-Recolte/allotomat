@@ -25,7 +25,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
         {
             logger.LogInformation($"[Mutation] ConfirmEmail({request.Email})");
             var user = await userManager.FindByEmailAsync(request.Email);
-            if (user == null || user.EmailConfirmed) throw new NoNeedToConfirmException();
+            if (user == null || user.EmailConfirmed)
+            {
+                logger.LogWarning("[Mutation] ConfirmEmail - NoNeedToConfirmException");
+                throw new NoNeedToConfirmException();
+            }
 
             var result = await userManager.ConfirmEmailAsync(user, request.Token);
             result.AssertSuccess();

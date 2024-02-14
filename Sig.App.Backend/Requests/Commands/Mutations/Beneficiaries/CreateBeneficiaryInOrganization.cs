@@ -34,12 +34,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] CreateBeneficiaryInOrganization - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
 
             var beneficiaryTypeId = request.BeneficiaryTypeId.LongIdentifierForType<BeneficiaryType>();
             var beneficiaryType = await db.BeneficiaryTypes.FirstOrDefaultAsync(x => x.Id == beneficiaryTypeId, cancellationToken);
 
-            if (beneficiaryType == null) throw new BeneficiaryTypeNotFoundException();
+            if (beneficiaryType == null)
+            {
+                logger.LogWarning("[Mutation] CreateBeneficiaryInOrganization - BeneficiaryTypeNotFoundException");
+                throw new BeneficiaryTypeNotFoundException();
+            }
 
             var lastBeneficiary = await db.Beneficiaries.Where(x => x.OrganizationId == organizationId).OrderBy(x => x.SortOrder).LastOrDefaultAsync();
             var sortOrder = lastBeneficiary != null ? lastBeneficiary.SortOrder + 1 : 0;

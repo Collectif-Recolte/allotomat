@@ -38,15 +38,35 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
             var subscription = await db.Subscriptions.Include(x => x.Types).FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
-            if (subscription == null) throw new SubscriptionNotFoundException();
+            if (subscription == null)
+            {
+                logger.LogWarning("[Mutation] EditSubscription - SubscriptionNotFoundException");
+                throw new SubscriptionNotFoundException();
+            }
 
             var beneficiaryTypeIds = request.Types.Select(x => x.BeneficiaryTypeId.ToString() + x.ProductGroupId.ToString());
-            if(!beneficiaryTypeIds.Any()) throw new SubscriptionTypesCantBeEmpty();
-            if (beneficiaryTypeIds.Count() != beneficiaryTypeIds.Distinct().Count()) throw new BeneficiaryTypeCanOnlyBeAssignOnce();
+            if (!beneficiaryTypeIds.Any())
+            {
+                logger.LogWarning("[Mutation] EditSubscription - SubscriptionTypesCantBeEmpty");
+                throw new SubscriptionTypesCantBeEmpty();
+            }
+            if (beneficiaryTypeIds.Count() != beneficiaryTypeIds.Distinct().Count())
+            {
+                logger.LogWarning("[Mutation] EditSubscription - BeneficiaryTypeCanOnlyBeAssignOnce");
+                throw new BeneficiaryTypeCanOnlyBeAssignOnce();
+            }
 
-            if (db.SubscriptionBeneficiaries.Where(x => x.SubscriptionId == subscriptionId).Any()) throw new CantEditSubscriptionWithBeneficiaries();
+            if (db.SubscriptionBeneficiaries.Where(x => x.SubscriptionId == subscriptionId).Any())
+            {
+                logger.LogWarning("[Mutation] EditSubscription - CantEditSubscriptionWithBeneficiaries");
+                throw new CantEditSubscriptionWithBeneficiaries();
+            }
 
-            if (request.StartDate > request.EndDate) throw new EndDateMustBeAfterStartDateException();
+            if (request.StartDate > request.EndDate)
+            {
+                logger.LogWarning("[Mutation] EditSubscription - EndDateMustBeAfterStartDateException");
+                throw new EndDateMustBeAfterStartDateException();
+            }
 
             subscription.Name = request.Name;
             subscription.MonthlyPaymentMoment = request.MonthlyPaymentMoment;

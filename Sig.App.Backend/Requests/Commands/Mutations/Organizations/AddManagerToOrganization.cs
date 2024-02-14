@@ -45,7 +45,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] AddManagerToOrganization - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
             var managers = new List<AppUser>();
 
             foreach (var email in request.ManagerEmails)
@@ -53,7 +57,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 var (manager, isNew) = await GetOrCreateOrganizationManager(email);
                 var existingClaims = await userManager.GetClaimsAsync(manager);
                 if (existingClaims.Any(c => c.Type == AppClaimTypes.OrganizationManagerOf))
+                {
+                    logger.LogWarning("[Mutation] AddManagerToOrganization - UserAlreadyManagerException");
                     throw new UserAlreadyManagerException();
+                }
 
                 await userManager.AddClaimAsync(manager, new Claim(AppClaimTypes.OrganizationManagerOf, organization.Id.ToString()));
 
@@ -93,6 +100,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                     case UserType.OrganizationManager:
                         return (user, false);
                     default:
+                        logger.LogWarning($"[Mutation] AddManagerToOrganization - ExistingUserNotOrganizationManagerException ({email})");
                         throw new ExistingUserNotOrganizationManagerException();
                 }
             }

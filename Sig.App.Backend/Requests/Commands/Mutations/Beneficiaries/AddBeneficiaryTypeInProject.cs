@@ -33,12 +33,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.Include(x => x.Markets).FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] AddBeneficiaryTypeInProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             var beneficiaryTypes = await db.BeneficiaryTypes.Where(x => x.ProjectId == projectId).ToListAsync();
             var beneficiaryTypesKeys = beneficiaryTypes.SelectMany(x => x.GetKeys());
 
-            if (request.Keys.Where(x => beneficiaryTypesKeys.Contains(x.Trim().ToLower())).Any()) throw new BeneficiaryTypeKeyAlreadyInUseException();
+            if (request.Keys.Where(x => beneficiaryTypesKeys.Contains(x.Trim().ToLower())).Any())
+            {
+                logger.LogWarning("[Mutation] AddBeneficiaryTypeInProject - BeneficiaryTypeKeyAlreadyInUseException");
+                throw new BeneficiaryTypeKeyAlreadyInUseException();
+            }
 
             var beneficiaryType = new BeneficiaryType()
             {

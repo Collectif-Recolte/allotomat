@@ -45,7 +45,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             var marketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
-            if (market == null) throw new MarketNotFoundException();
+            if (market == null)
+            {
+                logger.LogWarning("[Mutation] AddManagerToMarket - MarketNotFoundException");
+                throw new MarketNotFoundException();
+            }
             var managers = new List<AppUser>();
 
             foreach (var email in request.ManagerEmails)
@@ -53,7 +57,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 var (manager, isNew) = await GetOrCreateMarketManager(email);
                 var existingClaims = await userManager.GetClaimsAsync(manager);
                 if (existingClaims.Any(c => c.Type == AppClaimTypes.MarketManagerOf))
+                {
+                    logger.LogWarning("[Mutation] AddManagerToMarket - UserAlreadyManagerException");
                     throw new UserAlreadyManagerException();
+                }
 
                 await userManager.AddClaimAsync(manager, new Claim(AppClaimTypes.MarketManagerOf, market.Id.ToString()));
 
@@ -93,6 +100,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                     case UserType.Merchant:
                         return (user, false);
                     default:
+                        logger.LogWarning("[Mutation] AddManagerToMarket - ExistingUserNotMarketManagerException");
                         throw new ExistingUserNotMarketManagerException();
                 }
             }

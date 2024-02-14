@@ -43,22 +43,50 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             logger.LogInformation($"[Mutation] TransfertCard({request.OriginalCardId}, {request.NewCardId})");
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             var currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
-            
+
             var originalCardId = request.OriginalCardId.LongIdentifierForType<Card>();
             var originalCard = await db.Cards.Include(x => x.Beneficiary).ThenInclude(x => x.Organization).Include(x => x.Transactions).Include(x => x.Funds).Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == originalCardId, cancellationToken);
 
-            if (originalCard == null) throw new OriginalCardNotFoundException();
+            if (originalCard == null)
+            {
+                logger.LogWarning("[Mutation] TransfertCard - OriginalCardNotFoundException");
+                throw new OriginalCardNotFoundException();
+            }
 
             var newCard = await db.Cards.FirstOrDefaultAsync(x => x.ProgramCardId == request.NewCardId && x.ProjectId == originalCard.ProjectId, cancellationToken);
-            if (newCard == null) throw new NewCardNotFoundException();
+            if (newCard == null)
+            {
+                logger.LogWarning("[Mutation] TransfertCard - NewCardNotFoundException");
+                throw new NewCardNotFoundException();
+            }
 
-            if (originalCard.Status != CardStatus.Assigned) throw new OriginalCardNotAssignException();
-            if (newCard.Status == CardStatus.Assigned) throw new NewCardAlreadyAssignException();
-            if (newCard.Status == CardStatus.GiftCard) throw new NewCardAlreadyGiftCardException();
-            if (newCard.Status == CardStatus.Lost) throw new NewCardAlreadyLostException();
+            if (originalCard.Status != CardStatus.Assigned)
+            {
+                logger.LogWarning("[Mutation] TransfertCard - OriginalCardNotAssignException");
+                throw new OriginalCardNotAssignException();
+            }
+            if (newCard.Status == CardStatus.Assigned)
+            {
+                logger.LogWarning("[Mutation] TransfertCard - NewCardAlreadyAssignException");
+                throw new NewCardAlreadyAssignException();
+            }
+            if (newCard.Status == CardStatus.GiftCard)
+            {
+                logger.LogWarning("[Mutation] TransfertCard - NewCardAlreadyGiftCardException");
+                throw new NewCardAlreadyGiftCardException();
+            }
+            if (newCard.Status == CardStatus.Lost)
+            {
+                logger.LogWarning("[Mutation] TransfertCard - NewCardAlreadyLostException");
+                throw new NewCardAlreadyLostException();
+            }
 
-            if (originalCard.ProjectId != newCard.ProjectId) throw new NewCardNotInProjectException();
-            
+            if (originalCard.ProjectId != newCard.ProjectId)
+            {
+                logger.LogWarning("[Mutation] TransfertCard - NewCardNotInProjectException");
+                throw new NewCardNotInProjectException();
+            }
+
             var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
 
             foreach (var transaction in originalCard.Transactions)

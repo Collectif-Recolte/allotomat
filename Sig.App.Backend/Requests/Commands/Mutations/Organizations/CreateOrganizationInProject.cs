@@ -47,7 +47,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] CreateOrganizationInProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             var organization = new Organization()
             {
@@ -64,7 +68,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 var (manager, isNew) = await GetOrCreateOrganizationManager(email);
                 var existingClaims = await userManager.GetClaimsAsync(manager);
                 if (existingClaims.Any(c => c.Type == AppClaimTypes.OrganizationManagerOf))
+                {
+                    logger.LogWarning($"[Mutation] CreateOrganizationInProject - UserAlreadyManagerException ({email})");
                     throw new UserAlreadyManagerException();
+                }
 
                 await userManager.AddClaimAsync(manager, new Claim(AppClaimTypes.OrganizationManagerOf, organization.Id.ToString()));
 
@@ -106,6 +113,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                     case UserType.OrganizationManager:
                         return (user, false);
                     default:
+                        logger.LogWarning($"[Mutation] CreateOrganizationInProject - ExistingUserNotOrganizationManagerException ({email})");
                         throw new ExistingUserNotOrganizationManagerException();
                 }
             }

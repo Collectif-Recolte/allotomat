@@ -52,14 +52,26 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             }
             var beneficiary = await db.Beneficiaries.Include(x => x.Organization).ThenInclude(x => x.Project).FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
-            if (beneficiary == null) throw new BeneficiaryNotFoundException();
+            if (beneficiary == null)
+            {
+                logger.LogWarning("[Mutation] UnassignCardFromBeneficiary - BeneficiaryNotFoundException");
+                throw new BeneficiaryNotFoundException();
+            }
 
             var cardId = request.CardId.LongIdentifierForType<Card>();
             var card = await db.Cards.Include(x => x.Beneficiary).Include(x => x.Transactions).Include(x => x.Funds).ThenInclude(x => x.ProductGroup).FirstOrDefaultAsync(x => x.Id == cardId, cancellationToken);
 
-            if (card == null) throw new CardNotFoundException();
+            if (card == null)
+            {
+                logger.LogWarning("[Mutation] UnassignCardFromBeneficiary - CardNotFoundException");
+                throw new CardNotFoundException();
+            }
 
-            if (card.Beneficiary == null || card.Beneficiary.Id != beneficiaryId) throw new CardNotAssignToBeneficiaryException();
+            if (card.Beneficiary == null || card.Beneficiary.Id != beneficiaryId)
+            {
+                logger.LogWarning("[Mutation] UnassignCardFromBeneficiary - CardNotAssignToBeneficiaryException");
+                throw new CardNotAssignToBeneficiaryException();
+            }
             
             var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();

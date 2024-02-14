@@ -33,9 +33,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
             var productGroupId = request.ProductGroupId.LongIdentifierForType<ProductGroup>();
             var productGroup = await db.ProductGroups.FirstOrDefaultAsync(x => x.Id == productGroupId, cancellationToken);
 
-            if (productGroup == null) throw new ProductGroupNotFoundException();
+            if (productGroup == null)
+            {
+                logger.LogWarning("[Mutation] EditProductGroup - ProductGroupNotFoundException");
+                throw new ProductGroupNotFoundException();
+            }
 
-            if (productGroup.Name == ProductGroupType.LOYALTY) throw new CantEditLoyaltyProductGroup();
+            if (productGroup.Name == ProductGroupType.LOYALTY)
+            {
+                logger.LogWarning("[Mutation] EditProductGroup - CantEditLoyaltyProductGroup");
+                throw new CantEditLoyaltyProductGroup();
+            }
 
             request.Name.IfSet(x => productGroup.Name = x.Value);
             request.Color.IfSet(x => productGroup.Color = x);

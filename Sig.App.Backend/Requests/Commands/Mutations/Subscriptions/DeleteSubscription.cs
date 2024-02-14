@@ -31,9 +31,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
             var subscription = await db.Subscriptions.Include(x => x.Types).Include(x => x.Beneficiaries).Include(x=> x.BudgetAllowances).FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
-            if (subscription == null) throw new SubscriptionNotFoundException();
+            if (subscription == null)
+            {
+                logger.LogWarning("[Mutation] DeleteSubscription - SubscriptionNotFoundException");
+                throw new SubscriptionNotFoundException();
+            }
 
-            if (db.SubscriptionBeneficiaries.Where(x => x.SubscriptionId == subscriptionId).Any()) throw new CantDeleteSubscriptionWithBeneficiaries();
+            if (db.SubscriptionBeneficiaries.Where(x => x.SubscriptionId == subscriptionId).Any())
+            {
+                logger.LogWarning("[Mutation] DeleteSubscription - CantDeleteSubscriptionWithBeneficiaries");
+                throw new CantDeleteSubscriptionWithBeneficiaries();
+            }
 
             var subscriptionTypeIds = subscription.Types.Select(y => y.Id).ToArray();
 

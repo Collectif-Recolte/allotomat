@@ -29,7 +29,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 
             // Fail with InvalidToken error to not leak info about email validity
             if (user == null)
+            {
+                logger.LogWarning("[Mutation] ResetPassword - IdentityResultException");
                 throw new IdentityResultException(IdentityResult.Failed(userManager.ErrorDescriber.InvalidToken()));
+            }
 
             var result = await userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
             result.AssertSuccess();

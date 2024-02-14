@@ -36,8 +36,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
-            if (organization.Project.AdministrationSubscriptionsOffPlatform) throw new ProjectAdministrateSubscriptionOffPlatformException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] ImportBeneficiariesListInOrganization - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
+            if (organization.Project.AdministrationSubscriptionsOffPlatform)
+            {
+                logger.LogWarning("[Mutation] ImportBeneficiariesListInOrganization - ProjectAdministrateSubscriptionOffPlatformException");
+                throw new ProjectAdministrateSubscriptionOffPlatformException();
+            }
 
             var beneficiaryTypes = await db.BeneficiaryTypes.Where(x => x.ProjectId == organization.ProjectId).ToListAsync();
 
@@ -49,7 +57,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             {
                 BeneficiaryType beneficiaryType = beneficiaryTypes.FirstOrDefault(x => x.GetKeys().Contains(item.Key.Trim().ToLower()));
 
-                if (beneficiaryType == null) throw new BeneficiaryTypeNotFoundException();
+                if (beneficiaryType == null)
+                {
+                    logger.LogWarning($"[Mutation] ImportBeneficiariesListInOrganization - BeneficiaryTypeNotFoundException ({item.Key})");
+                    throw new BeneficiaryTypeNotFoundException();
+                }
 
                 var beneficiary = currentBeneficiaries.Where(x => x.ID1 == item.Id1).FirstOrDefault();
 

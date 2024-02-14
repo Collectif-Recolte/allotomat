@@ -54,7 +54,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             long beneficiaryId;
             var isOffPlatformBeneficiary = false;
-            
+
             if (request.BeneficiaryId.IsIdentifierForType(typeof(Beneficiary)))
             {
                 beneficiaryId = request.BeneficiaryId.LongIdentifierForType<Beneficiary>();
@@ -72,14 +72,26 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .Include(x => x.Subscriptions)
                 .FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
-            if (beneficiary == null) throw new BeneficiaryNotFoundException();
+            if (beneficiary == null)
+            {
+                logger.LogWarning("[Mutation] CreateManuallyAddingFundTransaction - BeneficiaryNotFoundException");
+                throw new BeneficiaryNotFoundException();
+            }
 
-            if (beneficiary.Card == null) throw new BeneficiaryDontHaveCardException();
+            if (beneficiary.Card == null)
+            {
+                logger.LogWarning("[Mutation] CreateManuallyAddingFundTransaction - BeneficiaryDontHaveCardException");
+                throw new BeneficiaryDontHaveCardException();
+            }
 
             var productGroupId = request.ProductGroupId.LongIdentifierForType<ProductGroup>();
             var productGroup = await db.ProductGroups.FirstOrDefaultAsync(x => x.Id == productGroupId, cancellationToken);
 
-            if (productGroup == null) throw new ProductGroupNotFoundException();
+            if (productGroup == null)
+            {
+                logger.LogWarning("[Mutation] CreateManuallyAddingFundTransaction - ProductGroupNotFoundException");
+                throw new ProductGroupNotFoundException();
+            }
 
             var card = beneficiary.Card;
 
@@ -95,7 +107,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 db.Funds.Add(fund);
             }
 
-            if(fund.Amount + request.Amount < 0) throw new AvailableFundCantBeLessThanZero();
+            if (fund.Amount + request.Amount < 0)
+            {
+                logger.LogWarning("[Mutation] CreateManuallyAddingFundTransaction - AvailableFundCantBeLessThanZero");
+                throw new AvailableFundCantBeLessThanZero();
+            }
+
             fund.Amount += request.Amount;
 
             AddingFundTransaction transaction;
@@ -105,19 +122,43 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 var subscriptionId = request.SubscriptionId.Value.LongIdentifierForType<Subscription>();
                 var subscription = await db.Subscriptions.Include(x => x.Types).ThenInclude(x => x.ProductGroup).FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
-                if (subscription == null) throw new SubscriptionNotFoundException();
+                if (subscription == null)
+                {
+                    logger.LogWarning("[Mutation] CreateManuallyAddingFundTransaction - SubscriptionNotFoundException");
+                    throw new SubscriptionNotFoundException();
+                }
 
-                if (!beneficiary.Subscriptions.Any(x => x.SubscriptionId == subscriptionId)) throw new BeneficiaryDontHaveThisSubscriptionException();
+                if (!beneficiary.Subscriptions.Any(x => x.SubscriptionId == subscriptionId))
+                {
+                    logger.LogWarning("[Mutation] CreateManuallyAddingFundTransaction - BeneficiaryDontHaveThisSubscriptionException");
+                    throw new BeneficiaryDontHaveThisSubscriptionException();
+                }
 
-                if (subscription.IsFundsAccumulable && subscription.FundsExpirationDate < today) throw new SubscriptionExpiredException();
+                if (subscription.IsFundsAccumulable && subscription.FundsExpirationDate < today)
+                {
+                    logger.LogWarning("[Mutation] CreateManuallyAddingFundTransaction - SubscriptionExpiredException");
+                    throw new SubscriptionExpiredException();
+                }
 
                 var budgetAllowance = await db.BudgetAllowances.FirstOrDefaultAsync(x => x.OrganizationId == beneficiary.OrganizationId && x.SubscriptionId == subscriptionId, cancellationToken);
 
-                if (budgetAllowance == null) throw new SubscriptionDontHaveBudgetAllowance();
+                if (budgetAllowance == null)
+                {
+                    logger.LogWarning("[Mutation] CreateManuallyAddingFundTransaction - SubscriptionDontHaveBudgetAllowance");
+                    throw new SubscriptionDontHaveBudgetAllowance();
+                }
 
-                if (budgetAllowance.AvailableFund < request.Amount) throw new SubscriptionDontHaveEnoughtAvailableAmount();
+                if (budgetAllowance.AvailableFund < request.Amount)
+                {
+                    logger.LogWarning("[Mutation] CreateManuallyAddingFundTransaction - SubscriptionDontHaveEnoughtAvailableAmount");
+                    throw new SubscriptionDontHaveEnoughtAvailableAmount();
+                }
 
-                if (!subscription.Types.Select(x => x.ProductGroup).Any(x => x.Id == productGroupId)) throw new ProductGroupNotFoundInSubscriptionException();
+                if (!subscription.Types.Select(x => x.ProductGroup).Any(x => x.Id == productGroupId))
+                {
+                    logger.LogWarning("[Mutation] CreateManuallyAddingFundTransaction - ProductGroupNotFoundInSubscriptionException");
+                    throw new ProductGroupNotFoundInSubscriptionException();
+                }
 
                 transaction = new ManuallyAddingFundTransaction()
                 {

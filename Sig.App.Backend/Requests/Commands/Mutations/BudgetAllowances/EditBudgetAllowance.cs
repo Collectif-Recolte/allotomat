@@ -30,12 +30,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
             var budgetAllowanceId = request.BudgetAllowanceId.LongIdentifierForType<BudgetAllowance>();
             var budgetAllowance = await db.BudgetAllowances.FirstOrDefaultAsync(x => x.Id == budgetAllowanceId, cancellationToken);
 
-            if (budgetAllowance == null) throw new BudgetAllowanceNotFoundException();
+            if (budgetAllowance == null)
+            {
+                logger.LogWarning("[Mutation] EditBudgetAllowance - BudgetAllowanceNotFoundException");
+                throw new BudgetAllowanceNotFoundException();
+            }
 
             var budgetDifference = budgetAllowance.OriginalFund - request.Amount;
             if (budgetDifference > 0)
             {
-                if (budgetAllowance.AvailableFund < budgetDifference) throw new AvailableBudgetOverNewBudgetException();
+                if (budgetAllowance.AvailableFund < budgetDifference)
+                {
+                    logger.LogWarning("[Mutation] EditBudgetAllowance - AvailableBudgetOverNewBudgetException");
+                    throw new AvailableBudgetOverNewBudgetException();
+                }
             }
 
             budgetAllowance.AvailableFund = budgetAllowance.AvailableFund - budgetDifference;

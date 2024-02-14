@@ -39,7 +39,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
                 .Include(x => x.Profile)
                 .FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
 
-            if (user == null || user.EmailConfirmed) throw new NoNeedToConfirmException();
+            if (user == null || user.EmailConfirmed)
+            {
+                logger.LogWarning("[Mutation] ResendConfirmationEmail - NoNeedToConfirmException");
+                throw new NoNeedToConfirmException();
+            }
 
             logger.LogInformation($"User {user.Email} requested new email confirmation token.");
 

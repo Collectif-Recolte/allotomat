@@ -33,7 +33,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] EditOrganization - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
 
             request.Name.IfSet(v => organization.Name = v.Trim());
             

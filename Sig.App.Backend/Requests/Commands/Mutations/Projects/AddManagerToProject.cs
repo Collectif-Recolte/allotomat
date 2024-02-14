@@ -45,7 +45,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] AddManagerToProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
             var managers = new List<AppUser>();
 
             foreach (var email in request.ManagerEmails)
@@ -53,7 +57,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 var (manager, isNew) = await GetOrCreateProjectManager(email);
                 var existingClaims = await userManager.GetClaimsAsync(manager);
                 if (existingClaims.Any(c => c.Type == AppClaimTypes.ProjectManagerOf))
+                {
+                    logger.LogWarning($"[Mutation] AddManagerToProject - UserAlreadyManagerException ({email})");
                     throw new UserAlreadyManagerException();
+                }
 
                 await userManager.AddClaimAsync(manager, new Claim(AppClaimTypes.ProjectManagerOf, project.Id.ToString()));
 
@@ -93,6 +100,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                     case UserType.ProjectManager:
                         return (user, false);
                     default:
+                        logger.LogWarning($"[Mutation] AddManagerToProject - ExistingUserNotProjectManagerException ({email})");
                         throw new ExistingUserNotProjectManagerException();
                 }
             }
