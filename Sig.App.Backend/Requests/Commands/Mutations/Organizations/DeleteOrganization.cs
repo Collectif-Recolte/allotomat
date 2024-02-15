@@ -42,7 +42,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Card).ThenInclude(x => x.Transactions)
                 .FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] DeleteOrganization - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
 
             var organizationManagers = await mediator.Send(new GetOrganizationManagers.Query
             {

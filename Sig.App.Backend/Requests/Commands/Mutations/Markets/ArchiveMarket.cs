@@ -40,7 +40,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 .Include(x => x.Projects)
                 .FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
-            if (market == null) throw new MarketNotFoundException();
+            if (market == null)
+            {
+                logger.LogWarning("[Mutation] ArchiveMarket - MarketNotFoundException");
+                throw new MarketNotFoundException();
+            }
 
             var marketManagers = await mediator.Send(new GetMarketManagers.Query
             {

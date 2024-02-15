@@ -40,18 +40,42 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             }
             var beneficiary = await db.Beneficiaries.Include(x => x.Organization).FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
-            if (beneficiary == null) throw new BeneficiaryNotFoundException();
+            if (beneficiary == null)
+            {
+                logger.LogWarning("[Mutation] AssignCardToBeneficiary - BeneficiaryNotFoundException");
+                throw new BeneficiaryNotFoundException();
+            }
 
             var card = await db.Cards.FirstOrDefaultAsync(x => x.ProgramCardId == request.CardId && x.ProjectId == beneficiary.Organization.ProjectId, cancellationToken);
 
             if (card == null) throw new CardNotFoundException();
 
-            if (card.Status == CardStatus.Assigned) throw new CardAlreadyAssignException();
-            if (card.Status == CardStatus.Lost) throw new CardLostException();
-            if (card.Status == CardStatus.Deactivated) throw new CardDeactivatedException();
-            if (card.Status == CardStatus.GiftCard) throw new CardAlreadyGiftCardException();
+            if (card.Status == CardStatus.Assigned)
+            {
+                logger.LogWarning("[Mutation] AssignCardToBeneficiary - CardAlreadyAssignException");
+                throw new CardAlreadyAssignException();
+            }
+            if (card.Status == CardStatus.Lost)
+            {
+                logger.LogWarning("[Mutation] AssignCardToBeneficiary - CardLostException");
+                throw new CardLostException();
+            }
+            if (card.Status == CardStatus.Deactivated)
+            {
+                logger.LogWarning("[Mutation] AssignCardToBeneficiary - CardDeactivatedException");
+                throw new CardDeactivatedException();
+            }
+            if (card.Status == CardStatus.GiftCard)
+            {
+                logger.LogWarning("[Mutation] AssignCardToBeneficiary - CardAlreadyGiftCardException");
+                throw new CardAlreadyGiftCardException();
+            }
 
-            if(card.ProjectId != beneficiary.Organization.ProjectId) throw new CardNotInProjectException();
+            if (card.ProjectId != beneficiary.Organization.ProjectId)
+            {
+                logger.LogWarning("[Mutation] AssignCardToBeneficiary - CardNotInProjectException");
+                throw new CardNotInProjectException();
+            }
 
             card.Status = CardStatus.Assigned;
 

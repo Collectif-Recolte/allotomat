@@ -33,14 +33,26 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.Include(x => x.Markets).FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] RemoveMarketFromProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             var marketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
-            if (market == null) throw new MarketNotFoundException();
+            if (market == null)
+            {
+                logger.LogWarning("[Mutation] RemoveMarketFromProject - MarketNotFoundException");
+                throw new MarketNotFoundException();
+            }
 
-            if (!project.Markets.Any(x => x.MarketId == marketId)) throw new MarketNotInProjectException();
+            if (!project.Markets.Any(x => x.MarketId == marketId))
+            {
+                logger.LogWarning("[Mutation] RemoveMarketFromProject - MarketNotInProjectException");
+                throw new MarketNotInProjectException();
+            }
 
             project.Markets.Remove(project.Markets.First(x => x.MarketId == marketId));
 

@@ -33,12 +33,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             var beneficiaryTypeId = request.BeneficiaryTypeId.LongIdentifierForType<BeneficiaryType>();
             var beneficiaryType = await db.BeneficiaryTypes.FirstOrDefaultAsync(x => x.Id == beneficiaryTypeId, cancellationToken);
 
-            if (beneficiaryType == null) throw new BeneficiaryTypeNotFoundException();
+            if (beneficiaryType == null)
+            {
+                logger.LogWarning("[Mutation] EditBeneficiaryType - BeneficiaryTypeNotFoundException");
+                throw new BeneficiaryTypeNotFoundException();
+            }
 
             var beneficiaryTypes = await db.BeneficiaryTypes.Where(x => x.ProjectId == beneficiaryType.ProjectId && x.Id != beneficiaryType.Id).ToListAsync();
             var beneficiaryTypesKeys = beneficiaryTypes.SelectMany(x => x.GetKeys());
 
-            if (request.Keys.Where(x => beneficiaryTypesKeys.Contains(x.Trim().ToLower())).Any()) throw new BeneficiaryTypeKeyAlreadyInUseException();
+            if (request.Keys.Where(x => beneficiaryTypesKeys.Contains(x.Trim().ToLower())).Any())
+            {
+                logger.LogWarning("[Mutation] EditBeneficiaryType - BeneficiaryTypeKeyAlreadyInUseException");
+                throw new BeneficiaryTypeKeyAlreadyInUseException();
+            }
 
             request.Name.IfSet(v => beneficiaryType.Name = v.Trim());
             beneficiaryType.SetKeys(request.Keys);

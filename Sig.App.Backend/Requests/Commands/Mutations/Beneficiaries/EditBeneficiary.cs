@@ -33,7 +33,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             var beneficiaryId = request.BeneficiaryId.LongIdentifierForType<Beneficiary>();
             var beneficiary = await db.Beneficiaries.FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
-            if (beneficiary == null) throw new BeneficiaryNotFoundException();
+            if (beneficiary == null)
+            {
+                logger.LogWarning("[Mutation] EditBeneficiary - BeneficiaryNotFoundException");
+                throw new BeneficiaryNotFoundException();
+            }
 
             request.Firstname.IfSet(v => beneficiary.Firstname = v.Trim());
             request.Lastname.IfSet(v => beneficiary.Lastname = v.Trim());

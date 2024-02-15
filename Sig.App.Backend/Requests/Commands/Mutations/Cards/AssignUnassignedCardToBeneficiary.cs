@@ -40,10 +40,18 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             }
             var beneficiary = await db.Beneficiaries.Include(x => x.Organization).FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
-            if (beneficiary == null) throw new BeneficiaryNotFoundException();
+            if (beneficiary == null)
+            {
+                logger.LogWarning("[Mutation] AssignUnassignedCardToBeneficiary - BeneficiaryNotFoundException");
+                throw new BeneficiaryNotFoundException();
+            }
 
             var card = await db.Cards.FirstOrDefaultAsync(x => x.Status == CardStatus.Unassigned && x.ProjectId == beneficiary.Organization.ProjectId);
-            if (card == null) throw new NoUnassignedCardAvailableException();
+            if (card == null)
+            {
+                logger.LogWarning("[Mutation] AssignUnassignedCardToBeneficiary - NoUnassignedCardAvailableException");
+                throw new NoUnassignedCardAvailableException();
+            }
 
             card.Status = CardStatus.Assigned;
             beneficiary.Card = card;

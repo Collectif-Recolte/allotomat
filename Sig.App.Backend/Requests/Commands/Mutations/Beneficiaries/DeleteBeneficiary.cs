@@ -35,11 +35,23 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                 .Include(x => x.Subscriptions).ThenInclude(x => x.Subscription)
                 .FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
-            if (beneficiary == null) throw new BeneficiaryNotFoundException();
+            if (beneficiary == null)
+            {
+                logger.LogWarning("[Mutation] DeleteBeneficiary - BeneficiaryNotFoundException");
+                throw new BeneficiaryNotFoundException();
+            }
             
-            if (HaveAnyActiveSubscription(beneficiary)) throw new BeneficiaryCantHaveActiveSubscriptionException();
+            if (HaveAnyActiveSubscription(beneficiary))
+            {
+                logger.LogWarning("[Mutation] DeleteBeneficiary - BeneficiaryCantHaveActiveSubscriptionException");
+                throw new BeneficiaryCantHaveActiveSubscriptionException();
+            }
 
-            if (beneficiary.CardId != null) throw new BeneficiaryCantHaveCardException();
+            if (beneficiary.CardId != null)
+            {
+                logger.LogWarning("[Mutation] DeleteBeneficiary - BeneficiaryCantHaveCardException");
+                throw new BeneficiaryCantHaveCardException();
+            }
 
             db.SubscriptionBeneficiaries.RemoveRange(beneficiary.Subscriptions);
             db.Beneficiaries.Remove(beneficiary);

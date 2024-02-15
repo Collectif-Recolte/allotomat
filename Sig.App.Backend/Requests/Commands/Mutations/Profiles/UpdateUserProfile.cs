@@ -43,7 +43,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Profiles
                     .Include(x => x.Profile)
                     .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
 
-                if (user == null) throw new UserNotFoundException();
+                if (user == null)
+                {
+                    logger.LogWarning("[Mutation] UpdateUserProfile - UserNotFoundException");
+                    throw new UserNotFoundException();
+                }
 
                 user.Profile = profile = CreateDefaultProfile(user);
             }

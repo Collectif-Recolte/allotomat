@@ -49,12 +49,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
             logger.LogInformation($"[Mutation] CreateCards({request.ProjectId}, {request.Count})");
-            if (request.Count <= 0) throw new CountMustBeHigherThanZeroException();
+            if (request.Count <= 0)
+            {
+                logger.LogWarning("[Mutation] CreateCards - CountMustBeHigherThanZeroException");
+                throw new CountMustBeHigherThanZeroException();
+            }
 
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] CreateCards - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             var actualCount = await db.Cards.Where(x => x.ProjectId == projectId).CountAsync();
             var cards = new List<Card>();

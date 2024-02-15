@@ -32,9 +32,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                 .Include(x => x.Beneficiaries)
                 .FirstOrDefaultAsync(x => x.Id == beneficiaryTypeId, cancellationToken);
 
-            if (beneficiaryType == null) throw new BeneficiaryTypeNotFoundException();
+            if (beneficiaryType == null)
+            {
+                logger.LogWarning("[Mutation] DeleteBeneficiaryType - BeneficiaryTypeNotFoundException");
+                throw new BeneficiaryTypeNotFoundException();
+            }
 
-            if (HaveAnyBeneficiaries(beneficiaryType)) throw new BeneficiaryTypeCantHaveBeneficiariesException();
+            if (HaveAnyBeneficiaries(beneficiaryType))
+            {
+                logger.LogWarning("[Mutation] DeleteBeneficiaryType - BeneficiaryTypeCantHaveBeneficiariesException");
+                throw new BeneficiaryTypeCantHaveBeneficiariesException();
+            }
 
             db.BeneficiaryTypes.Remove(beneficiaryType);
 

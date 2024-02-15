@@ -31,11 +31,23 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
             var productGroupId = request.ProductGroupId.LongIdentifierForType<ProductGroup>();
             var productGroup = await db.ProductGroups.Include(x => x.Types).FirstOrDefaultAsync(x => x.Id == productGroupId, cancellationToken);
 
-            if (productGroup == null) throw new ProductGroupNotFoundException();
+            if (productGroup == null)
+            {
+                logger.LogWarning("[Mutation] DeleteProductGroup - ProductGroupNotFoundException");
+                throw new ProductGroupNotFoundException();
+            }
 
-            if (productGroup.Name == ProductGroupType.LOYALTY) throw new CantDeleteLoyaltyProductGroup();
+            if (productGroup.Name == ProductGroupType.LOYALTY)
+            {
+                logger.LogWarning("[Mutation] DeleteProductGroup - CantDeleteLoyaltyProductGroup");
+                throw new CantDeleteLoyaltyProductGroup();
+            }
 
-            if (HaveSubscriptions(productGroup)) throw new ProductGroupCantHaveSubscriptionsException();
+            if (HaveSubscriptions(productGroup))
+            {
+                logger.LogWarning("[Mutation] DeleteProductGroup - ProductGroupCantHaveSubscriptionsException");
+                throw new ProductGroupCantHaveSubscriptionsException();
+            }
 
             db.ProductGroups.Remove(productGroup);
 

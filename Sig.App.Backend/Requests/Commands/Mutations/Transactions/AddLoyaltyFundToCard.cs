@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using GraphQL.Conventions;
+﻿using System.Collections.Generic;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -49,9 +47,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .FirstOrDefaultAsync(x => x.ProgramCardId == request.CardId && x.ProjectId == projectId,
                     cancellationToken);
 
-            if (card == null) throw new CardNotFoundException();
+            if (card == null)
+            {
+                logger.LogWarning("[Mutation] AddLoyaltyFundToCard - CardNotFoundException");
+                throw new CardNotFoundException();
+            }
 
-            if (card.Status == CardStatus.Lost) throw new CardLostException();
+            if (card.Status == CardStatus.Lost)
+            {
+                logger.LogWarning("[Mutation] AddLoyaltyFundToCard - CardLostException");
+                throw new CardLostException();
+            }
 
             var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();

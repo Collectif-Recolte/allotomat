@@ -37,11 +37,19 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] RemoveManagerFromProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
             
             var manager = await db.Users.FirstOrDefaultAsync(x => x.Id == request.ManagerId.IdentifierForType<AppUser>());
 
-            if (manager == null) throw new ManagerNotFoundException();
+            if (manager == null)
+            {
+                logger.LogWarning("[Mutation] RemoveManagerFromProject - ManagerNotFoundException");
+                throw new ManagerNotFoundException();
+            }
 
             await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.ProjectManagerOf, project.Id.ToString()));
 

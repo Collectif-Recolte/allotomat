@@ -37,11 +37,19 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             var marketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
-            if (market == null) throw new MarketNotFoundException();
+            if (market == null)
+            {
+                logger.LogWarning("[Mutation] RemoveManagerFromMarket - MarketNotFoundException");
+                throw new MarketNotFoundException();
+            }
             
             var manager = await db.Users.FirstOrDefaultAsync(x => x.Id == request.ManagerId.IdentifierForType<AppUser>());
 
-            if (manager == null) throw new ManagerNotFoundException();
+            if (manager == null)
+            {
+                logger.LogWarning("[Mutation] RemoveManagerFromMarket - ManagerNotFoundException");
+                throw new ManagerNotFoundException();
+            }
 
             await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.MarketManagerOf, market.Id.ToString()));
 

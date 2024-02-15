@@ -56,10 +56,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 .Include(x => x.Cards).ThenInclude(x => x.Funds)
                 .FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] DeleteProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             if (HaveAnyActiveSubscription(project))
             {
+                logger.LogWarning("[Mutation] DeleteProject - ProjectCantHaveActiveSubscription");
                 throw new ProjectCantHaveActiveSubscription();
             }
 

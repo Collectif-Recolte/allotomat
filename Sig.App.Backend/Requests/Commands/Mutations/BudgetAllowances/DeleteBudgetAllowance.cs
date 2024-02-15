@@ -30,9 +30,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
             var budgetAllowanceId = request.BudgetAllowanceId.LongIdentifierForType<BudgetAllowance>();
             var budgetAllowance = await db.BudgetAllowances.Include(x => x.Beneficiaries).FirstOrDefaultAsync(x => x.Id == budgetAllowanceId, cancellationToken);
 
-            if (budgetAllowance == null) throw new BudgetAllowanceNotFoundException();
+            if (budgetAllowance == null)
+            {
+                logger.LogWarning("[Mutation] DeleteBudgetAllowance - BudgetAllowanceNotFoundException");
+                throw new BudgetAllowanceNotFoundException();
+            }
 
-            if (HaveAnyBeneficiaries(budgetAllowance)) throw new BudgetAllowanceCantHaveBeneficiariesException();
+            if (HaveAnyBeneficiaries(budgetAllowance))
+            {
+                logger.LogWarning("[Mutation] DeleteBudgetAllowance - BudgetAllowanceCantHaveBeneficiariesException");
+                throw new BudgetAllowanceCantHaveBeneficiariesException();
+            }
 
             db.BudgetAllowances.Remove(budgetAllowance);
 

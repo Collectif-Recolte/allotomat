@@ -1,5 +1,4 @@
-﻿using GraphQL.Conventions;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
@@ -33,14 +32,26 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.Include(x => x.Markets).FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] AddMarketToProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             var marketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
-            if (market == null) throw new MarketNotFoundException();
+            if (market == null)
+            {
+                logger.LogWarning("[Mutation] AddMarketToProject - MarketNotFoundException");
+                throw new MarketNotFoundException();
+            }
 
-            if (project.Markets.Any(x => x.MarketId == marketId)) throw new MarketAlreadyInProjectException();
+            if (project.Markets.Any(x => x.MarketId == marketId))
+            {
+                logger.LogWarning("[Mutation] AddMarketToProject - MarketAlreadyInProjectException");
+                throw new MarketAlreadyInProjectException();
+            }
 
             project.Markets.Add(new ProjectMarket()
             {

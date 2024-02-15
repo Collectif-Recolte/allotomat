@@ -33,7 +33,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] EditProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             request.Name.IfSet(v => project.Name = v.Trim());
             request.Url.IfSet(v => project.Url = v.Trim());

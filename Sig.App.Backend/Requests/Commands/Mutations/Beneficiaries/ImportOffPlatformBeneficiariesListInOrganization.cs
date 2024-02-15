@@ -51,9 +51,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] ImportOffPlatformBeneficiariesListInOrganization - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
 
-            if (!organization.Project.AdministrationSubscriptionsOffPlatform) throw new ProjectDontAdministrateSubscriptionOffPlatformException();
+            if (!organization.Project.AdministrationSubscriptionsOffPlatform)
+            {
+                logger.LogWarning("[Mutation] ImportOffPlatformBeneficiariesListInOrganization - ProjectDontAdministrateSubscriptionOffPlatformException");
+                throw new ProjectDontAdministrateSubscriptionOffPlatformException();
+            }
 
             var beneficiaries = new List<OffPlatformBeneficiary>();
             var sortOrder = 0;
@@ -122,7 +130,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                 {
                     var productGroup = db.ProductGroups.FirstOrDefault(x => x.Name == fund.ProductGroupName && x.ProjectId == organization.Project.Id);
 
-                    if (productGroup == null) throw new ProductGroupNotFoundException();
+                    if (productGroup == null)
+                    {
+                        logger.LogWarning($"[Mutation] ImportOffPlatformBeneficiariesListInOrganization - ProductGroupNotFoundException ({fund.ProductGroupName})");
+                        throw new ProductGroupNotFoundException();
+                    }
 
                     if (isToday && beneficiary.Card != null)
                     {

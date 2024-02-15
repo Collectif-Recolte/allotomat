@@ -37,15 +37,27 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
             logger.LogInformation($"[Mutation] CreateSubscriptionInProject({request.ProjectId}, {request.Name}, {request.MonthlyPaymentMoment}, {request.StartDate}, {request.EndDate}, {request.FundsExpirationDate}, {request.Types}, {request.IsFundsAccumulable})");
-            if (request.StartDate > request.EndDate) throw new EndDateMustBeAfterStartDateException();
+            if (request.StartDate > request.EndDate)
+            {
+                logger.LogWarning("[Mutation] CreateSubscriptionInProject - EndDateMustBeAfterStartDateException");
+                throw new EndDateMustBeAfterStartDateException();
+            }
 
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.Include(x => x.BeneficiaryTypes).Include(x => x.ProductGroups).FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] CreateSubscriptionInProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             var beneficiaryTypeIds = request.Types.Select(x => x.BeneficiaryTypeId);
-            if (!beneficiaryTypeIds.Any()) throw new SubscriptionTypesCantBeEmpty();
+            if (!beneficiaryTypeIds.Any())
+            {
+                logger.LogWarning("[Mutation] CreateSubscriptionInProject - SubscriptionTypesCantBeEmpty");
+                throw new SubscriptionTypesCantBeEmpty();
+            }
 
             var subscription = new Subscription()
             {
@@ -67,14 +79,26 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 var beneficiaryTypeId = type.BeneficiaryTypeId.LongIdentifierForType<BeneficiaryType>();
                 var beneficiaryType = project.BeneficiaryTypes.First(x => x.Id == beneficiaryTypeId);
 
-                if (beneficiaryType == null) throw new BeneficiaryTypeNotFoundException();
+                if (beneficiaryType == null)
+                {
+                    logger.LogWarning("[Mutation] CreateSubscriptionInProject - SubscriptionTypesCantBeEmpty");
+                    throw new BeneficiaryTypeNotFoundException();
+                }
 
                 var productGroupId = type.ProductGroupId.LongIdentifierForType<ProductGroup>();
                 var productGroup = project.ProductGroups.First(x => x.Id == productGroupId);
 
-                if (productGroup == null) throw new ProductGroupNotFoundException();
+                if (productGroup == null)
+                {
+                    logger.LogWarning("[Mutation] CreateSubscriptionInProject - ProductGroupNotFoundException");
+                    throw new ProductGroupNotFoundException();
+                }
 
-                if (subscription.Types.Any(x => x.BeneficiaryTypeId == beneficiaryTypeId && x.ProductGroupId == productGroupId)) throw new CantHaveMultipleBeneficiaryTypeAndProductGroupInSubscriptionException();
+                if (subscription.Types.Any(x => x.BeneficiaryTypeId == beneficiaryTypeId && x.ProductGroupId == productGroupId))
+                {
+                    logger.LogWarning("[Mutation] CreateSubscriptionInProject - CantHaveMultipleBeneficiaryTypeAndProductGroupInSubscriptionException");
+                    throw new CantHaveMultipleBeneficiaryTypeAndProductGroupInSubscriptionException();
+                }
 
                 subscription.Types.Add(new SubscriptionType()
                 {
