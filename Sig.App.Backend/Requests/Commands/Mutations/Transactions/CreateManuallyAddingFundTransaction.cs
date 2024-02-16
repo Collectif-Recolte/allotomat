@@ -234,7 +234,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 TransactionLogProductGroups = transactionLogProductGroups
             });
 
-            logger.LogInformation($"Adding manual fund {request.Amount} to ({beneficiary.Id}) card for product group {productGroupId}");
+            logger.LogInformation($"[Mutation] AddLoyaltyFundToCard - Adding manual fund {request.Amount} to ({beneficiary.Id}) card for product group {productGroupId}");
 
             await db.SaveChangesAsync(cancellationToken);
 

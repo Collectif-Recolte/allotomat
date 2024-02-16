@@ -12,7 +12,6 @@ using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using static Sig.App.Backend.Requests.Commands.Mutations.ProductGroups.CreateProductGroup;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
 {
@@ -51,7 +50,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
 
             await db.SaveChangesAsync();
 
-            logger.LogInformation($"Product group edited {productGroup.Id}");
+            logger.LogInformation($"[Mutation] EditProductGroup - Product group edited {productGroup.Id}");
 
             return new Payload()
             {

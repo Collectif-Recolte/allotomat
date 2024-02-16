@@ -43,7 +43,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Market edited {market.Name} ({market.Id})");
+            logger.LogInformation($"[Mutation] EditMarket - Market edited {market.Name} ({market.Id})");
 
             return new Payload
             {

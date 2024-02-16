@@ -34,7 +34,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             var result = await userManager.ConfirmEmailAsync(user, request.Token);
             result.AssertSuccess();
 
-            logger.LogInformation($"Email address confirmed {user.Email}");
+            logger.LogInformation($"[Mutation] ConfirmEmail - Email address confirmed {user.Email}");
         }
 
         [MutationInput]

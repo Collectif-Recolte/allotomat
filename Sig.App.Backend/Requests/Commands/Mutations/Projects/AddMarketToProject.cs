@@ -61,7 +61,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Market {market.Name} added to project {project.Name}");
+            logger.LogInformation($"[Mutation] AddMarketToProject - Market {market.Name} added to project {project.Name}");
 
             return new Payload()
             {

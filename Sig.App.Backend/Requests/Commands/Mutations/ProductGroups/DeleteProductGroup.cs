@@ -52,7 +52,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
             db.ProductGroups.Remove(productGroup);
 
             await db.SaveChangesAsync();
-            logger.LogInformation($"Product group deleted ({productGroupId})");
+            logger.LogInformation($"[Mutation] DeleteProductGroup - Product group deleted ({productGroupId})");
         }
 
         private bool HaveSubscriptions(ProductGroup productGroup)

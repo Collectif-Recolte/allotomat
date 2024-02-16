@@ -51,7 +51,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
 
             await db.SaveChangesAsync();
 
-            logger.LogInformation($"Budget allowance edited {budgetAllowance.Id} ({request.Amount})");
+            logger.LogInformation($"[Mutation] EditBudgetAllowance - Budget allowance edited {budgetAllowance.Id} ({request.Amount})");
 
             return new Payload()
             {

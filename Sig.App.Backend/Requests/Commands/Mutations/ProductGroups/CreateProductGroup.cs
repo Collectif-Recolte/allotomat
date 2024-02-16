@@ -1,5 +1,4 @@
-﻿using GraphQL.Conventions;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
@@ -56,7 +55,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
             db.ProductGroups.Add(productGroup);
             await db.SaveChangesAsync();
 
-            logger.LogInformation($"New product group created for {project.Name} ({request.Name})");
+            logger.LogInformation($"[Mutation] CreateProductGroup - New product group created for {project.Name} ({request.Name})");
 
             return new Payload()
             {

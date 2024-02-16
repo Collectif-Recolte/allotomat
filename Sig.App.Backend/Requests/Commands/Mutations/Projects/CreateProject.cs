@@ -87,7 +87,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 }
 
                 managers.Add(manager);
-                logger.LogInformation($"Project manager {manager.Email} added to project {project.Name} ({project.Id})");
+                logger.LogInformation($"[Mutation] CreateProject - Project manager {manager.Email} added to project {project.Name} ({project.Id})");
             }
 
             if (!request.AdministrationSubscriptionsOffPlatform)
@@ -132,7 +132,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"New project created {project.Name} ({project.Id})");
+            logger.LogInformation($"[Mutation] CreateProject - New project created {project.Name} ({project.Id})");
 
             if (userAlreadyManagerException)
             {
@@ -178,7 +178,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 var result = await userManager.CreateAsync(user);
                 result.AssertSuccess();
 
-                logger.LogDebug($"New project manager created {user.Email} ({user.Id}). Sending email invitation.");
+                logger.LogInformation($"[Mutation] CreateProject - New project manager created {user.Email} ({user.Id}). Sending email invitation.");
             }
 
             return (user, true, false);

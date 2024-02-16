@@ -1,5 +1,4 @@
-﻿using GraphQL.Conventions;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
@@ -58,7 +57,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Market {market.Name} remove from project {project.Name}");
+            logger.LogInformation($"[Mutation] RemoveMarketFromProject - Market {market.Name} remove from project {project.Name}");
 
             return new Payload()
             {

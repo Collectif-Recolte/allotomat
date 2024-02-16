@@ -87,7 +87,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                         Organization = organization,
                     };
                     db.Beneficiaries.Add(beneficiary);
-                    logger.LogInformation($"New off-platform beneficiary created {beneficiary.Firstname} {beneficiary.Lastname}");
+                    logger.LogInformation($"[Mutation] ImportOffPlatformBeneficiariesListInOrganization - New off-platform beneficiary created {beneficiary.Firstname} {beneficiary.Lastname}");
                 }
 
                 beneficiary.Firstname = item.Firstname;
@@ -148,6 +148,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                                 ProductGroup = productGroup
                             };
                             db.Funds.Add(cardFund);
+                            logger.LogInformation($"[Mutation] ImportOffPlatformBeneficiariesListInOrganization - New fund created {beneficiary.Card.Id} - {productGroup.Name}");
                         }
 
                         var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();

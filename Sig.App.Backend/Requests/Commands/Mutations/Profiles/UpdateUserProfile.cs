@@ -56,7 +56,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Profiles
 
             await DbContext.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"User profile {userId} updated ({typeof(UserProfile).Name})");
+            logger.LogInformation($"[Mutation] UpdateUserProfile - User profile {userId} updated ({typeof(UserProfile).Name})");
 
             return CreateOutput(profile);
         }

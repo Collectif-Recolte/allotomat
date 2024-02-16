@@ -120,6 +120,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             decimal totalAmount = 0;
             var beneficiariesWhoGetSubscriptions = 0;
 
+            logger.LogInformation($"[Mutation] AssignBeneficiariesToSubscription - Beneficiary count that fit the search ({beneficiaries.Length})");
+
             if (subscription.EndDate < today)
             {
                 beneficiariesWhoGetSubscriptions = beneficiaries.Length;
@@ -134,7 +136,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                     });
 
                     logger.LogInformation(
-                        $"Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} added to subscription {subscription.Name}");
+                        $"[Mutation] AssignBeneficiariesToSubscription - Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} added to subscription {subscription.Name}");
                 }
             }
             else
@@ -160,7 +162,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         beneficiariesWhoGetSubscriptions++;
 
                         logger.LogInformation(
-                            $"Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} added to subscription {subscription.Name}");
+                            $"[Mutation] AssignBeneficiariesToSubscription - Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} added to subscription {subscription.Name}");
                     }
                     else
                     {
@@ -168,6 +170,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                     }
                 }
             }
+
+            logger.LogInformation($"[Mutation] AssignBeneficiariesToSubscription - Beneficiary who get a subscriptions ({beneficiariesWhoGetSubscriptions})");
 
             await db.SaveChangesAsync(cancellationToken);
 

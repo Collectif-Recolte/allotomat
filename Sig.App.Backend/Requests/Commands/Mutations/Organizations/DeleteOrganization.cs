@@ -58,6 +58,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 foreach (var manager in organizationManagers)
                 {
                     await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.OrganizationManagerOf, organizationId.ToString()));
+                    logger.LogInformation($"[Mutation] DeleteOrganization - Remove claim from manager {manager.Email}");
                 }
             }
 
@@ -68,7 +69,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
 
             await db.SaveChangesAsync();
             
-            logger.LogInformation($"Organization deleted ({organizationId}, {organization.Name})");
+            logger.LogInformation($"[Mutation] DeleteOrganization - Organization deleted ({organizationId}, {organization.Name})");
         }
 
         [MutationInput]

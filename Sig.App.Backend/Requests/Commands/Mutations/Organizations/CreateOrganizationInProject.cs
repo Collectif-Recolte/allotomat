@@ -89,12 +89,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 }
 
                 managers.Add(manager);
-                logger.LogInformation($"Organization manager {manager.Email} added to Organization {organization.Name} ({organization.Id})");
+                logger.LogInformation($"[Mutation] CreateOrganizationInProject - Organization manager {manager.Email} added to Organization {organization.Name} ({organization.Id})");
             }
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"New organization created {organization.Name} ({organization.Id})");
+            logger.LogInformation($"[Mutation] CreateOrganizationInProject - New organization created {organization.Name} ({organization.Id})");
 
             return new Payload
             {
@@ -128,7 +128,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 var result = await userManager.CreateAsync(user);
                 result.AssertSuccess();
 
-                logger.LogDebug($"New organization manager created {user.Email} ({user.Id}). Sending email invitation.");
+                logger.LogInformation($"[Mutation] CreateOrganizationInProject - New organization manager created {user.Email} ({user.Id}). Sending email invitation.");
             }
 
             return (user, true);

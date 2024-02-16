@@ -34,7 +34,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             var result = await userManager.ChangeEmailAsync(user, request.NewEmail, request.Token);
             result.AssertSuccess();
 
-            logger.LogInformation($"Email change confirmed from {previousEmail} to {request.NewEmail}");
+            logger.LogInformation($"[Mutation] ConfirmChangeEmail - Email change confirmed from {previousEmail} to {request.NewEmail}");
 
             return new Payload
             {

@@ -42,7 +42,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
                 return;
             }
 
-            logger.LogInformation($"Password reset requested for user {user.Email}");
+            logger.LogInformation($"[Mutation] SendPasswordReset - Password reset requested for user {user.Email}");
 
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
             await mailer.Send(new ResetPasswordEmail(request.Email)

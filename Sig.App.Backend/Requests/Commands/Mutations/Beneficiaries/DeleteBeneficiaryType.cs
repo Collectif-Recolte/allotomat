@@ -47,7 +47,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             db.BeneficiaryTypes.Remove(beneficiaryType);
 
             await db.SaveChangesAsync();
-            logger.LogInformation($"Beneficiary type deleted ({beneficiaryTypeId}, {beneficiaryType.Name})");
+            logger.LogInformation($"[Mutation] DeleteBeneficiaryType - Beneficiary type deleted ({beneficiaryTypeId}, {beneficiaryType.Name})");
         }
 
         private bool HaveAnyBeneficiaries(BeneficiaryType beneficiaryType)

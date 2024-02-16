@@ -12,7 +12,6 @@ using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Services.Mailer;
-using Newtonsoft.Json;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 {
@@ -48,7 +47,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             var token = await userManager.GenerateUserTokenAsync(user, TokenProviders.EmailInvites, TokenPurposes.AdminInvite);
             await mailer.Send(new AdminInviteEmail(request.Email, token, request.FirstName));
 
-            logger.LogInformation($"Admin account created ({user.Email}).");
+            logger.LogInformation($"[Mutation] CreateAdminAccount - Admin account created ({user.Email}).");
 
             return new Payload
             {

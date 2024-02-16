@@ -65,7 +65,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             db.Subscriptions.Remove(subscription);
 
             await db.SaveChangesAsync();
-            logger.LogInformation($"Subscription deleted ({subscriptionId}, {subscription.Name})");
+            logger.LogInformation($"[Mutation] DeleteSubscription - Subscription deleted ({subscriptionId}, {subscription.Name})");
         }
 
         [MutationInput]

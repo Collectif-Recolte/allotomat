@@ -55,7 +55,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Market manager {manager.Email} remove from market {market.Name} ({market.Id})");
+            logger.LogInformation($"[Mutation] RemoveManagerFromMarket - Market manager {manager.Email} remove from market {market.Name} ({market.Id})");
 
             return new Payload
             {

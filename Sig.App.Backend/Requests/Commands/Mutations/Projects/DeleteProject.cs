@@ -78,6 +78,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 {
                     await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.ProjectManagerOf, projectId.ToString()));
                     await userManager.DeleteAsync(manager);
+                    logger.LogInformation($"[Mutation] DeleteProject - Remove claim from project manager and delete manager {manager.Email}");
                 }
             }
 
@@ -94,6 +95,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                     {
                         await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.OrganizationManagerOf, organization.Id.ToString()));
                         await userManager.DeleteAsync(manager);
+                        logger.LogInformation($"[Mutation] DeleteProject - Remove claim from organization manager and delete manager {manager.Email}");
                     }
                 }
             }
@@ -203,7 +205,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
             await db.SaveChangesAsync();
 
-            logger.LogInformation($"Project deleted ({projectId}, {project.Name})");
+            logger.LogInformation($"[Mutation] DeleteProject - Project deleted ({projectId}, {project.Name})");
         }
 
         private bool HaveAnyActiveSubscription(Project project)

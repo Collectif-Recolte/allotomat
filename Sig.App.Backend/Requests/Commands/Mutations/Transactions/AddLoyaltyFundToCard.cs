@@ -137,7 +137,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 card.Status = CardStatus.GiftCard;
             }
 
-            logger.LogInformation($"Adding loyalty fund {request.Amount} to ({request.CardId}) card");
+            logger.LogInformation($"[Mutation] AddLoyaltyFundToCard - Adding loyalty fund {request.Amount} to ({request.CardId}) card");
 
             await db.SaveChangesAsync();
 

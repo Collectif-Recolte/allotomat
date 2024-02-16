@@ -83,7 +83,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             await db.SaveChangesAsync();
 
-            logger.LogInformation($"Card ({card.Id}) assign  to {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
+            logger.LogInformation($"[Mutation] AssignCardToBeneficiary - Card ({card.Id}) assign  to {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
 
             return new Payload() {
                 Beneficiary = beneficiary is OffPlatformBeneficiary ? new OffPlatformBeneficiaryGraphType(beneficiary as OffPlatformBeneficiary) : new BeneficiaryGraphType(beneficiary)

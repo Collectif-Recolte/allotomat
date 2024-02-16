@@ -43,7 +43,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
             
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Organization edited {organization.Name} ({organization.Id})");
+            logger.LogInformation($"[Mutation] EditOrganization - Organization edited {organization.Name} ({organization.Id})");
 
             return new Payload
             {

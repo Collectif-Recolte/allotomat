@@ -55,7 +55,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Organization manager {manager.Email} remove from organization {organization.Name} ({organization.Id})");
+            logger.LogInformation($"[Mutation] RemoveManagerFromOrganization - Organization manager {manager.Email} remove from organization {organization.Name} ({organization.Id})");
 
             return new Payload
             {

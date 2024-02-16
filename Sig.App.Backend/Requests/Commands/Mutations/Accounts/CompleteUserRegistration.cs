@@ -74,7 +74,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             profile.LastName = request.LastName.Trim();
             await dbContext.SaveChangesAsync();
 
-            logger.LogInformation($"{userType} registration completed for {user.Email}");
+            logger.LogInformation($"[Mutation] CompleteUserRegistration - {userType} registration completed for {user.Email}");
 
             return new Payload
             {
