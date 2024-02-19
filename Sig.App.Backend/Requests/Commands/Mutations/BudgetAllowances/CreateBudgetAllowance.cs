@@ -72,7 +72,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
             db.BudgetAllowances.Add(budgetAllowance);
             await db.SaveChangesAsync();
 
-            logger.LogInformation($"New budget allowance created for {organization.Name} ({request.Amount})");
+            logger.LogInformation($"[Mutation] CreateBudgetAllowance - New budget allowance created for {organization.Name} ({request.Amount})");
 
             return new Payload()
             {

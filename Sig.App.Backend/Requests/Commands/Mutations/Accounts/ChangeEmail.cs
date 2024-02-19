@@ -41,7 +41,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             var user = await userManager.FindByIdAsync(httpContextAccessor.HttpContext.User.GetUserId()); 
             var token = await userManager.GenerateChangeEmailTokenAsync(user, request.NewEmail.Trim());
 
-            logger.LogInformation($"User {user.Email} requesting new email {request.NewEmail}. Sending email confirmation.");
+            logger.LogInformation($"[Mutation] ChangeEmail - User {user.Email} requesting new email {request.NewEmail}. Sending email confirmation.");
 
             await mailer.Send(new ChangeEmailEmail(request.NewEmail?.Trim(), token, user.Profile?.FirstName));
         }

@@ -55,7 +55,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Project manager {manager.Email} remove from project {project.Name} ({project.Id})");
+            logger.LogInformation($"[Mutation] RemoveManagerFromProject - Project manager {manager.Email} remove from project {project.Name} ({project.Id})");
 
             return new Payload
             {

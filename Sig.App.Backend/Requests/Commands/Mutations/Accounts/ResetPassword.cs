@@ -37,7 +37,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             var result = await userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
             result.AssertSuccess();
 
-            logger.LogInformation($"Password reset successful for user {user.Email}");
+            logger.LogInformation($"[Mutation] ResetPassword - Password reset successful for user {user.Email}");
 
             return new Payload
             {

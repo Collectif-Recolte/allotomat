@@ -189,7 +189,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Transaction refund between {cardName} with ({market.Name}) for an amount of {request.Transactions.Sum(x => x.Amount)} for product group(s) {request.Transactions.Select(x => x.ProductGroupId)}");
+            logger.LogInformation($"[Mutation] RefundTransaction - Transaction refund between {cardName} with ({market.Name}) for an amount of {request.Transactions.Sum(x => x.Amount)} for product group(s) {request.Transactions.Select(x => x.ProductGroupId)}");
 
             if (beneficiary != null && !string.IsNullOrEmpty(beneficiary.Email))
             {
@@ -207,7 +207,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 }
                 catch (Exception e)
                 {
-                    logger.LogError($"Could not send refund confirmation email to ({cardName}) for transaction with ({market.Name}). Error message: {e.Message}");
+                    logger.LogError($"[Mutation] RefundTransaction - Could not send refund confirmation email to ({cardName}) for transaction with ({market.Name}). Error message: {e.Message}");
                 }
             }
 

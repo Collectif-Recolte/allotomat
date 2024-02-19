@@ -58,6 +58,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 foreach (var manager in marketManagers)
                 {
                     await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.MarketManagerOf, marketId.ToString()));
+                    logger.LogInformation($"[Mutation] DeleteMarket - Remove claim from manager {manager.Email}");
                 }
             }
 
@@ -74,7 +75,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             db.Markets.Remove(market);
 
             await db.SaveChangesAsync();
-            logger.LogInformation($"Market deleted ({marketId}, {market.Name})");
+            logger.LogInformation($"[Mutation] DeleteMarket - Market deleted ({marketId}, {market.Name})");
         }
 
         [MutationInput]

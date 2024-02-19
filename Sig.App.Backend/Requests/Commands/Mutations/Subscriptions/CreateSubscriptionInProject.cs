@@ -100,6 +100,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                     throw new CantHaveMultipleBeneficiaryTypeAndProductGroupInSubscriptionException();
                 }
 
+                logger.LogInformation($"[Mutation] CreateSubscriptionInProject - Add subscription type ({type.Amount}, {beneficiaryType.Name}, {productGroup.Name})");
+
                 subscription.Types.Add(new SubscriptionType()
                 {
                     Amount = type.Amount,
@@ -111,7 +113,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"New subscription created {subscription.Name} ({subscription.Id})");
+            logger.LogInformation($"[Mutation] CreateSubscriptionInProject - New subscription created {subscription.Name} ({subscription.Id})");
 
             return new Payload()
             {

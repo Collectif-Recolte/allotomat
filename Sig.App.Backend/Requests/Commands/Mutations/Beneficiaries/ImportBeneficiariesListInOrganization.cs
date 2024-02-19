@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries.ImportOffPlatformBeneficiariesListInOrganization;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 {
@@ -72,7 +71,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                         Organization = organization,
                     };
                     db.Beneficiaries.Add(beneficiary);
-                    logger.LogInformation($"New beneficiary created {beneficiary.Firstname} {beneficiary.Lastname}");
+                    logger.LogInformation($"[Mutation] ImportBeneficiariesListInOrganization - New beneficiary created {beneficiary.Firstname} {beneficiary.Lastname}");
                 }
                 else
                 {

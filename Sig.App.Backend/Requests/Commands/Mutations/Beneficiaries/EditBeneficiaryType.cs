@@ -53,7 +53,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Beneficiary type edited {beneficiaryType.Name} ({beneficiaryType.Id})");
+            logger.LogInformation($"[Mutation] EditBeneficiaryType - Beneficiary type edited {beneficiaryType.Name} ({beneficiaryType.Id})");
 
             return new Payload
             {

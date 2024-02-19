@@ -47,7 +47,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Project edited {project.Name} ({project.Id})");
+            logger.LogInformation($"[Mutation] EditProject - Project edited {project.Name} ({project.Id})");
 
             return new Payload
             {

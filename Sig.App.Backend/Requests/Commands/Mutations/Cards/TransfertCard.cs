@@ -171,7 +171,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Card ({originalCard.Id}) transferred to ({newCard.Id})");
+            logger.LogInformation($"[Mutation] TransfertCard - Card ({originalCard.Id}) transferred to ({newCard.Id})");
 
             return new Payload()
             {

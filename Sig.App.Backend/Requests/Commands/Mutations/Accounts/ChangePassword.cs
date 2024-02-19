@@ -39,7 +39,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             var result = await userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
             result.AssertSuccess();
 
-            logger.LogInformation($"Password changed for user {user.Email}");
+            logger.LogInformation($"[Mutation] ChangePassword - Password changed for user {user.Email}");
 
             return new Payload
             {

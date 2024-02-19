@@ -45,7 +45,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
             db.BudgetAllowances.Remove(budgetAllowance);
 
             await db.SaveChangesAsync();
-            logger.LogInformation($"Budget allowance deleted ({budgetAllowanceId})");
+            logger.LogInformation($"[Mutation] DeleteBudgetAllowance - Budget allowance deleted ({budgetAllowanceId})");
         }
 
         private bool HaveAnyBeneficiaries(BudgetAllowance budgetAllowance)

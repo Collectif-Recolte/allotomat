@@ -276,7 +276,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             await db.SaveChangesAsync(cancellationToken);
 
             var cardName = beneficiary != null ? $"{card.Beneficiary.Firstname} {card.Beneficiary.Lastname}" : card.Id.ToString();
-            logger.LogInformation($"Transaction between {cardName} with ({market.Name}) or an amount of a total {request.Transactions.Sum(x => x.Amount)} for product group(s) {request.Transactions.Select(x => x.ProductGroupId)}");
+            logger.LogInformation($"[Mutation] CreateTransaction - Transaction between {cardName} with ({market.Name}) or an amount of a total {request.Transactions.Sum(x => x.Amount)} for product group(s) {request.Transactions.Select(x => x.ProductGroupId)}");
 
             if (beneficiary != null && !string.IsNullOrEmpty(beneficiary.Email))
             {
@@ -294,7 +294,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 }
                 catch (Exception e)
                 {
-                    logger.LogError($"Could not send transaction confirmation email to ({cardName}) for transaction with ({market.Name}). Error message: {e.Message}");
+                    logger.LogError($"[Mutation] CreateTransaction - Could not send transaction confirmation email to ({cardName}) for transaction with ({market.Name}). Error message: {e.Message}");
                 }
             }
             

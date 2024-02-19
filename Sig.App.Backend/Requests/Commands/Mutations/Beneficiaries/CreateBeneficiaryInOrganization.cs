@@ -71,7 +71,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             db.Beneficiaries.Add(beneficiary);
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"New beneficiary created {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
+            logger.LogInformation($"[Mutation] CreateBeneficiaryInOrganization - New beneficiary created {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
 
             return new Payload
             {

@@ -9,7 +9,6 @@ using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.MediatR;
 using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.Extensions;
-using GraphQL.Conventions;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using System.Linq;
 using Sig.App.Backend.Gql.Bases;
@@ -59,7 +58,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"New beneficiary type created {beneficiaryType.Name} ({beneficiaryType.Id})");
+            logger.LogInformation($"[Mutation] AddBeneficiaryTypeInProject - New beneficiary type created {beneficiaryType.Name} ({beneficiaryType.Id})");
 
             return new Payload
             {

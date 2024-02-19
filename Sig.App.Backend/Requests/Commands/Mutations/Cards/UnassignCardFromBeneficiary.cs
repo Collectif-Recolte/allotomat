@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using GraphQL.Conventions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -183,7 +182,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Card ({card.Id}) unassign from {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
+            logger.LogInformation($"[Mutation] UnassignCardFromBeneficiary - Card ({card.Id}) unassign from {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
 
             return new Payload() {
                 Beneficiary = beneficiary is OffPlatformBeneficiary opb ? new OffPlatformBeneficiaryGraphType(opb) : new BeneficiaryGraphType(beneficiary)

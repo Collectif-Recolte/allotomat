@@ -55,6 +55,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 foreach (var manager in marketManagers)
                 {
                     await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.MarketManagerOf, market.Id.ToString()));
+                    logger.LogInformation($"[Mutation] ArchiveMarket - Remove claim for manager {manager.Email}");
                 }
             }
 
@@ -63,7 +64,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             market.IsArchived = true;
 
             await db.SaveChangesAsync();
-            logger.LogInformation($"Market archive ({marketId}, {market.Name})");
+            logger.LogInformation($"[Mutation] ArchiveMarket - Market archive ({marketId}, {market.Name})");
         }
 
         [MutationInput]

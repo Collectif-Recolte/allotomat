@@ -78,7 +78,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 }
 
                 managers.Add(manager);
-                logger.LogInformation($"Market manager {manager.Email} added to market {market.Name} ({market.Id})");
+                logger.LogInformation($"[Mutation] AddManagerToMarket - Market manager {manager.Email} added to market {market.Name} ({market.Id})");
             }
 
             await db.SaveChangesAsync(cancellationToken);
@@ -115,7 +115,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 var result = await userManager.CreateAsync(user);
                 result.AssertSuccess();
 
-                logger.LogDebug($"New market manager created {user.Email} ({user.Id}). Sending email invitation.");
+                logger.LogInformation($"[Mutation] AddManagerToMarket - New market manager created {user.Email} ({user.Id}). Sending email invitation.");
             }
 
             return (user, true);

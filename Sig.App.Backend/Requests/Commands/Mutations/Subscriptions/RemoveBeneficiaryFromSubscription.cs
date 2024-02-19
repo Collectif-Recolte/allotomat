@@ -122,7 +122,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} remove from subscription {subscription.Name}");
+            logger.LogInformation($"[Mutation] RemoveBeneficiaryFromSubscription - Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} remove from subscription {subscription.Name}");
         }
 
         public class SubscriptionNotFoundException : RequestValidationException { }

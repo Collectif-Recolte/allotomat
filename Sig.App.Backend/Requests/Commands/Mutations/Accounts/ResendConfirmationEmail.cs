@@ -45,7 +45,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
                 throw new NoNeedToConfirmException();
             }
 
-            logger.LogInformation($"User {user.Email} requested new email confirmation token.");
+            logger.LogInformation($"[Mutation] ResendConfirmationEmail - User {user.Email} requested new email confirmation token.");
 
             if (user.Type == UserType.PCAAdmin)
             {

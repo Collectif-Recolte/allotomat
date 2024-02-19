@@ -1,5 +1,4 @@
-﻿using GraphQL.Conventions;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -78,7 +77,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 }
 
                 managers.Add(manager);
-                logger.LogInformation($"Project manager {manager.Email} added to project {project.Name} ({project.Id})");
+                logger.LogInformation($"[Mutation] AddManagerToProject - Project manager {manager.Email} added to project {project.Name} ({project.Id})");
             }
 
             await db.SaveChangesAsync(cancellationToken);
@@ -115,7 +114,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 var result = await userManager.CreateAsync(user);
                 result.AssertSuccess();
 
-                logger.LogDebug($"New project manager created {user.Email} ({user.Id}). Sending email invitation.");
+                logger.LogInformation($"[Mutation] AddManagerToProject - New project manager created {user.Email} ({user.Id}). Sending email invitation.");
             }
 
             return (user, true);

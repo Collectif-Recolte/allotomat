@@ -79,7 +79,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Subscription {subscription.Name} ({subscription.Id}) updated");
+            logger.LogInformation($"[Mutation] EditSubscription - Subscription {subscription.Name} ({subscription.Id}) updated");
 
             return new Payload()
             {

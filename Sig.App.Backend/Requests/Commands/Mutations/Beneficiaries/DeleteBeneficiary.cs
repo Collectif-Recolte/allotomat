@@ -65,7 +65,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             }
 
             await db.SaveChangesAsync();
-            logger.LogInformation($"Beneficiary deleted ({beneficiaryId}, {beneficiary.Firstname} {beneficiary.Lastname})");
+            logger.LogInformation($"[Mutation] DeleteBeneficiary - Beneficiary deleted ({beneficiaryId}, {beneficiary.Firstname} {beneficiary.Lastname})");
         }
 
         private bool HaveAnyActiveSubscription(Beneficiary beneficiary)

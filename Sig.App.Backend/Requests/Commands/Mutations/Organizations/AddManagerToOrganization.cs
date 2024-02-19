@@ -78,7 +78,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 }
 
                 managers.Add(manager);
-                logger.LogInformation($"Organization manager {manager.Email} added to organization {organization.Name} ({organization.Id})");
+                logger.LogInformation($"[Mutation] AddManagerToOrganization - Organization manager {manager.Email} added to organization {organization.Name} ({organization.Id})");
             }
 
             await db.SaveChangesAsync(cancellationToken);
@@ -115,7 +115,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 var result = await userManager.CreateAsync(user);
                 result.AssertSuccess();
 
-                logger.LogDebug($"New Organization manager created {user.Email} ({user.Id}). Sending email invitation.");
+                logger.LogInformation($"[Mutation] AddManagerToOrganization - New Organization manager created {user.Email} ({user.Id}). Sending email invitation.");
             }
 
             return (user, true);
