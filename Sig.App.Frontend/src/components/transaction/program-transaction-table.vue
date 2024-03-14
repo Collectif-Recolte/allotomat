@@ -108,7 +108,7 @@ import {
   TRANSFER_FUND_TRANSACTION_LOG
 } from "@/lib/consts/enums";
 
-import { GLOBAL_CREATE_TRANSACTION } from "@/lib/consts/permissions";
+import { GLOBAL_REFUND_TRANSACTION } from "@/lib/consts/permissions";
 
 const { t } = useI18n();
 const { getGlobalPermissions } = storeToRefs(useAuthStore());
@@ -133,8 +133,8 @@ const cols = computed(() => [
   { label: "" }
 ]);
 
-const canCreateTransaction = computed(() => {
-  return getGlobalPermissions.value.includes(GLOBAL_CREATE_TRANSACTION);
+const canRefundTransaction = computed(() => {
+  return getGlobalPermissions.value.includes(GLOBAL_REFUND_TRANSACTION);
 });
 
 function getTransactionDate(transaction) {
@@ -216,7 +216,7 @@ function getTransactionAmount(transaction) {
 }
 
 function getBtnGroup(item) {
-  if (item.discriminator !== PAYMENT_TRANSACTION_LOG || !canCreateTransaction.value) {
+  if (item.discriminator !== PAYMENT_TRANSACTION_LOG || !canRefundTransaction.value) {
     return [];
   }
   return [

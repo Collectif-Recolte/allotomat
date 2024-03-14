@@ -14,7 +14,8 @@ import {
   GLOBAL_MANAGE_CARDS,
   GLOBAL_CREATE_TRANSACTION,
   GLOBAL_MANAGE_TRANSACTIONS,
-  GLOBAL_MANAGE_PRODUCT_GROUP
+  GLOBAL_MANAGE_PRODUCT_GROUP,
+  GLOBAL_REFUND_TRANSACTION
 } from "@/lib/consts/permissions";
 
 import { useAuthStore } from "@/lib/store/auth";
@@ -309,7 +310,7 @@ export default [
         path: ":transactionId/refund",
         component: () => import("@/views/transaction/Refund.vue"),
         meta: {
-          claim: GLOBAL_CREATE_TRANSACTION
+          claim: GLOBAL_REFUND_TRANSACTION
         }
       }
     ]
