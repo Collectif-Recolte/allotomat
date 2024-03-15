@@ -134,6 +134,7 @@ if (route.query.transactionTypes) {
 }
 if (route.query.text) {
   searchText.value = route.query.text;
+  searchInput.value = route.query.text;
 }
 
 if (route.query.dateFrom) {
