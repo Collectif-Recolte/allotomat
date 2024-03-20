@@ -43,7 +43,8 @@ namespace Sig.App.Backend.Services.Permission
             GlobalPermission.ManageCategories,
             GlobalPermission.ManageBudgetAllowance,
             GlobalPermission.ManageProductGroup,
-            GlobalPermission.CreateTransaction
+            GlobalPermission.CreateTransaction,
+            GlobalPermission.RefundTransaction
         };
 
         private static GlobalPermission[] ProjectManagerSubscriptionsOffPlatformGlobalPermissions = new[]
@@ -57,7 +58,8 @@ namespace Sig.App.Backend.Services.Permission
             GlobalPermission.ManageTransactions,
             GlobalPermission.ManageBudgetAllowance,
             GlobalPermission.ManageProductGroup,
-            GlobalPermission.CreateTransaction
+            GlobalPermission.CreateTransaction,
+            GlobalPermission.RefundTransaction
         };
 
         private static GlobalPermission[] OrganizationManagerGlobalPermissions = new[]
@@ -66,12 +68,14 @@ namespace Sig.App.Backend.Services.Permission
             GlobalPermission.ManageBeneficiaries,
             GlobalPermission.ManageOrganizationManagers,
             GlobalPermission.ManageTransactions,
+            GlobalPermission.RefundTransaction
         };
 
         private static GlobalPermission[] MarketManagerGlobalPermissions = new[]
         {
             GlobalPermission.CreateTransaction,
-            GlobalPermission.ManageSpecificMarket
+            GlobalPermission.ManageSpecificMarket,
+            GlobalPermission.RefundTransaction
         };
 
         private static readonly ProjectPermission[] AdminProjectPermission = new[]
@@ -115,6 +119,11 @@ namespace Sig.App.Backend.Services.Permission
         private static readonly MarketPermission[] ProjectManagerMarketPermission = new[]
         {
             MarketPermission.CreateTransaction,
+            MarketPermission.RefundTransaction
+        };
+
+        private static readonly MarketPermission[] OrganizationManagerMarketPermission = new[]
+        {
             MarketPermission.RefundTransaction
         };
 
@@ -259,6 +268,21 @@ namespace Sig.App.Backend.Services.Permission
                     if (claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectMarket.ProjectId.ToString()))
                     {
                         return Task.FromResult(ProjectManagerMarketPermission);
+                    }
+                }
+            }
+            
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.OrganizationManager.ToString()))
+            {
+                var marketLongId = Id.New<Market>(marketId).LongIdentifierForType<Market>();
+                var projectMarkets = db.ProjectMarkets.Where(x => x.MarketId == marketLongId).ToList();
+                var organizationForProjects = db.Organizations.Where(x => projectMarkets.Select(y => y.ProjectId).Contains(x.ProjectId)).ToList();
+
+                foreach (var organization in organizationForProjects)
+                {
+                    if (claimsPrincipal.HasClaim(AppClaimTypes.OrganizationManagerOf, organization.GetIdentifier().IdentifierForType<Organization>()))
+                    {
+                        return Task.FromResult(OrganizationManagerMarketPermission);
                     }
                 }
             }
