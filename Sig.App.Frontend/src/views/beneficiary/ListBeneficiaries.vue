@@ -515,6 +515,7 @@ const {
               subscriptions {
                 id
                 name
+                endDate
                 types {
                   id
                   beneficiaryType {
