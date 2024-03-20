@@ -4,7 +4,8 @@
       "sub-title": "Purchase on behalf of program",
       "select-market": "Merchant",
       "card-number": "Card number",
-      "card-number-error": "Card number must be of format \"0000-0000-0000-0000\"",
+      "card-number-description": "Card number must be of format \"1234-5678-9012-3456\"",
+      "card-number-error": "Card number must be of format \"1234-5678-9012-3456\"",
       "choose-market": "Select",
       "next-step": "Next",
       "cancel": "Cancel",
@@ -15,7 +16,8 @@
       "sub-title": "Achat au nom du programme",
       "select-market": "Marchand",
       "card-number": "N° de carte",
-      "card-number-error": "Le numéro de carte doit être de format \"0000-0000-0000-0000\"",
+      "card-number-description": "Le numéro de carte doit être de format \"1234-5678-9012-3456\"",
+      "card-number-error": "Le numéro de carte doit être de format \"1234-5678-9012-3456\"",
       "choose-market": "Sélectionner",
       "next-step": "Suivant",
       "cancel": "Annuler",
@@ -50,7 +52,12 @@
         </Field>
         <div>
           <Field v-slot="{ field: inputField, errors: fieldErrors }" name="cardNumber">
-            <PfFormInputText id="cardNumber" v-bind="inputField" :label="t('card-number')" :errors="fieldErrors" />
+            <PfFormInputText
+              id="cardNumber"
+              v-bind="inputField"
+              :description="t('card-number-description')"
+              :label="t('card-number')"
+              :errors="fieldErrors" />
           </Field>
         </div>
       </PfFormSection>
