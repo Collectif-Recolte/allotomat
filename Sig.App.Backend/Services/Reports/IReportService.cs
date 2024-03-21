@@ -1,4 +1,5 @@
 ﻿using GraphQL.Conventions;
+using Sig.App.Backend.Gql.Schema.Enums;
 using Sig.App.Backend.Gql.Schema.Types;
 using System;
 using System.Collections.Generic;
@@ -24,5 +25,6 @@ namespace Sig.App.Backend.Services.Reports
         public IEnumerable<string> TransactionTypes { get; set; }
         public Maybe<string> SearchText { get; set; }
         public string TimeZoneId { get; set; }
+        public Language Language { get; set; }
     }
 }
