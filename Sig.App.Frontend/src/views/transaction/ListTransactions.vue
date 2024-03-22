@@ -89,7 +89,7 @@ import TransactionFilters from "@/components/transaction/transaction-filters";
 import ProgramTransactionTable from "@/components/transaction/program-transaction-table";
 
 import { URL_TRANSACTION_ADD } from "@/lib/consts/urls";
-import { WITHOUT_SUBSCRIPTION } from "@/lib/consts/enums";
+import { WITHOUT_SUBSCRIPTION, LANGUAGE_FILTER_EN, LANGUAGE_FILTER_FR } from "@/lib/consts/enums";
 import { LANG_EN } from "@/lib/consts/langs";
 import { GLOBAL_CREATE_TRANSACTION } from "@/lib/consts/permissions";
 import { URL_TRANSACTION_ADMIN } from "@/lib/consts/urls";
@@ -446,7 +446,7 @@ async function onExportReport() {
       categories: beneficiaryTypes.value,
       transactionTypes: transactionTypes.value,
       searchText: searchText.value,
-      language: locale.value === LANG_EN ? "ENGLISH" : "FRENCH"
+      language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR
     }
   });
 

@@ -264,7 +264,9 @@ import {
   BENEFICIARY_WITH_CARD,
   BENEFICIARY_WITHOUT_CARD,
   BENEFICIARY_WITH_PAYMENT_CONFLICT,
-  BENEFICIARY_WITHOUT_PAYMENT_CONFLICT
+  BENEFICIARY_WITHOUT_PAYMENT_CONFLICT,
+  LANGUAGE_FILTER_EN,
+  LANGUAGE_FILTER_FR
 } from "@/lib/consts/enums";
 import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
 import { LANG_EN } from "@/lib/consts/langs";
@@ -694,7 +696,7 @@ async function onExportReport() {
       variables: {
         organizationId: selectedOrganization.value,
         timeZoneId: timeZone,
-        language: locale.value === LANG_EN ? "ENGLISH" : "FRENCH"
+        language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR
       }
     });
     window.open(result.data.exportBeneficiariesList, "_blank");
