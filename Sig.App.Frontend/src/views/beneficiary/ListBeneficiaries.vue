@@ -264,9 +264,12 @@ import {
   BENEFICIARY_WITH_CARD,
   BENEFICIARY_WITHOUT_CARD,
   BENEFICIARY_WITH_PAYMENT_CONFLICT,
-  BENEFICIARY_WITHOUT_PAYMENT_CONFLICT
+  BENEFICIARY_WITHOUT_PAYMENT_CONFLICT,
+  LANGUAGE_FILTER_EN,
+  LANGUAGE_FILTER_FR
 } from "@/lib/consts/enums";
 import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
+import { LANG_EN } from "@/lib/consts/langs";
 
 import ICON_UPLOAD from "@/lib/icons/upload-file.json";
 import ICON_TABLE from "@/lib/icons/table.json";
@@ -278,7 +281,7 @@ import BeneficiaryFilters from "@/components/beneficiaries/beneficiary-filters";
 import ListBeneficiariesWithoutDetailed from "@/components/beneficiaries/list-beneficiaries-without-detailed";
 import ListBeneficiariesWithDetailed from "@/components/beneficiaries/list-beneficiaries-detailed";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const { resolveClient } = useApolloClient();
@@ -686,13 +689,14 @@ async function onExportReport() {
   } else {
     result = await client.query({
       query: gql`
-        query ExportBeneficiariesList($organizationId: ID!, $timeZoneId: String!) {
-          exportBeneficiariesList(id: $organizationId, timeZoneId: $timeZoneId)
+        query ExportBeneficiariesList($organizationId: ID!, $timeZoneId: String!, $language: Language!) {
+          exportBeneficiariesList(id: $organizationId, timeZoneId: $timeZoneId, language: $language)
         }
       `,
       variables: {
         organizationId: selectedOrganization.value,
-        timeZoneId: timeZone
+        timeZoneId: timeZone,
+        language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR
       }
     });
     window.open(result.data.exportBeneficiariesList, "_blank");

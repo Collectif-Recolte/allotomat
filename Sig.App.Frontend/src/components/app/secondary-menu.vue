@@ -66,8 +66,10 @@ import {
   GLOBAL_MANAGE_PRODUCT_GROUP,
   GLOBAL_MANAGE_BENEFICIARIES
 } from "@/lib/consts/permissions";
+import { LANG_EN } from "@/lib/consts/langs";
+import { LANGUAGE_FILTER_EN, LANGUAGE_FILTER_FR } from "@/lib/consts/enums";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const { resolveClient } = useApolloClient();
 const client = resolveClient();
@@ -142,13 +144,14 @@ async function onExportReport() {
   } else {
     result = await client.query({
       query: gql`
-        query ExportBeneficiariesList($projectId: ID!, $timeZoneId: String!) {
-          exportBeneficiariesList(id: $projectId, timeZoneId: $timeZoneId)
+        query ExportBeneficiariesList($projectId: ID!, $timeZoneId: String!, $language: Language!) {
+          exportBeneficiariesList(id: $projectId, timeZoneId: $timeZoneId, language: $language)
         }
       `,
       variables: {
         projectId: project.id,
-        timeZoneId: timeZone
+        timeZoneId: timeZone,
+        language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR
       }
     });
     window.open(result.data.exportBeneficiariesList, "_blank");
