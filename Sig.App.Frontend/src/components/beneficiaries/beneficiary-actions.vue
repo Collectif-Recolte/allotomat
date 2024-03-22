@@ -174,6 +174,12 @@ function updateItems() {
       },
       {
         isExtra: true,
+        icon: ICON_CLOCK,
+        label: t("beneficiary-transactions-history"),
+        route: { name: URL_TRANSACTION_ADMIN, query: { text: props.beneficiary.id1, dateFrom: "2023-01-01" } } // Set datefrom to a farthest date to get all transactions
+      },
+      {
+        isExtra: true,
         icon: ICON_ADD_CASH,
         label: t("beneficiary-add-funds"),
         route: { name: URL_BENEFICIARY_MANUALLY_ADD_FUND, params: { beneficiaryId: props.beneficiary.id } },
