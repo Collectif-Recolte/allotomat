@@ -15,17 +15,17 @@
 
 <template>
   <RouterView v-slot="{ Component }">
-    <AppShell>
+    <AppShell :loading="loading">
       <template #title>
         <Title :title="t('title')" :subpages="subpages" />
       </template>
-      <Component :is="Component" />
+      <Component :is="Component" @isLoading="isLoading" @loadingFinish="loadingFinish" />
     </AppShell>
   </RouterView>
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
@@ -39,6 +39,8 @@ import Title from "@/components/app/title";
 
 const { t } = useI18n();
 const authStore = useAuthStore();
+
+const loading = ref(false);
 
 usePageTitle(t("title"));
 
@@ -66,4 +68,12 @@ const subpages = computed(() => {
     ];
   }
 });
+
+const isLoading = () => {
+  loading.value = true;
+};
+
+const loadingFinish = () => {
+  loading.value = false;
+};
 </script>

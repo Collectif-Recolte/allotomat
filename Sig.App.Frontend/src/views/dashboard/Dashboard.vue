@@ -89,7 +89,7 @@ usePageTitle(t("title"));
 
 const selectedSubscriptions = ref([]);
 
-const { result: resultProjects } = useQuery(
+const { result: resultProjects, loading } = useQuery(
   gql`
     query Projects($subscriptions: [ID!]) {
       projects {

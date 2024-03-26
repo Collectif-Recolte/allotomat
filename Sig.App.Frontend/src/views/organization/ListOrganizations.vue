@@ -17,7 +17,7 @@
 
 <template>
   <RouterView v-slot="{ Component }">
-    <AppShell :title="t('title')" :loading="loading">
+    <AppShell :title="t('title')" :loading="loading || projectsLoading">
       <div v-if="projects && projects.length > 0 && organizations">
         <template v-if="organizations.length > 0">
           <UiTableHeader
@@ -72,7 +72,7 @@ const {
 );
 const organizations = useResult(resultOrganizations);
 
-const { result: resultProjects } = useQuery(
+const { result: resultProjects, loading: projectsLoading } = useQuery(
   gql`
     query Projects {
       projects {
