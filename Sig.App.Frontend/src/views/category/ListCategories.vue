@@ -34,19 +34,19 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, defineEmits, onBeforeMount } from "vue";
 import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
-import { onBeforeRouteUpdate } from "vue-router";
 import { useQuery, useResult } from "@vue/apollo-composable";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
 
-import { URL_CATEGORY_ADD, URL_CATEGORY_ADMIN } from "@/lib/consts/urls";
+import { URL_CATEGORY_ADD } from "@/lib/consts/urls";
 
 import CategoryTable from "@/components/category/category-table";
 
 const { t } = useI18n();
+const emit = defineEmits(["isLoading", "loadingFinish"]);
 
 usePageTitle(t("title"));
 
@@ -67,7 +67,12 @@ const { result, refetch } = useQuery(
     }
   `
 );
-const projects = useResult(result);
+const projects = useResult(result, null, (data) => {
+  if (data.projects !== null) {
+    emit("loadingFinish");
+  }
+  return data.projects;
+});
 
 const showCategoryList = computed(() => projects.value[0].beneficiaryTypes.length > 0);
 
@@ -80,9 +85,8 @@ const addCategoryRoute = computed(() => {
   };
 });
 
-onBeforeRouteUpdate((to) => {
-  if (to.name === URL_CATEGORY_ADMIN) {
-    refetch();
-  }
+onBeforeMount(() => {
+  refetch();
+  emit("isLoading");
 });
 </script>

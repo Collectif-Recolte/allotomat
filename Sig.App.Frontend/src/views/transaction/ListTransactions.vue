@@ -17,7 +17,7 @@
 
 <template>
   <RouterView v-slot="{ Component }">
-    <AppShell :loading="loading">
+    <AppShell :loading="loading || loadingProjects">
       <template #title>
         <Title :title="t('title')">
           <template #subpagesCta>
@@ -151,7 +151,7 @@ const client = resolveClient();
 
 usePageTitle(t("title"));
 
-const { result: resultProjects } = useQuery(
+const { result: resultProjects, loading: loadingProjects } = useQuery(
   gql`
     query Projects {
       projects {

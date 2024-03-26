@@ -37,20 +37,20 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, defineEmits, onBeforeMount } from "vue";
 import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
-import { onBeforeRouteUpdate } from "vue-router";
 import { useQuery, useResult } from "@vue/apollo-composable";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
 
 import { COLOR_0 } from "@/lib/consts/color";
-import { URL_PRODUCT_GROUP_ADD, URL_PRODUCT_GROUP_ADMIN } from "@/lib/consts/urls";
+import { URL_PRODUCT_GROUP_ADD } from "@/lib/consts/urls";
 
 import ProductGroupTable from "@/components/product-groups/product-group-table";
 
 const { t } = useI18n();
+const emit = defineEmits(["isLoading", "loadingFinish"]);
 
 usePageTitle(t("title"));
 
@@ -72,7 +72,12 @@ const { result, refetch } = useQuery(
     }
   `
 );
-const projects = useResult(result);
+const projects = useResult(result, null, (data) => {
+  if (data.projects !== null) {
+    emit("loadingFinish");
+  }
+  return data.projects;
+});
 
 const showProductGroupList = computed(() => productGroups.value.length > 0);
 
@@ -93,9 +98,8 @@ const addProductGroupRoute = computed(() => {
   };
 });
 
-onBeforeRouteUpdate((to) => {
-  if (to.name === URL_PRODUCT_GROUP_ADMIN) {
-    refetch();
-  }
+onBeforeMount(() => {
+  refetch();
+  emit("isLoading");
 });
 </script>

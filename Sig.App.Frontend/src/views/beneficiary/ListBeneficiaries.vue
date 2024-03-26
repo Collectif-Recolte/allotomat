@@ -41,7 +41,7 @@
 
 <template>
   <RouterView v-slot="{ Component }">
-    <AppShell :loading="loading">
+    <AppShell :loading="loading || projectsLoading || organizationsLoading">
       <template #title>
         <Title :title="t('title')">
           <template v-if="organizations && !administrationSubscriptionsOffPlatform" #center>
