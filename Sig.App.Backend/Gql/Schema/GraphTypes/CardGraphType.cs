@@ -65,6 +65,31 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return null;
         }
 
+        public async Task<IEnumerable<IAddingFundTransactionGraphType>> AddingFundTransactions(IAppUserContext ctx)
+        {
+            var transactions = await ctx.DataLoader.LoadTransactionByCardId(card.Id).GetResultAsync();
+            var addingFundTransactions = transactions.Where(x => x.GetType() == typeof(ManuallyAddingFundTransaction) || x.GetType() == typeof(SubscriptionAddingFundTransaction) || x.GetType() == typeof(OffPlatformAddingFundTransaction));
+            if (addingFundTransactions.Count() > 0)
+            {
+                return addingFundTransactions.Select(x =>
+                {
+                    switch (x)
+                    {
+                        case ManuallyAddingFundTransaction maft:
+                            return new ManuallyAddingFundTransactionGraphType(maft);
+                        case SubscriptionAddingFundTransaction saft:
+                            return new SubscriptionAddingFundTransactionGraphType(saft);
+                        case OffPlatformAddingFundTransaction opaft:
+                            return new OffPlatformAddingFundTransactionGraphType(opaft) as IAddingFundTransactionGraphType;
+                    }
+
+                    return null;
+                });
+            }
+
+            return null;
+        }
+
         public IDataLoaderResult<IEnumerable<FundGraphType>> Funds(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadSubscriptionCardFunds(Id.LongIdentifierForType<Card>());
