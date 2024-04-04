@@ -8,7 +8,8 @@
     :errors="errors"
     :disabled="disabled"
     :is-filter="isFilter"
-    is-checkbox>
+    is-checkbox
+    :has-hidden-label="hasHiddenLabel">
     <input
       :id="id"
       :name="name"
@@ -23,6 +24,7 @@
           ? 'text-red-600 border-red-600 focus:ring-red-900 focus:border-red-600'
           : 'text-primary-700 border-grey-300 focus:ring-yellow-500 focus:border-yellow-500'
       "
+      :aria-label="hasHiddenLabel ? label : null"
       :aria-invalid="hasErrorState"
       :aria-errormessage="hasErrorState ? `${id}-error` : null"
       :aria-describedby="description ? `${id}-description` : null"

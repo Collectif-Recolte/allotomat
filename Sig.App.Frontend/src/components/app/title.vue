@@ -12,9 +12,15 @@
         </slot>
       </div>
       <div
-        v-if="slots.center || slots.right"
+        v-if="slots.left || slots.center || slots.right"
         class="flex flex-col xs:flex-row ml-auto mr-0 xs:px-section md:px-8 divide-y xs:divide-y-0 xs:divide-x divide-primary-200">
-        <div v-if="slots.center" class="flex items-center px-section xs:pr-6 xs:pl-0 py-3 xs:mt-0">
+        <div v-if="slots.left" class="flex items-center px-section xs:pr-6 xs:pl-0 py-3 xs:mt-0">
+          <slot name="left"></slot>
+        </div>
+        <div
+          v-if="slots.center"
+          class="flex items-center px-section xs:pr-6 py-3 xs:mt-0"
+          :class="slots.left ? 'xs:pl-6' : 'xs:pl-0'">
           <slot name="center"></slot>
         </div>
         <div
