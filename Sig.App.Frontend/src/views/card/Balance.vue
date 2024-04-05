@@ -143,12 +143,14 @@ const programName = computed(() => {
 const getProductGroups = (funds) => {
   const productGroups = [];
   for (let fund of funds) {
-    productGroups.push({
-      color: fund.productGroup.color,
-      label: fund.productGroup.name,
-      fund: fund.amount ?? fund.availableFund,
-      expirationDate: fund.expirationDate
-    });
+    if (fund.expirationDate > new Date().toISOString()) {
+      productGroups.push({
+        color: fund.productGroup.color,
+        label: fund.productGroup.name,
+        fund: fund.amount ?? fund.availableFund,
+        expirationDate: fund.expirationDate
+      });
+    }
   }
   return productGroups;
 };
