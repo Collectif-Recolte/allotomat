@@ -575,7 +575,10 @@ const availableBeneficiaryTypes = computed(() => {
   if (selectedSubscription.value === null) {
     return beneficiaryTypes != null ? beneficiaryTypes.value : [];
   }
-  return subscriptions.value.find((x) => x.value === selectedSubscription.value).types.map((x) => x.beneficiaryType);
+  return subscriptions.value
+    .find((x) => x.value === selectedSubscription.value)
+    .types.map((x) => x.beneficiaryType)
+    .filter((value, index, array) => array.indexOf(value) === index);
 });
 
 const isConfirmButtonDisabled = computed(() => {
