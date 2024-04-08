@@ -22,7 +22,9 @@
       "usage-amount": "<b>{amount}$</b> will be distributed as follows:</br> {detail}",
       "remaining-amount": "The remaining budget allowance will be: <b>{amount}$</b>",
       "success-assign-beneficiaries-to-subscription": "The subscription \"{subscriptionName}\" was successfully assigned to {assignedBeneficiariesCount} participants out of the {totalBeneficiariesCount} selected.",
-      "load-more-beneficiaries": "Load more participants"
+      "load-more-beneficiaries": "Load more participants",
+      "sort": "Sort list",
+      "randomize": "Randomize list"
     },
     "fr": {
       "selected-organization": "Organisme",
@@ -46,7 +48,9 @@
       "usage-amount": "<b>{amount}$</b> seront répartis de la façon suivante :</br> {detail}",	
       "remaining-amount": "L'enveloppe restante sera de : <b>{amount}$</b>",
       "success-assign-beneficiaries-to-subscription": "L'abonnement «{subscriptionName}» a été assigné avec succès à {assignedBeneficiariesCount} participant-e-s.",
-      "load-more-beneficiaries": "Charger plus de participants"
+      "load-more-beneficiaries": "Charger plus de participants",
+      "sort": "Trier la liste",
+      "randomize": "Trier la liste aléatoirement"
     }
   }
 </i18n>
@@ -82,7 +86,7 @@
             </div>
           </template>
           <template v-if="organizations" #subpagesCta>
-            <div class="flex flex-right gap-x-4 gap-y-3 justify-end">
+            <div class="sm:ml-6 flex flex-right gap-x-4 gap-y-3 justify-end">
               <div class="flex items-center gap-x-4">
                 <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-subscription") }}</span>
                 <PfFormInputSelect
@@ -111,9 +115,23 @@
                   </template>
                 </PfFormInputText>
               </div>
-              <!--TODO :: New Toggle between sorted and random order -->
-              <div class="flex items-center gap-x-4">
-                <UiSwitch id="isSortedOrRandom" v-model="isSortedOrRandom" class="mx-auto mr-0" />
+              <div class="flex items-center">
+                <button
+                  class="pf-button px-0 border-primary-700 border rounded-r-none"
+                  :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                  type="button"
+                  @click="isRandomized = false">
+                  <PfIcon :icon="SortIcon" size="lg" />
+                  <span class="sr-only">{{ t("sort") }}</span>
+                </button>
+                <button
+                  class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
+                  :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                  type="button"
+                  @click="isRandomized = true">
+                  <PfIcon :icon="RandomIcon" size="lg" />
+                  <span class="sr-only">{{ t("randomize") }}</span>
+                </button>
               </div>
               <PfButtonAction
                 btn-style="primary"
@@ -272,6 +290,9 @@ import {
 import { URL_BENEFICIARY_ADMIN, URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS } from "@/lib/consts/urls";
 import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
 
+import SortIcon from "@/lib/icons/sort.json";
+import RandomIcon from "@/lib/icons/random.json";
+
 import Title from "@/components/app/title";
 import BeneficiaryFilters from "@/components/beneficiaries/beneficiary-filters";
 import BeneficiaryTable from "@/components/beneficiaries/beneficiary-table";
@@ -313,7 +334,7 @@ const selectedOrganization = ref(currentOrganization);
 const selectedSubscription = ref(null);
 const searchInput = ref("");
 const searchText = ref("");
-const isSortedOrRandom = ref(true);
+const isRandomized = ref(true);
 const maxAllocation = ref(null);
 const displayConfirmDialog = ref(false);
 const loadMoreBeneficiaries = ref(false);
@@ -685,7 +706,7 @@ function onAutoSelect() {
 
   var beneficiariesToSelect = [...beneficiaries.value];
 
-  if (isSortedOrRandom.value) {
+  if (isRandomized.value) {
     beneficiariesToSelect = beneficiariesToSelect.sort(() => Math.random() - 0.5);
   }
 

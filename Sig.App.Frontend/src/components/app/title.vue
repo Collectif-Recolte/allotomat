@@ -33,8 +33,8 @@
     </div>
     <div
       v-if="props.subpages || slots.subpagesCta"
-      class="flex flex-col sm:flex-row sm:items-center sm:px-section md:px-8 divide-y sm:divide-y-0 divide-primary-200 border-b border-primary-200 dark:border-grey-800">
-      <ul class="mx-section sm:mx-0 mb-0 flex gap-x-12 xs:mt-auto">
+      class="flex flex-col sm:flex-row sm:items-center sm:px-section sm:gap-x-6 md:px-8 divide-y sm:divide-y-0 divide-primary-200 border-b border-primary-200 dark:border-grey-800">
+      <ul class="mx-section sm:mx-0 mb-0 flex gap-x-6 lg:gap-x-8 xl:gap-x-12 xs:mt-auto">
         <li v-for="(subpage, index) in subpages" :key="index" class="inline-block">
           <RouterLink
             class="subpage-link text-h4 font-semibold text-primary-900 inline-flex h-12 items-center border-b-4 transition-colors duration-300 ease-in-out"
