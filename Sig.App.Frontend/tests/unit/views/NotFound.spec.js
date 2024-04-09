@@ -19,17 +19,17 @@ describe("NotFound.vue", () => {
     };
   });
 
-  it("shows a not-found message in french by default", async () => {
-    const wrapper = shallowMount(NotFound, mountOptions);
-
-    expect(wrapper.find("h1").text()).toEqual("Page introuvable");
-  });
-
-  it("shows a not-found message in english", async () => {
-    i18n.global.locale.value = "en";
-
+  it("shows a not-found message in english by default", async () => {
     const wrapper = shallowMount(NotFound, mountOptions);
 
     expect(wrapper.find("h1").text()).toEqual("Page not found");
+  });
+
+  it("shows a not-found message in french", async () => {
+    i18n.global.locale.value = "fr";
+
+    const wrapper = shallowMount(NotFound, mountOptions);
+
+    expect(wrapper.find("h1").text()).toEqual("Page introuvable");
   });
 });
