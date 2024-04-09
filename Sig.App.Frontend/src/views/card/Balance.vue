@@ -123,11 +123,11 @@ const cardId = computed(() => {
 const allFunds = computed(() => {
   let funds = [];
   if (card.value !== undefined && card.value !== null) {
-    if (card.value.loyaltyFund) {
-      funds.push(card.value.loyaltyFund);
-    }
     if (card.value.addingFundTransactions) {
       funds = [...card.value.addingFundTransactions];
+    }
+    if (card.value.loyaltyFund) {
+      funds.push(card.value.loyaltyFund);
     }
   }
 
