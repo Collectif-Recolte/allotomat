@@ -36,19 +36,28 @@ namespace Sig.App.Backend.BackgroundJobs
             RecurringJob.AddOrUpdate<AddingFundToCard>("AddingFundToCard:FirstDayOfTheMonth",
                 x => x.Run(new SubscriptionMonthlyPaymentMoment[2] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth, SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth }),
                 cronFirstDayOfMonth,
-                TimeZoneInfo.FindSystemTimeZoneById(config["systemLocalTimezone"]));
+                new RecurringJobOptions
+                {
+                    TimeZone = TimeZoneInfo.FindSystemTimeZoneById(config["systemLocalTimezone"])
+                });
 
             var cronFifteenDayOfMonth = Cron.Monthly(15);
             RecurringJob.AddOrUpdate<AddingFundToCard>("AddingFundToCard:FifteenthDayOfTheMonth",
                 x => x.Run(new SubscriptionMonthlyPaymentMoment[2] { SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth, SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth }),
                 cronFifteenDayOfMonth,
-                TimeZoneInfo.FindSystemTimeZoneById(config["systemLocalTimezone"]));
+                new RecurringJobOptions
+                {
+                    TimeZone = TimeZoneInfo.FindSystemTimeZoneById(config["systemLocalTimezone"])
+                });
 
             var cronWeekly = Cron.Weekly();
             RecurringJob.AddOrUpdate<AddingFundToCard>("AddingFundToCard:FirstDayOfTheWeek",
                 x => x.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheWeek }),
                 cronWeekly,
-                TimeZoneInfo.FindSystemTimeZoneById(config["systemLocalTimezone"]));
+                new RecurringJobOptions
+                {
+                    TimeZone = TimeZoneInfo.FindSystemTimeZoneById(config["systemLocalTimezone"])
+                });
         }
 
         public async Task Run(SubscriptionMonthlyPaymentMoment[] monthlyPaymentMoment)

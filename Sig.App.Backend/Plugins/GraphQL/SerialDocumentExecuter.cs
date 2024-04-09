@@ -1,6 +1,6 @@
 ﻿using GraphQL;
 using GraphQL.Execution;
-using GraphQL.Language.AST;
+using GraphQLParser.AST;
 
 
 namespace Sig.App.Backend.Plugins.GraphQL
@@ -9,7 +9,7 @@ namespace Sig.App.Backend.Plugins.GraphQL
     {
         protected override IExecutionStrategy SelectExecutionStrategy(ExecutionContext context)
         {
-            return context.Operation.OperationType == OperationType.Query
+            return context.Operation.Operation == OperationType.Query
                 ? new SerialExecutionStrategy()
                 : base.SelectExecutionStrategy(context);
         }

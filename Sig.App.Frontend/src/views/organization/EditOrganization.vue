@@ -51,7 +51,10 @@ const { result } = useQuery(
   `,
   {
     id: route.params.organizationId
-  }
+  },
+  () => ({
+    enabled: route.params.organizationId !== null
+  })
 );
 let organization = useResult(result);
 

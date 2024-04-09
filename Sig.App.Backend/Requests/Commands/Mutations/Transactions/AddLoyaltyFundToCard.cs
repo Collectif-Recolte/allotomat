@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using GraphQL.Conventions;
+﻿using System.Collections.Generic;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,7 +9,6 @@ using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -22,6 +19,7 @@ using Microsoft.AspNetCore.Http;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.Helpers;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 {
@@ -42,15 +40,24 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] AddLoyaltyFundToCard({request.ProjectId}, {request.CardId}, {request.Amount})");
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var card = await db.Cards.Include(x => x.Beneficiary).ThenInclude(x => x.Organization).Include(x => x.Transactions).Include(x => x.Funds)
                 .ThenInclude(x => x.ProductGroup).Include(x => x.Project)
                 .FirstOrDefaultAsync(x => x.ProgramCardId == request.CardId && x.ProjectId == projectId,
                     cancellationToken);
 
-            if (card == null) throw new CardNotFoundException();
+            if (card == null)
+            {
+                logger.LogWarning("[Mutation] AddLoyaltyFundToCard - CardNotFoundException");
+                throw new CardNotFoundException();
+            }
 
-            if (card.Status == CardStatus.Lost) throw new CardLostException();
+            if (card.Status == CardStatus.Lost)
+            {
+                logger.LogWarning("[Mutation] AddLoyaltyFundToCard - CardLostException");
+                throw new CardLostException();
+            }
 
             var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
@@ -130,7 +137,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 card.Status = CardStatus.GiftCard;
             }
 
-            logger.LogInformation($"Adding loyalty fund {request.Amount} to ({request.CardId}) card");
+            logger.LogInformation($"[Mutation] AddLoyaltyFundToCard - Adding loyalty fund {request.Amount} to ({request.CardId}) card");
 
             await db.SaveChangesAsync();
 
@@ -141,9 +148,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveProjectId
+        public class Input : HaveProjectId, IRequest<Payload>
         {
-            public Id ProjectId { get; set; }
             public long CardId { get; set; }
             public decimal Amount { get; set; }
         }

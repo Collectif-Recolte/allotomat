@@ -141,7 +141,10 @@ const { result: resultBeneficiaries, refetch } = useQuery(
       }
     }
   `,
-  beneficiariesVariables
+  beneficiariesVariables,
+  () => ({
+    enabled: props.selectedOrganization !== null
+  })
 );
 
 function beneficiariesVariables() {

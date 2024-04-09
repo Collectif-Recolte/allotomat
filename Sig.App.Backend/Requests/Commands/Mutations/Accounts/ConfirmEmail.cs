@@ -10,7 +10,7 @@ using Sig.App.Backend.Plugins.MediatR;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 {
-    public class ConfirmEmail : AsyncRequestHandler<ConfirmEmail.Input>
+    public class ConfirmEmail : IRequestHandler<ConfirmEmail.Input>
     {
         private readonly UserManager<AppUser> userManager;
         private readonly ILogger<ConfirmEmail> logger;
@@ -21,15 +21,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             this.logger = logger;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] ConfirmEmail({request.Email})");
             var user = await userManager.FindByEmailAsync(request.Email);
-            if (user == null || user.EmailConfirmed) throw new NoNeedToConfirmException();
+            if (user == null || user.EmailConfirmed)
+            {
+                logger.LogWarning("[Mutation] ConfirmEmail - NoNeedToConfirmException");
+                throw new NoNeedToConfirmException();
+            }
 
             var result = await userManager.ConfirmEmailAsync(user, request.Token);
             result.AssertSuccess();
 
-            logger.LogInformation($"Email address confirmed {user.Email}");
+            logger.LogInformation($"[Mutation] ConfirmEmail - Email address confirmed {user.Email}");
         }
 
         [MutationInput]

@@ -13,7 +13,9 @@ namespace Sig.App.Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20230926145159_create-transaction-unique-ids")]
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
     partial class createtransactionuniqueids
+#pragma warning restore CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

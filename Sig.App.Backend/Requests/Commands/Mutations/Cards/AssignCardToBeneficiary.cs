@@ -6,7 +6,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -28,6 +28,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] AssignCardToBeneficiary({request.BeneficiaryId}, {request.CardId})");
             long beneficiaryId;
             if (request.BeneficiaryId.IsIdentifierForType(typeof(Beneficiary)))
             {
@@ -39,18 +40,42 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             }
             var beneficiary = await db.Beneficiaries.Include(x => x.Organization).FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
-            if (beneficiary == null) throw new BeneficiaryNotFoundException();
+            if (beneficiary == null)
+            {
+                logger.LogWarning("[Mutation] AssignCardToBeneficiary - BeneficiaryNotFoundException");
+                throw new BeneficiaryNotFoundException();
+            }
 
             var card = await db.Cards.FirstOrDefaultAsync(x => x.ProgramCardId == request.CardId && x.ProjectId == beneficiary.Organization.ProjectId, cancellationToken);
 
             if (card == null) throw new CardNotFoundException();
 
-            if (card.Status == CardStatus.Assigned) throw new CardAlreadyAssignException();
-            if (card.Status == CardStatus.Lost) throw new CardLostException();
-            if (card.Status == CardStatus.Deactivated) throw new CardDeactivatedException();
-            if (card.Status == CardStatus.GiftCard) throw new CardAlreadyGiftCardException();
+            if (card.Status == CardStatus.Assigned)
+            {
+                logger.LogWarning("[Mutation] AssignCardToBeneficiary - CardAlreadyAssignException");
+                throw new CardAlreadyAssignException();
+            }
+            if (card.Status == CardStatus.Lost)
+            {
+                logger.LogWarning("[Mutation] AssignCardToBeneficiary - CardLostException");
+                throw new CardLostException();
+            }
+            if (card.Status == CardStatus.Deactivated)
+            {
+                logger.LogWarning("[Mutation] AssignCardToBeneficiary - CardDeactivatedException");
+                throw new CardDeactivatedException();
+            }
+            if (card.Status == CardStatus.GiftCard)
+            {
+                logger.LogWarning("[Mutation] AssignCardToBeneficiary - CardAlreadyGiftCardException");
+                throw new CardAlreadyGiftCardException();
+            }
 
-            if(card.ProjectId != beneficiary.Organization.ProjectId) throw new CardNotInProjectException();
+            if (card.ProjectId != beneficiary.Organization.ProjectId)
+            {
+                logger.LogWarning("[Mutation] AssignCardToBeneficiary - CardNotInProjectException");
+                throw new CardNotInProjectException();
+            }
 
             card.Status = CardStatus.Assigned;
 
@@ -58,7 +83,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             await db.SaveChangesAsync();
 
-            logger.LogInformation($"Card ({card.Id}) assign  to {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
+            logger.LogInformation($"[Mutation] AssignCardToBeneficiary - Card ({card.Id}) assign  to {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
 
             return new Payload() {
                 Beneficiary = beneficiary is OffPlatformBeneficiary ? new OffPlatformBeneficiaryGraphType(beneficiary as OffPlatformBeneficiary) : new BeneficiaryGraphType(beneficiary)
@@ -66,9 +91,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveBeneficiaryId
+        public class Input : HaveBeneficiaryId, IRequest<Payload>
         {
-            public Id BeneficiaryId { get; set; }
             public long CardId { get; set; }
         }
 

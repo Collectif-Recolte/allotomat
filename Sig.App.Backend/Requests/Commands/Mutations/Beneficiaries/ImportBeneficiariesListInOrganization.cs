@@ -6,7 +6,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries.ImportOffPlatformBeneficiariesListInOrganization;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 {
@@ -32,11 +31,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] ImportBeneficiariesListInOrganization({request.Items.Count})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
-            if (organization.Project.AdministrationSubscriptionsOffPlatform) throw new ProjectAdministrateSubscriptionOffPlatformException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] ImportBeneficiariesListInOrganization - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
+            if (organization.Project.AdministrationSubscriptionsOffPlatform)
+            {
+                logger.LogWarning("[Mutation] ImportBeneficiariesListInOrganization - ProjectAdministrateSubscriptionOffPlatformException");
+                throw new ProjectAdministrateSubscriptionOffPlatformException();
+            }
 
             var beneficiaryTypes = await db.BeneficiaryTypes.Where(x => x.ProjectId == organization.ProjectId).ToListAsync();
 
@@ -48,7 +56,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             {
                 BeneficiaryType beneficiaryType = beneficiaryTypes.FirstOrDefault(x => x.GetKeys().Contains(item.Key.Trim().ToLower()));
 
-                if (beneficiaryType == null) throw new BeneficiaryTypeNotFoundException();
+                if (beneficiaryType == null)
+                {
+                    logger.LogWarning($"[Mutation] ImportBeneficiariesListInOrganization - BeneficiaryTypeNotFoundException ({item.Key})");
+                    throw new BeneficiaryTypeNotFoundException();
+                }
 
                 var beneficiary = currentBeneficiaries.Where(x => x.ID1 == item.Id1).FirstOrDefault();
 
@@ -59,7 +71,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                         Organization = organization,
                     };
                     db.Beneficiaries.Add(beneficiary);
-                    logger.LogInformation($"New beneficiary created {beneficiary.Firstname} {beneficiary.Lastname}");
+                    logger.LogInformation($"[Mutation] ImportBeneficiariesListInOrganization - New beneficiary created {beneficiary.Firstname} {beneficiary.Lastname}");
                 }
                 else
                 {
@@ -95,9 +107,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveOrganizationId
+        public class Input : HaveOrganizationId, IRequest<Payload>
         {
-            public Id OrganizationId { get; set; }
             public List<BeneficiaryItem> Items { get; set; }
         }
 

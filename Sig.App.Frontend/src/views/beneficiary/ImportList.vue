@@ -145,7 +145,10 @@ const { result } = useQuery(
   `,
   {
     id: currentOrganization
-  }
+  },
+  () => ({
+    enabled: currentOrganization !== null
+  })
 );
 const organization = useResult(result);
 

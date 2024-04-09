@@ -41,6 +41,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateMarket({request.Name}, {request.ManagerEmails})");
             var market = new Market()
             {
                 Name = request.Name
@@ -55,7 +56,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 var (manager, isNew) = await GetOrCreateMarketManager(email);
                 var existingClaims = await userManager.GetClaimsAsync(manager);
                 if (existingClaims.Any(c => c.Type == AppClaimTypes.MarketManagerOf))
+                {
+                    logger.LogWarning($"[Mutation] CreateMarket - MarketNotFoundException ({email})");
                     throw new UserAlreadyManagerException();
+                }
 
                 await userManager.AddClaimAsync(manager, new Claim(AppClaimTypes.MarketManagerOf, market.Id.ToString()));
 
@@ -73,12 +77,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 }
 
                 managers.Add(manager);
-                logger.LogInformation($"Market manager {manager.Email} added to market {market.Name} ({market.Id})");
+                logger.LogInformation($"[Mutation] CreateMarket - Market manager {manager.Email} added to market {market.Name} ({market.Id})");
             }
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"New market created {market.Name} ({market.Id})");
+            logger.LogInformation($"[Mutation] CreateMarket - New market created {market.Name} ({market.Id})");
 
             return new Payload
             {
@@ -98,6 +102,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                     case UserType.Merchant:
                         return (user, false);
                     default:
+                        logger.LogWarning($"[Mutation] CreateMarket - ExistingUserNotMerchantException ({email})");
                         throw new ExistingUserNotMerchantException();
                 }
             }
@@ -112,7 +117,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 var result = await userManager.CreateAsync(user);
                 result.AssertSuccess();
 
-                logger.LogDebug($"New market manager created {user.Email} ({user.Id}). Sending email invitation.");
+                logger.LogInformation($"[Mutation] CreateMarket - New market manager created {user.Email} ({user.Id}). Sending email invitation.");
             }
 
             return (user, true);

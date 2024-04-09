@@ -17,7 +17,7 @@ using System;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 {
-    public class ResendConfirmationEmail : AsyncRequestHandler<ResendConfirmationEmail.Input>
+    public class ResendConfirmationEmail : IRequestHandler<ResendConfirmationEmail.Input>
     {
         private readonly AppDbContext db;
         private readonly UserManager<AppUser> userManager;
@@ -32,15 +32,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             this.logger = logger;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] ResendConfirmationEmail({request.Email})");
             var user = await db.Users
                 .Include(x => x.Profile)
                 .FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
 
-            if (user == null || user.EmailConfirmed) throw new NoNeedToConfirmException();
+            if (user == null || user.EmailConfirmed)
+            {
+                logger.LogWarning("[Mutation] ResendConfirmationEmail - NoNeedToConfirmException");
+                throw new NoNeedToConfirmException();
+            }
 
-            logger.LogInformation($"User {user.Email} requested new email confirmation token.");
+            logger.LogInformation($"[Mutation] ResendConfirmationEmail - User {user.Email} requested new email confirmation token.");
 
             if (user.Type == UserType.PCAAdmin)
             {

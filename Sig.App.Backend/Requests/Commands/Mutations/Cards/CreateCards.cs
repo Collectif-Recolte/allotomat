@@ -8,7 +8,7 @@ using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.PdfTemplates;
 using Sig.App.Backend.Plugins.GraphQL;
@@ -48,12 +48,21 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
-            if (request.Count <= 0) throw new CountMustBeHigherThanZeroException();
+            logger.LogInformation($"[Mutation] CreateCards({request.ProjectId}, {request.Count})");
+            if (request.Count <= 0)
+            {
+                logger.LogWarning("[Mutation] CreateCards - CountMustBeHigherThanZeroException");
+                throw new CountMustBeHigherThanZeroException();
+            }
 
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] CreateCards - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             var actualCount = await db.Cards.Where(x => x.ProjectId == projectId).CountAsync();
             var cards = new List<Card>();
@@ -147,9 +156,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveProjectId
+        public class Input : HaveProjectId, IRequest<Payload>
         {
-            public Id ProjectId { get; set; }
             public long Count { get; set; }
         }
 

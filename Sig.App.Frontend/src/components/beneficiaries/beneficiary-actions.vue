@@ -42,10 +42,13 @@
 </template>
 
 <script setup>
-import { defineProps, ref, onMounted, watch } from "vue";
+import { defineProps, ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { storeToRefs } from "pinia";
 
 import { canEditBeneficiary } from "@/lib/helpers/beneficiary";
+
+import { useAuthStore } from "@/lib/store/auth";
 
 import ICON_PENCIL from "@/lib/icons/pencil.json";
 import ICON_ADD_CASH from "@/lib/icons/add-cash.json";
@@ -65,7 +68,10 @@ import {
   URL_BENEFICIARY_CARD_ASSIGN
 } from "@/lib/consts/urls";
 
+import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
+
 const { t } = useI18n();
+const { getGlobalPermissions } = storeToRefs(useAuthStore());
 
 const items = ref([]);
 
@@ -80,67 +86,96 @@ watch(
   }
 );
 
+const manageCards = computed(() => {
+  return getGlobalPermissions.value.includes(GLOBAL_MANAGE_CARDS);
+});
+
 function updateItems() {
-  items.value = [
-    {
-      isExtra: true,
-      icon: ICON_PENCIL,
-      label: t("beneficiary-edit"),
-      route: { name: URL_BENEFICIARY_EDIT, params: { beneficiaryId: props.beneficiary.id } },
-      disabled: !canEditBeneficiary() || props.beneficiariesAreAnonymous,
-      reason: t("beneficiary-edit-disabled")
-    },
-    {
-      isExtra: true,
-      icon: ICON_ADD_CASH,
-      label: t("beneficiary-add-funds"),
-      route: { name: URL_BENEFICIARY_MANUALLY_ADD_FUND, params: { beneficiaryId: props.beneficiary.id } },
-      disabled: !haveCard() || props.beneficiariesAreAnonymous || !haveSubscriptions(),
-      reason: !haveCard()
-        ? t("beneficiary-add-funds-disabled")
-        : !haveSubscriptions()
-        ? t("beneficiary-add-funds-disabled-no-subscription")
-        : t("beneficiary-add-funds-disabled-anonymous")
-    },
-    {
-      isExtra: true,
-      icon: ICON_QR_CODE,
-      label: t("beneficiary-display-qrcode"),
-      route: qrCodeLink(),
-      disabled: !haveCard(),
-      reason: t("beneficiary-display-qrcode-disabled")
-    },
-    {
-      isExtra: true,
-      icon: ICON_CARD_LOST,
-      label: t("beneficiary-lost-card"),
-      route: lostCardLink(),
-      disabled: !haveCard(),
-      reason: t("beneficiary-lost-card-disabled")
-    },
-    {
-      isExtra: true,
-      icon: ICON_CARD_LINK,
-      label: t("beneficiary-assign-card"),
-      route: { name: URL_BENEFICIARY_CARD_ASSIGN, params: { beneficiaryId: props.beneficiary.id } },
-      if: !haveCard()
-    },
-    {
-      isExtra: true,
-      icon: ICON_MINUS,
-      label: t("beneficiary-unassign-card"),
-      route: unassignCardLink(),
-      if: haveCard()
-    },
-    {
-      isExtra: true,
-      icon: ICON_TRASH,
-      label: t("beneficiary-delete", { firstname: props.beneficiary.firstname }),
-      route: { name: URL_BENEFICIARY_DELETE, params: { beneficiaryId: props.beneficiary.id } },
-      disabled: haveCard() || props.beneficiariesAreAnonymous,
-      reason: haveCard() ? t("beneficiary-delete-disabled") : t("beneficiary-delete-disabled-anonymous")
-    }
-  ];
+  if (manageCards.value) {
+    items.value = [
+      {
+        isExtra: true,
+        icon: ICON_PENCIL,
+        label: t("beneficiary-edit"),
+        route: { name: URL_BENEFICIARY_EDIT, params: { beneficiaryId: props.beneficiary.id } },
+        disabled: !canEditBeneficiary() || props.beneficiariesAreAnonymous,
+        reason: t("beneficiary-edit-disabled")
+      },
+      {
+        isExtra: true,
+        icon: ICON_ADD_CASH,
+        label: t("beneficiary-add-funds"),
+        route: { name: URL_BENEFICIARY_MANUALLY_ADD_FUND, params: { beneficiaryId: props.beneficiary.id } },
+        disabled: !haveCard() || props.beneficiariesAreAnonymous || !haveSubscriptions(),
+        reason: !haveCard()
+          ? t("beneficiary-add-funds-disabled")
+          : !haveSubscriptions()
+          ? t("beneficiary-add-funds-disabled-no-subscription")
+          : t("beneficiary-add-funds-disabled-anonymous")
+      },
+      {
+        isExtra: true,
+        icon: ICON_QR_CODE,
+        label: t("beneficiary-display-qrcode"),
+        route: qrCodeLink(),
+        disabled: !haveCard(),
+        reason: t("beneficiary-display-qrcode-disabled")
+      },
+      {
+        isExtra: true,
+        icon: ICON_CARD_LOST,
+        label: t("beneficiary-lost-card"),
+        route: lostCardLink(),
+        disabled: !haveCard(),
+        reason: t("beneficiary-lost-card-disabled")
+      },
+      {
+        isExtra: true,
+        icon: ICON_CARD_LINK,
+        label: t("beneficiary-assign-card"),
+        route: { name: URL_BENEFICIARY_CARD_ASSIGN, params: { beneficiaryId: props.beneficiary.id } },
+        if: !haveCard()
+      },
+      {
+        isExtra: true,
+        icon: ICON_MINUS,
+        label: t("beneficiary-unassign-card"),
+        route: unassignCardLink(),
+        if: haveCard()
+      },
+      {
+        isExtra: true,
+        icon: ICON_TRASH,
+        label: t("beneficiary-delete", { firstname: props.beneficiary.firstname }),
+        route: { name: URL_BENEFICIARY_DELETE, params: { beneficiaryId: props.beneficiary.id } },
+        disabled: haveCard() || props.beneficiariesAreAnonymous,
+        reason: haveCard() ? t("beneficiary-delete-disabled") : t("beneficiary-delete-disabled-anonymous")
+      }
+    ];
+  } else {
+    items.value = [
+      {
+        isExtra: true,
+        icon: ICON_PENCIL,
+        label: t("beneficiary-edit"),
+        route: { name: URL_BENEFICIARY_EDIT, params: { beneficiaryId: props.beneficiary.id } },
+        disabled: !canEditBeneficiary() || props.beneficiariesAreAnonymous,
+        reason: t("beneficiary-edit-disabled")
+      },
+      {
+        isExtra: true,
+        icon: ICON_ADD_CASH,
+        label: t("beneficiary-add-funds"),
+        route: { name: URL_BENEFICIARY_MANUALLY_ADD_FUND, params: { beneficiaryId: props.beneficiary.id } },
+        disabled: !haveCard() || props.beneficiariesAreAnonymous || !haveSubscriptions(),
+        reason: !haveCard()
+          ? t("beneficiary-add-funds-disabled")
+          : !haveSubscriptions()
+          ? t("beneficiary-add-funds-disabled-no-subscription")
+          : t("beneficiary-add-funds-disabled-anonymous")
+      }
+    ];
+  }
 }
 
 const props = defineProps({

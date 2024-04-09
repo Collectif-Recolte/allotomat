@@ -12,7 +12,7 @@ using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -43,10 +43,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateOrganizationInProject({request.ProjectId}, {request.Name}, {request.ManagerEmails})");
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] CreateOrganizationInProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             var organization = new Organization()
             {
@@ -63,7 +68,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 var (manager, isNew) = await GetOrCreateOrganizationManager(email);
                 var existingClaims = await userManager.GetClaimsAsync(manager);
                 if (existingClaims.Any(c => c.Type == AppClaimTypes.OrganizationManagerOf))
+                {
+                    logger.LogWarning($"[Mutation] CreateOrganizationInProject - UserAlreadyManagerException ({email})");
                     throw new UserAlreadyManagerException();
+                }
 
                 await userManager.AddClaimAsync(manager, new Claim(AppClaimTypes.OrganizationManagerOf, organization.Id.ToString()));
 
@@ -81,12 +89,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 }
 
                 managers.Add(manager);
-                logger.LogInformation($"Organization manager {manager.Email} added to Organization {organization.Name} ({organization.Id})");
+                logger.LogInformation($"[Mutation] CreateOrganizationInProject - Organization manager {manager.Email} added to Organization {organization.Name} ({organization.Id})");
             }
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"New organization created {organization.Name} ({organization.Id})");
+            logger.LogInformation($"[Mutation] CreateOrganizationInProject - New organization created {organization.Name} ({organization.Id})");
 
             return new Payload
             {
@@ -105,6 +113,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                     case UserType.OrganizationManager:
                         return (user, false);
                     default:
+                        logger.LogWarning($"[Mutation] CreateOrganizationInProject - ExistingUserNotOrganizationManagerException ({email})");
                         throw new ExistingUserNotOrganizationManagerException();
                 }
             }
@@ -119,16 +128,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 var result = await userManager.CreateAsync(user);
                 result.AssertSuccess();
 
-                logger.LogDebug($"New organization manager created {user.Email} ({user.Id}). Sending email invitation.");
+                logger.LogInformation($"[Mutation] CreateOrganizationInProject - New organization manager created {user.Email} ({user.Id}). Sending email invitation.");
             }
 
             return (user, true);
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveProjectId
+        public class Input : HaveProjectId, IRequest<Payload>
         {
-            public Id ProjectId { get; set; }
             public string Name { get; set; }
             public IEnumerable<string> ManagerEmails { get; set; }
         }

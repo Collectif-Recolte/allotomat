@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Plugins.GraphQL;
@@ -29,10 +29,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] EditProject({request.Name}, {request.Url}, {request.AllowOrganizationsAssignCards}, {request.BeneficiariesAreAnonymous})");
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] EditProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             request.Name.IfSet(v => project.Name = v.Trim());
             request.Url.IfSet(v => project.Url = v.Trim());
@@ -42,7 +47,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Project edited {project.Name} ({project.Id})");
+            logger.LogInformation($"[Mutation] EditProject - Project edited {project.Name} ({project.Id})");
 
             return new Payload
             {
@@ -51,9 +56,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveProjectId
+        public class Input : HaveProjectId, IRequest<Payload>
         {
-            public Id ProjectId { get; set; }
             public Maybe<NonNull<string>> Name { get; set; }
             public Maybe<NonNull<string>> Url { get; set; }
             public Maybe<NonNull<string>> CardImageFileId { get; set; }

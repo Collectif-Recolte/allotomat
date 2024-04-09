@@ -1,5 +1,4 @@
-﻿using GraphQL.Conventions;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -8,12 +7,10 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
-using Sig.App.Backend.Requests.Queries.Markets;
 using Sig.App.Backend.Requests.Queries.Organizations;
-using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
@@ -21,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
 {
-    public class DeleteOrganization : AsyncRequestHandler<DeleteOrganization.Input>
+    public class DeleteOrganization : IRequestHandler<DeleteOrganization.Input>
     {
         private readonly ILogger<DeleteOrganization> logger;
         private readonly UserManager<AppUser> userManager;
@@ -36,15 +33,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
             this.mediator = mediator;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] DeleteOrganization({request.OrganizationId})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Subscriptions)
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Card).ThenInclude(x => x.Transactions)
                 .FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] DeleteOrganization - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
 
             var organizationManagers = await mediator.Send(new GetOrganizationManagers.Query
             {
@@ -56,6 +58,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 foreach (var manager in organizationManagers)
                 {
                     await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.OrganizationManagerOf, organizationId.ToString()));
+                    logger.LogInformation($"[Mutation] DeleteOrganization - Remove claim from manager {manager.Email}");
                 }
             }
 
@@ -66,14 +69,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
 
             await db.SaveChangesAsync();
             
-            logger.LogInformation($"Organization deleted ({organizationId}, {organization.Name})");
+            logger.LogInformation($"[Mutation] DeleteOrganization - Organization deleted ({organizationId}, {organization.Name})");
         }
 
         [MutationInput]
-        public class Input : IRequest, IHaveOrganizationId
-        {
-            public Id OrganizationId { get; set; }
-        }
+        public class Input : HaveOrganizationId, IRequest {}
 
         public class OrganizationNotFoundException : RequestValidationException { }
     }

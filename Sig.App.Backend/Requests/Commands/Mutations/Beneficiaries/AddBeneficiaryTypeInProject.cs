@@ -9,10 +9,9 @@ using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.MediatR;
 using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.Extensions;
-using GraphQL.Conventions;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
-using Sig.App.Backend.Gql.Interfaces;
 using System.Linq;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 {
@@ -29,15 +28,24 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] AddBeneficiaryTypeInProject({request.ProjectId}, {request.Name}, {request.Keys})");
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.Include(x => x.Markets).FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] AddBeneficiaryTypeInProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             var beneficiaryTypes = await db.BeneficiaryTypes.Where(x => x.ProjectId == projectId).ToListAsync();
             var beneficiaryTypesKeys = beneficiaryTypes.SelectMany(x => x.GetKeys());
 
-            if (request.Keys.Where(x => beneficiaryTypesKeys.Contains(x.Trim().ToLower())).Any()) throw new BeneficiaryTypeKeyAlreadyInUseException();
+            if (request.Keys.Where(x => beneficiaryTypesKeys.Contains(x.Trim().ToLower())).Any())
+            {
+                logger.LogWarning("[Mutation] AddBeneficiaryTypeInProject - BeneficiaryTypeKeyAlreadyInUseException");
+                throw new BeneficiaryTypeKeyAlreadyInUseException();
+            }
 
             var beneficiaryType = new BeneficiaryType()
             {
@@ -50,7 +58,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"New beneficiary type created {beneficiaryType.Name} ({beneficiaryType.Id})");
+            logger.LogInformation($"[Mutation] AddBeneficiaryTypeInProject - New beneficiary type created {beneficiaryType.Name} ({beneficiaryType.Id})");
 
             return new Payload
             {
@@ -59,9 +67,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveProjectId
+        public class Input : HaveProjectId, IRequest<Payload>
         {
-            public Id ProjectId { get; set; }
             public string Name { get; set; }
             public string[] Keys { get; set; }
         }

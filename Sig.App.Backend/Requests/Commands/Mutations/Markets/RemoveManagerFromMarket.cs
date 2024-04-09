@@ -8,7 +8,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -33,20 +33,29 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] RemoveManagerFromMarket({request.MarketId}, {request.ManagerId})");
             var marketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
-            if (market == null) throw new MarketNotFoundException();
+            if (market == null)
+            {
+                logger.LogWarning("[Mutation] RemoveManagerFromMarket - MarketNotFoundException");
+                throw new MarketNotFoundException();
+            }
             
             var manager = await db.Users.FirstOrDefaultAsync(x => x.Id == request.ManagerId.IdentifierForType<AppUser>());
 
-            if (manager == null) throw new ManagerNotFoundException();
+            if (manager == null)
+            {
+                logger.LogWarning("[Mutation] RemoveManagerFromMarket - ManagerNotFoundException");
+                throw new ManagerNotFoundException();
+            }
 
             await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.MarketManagerOf, market.Id.ToString()));
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Market manager {manager.Email} remove from market {market.Name} ({market.Id})");
+            logger.LogInformation($"[Mutation] RemoveManagerFromMarket - Market manager {manager.Email} remove from market {market.Name} ({market.Id})");
 
             return new Payload
             {
@@ -59,9 +68,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveMarketId
+        public class Input : HaveMarketId, IRequest<Payload>
         {
-            public Id MarketId { get; set; }
             public Id ManagerId { get; set; }
         }
 

@@ -24,16 +24,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] ResetPassword({request.EmailAddress})");
             var user = await userManager.FindByEmailAsync(request.EmailAddress);
 
             // Fail with InvalidToken error to not leak info about email validity
             if (user == null)
+            {
+                logger.LogWarning("[Mutation] ResetPassword - IdentityResultException");
                 throw new IdentityResultException(IdentityResult.Failed(userManager.ErrorDescriber.InvalidToken()));
+            }
 
             var result = await userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
             result.AssertSuccess();
 
-            logger.LogInformation($"Password reset successful for user {user.Email}");
+            logger.LogInformation($"[Mutation] ResetPassword - Password reset successful for user {user.Email}");
 
             return new Payload
             {

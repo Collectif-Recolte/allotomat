@@ -1,11 +1,10 @@
-﻿using GraphQL.Conventions;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
 using System.Linq;
@@ -14,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 {
-    public class DeleteBeneficiaryType : AsyncRequestHandler<DeleteBeneficiaryType.Input>
+    public class DeleteBeneficiaryType : IRequestHandler<DeleteBeneficiaryType.Input>
     {
         private readonly ILogger<DeleteBeneficiaryType> logger;
         private readonly AppDbContext db;
@@ -25,21 +24,30 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             this.db = db;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] DeleteBeneficiaryType({request.BeneficiaryTypeId})");
             var beneficiaryTypeId = request.BeneficiaryTypeId.LongIdentifierForType<BeneficiaryType>();
             var beneficiaryType = await db.BeneficiaryTypes
                 .Include(x => x.Beneficiaries)
                 .FirstOrDefaultAsync(x => x.Id == beneficiaryTypeId, cancellationToken);
 
-            if (beneficiaryType == null) throw new BeneficiaryTypeNotFoundException();
+            if (beneficiaryType == null)
+            {
+                logger.LogWarning("[Mutation] DeleteBeneficiaryType - BeneficiaryTypeNotFoundException");
+                throw new BeneficiaryTypeNotFoundException();
+            }
 
-            if (HaveAnyBeneficiaries(beneficiaryType)) throw new BeneficiaryTypeCantHaveBeneficiariesException();
+            if (HaveAnyBeneficiaries(beneficiaryType))
+            {
+                logger.LogWarning("[Mutation] DeleteBeneficiaryType - BeneficiaryTypeCantHaveBeneficiariesException");
+                throw new BeneficiaryTypeCantHaveBeneficiariesException();
+            }
 
             db.BeneficiaryTypes.Remove(beneficiaryType);
 
             await db.SaveChangesAsync();
-            logger.LogInformation($"Beneficiary type deleted ({beneficiaryTypeId}, {beneficiaryType.Name})");
+            logger.LogInformation($"[Mutation] DeleteBeneficiaryType - Beneficiary type deleted ({beneficiaryTypeId}, {beneficiaryType.Name})");
         }
 
         private bool HaveAnyBeneficiaries(BeneficiaryType beneficiaryType)
@@ -48,10 +56,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
         }
 
         [MutationInput]
-        public class Input : IRequest, IHaveBeneficiaryTypeId
-        {
-            public Id BeneficiaryTypeId { get; set; }
-        }
+        public class Input : HaveBeneficiaryTypeId, IRequest {}
 
         public class BeneficiaryTypeNotFoundException : RequestValidationException { }
         public class BeneficiaryTypeCantHaveBeneficiariesException : RequestValidationException { }

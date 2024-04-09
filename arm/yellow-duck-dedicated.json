@@ -114,7 +114,7 @@
                     "name": "CURRENT_STACK",
                     "value": "dotnet"
                 }],
-                "linuxFxVersion": "DOTNETCORE|6.0"
+                "linuxFxVersion": "DOTNETCORE|8.0"
             }
         }
     },

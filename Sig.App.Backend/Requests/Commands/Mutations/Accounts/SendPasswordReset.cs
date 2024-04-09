@@ -11,7 +11,7 @@ using Sig.App.Backend.Services.Mailer;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 {
-    public class SendPasswordReset : AsyncRequestHandler<SendPasswordReset.Input>
+    public class SendPasswordReset : IRequestHandler<SendPasswordReset.Input>
     {
         private readonly UserManager<AppUser> userManager;
         private readonly IMailer mailer;
@@ -26,8 +26,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             this.mediator = mediator;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] SendPasswordReset({request.Email})");
             var user = await userManager.FindByEmailAsync(request.Email);
             if (user == null) return;
 
@@ -41,7 +42,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
                 return;
             }
 
-            logger.LogInformation($"Password reset requested for user {user.Email}");
+            logger.LogInformation($"[Mutation] SendPasswordReset - Password reset requested for user {user.Email}");
 
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
             await mailer.Send(new ResetPasswordEmail(request.Email)

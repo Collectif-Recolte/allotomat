@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Plugins.GraphQL;
@@ -29,10 +29,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] EditBeneficiary({request.BeneficiaryId}, {request.Firstname}, {request.Lastname}, {request.Id1}, {request.Id2}, {request.BeneficiaryTypeId})");
             var beneficiaryId = request.BeneficiaryId.LongIdentifierForType<Beneficiary>();
             var beneficiary = await db.Beneficiaries.FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
-            if (beneficiary == null) throw new BeneficiaryNotFoundException();
+            if (beneficiary == null)
+            {
+                logger.LogWarning("[Mutation] EditBeneficiary - BeneficiaryNotFoundException");
+                throw new BeneficiaryNotFoundException();
+            }
 
             request.Firstname.IfSet(v => beneficiary.Firstname = v.Trim());
             request.Lastname.IfSet(v => beneficiary.Lastname = v.Trim());
@@ -48,7 +53,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Beneficiary edited {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
+            logger.LogInformation($"[Mutation] EditBeneficiary - Beneficiary edited {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
 
             return new Payload
             {
@@ -67,9 +72,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveBeneficiaryId
+        public class Input : HaveBeneficiaryId, IRequest<Payload>
         {
-            public Id BeneficiaryId { get; set; }
             public Maybe<NonNull<string>> Firstname { get; set; }
             public Maybe<NonNull<string>> Lastname { get; set; }
             public Maybe<NonNull<string>> Email { get; set; }

@@ -61,7 +61,7 @@ namespace Sig.App.Backend.Helpers
             {
                 return Column(
                     renderHeading,
-                    (item, cell) => cell.Value = getValue(item)
+                    (item, cell) => cell.Value = TransformValue(getValue(item))
                 );
             }
 
@@ -69,7 +69,7 @@ namespace Sig.App.Backend.Helpers
             {
                 return Column(
                     x => x.Value = heading,
-                    (item, cell) => cell.Value = getValue(item)
+                    (item, cell) => cell.Value = TransformValue(getValue(item))
                 );
             }
 
@@ -107,6 +107,35 @@ namespace Sig.App.Backend.Helpers
                 var currentCell = 1;
                 foreach (var cellRenderer in cellRenderers)
                     cellRenderer(dataItem, row.Cell(currentCell++));
+            }
+
+            private XLCellValue TransformValue(object value)
+            {
+                switch (value)
+                {
+                    case null:
+                        return new XLCellValue();
+                    case bool boolValue:
+                        return boolValue;
+                    case string stringValue:
+                        return stringValue;
+                    case int intValue:
+                        return intValue;
+                    case long int64Value:
+                        return int64Value;
+                    case decimal decimalValue:
+                        return decimalValue;
+                    case double doubleValue:
+                        return doubleValue;
+                    case DateTime dateTimeValue:
+                        return dateTimeValue;
+                    case XLError xlErrorValue:
+                        return xlErrorValue;
+                    case TimeSpan timeSpanValue:
+                        return timeSpanValue;
+                    default:
+                        throw new NotSupportedException($"Unsupported value type: {value.GetType()}");
+                }
             }
         }
     }

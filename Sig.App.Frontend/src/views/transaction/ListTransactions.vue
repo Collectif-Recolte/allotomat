@@ -62,6 +62,7 @@
           class="mb-6"
           :total-pages="transactionLogs.totalPages" />
         <div
+          v-if="canCreateTransaction"
           class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
           <PfButtonLink tag="routerLink" :to="{ name: URL_TRANSACTION_ADD }" btn-style="secondary" class="rounded-full">
             <span class="inline-flex items-center">
@@ -81,6 +82,7 @@ import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult, useApolloClient } from "@vue/apollo-composable";
 import { useRouter, useRoute, onBeforeRouteUpdate } from "vue-router";
+import { storeToRefs } from "pinia";
 
 import Title from "@/components/app/title";
 import TransactionFilters from "@/components/transaction/transaction-filters";
@@ -90,12 +92,17 @@ import { URL_TRANSACTION_ADD } from "@/lib/consts/urls";
 import { WITHOUT_SUBSCRIPTION } from "@/lib/consts/enums";
 import ICON_DOWNLOAD from "@/lib/icons/download.json";
 
+import { GLOBAL_CREATE_TRANSACTION } from "@/lib/consts/permissions";
 import { URL_TRANSACTION_ADMIN } from "@/lib/consts/urls";
+
+import { useAuthStore } from "@/lib/store/auth";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
 
 const route = useRoute();
 const router = useRouter();
+
+const { getGlobalPermissions } = storeToRefs(useAuthStore());
 
 let previousMonth = new Date();
 previousMonth.setMonth(previousMonth.getMonth() - 1);
@@ -209,6 +216,10 @@ const projectsOrOrganizationLoaded = computed(() => {
   return (
     (project.value !== undefined && project.value !== null) || (organization.value !== undefined && organization.value !== null)
   );
+});
+
+const canCreateTransaction = computed(() => {
+  return getGlobalPermissions.value.includes(GLOBAL_CREATE_TRANSACTION);
 });
 
 const {

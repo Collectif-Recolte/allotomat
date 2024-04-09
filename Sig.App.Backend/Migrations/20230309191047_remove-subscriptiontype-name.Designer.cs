@@ -13,7 +13,9 @@ namespace Sig.App.Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20230309191047_remove-subscriptiontype-name")]
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
     partial class removesubscriptiontypename
+#pragma warning restore CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

@@ -8,7 +8,6 @@ using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Plugins.GraphQL;
@@ -18,6 +17,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 {
@@ -36,15 +36,24 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] AssignBeneficiariesToSubscription({request.OrganizationId}, {request.SubscriptionId}, {request.Amount}, {request.WithoutSubscription}, {request.WithSubscriptions}, {request.WithCategories}, {request.SearchText}, {request.Sort})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.Include(x => x.BudgetAllowances).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] AssignBeneficiariesToSubscription - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
 
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
             var subscription = await db.Subscriptions.Include(x => x.Types).Include(x => x.Beneficiaries).FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
-            if (subscription == null) throw new SubscriptionNotFoundException();
+            if (subscription == null)
+            {
+                logger.LogWarning("[Mutation] AssignBeneficiariesToSubscription - SubscriptionNotFoundException");
+                throw new SubscriptionNotFoundException();
+            }
 
             var today = clock
                 .GetCurrentInstant()
@@ -52,12 +61,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             if (subscription.GetLastDateToAssignBeneficiary() < today)
             {
+                logger.LogWarning("[Mutation] AssignBeneficiariesToSubscription - SubscriptionAlreadyExpiredException");
                 throw new SubscriptionAlreadyExpiredException();
             }
 
             var budgetAllowance = organization.BudgetAllowances.FirstOrDefault(x => x.SubscriptionId == subscriptionId);
 
-            if (budgetAllowance == null) throw new MissingBudgetAllowanceException();
+            if (budgetAllowance == null)
+            {
+                logger.LogWarning("[Mutation] AssignBeneficiariesToSubscription - MissingBudgetAllowanceException");
+                throw new MissingBudgetAllowanceException();
+            }
 
             IQueryable<Beneficiary> query = db.Beneficiaries.Include(x => x.BeneficiaryType).Where(x => x.OrganizationId == organizationId);
 
@@ -106,13 +120,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             decimal totalAmount = 0;
             var beneficiariesWhoGetSubscriptions = 0;
 
+            logger.LogInformation($"[Mutation] AssignBeneficiariesToSubscription - Beneficiary count that fit the search ({beneficiaries.Length})");
+
             if (subscription.EndDate < today)
             {
                 beneficiariesWhoGetSubscriptions = beneficiaries.Length;
                 foreach (var beneficiary in beneficiaries)
                 {
-                    var amount = 0;
-                    
                     subscription.Beneficiaries.Add(new SubscriptionBeneficiary()
                     {
                         BeneficiaryId = beneficiary.Id,
@@ -122,7 +136,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                     });
 
                     logger.LogInformation(
-                        $"Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} added to subscription {subscription.Name}");
+                        $"[Mutation] AssignBeneficiariesToSubscription - Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} added to subscription {subscription.Name}");
                 }
             }
             else
@@ -148,7 +162,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         beneficiariesWhoGetSubscriptions++;
 
                         logger.LogInformation(
-                            $"Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} added to subscription {subscription.Name}");
+                            $"[Mutation] AssignBeneficiariesToSubscription - Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} added to subscription {subscription.Name}");
                     }
                     else
                     {
@@ -156,6 +170,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                     }
                 }
             }
+
+            logger.LogInformation($"[Mutation] AssignBeneficiariesToSubscription - Beneficiary who get a subscriptions ({beneficiariesWhoGetSubscriptions})");
 
             await db.SaveChangesAsync(cancellationToken);
 
@@ -169,10 +185,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveSubscriptionId, IHaveOrganizationId
+        public class Input : HaveOrganizationIdAndSubscriptionId, IRequest<Payload>
         {
-            public Id OrganizationId { get; set; }
-            public Id SubscriptionId { get; set; }
             public decimal Amount { get; set; }
 
             //Filters

@@ -20,6 +20,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Cards;
 using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.DbModel.Entities.Transactions;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Authorization
 {
@@ -120,9 +121,13 @@ namespace Sig.App.Backend.Authorization
 
         private string GetProjectIdFromInput(object input)
         {
-            if (input is IHaveProjectId hpi)
+            if (input is HaveProjectId hpi)
             {
                 return hpi.ProjectId.IdentifierForType<Project>();
+            }
+            if (input is HaveProjectIdAndMarketId hpiami)
+            {
+                return hpiami.ProjectId.IdentifierForType<Project>();
             }
             if (input is ProjectGraphType pgt)
             {
@@ -138,14 +143,22 @@ namespace Sig.App.Backend.Authorization
 
         private string GetMarketIdFromInput(object input)
         {
-            if (input is IHaveInitialTransactionId hiti)
+            if (input is HaveInitialTransactionId hiti)
             {
-                var transaction = db.Transactions.OfType<PaymentTransaction>().Include(x => x.Market).Where(x => x.Id == (input as IHaveInitialTransactionId).InitialTransactionId.LongIdentifierForType<PaymentTransaction>()).FirstOrDefault();
+                var transaction = db.Transactions.OfType<PaymentTransaction>().Include(x => x.Market).Where(x => x.Id == (input as HaveInitialTransactionId).InitialTransactionId.LongIdentifierForType<PaymentTransaction>()).FirstOrDefault();
                 return transaction.Market.GetIdentifier().IdentifierForType<Market>();
             }
-            if (input is IHaveMarketId hmi)
+            if (input is HaveMarketId hmi)
             {
                 return hmi.MarketId.IdentifierForType<Market>();
+            }
+            if (input is HaveMarketIdAndCardId hmiaci)
+            {
+                return hmiaci.MarketId.IdentifierForType<Market>();
+            }
+            if (input is HaveProjectIdAndMarketId hpiami)
+            {
+                return hpiami.MarketId.IdentifierForType<Market>();
             }
             if (input is MarketGraphType mgt)
             {
@@ -161,9 +174,13 @@ namespace Sig.App.Backend.Authorization
 
         private string GetOrganizationIdFromInput(object input)
         {
-            if (input is IHaveOrganizationId hoi)
+            if (input is HaveOrganizationId hoi)
             {
                 return hoi.OrganizationId.IdentifierForType<Organization>();
+            }
+            if (input is HaveOrganizationIdAndSubscriptionId hoiasi)
+            {
+                return hoiasi.OrganizationId.IdentifierForType<Organization>();
             }
             if (input is OrganizationGraphType ogt)
             {
@@ -179,7 +196,7 @@ namespace Sig.App.Backend.Authorization
 
         private string GetBeneficiaryIdFromInput(object input)
         {
-            if (input is IHaveBeneficiaryId hbi)
+            if (input is HaveBeneficiaryId hbi)
             {
                 if (hbi.BeneficiaryId.IsIdentifierForType<Beneficiary>())
                 {
@@ -190,9 +207,31 @@ namespace Sig.App.Backend.Authorization
                     return hbi.BeneficiaryId.IdentifierForType<OffPlatformBeneficiary>();
                 }
             }
-            if (input is IHaveOriginalCardId hoci)
+            if (input is HaveBeneficiaryIdAndCardId hbiaci)
             {
-                var beneficiary = db.Cards.Include(x => x.Beneficiary).Where(x => x.Id == (input as IHaveOriginalCardId).OriginalCardId.LongIdentifierForType<Card>()).FirstOrDefault().Beneficiary;
+                if (hbiaci.BeneficiaryId.IsIdentifierForType<Beneficiary>())
+                {
+                    return hbiaci.BeneficiaryId.IdentifierForType<Beneficiary>();
+                }
+                else
+                {
+                    return hbiaci.BeneficiaryId.IdentifierForType<OffPlatformBeneficiary>();
+                }
+            }
+            if (input is HaveSubscriptionIdAndBeneficiaryId hsiabi)
+            {
+                if (hsiabi.BeneficiaryId.IsIdentifierForType<Beneficiary>())
+                {
+                    return hsiabi.BeneficiaryId.IdentifierForType<Beneficiary>();
+                }
+                else
+                {
+                    return hsiabi.BeneficiaryId.IdentifierForType<OffPlatformBeneficiary>();
+                }
+            }
+            if (input is HaveOriginalCardId hoci)
+            {
+                var beneficiary = db.Cards.Include(x => x.Beneficiary).Where(x => x.Id == hoci.OriginalCardId.LongIdentifierForType<Card>()).FirstOrDefault().Beneficiary;
                 if (beneficiary is OffPlatformBeneficiary)
                 {
                     return beneficiary.GetIdentifier().IdentifierForType<OffPlatformBeneficiary>();
@@ -224,9 +263,17 @@ namespace Sig.App.Backend.Authorization
 
         private string GetSubscriptionIdFromInput(object input)
         {
-            if (input is IHaveSubscriptionId hbi)
+            if (input is HaveSubscriptionId hbi)
             {
                 return hbi.SubscriptionId.IdentifierForType<Subscription>();
+            }
+            if (input is HaveOrganizationIdAndSubscriptionId hoiasi)
+            {
+                return hoiasi.SubscriptionId.IdentifierForType<Subscription>();
+            }
+            if (input is HaveSubscriptionIdAndBeneficiaryId hsiabi)
+            {
+                return hsiabi.SubscriptionId.IdentifierForType<Subscription>();
             }
             if (input is SubscriptionGraphType bgt)
             {
@@ -242,7 +289,7 @@ namespace Sig.App.Backend.Authorization
 
         private long GetBeneficiaryTypeIdFromInput(object input)
         {
-            if (input is IHaveBeneficiaryTypeId bti)
+            if (input is HaveBeneficiaryTypeId bti)
             {
                 return bti.BeneficiaryTypeId.LongIdentifierForType<BeneficiaryType>();
             }

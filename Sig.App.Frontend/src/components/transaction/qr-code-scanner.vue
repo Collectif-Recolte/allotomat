@@ -94,12 +94,13 @@ async function decryptQRCode(result) {
     processing.value = true;
     const decryptResult = await QRCodeService.decrypt(result.data);
 
-    if (decryptResult === "") {
+    if (decryptResult === "" || decryptResult === null) {
       emit("triggerError");
       router.push({ name: props.errorUrlConst, query: { error: CARD_NOT_FOUND } });
+    } else {
+      emit("checkQRCode", decryptResult);
     }
 
-    emit("checkQRCode", decryptResult);
     qrScanner.stop();
     processing.value = false;
   }

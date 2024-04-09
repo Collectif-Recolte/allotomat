@@ -34,6 +34,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CompleteUserRegistration({request.UserId}, {request.FirstName}, {request.LastName}, {request.EmailAddress})");
             var userType = request.TokenType == TokenType.AdminInvitation ? UserType.PCAAdmin :
                 request.TokenType == TokenType.ProjectManagerInvitation ? UserType.ProjectManager :
                 request.TokenType == TokenType.MerchantInvitation ? UserType.Merchant : UserType.OrganizationManager;
@@ -43,11 +44,24 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
                 request.TokenType == TokenType.MerchantInvitation ? TokenPurposes.MerchantInvite : TokenPurposes.OrganizationManagerInvite;
 
             var user = await userManager.FindByEmailAsync(request.EmailAddress);
-            if (user == null) throw new UserNotFoundException();
-            if (user.Type != userType) throw new UserNotCorrectTypeException();
+            if (user == null)
+            {
+                logger.LogWarning("[Mutation] CompleteUserRegistration - UserNotFoundException");
+                throw new UserNotFoundException();
+            }
+
+            if (user.Type != userType)
+            {
+                logger.LogWarning("[Mutation] CompleteUserRegistration - UserNotCorrectTypeException");
+                throw new UserNotCorrectTypeException();
+            }
 
             var tokenValid = await userManager.VerifyUserTokenAsync(user, TokenProviders.EmailInvites, tokenPurpose, request.InviteToken);
-            if (tokenValid == false) throw new InvalidInviteTokenException();
+            if (tokenValid == false)
+            {
+                logger.LogWarning("[Mutation] CompleteUserRegistration - InvalidInviteTokenException");
+                throw new InvalidInviteTokenException();
+            }
 
             var identityResult = await userManager.AddPasswordAsync(user, request.Password);
             identityResult.AssertSuccess();
@@ -60,7 +74,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             profile.LastName = request.LastName.Trim();
             await dbContext.SaveChangesAsync();
 
-            logger.LogInformation($"{userType} registration completed for {user.Email}");
+            logger.LogInformation($"[Mutation] CompleteUserRegistration - {userType} registration completed for {user.Email}");
 
             return new Payload
             {

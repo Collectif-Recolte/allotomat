@@ -6,7 +6,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Plugins.MediatR;
 using System;
 using System.Linq;
@@ -79,9 +79,8 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
             };
         }
 
-        public class Input : IRequest<ImportOffPlatformBeneficiariesListPayload>, IHaveOrganizationId
+        public class Input : HaveOrganizationId, IRequest<ImportOffPlatformBeneficiariesListPayload>
         {
-            public Id OrganizationId { get; set; }
             public ForecastOffPlatformBeneficiaryItem[] Items { get; set; }
         }
 

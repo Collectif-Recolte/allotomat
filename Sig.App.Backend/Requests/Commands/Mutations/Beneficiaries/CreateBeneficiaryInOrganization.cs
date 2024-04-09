@@ -6,7 +6,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -30,15 +30,24 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateBeneficiaryInOrganization({request.Firstname}, {request.Lastname}, {request.Id1}, {request.Id2}, {request.BeneficiaryTypeId})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] CreateBeneficiaryInOrganization - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
 
             var beneficiaryTypeId = request.BeneficiaryTypeId.LongIdentifierForType<BeneficiaryType>();
             var beneficiaryType = await db.BeneficiaryTypes.FirstOrDefaultAsync(x => x.Id == beneficiaryTypeId, cancellationToken);
 
-            if (beneficiaryType == null) throw new BeneficiaryTypeNotFoundException();
+            if (beneficiaryType == null)
+            {
+                logger.LogWarning("[Mutation] CreateBeneficiaryInOrganization - BeneficiaryTypeNotFoundException");
+                throw new BeneficiaryTypeNotFoundException();
+            }
 
             var lastBeneficiary = await db.Beneficiaries.Where(x => x.OrganizationId == organizationId).OrderBy(x => x.SortOrder).LastOrDefaultAsync();
             var sortOrder = lastBeneficiary != null ? lastBeneficiary.SortOrder + 1 : 0;
@@ -62,7 +71,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             db.Beneficiaries.Add(beneficiary);
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"New beneficiary created {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
+            logger.LogInformation($"[Mutation] CreateBeneficiaryInOrganization - New beneficiary created {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
 
             return new Payload
             {
@@ -71,9 +80,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveOrganizationId
+        public class Input : HaveOrganizationId, IRequest<Payload>
         {
-            public Id OrganizationId { get; set; }
             public string Firstname { get; set; }
             public string Lastname { get; set; }
             public string Email { get; set; }

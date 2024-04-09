@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
 {
-    public class DeleteBudgetAllowance : AsyncRequestHandler<DeleteBudgetAllowance.Input>
+    public class DeleteBudgetAllowance : IRequestHandler<DeleteBudgetAllowance.Input>
     {
         private readonly ILogger<DeleteBudgetAllowance> logger;
         private readonly AppDbContext db;
@@ -24,19 +24,28 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
             this.db = db;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] DeleteBudgetAllowance({request.BudgetAllowanceId})");
             var budgetAllowanceId = request.BudgetAllowanceId.LongIdentifierForType<BudgetAllowance>();
             var budgetAllowance = await db.BudgetAllowances.Include(x => x.Beneficiaries).FirstOrDefaultAsync(x => x.Id == budgetAllowanceId, cancellationToken);
 
-            if (budgetAllowance == null) throw new BudgetAllowanceNotFoundException();
+            if (budgetAllowance == null)
+            {
+                logger.LogWarning("[Mutation] DeleteBudgetAllowance - BudgetAllowanceNotFoundException");
+                throw new BudgetAllowanceNotFoundException();
+            }
 
-            if (HaveAnyBeneficiaries(budgetAllowance)) throw new BudgetAllowanceCantHaveBeneficiariesException();
+            if (HaveAnyBeneficiaries(budgetAllowance))
+            {
+                logger.LogWarning("[Mutation] DeleteBudgetAllowance - BudgetAllowanceCantHaveBeneficiariesException");
+                throw new BudgetAllowanceCantHaveBeneficiariesException();
+            }
 
             db.BudgetAllowances.Remove(budgetAllowance);
 
             await db.SaveChangesAsync();
-            logger.LogInformation($"Budget allowance deleted ({budgetAllowanceId})");
+            logger.LogInformation($"[Mutation] DeleteBudgetAllowance - Budget allowance deleted ({budgetAllowanceId})");
         }
 
         private bool HaveAnyBeneficiaries(BudgetAllowance budgetAllowance)

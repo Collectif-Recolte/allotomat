@@ -27,7 +27,9 @@ namespace Sig.App.Backend.DbModel.Entities.Beneficiaries
         public string ID2 { get; set; }
 
         public long? BeneficiaryTypeId { get; set; }
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         public BeneficiaryType? BeneficiaryType { get; set; }
+#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
 
         public IList<SubscriptionBeneficiary> Subscriptions { get; set; }
 

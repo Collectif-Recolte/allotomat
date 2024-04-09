@@ -11,7 +11,7 @@ using Sig.App.Backend.DbModel.Entities.Profiles;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -41,10 +41,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] AddManagerToMarket({request.MarketId}, {request.ManagerEmails})");
             var marketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
-            if (market == null) throw new MarketNotFoundException();
+            if (market == null)
+            {
+                logger.LogWarning("[Mutation] AddManagerToMarket - MarketNotFoundException");
+                throw new MarketNotFoundException();
+            }
             var managers = new List<AppUser>();
 
             foreach (var email in request.ManagerEmails)
@@ -52,7 +57,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 var (manager, isNew) = await GetOrCreateMarketManager(email);
                 var existingClaims = await userManager.GetClaimsAsync(manager);
                 if (existingClaims.Any(c => c.Type == AppClaimTypes.MarketManagerOf))
+                {
+                    logger.LogWarning("[Mutation] AddManagerToMarket - UserAlreadyManagerException");
                     throw new UserAlreadyManagerException();
+                }
 
                 await userManager.AddClaimAsync(manager, new Claim(AppClaimTypes.MarketManagerOf, market.Id.ToString()));
 
@@ -70,7 +78,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 }
 
                 managers.Add(manager);
-                logger.LogInformation($"Market manager {manager.Email} added to market {market.Name} ({market.Id})");
+                logger.LogInformation($"[Mutation] AddManagerToMarket - Market manager {manager.Email} added to market {market.Name} ({market.Id})");
             }
 
             await db.SaveChangesAsync(cancellationToken);
@@ -92,6 +100,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                     case UserType.Merchant:
                         return (user, false);
                     default:
+                        logger.LogWarning("[Mutation] AddManagerToMarket - ExistingUserNotMarketManagerException");
                         throw new ExistingUserNotMarketManagerException();
                 }
             }
@@ -106,7 +115,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 var result = await userManager.CreateAsync(user);
                 result.AssertSuccess();
 
-                logger.LogDebug($"New market manager created {user.Email} ({user.Id}). Sending email invitation.");
+                logger.LogInformation($"[Mutation] AddManagerToMarket - New market manager created {user.Email} ({user.Id}). Sending email invitation.");
             }
 
             return (user, true);
@@ -117,9 +126,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
         public class ExistingUserNotMarketManagerException : RequestValidationException { }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveMarketId
+        public class Input : HaveMarketId, IRequest<Payload>
         {
-            public Id MarketId { get; set; }
             public IEnumerable<string> ManagerEmails { get; set; }
         }
 

@@ -1,4 +1,5 @@
-﻿using GraphQL.Conventions;
+﻿using DocumentFormat.OpenXml.Presentation;
+using GraphQL.Conventions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -10,7 +11,7 @@ using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Plugins.GraphQL;
@@ -35,15 +36,28 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
-            if (request.StartDate > request.EndDate) throw new EndDateMustBeAfterStartDateException();
+            logger.LogInformation($"[Mutation] CreateSubscriptionInProject({request.ProjectId}, {request.Name}, {request.MonthlyPaymentMoment}, {request.StartDate}, {request.EndDate}, {request.FundsExpirationDate}, {request.Types}, {request.IsFundsAccumulable})");
+            if (request.StartDate > request.EndDate)
+            {
+                logger.LogWarning("[Mutation] CreateSubscriptionInProject - EndDateMustBeAfterStartDateException");
+                throw new EndDateMustBeAfterStartDateException();
+            }
 
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.Include(x => x.BeneficiaryTypes).Include(x => x.ProductGroups).FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] CreateSubscriptionInProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             var beneficiaryTypeIds = request.Types.Select(x => x.BeneficiaryTypeId);
-            if (!beneficiaryTypeIds.Any()) throw new SubscriptionTypesCantBeEmpty();
+            if (!beneficiaryTypeIds.Any())
+            {
+                logger.LogWarning("[Mutation] CreateSubscriptionInProject - SubscriptionTypesCantBeEmpty");
+                throw new SubscriptionTypesCantBeEmpty();
+            }
 
             var subscription = new Subscription()
             {
@@ -65,14 +79,28 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 var beneficiaryTypeId = type.BeneficiaryTypeId.LongIdentifierForType<BeneficiaryType>();
                 var beneficiaryType = project.BeneficiaryTypes.First(x => x.Id == beneficiaryTypeId);
 
-                if (beneficiaryType == null) throw new BeneficiaryTypeNotFoundException();
+                if (beneficiaryType == null)
+                {
+                    logger.LogWarning("[Mutation] CreateSubscriptionInProject - SubscriptionTypesCantBeEmpty");
+                    throw new BeneficiaryTypeNotFoundException();
+                }
 
                 var productGroupId = type.ProductGroupId.LongIdentifierForType<ProductGroup>();
                 var productGroup = project.ProductGroups.First(x => x.Id == productGroupId);
 
-                if (productGroup == null) throw new ProductGroupNotFoundException();
+                if (productGroup == null)
+                {
+                    logger.LogWarning("[Mutation] CreateSubscriptionInProject - ProductGroupNotFoundException");
+                    throw new ProductGroupNotFoundException();
+                }
 
-                if (subscription.Types.Any(x => x.BeneficiaryTypeId == beneficiaryTypeId && x.ProductGroupId == productGroupId)) throw new CantHaveMultipleBeneficiaryTypeAndProductGroupInSubscriptionException();
+                if (subscription.Types.Any(x => x.BeneficiaryTypeId == beneficiaryTypeId && x.ProductGroupId == productGroupId))
+                {
+                    logger.LogWarning("[Mutation] CreateSubscriptionInProject - CantHaveMultipleBeneficiaryTypeAndProductGroupInSubscriptionException");
+                    throw new CantHaveMultipleBeneficiaryTypeAndProductGroupInSubscriptionException();
+                }
+
+                logger.LogInformation($"[Mutation] CreateSubscriptionInProject - Add subscription type ({type.Amount}, {beneficiaryType.Name}, {productGroup.Name})");
 
                 subscription.Types.Add(new SubscriptionType()
                 {
@@ -85,7 +113,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"New subscription created {subscription.Name} ({subscription.Id})");
+            logger.LogInformation($"[Mutation] CreateSubscriptionInProject - New subscription created {subscription.Name} ({subscription.Id})");
 
             return new Payload()
             {
@@ -94,9 +122,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveProjectId
+        public class Input : HaveProjectId, IRequest<Payload>
         {
-            public Id ProjectId { get; set; }
             public string Name { get; set; }
             public SubscriptionMonthlyPaymentMoment MonthlyPaymentMoment { get; set; }
             public LocalDate StartDate { get; set; }
@@ -118,6 +145,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             public Id ProductGroupId { get; set; }
             public decimal Amount { get; set; }
             public Id BeneficiaryTypeId { get; set; }
+
+            public override string ToString()
+            {
+                return $"{ProductGroupId}, {Amount}, {BeneficiaryTypeId}";
+            }
         }
 
         public class ProjectNotFoundException : RequestValidationException { }

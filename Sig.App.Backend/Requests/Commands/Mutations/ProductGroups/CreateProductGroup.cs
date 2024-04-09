@@ -1,5 +1,4 @@
-﻿using GraphQL.Conventions;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
@@ -7,7 +6,7 @@ using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -29,12 +28,21 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateProductGroup({request.ProjectId}, {request.Name}, {request.Color}, {request.OrderOfAppearance})");
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.Include(x => x.ProductGroups).FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] CreateProductGroup - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
-            if (request.Name == ProductGroupType.LOYALTY) throw new CantCreateProductGroupWithLoyaltyDefaultName();
+            if (request.Name == ProductGroupType.LOYALTY)
+            {
+                logger.LogWarning("[Mutation] CreateProductGroup - CantCreateProductGroupWithLoyaltyDefaultName");
+                throw new CantCreateProductGroupWithLoyaltyDefaultName();
+            }
 
             var productGroup = new ProductGroup()
             {
@@ -47,7 +55,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
             db.ProductGroups.Add(productGroup);
             await db.SaveChangesAsync();
 
-            logger.LogInformation($"New product group created for {project.Name} ({request.Name})");
+            logger.LogInformation($"[Mutation] CreateProductGroup - New product group created for {project.Name} ({request.Name})");
 
             return new Payload()
             {
@@ -56,9 +64,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveProjectId
+        public class Input : HaveProjectId, IRequest<Payload>
         {
-            public Id ProjectId { get; set; }
             public string Name { get; set; }
             public ProductGroupColor Color { get; set; }
             public int OrderOfAppearance { get; set; }

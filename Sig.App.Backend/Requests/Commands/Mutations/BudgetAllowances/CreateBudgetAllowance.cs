@@ -7,7 +7,7 @@ using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -30,19 +30,36 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateBudgetAllowance({request.OrganizationId}, {request.SubscriptionId}, {request.Amount})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.Include(x => x.BudgetAllowances).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] CreateBudgetAllowance - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
 
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
             var subscription = await db.Subscriptions.FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
-            if (subscription == null) throw new SubscriptionNotFoundException();
+            if (subscription == null)
+            {
+                logger.LogWarning("[Mutation] CreateBudgetAllowance - SubscriptionNotFoundException");
+                throw new SubscriptionNotFoundException();
+            }
 
-            if (subscription.ProjectId != organization.ProjectId) throw new OrganizationAndSubscriptionNotRelated();
+            if (subscription.ProjectId != organization.ProjectId)
+            {
+                logger.LogWarning("[Mutation] CreateBudgetAllowance - OrganizationAndSubscriptionNotRelated");
+                throw new OrganizationAndSubscriptionNotRelated();
+            }
 
-            if (organization.BudgetAllowances.Any(x => x.SubscriptionId == subscriptionId)) throw new OrganizationAlreadyHaveBudgetForSubscriptionException();
+            if (organization.BudgetAllowances.Any(x => x.SubscriptionId == subscriptionId))
+            {
+                logger.LogWarning("[Mutation] CreateBudgetAllowance - OrganizationAlreadyHaveBudgetForSubscriptionException");
+                throw new OrganizationAlreadyHaveBudgetForSubscriptionException();
+            }
 
             var budgetAllowance = new BudgetAllowance()
             {
@@ -55,7 +72,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
             db.BudgetAllowances.Add(budgetAllowance);
             await db.SaveChangesAsync();
 
-            logger.LogInformation($"New budget allowance created for {organization.Name} ({request.Amount})");
+            logger.LogInformation($"[Mutation] CreateBudgetAllowance - New budget allowance created for {organization.Name} ({request.Amount})");
 
             return new Payload()
             {
@@ -64,10 +81,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveOrganizationId, IHaveSubscriptionId
+        public class Input : HaveOrganizationIdAndSubscriptionId, IRequest<Payload>
         {
-            public Id OrganizationId { get; set; }
-            public Id SubscriptionId { get; set; }
             public decimal Amount { get; set; }
         }
 

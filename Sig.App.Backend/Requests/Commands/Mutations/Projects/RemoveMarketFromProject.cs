@@ -1,12 +1,11 @@
-﻿using GraphQL.Conventions;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -29,23 +28,36 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] RemoveMarketFromProject({request.MarketId}, {request.ProjectId})");
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.Include(x => x.Markets).FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] RemoveMarketFromProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             var marketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
-            if (market == null) throw new MarketNotFoundException();
+            if (market == null)
+            {
+                logger.LogWarning("[Mutation] RemoveMarketFromProject - MarketNotFoundException");
+                throw new MarketNotFoundException();
+            }
 
-            if (!project.Markets.Any(x => x.MarketId == marketId)) throw new MarketNotInProjectException();
+            if (!project.Markets.Any(x => x.MarketId == marketId))
+            {
+                logger.LogWarning("[Mutation] RemoveMarketFromProject - MarketNotInProjectException");
+                throw new MarketNotInProjectException();
+            }
 
             project.Markets.Remove(project.Markets.First(x => x.MarketId == marketId));
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Market {market.Name} remove from project {project.Name}");
+            logger.LogInformation($"[Mutation] RemoveMarketFromProject - Market {market.Name} remove from project {project.Name}");
 
             return new Payload()
             {
@@ -58,11 +70,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
         public class MarketNotInProjectException : RequestValidationException { }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveProjectId, IHaveMarketId
-        {
-            public Id ProjectId { get; set; }
-            public Id MarketId { get; set; }
-        }
+        public class Input : HaveProjectIdAndMarketId, IRequest<Payload> {}
 
         [MutationPayload]
         public class Payload
