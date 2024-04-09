@@ -115,7 +115,7 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
                 }
             }
 
-            var sorted = Sort(query, TransactionLogSort.Default, SortOrder.Asc);
+            var sorted = Sort(query, TransactionLogSort.Default, SortOrder.Desc);
             return await Pagination.For(sorted, request.Page);
         }
 
