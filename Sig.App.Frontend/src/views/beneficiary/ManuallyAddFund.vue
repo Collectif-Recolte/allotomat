@@ -11,7 +11,8 @@
 		"manually-add-fund-success-notification": "{name} received {amount} on their card.",
     "select-product-group-label": "Product group",
     "available-fund-cant-be-less-than-zero-error-notification": "The card balance cannot be negative.",
-    "card-current-balance": "Current balance: {amount}"
+    "card-current-balance": "Current balance: {amount}",
+    "select-subscription-description": "Subscriptions that have expired or subscriptions that are not assigned to the participant are not displayed and selectable for manual fund addition."
 	},
 	"fr": {
 		"title": "Ajouter manuellement des fonds",
@@ -24,7 +25,8 @@
 		"manually-add-fund-success-notification": "{name} a reçu {amount} sur sa carte.",
     "select-product-group-label": "Groupe de produits",
     "available-fund-cant-be-less-than-zero-error-notification": "Le solde de la carte ne peut pas être négatif.",
-    "card-current-balance": "Solde actuel: {amount}"
+    "card-current-balance": "Solde actuel: {amount}",
+    "select-subscription-description": "Les abonnements qui ont expiré ou les abonnements qui ne sont pas assignés au participant ne sont pas affichés et sélectionnables pour l'ajout manuel de fonds."
 	}
 }
 </i18n>
@@ -55,6 +57,7 @@
               v-bind="field"
               :label="t('select-subscription-label')"
               :options="subscriptionOptions"
+              :description="t('select-subscription-description')"
               :errors="fieldErrors"
               @input="onSubscriptionSelected" />
           </Field>
@@ -209,7 +212,8 @@ const subscriptionOptions = useResult(resultOrganization, null, (data) => {
     .filter(
       (x) =>
         availableSubscriptionIds.includes(x.subscription.id) &&
-        (!x.subscription.isFundsAccumulable || dateUtc(x.subscription.fundsExpirationDate) > Date.now())
+        x.subscription.isFundsAccumulable &&
+        dateUtc(x.subscription.fundsExpirationDate) > Date.now()
     )
     .map((x) => {
       let label = "";
