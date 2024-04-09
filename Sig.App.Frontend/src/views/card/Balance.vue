@@ -25,7 +25,10 @@
         {{ getMoneyFormat(fund) }}
       </p>
 
-      <ProductGroupFundList class="flex justify-center mb-6" :product-groups="getProductGroups(allFunds)" />
+      <ProductGroupFundList
+        display-expiration-date
+        class="flex justify-center mb-6"
+        :product-groups="getProductGroups(allFunds)" />
 
       <div class="border-t border-grey-100 pt-4">
         <PfButtonAction btn-style="link" size="sm" :label="t('done')" @click="emit('onUpdateStep', CHECK_CARD_STEPS_START)" />
