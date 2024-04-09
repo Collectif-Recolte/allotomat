@@ -45,7 +45,7 @@ namespace Sig.App.Backend.Helpers
                 if (startDate > today && startDate.Day <= 15) cardPaymentRemaining++;
             }
 
-            return cardPaymentRemaining;
+            return Math.Max(0, cardPaymentRemaining);
         }
 
         public static DateTime GetNextPaymentDateTime(IClock clock, SubscriptionMonthlyPaymentMoment moment)
