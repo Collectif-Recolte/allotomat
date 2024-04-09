@@ -212,8 +212,7 @@ const subscriptionOptions = useResult(resultOrganization, null, (data) => {
     .filter(
       (x) =>
         availableSubscriptionIds.includes(x.subscription.id) &&
-        x.subscription.isFundsAccumulable &&
-        dateUtc(x.subscription.fundsExpirationDate) > Date.now()
+        (!x.subscription.isFundsAccumulable || dateUtc(x.subscription.fundsExpirationDate) > Date.now())
     )
     .map((x) => {
       let label = "";
