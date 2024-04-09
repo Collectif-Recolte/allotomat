@@ -18,6 +18,7 @@
         CreateTransaction,
         ManageOrganizationManagers,
         ManageBudgetAllowance,
-        ManageProductGroup
+        ManageProductGroup,
+        RefundTransaction
     }
 }

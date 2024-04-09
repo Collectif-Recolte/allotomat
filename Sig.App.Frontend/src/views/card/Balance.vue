@@ -67,9 +67,10 @@ const { result, loading } = useQuery(
           name
         }
         totalFund
-        funds {
-          id
-          amount
+        addingFundTransactions {
+          expirationDate
+          availableFund
+          status
           productGroup {
             id
             name
@@ -120,8 +121,8 @@ const cardId = computed(() => {
 });
 
 const allFunds = computed(() => {
-  if (card.value && card.value.funds) {
-    let funds = [...card.value.funds];
+  if (card.value && card.value.addingFundTransactions) {
+    let funds = [...card.value.addingFundTransactions];
     if (card.value.loyaltyFund) {
       funds.push(card.value.loyaltyFund);
     }
@@ -142,11 +143,14 @@ const programName = computed(() => {
 const getProductGroups = (funds) => {
   const productGroups = [];
   for (let fund of funds) {
-    productGroups.push({
-      color: fund.productGroup.color,
-      label: fund.productGroup.name,
-      fund: fund.amount
-    });
+    if (fund.expirationDate > new Date().toISOString()) {
+      productGroups.push({
+        color: fund.productGroup.color,
+        label: fund.productGroup.name,
+        fund: fund.amount ?? fund.availableFund,
+        expirationDate: fund.expirationDate
+      });
+    }
   }
   return productGroups;
 };

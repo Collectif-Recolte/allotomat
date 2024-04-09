@@ -8,6 +8,7 @@
       "beneficiary-assign-card": "Assign a card",
       "beneficiary-unassign-card": "Unassign card",
       "beneficiary-delete": "Delete {firstname}",
+      "beneficiary-transactions-history": "Transactions history",
       "beneficiary-edit-disabled": "You don't have the permission to edit this beneficiary",
       "beneficiary-add-funds-disabled": "You can't add funds if the beneficiary doesn't have a card",
       "beneficiary-display-qrcode-disabled": "You can't display a QR code if the beneficiary doesn't have a card",
@@ -25,6 +26,7 @@
       "beneficiary-assign-card": "Assigner une carte",
       "beneficiary-unassign-card": "Désassigner la carte",
       "beneficiary-delete": "Supprimer {firstname}",
+      "beneficiary-transactions-history": "Historique de transactions",
       "beneficiary-edit-disabled": "Vous n'avez pas la permission de modifier ce participant-e-",
       "beneficiary-add-funds-disabled": "Vous ne pouvez pas ajouter des fonds si le participant-e n'a pas de carte",
       "beneficiary-display-qrcode-disabled": "Vous ne pouvez pas afficher un code QR si le participant-e n'a pas de carte",
@@ -57,6 +59,7 @@ import ICON_CARD_LOST from "@/lib/icons/card-lost.json";
 import ICON_MINUS from "@/lib/icons/minus.json";
 import ICON_TRASH from "@/lib/icons/trash.json";
 import ICON_CARD_LINK from "@/lib/icons/card-link.json";
+import ICON_CLOCK from "@/lib/icons/clock.json";
 
 import {
   URL_BENEFICIARY_EDIT,
@@ -65,7 +68,8 @@ import {
   URL_BENEFICIARY_CARD_LOST,
   URL_BENEFICIARY_CARD_UNASSIGN,
   URL_BENEFICIARY_DELETE,
-  URL_BENEFICIARY_CARD_ASSIGN
+  URL_BENEFICIARY_CARD_ASSIGN,
+  URL_TRANSACTION_ADMIN
 } from "@/lib/consts/urls";
 
 import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
@@ -100,6 +104,12 @@ function updateItems() {
         route: { name: URL_BENEFICIARY_EDIT, params: { beneficiaryId: props.beneficiary.id } },
         disabled: !canEditBeneficiary() || props.beneficiariesAreAnonymous,
         reason: t("beneficiary-edit-disabled")
+      },
+      {
+        isExtra: true,
+        icon: ICON_CLOCK,
+        label: t("beneficiary-transactions-history"),
+        route: { name: URL_TRANSACTION_ADMIN, query: { text: props.beneficiary.id1, dateFrom: "2023-01-01" } } // Set datefrom to a farthest date to get all transactions
       },
       {
         isExtra: true,
@@ -161,6 +171,12 @@ function updateItems() {
         route: { name: URL_BENEFICIARY_EDIT, params: { beneficiaryId: props.beneficiary.id } },
         disabled: !canEditBeneficiary() || props.beneficiariesAreAnonymous,
         reason: t("beneficiary-edit-disabled")
+      },
+      {
+        isExtra: true,
+        icon: ICON_CLOCK,
+        label: t("beneficiary-transactions-history"),
+        route: { name: URL_TRANSACTION_ADMIN, query: { text: props.beneficiary.id1, dateFrom: "2023-01-01" } } // Set datefrom to a farthest date to get all transactions
       },
       {
         isExtra: true,

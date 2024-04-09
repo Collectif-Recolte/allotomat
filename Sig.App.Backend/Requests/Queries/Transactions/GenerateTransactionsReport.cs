@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.Gql.Schema.Enums;
 
 namespace Sig.App.Backend.Requests.Commands.Queries.Transactions
 {
@@ -52,6 +52,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Transactions
             public IEnumerable<string> TransactionTypes { get; set; }
             public Maybe<string> SearchText { get; set; }
             public string TimeZoneId { get; set; }
+            public Language Language { get; set; }
         }
 
         public class Payload

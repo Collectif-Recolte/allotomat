@@ -17,7 +17,7 @@
 
 <template>
   <RouterView v-slot="{ Component }">
-    <AppShell :loading="loading">
+    <AppShell :loading="loading || loadingProjects">
       <template #title>
         <Title :title="t('title')">
           <template #subpagesCta>
@@ -89,11 +89,12 @@ import TransactionFilters from "@/components/transaction/transaction-filters";
 import ProgramTransactionTable from "@/components/transaction/program-transaction-table";
 
 import { URL_TRANSACTION_ADD } from "@/lib/consts/urls";
-import { WITHOUT_SUBSCRIPTION } from "@/lib/consts/enums";
-import ICON_DOWNLOAD from "@/lib/icons/download.json";
-
+import { WITHOUT_SUBSCRIPTION, LANGUAGE_FILTER_EN, LANGUAGE_FILTER_FR } from "@/lib/consts/enums";
+import { LANG_EN } from "@/lib/consts/langs";
 import { GLOBAL_CREATE_TRANSACTION } from "@/lib/consts/permissions";
 import { URL_TRANSACTION_ADMIN } from "@/lib/consts/urls";
+
+import ICON_DOWNLOAD from "@/lib/icons/download.json";
 
 import { useAuthStore } from "@/lib/store/auth";
 
@@ -134,6 +135,7 @@ if (route.query.transactionTypes) {
 }
 if (route.query.text) {
   searchText.value = route.query.text;
+  searchInput.value = route.query.text;
 }
 
 if (route.query.dateFrom) {
@@ -143,13 +145,13 @@ if (route.query.dateTo) {
   dateTo.value = new Date(route.query.dateTo);
 }
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { resolveClient } = useApolloClient();
 const client = resolveClient();
 
 usePageTitle(t("title"));
 
-const { result: resultProjects } = useQuery(
+const { result: resultProjects, loading: loadingProjects } = useQuery(
   gql`
     query Projects {
       projects {
@@ -416,6 +418,7 @@ async function onExportReport() {
         $withoutSubscription: Boolean
         $transactionTypes: [String]
         $searchText: String
+        $language: Language!
       ) {
         generateTransactionsReport(
           projectId: $projectId
@@ -428,6 +431,7 @@ async function onExportReport() {
           withoutSubscription: $withoutSubscription
           transactionTypes: $transactionTypes
           searchText: $searchText
+          language: $language
         )
       }
     `,
@@ -441,7 +445,8 @@ async function onExportReport() {
       withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
       categories: beneficiaryTypes.value,
       transactionTypes: transactionTypes.value,
-      searchText: searchText.value
+      searchText: searchText.value,
+      language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR
     }
   });
 

@@ -169,7 +169,7 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(GlobalPermission.ManageSpecificOrganization)]
         [Description("All organizations manageable by current user")]
-        public static async Task<IEnumerable<OrganizationGraphType>> Organizations(this GqlQuery _, IAppUserContext ctx, [Inject] AppDbContext db, [Inject] PermissionService permissionService)
+        public static async Task<IEnumerable<OrganizationGraphType>> Organizations(this GqlQuery _, IAppUserContext ctx, [Inject] PermissionService permissionService)
         {
             var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
             if (globalPermissions.Contains(GlobalPermission.ManageSpecificOrganization))
@@ -316,7 +316,7 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText, string timeZoneId, [Inject] IMediator mediator)
+        public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
         {
             return await mediator.Send(new GenerateTransactionsReport.Input()
             {
@@ -329,16 +329,18 @@ namespace Sig.App.Backend.Gql.Schema
                 Categories = categories,
                 TransactionTypes = transactionTypes,
                 SearchText = searchText,
-                TimeZoneId = timeZoneId
+                TimeZoneId = timeZoneId,
+                Language = language
             });
         }
 
-        public static async Task<string> ExportBeneficiariesList(this GqlQuery _, Id id, string timeZoneId, [Inject] IMediator mediator)
+        public static async Task<string> ExportBeneficiariesList(this GqlQuery _, Id id, string timeZoneId, Language language, [Inject] IMediator mediator)
         {
             return await mediator.Send(new ExportBeneficiariesList.Input()
             {
                 Id = id,
-                TimeZoneId = timeZoneId
+                TimeZoneId = timeZoneId,
+                Language = language
             });
         }
 

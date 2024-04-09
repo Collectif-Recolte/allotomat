@@ -13,6 +13,7 @@ export const GLOBAL_MANAGE_TRANSACTIONS = "ManageTransactions";
 export const GLOBAL_CREATE_TRANSACTION = "CreateTransaction";
 export const GLOBAL_MANAGE_ORGANIZATION_MANAGERS = "ManageOrganizationManagers";
 export const GLOBAL_MANAGE_PRODUCT_GROUP = "ManageProductGroup";
+export const GLOBAL_REFUND_TRANSACTION = "RefundTransaction";
 
 export const PROJECT_CREATE_PROJECT = "CreateProject";
 export const PROJECT_MANAGE_PROJECT = "ManageProject";

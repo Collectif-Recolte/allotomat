@@ -195,7 +195,10 @@ function getBeneficiarySubscriptions() {
 
 function isSubscriptionPaymentConflict(subscription) {
   for (var j = 0; j < subscription.types.length; j++) {
-    if (subscription.types[j].beneficiaryType.id === beneficiary.value.beneficiaryType.id) {
+    if (
+      dateUtc(subscription.endDate) < new Date() ||
+      subscription.types[j].beneficiaryType.id === beneficiary.value.beneficiaryType.id
+    ) {
       return false;
     }
   }
