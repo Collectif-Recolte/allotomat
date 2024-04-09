@@ -12,7 +12,6 @@ using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using static Sig.App.Backend.Requests.Commands.Mutations.ProductGroups.CreateProductGroup;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
 {
@@ -29,12 +28,21 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] EditProductGroup({request.ProductGroupId}, {request.Name}, {request.Color}, {request.OrderOfAppearance})");
             var productGroupId = request.ProductGroupId.LongIdentifierForType<ProductGroup>();
             var productGroup = await db.ProductGroups.FirstOrDefaultAsync(x => x.Id == productGroupId, cancellationToken);
 
-            if (productGroup == null) throw new ProductGroupNotFoundException();
+            if (productGroup == null)
+            {
+                logger.LogWarning("[Mutation] EditProductGroup - ProductGroupNotFoundException");
+                throw new ProductGroupNotFoundException();
+            }
 
-            if (productGroup.Name == ProductGroupType.LOYALTY) throw new CantEditLoyaltyProductGroup();
+            if (productGroup.Name == ProductGroupType.LOYALTY)
+            {
+                logger.LogWarning("[Mutation] EditProductGroup - CantEditLoyaltyProductGroup");
+                throw new CantEditLoyaltyProductGroup();
+            }
 
             request.Name.IfSet(x => productGroup.Name = x.Value);
             request.Color.IfSet(x => productGroup.Color = x);
@@ -42,7 +50,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
 
             await db.SaveChangesAsync();
 
-            logger.LogInformation($"Product group edited {productGroup.Id}");
+            logger.LogInformation($"[Mutation] EditProductGroup - Product group edited {productGroup.Id}");
 
             return new Payload()
             {

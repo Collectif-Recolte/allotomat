@@ -41,7 +41,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             [Description("If specified, only beneficiaries active/inactive are returned")] BeneficiaryStatus[] status = null,
             [Description("If specified, only beneficiaries with or without card is returned.")] bool? withCard = null,
             [Description("If specified, only beneficiaries with or without payment conflict is retuner.")] bool? withConflictPayment = null,
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
             [Description("If specified, only that match text is returned.")] string? searchText = "",
+#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
             Sort<BeneficiarySort> sort = null)
         {
             var results = await mediator.Send(new SearchBeneficiaries.Query

@@ -11,7 +11,6 @@ using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Helpers;
@@ -23,6 +22,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 {
@@ -43,6 +43,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] ImportOffPlatformBeneficiariesListInOrganization({request.Items.Length})");
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             var currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
             var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
@@ -50,9 +51,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] ImportOffPlatformBeneficiariesListInOrganization - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
 
-            if (!organization.Project.AdministrationSubscriptionsOffPlatform) throw new ProjectDontAdministrateSubscriptionOffPlatformException();
+            if (!organization.Project.AdministrationSubscriptionsOffPlatform)
+            {
+                logger.LogWarning("[Mutation] ImportOffPlatformBeneficiariesListInOrganization - ProjectDontAdministrateSubscriptionOffPlatformException");
+                throw new ProjectDontAdministrateSubscriptionOffPlatformException();
+            }
 
             var beneficiaries = new List<OffPlatformBeneficiary>();
             var sortOrder = 0;
@@ -78,7 +87,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                         Organization = organization,
                     };
                     db.Beneficiaries.Add(beneficiary);
-                    logger.LogInformation($"New off-platform beneficiary created {beneficiary.Firstname} {beneficiary.Lastname}");
+                    logger.LogInformation($"[Mutation] ImportOffPlatformBeneficiariesListInOrganization - New off-platform beneficiary created {beneficiary.Firstname} {beneficiary.Lastname}");
                 }
 
                 beneficiary.Firstname = item.Firstname;
@@ -121,7 +130,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                 {
                     var productGroup = db.ProductGroups.FirstOrDefault(x => x.Name == fund.ProductGroupName && x.ProjectId == organization.Project.Id);
 
-                    if (productGroup == null) throw new ProductGroupNotFoundException();
+                    if (productGroup == null)
+                    {
+                        logger.LogWarning($"[Mutation] ImportOffPlatformBeneficiariesListInOrganization - ProductGroupNotFoundException ({fund.ProductGroupName})");
+                        throw new ProductGroupNotFoundException();
+                    }
 
                     if (isToday && beneficiary.Card != null)
                     {
@@ -135,6 +148,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                                 ProductGroup = productGroup
                             };
                             db.Funds.Add(cardFund);
+                            logger.LogInformation($"[Mutation] ImportOffPlatformBeneficiariesListInOrganization - New fund created {beneficiary.Card.Id} - {productGroup.Name}");
                         }
 
                         var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
@@ -305,9 +319,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveOrganizationId
+        public class Input : HaveOrganizationId, IRequest<Payload>
         {
-            public Id OrganizationId { get; set; }
             public OffPlatformBeneficiaryItem[] Items { get; set; }
         }
 

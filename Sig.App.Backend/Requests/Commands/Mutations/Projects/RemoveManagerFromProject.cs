@@ -8,7 +8,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -33,20 +33,29 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] RemoveManagerFromProject({request.ManagerId})");
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] RemoveManagerFromProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
             
             var manager = await db.Users.FirstOrDefaultAsync(x => x.Id == request.ManagerId.IdentifierForType<AppUser>());
 
-            if (manager == null) throw new ManagerNotFoundException();
+            if (manager == null)
+            {
+                logger.LogWarning("[Mutation] RemoveManagerFromProject - ManagerNotFoundException");
+                throw new ManagerNotFoundException();
+            }
 
             await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.ProjectManagerOf, project.Id.ToString()));
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Project manager {manager.Email} remove from project {project.Name} ({project.Id})");
+            logger.LogInformation($"[Mutation] RemoveManagerFromProject - Project manager {manager.Email} remove from project {project.Name} ({project.Id})");
 
             return new Payload
             {
@@ -59,9 +68,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveProjectId
+        public class Input : HaveProjectId, IRequest<Payload>
         {
-            public Id ProjectId { get; set; }
             public Id ManagerId { get; set; }
         }
 

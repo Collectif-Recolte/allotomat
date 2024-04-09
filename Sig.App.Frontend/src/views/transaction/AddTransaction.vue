@@ -24,13 +24,13 @@
       @onCloseModal="closeModal" />
     <AddTransaction
       v-else-if="activeStep === TRANSACTION_STEPS_ADD"
-      :marketId="marketId"
-      :cardId="cardId"
+      :market-id="marketId"
+      :card-id="cardId"
       @onUpdateStep="updateStep"
       @onCloseModal="closeModal" />
     <CompleteTransaction
       v-else-if="activeStep === TRANSACTION_STEPS_COMPLETE"
-      :transactionId="transactionId"
+      :transaction-id="transactionId"
       @onUpdateStep="updateStep" />
   </UiDialogModal>
 </template>

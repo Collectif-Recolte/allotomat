@@ -4,10 +4,10 @@ using GraphQL.Conventions;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using Sig.App.Backend.DbModel.Entities;
-using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Services.Permission;
 using Sig.App.Backend.Services.Permission.Enums;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Authorization.Requirements
 {
@@ -44,7 +44,7 @@ namespace Sig.App.Backend.Authorization.Requirements
                     case IResolutionContext ctx when ctx.Source is UserGraphType ugt:
                         userId = ugt.Id.IdentifierForType<AppUser>();
                         break;
-                    case IResolutionContext ctx when ctx.GetInputValue() is IHaveUserId hui:
+                    case IResolutionContext ctx when ctx.GetInputValue() is HaveUserId hui:
                         userId = hui.UserId.IdentifierForType<AppUser>();
                         break;
                     case Id id when id.IsIdentifierForType<AppUser>():

@@ -108,14 +108,16 @@ const showSecondaryMenu = computed(() => {
 
 const { result } = useQuery(
   gql`
-    query Projects {
+    query SecondaryMenuProjects {
       projects {
         id
         name
         administrationSubscriptionsOffPlatform
       }
     }
-  `
+  `,
+  {},
+  { fetchPolicy: "cache-first" }
 );
 const projects = useResult(result);
 

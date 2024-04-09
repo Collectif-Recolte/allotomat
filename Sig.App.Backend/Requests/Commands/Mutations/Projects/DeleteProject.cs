@@ -8,8 +8,6 @@ using Sig.App.Backend.Services.Mailer;
 using Microsoft.AspNetCore.Identity;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.Plugins.MediatR;
-using Sig.App.Backend.Gql.Interfaces;
-using GraphQL.Conventions;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Microsoft.EntityFrameworkCore;
@@ -18,14 +16,14 @@ using System.Security.Claims;
 using Sig.App.Backend.Constants;
 using NodaTime;
 using System.Linq;
-using System;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using System.Collections.Generic;
 using Sig.App.Backend.Requests.Queries.Organizations;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 {
-    public class DeleteProject : AsyncRequestHandler<DeleteProject.Input>
+    public class DeleteProject : IRequestHandler<DeleteProject.Input>
     {
         private readonly ILogger<DeleteProject> logger;
         private readonly IMailer mailer;
@@ -44,8 +42,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             this.clock = clock;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] DeleteProject({request.ProjectId})");
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects
                 .Include(x => x.Markets).ThenInclude(x => x.Market)
@@ -57,10 +56,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 .Include(x => x.Cards).ThenInclude(x => x.Funds)
                 .FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] DeleteProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
 
             if (HaveAnyActiveSubscription(project))
             {
+                logger.LogWarning("[Mutation] DeleteProject - ProjectCantHaveActiveSubscription");
                 throw new ProjectCantHaveActiveSubscription();
             }
 
@@ -74,6 +78,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 {
                     await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.ProjectManagerOf, projectId.ToString()));
                     await userManager.DeleteAsync(manager);
+                    logger.LogInformation($"[Mutation] DeleteProject - Remove claim from project manager and delete manager {manager.Email}");
                 }
             }
 
@@ -90,6 +95,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                     {
                         await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.OrganizationManagerOf, organization.Id.ToString()));
                         await userManager.DeleteAsync(manager);
+                        logger.LogInformation($"[Mutation] DeleteProject - Remove claim from organization manager and delete manager {manager.Email}");
                     }
                 }
             }
@@ -199,7 +205,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
             await db.SaveChangesAsync();
 
-            logger.LogInformation($"Project deleted ({projectId}, {project.Name})");
+            logger.LogInformation($"[Mutation] DeleteProject - Project deleted ({projectId}, {project.Name})");
         }
 
         private bool HaveAnyActiveSubscription(Project project)
@@ -221,10 +227,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
         }
 
         [MutationInput]
-        public class Input : IRequest, IHaveProjectId
-        {
-            public Id ProjectId { get; set; }
-        }
+        public class Input : HaveProjectId, IRequest {}
 
         public class ProjectNotFoundException : RequestValidationException { }
         public class ProjectCantHaveActiveSubscription : RequestValidationException { }

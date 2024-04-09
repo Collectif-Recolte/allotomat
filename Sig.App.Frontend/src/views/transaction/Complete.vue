@@ -12,7 +12,7 @@
     <div class="bg-white rounded-2xl pt-6 pb-3 px-3 h-remove-margin relative xs:p-6 w-full xs:w-auto xs:min-w-[460px]">
       <UiIconComplete />
       <CompleteTransaction
-        :transactionId="props.transactionId"
+        :transaction-id="props.transactionId"
         @onUpdateStep="(stepName, values) => emit('onUpdateStep', stepName, values)"
         @onUpdateLoadingState="(e) => emit('onUpdateLoadingState', e)" />
     </div>

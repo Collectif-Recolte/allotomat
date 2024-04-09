@@ -23,8 +23,8 @@ using Sig.App.Backend.Helpers;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
-using Sig.App.Backend.Gql.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 {
@@ -55,6 +55,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] RefundTransaction({request.InitialTransactionId}, {request.Transactions})");
             today = clock
                 .GetCurrentInstant()
                 .InUtc()
@@ -72,13 +73,21 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .Include(x => x.Transactions)
                 .FirstOrDefaultAsync(x => x.Id == initialTransactionId, cancellationToken);
 
-            if (initialTransaction == null) throw new InitialTransactionNotFoundException();
+            if (initialTransaction == null)
+            {
+                logger.LogWarning("[Mutation] RefundTransaction - InitialTransactionNotFoundException");
+                throw new InitialTransactionNotFoundException();
+            }
 
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
 
             var isValid = await userManager.CheckPasswordAsync(currentUser, request.Password);
-            if (!isValid) throw new WrongPasswordException();
+            if (!isValid)
+            {
+                logger.LogWarning("[Mutation] RefundTransaction - WrongPasswordException");
+                throw new WrongPasswordException();
+            }
 
             var refundTransaction = new DbModel.Entities.Transactions.RefundTransaction()
             {
@@ -136,9 +145,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 var fund = initialTransaction.Card.Funds.Where(x => x.ProductGroupId == productGroupId).FirstOrDefault();
                 var addingFundTransaction = initialTransaction.Transactions.Where(x => x.ProductGroupId == productGroupId).FirstOrDefault();
 
-                if (paymentTransactionProductGroup == null) throw new ProductGroupNotFoundException();
+                if (paymentTransactionProductGroup == null)
+                {
+                    logger.LogWarning("[Mutation] RefundTransaction - ProductGroupNotFoundException");
+                    throw new ProductGroupNotFoundException();
+                }
 
-                if (paymentTransactionProductGroup.Amount - paymentTransactionProductGroup.RefundAmount < refund.Amount) throw new TooMuchRefundException();
+                if (paymentTransactionProductGroup.Amount - paymentTransactionProductGroup.RefundAmount < refund.Amount)
+                {
+                    logger.LogWarning("[Mutation] RefundTransaction - TooMuchRefundException");
+                    throw new TooMuchRefundException();
+                }
 
                 var refundTransactionProductGroup = new RefundTransactionProductGroup()
                 {
@@ -172,7 +189,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Transaction refund between {cardName} with ({market.Name}) for an amount of {request.Transactions.Sum(x => x.Amount)} for product group(s) {request.Transactions.Select(x => x.ProductGroupId)}");
+            logger.LogInformation($"[Mutation] RefundTransaction - Transaction refund between {cardName} with ({market.Name}) for an amount of {request.Transactions.Sum(x => x.Amount)} for product group(s) {request.Transactions.Select(x => x.ProductGroupId)}");
 
             if (beneficiary != null && !string.IsNullOrEmpty(beneficiary.Email))
             {
@@ -190,7 +207,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 }
                 catch (Exception e)
                 {
-                    logger.LogError($"Could not send refund confirmation email to ({cardName}) for transaction with ({market.Name}). Error message: {e.Message}");
+                    logger.LogError($"[Mutation] RefundTransaction - Could not send refund confirmation email to ({cardName}) for transaction with ({market.Name}). Error message: {e.Message}");
                 }
             }
 
@@ -201,10 +218,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveInitialTransactionId
+        public class Input : HaveInitialTransactionId, IRequest<Payload>
         {
             public string Password { get; set; }
-            public Id InitialTransactionId { get; set; }
             public List<RefundTransactionsInput> Transactions { get; set; }
         }
 
@@ -213,6 +229,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         {
             public decimal Amount { get; set; }
             public Id ProductGroupId { get; set; }
+
+            public override string ToString()
+            {
+                return $"{Amount}, {ProductGroupId}";
+            }
         }
 
         [MutationPayload]

@@ -16,8 +16,8 @@
       <h1 class="font-semibold mb-2">{{ t("title") }}</h1>
       <AddTransaction
         v-if="myMarket"
-        :cardId="props.cardId"
-        :marketId="myMarket.id"
+        :card-id="props.cardId"
+        :market-id="myMarket.id"
         @onUpdateStep="(stepName, values) => emit('onUpdateStep', stepName, values)"
         @onUpdateLoadingState="(e) => emit('onUpdateLoadingState', e)"
         @onCloseModal="emit('onUpdateStep', TRANSACTION_STEPS_START, {})" />

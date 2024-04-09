@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using GraphQL.Conventions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -9,7 +8,6 @@ using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -20,6 +18,7 @@ using Microsoft.AspNetCore.Http;
 using NodaTime;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.Helpers;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 {
@@ -40,6 +39,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] UnassignCardFromBeneficiary({request.BeneficiaryId}, {request.CardId})");
             long beneficiaryId;
             if (request.BeneficiaryId.IsIdentifierForType(typeof(Beneficiary)))
             {
@@ -51,14 +51,26 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             }
             var beneficiary = await db.Beneficiaries.Include(x => x.Organization).ThenInclude(x => x.Project).FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
-            if (beneficiary == null) throw new BeneficiaryNotFoundException();
+            if (beneficiary == null)
+            {
+                logger.LogWarning("[Mutation] UnassignCardFromBeneficiary - BeneficiaryNotFoundException");
+                throw new BeneficiaryNotFoundException();
+            }
 
             var cardId = request.CardId.LongIdentifierForType<Card>();
             var card = await db.Cards.Include(x => x.Beneficiary).Include(x => x.Transactions).Include(x => x.Funds).ThenInclude(x => x.ProductGroup).FirstOrDefaultAsync(x => x.Id == cardId, cancellationToken);
 
-            if (card == null) throw new CardNotFoundException();
+            if (card == null)
+            {
+                logger.LogWarning("[Mutation] UnassignCardFromBeneficiary - CardNotFoundException");
+                throw new CardNotFoundException();
+            }
 
-            if (card.Beneficiary == null || card.Beneficiary.Id != beneficiaryId) throw new CardNotAssignToBeneficiaryException();
+            if (card.Beneficiary == null || card.Beneficiary.Id != beneficiaryId)
+            {
+                logger.LogWarning("[Mutation] UnassignCardFromBeneficiary - CardNotAssignToBeneficiaryException");
+                throw new CardNotAssignToBeneficiaryException();
+            }
             
             var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
@@ -170,7 +182,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Card ({card.Id}) unassign from {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
+            logger.LogInformation($"[Mutation] UnassignCardFromBeneficiary - Card ({card.Id}) unassign from {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
 
             return new Payload() {
                 Beneficiary = beneficiary is OffPlatformBeneficiary opb ? new OffPlatformBeneficiaryGraphType(opb) : new BeneficiaryGraphType(beneficiary)
@@ -178,11 +190,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveBeneficiaryId, IHaveCardId
-        {
-            public Id BeneficiaryId { get; set; }
-            public Id CardId { get; set; }
-        }
+        public class Input : HaveBeneficiaryIdAndCardId, IRequest<Payload> {}
 
         [MutationPayload]
         public class Payload

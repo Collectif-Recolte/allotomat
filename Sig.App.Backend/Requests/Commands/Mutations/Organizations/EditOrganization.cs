@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Plugins.GraphQL;
@@ -29,16 +29,21 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] EditOrganization({request.OrganizationId}, {request.Name})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] EditOrganization - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
 
             request.Name.IfSet(v => organization.Name = v.Trim());
             
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Organization edited {organization.Name} ({organization.Id})");
+            logger.LogInformation($"[Mutation] EditOrganization - Organization edited {organization.Name} ({organization.Id})");
 
             return new Payload
             {
@@ -47,9 +52,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveOrganizationId
+        public class Input : HaveOrganizationId, IRequest<Payload>
         {
-            public Id OrganizationId { get; set; }
             public Maybe<NonNull<string>> Name { get; set; }
         }
 

@@ -6,7 +6,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -28,6 +28,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] AssignUnassignedCardToBeneficiary({request.BeneficiaryId})");
             long beneficiaryId;
             if (request.BeneficiaryId.IsIdentifierForType(typeof(Beneficiary)))
             {
@@ -39,10 +40,18 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             }
             var beneficiary = await db.Beneficiaries.Include(x => x.Organization).FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
-            if (beneficiary == null) throw new BeneficiaryNotFoundException();
+            if (beneficiary == null)
+            {
+                logger.LogWarning("[Mutation] AssignUnassignedCardToBeneficiary - BeneficiaryNotFoundException");
+                throw new BeneficiaryNotFoundException();
+            }
 
             var card = await db.Cards.FirstOrDefaultAsync(x => x.Status == CardStatus.Unassigned && x.ProjectId == beneficiary.Organization.ProjectId);
-            if (card == null) throw new NoUnassignedCardAvailableException();
+            if (card == null)
+            {
+                logger.LogWarning("[Mutation] AssignUnassignedCardToBeneficiary - NoUnassignedCardAvailableException");
+                throw new NoUnassignedCardAvailableException();
+            }
 
             card.Status = CardStatus.Assigned;
             beneficiary.Card = card;
@@ -56,10 +65,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveBeneficiaryId
-        {
-            public Id BeneficiaryId { get; set; }
-        }
+        public class Input : HaveBeneficiaryId, IRequest<Payload> {}
 
         [MutationPayload]
         public class Payload

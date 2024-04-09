@@ -105,7 +105,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public async Task<Pagination<CardGraphType>> Cards([Inject] IMediator mediator, int page, int limit,
             [Description("If specified, only card with specific status are returned")] CardStatus[] status = null,
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
             [Description("If specified, only that match text is returned.")] string? searchText = "")
+#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         {
             var results = await mediator.Send(new SearchCards.Query
             {

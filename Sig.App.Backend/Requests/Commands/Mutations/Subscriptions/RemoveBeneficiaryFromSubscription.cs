@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using GraphQL.Conventions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -8,7 +7,6 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -18,10 +16,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 {
-    public class RemoveBeneficiaryFromSubscription : AsyncRequestHandler<RemoveBeneficiaryFromSubscription.Input>
+    public class RemoveBeneficiaryFromSubscription : IRequestHandler<RemoveBeneficiaryFromSubscription.Input>
     {
         private readonly ILogger<RemoveBeneficiaryFromSubscription> logger;
         private readonly AppDbContext db;
@@ -36,24 +35,37 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             this.httpContextAccessor = httpContextAccessor;
         }
 
-        protected override async Task Handle(Input request, CancellationToken cancellationToken)
+        public async Task Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] RemoveBeneficiaryFromSubscription({request.BeneficiaryId}, {request.SubscriptionId})");
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
             var subscription = await db.Subscriptions.Include(x => x.Types).ThenInclude(x => x.ProductGroup)
                 .Include(x => x.Beneficiaries)
                 .ThenInclude(x => x.BudgetAllowance)
                 .FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
-            if (subscription == null) throw new SubscriptionNotFoundException();
+            if (subscription == null)
+            {
+                logger.LogWarning("[Mutation] RemoveBeneficiaryFromSubscription - SubscriptionNotFoundException");
+                throw new SubscriptionNotFoundException();
+            }
 
             var beneficiaryId = request.BeneficiaryId.LongIdentifierForType<Beneficiary>();
             var beneficiary = await db.Beneficiaries.Include(x => x.Organization).ThenInclude(x => x.Project).Include(x => x.Card)
                 .FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
-            if (beneficiary == null) throw new BeneficiaryNotFoundException();
+            if (beneficiary == null)
+            {
+                logger.LogWarning("[Mutation] RemoveBeneficiaryFromSubscription - BeneficiaryNotFoundException");
+                throw new BeneficiaryNotFoundException();
+            }
 
             var subscriptionBeneficiary = subscription.Beneficiaries.FirstOrDefault(x => x.BeneficiaryId == beneficiaryId);
-            if (subscriptionBeneficiary == null) throw new BeneficiaryNotInSubscriptionException();
+            if (subscriptionBeneficiary == null)
+            {
+                logger.LogWarning("[Mutation] RemoveBeneficiaryFromSubscription - BeneficiaryNotInSubscriptionException");
+                throw new BeneficiaryNotInSubscriptionException();
+            }
             
             var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
@@ -110,7 +122,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} remove from subscription {subscription.Name}");
+            logger.LogInformation($"[Mutation] RemoveBeneficiaryFromSubscription - Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} remove from subscription {subscription.Name}");
         }
 
         public class SubscriptionNotFoundException : RequestValidationException { }
@@ -118,10 +130,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         public class BeneficiaryNotInSubscriptionException : RequestValidationException { }
 
         [MutationInput]
-        public class Input : IRequest, IHaveSubscriptionId, IHaveBeneficiaryId
-        {
-            public Id BeneficiaryId { get; set; }
-            public Id SubscriptionId { get; set; }
-        }
+        public class Input : HaveSubscriptionIdAndBeneficiaryId, IRequest { }
     }
 }

@@ -20,8 +20,6 @@ using System.Security.Claims;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.DbModel.Entities.Profiles;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
-using GraphQL.Conventions;
-using Sig.App.Backend.Gql.Schema.Types;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 {
@@ -42,6 +40,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateProject({request.Name}, {request.Url}, {request.ManagerEmails}, {request.AllowOrganizationsAssignCards}, {request.BeneficiariesAreAnonymous}, {request.AdministrationSubscriptionsOffPlatform})");
             var userAlreadyManagerException = false;
             var existingUserNotProjectManager = false;
 
@@ -88,7 +87,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 }
 
                 managers.Add(manager);
-                logger.LogInformation($"Project manager {manager.Email} added to project {project.Name} ({project.Id})");
+                logger.LogInformation($"[Mutation] CreateProject - Project manager {manager.Email} added to project {project.Name} ({project.Id})");
             }
 
             if (!request.AdministrationSubscriptionsOffPlatform)
@@ -133,15 +132,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"New project created {project.Name} ({project.Id})");
+            logger.LogInformation($"[Mutation] CreateProject - New project created {project.Name} ({project.Id})");
 
             if (userAlreadyManagerException)
             {
+                logger.LogWarning("[Mutation] CreateProject - UserAlreadyManagerException");
                 throw new UserAlreadyManagerException();
             }
 
             if (existingUserNotProjectManager)
             {
+                logger.LogWarning("[Mutation] CreateProject - ExistingUserNotProjectManagerException");
                 throw new ExistingUserNotProjectManagerException();
             }
 
@@ -177,7 +178,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 var result = await userManager.CreateAsync(user);
                 result.AssertSuccess();
 
-                logger.LogDebug($"New project manager created {user.Email} ({user.Id}). Sending email invitation.");
+                logger.LogInformation($"[Mutation] CreateProject - New project manager created {user.Email} ({user.Id}). Sending email invitation.");
             }
 
             return (user, true, false);

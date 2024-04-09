@@ -254,7 +254,10 @@ const { result } = useQuery(
   `,
   {
     id: props.organizationId
-  }
+  },
+  () => ({
+    enabled: props.organizationId !== null
+  })
 );
 const beneficiaryTypes = useResult(result, null, (data) => {
   return data.organization.project.beneficiaryTypes.map((x) => ({ label: x.name, value: x.id }));
@@ -281,7 +284,8 @@ const validationSchema = computed(() =>
           return regex.test(value);
         }
       }),
-    beneficiaryTypeId: string().label(t("beneficiary-category")).required()
+    beneficiaryTypeId: string().label(t("beneficiary-category")).required(),
+    id1: string().label(t("unique-id-id1")).required()
   })
 );
 

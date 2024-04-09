@@ -11,7 +11,7 @@ using Sig.App.Backend.DbModel.Entities.Profiles;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -41,10 +41,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] AddManagerToOrganization({request.OrganizationId}, {request.ManagerEmails})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] AddManagerToOrganization - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
             var managers = new List<AppUser>();
 
             foreach (var email in request.ManagerEmails)
@@ -52,7 +57,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 var (manager, isNew) = await GetOrCreateOrganizationManager(email);
                 var existingClaims = await userManager.GetClaimsAsync(manager);
                 if (existingClaims.Any(c => c.Type == AppClaimTypes.OrganizationManagerOf))
+                {
+                    logger.LogWarning("[Mutation] AddManagerToOrganization - UserAlreadyManagerException");
                     throw new UserAlreadyManagerException();
+                }
 
                 await userManager.AddClaimAsync(manager, new Claim(AppClaimTypes.OrganizationManagerOf, organization.Id.ToString()));
 
@@ -70,7 +78,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 }
 
                 managers.Add(manager);
-                logger.LogInformation($"Organization manager {manager.Email} added to organization {organization.Name} ({organization.Id})");
+                logger.LogInformation($"[Mutation] AddManagerToOrganization - Organization manager {manager.Email} added to organization {organization.Name} ({organization.Id})");
             }
 
             await db.SaveChangesAsync(cancellationToken);
@@ -92,6 +100,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                     case UserType.OrganizationManager:
                         return (user, false);
                     default:
+                        logger.LogWarning($"[Mutation] AddManagerToOrganization - ExistingUserNotOrganizationManagerException ({email})");
                         throw new ExistingUserNotOrganizationManagerException();
                 }
             }
@@ -106,7 +115,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 var result = await userManager.CreateAsync(user);
                 result.AssertSuccess();
 
-                logger.LogDebug($"New Organization manager created {user.Email} ({user.Id}). Sending email invitation.");
+                logger.LogInformation($"[Mutation] AddManagerToOrganization - New Organization manager created {user.Email} ({user.Id}). Sending email invitation.");
             }
 
             return (user, true);
@@ -117,9 +126,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
         public class ExistingUserNotOrganizationManagerException : RequestValidationException { }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveOrganizationId
+        public class Input : HaveOrganizationId, IRequest<Payload>
         {
-            public Id OrganizationId { get; set; }
             public IEnumerable<string> ManagerEmails { get; set; }
         }
 

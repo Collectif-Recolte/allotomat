@@ -7,7 +7,7 @@ using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Plugins.MediatR;
 using System.Linq;
@@ -138,10 +138,8 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Subscriptions
             };
         }
 
-        public class Input : IRequest<Payload>, IHaveSubscriptionId, IHaveOrganizationId
+        public class Input : HaveOrganizationIdAndSubscriptionId, IRequest<Payload>
         {
-            public Id OrganizationId { get; set; }
-            public Id SubscriptionId { get; set; }
             public decimal Amount { get; set; }
 
             //Filters

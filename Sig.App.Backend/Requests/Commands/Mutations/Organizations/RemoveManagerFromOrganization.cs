@@ -8,7 +8,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -33,20 +33,29 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] RemoveManagerFromOrganization({request.OrganizationId}, {request.ManagerId})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
-            if (organization == null) throw new OrganizationNotFoundException();
+            if (organization == null)
+            {
+                logger.LogWarning("[Mutation] RemoveManagerFromOrganization - OrganizationNotFoundException");
+                throw new OrganizationNotFoundException();
+            }
             
             var manager = await db.Users.FirstOrDefaultAsync(x => x.Id == request.ManagerId.IdentifierForType<AppUser>());
 
-            if (manager == null) throw new ManagerNotFoundException();
+            if (manager == null)
+            {
+                logger.LogWarning("[Mutation] RemoveManagerFromOrganization - ManagerNotFoundException");
+                throw new ManagerNotFoundException();
+            }
 
             await userManager.RemoveClaimAsync(manager, new Claim(AppClaimTypes.OrganizationManagerOf, organization.Id.ToString()));
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Organization manager {manager.Email} remove from organization {organization.Name} ({organization.Id})");
+            logger.LogInformation($"[Mutation] RemoveManagerFromOrganization - Organization manager {manager.Email} remove from organization {organization.Name} ({organization.Id})");
 
             return new Payload
             {
@@ -59,9 +68,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
 
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveOrganizationId
+        public class Input : HaveOrganizationId, IRequest<Payload>
         {
-            public Id OrganizationId { get; set; }
             public Id ManagerId { get; set; }
         }
 

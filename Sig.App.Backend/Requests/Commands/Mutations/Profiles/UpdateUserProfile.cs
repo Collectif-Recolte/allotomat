@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Entities.Profiles;
-using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Profiles
 {
@@ -33,6 +33,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Profiles
 
         public async Task<UpdateUserProfile.Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] UpdateUserProfile({request.UserId}, {request.FirstName}, {request.LastName})");
             var userId = request.UserId.IdentifierForType<AppUser>();
             var profile = await GetProfileWithUser(userId, cancellationToken);
 
@@ -42,7 +43,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Profiles
                     .Include(x => x.Profile)
                     .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
 
-                if (user == null) throw new UserNotFoundException();
+                if (user == null)
+                {
+                    logger.LogWarning("[Mutation] UpdateUserProfile - UserNotFoundException");
+                    throw new UserNotFoundException();
+                }
 
                 user.Profile = profile = CreateDefaultProfile(user);
             }
@@ -51,7 +56,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Profiles
 
             await DbContext.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"User profile {userId} updated ({typeof(UserProfile).Name})");
+            logger.LogInformation($"[Mutation] UpdateUserProfile - User profile {userId} updated ({typeof(UserProfile).Name})");
 
             return CreateOutput(profile);
         }
@@ -91,10 +96,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Profiles
         public class UserNotFoundException : UpdateProfileException { }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveUserId
+        public class Input : HaveUserId, IRequest<Payload>
         {
-            public Id UserId { get; set; }
-
             public Maybe<NonNull<string>> FirstName { get; set; }
             public Maybe<NonNull<string>> LastName { get; set; }
         }

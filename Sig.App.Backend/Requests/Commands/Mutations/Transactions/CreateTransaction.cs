@@ -11,7 +11,6 @@ using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -28,6 +27,7 @@ using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.Helpers;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 {
@@ -56,6 +56,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateTransaction({request.CardId}, {request.CardNumber}, {request.Transactions})");
             long cardId = -1;
             if (request.CardId.HasValue)
             {
@@ -70,12 +71,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .ThenInclude(x => x.Organization).Include(x => x.Transactions).Include(x => x.Funds)
                 .ThenInclude(x => x.ProductGroup).FirstOrDefaultAsync(x => x.Id == cardId, cancellationToken);
 
-            if (card == null) throw new CardNotFoundException();
+            if (card == null)
+            {
+                logger.LogWarning("[Mutation] CreateTransaction - CardNotFoundException");
+                throw new CardNotFoundException();
+            }
 
             var martketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == martketId, cancellationToken);
 
-            if (market == null) throw new MarketNotFoundException();
+            if (market == null)
+            {
+                logger.LogWarning("[Mutation] CreateTransaction - MarketNotFoundException");
+                throw new MarketNotFoundException();
+            }
 
             var cardCanBeUsedInMarket = await mediator.Send(new VerifyCardCanBeUsedInMarket.Input
             {
@@ -83,7 +92,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 CardId = card.GetIdentifier()
             }, cancellationToken);
 
-            if (!cardCanBeUsedInMarket) throw new CardCantBeUsedInMarketException();
+            if (!cardCanBeUsedInMarket)
+            {
+                logger.LogWarning("[Mutation] CreateTransaction - CardCantBeUsedInMarketException");
+                throw new CardCantBeUsedInMarketException();
+            }
             
             today = clock
                 .GetCurrentInstant()
@@ -128,9 +141,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 {
                     var fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroupId);
 
-                    if (fund == null) throw new CardDontHaveFundType();
+                    if (fund == null)
+                    {
+                        logger.LogWarning("[Mutation] CreateTransaction - CardDontHaveFundType");
+                        throw new CardDontHaveFundType();
+                    }
 
-                    if (fund.Amount + card.LoyaltyFund() < transactionInput.Amount) throw new NotEnoughtFundException();
+                    if (fund.Amount + card.LoyaltyFund() < transactionInput.Amount)
+                    {
+                        logger.LogWarning("[Mutation] CreateTransaction - NotEnoughtFundException");
+                        throw new NotEnoughtFundException();
+                    }
 
                     var addingFundTransactions = card.Transactions
                         .Where(x => x is SubscriptionAddingFundTransaction or ManuallyAddingFundTransaction)
@@ -242,7 +263,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 }
             }
 
-            if (loyaltyFundToRemove > 0) throw new NotEnoughtFundException();
+            if (loyaltyFundToRemove > 0)
+            {
+                logger.LogWarning("[Mutation] CreateTransaction - NotEnoughtFundException");
+                throw new NotEnoughtFundException();
+            }
 
             transaction.Transactions = affectedAddingFundTransactions;
             transaction.TransactionByProductGroups = transactionByProductGroups;
@@ -251,7 +276,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             await db.SaveChangesAsync(cancellationToken);
 
             var cardName = beneficiary != null ? $"{card.Beneficiary.Firstname} {card.Beneficiary.Lastname}" : card.Id.ToString();
-            logger.LogInformation($"Transaction between {cardName} with ({market.Name}) or an amount of a total {request.Transactions.Sum(x => x.Amount)} for product group(s) {request.Transactions.Select(x => x.ProductGroupId)}");
+            logger.LogInformation($"[Mutation] CreateTransaction - Transaction between {cardName} with ({market.Name}) or an amount of a total {request.Transactions.Sum(x => x.Amount)} for product group(s) {request.Transactions.Select(x => x.ProductGroupId)}");
 
             if (beneficiary != null && !string.IsNullOrEmpty(beneficiary.Email))
             {
@@ -269,7 +294,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 }
                 catch (Exception e)
                 {
-                    logger.LogError($"Could not send transaction confirmation email to ({cardName}) for transaction with ({market.Name}). Error message: {e.Message}");
+                    logger.LogError($"[Mutation] CreateTransaction - Could not send transaction confirmation email to ({cardName}) for transaction with ({market.Name}). Error message: {e.Message}");
                 }
             }
             
@@ -337,11 +362,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveCardIdOrCardNumber, IHaveMarketId
+        public class Input : HaveMarketId, IRequest<Payload>
         {
             public Id? CardId { get; set; }
             public string CardNumber { get; set; }
-            public Id MarketId { get; set; }
             public List<TransactionInput> Transactions { get; set; }
         }
 
@@ -350,6 +374,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         {
             public decimal Amount { get; set; }
             public Id ProductGroupId { get; set; }
+
+            public override string ToString()
+            {
+                return $"{Amount}, {ProductGroupId}";
+            }
         }
 
         [MutationPayload]

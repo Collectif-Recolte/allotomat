@@ -1,5 +1,4 @@
-﻿using GraphQL.Conventions;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,7 +10,7 @@ using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -41,10 +40,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] AddManagerToProject({request.ProjectId}, {request.ManagerEmails})");
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects.FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-            if (project == null) throw new ProjectNotFoundException();
+            if (project == null)
+            {
+                logger.LogWarning("[Mutation] AddManagerToProject - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
             var managers = new List<AppUser>();
 
             foreach (var email in request.ManagerEmails)
@@ -52,7 +56,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 var (manager, isNew) = await GetOrCreateProjectManager(email);
                 var existingClaims = await userManager.GetClaimsAsync(manager);
                 if (existingClaims.Any(c => c.Type == AppClaimTypes.ProjectManagerOf))
+                {
+                    logger.LogWarning($"[Mutation] AddManagerToProject - UserAlreadyManagerException ({email})");
                     throw new UserAlreadyManagerException();
+                }
 
                 await userManager.AddClaimAsync(manager, new Claim(AppClaimTypes.ProjectManagerOf, project.Id.ToString()));
 
@@ -70,7 +77,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 }
 
                 managers.Add(manager);
-                logger.LogInformation($"Project manager {manager.Email} added to project {project.Name} ({project.Id})");
+                logger.LogInformation($"[Mutation] AddManagerToProject - Project manager {manager.Email} added to project {project.Name} ({project.Id})");
             }
 
             await db.SaveChangesAsync(cancellationToken);
@@ -92,6 +99,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                     case UserType.ProjectManager:
                         return (user, false);
                     default:
+                        logger.LogWarning($"[Mutation] AddManagerToProject - ExistingUserNotProjectManagerException ({email})");
                         throw new ExistingUserNotProjectManagerException();
                 }
             }
@@ -106,7 +114,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 var result = await userManager.CreateAsync(user);
                 result.AssertSuccess();
 
-                logger.LogDebug($"New project manager created {user.Email} ({user.Id}). Sending email invitation.");
+                logger.LogInformation($"[Mutation] AddManagerToProject - New project manager created {user.Email} ({user.Id}). Sending email invitation.");
             }
 
             return (user, true);
@@ -117,9 +125,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
         public class ExistingUserNotProjectManagerException : RequestValidationException { }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveProjectId
+        public class Input : HaveProjectId, IRequest<Payload>
         {
-            public Id ProjectId { get; set; }
             public IEnumerable<string> ManagerEmails { get; set; }
         }
 

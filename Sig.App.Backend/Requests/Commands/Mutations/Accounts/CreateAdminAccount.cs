@@ -30,6 +30,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] CreateAdminAccount({request.FirstName}, {request.LastName}, {request.Email})");
             var user = new AppUser(request.Email?.Trim())
             {
                 Type = UserType.PCAAdmin,
@@ -46,7 +47,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             var token = await userManager.GenerateUserTokenAsync(user, TokenProviders.EmailInvites, TokenPurposes.AdminInvite);
             await mailer.Send(new AdminInviteEmail(request.Email, token, request.FirstName));
 
-            logger.LogInformation($"Admin account created ({user.Email}).");
+            logger.LogInformation($"[Mutation] CreateAdminAccount - Admin account created ({user.Email}).");
 
             return new Payload
             {

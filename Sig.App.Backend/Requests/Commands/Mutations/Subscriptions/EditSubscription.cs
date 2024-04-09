@@ -9,7 +9,7 @@ using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Plugins.GraphQL;
@@ -34,18 +34,39 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] EditSubscription({request.SubscriptionId}, {request.Name}, {request.MonthlyPaymentMoment}, {request.StartDate}, {request.EndDate}, {request.FundsExpirationDate}, {request.Types}, {request.IsFundsAccumulable})");
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
             var subscription = await db.Subscriptions.Include(x => x.Types).FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
-            if (subscription == null) throw new SubscriptionNotFoundException();
+            if (subscription == null)
+            {
+                logger.LogWarning("[Mutation] EditSubscription - SubscriptionNotFoundException");
+                throw new SubscriptionNotFoundException();
+            }
 
             var beneficiaryTypeIds = request.Types.Select(x => x.BeneficiaryTypeId.ToString() + x.ProductGroupId.ToString());
-            if(!beneficiaryTypeIds.Any()) throw new SubscriptionTypesCantBeEmpty();
-            if (beneficiaryTypeIds.Count() != beneficiaryTypeIds.Distinct().Count()) throw new BeneficiaryTypeCanOnlyBeAssignOnce();
+            if (!beneficiaryTypeIds.Any())
+            {
+                logger.LogWarning("[Mutation] EditSubscription - SubscriptionTypesCantBeEmpty");
+                throw new SubscriptionTypesCantBeEmpty();
+            }
+            if (beneficiaryTypeIds.Count() != beneficiaryTypeIds.Distinct().Count())
+            {
+                logger.LogWarning("[Mutation] EditSubscription - BeneficiaryTypeCanOnlyBeAssignOnce");
+                throw new BeneficiaryTypeCanOnlyBeAssignOnce();
+            }
 
-            if (db.SubscriptionBeneficiaries.Where(x => x.SubscriptionId == subscriptionId).Any()) throw new CantEditSubscriptionWithBeneficiaries();
+            if (db.SubscriptionBeneficiaries.Where(x => x.SubscriptionId == subscriptionId).Any())
+            {
+                logger.LogWarning("[Mutation] EditSubscription - CantEditSubscriptionWithBeneficiaries");
+                throw new CantEditSubscriptionWithBeneficiaries();
+            }
 
-            if (request.StartDate > request.EndDate) throw new EndDateMustBeAfterStartDateException();
+            if (request.StartDate > request.EndDate)
+            {
+                logger.LogWarning("[Mutation] EditSubscription - EndDateMustBeAfterStartDateException");
+                throw new EndDateMustBeAfterStartDateException();
+            }
 
             subscription.Name = request.Name;
             subscription.MonthlyPaymentMoment = request.MonthlyPaymentMoment;
@@ -58,7 +79,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Subscription {subscription.Name} ({subscription.Id}) updated");
+            logger.LogInformation($"[Mutation] EditSubscription - Subscription {subscription.Name} ({subscription.Id}) updated");
 
             return new Payload()
             {
@@ -79,9 +100,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveSubscriptionId
+        public class Input : HaveSubscriptionId, IRequest<Payload>
         {
-            public Id SubscriptionId { get; set; }
             public string Name { get; set; }
             public SubscriptionMonthlyPaymentMoment MonthlyPaymentMoment { get; set; }
             public LocalDate StartDate { get; set; }

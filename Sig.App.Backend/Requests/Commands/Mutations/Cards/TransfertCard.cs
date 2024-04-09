@@ -7,7 +7,6 @@ using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -20,6 +19,7 @@ using NodaTime;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.Helpers;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 {
@@ -40,24 +40,53 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            logger.LogInformation($"[Mutation] TransfertCard({request.OriginalCardId}, {request.NewCardId})");
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             var currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
-            
+
             var originalCardId = request.OriginalCardId.LongIdentifierForType<Card>();
             var originalCard = await db.Cards.Include(x => x.Beneficiary).ThenInclude(x => x.Organization).Include(x => x.Transactions).Include(x => x.Funds).Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == originalCardId, cancellationToken);
 
-            if (originalCard == null) throw new OriginalCardNotFoundException();
+            if (originalCard == null)
+            {
+                logger.LogWarning("[Mutation] TransfertCard - OriginalCardNotFoundException");
+                throw new OriginalCardNotFoundException();
+            }
 
             var newCard = await db.Cards.FirstOrDefaultAsync(x => x.ProgramCardId == request.NewCardId && x.ProjectId == originalCard.ProjectId, cancellationToken);
-            if (newCard == null) throw new NewCardNotFoundException();
+            if (newCard == null)
+            {
+                logger.LogWarning("[Mutation] TransfertCard - NewCardNotFoundException");
+                throw new NewCardNotFoundException();
+            }
 
-            if (originalCard.Status != CardStatus.Assigned) throw new OriginalCardNotAssignException();
-            if (newCard.Status == CardStatus.Assigned) throw new NewCardAlreadyAssignException();
-            if (newCard.Status == CardStatus.GiftCard) throw new NewCardAlreadyGiftCardException();
-            if (newCard.Status == CardStatus.Lost) throw new NewCardAlreadyLostException();
+            if (originalCard.Status != CardStatus.Assigned)
+            {
+                logger.LogWarning("[Mutation] TransfertCard - OriginalCardNotAssignException");
+                throw new OriginalCardNotAssignException();
+            }
+            if (newCard.Status == CardStatus.Assigned)
+            {
+                logger.LogWarning("[Mutation] TransfertCard - NewCardAlreadyAssignException");
+                throw new NewCardAlreadyAssignException();
+            }
+            if (newCard.Status == CardStatus.GiftCard)
+            {
+                logger.LogWarning("[Mutation] TransfertCard - NewCardAlreadyGiftCardException");
+                throw new NewCardAlreadyGiftCardException();
+            }
+            if (newCard.Status == CardStatus.Lost)
+            {
+                logger.LogWarning("[Mutation] TransfertCard - NewCardAlreadyLostException");
+                throw new NewCardAlreadyLostException();
+            }
 
-            if (originalCard.ProjectId != newCard.ProjectId) throw new NewCardNotInProjectException();
-            
+            if (originalCard.ProjectId != newCard.ProjectId)
+            {
+                logger.LogWarning("[Mutation] TransfertCard - NewCardNotInProjectException");
+                throw new NewCardNotInProjectException();
+            }
+
             var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
 
             foreach (var transaction in originalCard.Transactions)
@@ -142,7 +171,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"Card ({originalCard.Id}) transferred to ({newCard.Id})");
+            logger.LogInformation($"[Mutation] TransfertCard - Card ({originalCard.Id}) transferred to ({newCard.Id})");
 
             return new Payload()
             {
@@ -151,9 +180,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>, IHaveOriginalCardId
+        public class Input : HaveOriginalCardId, IRequest<Payload>
         {
-            public Id OriginalCardId { get; set; }
             public long NewCardId { get; set; }
         }
 

@@ -36,7 +36,10 @@ namespace Sig.App.Backend.BackgroundJobs
             RecurringJob.AddOrUpdate<ExpireFundsFromCard>("ExpireFundsFromCard",
                 x => x.Run(),
                 Cron.Daily(),
-                TimeZoneInfo.FindSystemTimeZoneById(config["systemLocalTimezone"]));
+                new RecurringJobOptions
+                {
+                    TimeZone = TimeZoneInfo.FindSystemTimeZoneById(config["systemLocalTimezone"])
+                });
         }
 
         public async Task Run()
