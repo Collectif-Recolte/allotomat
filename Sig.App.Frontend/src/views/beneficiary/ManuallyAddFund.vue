@@ -8,7 +8,7 @@
 		"amount-label": "Amount",
 		"amount-placeholder": "Ex. {amount}",
 		"subscription-label": "{name} - expires on {date}",
-		"manually-add-fund-success-notification": "{name} received {amount} on their card.",
+		"manually-add-fund-success-notification": "{name} has received {amount} on their card. The funds will expire on {expirationDate}.",
     "select-product-group-label": "Product group",
     "available-fund-cant-be-less-than-zero-error-notification": "The card balance cannot be negative.",
     "card-current-balance": "Current balance: {amount}",
@@ -22,7 +22,7 @@
 		"amount-label": "Montant",
 		"amount-placeholder": "Ex. {amount}",
 		"subscription-label": "{name} - expire le {date}",
-		"manually-add-fund-success-notification": "{name} a reçu {amount} sur sa carte.",
+		"manually-add-fund-success-notification": "{name} a reçu {amount} sur sa carte. Les fonds vont expirer le {expirationDate}.",
     "select-product-group-label": "Groupe de produits",
     "available-fund-cant-be-less-than-zero-error-notification": "Le solde de la carte ne peut pas être négatif.",
     "card-current-balance": "Solde actuel: {amount}",
@@ -277,7 +277,11 @@ async function onSubmit({ amount, subscription, productGroup }) {
   addSuccess(
     t("manually-add-fund-success-notification", {
       name: `${result.data.createManuallyAddingFundTransaction.transaction.card.beneficiary.firstname} ${result.data.createManuallyAddingFundTransaction.transaction.card.beneficiary.lastname}`,
-      amount: getMoneyFormat(parseFloat(amount))
+      amount: getMoneyFormat(parseFloat(amount)),
+      expirationDate: formatDate(
+        dateUtc(result.data.createManuallyAddingFundTransaction.transaction.expirationDate),
+        textualFormat
+      )
     })
   );
 }
