@@ -21,7 +21,7 @@
 		"add-amount": "Ajouter le montant",
 		"amount-label": "Montant",
 		"amount-placeholder": "Ex. {amount}",
-		"subscription-label": "{name} - expire {date}",
+		"subscription-label": "{name} - expire le {date}",
 		"manually-add-fund-success-notification": "{name} a reçu {amount} sur sa carte.",
     "select-product-group-label": "Groupe de produits",
     "available-fund-cant-be-less-than-zero-error-notification": "Le solde de la carte ne peut pas être négatif.",
