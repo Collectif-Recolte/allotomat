@@ -51,9 +51,8 @@ namespace Sig.App.Backend.Helpers
         public static int GetTotalPayment(this Subscription subscription)
         {
             var cardPaymentRemaining = 0;
-            var today = subscription.StartDate;
-
-            var startDate = today > subscription.StartDate ? today : subscription.StartDate;
+            
+            var startDate = subscription.StartDate;
             var endDate = subscription.EndDate;
 
             if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth ||
@@ -62,26 +61,22 @@ namespace Sig.App.Backend.Helpers
                 int monthsApart = 12 * (endDate.Year - startDate.Year) + endDate.Month - startDate.Month;
 
                 cardPaymentRemaining += monthsApart;
-
-                if (startDate >= today && startDate.Day == 1) cardPaymentRemaining++;
             }
 
             if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth ||
                 subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth)
             {
                 int monthsApart = 12 * (endDate.Year - startDate.Year) + endDate.Month - startDate.Month;
-                if (today.Day < 15 && endDate.Day >= 15)
+                if (startDate.Day < 15 && endDate.Day >= 15)
                 {
                     monthsApart++;
                 }
-                if (today.Day >= 15 && endDate.Day < 15)
+                if (startDate.Day >= 15 && endDate.Day < 15)
                 {
                     monthsApart--;
                 }
 
                 cardPaymentRemaining += monthsApart;
-
-                if (startDate >= today && startDate.Day <= 15) cardPaymentRemaining++;
             }
 
             return cardPaymentRemaining;
