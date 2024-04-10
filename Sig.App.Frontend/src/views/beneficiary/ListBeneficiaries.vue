@@ -4,37 +4,37 @@
       "import-beneficiaries-list": "Import a list",
       "selected-organization": "Organization",
       "title": "Participants",
-      "download-template-file": "Download a template file",
+      "download-template-file": "Download a template",
       "available-amount-for-allocation": "Remaining budget allowance",
       "participant-count": "{count} participants",
       "empty-list": "There are no participants.",
       "import-new-list": "Import a list",
-      "export-beneficiaries-list": "Export participants",
+      "export-beneficiaries-list": "Export",
       "no-results": "Your search yields no results",
       "reset-search": "Reset search",
       "empty-organizations-list": "No organization is associated with the program.",
       "add-organization": "Add an organization",
-      "detailed-view": "Detailed view",
-      "toggle-view": "Change display type",
-      "payment-conflicts-alert": "{count} payment conflicts"
+      "payment-conflicts-alert": "{count} payment conflicts",
+      "manage-participants": "Manage",
+      "assign-subscriptions": "Assignments"
     },
     "fr": {
       "import-beneficiaries-list": "Importer une liste",
       "selected-organization": "Organisme",
       "title": "Participant-e-s",
-      "download-template-file": "Télécharger un fichier modèle",
+      "download-template-file": "Télécharger un modèle",
       "available-amount-for-allocation": "Enveloppe restante",
       "participant-count": "{count} participant-e-s",
       "empty-list": "Il n'y a pas de participant-e-s.",
       "import-new-list": "Importer une liste",
-      "export-beneficiaries-list": "Exporter les participants",
+      "export-beneficiaries-list": "Exporter",
       "no-results": "Votre recherche ne donne aucun résultat",
       "reset-search": "Réinitialiser la recherche",
       "empty-organizations-list": "Aucun organisme n'est associé au programme.",
       "add-organization": "Ajouter un organisme",
-      "detailed-view": "Affichage détaillé",
-      "toggle-view": "Changer le type d'affichage",
-      "payment-conflicts-alert":"{count} conflit de versement | {count} conflits de versements"
+      "payment-conflicts-alert":"{count} conflit de versement | {count} conflits de versements",
+      "manage-participants": "Gestion",
+      "assign-subscriptions": "Attribution"
     }
   }
 </i18n>
@@ -43,7 +43,7 @@
   <RouterView v-slot="{ Component }">
     <AppShell :loading="loading || projectsLoading || organizationsLoading">
       <template #title>
-        <Title :title="t('title')">
+        <Title :title="t('title')" :subpages="subpages">
           <template v-if="organizations && !administrationSubscriptionsOffPlatform" #center>
             <div class="xs:text-right flex items-center gap-x-4 text-primary-700">
               <span class="text-sm">{{ t("available-amount-for-allocation") }}</span>
@@ -63,8 +63,8 @@
                 @input="onOrganizationSelected" />
             </div>
           </template>
-          <template v-if="organizations" #bottom>
-            <div class="flex flex-wrap gap-x-4 gap-y-3">
+          <template v-if="organizations" #subpagesCta>
+            <div class="flex flex-right gap-x-4 gap-y-3 justify-end">
               <PfButtonLink
                 v-if="!beneficiariesAreAnonymous"
                 :label="t('import-beneficiaries-list')"
@@ -73,26 +73,29 @@
                 :icon="ICON_UPLOAD"
                 has-icon-left />
               <PfButtonAction
+                btn-style="outline"
                 :label="t('export-beneficiaries-list')"
                 :icon="ICON_DOWNLOAD"
                 has-icon-left
                 @click="onExportReport" />
-              <PfButtonLink
-                v-if="!beneficiariesAreAnonymous && !administrationSubscriptionsOffPlatform"
-                btn-style="outline"
-                :label="t('download-template-file')"
-                href="/files/Template_Upload.xlsx"
-                file-name="Template_Upload.xlsx"
-                is-downloadable
-                :icon="ICON_TABLE"
-                has-icon-left />
-              <PfButtonAction
-                v-if="!beneficiariesAreAnonymous && administrationSubscriptionsOffPlatform"
-                btn-style="outline"
-                :label="t('download-template-file')"
-                :icon="ICON_TABLE"
-                has-icon-left
-                @click="onDownloadTemplateFile" />
+              <template v-if="!beneficiariesAreAnonymous">
+                <PfButtonLink
+                  v-if="!administrationSubscriptionsOffPlatform"
+                  btn-style="outline"
+                  :label="t('download-template-file')"
+                  href="/files/Template_Upload.xlsx"
+                  file-name="Template_Upload.xlsx"
+                  is-downloadable
+                  :icon="ICON_TABLE"
+                  has-icon-left />
+                <PfButtonAction
+                  v-else
+                  btn-style="outline"
+                  :label="t('download-template-file')"
+                  :icon="ICON_TABLE"
+                  has-icon-left
+                  @click="onDownloadTemplateFile" />
+              </template>
             </div>
           </template>
         </Title>
@@ -117,21 +120,6 @@
             </PfButtonLink>
           </div>
           <div class="lg:flex lg:items-center">
-            <!-- Intégration de la switch pour la vue en tableau, TODO: CRCL-1513
-              <UiSwitch
-                v-model="displayBeneficiariesListWithDetailed"
-                class="justify-end mb-2.5 lg:mb-0"
-                :label="t('toggle-view')"
-                change-color>
-                <template #right>
-                  <span
-                    class="ml-2 text-p3 font-semibold transition-colors duration-300 ease-in-out"
-                    :class="displayBeneficiariesListWithDetailed ? 'text-green-300' : 'text-grey-500'"
-                    >{{ t("detailed-view") }}</span
-                  >
-                </template>
-              </UiSwitch> -->
-
             <BeneficiaryFilters
               v-if="selectedOrganization !== ''"
               v-model="searchInput"
@@ -169,14 +157,6 @@
 
         <template v-if="selectedOrganization !== '' && beneficiariesPagination.items.length > 0">
           <ListBeneficiariesWithDetailed
-            v-if="displayBeneficiariesListWithDetailed"
-            :product-groups="productGroups"
-            :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
-            :beneficiaries-pagination="beneficiariesPagination"
-            :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
-            :filtered-query="filteredQuery" />
-          <ListBeneficiariesWithoutDetailed
-            v-else
             :product-groups="productGroups"
             :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
             :beneficiaries-pagination="beneficiariesPagination"
@@ -253,7 +233,8 @@ import {
   URL_BENEFICIARY_ADMIN,
   URL_BENEFICIARY_IMPORT_LIST,
   URL_BENEFICIARY_OFF_PLATFORM_IMPORT_LIST,
-  URL_ORGANIZATION_ADD
+  URL_ORGANIZATION_ADD,
+  URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS
 } from "@/lib/consts/urls";
 import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
 import {
@@ -278,7 +259,6 @@ import ICON_INFO from "@/lib/icons/info.json";
 
 import Title from "@/components/app/title";
 import BeneficiaryFilters from "@/components/beneficiaries/beneficiary-filters";
-import ListBeneficiariesWithoutDetailed from "@/components/beneficiaries/list-beneficiaries-without-detailed";
 import ListBeneficiariesWithDetailed from "@/components/beneficiaries/list-beneficiaries-detailed";
 
 const { t, locale } = useI18n();
@@ -289,6 +269,21 @@ const client = resolveClient();
 const { currentOrganization, changeOrganization } = useOrganizationStore();
 
 usePageTitle(t("title"));
+
+const subpages = computed(() => {
+  return [
+    {
+      route: { name: URL_BENEFICIARY_ADMIN },
+      label: t("manage-participants"),
+      isActive: true
+    },
+    {
+      route: { name: URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS },
+      label: t("assign-subscriptions"),
+      isActive: false
+    }
+  ];
+});
 
 const importBeneficiariesListRoute = computed(() => {
   if (administrationSubscriptionsOffPlatform.value) {
@@ -326,7 +321,6 @@ const conflictPaymentStatus = ref([]);
 const selectedOrganization = ref(currentOrganization);
 const searchInput = ref("");
 const searchText = ref("");
-const displayBeneficiariesListWithDetailed = ref(true);
 
 const filteredQuery = computed(() => {
   return {

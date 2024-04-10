@@ -2,31 +2,19 @@
   {
     "en": {
       "beneficiary-name": "Name",
-      "beneficiary-contact-information": "Contact information",
-      "beneficiary-notes": "Notes",
       "beneficiary-category": "Category",
       "beneficiary-id1": "ID 1",
       "beneficiary-id2": "ID 2",
-      "beneficiary-subscription": "Subscription",
-      "beneficiary-none-subscription": "None",
-      "actions": "Actions",
-      "delete-beneficiary": "Delete",
-      "edit-beneficiary": "Edit",
-      "add-manually-money": "Manually add funds"
+      "beneficiary-payment": "Payment",
+      "beneficiary-order-random": "Random order",
     },
     "fr": {
       "beneficiary-name": "Nom",
-      "beneficiary-contact-information": "Coordonnées",
-      "beneficiary-notes": "Notes",
       "beneficiary-category": "Catégorie",
       "beneficiary-id1": "ID 1",
       "beneficiary-id2": "ID 2",
-      "beneficiary-subscription": "Abonnement",
-      "beneficiary-none-subscription": "Aucun",
-      "actions": "Actions",
-      "delete-beneficiary": "Supprimer",
-      "edit-beneficiary": "Modifier",
-      "add-manually-money": "Ajouter manuellement des fonds"
+      "beneficiary-payment": "Versement",
+      "beneficiary-order-random": "Ordre aléatoire",
     }
   }
 </i18n>
@@ -34,6 +22,14 @@
 <template>
   <UiTable v-if="props.beneficiaries" class="mb-8" :items="props.beneficiaries" :cols="cols">
     <template #default="slotProps">
+      <td>
+        <PfFormInputCheckbox
+          id="selected"
+          has-hidden-label
+          :label="t('beneficiary-order-random')"
+          :checked="isChecked(slotProps.item)"
+          @input="(e) => onSelectedBeneficiaryChecked(slotProps.item, e)" />
+      </td>
       <td>
         {{ getBeneficiaryId1(slotProps.item) }}
       </td>
@@ -47,60 +43,22 @@
         </div>
       </td>
       <td>
-        <template v-if="haveAnySubscriptions(slotProps.item)">
-          <div class="inline-flex flex-col justify-start items-start gap-y-1">
-            <PfTag
-              v-for="item in getBeneficiarySubscriptions(slotProps.item)"
-              :key="item.id"
-              :label="item.name"
-              can-dismiss
-              is-dark-theme
-              bg-color-class="bg-primary-700"
-              @dismiss="removeSubscription(slotProps.item, item)" />
-          </div>
-        </template>
-        <PfTag v-else :label="t('beneficiary-none-subscription')" bg-color-class="bg-primary-300" />
-      </td>
-      <td>
         {{ getBeneficiaryCategory(slotProps.item) }}
       </td>
-      <UiTableContactCell v-if="!beneficiariesAreAnonymous" :person="slotProps.item" />
-      <td v-if="!beneficiariesAreAnonymous" class="text-p4 py-2">
-        <p class="mb-0">
-          {{ getBeneficiaryNotes(slotProps.item) }}
-        </p>
+      <td>
+        {{ getBeneficiaryPayment(slotProps.item) }}
       </td>
-      <td v-if="!beneficiariesAreAnonymous">
-        <UiButtonGroup :items="getBtnGroup(slotProps.item)" tooltip-position="left" />
-      </td>
-    </template>
-    <template #floatingActions>
-      <slot name="floatingActions"></slot>
     </template>
   </UiTable>
 </template>
 
 <script setup>
-import { defineProps, computed } from "vue";
+import { defineProps, defineEmits, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
-import { useRouter } from "vue-router";
-
-import ICON_TRASH from "@/lib/icons/trash.json";
-import ICON_PENCIL from "@/lib/icons/pencil.json";
-import ICON_ADD_CASH from "@/lib/icons/add-cash.json";
 import ICON_CREDIT_CARD from "@/lib/icons/credit-card.json";
-import {
-  URL_BENEFICIARY_EDIT,
-  URL_BENEFICIARY_DELETE,
-  URL_BENEFICIARY_REMOVE_SUBSCRIPTION,
-  URL_BENEFICIARY_MANUALLY_ADD_FUND
-} from "@/lib/consts/urls";
-
-import { canEditBeneficiary } from "@/lib/helpers/beneficiary";
 
 const { t } = useI18n();
-const router = useRouter();
 
 const props = defineProps({
   beneficiaries: { type: Object, default: null },
@@ -108,71 +66,44 @@ const props = defineProps({
   beneficiariesAreAnonymous: {
     type: Boolean,
     default: false
+  },
+  subscriptions: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
+  selectedSubscription: {
+    type: String,
+    default: ""
   }
 });
+
+const emit = defineEmits(["beneficiarySelectedChecked", "beneficiarySelectedUnchecked"]);
 
 const cols = computed(() => {
   const cols = [];
 
-  if (props.beneficiariesAreAnonymous) {
-    cols.push({ label: t("beneficiary-id1") });
-    cols.push({ label: t("beneficiary-id2") });
-    cols.push({ label: t("beneficiary-subscription") });
-    cols.push({ label: t("beneficiary-category") });
-  } else {
-    cols.push({ label: t("beneficiary-id1") });
-    cols.push({ label: t("beneficiary-id2") });
+  cols.push({ label: "" });
+  cols.push({ label: t("beneficiary-id1") });
+  cols.push({ label: t("beneficiary-id2") });
+
+  if (!props.beneficiariesAreAnonymous) {
     cols.push({ label: t("beneficiary-name") });
-    cols.push({ label: t("beneficiary-subscription") });
-    cols.push({ label: t("beneficiary-category") });
-    cols.push({ label: t("beneficiary-contact-information") });
-    cols.push({ label: t("beneficiary-notes") });
-    cols.push({
-      label: t("actions"),
-      hasHiddenLabel: true
-    });
   }
+
+  cols.push({ label: t("beneficiary-category") });
+  cols.push({ label: t("beneficiary-payment"), isRight: true });
+
   return cols;
 });
 
-const getBtnGroup = (beneficiary) => {
-  return [
-    {
-      icon: ICON_ADD_CASH,
-      label: t("add-manually-money"),
-      route: {
-        name: URL_BENEFICIARY_MANUALLY_ADD_FUND,
-        params: { beneficiaryId: beneficiary.id }
-      },
-      if: haveCard(beneficiary)
-    },
-    {
-      icon: ICON_PENCIL,
-      label: t("edit-beneficiary"),
-      route: {
-        name: URL_BENEFICIARY_EDIT,
-        params: { beneficiaryId: beneficiary.id }
-      },
-      if: canEditBeneficiary()
-    },
-    {
-      icon: ICON_TRASH,
-      label: t("delete-beneficiary"),
-      route: {
-        name: URL_BENEFICIARY_DELETE,
-        params: { beneficiaryId: beneficiary.id }
-      },
-      if: canDelete(beneficiary)
-    }
-  ];
-};
+function isChecked(beneficiary) {
+  return beneficiary.isSelected;
+}
 
 function getBeneficiaryName(beneficiary) {
   return `${beneficiary.firstname} ${beneficiary.lastname}`;
-}
-
-function getBeneficiaryNotes(beneficiary) {
-  return beneficiary.notes ? beneficiary.notes : "";
 }
 
 function getBeneficiaryCategory(beneficiary) {
@@ -187,26 +118,24 @@ function getBeneficiaryId2(beneficiary) {
   return beneficiary.id2 ? beneficiary.id2 : "";
 }
 
-function getBeneficiarySubscriptions(beneficiary) {
-  return beneficiary.subscriptions;
-}
+function getBeneficiaryPayment(beneficiary) {
+  if (props.selectedSubscription === "" || props.selectedSubscription === null) return "-$";
 
-function haveAnySubscriptions(beneficiary) {
-  return beneficiary.subscriptions.length > 0;
-}
-
-function removeSubscription(beneficiary, subscription) {
-  router.push({
-    name: URL_BENEFICIARY_REMOVE_SUBSCRIPTION,
-    params: { beneficiaryId: beneficiary.id, subscriptionId: subscription.id }
-  });
-}
-
-function canDelete(beneficiary) {
-  return !haveAnySubscriptions(beneficiary) && !haveCard(beneficiary);
+  return `${props.subscriptions
+    .find((subscription) => subscription.value === props.selectedSubscription)
+    .types.filter((type) => type.beneficiaryType.id === beneficiary.beneficiaryType.id)
+    .reduce((accumulator, type) => accumulator + type.amount, 0)}$`;
 }
 
 function haveCard(beneficiary) {
   return beneficiary.card !== null;
+}
+
+function onSelectedBeneficiaryChecked(beneficiary, input) {
+  if (input) {
+    emit("beneficiarySelectedChecked", beneficiary);
+  } else {
+    emit("beneficiarySelectedUnchecked", beneficiary);
+  }
 }
 </script>

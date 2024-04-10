@@ -570,16 +570,16 @@ export default [
         meta: {
           claim: GLOBAL_MANAGE_BENEFICIARIES
         }
-      },
-      {
-        name: urls.URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS,
-        path: "assign-subscriptions",
-        component: () => import("@/views/beneficiary/AssignSubscriptions.vue"),
-        meta: {
-          claim: GLOBAL_MANAGE_BENEFICIARIES
-        }
       }
     ]
+  },
+  {
+    name: urls.URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS,
+    path: "/assign-subscriptions",
+    component: () => import("@/views/beneficiary/AssignSubscriptions.vue"),
+    meta: {
+      claim: GLOBAL_MANAGE_BENEFICIARIES
+    }
   },
   {
     name: urls.URL_CARDS,

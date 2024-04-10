@@ -1,205 +1,385 @@
 <i18n>
-{
-	"en": {
-		"assign-subscriptions": "Assign subscriptions",
-		"title-edit": "Assign subscriptions",
-    "title-confirm": "Do we confirm the selection?",
-    "warning-message": "The amounts will be distributed in order according to the selected filters.",
-    "warning-message-random": "The amounts will be distributed randomly according to the selected filters.",
-    "select-subscription": "Susbscription selection",
-    "choose-subscription": "Choose a subscription",
-    "allowance": "Amount allocated to the assignation",
-    "available-amount": "Remaining budget allowance",
-    "no-available-subscription": "There are no subscriptions left to assign for your selection.",
-    "subscription-count": "{count} participant will be assigned the subscription {subscriptionName}. | {count} participant will be assigned the subscription {subscriptionName}. | {count} participants will be assigned the subscription {subscriptionName}.",
-    "usage-amount": "will be allocated.",
-    "remaining-amount": "The remaining amount will be:",
-    "edit": "Cancel",
-    "submit": "Yes, assign subscriptions",
-    "success-assign-beneficiaries-to-subscription": "The subscription \"{subscriptionName}\" was successfully assigned to {assignedBeneficiariesCount} participants out of the {totalBeneficiariesCount} selected.",
-    "attribution-method": "Distribution of amounts",
-    "random-attribution": "Random distribution",
-    "in-order": "In order (top to bottom)",
-    "random": "Random",
-	},
-	"fr": {
-		"assign-subscriptions": "Attribuer des abonnements",
-		"title-edit": "Attribuer des abonnements",
-    "title-confirm": "On confirme la sélection ?",
-    "warning-message": "Les montants seront distribués dans l’ordre selon les filtres sélectionnés.",
-    "warning-message-random": "Les montants seront distribués aléatoirement selon les filtres sélectionnés.",
-    "select-subscription": "Sélection de l'abonnement",
-    "choose-subscription": "Choisir un abonnement",
-    "allowance": "Montant alloué à l'attribution",
-    "available-amount": "Enveloppe restante",
-    "no-available-subscription": "Il ne reste aucun abonnement à assigner pour votre sélection.",
-    "subscription-count": "{count} participant-e se verra attribuer l’abonnement {subscriptionName}. | {count} participant-e se verra attribuer l’abonnement {subscriptionName}. | {count} participant-es se verront attribuer l’abonnement {subscriptionName}.",
-    "usage-amount": "seront alloués.",
-    "remaining-amount": "L'enveloppe restante sera de:",
-    "edit": "Annuler",
-    "submit": "Oui, attribuer les abonnements",
-    "success-assign-beneficiaries-to-subscription": "L'abonnement «{subscriptionName}» a été assigné avec succès à {assignedBeneficiariesCount} participant-e-s sur les {totalBeneficiariesCount} sélectionnés.",
-    "attribution-method": "Distribution des montants",
-    "random-attribution": "Distribution aléatoire",
-    "in-order": "Dans l'ordre (de haut en bas)",
-    "random": "Aléatoire",
+  {
+    "en": {
+      "selected-organization": "Organization",
+      "title": "Participants",
+      "available-amount-for-allocation": "Budget allowance",
+      "amount-of-payment-remaining": "Payment remaining",
+      "manage-participants": "Manage",
+      "assign-subscriptions": "Assignments",
+      "auto-select-participants": "Auto select",
+      "selected-subscription": "Subscription",
+      "max-allocation": "Max allocation",
+      "amount-allocated": "{amount}$ will be allocated",
+      "budget-allowance-available": "Remaining budget allowance after allocation: {amount}$",
+      "no-results": "Your search yields no results",
+      "reset-search": "Reset search",
+      "assign-subscription-btn": "Confirm assignment",
+      "title-confirm": "Confirm selection?",
+      "cancel-confirmation": "Cancel",
+      "submit-confirmation": "Yes, assign subscriptions",
+      "subscription-count": "{participantCount} participants will be assigned the {subscriptionName} subscription",
+      "usage-amount": "<b>{amount}$</b> will be distributed as follows:</br> {detail}",
+      "remaining-amount": "The remaining budget allowance will be: <b>{amount}$</b>",
+      "success-assign-beneficiaries-to-subscription": "The subscription \"{subscriptionName}\" was successfully assigned to {assignedBeneficiariesCount} participants out of the {totalBeneficiariesCount} selected.",
+      "load-more-beneficiaries": "Load more participants",
+      "sort": "Sort list",
+      "randomize": "Randomize list"
+    },
+    "fr": {
+      "selected-organization": "Organisme",
+      "title": "Participant-e-s",
+      "available-amount-for-allocation": "Enveloppe",
+      "amount-of-payment-remaining": "Versements",
+      "manage-participants": "Gestion",
+      "assign-subscriptions": "Attribution",
+      "auto-select-participants": "Sélection automatique",
+      "selected-subscription":"Abonnement",
+      "max-allocation":"Allocation max.",
+      "amount-allocated": "{amount}$ seront alloués",
+      "budget-allowance-available": "Enveloppe restante après attribution: {amount}$",
+      "no-results": "Votre recherche ne donne aucun résultat",
+      "reset-search": "Réinitialiser la recherche",
+      "assign-subscription-btn":"Confirmer l'attribution",
+      "title-confirm": "On confirme la sélection ?",
+      "cancel-confirmation": "Annuler",
+      "submit-confirmation": "Oui, attribuer les abonnements",
+      "subscription-count": "{participantCount} participant-e-s se verront attribuer l'abonnement {subscriptionName}",
+      "usage-amount": "<b>{amount}$</b> seront répartis de la façon suivante :</br> {detail}",	
+      "remaining-amount": "L'enveloppe restante sera de : <b>{amount}$</b>",
+      "success-assign-beneficiaries-to-subscription": "L'abonnement «{subscriptionName}» a été assigné avec succès à {assignedBeneficiariesCount} participant-e-s.",
+      "load-more-beneficiaries": "Charger plus de participants",
+      "sort": "Trier la liste",
+      "randomize": "Trier la liste aléatoirement"
+    }
   }
-}
 </i18n>
 
 <template>
-  <UiDialogModal
-    v-if="subscriptions && currentStep === 0"
-    v-slot="{ closeModal }"
-    :title="t('title-edit')"
-    :has-footer="subscriptionAvailable ? false : true"
-    :return-route="{ name: URL_BENEFICIARY_ADMIN }">
-    <Form
-      v-if="subscriptionAvailable"
-      v-slot="{ errors: formErrors, values }"
-      :validation-schema="currentSchema"
-      keep-values
-      @submit="nextStep">
-      <PfForm
-        has-footer
-        :disable-submit="!forecast || Object.keys(formErrors).length > 0"
-        :submit-label="t('assign-subscriptions')"
-        :cancel-label="t('edit')"
-        can-cancel
-        :warning-message="randomAttribution ? t('warning-message-random') : t('warning-message')"
-        @cancel="closeModal">
-        <PfFormSection is-grid>
-          <Field v-slot="{ field: inputField, errors: fieldErrors }" name="subscription">
-            <PfFormInputSelect
-              id="subscription"
-              v-bind="inputField"
-              :placeholder="t('choose-subscription')"
-              :label="t('select-subscription')"
-              :options="availableSubscriptionSelectOptions"
-              col-span-class="sm:col-span-8"
-              :errors="fieldErrors"
-              @change="onSubscriptionChange" />
-          </Field>
-          <div v-if="values.subscription" class="sm:col-span-4 sm:pl-4">
-            <span class="text-sm block font-semibold mb-1">{{ t("available-amount") }}</span>
-            <span v-if="availableBudgetAllowance" class="text-3xl font-bold text-primary-700">
-              {{ getShortMoneyFormat(availableBudgetAllowance) }}
-            </span>
-          </div>
-          <div class="sm:col-span-6" :class="values.subscription ? 'visible' : 'invisible'">
-            <Field v-slot="{ field: inputField, errors: fieldErrors }" name="allowance">
-              <PfFormInputText
-                id="allowance"
-                v-bind="inputField"
-                :label="t('allowance')"
-                :disabled="!values.subscription"
-                :errors="fieldErrors"
-                input-type="number"
-                min="0"
-                @change="onAllowanceChange">
-                <template #trailingIcon>
-                  <UiDollarSign :errors="fieldErrors" />
-                </template>
-              </PfFormInputText>
-            </Field>
-          </div>
-        </PfFormSection>
+  <RouterView v-slot="{ Component }">
+    <AppShell :loading="beneficiariesLoading || organizationsLoading || loadMoreBeneficiaries">
+      <template #title>
+        <Title :title="t('title')" :subpages="subpages">
+          <template v-if="organizations && !administrationSubscriptionsOffPlatform" #left>
+            <div class="text-left flex flex-col gap-x-4 text-primary-700">
+              <span class="text-md">{{ t("available-amount-for-allocation") }}</span>
+              <span class="text-4xl font-bold text-center">{{ budgetAllowanceBySubscription }}</span>
+            </div>
+          </template>
+          <template v-if="organizations && !administrationSubscriptionsOffPlatform" #center>
+            <div class="text-left flex flex-col gap-x-4 text-primary-700">
+              <span class="text-md">{{ t("amount-of-payment-remaining") }}</span>
+              <span class="text-4xl font-bold text-center">{{ subscriptionPaymentRemainingCount }}</span>
+            </div>
+          </template>
+          <template v-if="organizations && manageOrganizations" #right>
+            <div class="flex items-center gap-x-4">
+              <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-organization") }}</span>
+              <PfFormInputSelect
+                id="selectedOrganization"
+                has-hidden-label
+                col-span-class="sm:col-span-3"
+                :label="t('selected-organization')"
+                :value="selectedOrganization"
+                :options="organizations"
+                @input="onOrganizationSelected" />
+            </div>
+          </template>
+          <template v-if="organizations" #subpagesCta>
+            <div class="sm:ml-6 flex flex-right gap-x-4 gap-y-3 justify-end">
+              <div class="flex items-center gap-x-4">
+                <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-subscription") }}</span>
+                <PfFormInputSelect
+                  id="selectedSubscription"
+                  has-hidden-label
+                  col-span-class="sm:col-span-3"
+                  :label="t('selected-subscription')"
+                  :value="selectedSubscription"
+                  :options="subscriptions"
+                  @input="onSubscriptionSelected" />
+              </div>
+              <div class="flex items-center gap-x-4">
+                <span class="text-sm text-primary-700" aria-hidden>{{ t("max-allocation") }}</span>
+                <PfFormInputText
+                  id="maxAllocation"
+                  has-hidden-label
+                  input-type="number"
+                  input-mode="decimal"
+                  col-span-class="sm:col-span-3"
+                  :disabled="isMaxAllocationInputDisabled"
+                  :label="t('max-allocation')"
+                  :value="maxAllocation"
+                  @input="updateMaxAllocation">
+                  <template #trailingIcon>
+                    <UiDollarSign />
+                  </template>
+                </PfFormInputText>
+              </div>
+              <div class="flex items-center">
+                <button
+                  class="pf-button px-0 border-primary-700 border rounded-r-none"
+                  :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                  type="button"
+                  @click="isRandomized = false">
+                  <PfIcon :icon="SortIcon" size="lg" />
+                  <span class="sr-only">{{ t("sort") }}</span>
+                </button>
+                <button
+                  class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
+                  :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                  type="button"
+                  @click="isRandomized = true">
+                  <PfIcon :icon="RandomIcon" size="lg" />
+                  <span class="sr-only">{{ t("randomize") }}</span>
+                </button>
+              </div>
+              <PfButtonAction
+                btn-style="primary"
+                :disabled="isAutoSelectBtnDisabled"
+                :label="t('auto-select-participants')"
+                @click="onAutoSelect" />
+            </div>
+          </template>
+        </Title>
+      </template>
 
-        <PfFormSection>
-          <div>
-            <p class="font-semibold text-primary-900 mb-3 text-sm">{{ t("attribution-method") }}</p>
-            <UiSwitch v-model="randomAttribution" :label="t('random-attribution')">
-              <template #left>
-                <span class="mr-2 text-p3 font-semibold">{{ t("in-order") }}</span>
-              </template>
-              <template #right>
-                <span class="ml-2 text-p3 font-semibold">{{ t("random") }}</span>
-              </template>
-            </UiSwitch>
+      <div v-if="beneficiaries">
+        <div class="flex flex-col gap-y-4 sm:flex-row sm:gap-x-4 sm:justify-between sm:items-center pb-5">
+          <div class="flex flex-wrap gap-x-4">
+            <h2 class="my-0">{{ t("amount-allocated", { amount: amountThatWillBeAllocated }) }}</h2>
+            <p class="my-1" :class="{ 'text-red-500 font-bold': budgetAllowanceAvailableAfterAllocation < 0 }">
+              {{ t("budget-allowance-available", { amount: budgetAllowanceAvailableAfterAllocation }) }}
+            </p>
           </div>
-        </PfFormSection>
-      </PfForm>
-    </Form>
-    <p v-else class="text-red-600">{{ t("no-available-subscription") }}</p>
-  </UiDialogModal>
+          <div class="lg:flex lg:items-center">
+            <BeneficiaryFilters
+              v-if="selectedOrganization !== ''"
+              v-model="searchInput"
+              hide-conflict-filter
+              :available-beneficiary-types="availableBeneficiaryTypes"
+              :available-subscriptions="availableSubscriptions"
+              :selected-beneficiary-types="beneficiaryTypesFilter"
+              :selected-subscriptions="subscriptionsFilter"
+              :selected-status="status"
+              :selected-card-status="cardStatus"
+              :without-subscription-id="WITHOUT_SUBSCRIPTION"
+              :beneficiary-status-inactive="BENEFICIARY_STATUS_INACTIVE"
+              :beneficiary-status-active="BENEFICIARY_STATUS_ACTIVE"
+              :card-status-with="BENEFICIARY_WITH_CARD"
+              :card-status-without="BENEFICIARY_WITHOUT_CARD"
+              :search-filter="searchText"
+              :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
+              :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
+              @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
+              @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
+              @subscriptionsUnchecked="onSubscriptionsUnchecked"
+              @subscriptionsChecked="onSubscriptionsChecked"
+              @statusChecked="onStatusChecked"
+              @statusUnchecked="onStatusUnchecked"
+              @cardStatusChecked="onCardStatusChecked"
+              @cardStatusUnchecked="onCardStatusUnchecked"
+              @resetFilters="onResetFilters"
+              @search="onSearch" />
+          </div>
+        </div>
 
-  <UiDialogWarningModal
-    v-else-if="subscriptions && currentStep === 1"
-    :title="t('title-confirm')"
-    :cancel-button-label="t('edit')"
-    :confirm-button-label="t('submit')"
-    @goBack="prevStep"
-    @confirm="nextStep">
-    <template #description>
-      <div>
-        <p class="text-h1 font-bold text-primary-900">
-          {{
-            t(
-              "subscription-count",
-              {
-                count: forecast.beneficiariesWhoGetSubscriptions,
-                subscriptionName: activeSubscription.label
-              },
-              forecast.beneficiariesWhoGetSubscriptions
-            )
-          }}
-        </p>
-        <p class="text-primary-700">
-          <span class="font-bold">{{ getUsageBudgetAllowance() }} </span>
-          {{ t("usage-amount") }}
-        </p>
-        <p class="text-primary-700">
-          {{ t("remaining-amount") }}
-          <span class="font-bold"> {{ getRemainingBudgetAllowance() }}</span>
-        </p>
+        <template v-if="selectedOrganization !== '' && beneficiaries.length > 0">
+          <BeneficiaryTable
+            show-associated-card
+            :beneficiaries="beneficiaries"
+            :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
+            :subscriptions="subscriptions"
+            :selected-subscription="selectedSubscription"
+            @beneficiarySelectedChecked="onSelectedBeneficiaryChecked"
+            @beneficiarySelectedUnchecked="onSelectedBeneficiaryUnchecked">
+          </BeneficiaryTable>
+          <div
+            class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
+            <PfButtonAction
+              tag="routerLink"
+              btn-style="secondary"
+              class="rounded-full"
+              :disabled="isConfirmButtonDisabled"
+              @click="onConfirmSubscription">
+              <span class="inline-flex items-center">
+                {{ t("assign-subscription-btn") }}
+                <span
+                  class="bg-primary-700 w-6 h-6 flex items-center justify-center rounded-full text-p3 leading-none ml-2 -mr-2"
+                  >{{ selectedBeneficiaries.length }}</span
+                >
+              </span>
+            </PfButtonAction>
+          </div>
+          <div
+            v-if="displayLoadMoreBeneficiaries"
+            class="sticky items-center justify-center py-4 px-4 text-center sm:block sm:p-0">
+            <PfButtonAction tag="routerLink" btn-style="primary" class="rounded-full" @click="onFetchMoreBeneficiaries">
+              <span class="inline-flex items-center">
+                {{ t("load-more-beneficiaries") }}
+              </span>
+            </PfButtonAction>
+          </div>
+        </template>
+        <UiEmptyPage v-else>
+          <UiCta
+            :img-src="require('@/assets/img/swan.jpg')"
+            :description="t('no-results')"
+            :primary-btn-label="t('reset-search')"
+            primary-btn-is-action
+            @onPrimaryBtnClick="onResetFilters">
+          </UiCta>
+        </UiEmptyPage>
       </div>
-    </template>
-  </UiDialogWarningModal>
+
+      <UiDialogWarningModal
+        v-if="displayConfirmDialog"
+        :title="t('title-confirm')"
+        :cancel-button-label="t('cancel-confirmation')"
+        :confirm-button-label="t('submit-confirmation')"
+        @goBack="closeConfirmDialog"
+        @confirm="confirmAssignation">
+        <template #description>
+          <div>
+            <p class="text-h1 font-bold text-primary-900">
+              {{
+                t("subscription-count", {
+                  participantCount: selectedBeneficiaries.length,
+                  subscriptionName: selectedSubscriptionName
+                })
+              }}
+            </p>
+            <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
+            <p
+              class="text-primary-700"
+              v-html="t('usage-amount', { amount: amountThatWillBeAllocated, detail: usageAmountDetail })"></p>
+            <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
+            <p class="text-primary-700" v-html="t('remaining-amount', { amount: budgetAllowanceAvailableAfterAllocation })"></p>
+          </div>
+        </template>
+      </UiDialogWarningModal>
+
+      <Component :is="Component" />
+    </AppShell>
+  </RouterView>
 </template>
 
 <script setup>
 import gql from "graphql-tag";
-import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
-import { computed, ref } from "vue";
+import { ref, computed, reactive } from "vue";
 import { useI18n } from "vue-i18n";
+import { onBeforeRouteUpdate } from "vue-router";
+import { storeToRefs } from "pinia";
+import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
 import { useRoute, useRouter } from "vue-router";
-import { string, object, number } from "yup";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 import { useOrganizationStore } from "@/lib/store/organization";
+import { useAuthStore } from "@/lib/store/auth";
+import { usePageTitle } from "@/lib/helpers/page-title";
+
 import { getShortMoneyFormat } from "@/lib/helpers/money";
-import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
+
 import {
   WITHOUT_SUBSCRIPTION,
-  SORT_DEFAULT,
-  SORT_RANDOM,
+  BENEFICIARY_STATUS_INACTIVE,
+  BENEFICIARY_STATUS_ACTIVE,
   BENEFICIARY_WITH_CARD,
-  BENEFICIARY_WITHOUT_CARD
+  BENEFICIARY_WITHOUT_CARD,
+  USER_TYPE_PROJECTMANAGER
 } from "@/lib/consts/enums";
+import { URL_BENEFICIARY_ADMIN, URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS } from "@/lib/consts/urls";
+import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
+
+import SortIcon from "@/lib/icons/sort.json";
+import RandomIcon from "@/lib/icons/random.json";
+
+import Title from "@/components/app/title";
+import BeneficiaryFilters from "@/components/beneficiaries/beneficiary-filters";
+import BeneficiaryTable from "@/components/beneficiaries/beneficiary-table";
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const { addSuccess } = useNotificationsStore();
-const { currentOrganization } = useOrganizationStore();
+const { currentOrganization, changeOrganization } = useOrganizationStore();
 
-const randomAttribution = ref(false);
-const currentStep = ref(0);
-const activeSubscription = ref({
-  id: "",
-  label: ""
+usePageTitle(t("title"));
+
+const subpages = computed(() => {
+  return [
+    {
+      route: { name: URL_BENEFICIARY_ADMIN },
+      label: t("manage-participants"),
+      isActive: true
+    },
+    {
+      route: { name: URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS },
+      label: t("assign-subscriptions"),
+      isActive: false
+    }
+  ];
 });
-const activeAllowance = ref(0);
-const organizationId = currentOrganization;
 
-const { result: resultSubscriptions } = useQuery(
+const { getGlobalPermissions, userType } = storeToRefs(useAuthStore());
+const manageOrganizations = computed(() => {
+  return getGlobalPermissions.value.includes(GLOBAL_MANAGE_ORGANIZATIONS);
+});
+
+const page = ref(1);
+const beneficiaryTypesFilter = ref([]);
+const subscriptionsFilter = ref([]);
+const status = ref([]);
+const cardStatus = ref([]);
+const selectedOrganization = ref(currentOrganization);
+const selectedSubscription = ref(null);
+const searchInput = ref("");
+const searchText = ref("");
+const isRandomized = ref(true);
+const maxAllocation = ref(null);
+const displayConfirmDialog = ref(false);
+const loadMoreBeneficiaries = ref(false);
+const displayLoadMoreBeneficiaries = ref(false);
+
+if (route.query.beneficiaryTypes) {
+  beneficiaryTypesFilter.value = route.query.beneficiaryTypes.split(",");
+}
+if (route.query.subscriptions) {
+  subscriptionsFilter.value = route.query.subscriptions.split(",");
+}
+if (route.query.status) {
+  status.value = route.query.status.split(",");
+}
+
+if (route.query.cardStatus) {
+  cardStatus.value = route.query.cardStatus.split(",");
+}
+
+if (route.query.text) {
+  searchText.value = route.query.text;
+}
+
+if (route.query.organizationId) {
+  selectedOrganization.value = route.query.organizationId;
+}
+
+const {
+  result: resultOrganizations,
+  loading: organizationsLoading,
+  refetch: refetchOrganizations
+} = useQuery(
   gql`
-    query Organization($id: ID!) {
-      organization(id: $id) {
+    query Organizations {
+      organizations {
         id
-        budgetAllowancesTotal
+        name
         project {
           id
+          beneficiariesAreAnonymous
+          administrationSubscriptionsOffPlatform
+          productGroups {
+            id
+            name
+          }
           beneficiaryTypes {
             id
             name
@@ -207,12 +387,108 @@ const { result: resultSubscriptions } = useQuery(
           subscriptions {
             id
             name
-            getLastDateToAssignBeneficiary
-            budgetAllowances {
+            budgetAllowancesTotal
+            totalPayment
+            paymentRemaining
+            types {
               id
-              availableFund
-              originalFund
-              organization {
+              amount
+              beneficiaryType {
+                id
+                name
+              }
+              productGroup {
+                id
+              }
+            }
+          }
+        }
+      }
+    }
+  `
+);
+
+const organizations = useResult(resultOrganizations, null, (data) => {
+  if (!selectedOrganization.value) {
+    selectedOrganization.value = data.organizations[0].id;
+    changeOrganization(data.organizations[0].id);
+  }
+  return data.organizations.map((x) => ({
+    label: x.name,
+    value: x.id,
+    beneficiariesAreAnonymous: x.project.beneficiariesAreAnonymous
+  }));
+});
+
+let beneficiaryTypes = useResult(resultOrganizations, null, (data) => {
+  return data.organizations[0].project.beneficiaryTypes;
+});
+
+let organizationSubscriptions = useResult(resultOrganizations, null, (data) => {
+  return data.organizations[0].project.subscriptions;
+});
+
+const subscriptions = useResult(resultOrganizations, null, (data) => {
+  return data.organizations[0].project.subscriptions.map((x) => ({
+    label: x.name,
+    value: x.id,
+    budgetAllowance: x.budgetAllowancesTotal,
+    totalPayment: x.totalPayment,
+    paymentRemaining: x.paymentRemaining,
+    types: x.types
+  }));
+});
+
+const {
+  result: resultBeneficiaries,
+  loading: beneficiariesLoading,
+  refetch: refetchBeneficiaries,
+  fetchMore: fetchMoreBeneficiaries
+} = useQuery(
+  gql`
+    query Organization(
+      $id: ID!
+      $page: Int!
+      $categories: [ID!]
+      $subscriptions: [ID!]
+      $status: [BeneficiaryStatus!]
+      $withoutSubscription: Boolean
+      $searchText: String
+      $withCard: Boolean
+      $withConflictPayment: Boolean
+      $withoutSpecificSubscriptions: [ID!]
+      $withoutSpecificCategories: [ID!]
+    ) {
+      organization(id: $id) {
+        id
+        beneficiaries(
+          page: $page
+          categories: $categories
+          withoutSpecificCategories: $withoutSpecificCategories
+          subscriptions: $subscriptions
+          withoutSubscription: $withoutSubscription
+          withoutSpecificSubscriptions: $withoutSpecificSubscriptions
+          status: $status
+          limit: 500
+          searchText: $searchText
+          withCard: $withCard
+          withConflictPayment: $withConflictPayment
+        ) {
+          totalCount
+          totalPages
+          pageNumber
+          items {
+            id
+            firstname
+            lastname
+            id1
+            id2
+            ... on BeneficiaryGraphType {
+              beneficiaryType {
+                id
+                name
+              }
+              subscriptions {
                 id
               }
             }
@@ -221,199 +497,243 @@ const { result: resultSubscriptions } = useQuery(
       }
     }
   `,
-  {
-    id: organizationId
-  },
+  beneficiariesVariables,
   () => ({
-    enabled: organizationId !== null
+    enabled: selectedOrganization.value !== null
   })
 );
 
-let subscriptions = useResult(resultSubscriptions, null, (data) => {
-  return data.organization?.project?.subscriptions.filter(
-    (x) =>
-      x.budgetAllowances != null &&
-      x.budgetAllowances.find((y) => y.organization.id == organizationId) != undefined &&
-      new Date(x.getLastDateToAssignBeneficiary) > new Date()
+const beneficiaries = useResult(resultBeneficiaries, null, (data) => {
+  if (
+    data.organization.beneficiaries.totalPages > 1 &&
+    data.organization.beneficiaries.pageNumber < data.organization.beneficiaries.totalPages
+  ) {
+    displayLoadMoreBeneficiaries.value = true;
+  } else if (
+    data.organization.beneficiaries.totalPages === 1 ||
+    data.organization.beneficiaries.pageNumber === data.organization.beneficiaries.totalPages
+  ) {
+    displayLoadMoreBeneficiaries.value = false;
+  }
+
+  loadMoreBeneficiaries.value = false;
+
+  return data.organization.beneficiaries.items.map((x) => reactive({ ...x, isSelected: false }));
+});
+
+const beneficiariesPagination = useResult(resultBeneficiaries, null, (data) => {
+  return {
+    totalCount: data.organization.beneficiaries.totalCount,
+    totalPages: data.organization.beneficiaries.totalPages,
+    pageNumber: data.organization.beneficiaries.pageNumber
+  };
+});
+
+let beneficiariesAreAnonymous = computed(() => {
+  return (
+    userType.value === USER_TYPE_PROJECTMANAGER &&
+    organizations.value?.find((x) => x.value === selectedOrganization.value)?.beneficiariesAreAnonymous
   );
 });
 
-// Find list of subscriptions' filtered ids
-const filteredSubscriptionIds = computed(() => {
-  if (!route.query.subscriptions) return [];
-  let subscriptions = route.query.subscriptions.split(",");
-  let index = subscriptions.indexOf(WITHOUT_SUBSCRIPTION);
-  if (index !== -1) {
-    subscriptions.splice(index, 1);
+let administrationSubscriptionsOffPlatform = useResult(resultOrganizations, null, (data) => {
+  return data.organizations[0].project.administrationSubscriptionsOffPlatform;
+});
+
+const budgetAllowanceBySubscription = computed(() => {
+  if (selectedSubscription.value === null) return "-";
+  var selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
+  return getShortMoneyFormat(selectedSubscriptionData.budgetAllowance);
+});
+
+const subscriptionPaymentRemainingCount = computed(() => {
+  if (selectedSubscription.value === null) return "-";
+  var selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
+  return `${selectedSubscriptionData.paymentRemaining}/${selectedSubscriptionData.totalPayment}`;
+});
+
+const isMaxAllocationInputDisabled = computed(() => {
+  return selectedSubscription.value === null;
+});
+
+const isAutoSelectBtnDisabled = computed(() => {
+  return selectedSubscription.value === null || maxAllocation.value === null;
+});
+
+const selectedBeneficiaries = computed(() => {
+  return beneficiaries.value.filter((x) => x.isSelected);
+});
+
+const amountThatWillBeAllocated = computed(() => {
+  if (selectedSubscription.value === null) return "-";
+
+  var selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
+
+  var amount = 0;
+
+  selectedBeneficiaries.value.forEach((x) => {
+    var beneficiaryPaymentAmount = selectedSubscriptionData.types
+      .filter((y) => y.beneficiaryType.id === x.beneficiaryType.id)
+      .reduce((accumulator, type) => accumulator + type.amount, 0);
+
+    amount += beneficiaryPaymentAmount;
+  });
+  return amount * selectedSubscriptionData.paymentRemaining;
+});
+
+const budgetAllowanceAvailableAfterAllocation = computed(() => {
+  if (selectedSubscription.value === null) return "-";
+  var selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
+  return selectedSubscriptionData.budgetAllowance - amountThatWillBeAllocated.value;
+});
+
+const availableSubscriptions = computed(() => {
+  if (selectedSubscription.value === null) return organizationSubscriptions.value;
+  return organizationSubscriptions.value.filter((x) => x.id !== selectedSubscription.value);
+});
+
+const availableBeneficiaryTypes = computed(() => {
+  if (selectedSubscription.value === null) {
+    return beneficiaryTypes != null ? beneficiaryTypes.value : [];
   }
-  return subscriptions;
-});
-
-// Check if withoutSubscription filter is active
-const withoutSubscription = computed(() => {
-  if (!route.query.subscriptions) return false;
-  return route.query.subscriptions.includes(WITHOUT_SUBSCRIPTION);
-});
-
-const withCard = computed(() => {
-  if (!route.query.cardStatus) return null;
-  return route.query.cardStatus.includes(BENEFICIARY_WITH_CARD) && !route.query.cardStatus.includes(BENEFICIARY_WITHOUT_CARD)
-    ? true
-    : route.query.cardStatus.includes(BENEFICIARY_WITH_CARD) && route.query.cardStatus.includes(BENEFICIARY_WITHOUT_CARD)
-    ? null
-    : false;
-});
-
-// Find list of categories' filtered ids
-const filteredCategoryIds = computed(() => {
-  if (!route.query.beneficiaryTypes) return [];
-  let categories = route.query.beneficiaryTypes.split(",");
-  return categories;
-});
-
-// Find text for filter
-const searchText = computed(() => {
-  return route.query.text ? route.query.text : "";
-});
-
-// Build select input options array
-const subscriptionSelectOptions = computed(() => subscriptions.value?.map((x) => ({ label: x.name, value: x.id })));
-
-// Remove filtered subscriptions from the list of options
-const availableSubscriptionSelectOptions = computed(() => {
-  if (!filteredSubscriptionIds.value) return subscriptionSelectOptions.value;
-  let availableSubscr = subscriptionSelectOptions.value;
-  for (let filter of filteredSubscriptionIds.value) {
-    if (availableSubscr) {
-      const subset = availableSubscr.filter((x) => x.value !== filter);
-      availableSubscr = subset;
-    }
-  }
-  return availableSubscr;
-});
-
-// Helper variable for subscription available state
-const subscriptionAvailable = computed(
-  () => availableSubscriptionSelectOptions.value && availableSubscriptionSelectOptions.value?.length > 0
-);
-
-// Update active subscription if selection changes
-function onSubscriptionChange(e) {
-  activeSubscription.value = {
-    id: e.target.value,
-    label: subscriptionSelectOptions.value.find((x) => x.value === e.target.value).label
-  };
-}
-
-// Update active allowance if amount changes
-function onAllowanceChange(e) {
-  activeAllowance.value = e.target.value;
-}
-
-// Call forecast to predict how many beneficiaries could benefit from the allowance attributed
-const { result: resultForecast } = useQuery(
-  gql`
-    query ForecastAssignBeneficiariesToSubscription(
-      $amount: Int!
-      $organizationId: ID!
-      $subscriptionId: ID!
-      $withCategories: [ID!]
-      $withoutSubscription: Boolean!
-      $withSubscriptions: [ID!]
-      $withCard: Boolean
-      $searchText: String!
-    ) {
-      forecastAssignBeneficiariesToSubscription(
-        amount: $amount
-        organizationId: $organizationId
-        subscriptionId: $subscriptionId
-        withCategories: $withCategories
-        withoutSubscription: $withoutSubscription
-        withSubscriptions: $withSubscriptions
-        withCard: $withCard
-        searchText: $searchText
-      ) {
-        beneficiariesWhoGetSubscriptions
-        totalBeneficiaries
-        availableBudgetAfter
-        usageOfBudget
-      }
-    }
-  `,
-  forecastVariables,
-  () => ({
-    enabled:
-      activeSubscription.value.id !== "" &&
-      activeSubscription.value.id !== null &&
-      organizationId !== null &&
-      organizationId !== ""
-  })
-);
-
-function forecastVariables() {
-  return {
-    amount: parseFloat(activeAllowance.value) ?? 0,
-    organizationId: organizationId,
-    subscriptionId: activeSubscription.value.id,
-    withCategories: filteredCategoryIds.value,
-    withSubscriptions: filteredSubscriptionIds.value,
-    withoutSubscription: withoutSubscription.value,
-    withCard: withCard.value,
-    searchText: searchText.value
-  };
-}
-
-let forecast = useResult(resultForecast, null, (data) => {
-  return data.forecastAssignBeneficiariesToSubscription;
-});
-
-// Available fund for active subscription
-const availableBudgetAllowance = computed(() => {
-  if (!activeSubscription.value.id) return null;
   return subscriptions.value
-    .find((x) => x.id === activeSubscription.value.id)
-    .budgetAllowances.find((y) => y.organization.id === organizationId).availableFund;
+    .find((x) => x.value === selectedSubscription.value)
+    .types.map((x) => x.beneficiaryType)
+    .filter((value, index, array) => array.indexOf(value) === index);
 });
 
-// Remaining fund after attribution
-function getRemainingBudgetAllowance() {
-  if (!forecast.value) return;
-  return getShortMoneyFormat(forecast.value.availableBudgetAfter);
+const isConfirmButtonDisabled = computed(() => {
+  return (
+    selectedBeneficiaries.value.length === 0 ||
+    budgetAllowanceAvailableAfterAllocation.value < 0 ||
+    selectedSubscription.value === null
+  );
+});
+
+const selectedSubscriptionName = computed(() => {
+  if (selectedSubscription.value === null) return "-";
+  return subscriptions.value.find((x) => x.value === selectedSubscription.value).label;
+});
+
+const usageAmountDetail = computed(() => {
+  var selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
+  return selectedSubscriptionData.types
+    .map(
+      (x) =>
+        `${x.beneficiaryType.name}: <b>${
+          selectedBeneficiaries.value.filter((y) => y.beneficiaryType.id === x.beneficiaryType.id).length
+        }</b>`
+    )
+    .join(", ");
+});
+
+function onOrganizationSelected(e) {
+  selectedOrganization.value = e;
+  changeOrganization(e);
 }
 
-function getUsageBudgetAllowance() {
-  if (!forecast.value) return;
-  return getShortMoneyFormat(forecast.value.usageOfBudget);
+function onBeneficiaryTypesChecked(value) {
+  beneficiaryTypesFilter.value.push(value);
+  updateUrl();
 }
 
-// Form validation & steps management
-const validationSchemas = computed(() => {
-  return [
-    object({
-      subscription: string().label(t("select-subscription")).required(),
-      allowance: number().label(t("allowance")).required().min(0).max(availableBudgetAllowance.value)
-    })
-  ];
-});
+function onBeneficiaryTypesUnchecked(value) {
+  beneficiaryTypesFilter.value = beneficiaryTypesFilter.value.filter((x) => x !== value);
+  updateUrl();
+}
 
-const currentSchema = computed(() => {
-  return validationSchemas.value[currentStep.value];
-});
+function onSubscriptionsChecked(value) {
+  subscriptionsFilter.value.push(value);
+  updateUrl();
+}
 
-function nextStep(values) {
-  if (currentStep.value === 1) {
-    onSubmit(values);
-    return;
+function onSubscriptionsUnchecked(value) {
+  subscriptionsFilter.value = subscriptionsFilter.value.filter((x) => x !== value);
+  updateUrl();
+}
+
+function onStatusChecked(value) {
+  status.value.push(value);
+  updateUrl();
+}
+
+function onStatusUnchecked(value) {
+  status.value = status.value.filter((x) => x !== value);
+  updateUrl();
+}
+
+function onCardStatusChecked(value) {
+  cardStatus.value.push(value);
+  updateUrl();
+}
+
+function onCardStatusUnchecked(value) {
+  cardStatus.value = cardStatus.value.filter((x) => x !== value);
+  updateUrl();
+}
+
+function onSelectedBeneficiaryChecked(beneficiary) {
+  beneficiary.isSelected = true;
+}
+
+function onSelectedBeneficiaryUnchecked(beneficiary) {
+  beneficiary.isSelected = false;
+}
+
+function onSubscriptionSelected(e) {
+  selectedSubscription.value = e;
+
+  var availableBeneficiaryType = subscriptions.value
+    .find((x) => x.value === selectedSubscription.value)
+    .types.map((x) => x.beneficiaryType);
+  beneficiaryTypesFilter.value = beneficiaryTypesFilter.value.filter((x) =>
+    availableBeneficiaryType.map((y) => y.id).includes(x)
+  );
+  subscriptionsFilter.value = subscriptionsFilter.value.filter((x) => x !== e);
+  maxAllocation.value = subscriptions.value.find((x) => x.value === selectedSubscription.value).budgetAllowance;
+
+  updateUrl();
+}
+
+function updateMaxAllocation(e) {
+  maxAllocation.value = e;
+}
+
+function onAutoSelect() {
+  if (selectedSubscription.value === null || maxAllocation.value === null) return;
+
+  var selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
+
+  var beneficiariesToSelect = [...beneficiaries.value];
+
+  if (isRandomized.value) {
+    beneficiariesToSelect = beneficiariesToSelect.sort(() => Math.random() - 0.5);
   }
-  currentStep.value++;
+
+  var amount = 0;
+  var selectedBeneficiaries = [];
+
+  beneficiariesToSelect.forEach((x) => {
+    var beneficiaryPaymentAmount = selectedSubscriptionData.types
+      .filter((y) => y.beneficiaryType.id === x.beneficiaryType.id)
+      .reduce((accumulator, type) => accumulator + type.amount, 0);
+    if (amount + beneficiaryPaymentAmount * selectedSubscriptionData.paymentRemaining <= maxAllocation.value) {
+      amount += beneficiaryPaymentAmount * selectedSubscriptionData.paymentRemaining;
+      selectedBeneficiaries.push(x);
+    }
+  });
+
+  beneficiaries.value.forEach((x) => {
+    x.isSelected = selectedBeneficiaries.map((y) => y.id).includes(x.id);
+  });
 }
 
-function prevStep() {
-  if (currentStep.value <= 0) {
-    return;
-  }
+function onConfirmSubscription() {
+  displayConfirmDialog.value = true;
+}
 
-  currentStep.value--;
+function closeConfirmDialog() {
+  displayConfirmDialog.value = false;
 }
 
 // Send data to backend
@@ -433,26 +753,126 @@ const { mutate: assignBeneficiariesToSubscription } = useMutation(
   `
 );
 
-async function onSubmit() {
+async function confirmAssignation() {
   await assignBeneficiariesToSubscription({
     input: {
-      amount: parseFloat(activeAllowance.value),
-      organizationId: organizationId,
-      subscriptionId: activeSubscription.value.id,
-      withCategories: filteredCategoryIds.value,
-      withSubscriptions: filteredSubscriptionIds.value,
-      withoutSubscription: withoutSubscription.value,
-      sort: randomAttribution.value ? SORT_RANDOM : SORT_DEFAULT,
-      searchText: searchText.value
+      organizationId: selectedOrganization.value,
+      subscriptionId: selectedSubscription.value,
+      beneficiaries: selectedBeneficiaries.value.map((x) => x.id)
     }
   });
-  router.push({ name: URL_BENEFICIARY_ADMIN });
+
   addSuccess(
     t("success-assign-beneficiaries-to-subscription", {
-      assignedBeneficiariesCount: forecast.value.beneficiariesWhoGetSubscriptions,
-      totalBeneficiariesCount: forecast.value.totalBeneficiaries,
-      subscriptionName: activeSubscription.value.label
+      assignedBeneficiariesCount: selectedBeneficiaries.value.length,
+      subscriptionName: selectedSubscriptionName.value
     })
   );
+
+  displayConfirmDialog.value = false;
+
+  refetchBeneficiaries();
+  refetchOrganizations();
 }
+
+function onFetchMoreBeneficiaries() {
+  loadMoreBeneficiaries.value = true;
+  fetchMoreBeneficiaries({
+    variables: {
+      page: beneficiariesPagination.value.pageNumber + 1
+    },
+    updateQuery: (previousResult, { fetchMoreResult }) => {
+      if (!fetchMoreResult) return previousResult;
+
+      return {
+        organization: {
+          ...previousResult.organization,
+          beneficiaries: {
+            ...previousResult.organization.beneficiaries,
+            pageNumber: fetchMoreResult.organization.beneficiaries.pageNumber,
+            items: [...previousResult.organization.beneficiaries.items, ...fetchMoreResult.organization.beneficiaries.items]
+          }
+        }
+      };
+    }
+  });
+}
+
+function onResetFilters() {
+  subscriptionsFilter.value = [];
+  beneficiaryTypesFilter.value = [];
+  cardStatus.value = [];
+  onResetSearch();
+  updateUrl();
+}
+
+function updateUrl() {
+  router.push({
+    name: URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS,
+    query: {
+      organizationId: selectedOrganization.value,
+      subscriptions: subscriptionsFilter.value.length > 0 ? subscriptionsFilter.value.toString() : undefined,
+      beneficiaryTypes: beneficiaryTypesFilter.value.length > 0 ? beneficiaryTypesFilter.value.toString() : undefined,
+      status: status.value.length > 0 ? status.value.toString() : undefined,
+      cardStatus: cardStatus.value.length > 0 ? cardStatus.value.toString() : undefined,
+      text: searchText.value ? searchText.value : undefined
+    }
+  });
+}
+
+function beneficiariesVariables() {
+  return {
+    id: selectedOrganization.value,
+    page: page.value,
+    subscriptions:
+      subscriptionsFilter.value.length > 0 ? subscriptionsFilter.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
+    withoutSubscription: subscriptionsFilter.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
+    withoutSpecificSubscriptions: selectedSubscription.value != null ? [selectedSubscription.value] : [],
+    categories: beneficiaryTypesFilter.value.length > 0 ? beneficiaryTypesFilter.value : null,
+    withoutSpecificCategories:
+      beneficiaryTypes.value !== null && availableBeneficiaryTypes.value !== null
+        ? beneficiaryTypes.value.filter((x) => !availableBeneficiaryTypes.value.includes(x)).map((x) => x.id)
+        : [],
+    status: status.value.length > 0 ? status.value : null,
+    withCard: cardStatus.value.length === 1 ? cardStatus.value.indexOf(BENEFICIARY_WITH_CARD) !== -1 : null,
+    searchText: searchText.value
+  };
+}
+
+function onSearch() {
+  page.value = 1;
+  searchText.value = searchInput.value;
+}
+
+function onResetSearch() {
+  page.value = 1;
+  searchText.value = "";
+  searchInput.value = "";
+}
+
+onBeforeRouteUpdate((to) => {
+  if (to.name === URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS) {
+    if (to.query.beneficiaryTypes) {
+      beneficiaryTypesFilter.value = to.query.beneficiaryTypes.split(",");
+    }
+    if (to.query.subscriptions) {
+      subscriptionsFilter.value = to.query.subscriptions.split(",");
+    }
+    if (to.query.status) {
+      status.value = to.query.status.split(",");
+    }
+    if (to.query.cardStatus) {
+      cardStatus.value = to.query.cardStatus.split(",");
+    }
+    if (to.query.text) {
+      searchText.value = to.query.text;
+    }
+    if (to.query.organizationId) {
+      selectedOrganization.value = to.query.organizationId;
+    }
+
+    refetchBeneficiaries();
+    refetchOrganizations();
+  }
+});
 </script>

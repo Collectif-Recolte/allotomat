@@ -77,6 +77,7 @@
       :options="cardStatus"
       @input="onCardStatusChecked" />
     <PfFormInputCheckboxGroup
+      v-if="!props.hideConflictFilter"
       id="paymentConflictStatus"
       class="mt-3"
       is-filter
@@ -195,6 +196,10 @@ const props = defineProps({
     default() {
       return [];
     }
+  },
+  hideConflictFilter: {
+    type: Boolean,
+    default: false
   }
 });
 

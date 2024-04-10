@@ -48,6 +48,40 @@ namespace Sig.App.Backend.Helpers
             return Math.Max(0, cardPaymentRemaining);
         }
 
+        public static int GetTotalPayment(this Subscription subscription)
+        {
+            var cardPaymentRemaining = 0;
+            
+            var startDate = subscription.StartDate;
+            var endDate = subscription.EndDate;
+
+            if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth ||
+                subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth)
+            {
+                int monthsApart = 12 * (endDate.Year - startDate.Year) + endDate.Month - startDate.Month;
+
+                cardPaymentRemaining += monthsApart;
+            }
+
+            if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth ||
+                subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth)
+            {
+                int monthsApart = 12 * (endDate.Year - startDate.Year) + endDate.Month - startDate.Month;
+                if (startDate.Day < 15 && endDate.Day >= 15)
+                {
+                    monthsApart++;
+                }
+                if (startDate.Day >= 15 && endDate.Day < 15)
+                {
+                    monthsApart--;
+                }
+
+                cardPaymentRemaining += monthsApart;
+            }
+
+            return cardPaymentRemaining;
+        }
+
         public static DateTime GetNextPaymentDateTime(IClock clock, SubscriptionMonthlyPaymentMoment moment)
         {
             var today = clock
