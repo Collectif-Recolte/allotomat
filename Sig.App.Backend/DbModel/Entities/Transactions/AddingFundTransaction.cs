@@ -1,6 +1,7 @@
 ﻿using Sig.App.Backend.DbModel.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sig.App.Backend.DbModel.Entities.Transactions
 {
@@ -15,5 +16,10 @@ namespace Sig.App.Backend.DbModel.Entities.Transactions
 
         public long? ExpireFundTransactionId { get; set; }
         public ExpireFundTransaction ExpireFundTransaction { get; set; }
+
+        public bool IsAlreadyUsed()
+        {
+            return Transactions.Any();
+        }
     }
 }

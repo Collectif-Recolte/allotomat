@@ -109,12 +109,16 @@ const { mutate: createSubscriptionInProject } = useMutation(
 
 async function onSubmit({
   subscriptionName,
-  monthlyPaymentMoment,
-  fundsExpirationDate,
   startDate,
   endDate,
-  productGroupSubscriptionTypes,
-  isFundsAccumulable
+  monthlyPaymentMoment,
+  isSubscriptionPaymentBasedCardUsage,
+  maxNumberOfPayments,
+  isFundsAccumulable,
+  fundsExpirationDate,
+  triggerFundExpiration,
+  numberDaysUntilFundsExpire,
+  productGroupSubscriptionTypes
 }) {
   let types = [];
   for (var i = 0; i < productGroupSubscriptionTypes.length; i++) {
@@ -136,6 +140,14 @@ async function onSubmit({
       monthlyPaymentMoment,
       startDate: formatDate(startDate, serverFormat),
       endDate: formatDate(endDate, serverFormat),
+      isSubscriptionPaymentBasedCardUsage,
+      maxNumberOfPayments:
+        maxNumberOfPayments !== null && maxNumberOfPayments !== undefined ? { value: maxNumberOfPayments } : undefined,
+      triggerFundExpiration,
+      numberDaysUntilFundsExpire:
+        numberDaysUntilFundsExpire !== null && numberDaysUntilFundsExpire !== undefined
+          ? { value: numberDaysUntilFundsExpire }
+          : undefined,
       types,
       fundsExpirationDate: isFundsAccumulable ? { value: formatDate(fundsExpirationDate, serverFormat) } : undefined,
       isFundsAccumulable

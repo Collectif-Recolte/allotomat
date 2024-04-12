@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Presentation;
-using GraphQL.Conventions;
+﻿using GraphQL.Conventions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -36,11 +35,23 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
-            logger.LogInformation($"[Mutation] CreateSubscriptionInProject({request.ProjectId}, {request.Name}, {request.MonthlyPaymentMoment}, {request.StartDate}, {request.EndDate}, {request.FundsExpirationDate}, {request.Types}, {request.IsFundsAccumulable})");
+            logger.LogInformation($"[Mutation] CreateSubscriptionInProject({request.ProjectId}, {request.Name}, {request.StartDate}, {request.EndDate}, {request.MonthlyPaymentMoment}, {request.IsSubscriptionPaymentBasedCardUsage}, {request.MaxNumberOfPayments}, {request.IsFundsAccumulable}, {request.FundsExpirationDate}, {request.TriggerFundExpiration}, {request.NumberDaysUntilFundsExpire}, {request.Types})");
             if (request.StartDate > request.EndDate)
             {
                 logger.LogWarning("[Mutation] CreateSubscriptionInProject - EndDateMustBeAfterStartDateException");
                 throw new EndDateMustBeAfterStartDateException();
+            }
+
+            if (request.IsSubscriptionPaymentBasedCardUsage && (!request.MaxNumberOfPayments.IsSet() || request.MaxNumberOfPayments.Value <= 0))
+            {
+                logger.LogWarning("[Mutation] CreateSubscriptionInProject - MaxNumberOfPaymentsCantBeZeroException");
+                throw new MaxNumberOfPaymentsCantBeZeroException();
+            }
+
+            if (request.TriggerFundExpiration == FundsExpirationTrigger.NumberOfDays && (!request.NumberDaysUntilFundsExpire.IsSet() || request.NumberDaysUntilFundsExpire.Value <= 0))
+            {
+                logger.LogWarning("[Mutation] CreateSubscriptionInProject - NumberDaysUntilFundsExpireCantBeZeroException");
+                throw new NumberDaysUntilFundsExpireCantBeZeroException();
             }
 
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
@@ -67,10 +78,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 StartDate = request.StartDate.AtMidnight().InUtc().ToDateTimeUtc(),
                 EndDate = request.EndDate.AtMidnight().InUtc().ToDateTimeUtc(),
                 IsFundsAccumulable = request.IsFundsAccumulable,
+                IsSubscriptionPaymentBasedCardUsage = request.IsSubscriptionPaymentBasedCardUsage,
+                TriggerFundExpiration = request.TriggerFundExpiration,
                 Types = new List<SubscriptionType>()
             };
 
+            request.MaxNumberOfPayments.IfSet(x => subscription.MaxNumberOfPayments = x);
             request.FundsExpirationDate.IfSet(x => subscription.FundsExpirationDate = x.AtMidnight().InUtc().ToDateTimeUtc());
+            request.NumberDaysUntilFundsExpire.IfSet(x => subscription.NumberDaysUntilFundsExpire = x);
 
             db.Subscriptions.Add(subscription);
 
@@ -125,12 +140,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         public class Input : HaveProjectId, IRequest<Payload>
         {
             public string Name { get; set; }
-            public SubscriptionMonthlyPaymentMoment MonthlyPaymentMoment { get; set; }
             public LocalDate StartDate { get; set; }
             public LocalDate EndDate { get; set; }
-            public Maybe<LocalDate> FundsExpirationDate { get; set; }
-            public List<SubscriptionTypeInput> Types { get; set; }
+            public SubscriptionMonthlyPaymentMoment MonthlyPaymentMoment { get; set; }
+            public bool IsSubscriptionPaymentBasedCardUsage { get; set; }
+            public Maybe<int> MaxNumberOfPayments { get; set; }
             public bool IsFundsAccumulable { get; set; }
+            public Maybe<LocalDate> FundsExpirationDate { get; set; }
+            public FundsExpirationTrigger TriggerFundExpiration { get; set; }
+            public Maybe<int> NumberDaysUntilFundsExpire { get; set; }
+            public List<SubscriptionTypeInput> Types { get; set; }
         }
 
         [MutationPayload]
@@ -154,6 +173,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
         public class ProjectNotFoundException : RequestValidationException { }
         public class EndDateMustBeAfterStartDateException : RequestValidationException { }
+        public class MaxNumberOfPaymentsCantBeZeroException : RequestValidationException { }
+        public class NumberDaysUntilFundsExpireCantBeZeroException : RequestValidationException { }
         public class SubscriptionTypesCantBeEmpty : RequestValidationException { }
         public class BeneficiaryTypeNotFoundException : RequestValidationException { }
         public class ProductGroupNotFoundException : RequestValidationException { }

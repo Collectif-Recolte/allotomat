@@ -390,6 +390,8 @@ const {
             budgetAllowancesTotal
             totalPayment
             paymentRemaining
+            isSubscriptionPaymentBasedCardUsage
+            maxNumberOfPayments
             types {
               id
               amount
@@ -435,6 +437,8 @@ const subscriptions = useResult(resultOrganizations, null, (data) => {
     budgetAllowance: x.budgetAllowancesTotal,
     totalPayment: x.totalPayment,
     paymentRemaining: x.paymentRemaining,
+    isSubscriptionPaymentBasedCardUsage: x.isSubscriptionPaymentBasedCardUsage,
+    maxNumberOfPayments: x.maxNumberOfPayments,
     types: x.types
   }));
 });
@@ -549,6 +553,12 @@ const budgetAllowanceBySubscription = computed(() => {
 const subscriptionPaymentRemainingCount = computed(() => {
   if (selectedSubscription.value === null) return "-";
   var selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
+  if (selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage) {
+    return `${Math.min(selectedSubscriptionData.paymentRemaining, selectedSubscriptionData.maxNumberOfPayments)}/${Math.min(
+      selectedSubscriptionData.totalPayment,
+      selectedSubscriptionData.maxNumberOfPayments
+    )}`;
+  }
   return `${selectedSubscriptionData.paymentRemaining}/${selectedSubscriptionData.totalPayment}`;
 });
 
@@ -578,6 +588,9 @@ const amountThatWillBeAllocated = computed(() => {
 
     amount += beneficiaryPaymentAmount;
   });
+  if (selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage) {
+    return amount * Math.min(selectedSubscriptionData.paymentRemaining, selectedSubscriptionData.maxNumberOfPayments);
+  }
   return amount * selectedSubscriptionData.paymentRemaining;
 });
 
@@ -713,12 +726,16 @@ function onAutoSelect() {
   var amount = 0;
   var selectedBeneficiaries = [];
 
+  var paymentRemaining = selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage
+    ? Math.min(selectedSubscriptionData.paymentRemaining, selectedSubscriptionData.maxNumberOfPayments)
+    : selectedSubscriptionData.paymentRemaining;
+
   beneficiariesToSelect.forEach((x) => {
     var beneficiaryPaymentAmount = selectedSubscriptionData.types
       .filter((y) => y.beneficiaryType.id === x.beneficiaryType.id)
       .reduce((accumulator, type) => accumulator + type.amount, 0);
-    if (amount + beneficiaryPaymentAmount * selectedSubscriptionData.paymentRemaining <= maxAllocation.value) {
-      amount += beneficiaryPaymentAmount * selectedSubscriptionData.paymentRemaining;
+    if (amount + beneficiaryPaymentAmount * paymentRemaining <= maxAllocation.value) {
+      amount += beneficiaryPaymentAmount * paymentRemaining;
       selectedBeneficiaries.push(x);
     }
   });
