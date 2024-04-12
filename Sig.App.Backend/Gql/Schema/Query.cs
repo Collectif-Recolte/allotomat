@@ -379,7 +379,7 @@ namespace Sig.App.Backend.Gql.Schema
         [RequirePermission(GlobalPermission.ManageTransactions)]
         [Description("All transactions")]
         public static async Task<Pagination<TransactionLogGraphType>> TransactionLogs(this GqlQuery _, [Inject] IMediator mediator,
-            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText)
+            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText, string timeZoneId)
         {
             var results = await mediator.Send(new SearchTransactionLogs.Query
             {
@@ -392,7 +392,8 @@ namespace Sig.App.Backend.Gql.Schema
                 WithoutSubscription = withoutSubscription,
                 Categories = categories,
                 TransactionTypes = transactionTypes,
-                SearchText = searchText
+                SearchText = searchText,
+                TimeZoneId = timeZoneId,
             });
 
             return results.Map(x => new TransactionLogGraphType(x));
