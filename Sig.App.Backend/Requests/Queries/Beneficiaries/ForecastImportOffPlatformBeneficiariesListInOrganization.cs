@@ -28,7 +28,7 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
 
         public async Task<ImportOffPlatformBeneficiariesListPayload> Handle(Input request, CancellationToken cancellationToken)
         {
-            var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
+            var today = clock.GetCurrentInstant().ToDateTimeUtc();
 
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);

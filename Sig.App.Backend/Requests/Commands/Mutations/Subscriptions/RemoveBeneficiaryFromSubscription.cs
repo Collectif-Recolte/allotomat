@@ -67,7 +67,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 throw new BeneficiaryNotInSubscriptionException();
             }
             
-            var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
+            var today = clock.GetCurrentInstant().ToDateTimeUtc();
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             var currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
 

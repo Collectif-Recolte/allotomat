@@ -108,7 +108,8 @@ namespace Sig.App.Backend.BackgroundJobs
                         foreach (var subscriptionType in subscriptionTypes)
                         {
                             var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
-                            var now = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
+
+                            var now = clock.GetCurrentInstant().ToDateTimeUtc();
                             card.Transactions.Add(new SubscriptionAddingFundTransaction()
                             {
                                 TransactionUniqueId = transactionUniqueId,
@@ -208,7 +209,7 @@ namespace Sig.App.Backend.BackgroundJobs
                     if (beneficiary.Card != null)
                     {
                         var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
-                        var now = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
+                        var now = clock.GetCurrentInstant().ToDateTimeUtc();
                         db.Transactions.Add(new OffPlatformAddingFundTransaction()
                         {
                             TransactionUniqueId = transactionUniqueId,
@@ -300,7 +301,7 @@ namespace Sig.App.Backend.BackgroundJobs
             db.TransactionLogs.Add(new TransactionLog()
             {
                 Discriminator = TransactionLogDiscriminator.RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog,
-                CreatedAtUtc = clock.GetCurrentInstant().InUtc().ToDateTimeUtc(),
+                CreatedAtUtc = clock.GetCurrentInstant().ToDateTimeUtc(),
                 TotalAmount = subscriptionTypes.Sum(x => x.Amount),
                 BeneficiaryId = beneficiary.Id,
                 BeneficiaryID1 = beneficiary.ID1,
