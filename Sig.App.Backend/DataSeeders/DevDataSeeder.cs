@@ -414,8 +414,8 @@ public class DevDataSeeder : IDataSeeder
             AvailableFund = 70,
             SubscriptionType = db.SubscriptionTypes.First(),
             Transactions = new List<PaymentTransaction>(),
-            ExpirationDate = DateTime.Now.AddMonths(3),
-            CreatedAtUtc = DateTime.Now.AddMonths(-1),
+            ExpirationDate = DateTime.UtcNow.AddMonths(3),
+            CreatedAtUtc = DateTime.UtcNow.AddMonths(-1),
             ProductGroup = productGroup
         };
         card.Transactions.Add(transaction);
@@ -448,7 +448,7 @@ public class DevDataSeeder : IDataSeeder
             CardNumber = card.CardNumber,
             ProjectId = card.ProjectId,
             ProjectName = card.Project.Name,
-            CreatedAtUtc = DateTime.Now.AddMonths(-1),
+            CreatedAtUtc = DateTime.UtcNow.AddMonths(-1),
             SubscriptionId = beneficiary.Subscriptions.First().SubscriptionId,
             SubscriptionName = beneficiary.Subscriptions.First().Subscription.Name,
             OrganizationId = beneficiary.OrganizationId,
@@ -486,7 +486,7 @@ public class DevDataSeeder : IDataSeeder
             return;
         }
 
-        var transaction1 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 25.75m, CreatedAtUtc = DateTime.Now.AddMonths(-1), Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>() };
+        var transaction1 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 25.75m, CreatedAtUtc = DateTime.UtcNow.AddMonths(-1), Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>() };
         transaction1.TransactionByProductGroups = new List<PaymentTransactionProductGroup>() { new PaymentTransactionProductGroup() { Amount = 25.75m, ProductGroup = productGroup, PaymentTransaction = transaction1 } };
         addingFundsTransaction.AvailableFund -= transaction1.Amount;
         var fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroup.Id);
@@ -524,7 +524,7 @@ public class DevDataSeeder : IDataSeeder
             CardNumber = card.CardNumber,
             ProjectId = card.ProjectId,
             ProjectName = card.Project.Name,
-            CreatedAtUtc = DateTime.Now.AddMonths(-1),
+            CreatedAtUtc = DateTime.UtcNow.AddMonths(-1),
             SubscriptionId = beneficiary.Subscriptions.First().SubscriptionId,
             SubscriptionName = beneficiary.Subscriptions.First().Subscription.Name,
             OrganizationId = beneficiary.OrganizationId,
@@ -534,7 +534,7 @@ public class DevDataSeeder : IDataSeeder
             TransactionLogProductGroups = transactionLogProductGroups
         });
         
-        var transaction2 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 32.33m, CreatedAtUtc = DateTime.Now, Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>() };
+        var transaction2 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 32.33m, CreatedAtUtc = DateTime.UtcNow, Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>() };
         transaction2.TransactionByProductGroups = new List<PaymentTransactionProductGroup>() { new PaymentTransactionProductGroup() { Amount = 32.33m, ProductGroup = productGroup, PaymentTransaction = transaction1 } };
         addingFundsTransaction.AvailableFund -= transaction2.Amount;
         fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroup.Id);
@@ -572,7 +572,7 @@ public class DevDataSeeder : IDataSeeder
             CardNumber = card.CardNumber,
             ProjectId = card.ProjectId,
             ProjectName = card.Project.Name,
-            CreatedAtUtc = DateTime.Now.AddMonths(-1),
+            CreatedAtUtc = DateTime.UtcNow.AddMonths(-1),
             SubscriptionId = beneficiary.Subscriptions.First().SubscriptionId,
             SubscriptionName = beneficiary.Subscriptions.First().Subscription.Name,
             OrganizationId = beneficiary.OrganizationId,
