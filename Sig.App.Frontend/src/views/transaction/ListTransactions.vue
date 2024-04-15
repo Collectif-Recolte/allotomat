@@ -277,18 +277,26 @@ const {
       }
     }
   `,
-  () => ({
-    page: page.value,
-    projectId: projectId.value,
-    startDate: dateFrom.value,
-    endDate: dateTo.value,
-    organizations: organizations.value,
-    subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
-    withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
-    categories: beneficiaryTypes.value,
-    transactionTypes: transactionTypes.value,
-    searchText: searchText.value
-  }),
+  () => {
+    var dateFromLocal = new Date(dateFrom.value);
+    dateFromLocal.setHours(0, 0, 0, 0);
+
+    var dateToLocal = new Date(dateTo.value);
+    dateToLocal.setHours(23, 59, 59, 999);
+
+    return {
+      page: page.value,
+      projectId: projectId.value,
+      startDate: dateFromLocal,
+      endDate: dateToLocal,
+      organizations: organizations.value,
+      subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
+      withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
+      categories: beneficiaryTypes.value,
+      transactionTypes: transactionTypes.value,
+      searchText: searchText.value
+    };
+  },
   {
     enabled: projectsOrOrganizationLoaded
   }
