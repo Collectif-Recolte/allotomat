@@ -15,10 +15,16 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
     public class SubscriptionGraphType
     {
         private readonly Subscription subscription;
+
         public Id Id => subscription.GetIdentifier();
         public NonNull<string> Name => subscription.Name;
         public SubscriptionMonthlyPaymentMoment MonthlyPaymentMoment => subscription.MonthlyPaymentMoment;
         public bool IsFundsAccumulable => subscription.IsFundsAccumulable;
+        public bool IsSubscriptionPaymentBasedCardUsage => subscription.IsSubscriptionPaymentBasedCardUsage;
+        public int? MaxNumberOfPayments => subscription.MaxNumberOfPayments;
+        public FundsExpirationTrigger TriggerFundExpiration => subscription.TriggerFundExpiration;
+        public int? NumberDaysUntilFundsExpire => subscription.NumberDaysUntilFundsExpire;
+
         public int TotalPayment => subscription.GetTotalPayment();
 
         public SubscriptionGraphType(Subscription subscription)

@@ -59,7 +59,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 throw new CardLostException();
             }
 
-            var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
+            var today = clock.GetCurrentInstant().ToDateTimeUtc();
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             var currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
 
@@ -72,7 +72,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 Card = card,
                 Amount = request.Amount,
                 AvailableFund = request.Amount,
-                CreatedAtUtc = clock.GetCurrentInstant().InUtc().ToDateTimeUtc(),
+                CreatedAtUtc = clock.GetCurrentInstant().ToDateTimeUtc(),
                 ProductGroup = loyaltyProductGroup
             };
             card.Transactions.Add(transaction);

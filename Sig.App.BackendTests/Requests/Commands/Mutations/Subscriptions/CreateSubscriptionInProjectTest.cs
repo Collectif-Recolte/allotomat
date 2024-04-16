@@ -124,7 +124,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 ProjectId = project.GetIdentifier(),
                 Name = "Subscription 1",
                 StartDate = new LocalDate(2022, 3, 30),
-                EndDate = new LocalDate(2022, 1, 1),
+                EndDate = new LocalDate(2022, 2, 1),
                 MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
                 Types = new List<CreateSubscriptionInProject.SubscriptionTypeInput>()
                 {
@@ -145,6 +145,72 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<CreateSubscriptionInProject.EndDateMustBeAfterStartDateException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfMaxNumberOfPaymentsCantBeZero()
+        {
+            var input = new CreateSubscriptionInProject.Input()
+            {
+                ProjectId = project.GetIdentifier(),
+                Name = "Subscription 1",
+                StartDate = new LocalDate(2022, 3, 30),
+                EndDate = new LocalDate(2022, 4, 1),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
+                Types = new List<CreateSubscriptionInProject.SubscriptionTypeInput>()
+                {
+                    new CreateSubscriptionInProject.SubscriptionTypeInput()
+                    {
+                        Amount = 25
+                    },
+                    new CreateSubscriptionInProject.SubscriptionTypeInput()
+                    {
+                        Amount = 50
+                    },
+                    new CreateSubscriptionInProject.SubscriptionTypeInput()
+                    {
+                        Amount = 100
+                    }
+                },
+                MaxNumberOfPayments = 0,
+                IsSubscriptionPaymentBasedCardUsage = true
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<CreateSubscriptionInProject.MaxNumberOfPaymentsCantBeZeroException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfNumberDaysUntilFundsExpireCantBeZero()
+        {
+            var input = new CreateSubscriptionInProject.Input()
+            {
+                ProjectId = project.GetIdentifier(),
+                Name = "Subscription 1",
+                StartDate = new LocalDate(2022, 3, 30),
+                EndDate = new LocalDate(2022, 6, 1),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
+                Types = new List<CreateSubscriptionInProject.SubscriptionTypeInput>()
+                {
+                    new CreateSubscriptionInProject.SubscriptionTypeInput()
+                    {
+                        Amount = 25
+                    },
+                    new CreateSubscriptionInProject.SubscriptionTypeInput()
+                    {
+                        Amount = 50
+                    },
+                    new CreateSubscriptionInProject.SubscriptionTypeInput()
+                    {
+                        Amount = 100
+                    }
+                },
+                TriggerFundExpiration = FundsExpirationTrigger.NumberOfDays,
+                NumberDaysUntilFundsExpire = 0
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<CreateSubscriptionInProject.NumberDaysUntilFundsExpireCantBeZeroException>();
         }
     }
 }

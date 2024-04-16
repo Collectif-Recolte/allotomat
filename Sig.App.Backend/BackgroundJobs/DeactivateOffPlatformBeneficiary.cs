@@ -38,7 +38,7 @@ namespace Sig.App.Backend.BackgroundJobs
 
         public async Task Run()
         {
-            var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
+            var today = clock.GetCurrentInstant().ToDateTimeUtc();
 
             var activeBeneficiaries = await db.Beneficiaries.Where(x => x is OffPlatformBeneficiary && (x as OffPlatformBeneficiary).EndDate <= today && (x as OffPlatformBeneficiary).IsActive).Select(x => x as OffPlatformBeneficiary).ToListAsync();
 

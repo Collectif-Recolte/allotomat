@@ -108,5 +108,32 @@ namespace Sig.App.Backend.Helpers
                 }
             }
         }
+
+        public static DateTime GetPreviousPaymentDateTime(IClock clock, SubscriptionMonthlyPaymentMoment moment)
+        {
+            var today = clock
+                .GetCurrentInstant()
+                .ToDateTimeUtc();
+
+            if (moment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth)
+            {
+                return new DateTime(today.Year, today.Month, 1).AddMonths(-1);
+            }
+            else if (moment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth)
+            {
+                return new DateTime(today.Year, today.Month, 15).AddMonths(-1);
+            }
+            else
+            {
+                if (today.Day >= 15)
+                {
+                    return new DateTime(today.Year, today.Month, 1);
+                }
+                else
+                {
+                    return new DateTime(today.Year, today.Month, 15).AddMonths(-1);
+                }
+            }
+        }
     }
 }

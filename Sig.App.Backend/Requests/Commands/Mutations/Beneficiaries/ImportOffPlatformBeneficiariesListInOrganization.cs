@@ -46,7 +46,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             logger.LogInformation($"[Mutation] ImportOffPlatformBeneficiariesListInOrganization({request.Items.Length})");
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             var currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
-            var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
+            var today = clock.GetCurrentInstant().ToDateTimeUtc();
 
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
@@ -152,7 +152,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                         }
 
                         var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
-                        var now = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
+                        var now = clock.GetCurrentInstant().ToDateTimeUtc();
                         db.Transactions.Add(new OffPlatformAddingFundTransaction()
                         {
                             TransactionUniqueId = transactionUniqueId,

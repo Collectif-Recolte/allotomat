@@ -87,7 +87,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
                 throw new NewCardNotInProjectException();
             }
 
-            var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
+            var today = clock.GetCurrentInstant().ToDateTimeUtc();
 
             foreach (var transaction in originalCard.Transactions)
             {
