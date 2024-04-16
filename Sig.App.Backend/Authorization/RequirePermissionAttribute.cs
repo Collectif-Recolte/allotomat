@@ -74,6 +74,8 @@ namespace Sig.App.Backend.Authorization
                 return await HasSubscriptionPermissions(claimsPrincipal, sp, input);
             if (permission is BeneficiaryTypePermission btp)
                 return await HasBeneficiaryTypePermissions(claimsPrincipal, btp, input);
+            if (permission is CardPermission cp)
+                return await HasCardPermissions(claimsPrincipal, cp, input);
             return false;
         }
 
@@ -115,8 +117,14 @@ namespace Sig.App.Backend.Authorization
 
         private async Task<bool> HasBeneficiaryTypePermissions(ClaimsPrincipal claimsPrincipal, BeneficiaryTypePermission permission, object input)
         {
-            var subscriptionPermissions = await permissionService.GetBeneficiaryTypePermissions(claimsPrincipal, GetBeneficiaryTypeIdFromInput(input));
-            return subscriptionPermissions.Contains(permission);
+            var beneficiaryTypePermissions = await permissionService.GetBeneficiaryTypePermissions(claimsPrincipal, GetBeneficiaryTypeIdFromInput(input));
+            return beneficiaryTypePermissions.Contains(permission);
+        }
+
+        private async Task<bool> HasCardPermissions(ClaimsPrincipal claimsPrincipal, CardPermission permission, object input)
+        {
+            var cardPermissions = await permissionService.GetCardPermissions(claimsPrincipal, GetCardIdFromInput(input));
+            return cardPermissions.Contains(permission);
         }
 
         private string GetProjectIdFromInput(object input)
@@ -303,6 +311,24 @@ namespace Sig.App.Backend.Authorization
             }
 
             return -1;
+        }
+
+        private string GetCardIdFromInput(object input)
+        {
+            if (input is HaveCardId hci)
+            {
+                return hci.CardId.IdentifierForType<Card>();
+            }
+            if (input is CardGraphType cgt)
+            {
+                return cgt.Id.IdentifierForType<Card>();
+            }
+            if (input is Id id)
+            {
+                return id.IdentifierForType<Card>();
+            }
+
+            return null;
         }
 
         bool IMetaDataAttribute.ShouldBeApplied(GraphEntityInfo entity) => true;

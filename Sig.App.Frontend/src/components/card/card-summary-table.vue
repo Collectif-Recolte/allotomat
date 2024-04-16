@@ -10,7 +10,8 @@
     "card-number":"N°",
     "card-assigned": "Assigned",
     "card-unassigned": "Unassigned",
-    "card-deactivated": "Deactivated"
+    "card-deactivated": "Deactivated",
+    "card-disabled": "Card disabled",
 	},
 	"fr": {
     "card-status": "Statut",
@@ -23,6 +24,7 @@
     "card-assigned": "Assignée",
     "card-unassigned": "Non assignée",
     "card-deactivated": "Désactivée",
+    "card-disabled": "Carte désactivée",
   }
 }
 </i18n>
@@ -44,6 +46,12 @@
           :label="getCardStatus(slotProps.item)"
           :is-dark-theme="isCardTagDarkTheme(slotProps.item)"
           :bg-color-class="getCardTagBgColor(slotProps.item)" />
+        <PfTag
+          v-if="slotProps.item.isDisabled"
+          class="ml-2"
+          :label="t('card-disabled')"
+          is-dark-theme
+          bg-color-class="bg-red-500" />
         <PfButtonLink
           v-if="!beneficiariesAreAnonymous && haveBeneficiary(slotProps.item)"
           class="ml-2"

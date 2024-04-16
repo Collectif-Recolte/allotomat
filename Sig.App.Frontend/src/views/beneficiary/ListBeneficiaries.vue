@@ -140,6 +140,9 @@
               :search-filter="searchText"
               :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
               :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
+              :card-is-disabled="CARD_IS_DISABLED"
+              :card-is-enabled="CARD_IS_ENABLED"
+              :selected-card-disabled="cardDisabled"
               @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
               @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
               @subscriptionsUnchecked="onSubscriptionsUnchecked"
@@ -150,6 +153,8 @@
               @cardStatusUnchecked="onCardStatusUnchecked"
               @paymentConflictStatusChecked="onPaymentConflictStatusChecked"
               @paymentConflictStatusUnchecked="onPaymentConflictStatusUnchecked"
+              @cardIsDisabledChecked="onCardDisabledChecked"
+              @cardIsDisabledUnchecked="onCardDisabledUnchecked"
               @resetFilters="onResetFilters"
               @search="onSearch" />
           </div>
@@ -247,7 +252,9 @@ import {
   BENEFICIARY_WITH_PAYMENT_CONFLICT,
   BENEFICIARY_WITHOUT_PAYMENT_CONFLICT,
   LANGUAGE_FILTER_EN,
-  LANGUAGE_FILTER_FR
+  LANGUAGE_FILTER_FR,
+  CARD_IS_ENABLED,
+  CARD_IS_DISABLED
 } from "@/lib/consts/enums";
 import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
 import { LANG_EN } from "@/lib/consts/langs";
@@ -318,6 +325,7 @@ const subscriptions = ref([]);
 const status = ref([]);
 const cardStatus = ref([]);
 const conflictPaymentStatus = ref([]);
+const cardDisabled = ref([]);
 const selectedOrganization = ref(currentOrganization);
 const searchInput = ref("");
 const searchText = ref("");
@@ -330,6 +338,7 @@ const filteredQuery = computed(() => {
     status: status.value.length > 0 ? status.value.toString() : undefined,
     cardStatus: cardStatus.value.length > 0 ? cardStatus.value.toString() : undefined,
     paymentConflict: conflictPaymentStatus.value.length > 0 ? conflictPaymentStatus.value.toString() : undefined,
+    cardDisabled: cardDisabled.value.length > 0 ? cardDisabled.value.toString() : undefined,
     text: searchText.value ? searchText.value : undefined
   };
 });
@@ -350,6 +359,10 @@ if (route.query.cardStatus) {
 
 if (route.query.paymentConflict) {
   conflictPaymentStatus.value = route.query.paymentConflict.split(",");
+}
+
+if (route.query.cardDisabled) {
+  cardDisabled.value = route.query.cardDisabled.split(",");
 }
 
 if (route.query.text) {
@@ -449,6 +462,7 @@ const {
       $searchText: String
       $withCard: Boolean
       $withConflictPayment: Boolean
+      $withCardDisabled: Boolean
     ) {
       organization(id: $id) {
         id
@@ -462,6 +476,7 @@ const {
           searchText: $searchText
           withCard: $withCard
           withConflictPayment: $withConflictPayment
+          withCardDisabled: $withCardDisabled
         ) {
           conflictPaymentCount
           totalCount
@@ -481,6 +496,7 @@ const {
               id
               cardNumber
               programCardId
+              isDisabled
               funds {
                 id
                 amount
@@ -615,6 +631,16 @@ function onPaymentConflictStatusUnchecked(value) {
   updateUrl();
 }
 
+function onCardDisabledChecked(value) {
+  cardDisabled.value.push(value);
+  updateUrl();
+}
+
+function onCardDisabledUnchecked(value) {
+  cardDisabled.value = cardDisabled.value.filter((x) => x !== value);
+  updateUrl();
+}
+
 function onSubscriptionsUnchecked(value) {
   subscriptions.value = subscriptions.value.filter((x) => x !== value);
   updateUrl();
@@ -625,6 +651,7 @@ function onResetFilters() {
   beneficiaryTypes.value = [];
   cardStatus.value = [];
   conflictPaymentStatus.value = [];
+  cardDisabled.value = [];
   onResetSearch();
   updateUrl();
 }
@@ -649,6 +676,7 @@ function beneficiariesVariables() {
       conflictPaymentStatus.value.length === 1
         ? conflictPaymentStatus.value.indexOf(BENEFICIARY_WITH_PAYMENT_CONFLICT) !== -1
         : null,
+    withCardDisabled: cardDisabled.value.length === 1 ? cardDisabled.value.indexOf(CARD_IS_DISABLED) !== -1 : null,
     searchText: searchText.value
   };
 }

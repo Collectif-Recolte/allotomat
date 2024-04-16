@@ -18,7 +18,12 @@
     "card-assigned": "Assigned",
     "card-unassigned": "Unassigned",
     "card-deactivated": "Deactivated",
-    "search-placeholder": "Search by ID or card number"
+    "search-placeholder": "Search by ID or card number",
+    "beneficiary-disable-card": "Disable card",
+    "beneficiary-enable-card": "Réactiver la carte",
+    "card-disabled-status": "Card status",
+    "card-is-disabled": "Card is disabled",
+    "card-is-enabled": "Card is enabled"
 	},
 	"fr": {
 		"generate-cards": "Générer de nouvelles cartes",
@@ -38,7 +43,12 @@
     "card-assigned": "Assignée",
     "card-unassigned": "Non assignée",
     "card-deactivated": "Désactivée",
-    "search-placeholder": "Chercher par ID ou n° de carte"
+    "search-placeholder": "Chercher par ID ou n° de carte",
+    "beneficiary-disable-card": "Désactiver la carte",
+    "beneficiary-enable-card": "Réactiver la carte",
+    "card-disabled-status": "État de la carte",
+    "card-is-disabled": "Carte désactivée",
+    "card-is-enabled": "Carte activée"
 	}
 }
 </i18n>
@@ -92,6 +102,14 @@
                 :label="t('card-status')"
                 :options="availableCardStatus"
                 @input="onCardStatusChecked" />
+              <PfFormInputCheckboxGroup
+                id="cardDisabled"
+                class="mt-3"
+                is-filter
+                :value="selectedCardDisabled"
+                :label="t('card-disabled-status')"
+                :options="cardDisabled"
+                @input="onCardIsDisabledChecked" />
             </UiFilter>
           </template>
         </UiTableHeader>
@@ -154,7 +172,9 @@ import {
   URL_GIFT_CARD_ADD,
   URL_CARDS_QRCODE_PREVIEW,
   URL_CARDS_UNASSIGN,
-  URL_CARDS_LOST
+  URL_CARDS_LOST,
+  URL_CARDS_ENABLE,
+  URL_CARDS_DISABLE
 } from "@/lib/consts/urls";
 import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
 import {
@@ -162,7 +182,9 @@ import {
   CARD_STATUS_UNASSIGNED,
   CARD_STATUS_DEACTIVATED,
   CARD_STATUS_LOST,
-  CARD_STATUS_GIFT
+  CARD_STATUS_GIFT,
+  CARD_IS_DISABLED,
+  CARD_IS_ENABLED
 } from "@/lib/consts/enums";
 
 import Title from "@/components/app/title";
@@ -171,6 +193,8 @@ import CardSummaryTable from "@/components/card/card-summary-table.vue";
 import ICON_CARD_LOST from "@/lib/icons/card-lost.json";
 import ICON_QR_CODE from "@/lib/icons/qrcode.json";
 import ICON_MINUS from "@/lib/icons/minus.json";
+import ICON_CLOSE from "@/lib/icons/close.json";
+import ICON_CARD_LINK from "@/lib/icons/card-link.json";
 
 const { getGlobalPermissions } = storeToRefs(useAuthStore());
 const { t } = useI18n();
@@ -179,6 +203,7 @@ const page = ref(1);
 const searchInput = ref("");
 const searchText = ref("");
 const selectedCardStatus = ref([]);
+const selectedCardDisabled = ref([]);
 
 const availableCardStatus = [
   { value: CARD_STATUS_ASSIGNED, label: t("card-assigned") },
@@ -187,6 +212,11 @@ const availableCardStatus = [
   { value: CARD_STATUS_LOST, label: t("lost-card-label") },
   { value: CARD_STATUS_GIFT, label: t("gift-card-label") }
 ];
+
+const cardDisabled = ref([
+  { value: CARD_IS_DISABLED, label: t("card-is-disabled") },
+  { value: CARD_IS_ENABLED, label: t("card-is-enabled") }
+]);
 
 usePageTitle(t("title"));
 
@@ -200,7 +230,7 @@ const {
   refetch: refetchCards
 } = useQuery(
   gql`
-    query Projects($page: Int!, $status: [CardStatus!], $searchText: String) {
+    query Projects($page: Int!, $status: [CardStatus!], $searchText: String, $withCardDisabled: Boolean) {
       projects {
         id
         name
@@ -209,13 +239,14 @@ const {
         cardStats {
           cardsUnassigned
         }
-        cards(page: $page, limit: 30, status: $status, searchText: $searchText) {
+        cards(page: $page, limit: 30, status: $status, searchText: $searchText, withCardDisabled: $withCardDisabled) {
           pageNumber
           pageSize
           totalCount
           totalPages
           items {
             id
+            isDisabled
             programCardId
             cardNumber
             status
@@ -244,6 +275,8 @@ function projectsVariables() {
   return {
     page: page.value,
     status: selectedCardStatus.value,
+    withCardDisabled:
+      selectedCardDisabled.value.length === 1 ? selectedCardDisabled.value.indexOf(CARD_IS_DISABLED) !== -1 : null,
     searchText: searchText.value
   };
 }
@@ -277,26 +310,86 @@ const getBeforeBtnGroup = (card) => [
 
 const getAfterBtnGroup = (card) => {
   if (card.beneficiary !== null) {
+    if (card.isDisabled) {
+      return [
+        {
+          label: t("lost-card"),
+          icon: ICON_CARD_LOST,
+          route: {
+            name: URL_CARDS_LOST,
+            params: { beneficiaryId: card.beneficiary.id, cardId: card.id }
+          }
+        },
+        {
+          label: t("beneficiary-enable-card"),
+          icon: ICON_CARD_LINK,
+          route: {
+            name: URL_CARDS_ENABLE,
+            params: { cardId: card.id }
+          }
+        },
+        {
+          label: t("remove-card"),
+          icon: ICON_MINUS,
+          route: {
+            name: URL_CARDS_UNASSIGN,
+            params: { beneficiaryId: card.beneficiary.id, cardId: card.id }
+          }
+        }
+      ];
+    } else {
+      return [
+        {
+          label: t("lost-card"),
+          icon: ICON_CARD_LOST,
+          route: {
+            name: URL_CARDS_LOST,
+            params: { beneficiaryId: card.beneficiary.id, cardId: card.id }
+          }
+        },
+        {
+          label: t("beneficiary-disable-card"),
+          icon: ICON_CLOSE,
+          route: {
+            name: URL_CARDS_DISABLE,
+            params: { cardId: card.id }
+          }
+        },
+        {
+          label: t("beneficiary-enable-card"),
+          icon: ICON_MINUS,
+          route: {
+            name: URL_CARDS_UNASSIGN,
+            params: { beneficiaryId: card.beneficiary.id, cardId: card.id }
+          }
+        }
+      ];
+    }
+  }
+  if (card.status === CARD_STATUS_GIFT) {
+    if (card.isDisabled) {
+      return [
+        {
+          label: t("beneficiary-enable-card"),
+          icon: ICON_CARD_LINK,
+          route: {
+            name: URL_CARDS_ENABLE,
+            params: { cardId: card.id }
+          }
+        }
+      ];
+    }
     return [
       {
-        label: t("lost-card"),
-        icon: ICON_CARD_LOST,
+        label: t("beneficiary-disable-card"),
+        icon: ICON_CLOSE,
         route: {
-          name: URL_CARDS_LOST,
-          params: { beneficiaryId: card.beneficiary.id, cardId: card.id }
-        }
-      },
-      {
-        label: t("remove-card"),
-        icon: ICON_MINUS,
-        route: {
-          name: URL_CARDS_UNASSIGN,
-          params: { beneficiaryId: card.beneficiary.id, cardId: card.id }
+          name: URL_CARDS_DISABLE,
+          params: { cardId: card.id }
         }
       }
     ];
   }
-  return [];
 };
 
 function onSearch() {
@@ -309,6 +402,7 @@ function resetSearch() {
   searchText.value = "";
   searchInput.value = "";
   selectedCardStatus.value = [];
+  selectedCardDisabled.value = [];
 }
 
 function onCardStatusChecked(input) {
@@ -319,8 +413,16 @@ function onCardStatusChecked(input) {
   }
 }
 
+function onCardIsDisabledChecked(input) {
+  if (input.isChecked) {
+    selectedCardDisabled.value.push(input.value);
+  } else {
+    selectedCardDisabled.value = selectedCardDisabled.value.filter((x) => x !== input.value);
+  }
+}
+
 const activeFiltersCount = computed(() => {
-  return selectedCardStatus.value.length;
+  return selectedCardStatus.value.length + selectedCardDisabled.value.length;
 });
 
 onBeforeRouteUpdate((to) => {

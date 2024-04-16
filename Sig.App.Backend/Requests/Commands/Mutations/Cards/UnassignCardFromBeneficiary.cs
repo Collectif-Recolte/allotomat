@@ -80,6 +80,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             if (loyaltyFund == null || loyaltyFund.Amount == 0)
             {
                 card.Status = CardStatus.Unassigned;
+                card.IsDisabled = false;
             }
             else
             {

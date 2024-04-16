@@ -547,6 +547,29 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         [Fact]
         public async Task ThrowsIfCardNotFound()
         {
+            card.IsDisabled = true;
+
+            DbContext.SaveChanges();
+
+            var input = new CreateTransaction.Input()
+            {
+                MarketId = market.GetIdentifier(),
+                Transactions = new List<CreateTransaction.TransactionInput>(),
+                CardId = card.GetIdentifier(),
+            };
+            input.Transactions.Add(new CreateTransaction.TransactionInput()
+            {
+                Amount = 30,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<CreateTransaction.CardIsDisabledException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfCardDisabled()
+        {
             var input = new CreateTransaction.Input()
             {
                 MarketId = market.GetIdentifier(),

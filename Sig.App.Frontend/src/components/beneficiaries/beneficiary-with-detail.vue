@@ -7,6 +7,7 @@
       "beneficiary-balance": "Balance",
       "beneficiary-without-subscription": "No subscription",
       "beneficiary-no-card": "No card",
+      "beneficiary-card-disabled": "Card disabled",
       "beneficiary-card-last-usage": "Last use"
     },
     "fr": {
@@ -16,6 +17,7 @@
       "beneficiary-balance": "Solde",
       "beneficiary-without-subscription": "Pas d'abonnement",
       "beneficiary-no-card": "Pas de carte",
+      "beneficiary-card-disabled": "Carte désactivée",
       "beneficiary-card-last-usage": "Dernier usage"
     }
   }
@@ -86,6 +88,11 @@
               <template v-if="getCardProgramId() || getCardNumber()">
                 <span :class="ddClasses" class="block">
                   {{ getCardProgramId() }}
+                  <PfTag
+                    v-if="beneficiary.card.isDisabled"
+                    :label="t('beneficiary-card-disabled')"
+                    is-dark-theme
+                    bg-color-class="bg-red-500" />
                 </span>
                 <span class="block text-p4">
                   {{ getCardNumber() }}

@@ -492,6 +492,30 @@ export default [
         }
       },
       {
+        name: urls.URL_BENEFICIARY_CARD_DISABLE,
+        path: ":beneficiaryId/disable-card/:cardId",
+        component: () => import("@/views/card/DisableCard.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_BENEFICIARY_CARD_ENABLE,
+        path: ":beneficiaryId/enable-card/:cardId",
+        component: () => import("@/views/card/EnableCard.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_BENEFICIARY_CARD_UNASSIGN,
+        path: ":beneficiaryId/unassign/:cardId",
+        component: () => import("@/views/card/UnassignCard.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
         name: urls.URL_BENEFICIARY_CARD_LOST,
         path: ":beneficiaryId/lost-card/:cardId",
         component: () => import("@/views/card/TransferCard.vue"),
@@ -625,6 +649,22 @@ export default [
         name: urls.URL_GIFT_CARD_ADD,
         path: "add-gift-card",
         component: () => import("@/views/card/AddGiftCard.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_CARDS_DISABLE,
+        path: ":cardId/disable-card",
+        component: () => import("@/views/card/DisableCard.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_CARDS_ENABLE,
+        path: ":cardId/enable-card",
+        component: () => import("@/views/card/EnableCard.vue"),
         meta: {
           claim: GLOBAL_MANAGE_CARDS
         }

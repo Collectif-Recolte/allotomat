@@ -101,6 +101,18 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
                 }
             }
 
+            if (request.WithCardDisabled.IsSet())
+            {
+                if (request.WithCardDisabled.Value)
+                {
+                    query = query.Where(x => x.Card.IsDisabled == request.WithCardDisabled.Value);
+                }
+                else
+                {
+                    query = query.Where(x => x.Card.IsDisabled == request.WithCardDisabled.Value || x.Card == null);
+                }
+            }
+
             if (request.Status != null)
             {
                 var isActive = request.Status.Contains(BeneficiaryStatus.Active);
@@ -147,6 +159,7 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
             public Maybe<bool> WithCard { get; set; }
             public Maybe<bool> WithConflictPayment { get; set; }
             public Maybe<string> SearchText { get; set; }
+            public Maybe<bool> WithCardDisabled { get; set; }
         }
 
         private static IOrderedQueryable<Beneficiary> Sort(IQueryable<Beneficiary> query, BeneficiarySort sort, SortOrder order)
