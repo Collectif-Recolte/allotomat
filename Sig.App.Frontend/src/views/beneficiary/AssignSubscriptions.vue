@@ -769,10 +769,12 @@ async function confirmAssignation() {
     })
   );
 
-  displayConfirmDialog.value = false;
-
-  refetchBeneficiaries();
-  refetchOrganizations();
+  router.push({
+    name: URL_BENEFICIARY_ADMIN,
+    query: {
+      organizationId: selectedOrganization.value
+    }
+  });
 }
 
 function onFetchMoreBeneficiaries() {
