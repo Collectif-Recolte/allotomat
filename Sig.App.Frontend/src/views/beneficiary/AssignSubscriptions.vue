@@ -24,7 +24,9 @@
       "success-assign-beneficiaries-to-subscription": "The subscription \"{subscriptionName}\" was successfully assigned to {assignedBeneficiariesCount} participants out of the {totalBeneficiariesCount} selected.",
       "load-more-beneficiaries": "Load more participants",
       "sort": "Sort list",
-      "randomize": "Randomize list"
+      "randomize": "Randomize list",
+      "no-participants": "No participants in the selected organization",
+      "no-participants-in-subscription": "No participants found for this subscription"
     },
     "fr": {
       "selected-organization": "Organisme",
@@ -50,7 +52,9 @@
       "success-assign-beneficiaries-to-subscription": "L'abonnement «{subscriptionName}» a été assigné avec succès à {assignedBeneficiariesCount} participant-e-s.",
       "load-more-beneficiaries": "Charger plus de participants",
       "sort": "Trier la liste",
-      "randomize": "Trier la liste aléatoirement"
+      "randomize": "Trier la liste aléatoirement",
+      "no-participants": "Aucun participant dans l'organisme sélectionné",
+      "no-participants-in-subscription": "Aucun participant n'a été trouvé pour cet abonnement"
     }
   }
 </i18n>
@@ -220,14 +224,20 @@
             </PfButtonAction>
           </div>
         </template>
-        <UiEmptyPage v-else>
+        <UiEmptyPage v-else-if="selectedSubscription && anyFiltersActive">
           <UiCta
-            :img-src="require('@/assets/img/swan.jpg')"
+            :img-src="require('@/assets/img/participants.jpg')"
             :description="t('no-results')"
             :primary-btn-label="t('reset-search')"
             primary-btn-is-action
             @onPrimaryBtnClick="onResetFilters">
           </UiCta>
+        </UiEmptyPage>
+        <UiEmptyPage v-else-if="selectedSubscription">
+          <UiCta :img-src="require('@/assets/img/participants.jpg')" :description="t('no-participants-in-subscription')"> </UiCta>
+        </UiEmptyPage>
+        <UiEmptyPage v-else>
+          <UiCta :img-src="require('@/assets/img/participants.jpg')" :description="t('no-participants')"> </UiCta>
         </UiEmptyPage>
       </div>
 
@@ -627,6 +637,16 @@ const usageAmountDetail = computed(() => {
     .join(", ");
 });
 
+const anyFiltersActive = computed(() => {
+  return (
+    beneficiaryTypesFilter.value.length > 0 ||
+    subscriptionsFilter.value.length > 0 ||
+    status.value.length > 0 ||
+    cardStatus.value.length > 0 ||
+    searchText.value !== ""
+  );
+});
+
 function onOrganizationSelected(e) {
   selectedOrganization.value = e;
   changeOrganization(e);
@@ -850,6 +870,10 @@ function onResetSearch() {
   page.value = 1;
   searchText.value = "";
   searchInput.value = "";
+  beneficiaryTypesFilter.value = [];
+  subscriptionsFilter.value = [];
+  status.value = [];
+  cardStatus.value = [];
 }
 
 onBeforeRouteUpdate((to) => {
