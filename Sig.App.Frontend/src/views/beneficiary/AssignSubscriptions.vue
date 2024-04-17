@@ -116,22 +116,44 @@
                 </PfFormInputText>
               </div>
               <div class="flex items-center">
-                <button
-                  class="pf-button px-0 border-primary-700 border rounded-r-none"
-                  :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
-                  type="button"
-                  @click="isRandomized = false">
-                  <PfIcon :icon="SortIcon" size="lg" />
-                  <span class="sr-only">{{ t("sort") }}</span>
-                </button>
-                <button
-                  class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
-                  :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
-                  type="button"
-                  @click="isRandomized = true">
-                  <PfIcon :icon="RandomIcon" size="lg" />
-                  <span class="sr-only">{{ t("randomize") }}</span>
-                </button>
+                <template v-if="isMaxAllocationInputDisabled">
+                  <PfButtonAction
+                    class="pf-button px-0 border-primary-700 border rounded-r-none"
+                    :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                    type="button"
+                    @click="isRandomized = false"
+                    :disabled="isMaxAllocationInputDisabled">
+                    <PfIcon :icon="SortIcon" size="lg" />
+                    <span class="sr-only">{{ t("sort") }}</span>
+                  </PfButtonAction>
+                  <PfButtonAction
+                    class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
+                    :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                    type="button"
+                    @click="isRandomized = true"
+                    :disabled="isMaxAllocationInputDisabled">
+                    <PfIcon :icon="RandomIcon" size="lg" />
+                    <span class="sr-only">{{ t("randomize") }}</span>
+                  </PfButtonAction>
+                </template>
+                <template v-else>
+                  <button
+                    class="pf-button px-0 border-primary-700 border rounded-r-none"
+                    :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                    type="button"
+                    @click="isRandomized = false">
+                    <PfIcon :icon="SortIcon" size="lg" />
+                    <span class="sr-only">{{ t("sort") }}</span>
+                  </button>
+                  <button
+                    class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
+                    :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                    type="button"
+                    @click="isRandomized = true">
+                    <PfIcon :icon="RandomIcon" size="lg" />
+                    <span class="sr-only">{{ t("randomize") }}</span>
+                  </button>
+                </template>
               </div>
               <PfButtonAction
                 btn-style="primary"
