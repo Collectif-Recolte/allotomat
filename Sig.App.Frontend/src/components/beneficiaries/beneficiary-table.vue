@@ -7,7 +7,7 @@
       "beneficiary-id2": "ID 2",
       "beneficiary-payment": "Payment",
       "beneficiary-order-random": "Random order",
-      "beneficiary-payment-data": "${amount}",
+      "beneficiary-payment-data": "{amount}",
       "beneficiary-payment-empty": "$-"
     },
     "fr": {
@@ -17,7 +17,7 @@
       "beneficiary-id2": "ID 2",
       "beneficiary-payment": "Versement",
       "beneficiary-order-random": "Ordre aléatoire",
-      "beneficiary-payment-data": "{amount}$",
+      "beneficiary-payment-data": "{amount}",
       "beneficiary-payment-empty": "-$"
     }
   }
@@ -59,6 +59,8 @@
 <script setup>
 import { defineProps, defineEmits, computed } from "vue";
 import { useI18n } from "vue-i18n";
+
+import { getMoneyFormat } from "@/lib/helpers/money";
 
 import ICON_CREDIT_CARD from "@/lib/icons/credit-card.json";
 
@@ -126,10 +128,12 @@ function getBeneficiaryPayment(beneficiary) {
   if (props.selectedSubscription === "" || props.selectedSubscription === null) return t("beneficiary-payment-empty");
 
   return t("beneficiary-payment-data", {
-    amount: props.subscriptions
-      .find((subscription) => subscription.value === props.selectedSubscription)
-      .types.filter((type) => type.beneficiaryType.id === beneficiary.beneficiaryType.id)
-      .reduce((accumulator, type) => accumulator + type.amount, 0)
+    amount: getMoneyFormat(
+      props.subscriptions
+        .find((subscription) => subscription.value === props.selectedSubscription)
+        .types.filter((type) => type.beneficiaryType.id === beneficiary.beneficiaryType.id)
+        .reduce((accumulator, type) => accumulator + type.amount, 0)
+    )
   });
 }
 
