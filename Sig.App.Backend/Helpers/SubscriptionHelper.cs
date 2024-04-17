@@ -78,6 +78,8 @@ namespace Sig.App.Backend.Helpers
                 }
 
                 cardPaymentRemaining += monthsApart;
+
+                if (startDate.Day == 15) cardPaymentRemaining++;
             }
 
             return cardPaymentRemaining;
