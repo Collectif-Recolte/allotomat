@@ -39,13 +39,13 @@
           <!-- TODO liens vers les pdf -->
           <a
             class="text-p3 font-normal text-left pf-button pf-button--link"
-            :href="`/files/PrivacyPolicy-${locale}-20230505.pdf`"
+            :href="`/files/PrivacyPolicy-${locale}-20240416.pdf`"
             target="_blank"
             >{{ t("privacy-policy") }}</a
           >
           <a
             class="text-p3 font-normal text-left pf-button pf-button--link"
-            :href="`/files/TermsOfUse-${locale}-20230505.pdf`"
+            :href="`/files/TermsOfUse-${locale}-20240408.pdf`"
             target="_blank"
             >{{ t("terms-of-use") }}</a
           >
