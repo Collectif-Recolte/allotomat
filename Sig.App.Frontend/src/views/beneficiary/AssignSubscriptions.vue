@@ -10,8 +10,8 @@
       "auto-select-participants": "Auto select",
       "selected-subscription": "Subscription",
       "max-allocation": "Max allocation",
-      "amount-allocated": "{amount}$ will be allocated",
-      "budget-allowance-available": "Remaining budget allowance after allocation: {amount}$",
+      "amount-allocated": "{amount} will be allocated",
+      "budget-allowance-available": "Remaining budget allowance after allocation: {amount}",
       "no-results": "Your search yields no results",
       "reset-search": "Reset search",
       "assign-subscription-btn": "Confirm assignment",
@@ -19,12 +19,16 @@
       "cancel-confirmation": "Cancel",
       "submit-confirmation": "Yes, assign subscriptions",
       "subscription-count": "{participantCount} participants will be assigned the {subscriptionName} subscription",
-      "usage-amount": "<b>{amount}$</b> will be distributed as follows:</br> {detail}",
-      "remaining-amount": "The remaining budget allowance will be: <b>{amount}$</b>",
+      "usage-amount": "<b>{amount}</b> will be distributed as follows:</br> {detail}",
+      "remaining-amount": "The remaining budget allowance will be: <b>{amount}</b>",
       "success-assign-beneficiaries-to-subscription": "The subscription \"{subscriptionName}\" was successfully assigned to {assignedBeneficiariesCount} participants out of the {totalBeneficiariesCount} selected.",
       "load-more-beneficiaries": "Load more participants",
       "sort": "Sort list",
-      "randomize": "Randomize list"
+      "randomize": "Randomize list",
+      "chronological-order": "Chronological",
+      "random-order": "Random",
+      "no-participants": "No participants in the selected organization",
+      "no-participants-in-subscription": "No participants found for this subscription"
     },
     "fr": {
       "selected-organization": "Organisme",
@@ -36,8 +40,8 @@
       "auto-select-participants": "Sélection automatique",
       "selected-subscription":"Abonnement",
       "max-allocation":"Allocation max.",
-      "amount-allocated": "{amount}$ seront alloués",
-      "budget-allowance-available": "Enveloppe restante après attribution: {amount}$",
+      "amount-allocated": "{amount} seront alloués",
+      "budget-allowance-available": "Enveloppe restante après attribution: {amount}",
       "no-results": "Votre recherche ne donne aucun résultat",
       "reset-search": "Réinitialiser la recherche",
       "assign-subscription-btn":"Confirmer l'attribution",
@@ -45,12 +49,16 @@
       "cancel-confirmation": "Annuler",
       "submit-confirmation": "Oui, attribuer les abonnements",
       "subscription-count": "{participantCount} participant-e-s se verront attribuer l'abonnement {subscriptionName}",
-      "usage-amount": "<b>{amount}$</b> seront répartis de la façon suivante :</br> {detail}",	
-      "remaining-amount": "L'enveloppe restante sera de : <b>{amount}$</b>",
+      "usage-amount": "<b>{amount}</b> seront répartis de la façon suivante :</br> {detail}",	
+      "remaining-amount": "L'enveloppe restante sera de : <b>{amount}</b>",
       "success-assign-beneficiaries-to-subscription": "L'abonnement «{subscriptionName}» a été assigné avec succès à {assignedBeneficiariesCount} participant-e-s.",
       "load-more-beneficiaries": "Charger plus de participants",
       "sort": "Trier la liste",
-      "randomize": "Trier la liste aléatoirement"
+      "randomize": "Trier la liste aléatoirement",
+      "chronological-order": "Chronologique",
+      "random-order": "Aléatoire",
+      "no-participants": "Aucun participant dans l'organisme sélectionné",
+      "no-participants-in-subscription": "Aucun participant n'a été trouvé pour cet abonnement"
     }
   }
 </i18n>
@@ -113,22 +121,48 @@
           </PfFormInputText>
         </div>
         <div class="flex items-center">
-          <button
-            class="pf-button px-0 border-primary-700 border rounded-r-none"
-            :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
-            type="button"
-            @click="isRandomized = false">
-            <PfIcon :icon="SortIcon" size="lg" />
-            <span class="sr-only">{{ t("sort") }}</span>
-          </button>
-          <button
-            class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
-            :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
-            type="button"
-            @click="isRandomized = true">
-            <PfIcon :icon="RandomIcon" size="lg" />
-            <span class="sr-only">{{ t("randomize") }}</span>
-          </button>
+          <template v-if="isMaxAllocationInputDisabled">
+            <PfButtonAction
+              class="pf-button px-0 border-primary-700 border rounded-r-none"
+              :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+              type="button"
+              :disabled="isMaxAllocationInputDisabled"
+              :title="t('chronological-order')"
+              @click="isRandomized = false">
+              <PfIcon :icon="SortIcon" size="lg" />
+              <span class="sr-only">{{ t("sort") }}</span>
+            </PfButtonAction>
+            <PfButtonAction
+              class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
+              :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+              type="button"
+              :disabled="isMaxAllocationInputDisabled"
+              :title="t('random-order')"
+              @click="isRandomized = true">
+              <PfIcon :icon="RandomIcon" size="lg" />
+              <span class="sr-only">{{ t("randomize") }}</span>
+            </PfButtonAction>
+          </template>
+          <template v-else>
+            <button
+              class="pf-button px-0 border-primary-700 border rounded-r-none"
+              :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+              type="button"
+              :title="t('chronological-order')"
+              @click="isRandomized = false">
+              <PfIcon :icon="SortIcon" size="lg" />
+              <span class="sr-only">{{ t("sort") }}</span>
+            </button>
+            <button
+              class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
+              :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+              type="button"
+              :title="t('random-order')"
+              @click="isRandomized = true">
+              <PfIcon :icon="RandomIcon" size="lg" />
+              <span class="sr-only">{{ t("randomize") }}</span>
+            </button>
+          </template>
         </div>
         <PfButtonAction
           btn-style="primary"
@@ -139,12 +173,12 @@
     </template>
   </Title>
 
-  <div class="px-section md:px-8 py-5" v-if="beneficiaries">
+  <div v-if="beneficiaries">
     <div class="flex flex-col gap-y-4 sm:flex-row sm:gap-x-4 sm:justify-between sm:items-center pb-5">
       <div class="flex flex-wrap gap-x-4">
-        <h2 class="my-0">{{ t("amount-allocated", { amount: amountThatWillBeAllocated }) }}</h2>
+        <h2 class="my-0">{{ t("amount-allocated", { amount: amountThatWillBeAllocatedMoneyFormat }) }}</h2>
         <p class="my-1" :class="{ 'text-red-500 font-bold': budgetAllowanceAvailableAfterAllocation < 0 }">
-          {{ t("budget-allowance-available", { amount: budgetAllowanceAvailableAfterAllocation }) }}
+          {{ t("budget-allowance-available", { amount: budgetAllowanceAvailableAfterAllocationMoneyFormat }) }}
         </p>
       </div>
       <div class="lg:flex lg:items-center">
@@ -213,14 +247,20 @@
         </PfButtonAction>
       </div>
     </template>
-    <UiEmptyPage v-else>
+    <UiEmptyPage v-else-if="selectedSubscription && anyFiltersActive">
       <UiCta
-        :img-src="require('@/assets/img/swan.jpg')"
+        :img-src="require('@/assets/img/participants.jpg')"
         :description="t('no-results')"
         :primary-btn-label="t('reset-search')"
         primary-btn-is-action
         @onPrimaryBtnClick="onResetFilters">
       </UiCta>
+    </UiEmptyPage>
+    <UiEmptyPage v-else-if="selectedSubscription">
+      <UiCta :img-src="require('@/assets/img/participants.jpg')" :description="t('no-participants-in-subscription')"> </UiCta>
+    </UiEmptyPage>
+    <UiEmptyPage v-else>
+      <UiCta :img-src="require('@/assets/img/participants.jpg')" :description="t('no-participants')"> </UiCta>
     </UiEmptyPage>
   </div>
 
@@ -244,7 +284,7 @@
         <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
         <p
           class="text-primary-700"
-          v-html="t('usage-amount', { amount: amountThatWillBeAllocated, detail: usageAmountDetail })"></p>
+          v-html="t('usage-amount', { amount: amountThatWillBeAllocatedMoneyFormat, detail: usageAmountDetail })"></p>
         <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
         <p class="text-primary-700" v-html="t('remaining-amount', { amount: budgetAllowanceAvailableAfterAllocation })"></p>
       </div>
@@ -281,6 +321,8 @@ import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
 
 import SortIcon from "@/lib/icons/sort.json";
 import RandomIcon from "@/lib/icons/random.json";
+
+import { getMoneyFormat } from "@/lib/helpers/money";
 
 import Title from "@/components/app/title";
 import BeneficiaryFilters from "@/components/beneficiaries/beneficiary-filters";
@@ -323,7 +365,7 @@ const selectedOrganization = ref(currentOrganization);
 const selectedSubscription = ref(null);
 const searchInput = ref("");
 const searchText = ref("");
-const isRandomized = ref(true);
+const isRandomized = ref(false);
 const maxAllocation = ref(null);
 const displayConfirmDialog = ref(false);
 const loadMoreBeneficiaries = ref(false);
@@ -548,8 +590,13 @@ const selectedBeneficiaries = computed(() => {
   return beneficiaries.value.filter((x) => x.isSelected);
 });
 
+const amountThatWillBeAllocatedMoneyFormat = computed(() => {
+  let amount = amountThatWillBeAllocated.value;
+  return amount !== 0 ? getMoneyFormat(amount) : "-";
+});
+
 const amountThatWillBeAllocated = computed(() => {
-  if (selectedSubscription.value === null) return "-";
+  if (selectedSubscription.value === null) return 0;
 
   var selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
 
@@ -565,8 +612,13 @@ const amountThatWillBeAllocated = computed(() => {
   return amount * selectedSubscriptionData.paymentRemaining;
 });
 
+const budgetAllowanceAvailableAfterAllocationMoneyFormat = computed(() => {
+  var amount = budgetAllowanceAvailableAfterAllocation.value;
+  return amount !== 0 ? getMoneyFormat(amount) : "-";
+});
+
 const budgetAllowanceAvailableAfterAllocation = computed(() => {
-  if (selectedSubscription.value === null) return "-";
+  if (selectedSubscription.value === null) return 0;
   var selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
   return selectedSubscriptionData.budgetAllowance - amountThatWillBeAllocated.value;
 });
@@ -609,6 +661,16 @@ const usageAmountDetail = computed(() => {
         }</b>`
     )
     .join(", ");
+});
+
+const anyFiltersActive = computed(() => {
+  return (
+    beneficiaryTypesFilter.value.length > 0 ||
+    subscriptionsFilter.value.length > 0 ||
+    status.value.length > 0 ||
+    cardStatus.value.length > 0 ||
+    searchText.value !== ""
+  );
 });
 
 function onOrganizationSelected(e) {
@@ -753,10 +815,12 @@ async function confirmAssignation() {
     })
   );
 
-  displayConfirmDialog.value = false;
-
-  refetchBeneficiaries();
-  refetchOrganizations();
+  router.push({
+    name: URL_BENEFICIARY_ADMIN,
+    query: {
+      organizationId: selectedOrganization.value
+    }
+  });
 }
 
 function onFetchMoreBeneficiaries() {
@@ -832,6 +896,10 @@ function onResetSearch() {
   page.value = 1;
   searchText.value = "";
   searchInput.value = "";
+  beneficiaryTypesFilter.value = [];
+  subscriptionsFilter.value = [];
+  status.value = [];
+  cardStatus.value = [];
 }
 
 onBeforeRouteUpdate((to) => {
