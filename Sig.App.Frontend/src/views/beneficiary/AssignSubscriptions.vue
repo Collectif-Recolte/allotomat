@@ -25,6 +25,8 @@
       "load-more-beneficiaries": "Load more participants",
       "sort": "Sort list",
       "randomize": "Randomize list",
+      "chronological-order": "Chronological",
+      "random-order": "Random",
       "no-participants": "No participants in the selected organization",
       "no-participants-in-subscription": "No participants found for this subscription"
     },
@@ -53,6 +55,8 @@
       "load-more-beneficiaries": "Charger plus de participants",
       "sort": "Trier la liste",
       "randomize": "Trier la liste aléatoirement",
+      "chronological-order": "Chronologique",
+      "random-order": "Aléatoire",
       "no-participants": "Aucun participant dans l'organisme sélectionné",
       "no-participants-in-subscription": "Aucun participant n'a été trouvé pour cet abonnement"
     }
@@ -120,22 +124,48 @@
                 </PfFormInputText>
               </div>
               <div class="flex items-center">
-                <button
-                  class="pf-button px-0 border-primary-700 border rounded-r-none"
-                  :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
-                  type="button"
-                  @click="isRandomized = false">
-                  <PfIcon :icon="SortIcon" size="lg" />
-                  <span class="sr-only">{{ t("sort") }}</span>
-                </button>
-                <button
-                  class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
-                  :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
-                  type="button"
-                  @click="isRandomized = true">
-                  <PfIcon :icon="RandomIcon" size="lg" />
-                  <span class="sr-only">{{ t("randomize") }}</span>
-                </button>
+                <template v-if="isMaxAllocationInputDisabled">
+                  <PfButtonAction
+                    class="pf-button px-0 border-primary-700 border rounded-r-none"
+                    :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                    type="button"
+                    @click="isRandomized = false"
+                    :disabled="isMaxAllocationInputDisabled"
+                    :title="t('chronological-order')">
+                    <PfIcon :icon="SortIcon" size="lg" />
+                    <span class="sr-only">{{ t("sort") }}</span>
+                  </PfButtonAction>
+                  <PfButtonAction
+                    class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
+                    :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                    type="button"
+                    @click="isRandomized = true"
+                    :disabled="isMaxAllocationInputDisabled"
+                    :title="t('random-order')">
+                    <PfIcon :icon="RandomIcon" size="lg" />
+                    <span class="sr-only">{{ t("randomize") }}</span>
+                  </PfButtonAction>
+                </template>
+                <template v-else>
+                  <button
+                    class="pf-button px-0 border-primary-700 border rounded-r-none"
+                    :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                    type="button"
+                    @click="isRandomized = false"
+                    :title="t('chronological-order')">
+                    <PfIcon :icon="SortIcon" size="lg" />
+                    <span class="sr-only">{{ t("sort") }}</span>
+                  </button>
+                  <button
+                    class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
+                    :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                    type="button"
+                    @click="isRandomized = true"
+                    :title="t('random-order')">
+                    <PfIcon :icon="RandomIcon" size="lg" />
+                    <span class="sr-only">{{ t("randomize") }}</span>
+                  </button>
+                </template>
               </div>
               <PfButtonAction
                 btn-style="primary"
