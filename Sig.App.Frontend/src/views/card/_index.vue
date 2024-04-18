@@ -22,7 +22,7 @@
     "beneficiary-disable-card": "Disable card",
     "beneficiary-enable-card": "Réactiver la carte",
     "card-disabled-status": "Card status",
-    "card-is-disabled": "Card is disabled",
+    "card-is-disabled": "Temporarily disabled",
     "card-is-enabled": "Card is enabled"
 	},
 	"fr": {
@@ -47,7 +47,7 @@
     "beneficiary-disable-card": "Désactiver la carte",
     "beneficiary-enable-card": "Réactiver la carte",
     "card-disabled-status": "État de la carte",
-    "card-is-disabled": "Carte désactivée",
+    "card-is-disabled": "Désactivée temporairement",
     "card-is-enabled": "Carte activée"
 	}
 }

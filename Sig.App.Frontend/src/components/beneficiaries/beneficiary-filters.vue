@@ -13,7 +13,7 @@
     "without-card": "Without card",
     "with-payment-conflict": "With payment conflict",
     "without-payment-conflict": "Without payment conflict",
-    "card-is-disabled": "Card is disabled",
+    "card-is-disabled": "Temporarily disabled",
     "card-is-enabled": "Card is enabled",
     "card-disabled-status": "Card status"
 	},
@@ -30,7 +30,7 @@
     "without-card": "Sans carte",
     "with-payment-conflict": "Avec conflit de versement",
     "without-payment-conflict": "Sans conflit de versement",
-    "card-is-disabled": "Carte désactivée",
+    "card-is-disabled": "Désactivée temporairement",
     "card-is-enabled": "Carte activée",
     "card-disabled-status": "État de la carte"
 	}

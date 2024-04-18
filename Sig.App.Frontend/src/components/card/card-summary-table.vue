@@ -11,7 +11,7 @@
     "card-assigned": "Assigned",
     "card-unassigned": "Unassigned",
     "card-deactivated": "Deactivated",
-    "card-disabled": "Card disabled",
+    "card-disabled": "Temporarily disabled",
 	},
 	"fr": {
     "card-status": "Statut",
@@ -24,7 +24,7 @@
     "card-assigned": "Assignée",
     "card-unassigned": "Non assignée",
     "card-deactivated": "Désactivée",
-    "card-disabled": "Carte désactivée",
+    "card-disabled": "Désactivée temporairement",
   }
 }
 </i18n>
