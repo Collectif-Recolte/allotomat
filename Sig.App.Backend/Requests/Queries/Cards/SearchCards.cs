@@ -44,6 +44,11 @@ namespace Sig.App.Backend.Requests.Queries.Cards
                 }
             }
 
+            if (request.WithCardDisabled.IsSet())
+            {
+                query = query.Where(x => x.IsDisabled == request.WithCardDisabled.Value);
+            }
+
             var sorted = Sort(query, CardSort.Default, SortOrder.Asc);
             return await Pagination.For(sorted, request.Page);
         }
@@ -54,6 +59,7 @@ namespace Sig.App.Backend.Requests.Queries.Cards
             public long ProjectId { get; set; }
             public IEnumerable<CardStatus> Status { get; set; }
             public Maybe<string> SearchText { get; set; }
+            public Maybe<bool> WithCardDisabled { get; set; }
         }
 
         private static IOrderedQueryable<Card> Sort(IQueryable<Card> query, CardSort sort, SortOrder order)

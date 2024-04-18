@@ -87,6 +87,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Cards
                 }
             };
 
+            originalCard.IsDisabled = true;
             originalCard.Status = CardStatus.Assigned;
             originalCard.Beneficiary = beneficiary;
             originalCard.Transactions = new List<Transaction>()
@@ -142,12 +143,14 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Cards
             localOriginalCard.Status.Should().Be(CardStatus.Lost);
             localOriginalCard.Transactions.Count.Should().Be(0);
             localOriginalCard.Beneficiary.Should().Be(null);
+            localOriginalCard.IsDisabled.Should().Be(false);
 
             localNewCard.Funds.First().Amount.Should().Be(400);
             localNewCard.Funds.First(x => x.ProductGroup.Name == ProductGroupType.LOYALTY).Amount.Should().Be(200);
             localNewCard.Status.Should().Be(CardStatus.Assigned);
             localNewCard.Transactions.Count.Should().Be(2);
             localNewCard.Beneficiary.Firstname.Should().Be("John");
+            localNewCard.IsDisabled.Should().Be(true);
 
             var transactionLogCreated = await DbContext.TransactionLogs
                 .Where(x => x.Discriminator == TransactionLogDiscriminator.TransferFundTransactionLog).ToListAsync();

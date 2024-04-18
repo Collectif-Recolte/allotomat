@@ -16,7 +16,9 @@
       "beneficiary-delete-disabled": "You can't delete a beneficiary with a card assigned",
       "beneficiary-delete-disabled-anonymous": "You can't delete an anonymous beneficiary",
       "beneficiary-add-funds-disabled-anonymous": "You can't add funds if the beneficiary is anonymous",
-      "beneficiary-add-funds-disabled-no-subscription": "You can't add funds if the beneficiary doesn't have a subscription"
+      "beneficiary-add-funds-disabled-no-subscription": "You can't add funds if the beneficiary doesn't have a subscription",
+      "beneficiary-disable-card": "Disable card",
+      "beneficiary-enable-card": "Réactiver la carte"
     },
     "fr": {
       "beneficiary-edit": "Modifier les détails",
@@ -34,7 +36,9 @@
       "beneficiary-delete-disabled": "Vous ne pouvez pas supprimer un participant-e avec une carte assignée",
       "beneficiary-delete-disabled-anonymous": "Vous ne pouvez pas supprimer un participant-e anonyme",
       "beneficiary-add-funds-disabled-anonymous": "Vous ne pouvez pas ajouter des fonds si le participant-e est anonyme",
-      "beneficiary-add-funds-disabled-no-subscription": "Vous ne pouvez pas ajouter des fonds si le participant-e n'a pas d'abonnement"
+      "beneficiary-add-funds-disabled-no-subscription": "Vous ne pouvez pas ajouter des fonds si le participant-e n'a pas d'abonnement",
+      "beneficiary-disable-card": "Désactiver la carte",
+      "beneficiary-enable-card": "Réactiver la carte"
     }
   }
   </i18n>
@@ -60,6 +64,7 @@ import ICON_MINUS from "@/lib/icons/minus.json";
 import ICON_TRASH from "@/lib/icons/trash.json";
 import ICON_CARD_LINK from "@/lib/icons/card-link.json";
 import ICON_CLOCK from "@/lib/icons/clock.json";
+import ICON_CLOSE from "@/lib/icons/close.json";
 
 import {
   URL_BENEFICIARY_EDIT,
@@ -69,7 +74,9 @@ import {
   URL_BENEFICIARY_CARD_UNASSIGN,
   URL_BENEFICIARY_DELETE,
   URL_BENEFICIARY_CARD_ASSIGN,
-  URL_TRANSACTION_ADMIN
+  URL_TRANSACTION_ADMIN,
+  URL_BENEFICIARY_CARD_DISABLE,
+  URL_BENEFICIARY_CARD_ENABLE
 } from "@/lib/consts/urls";
 
 import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
@@ -155,6 +162,20 @@ function updateItems() {
       },
       {
         isExtra: true,
+        icon: ICON_CLOSE,
+        label: t("beneficiary-disable-card"),
+        route: disableCardLink(),
+        if: haveCard() && !isCardDisabled()
+      },
+      {
+        isExtra: true,
+        icon: ICON_CARD_LINK,
+        label: t("beneficiary-enable-card"),
+        route: enableCardLink(),
+        if: haveCard() && isCardDisabled()
+      },
+      {
+        isExtra: true,
         icon: ICON_TRASH,
         label: t("beneficiary-delete", { firstname: props.beneficiary.firstname }),
         route: { name: URL_BENEFICIARY_DELETE, params: { beneficiaryId: props.beneficiary.id } },
@@ -207,6 +228,10 @@ const props = defineProps({
 
 function haveCard() {
   return props.beneficiary.card !== null;
+}
+
+function isCardDisabled() {
+  return props.beneficiary.card !== null && props.beneficiary.card.isDisabled;
 }
 
 function haveSubscriptions() {
@@ -266,6 +291,28 @@ function unassignCardLink() {
       cardId: 0
     }
   };
+}
+
+function disableCardLink() {
+  if (haveCard()) {
+    return {
+      name: URL_BENEFICIARY_CARD_DISABLE,
+      params: { cardId: props.beneficiary.card.id, beneficiaryId: props.beneficiary.id }
+    };
+  } else {
+    return null;
+  }
+}
+
+function enableCardLink() {
+  if (haveCard()) {
+    return {
+      name: URL_BENEFICIARY_CARD_ENABLE,
+      params: { cardId: props.beneficiary.card.id, beneficiaryId: props.beneficiary.id }
+    };
+  } else {
+    return null;
+  }
 }
 </script>
 

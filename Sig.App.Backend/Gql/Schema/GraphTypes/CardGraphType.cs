@@ -19,6 +19,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public Id Id => card.GetIdentifier();
         public CardStatus Status => card.Status;
+        public bool IsDisabled => card.IsDisabled;
         public long ProgramCardId => card.ProgramCardId;
         public string CardNumber => card.CardNumber;
 

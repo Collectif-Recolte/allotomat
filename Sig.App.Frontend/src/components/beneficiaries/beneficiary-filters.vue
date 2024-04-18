@@ -13,6 +13,9 @@
     "without-card": "Without card",
     "with-payment-conflict": "With payment conflict",
     "without-payment-conflict": "Without payment conflict",
+    "card-is-disabled": "Temporarily disabled",
+    "card-is-enabled": "Card is enabled",
+    "card-disabled-status": "Card status"
 	},
 	"fr": {
 		"beneficiary-type": "Catégories",
@@ -27,6 +30,9 @@
     "without-card": "Sans carte",
     "with-payment-conflict": "Avec conflit de versement",
     "without-payment-conflict": "Sans conflit de versement",
+    "card-is-disabled": "Désactivée temporairement",
+    "card-is-enabled": "Carte activée",
+    "card-disabled-status": "État de la carte"
 	}
 }
 </i18n>
@@ -85,6 +91,15 @@
       :label="t('payment-conflicts')"
       :options="paymentConflictStatus"
       @input="onPaymentConflictStatusChecked" />
+    <PfFormInputCheckboxGroup
+      v-if="!props.hideCardIsDisabledFilter"
+      id="cardDisabled"
+      class="mt-3"
+      is-filter
+      :value="selectedCardDisabled"
+      :label="t('card-disabled-status')"
+      :options="cardDisabled"
+      @input="onCardIsDisabledChecked" />
   </UiFilter>
 </template>
 
@@ -107,7 +122,9 @@ const emit = defineEmits([
   "cardStatusChecked",
   "cardStatusUnchecked",
   "paymentConflictStatusChecked",
-  "paymentConflictStatusUnchecked"
+  "paymentConflictStatusUnchecked",
+  "cardIsDisabledChecked",
+  "cardIsDisabledUnchecked"
 ]);
 
 const props = defineProps({
@@ -191,6 +208,20 @@ const props = defineProps({
     type: String,
     default: ""
   },
+  cardIsDisabled: {
+    type: String,
+    default: ""
+  },
+  cardIsEnabled: {
+    type: String,
+    default: ""
+  },
+  selectedCardDisabled: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
   selectedPaymentConflictStatus: {
     type: Array,
     default() {
@@ -198,6 +229,10 @@ const props = defineProps({
     }
   },
   hideConflictFilter: {
+    type: Boolean,
+    default: false
+  },
+  hideCardIsDisabledFilter: {
     type: Boolean,
     default: false
   }
@@ -209,7 +244,8 @@ const hasActiveFilters = computed(() => {
     props.selectedSubscriptions?.length > 0 ||
     !!props.searchFilter ||
     props.selectedCardStatus?.length > 0 ||
-    props.selectedPaymentConflictStatus?.length > 0
+    props.selectedPaymentConflictStatus?.length > 0 ||
+    props.selectedCardDisabled?.length > 0
   );
 });
 
@@ -218,7 +254,14 @@ const activeFiltersCount = computed(() => {
   const selectedSubscritionsCount = props.selectedSubscriptions?.length ?? 0;
   const selectedCardStatusCount = props.selectedCardStatus?.length ?? 0;
   const selectedPaymentConflictStatusCount = props.selectedPaymentConflictStatus?.length ?? 0;
-  return selectedBeneficiariesCount + selectedSubscritionsCount + selectedCardStatusCount + selectedPaymentConflictStatusCount;
+  const selectedCardDisabledCount = props.selectedCardDisabled?.length ?? 0;
+  return (
+    selectedBeneficiariesCount +
+    selectedSubscritionsCount +
+    selectedCardStatusCount +
+    selectedPaymentConflictStatusCount +
+    selectedCardDisabledCount
+  );
 });
 
 const availableBeneficiaryTypes = computed(() => {
@@ -262,6 +305,11 @@ const paymentConflictStatus = ref([
   { value: props.paymentConflictStatusWithout, label: t("without-payment-conflict") }
 ]);
 
+const cardDisabled = ref([
+  { value: props.cardIsDisabled, label: t("card-is-disabled") },
+  { value: props.cardIsEnabled, label: t("card-is-enabled") }
+]);
+
 function onSubscriptionsChecked(input) {
   if (input.isChecked) {
     emit("subscriptionsChecked", input.value);
@@ -299,6 +347,14 @@ function onPaymentConflictStatusChecked(input) {
     emit("paymentConflictStatusChecked", input.value);
   } else {
     emit("paymentConflictStatusUnchecked", input.value);
+  }
+}
+
+function onCardIsDisabledChecked(input) {
+  if (input.isChecked) {
+    emit("cardIsDisabledChecked", input.value);
+  } else {
+    emit("cardIsDisabledUnchecked", input.value);
   }
 }
 

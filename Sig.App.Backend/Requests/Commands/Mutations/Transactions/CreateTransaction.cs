@@ -77,6 +77,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 throw new CardNotFoundException();
             }
 
+            if (card.IsDisabled)
+            {
+                logger.LogWarning("[Mutation] CreateTransaction - CardIsDisabledException");
+                throw new CardIsDisabledException();
+            }
+
             var martketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == martketId, cancellationToken);
 
@@ -396,6 +402,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         }
 
         public class CardNotFoundException : RequestValidationException { }
+        public class CardIsDisabledException : RequestValidationException { }
         public class MarketNotFoundException : RequestValidationException { }
         public class ProductGroupNotFoundException : RequestValidationException { }
         public class CardCantBeUsedInMarketException : RequestValidationException { }

@@ -156,6 +156,7 @@
               v-if="selectedOrganization !== ''"
               v-model="searchInput"
               hide-conflict-filter
+              hide-card-is-disabled-filter
               :available-beneficiary-types="availableBeneficiaryTypes"
               :available-subscriptions="availableSubscriptions"
               :selected-beneficiary-types="beneficiaryTypesFilter"

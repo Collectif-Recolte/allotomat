@@ -3,12 +3,14 @@
 	"en": {
 		"card-description": "Program {programName} — Card #{cardId}",
 		"done": "Check another card",
-		"title": "Card balance"
+		"title": "Card balance",
+    "card-is-disabled": "The card is disabled."
 	},
 	"fr": {
 		"card-description": "Programme {programName} — Carte #{cardId}",
 		"done": "Vérifier une autre carte",
-		"title": "Solde de la carte"
+		"title": "Solde de la carte",
+    "card-is-disabled": "La carte est désactivée."
 	}
 }
 </i18n>
@@ -21,6 +23,7 @@
       <p v-if="card" class="text-p3">
         {{ t("card-description", { programName, cardId }) }}
       </p>
+      <p v-if="card && card.isDisabled" class="text-red-500 font-bold">{{ t("card-is-disabled") }}</p>
       <p v-if="card" class="font-bold text-primary-700 text-h1 xs:text-d2 my-6">
         {{ getMoneyFormat(fund) }}
       </p>
@@ -65,6 +68,7 @@ const { result, loading } = useQuery(
     query Card($id: ID!) {
       card(id: $id) {
         id
+        isDisabled
         project {
           id
           name
