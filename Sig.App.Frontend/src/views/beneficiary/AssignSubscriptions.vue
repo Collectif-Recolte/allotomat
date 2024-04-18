@@ -24,7 +24,9 @@
       "success-assign-beneficiaries-to-subscription": "The subscription \"{subscriptionName}\" was successfully assigned to {assignedBeneficiariesCount} participants out of the {totalBeneficiariesCount} selected.",
       "load-more-beneficiaries": "Load more participants",
       "sort": "Sort list",
-      "randomize": "Randomize list"
+      "randomize": "Randomize list",
+      "chronological-order": "Chronological",
+      "random-order": "Random"
     },
     "fr": {
       "selected-organization": "Organisme",
@@ -50,7 +52,9 @@
       "success-assign-beneficiaries-to-subscription": "L'abonnement «{subscriptionName}» a été assigné avec succès à {assignedBeneficiariesCount} participant-e-s.",
       "load-more-beneficiaries": "Charger plus de participants",
       "sort": "Trier la liste",
-      "randomize": "Trier la liste aléatoirement"
+      "randomize": "Trier la liste aléatoirement",
+      "chronological-order": "Chronologique",
+      "random-order": "Aléatoire"
     }
   }
 </i18n>
@@ -122,7 +126,8 @@
                     :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
                     type="button"
                     @click="isRandomized = false"
-                    :disabled="isMaxAllocationInputDisabled">
+                    :disabled="isMaxAllocationInputDisabled"
+                    :title="t('chronological-order')">
                     <PfIcon :icon="SortIcon" size="lg" />
                     <span class="sr-only">{{ t("sort") }}</span>
                   </PfButtonAction>
@@ -131,7 +136,8 @@
                     :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
                     type="button"
                     @click="isRandomized = true"
-                    :disabled="isMaxAllocationInputDisabled">
+                    :disabled="isMaxAllocationInputDisabled"
+                    :title="t('random-order')">
                     <PfIcon :icon="RandomIcon" size="lg" />
                     <span class="sr-only">{{ t("randomize") }}</span>
                   </PfButtonAction>
@@ -141,7 +147,8 @@
                     class="pf-button px-0 border-primary-700 border rounded-r-none"
                     :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
                     type="button"
-                    @click="isRandomized = false">
+                    @click="isRandomized = false"
+                    :title="t('chronological-order')">
                     <PfIcon :icon="SortIcon" size="lg" />
                     <span class="sr-only">{{ t("sort") }}</span>
                   </button>
@@ -149,7 +156,8 @@
                     class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
                     :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
                     type="button"
-                    @click="isRandomized = true">
+                    @click="isRandomized = true"
+                    :title="t('random-order')">
                     <PfIcon :icon="RandomIcon" size="lg" />
                     <span class="sr-only">{{ t("randomize") }}</span>
                   </button>
