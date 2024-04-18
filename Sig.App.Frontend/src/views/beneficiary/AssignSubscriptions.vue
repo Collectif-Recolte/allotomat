@@ -173,7 +173,7 @@
     </template>
   </Title>
 
-  <div v-if="beneficiaries">
+  <div v-if="beneficiaries" class="px-section md:px-8 py-5">
     <div class="flex flex-col gap-y-4 sm:flex-row sm:gap-x-4 sm:justify-between sm:items-center pb-5">
       <div class="flex flex-wrap gap-x-4">
         <h2 class="my-0">{{ t("amount-allocated", { amount: amountThatWillBeAllocatedMoneyFormat }) }}</h2>
