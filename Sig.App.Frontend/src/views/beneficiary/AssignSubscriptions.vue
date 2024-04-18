@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "selected-organization": "Organization",
+      "selected-organization": "Group",
       "title": "Participants",
       "available-amount-for-allocation": "Budget allowance",
       "amount-of-payment-remaining": "Payment remaining",
@@ -27,7 +27,7 @@
       "randomize": "Randomize list"
     },
     "fr": {
-      "selected-organization": "Organisme",
+      "selected-organization": "Groupe",
       "title": "Participant-e-s",
       "available-amount-for-allocation": "Enveloppe",
       "amount-of-payment-remaining": "Versements",

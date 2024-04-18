@@ -6,8 +6,8 @@
       "manage-beneficiary-btn": "Manage participants",
       "unspend-loyalty-fund-label": "Unspent amount on gift cards",
       "total-active-subscriptions-envelopes-label": "Budget allowance total (active subscriptions)",
-      "organization-list-stats": "By organization",
-      "empty-list": "No organization is associated with the program.",
+      "organization-list-stats": "By group",
+      "empty-list": "No group is associated with the program.",
       "subscription-filter": "Subscriptions"
     },
     "fr": {
@@ -16,8 +16,8 @@
       "manage-beneficiary-btn": "Gérer les participants",
       "unspend-loyalty-fund-label": "Montant non-dépensé sur les cartes-cadeaux",
       "total-active-subscriptions-envelopes-label": "Total des enveloppes (abonnements actifs)",
-      "organization-list-stats": "Par organisme",
-      "empty-list": "Aucun organisme n'est associé au programme.",
+      "organization-list-stats": "Par groupe",
+      "empty-list": "Aucun groupe n'est associé au programme.",
       "subscription-filter": "Abonnements"
     }
   }

@@ -1,16 +1,16 @@
 <i18n>
 {
 	"en": {
-		"add-organization": "Add an organization",
-		"title": "Management of organizations",
-    "empty-list": "No organization is associated with the program.",
-    "organization-count": "{count} organization | {count} organizations"
+		"add-organization": "Add a group",
+		"title": "Management of group",
+    "empty-list": "No group is associated with the program.",
+    "organization-count": "{count} group | {count} groups"
 	},
 	"fr": {
-		"add-organization": "Ajouter un organisme",
-		"title": "Gestion des organismes",
-    "empty-list": "Aucun organisme n'est associé au programme.",
-    "organization-count": "{count} organisme | {count} organismes"
+		"add-organization": "Ajouter un groupe",
+		"title": "Gestion des groupes",
+    "empty-list": "Aucun groupe n'est associé au programme.",
+    "organization-count": "{count} groupe | {count} groupes"
 	}
 }
 </i18n>

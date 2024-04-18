@@ -1,22 +1,22 @@
 <i18n>
 {
 	"en": {
-		"add-organization": "Add organization",
-		"add-organization-success-notification": "Adding organization {organizationName} was successful. Managers will receive an email for the creation of their account in the next few minutes.",
+		"add-organization": "Add a group",
+		"add-organization-success-notification": "Adding group {organizationName} was successful. Managers will receive an email for the creation of their account in the next few minutes.",
 		"manager-email": "Email",
-		"organization-name": "Organization name",
-		"title": "Add an Organization",
-		"user-already-manager": "One of the managers is already the manager of an organization.",
-		"user-not-oganization-manager": "One of the managers is not an organization manager."
+		"organization-name": "Group name",
+		"title": "Add a group",
+		"user-already-manager": "One of the managers is already the manager of a group.",
+		"user-not-oganization-manager": "One of the managers is not a group manager."
 	},
 	"fr": {
-		"add-organization": "Ajouter l'organisme",
-		"add-organization-success-notification": "L’ajout de l'organisme {organizationName} a été un succès. Les gestionnaires vont recevoir un courriel pour la création de leur compte dans les prochaines minutes.",
+		"add-organization": "Ajouter le groupe",
+		"add-organization-success-notification": "L’ajout du groupe {organizationName} a été un succès. Les gestionnaires vont recevoir un courriel pour la création de leur compte dans les prochaines minutes.",
 		"manager-email": "Courriel",
-		"organization-name": "Nom de l'organisme",
-		"title": "Ajouter un organisme",
-		"user-already-manager": "Un des gestionnaires est déjà gestionnaire d'un organisme.",
-		"user-not-oganization-manager": "Un des gestionnaires n'est pas du type gestionnaire d'organisme."
+		"organization-name": "Nom du groupe",
+		"title": "Ajouter un groupe",
+		"user-already-manager": "Un des gestionnaires est déjà gestionnaire d'un groupe.",
+		"user-not-oganization-manager": "Un des gestionnaires n'est pas du type gestionnaire de groupe."
 	}
 }
 </i18n>

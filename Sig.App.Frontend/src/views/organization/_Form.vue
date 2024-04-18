@@ -2,12 +2,12 @@
 {
 	"en": {
 		"cancel": "Cancel",
-		"organization-name": "Organization name",
+		"organization-name": "Group name",
 		"organization-name-placeholder": "Ex. The Carrefour"
 	},
 	"fr": {
 		"cancel": "Annuler",
-		"organization-name": "Nom de l'organisme",
+		"organization-name": "Nom du groupe",
 		"organization-name-placeholder": "Ex. Carrefour solidaire"
 	}
 }
