@@ -2,7 +2,7 @@
   {
     "en": {
       "import-beneficiaries-list": "Import a list",
-      "selected-organization": "Organization",
+      "selected-organization": "Group",
       "title": "Participants",
       "download-template-file": "Download a template",
       "available-amount-for-allocation": "Remaining budget allowance",
@@ -12,15 +12,15 @@
       "export-beneficiaries-list": "Export",
       "no-results": "Your search yields no results",
       "reset-search": "Reset search",
-      "empty-organizations-list": "No organization is associated with the program.",
-      "add-organization": "Add an organization",
+      "empty-organizations-list": "No group is associated with the program.",
+      "add-organization": "Add a group",
       "payment-conflicts-alert": "{count} payment conflicts",
       "manage-participants": "Manage",
       "assign-subscriptions": "Assignments"
     },
     "fr": {
       "import-beneficiaries-list": "Importer une liste",
-      "selected-organization": "Organisme",
+      "selected-organization": "Groupe",
       "title": "Participant-e-s",
       "download-template-file": "Télécharger un modèle",
       "available-amount-for-allocation": "Enveloppe restante",
@@ -30,8 +30,8 @@
       "export-beneficiaries-list": "Exporter",
       "no-results": "Votre recherche ne donne aucun résultat",
       "reset-search": "Réinitialiser la recherche",
-      "empty-organizations-list": "Aucun organisme n'est associé au programme.",
-      "add-organization": "Ajouter un organisme",
+      "empty-organizations-list": "Aucun groupe n'est associé au programme.",
+      "add-organization": "Ajouter un groupe",
       "payment-conflicts-alert":"{count} conflit de versement | {count} conflits de versements",
       "manage-participants": "Gestion",
       "assign-subscriptions": "Attribution"

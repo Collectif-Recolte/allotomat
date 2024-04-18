@@ -1,7 +1,7 @@
 <i18n>
 {
 	"en": {
-    "budget-allowance-organization": "Organization",
+    "budget-allowance-organization": "Group",
     "submit-btn": "OK",
     "cancel-btn": "Cancel",
     "amount-label": "Amount",
@@ -10,7 +10,7 @@
     "delete-allowance": "Delete"
 	},
 	"fr": {
-    "budget-allowance-organization": "Organisme",
+    "budget-allowance-organization": "Groupe",
     "submit-btn": "OK",
     "cancel-btn": "Annuler",
     "amount-label": "Montant",
