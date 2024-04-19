@@ -73,8 +73,8 @@ public class DevDataSeeder : IDataSeeder
         await userManager.CreateOrUpdateAsync(db, "outils+project1@sigmund.ca", "Project1", "Example", UserType.ProjectManager, defaultPassword);
         await userManager.CreateOrUpdateAsync(db, "outils+project2@sigmund.ca", "Project2", "Example", UserType.ProjectManager, defaultPassword);
 
-        await userManager.CreateOrUpdateAsync(db, "outils+organization1@sigmund.ca", "Organization1", "Example", UserType.OrganizationManager, defaultPassword);
-        await userManager.CreateOrUpdateAsync(db, "outils+organization2@sigmund.ca", "Organization2", "Example", UserType.OrganizationManager, defaultPassword);
+        await userManager.CreateOrUpdateAsync(db, "outils+group1@sigmund.ca", "Group1", "Example", UserType.OrganizationManager, defaultPassword);
+        await userManager.CreateOrUpdateAsync(db, "outils+group2@sigmund.ca", "Group2", "Example", UserType.OrganizationManager, defaultPassword);
 
         await userManager.CreateOrUpdateAsync(db, "outils+merchant1@sigmund.ca", "Merchant1", "Example", UserType.Merchant, defaultPassword);
         await userManager.CreateOrUpdateAsync(db, "outils+merchant2@sigmund.ca", "Merchant2", "Example", UserType.Merchant, defaultPassword);
@@ -153,17 +153,17 @@ public class DevDataSeeder : IDataSeeder
 
     private async Task SeedDevOrganizations()
     {
-        if (db.Organizations.Any(x => x.Name == "SeedDev - Organisme 1"))
+        if (db.Organizations.Any(x => x.Name == "SeedDev - Groupe 1"))
         {
             return;
         }
 
         var organization = new Organization()
         {
-            Name = "SeedDev - Organisme 1",
+            Name = "SeedDev - Groupe 1",
             Project = db.Projects.First(x => x.Name == "SeedDev - Programme 1")
         };
-        string[] managerEmails = { "outils+organization1@sigmund.ca", "outils+organization2@sigmund.ca" };
+        string[] managerEmails = { "outils+group1@sigmund.ca", "outils+group2@sigmund.ca" };
         await db.Organizations.AddAsync(organization);
 
         await db.SaveChangesAsync();
@@ -258,7 +258,7 @@ public class DevDataSeeder : IDataSeeder
 
     private async Task SeedDevBudgetAllowance()
     {
-        var organization = await db.Organizations.FirstAsync(x => x.Name == "SeedDev - Organisme 1");
+        var organization = await db.Organizations.FirstAsync(x => x.Name == "SeedDev - Groupe 1");
         var subscription = await db.Subscriptions.FirstAsync(x => x.Name == "SeedDev - Période 1");
 
         if (db.BudgetAllowances.Where(x => x.OrganizationId == organization.Id && x.SubscriptionId == subscription.Id).Count() == 1)
@@ -286,7 +286,7 @@ public class DevDataSeeder : IDataSeeder
             return;
         }
 
-        var organization = db.Organizations.First(x => x.Name == "SeedDev - Organisme 1");
+        var organization = db.Organizations.First(x => x.Name == "SeedDev - Groupe 1");
         var subscription = db.Subscriptions.Include(x => x.Types).First(x => x.Name == "SeedDev - Période 1");
         var beneficiary1 = new Beneficiary()
         {
