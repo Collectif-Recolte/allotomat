@@ -286,7 +286,9 @@
           class="text-primary-700"
           v-html="t('usage-amount', { amount: amountThatWillBeAllocatedMoneyFormat, detail: usageAmountDetail })"></p>
         <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
-        <p class="text-primary-700" v-html="t('remaining-amount', { amount: budgetAllowanceAvailableAfterAllocation })"></p>
+        <p
+          class="text-primary-700"
+          v-html="t('remaining-amount', { amount: budgetAllowanceAvailableAfterAllocationMoneyFormat })"></p>
       </div>
     </template>
   </UiDialogWarningModal>
