@@ -61,6 +61,7 @@ namespace Sig.App.Backend.Helpers
                 int monthsApart = 12 * (endDate.Year - startDate.Year) + endDate.Month - startDate.Month;
 
                 cardPaymentRemaining += monthsApart;
+                if (startDate.Day == 1) cardPaymentRemaining++;
             }
 
             if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth ||
@@ -77,6 +78,8 @@ namespace Sig.App.Backend.Helpers
                 }
 
                 cardPaymentRemaining += monthsApart;
+
+                if (startDate.Day == 15) cardPaymentRemaining++;
             }
 
             return cardPaymentRemaining;

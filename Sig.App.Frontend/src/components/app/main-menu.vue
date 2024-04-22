@@ -58,7 +58,7 @@
       :icon="IDENTIFICATION" />
     <MenuItem
       v-if="manageBeneficiaries"
-      :router-link="{ name: $consts.urls.URL_BENEFICIARY_ADMIN }"
+      :router-link="{ name: $consts.urls.URL_BENEFICIARY_MANAGE }"
       :label="t('manage-beneficiaries')"
       :icon="USER_GROUP" />
     <MenuItem

@@ -151,7 +151,7 @@ namespace Sig.App.Backend.Services.Reports
             dataWorksheet.Column(
                 "Transfert de fond depuis le numéro de carte/Transferred fund from card number",
                 x => x.FundTransferredFromCardNumber);
-            dataWorksheet.Column("Organisme/Organization", x => x.OrganizationName);
+            dataWorksheet.Column("Groupe/Group", x => x.OrganizationName);
             dataWorksheet.Column("Abonnement/Subscription", x => x.SubscriptionName);
             dataWorksheet.Column("Initiateur transaction/Transaction initiator", GetTransactionInitiatorName);
             dataWorksheet.Column("Courriel initiateur transaction/Transaction initiator email", x => x.TransactionInitiatorEmail);
