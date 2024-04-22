@@ -656,6 +656,10 @@ const selectedSubscriptionName = computed(() => {
 const usageAmountDetail = computed(() => {
   var selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
   return selectedSubscriptionData.types
+    .filter(
+      (elem, index) =>
+        selectedSubscriptionData.types.findIndex((obj) => obj.beneficiaryType.id === elem.beneficiaryType.id) === index
+    )
     .map(
       (x) =>
         `${x.beneficiaryType.name}: <b>${
