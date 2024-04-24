@@ -37,8 +37,8 @@
         <div class="inline-flex flex-col justify-start items-start gap-y-1">
           <PfTag
             v-for="item in getBeneficiarySubscriptions(slotProps.item)"
-            :key="item.id"
-            :label="item.name"
+            :key="item.subscription.id"
+            :label="item.subscription.name"
             is-dark-theme
             bg-color-class="bg-primary-700" />
         </div>
@@ -124,6 +124,6 @@ function getIsBeneficiaryActive(beneficiary) {
 }
 
 function getBeneficiarySubscriptions(beneficiary) {
-  return beneficiary.subscriptions;
+  return beneficiary.beneficiarySubscriptions;
 }
 </script>
