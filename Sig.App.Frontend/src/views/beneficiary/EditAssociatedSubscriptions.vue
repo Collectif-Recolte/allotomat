@@ -18,7 +18,9 @@
 <template>
   <UiDialogModal :title="t('title', { beneficiaryName: getBeneficiaryName() })" :return-route="{ name: URL_BENEFICIARY_ADMIN }">
     <template v-if="beneficiary">
-      <p v-if="beneficiary.subscriptions.length === 0" class="text-sm text-red-500">{{ t("no-associated-subscription") }}</p>
+      <p v-if="beneficiary.beneficiarySubscriptions.length === 0" class="text-sm text-red-500">
+        {{ t("no-associated-subscription") }}
+      </p>
       <SubscriptionTable v-else :subscriptions="subscriptionItems" />
 
       <UiSelectAndAdd
@@ -59,9 +61,11 @@ const { result: resultBeneficiary, refetch } = useQuery(
         id
         firstname
         lastname
-        subscriptions {
-          id
-          name
+        beneficiarySubscriptions {
+          subscription {
+            id
+            name
+          }
         }
         ... on BeneficiaryGraphType {
           beneficiaryType {
@@ -122,9 +126,11 @@ const { mutate: addBeneficiaryToSubscription } = useMutation(
       addBeneficiaryToSubscription(input: $input) {
         beneficiary {
           id
-          subscriptions {
-            id
-            name
+          beneficiarySubscriptions {
+            subscription {
+              id
+              name
+            }
           }
         }
       }
@@ -133,7 +139,7 @@ const { mutate: addBeneficiaryToSubscription } = useMutation(
 );
 
 const filteredSubscriptionOptions = computed(() => {
-  const subscriptions = beneficiary.value.subscriptions.map((x) => x.id);
+  const subscriptions = beneficiary.value.beneficiarySubscriptions.map((x) => x.subscription.id);
   const beneficiaryType = beneficiary.value.beneficiaryType.id;
   if (!subscriptionOptions.value) return [];
   return subscriptionOptions.value.filter(
@@ -142,13 +148,13 @@ const filteredSubscriptionOptions = computed(() => {
 });
 
 const subscriptionItems = computed(() => {
-  const items = beneficiary.value.subscriptions;
+  const items = beneficiary.value.beneficiarySubscriptions;
   const formattedItems = [];
 
   for (let item of items) {
     formattedItems.push({
-      id: item.id,
-      name: item.name
+      id: item.subscription.id,
+      name: item.subscription.name
     });
   }
 

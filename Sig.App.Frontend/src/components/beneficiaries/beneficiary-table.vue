@@ -51,12 +51,12 @@
           <div class="inline-flex flex-col justify-start items-start gap-y-1">
             <PfTag
               v-for="item in getBeneficiarySubscriptions(slotProps.item)"
-              :key="item.id"
-              :label="item.name"
+              :key="item.subscription.id"
+              :label="item.subscription.name"
               can-dismiss
               is-dark-theme
               bg-color-class="bg-primary-700"
-              @dismiss="removeSubscription(slotProps.item, item)" />
+              @dismiss="removeSubscription(slotProps.item, item.subscription)" />
           </div>
         </template>
         <PfTag v-else :label="t('beneficiary-none-subscription')" bg-color-class="bg-primary-300" />
@@ -188,11 +188,11 @@ function getBeneficiaryId2(beneficiary) {
 }
 
 function getBeneficiarySubscriptions(beneficiary) {
-  return beneficiary.subscriptions;
+  return beneficiary.beneficiarySubscriptions;
 }
 
 function haveAnySubscriptions(beneficiary) {
-  return beneficiary.subscriptions.length > 0;
+  return beneficiary.beneficiarySubscriptions.length > 0;
 }
 
 function removeSubscription(beneficiary, subscription) {
