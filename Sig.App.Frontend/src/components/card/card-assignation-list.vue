@@ -128,7 +128,7 @@ const { result: resultBeneficiaries, refetch } = useQuery(
                 id
                 name
               }
-              beneficiarySubscriptions
+              beneficiarySubscriptions {
                 subscription {
                   id
                   name
