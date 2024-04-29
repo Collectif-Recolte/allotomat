@@ -210,7 +210,7 @@ function haveCard() {
 }
 
 function haveSubscriptions() {
-  return props.beneficiary.subscriptions.length > 0;
+  return props.beneficiary.beneficiarySubscriptions.length > 0;
 }
 
 function qrCodeLink() {

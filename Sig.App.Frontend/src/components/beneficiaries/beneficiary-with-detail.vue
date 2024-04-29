@@ -55,13 +55,13 @@
         </dl>
         <template v-if="haveAnySubscriptions()">
           <ul class="inline-flex flex-col justify-start items-start gap-y-1 mb-4 sm:mb-0">
-            <li v-for="item in getBeneficiarySubscriptions()" :key="item.id">
+            <li v-for="item in getBeneficiarySubscriptions()" :key="item.subscription.id">
               <PfTag
-                :label="item.name"
+                :label="item.subscription.name"
                 is-dark-theme
                 :bg-color-class="isSubscriptionPaymentConflict(item) ? 'bg-red-500' : 'bg-primary-700'"
                 can-dismiss
-                @dismiss="removeSubscription(beneficiary, item)" />
+                @dismiss="removeSubscription(beneficiary, item.subscription)" />
             </li>
           </ul>
         </template>
@@ -177,8 +177,8 @@ const props = defineProps({
 });
 
 function isBeneficiaryPaymentConflict() {
-  for (var i = 0; i < beneficiary.value.subscriptions.length; i++) {
-    if (isSubscriptionPaymentConflict(beneficiary.value.subscriptions[i])) {
+  for (var i = 0; i < beneficiary.value.beneficiarySubscriptions.length; i++) {
+    if (isSubscriptionPaymentConflict(beneficiary.value.beneficiarySubscriptions[i])) {
       return true;
     }
   }
@@ -190,14 +190,14 @@ function getBeneficiaryCategory() {
 }
 
 function getBeneficiarySubscriptions() {
-  return beneficiary.value.subscriptions;
+  return beneficiary.value.beneficiarySubscriptions;
 }
 
-function isSubscriptionPaymentConflict(subscription) {
-  for (var j = 0; j < subscription.types.length; j++) {
+function isSubscriptionPaymentConflict(beneficiarySubscription) {
+  for (var j = 0; j < beneficiarySubscription.subscription.types.length; j++) {
     if (
-      dateUtc(subscription.endDate) < new Date() ||
-      subscription.types[j].beneficiaryType.id === beneficiary.value.beneficiaryType.id
+      dateUtc(beneficiarySubscription.subscription.endDate) < new Date() ||
+      beneficiarySubscription.beneficiaryType.id === beneficiary.value.beneficiaryType.id
     ) {
       return false;
     }
@@ -206,7 +206,7 @@ function isSubscriptionPaymentConflict(subscription) {
 }
 
 function haveAnySubscriptions() {
-  return beneficiary.value.subscriptions.length > 0;
+  return beneficiary.value.beneficiarySubscriptions.length > 0;
 }
 
 function getCardProgramId() {
