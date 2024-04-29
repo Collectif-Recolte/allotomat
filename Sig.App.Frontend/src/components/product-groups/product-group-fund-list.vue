@@ -30,7 +30,7 @@
             <div class="ml-2">{{ getMoneyFormat(product.fund) }}</div>
           </div>
         </div>
-        <div class="text-p2 align-middle w-full mb-1 last:mb-0">
+        <div v-if="props.displayExpirationDate" class="text-p2 align-middle w-full mb-1 last:mb-0">
           <template v-if="product && product.expirationDate">
             {{ t("expiration-date", { date: formatDate(dateUtc(product.expirationDate), textualFormat) }) }}
           </template>
@@ -55,7 +55,8 @@ import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
 const { t } = useI18n();
 
 const props = defineProps({
-  productGroups: { type: Object, default: null }
+  productGroups: { type: Object, default: null },
+  displayExpirationDate: { type: Boolean, default: false }
 });
 
 function getProductGroupName(label) {

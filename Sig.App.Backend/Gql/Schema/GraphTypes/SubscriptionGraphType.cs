@@ -5,7 +5,10 @@ using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Helpers;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Sig.App.Backend.Gql.Schema.GraphTypes
 {
@@ -16,6 +19,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public NonNull<string> Name => subscription.Name;
         public SubscriptionMonthlyPaymentMoment MonthlyPaymentMoment => subscription.MonthlyPaymentMoment;
         public bool IsFundsAccumulable => subscription.IsFundsAccumulable;
+        public int TotalPayment => subscription.GetTotalPayment();
 
         public SubscriptionGraphType(Subscription subscription)
         {
@@ -25,6 +29,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<ProjectGraphType> Project(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadProject(subscription.ProjectId);
+        }
+
+        public int PaymentRemaining([Inject] IClock clock)
+        {
+            return subscription.GetPaymentRemaining(clock);
         }
 
         public OffsetDateTime StartDate()
@@ -55,6 +64,12 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<IEnumerable<BudgetAllowanceGraphType>> BudgetAllowances(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadSubscriptionBudgetAllowance(Id.LongIdentifierForType<Subscription>());
+        }
+
+        public async Task<decimal> BudgetAllowancesTotal(IAppUserContext ctx)
+        {
+            var budgetAllowances = await ctx.DataLoader.LoadSubscriptionBudgetAllowance(Id.LongIdentifierForType<Subscription>()).GetResultAsync();
+            return budgetAllowances.Sum(x => x.AvailableFund);
         }
 
         public IDataLoaderResult<bool> HaveAnyBeneficiaries(IAppUserContext ctx)

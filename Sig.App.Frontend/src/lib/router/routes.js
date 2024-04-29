@@ -468,109 +468,16 @@ export default [
     ]
   },
   {
-    name: urls.URL_BENEFICIARY_ADMIN,
+    name: urls.URL_BENEFICIARY_MANAGE,
     path: "/participants",
-    component: () => import("@/views/beneficiary/ListBeneficiaries.vue"),
+    component: () => import("@/views/beneficiary/ManageBeneficiaries.vue"),
     meta: {
       claim: GLOBAL_MANAGE_BENEFICIARIES
     },
+    redirect: () => {
+      return { name: urls.URL_BENEFICIARY_ADMIN };
+    },
     children: [
-      {
-        name: urls.URL_BENEFICIARY_CARD_ASSIGN,
-        path: ":beneficiaryId/assign",
-        component: () => import("@/views/card/AssignCard.vue"),
-        meta: {
-          claim: GLOBAL_MANAGE_CARDS
-        }
-      },
-      {
-        name: urls.URL_BENEFICIARY_CARD_UNASSIGN,
-        path: ":beneficiaryId/unassign/:cardId",
-        component: () => import("@/views/card/UnassignCard.vue"),
-        meta: {
-          claim: GLOBAL_MANAGE_CARDS
-        }
-      },
-      {
-        name: urls.URL_BENEFICIARY_CARD_LOST,
-        path: ":beneficiaryId/lost-card/:cardId",
-        component: () => import("@/views/card/TransferCard.vue"),
-        meta: {
-          claim: GLOBAL_MANAGE_CARDS
-        }
-      },
-      {
-        name: urls.URL_BENEFICIARY_QRCODE_PREVIEW,
-        path: ":cardId/preview",
-        component: () => import("@/views/card/PreviewQRCode.vue"),
-        meta: {
-          claim: GLOBAL_MANAGE_CARDS
-        }
-      },
-      {
-        name: urls.URL_BENEFICIARY_REMOVE_SUBSCRIPTION,
-        path: ":beneficiaryId/:subscriptionId/remove",
-        component: () => import("@/views/beneficiary/RemoveSubscriptionFromBeneficiary.vue"),
-        meta: {
-          claim: GLOBAL_MANAGE_BENEFICIARIES
-        }
-      },
-      {
-        name: urls.URL_BENEFICIARY_MANAGE_SUBSCRIPTIONS,
-        path: ":beneficiaryId/manage-subscriptions",
-        component: () => import("@/views/beneficiary/EditAssociatedSubscriptions.vue"),
-        meta: {
-          claim: GLOBAL_MANAGE_BENEFICIARIES
-        }
-      },
-      {
-        name: urls.URL_BENEFICIARY_ADD,
-        path: "add",
-        component: () => import("@/views/beneficiary/AddBeneficiary.vue"),
-        meta: {
-          claim: GLOBAL_MANAGE_BENEFICIARIES
-        }
-      },
-      {
-        name: urls.URL_BENEFICIARY_EDIT,
-        path: ":beneficiaryId/edit",
-        component: () => import("@/views/beneficiary/EditBeneficiary.vue"),
-        meta: {
-          claim: GLOBAL_MANAGE_BENEFICIARIES
-        }
-      },
-      {
-        name: urls.URL_BENEFICIARY_DELETE,
-        path: ":beneficiaryId/delete",
-        component: () => import("@/views/beneficiary/DeleteBeneficiary.vue"),
-        meta: {
-          claim: GLOBAL_MANAGE_BENEFICIARIES
-        }
-      },
-      {
-        name: urls.URL_BENEFICIARY_MANUALLY_ADD_FUND,
-        path: ":beneficiaryId/add-fund",
-        component: () => import("@/views/beneficiary/ManuallyAddFund.vue"),
-        meta: {
-          claim: GLOBAL_MANAGE_BENEFICIARIES
-        }
-      },
-      {
-        name: urls.URL_BENEFICIARY_IMPORT_LIST,
-        path: "import",
-        component: () => import("@/views/beneficiary/ImportList.vue"),
-        meta: {
-          claim: GLOBAL_MANAGE_BENEFICIARIES
-        }
-      },
-      {
-        name: urls.URL_BENEFICIARY_OFF_PLATFORM_IMPORT_LIST,
-        path: "import-off-platform",
-        component: () => import("@/views/beneficiary/OffPlatformImportList.vue"),
-        meta: {
-          claim: GLOBAL_MANAGE_BENEFICIARIES
-        }
-      },
       {
         name: urls.URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS,
         path: "assign-subscriptions",
@@ -578,6 +485,112 @@ export default [
         meta: {
           claim: GLOBAL_MANAGE_BENEFICIARIES
         }
+      },
+      {
+        name: urls.URL_BENEFICIARY_ADMIN,
+        path: "manage",
+        component: () => import("@/views/beneficiary/ListBeneficiaries.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_BENEFICIARIES
+        },
+        children: [
+          {
+            name: urls.URL_BENEFICIARY_CARD_ASSIGN,
+            path: ":beneficiaryId/assign",
+            component: () => import("@/views/card/AssignCard.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_CARDS
+            }
+          },
+          {
+            name: urls.URL_BENEFICIARY_CARD_UNASSIGN,
+            path: ":beneficiaryId/unassign/:cardId",
+            component: () => import("@/views/card/UnassignCard.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_CARDS
+            }
+          },
+          {
+            name: urls.URL_BENEFICIARY_CARD_LOST,
+            path: ":beneficiaryId/lost-card/:cardId",
+            component: () => import("@/views/card/TransferCard.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_CARDS
+            }
+          },
+          {
+            name: urls.URL_BENEFICIARY_QRCODE_PREVIEW,
+            path: ":cardId/preview",
+            component: () => import("@/views/card/PreviewQRCode.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_CARDS
+            }
+          },
+          {
+            name: urls.URL_BENEFICIARY_REMOVE_SUBSCRIPTION,
+            path: ":beneficiaryId/:subscriptionId/remove",
+            component: () => import("@/views/beneficiary/RemoveSubscriptionFromBeneficiary.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_BENEFICIARIES
+            }
+          },
+          {
+            name: urls.URL_BENEFICIARY_MANAGE_SUBSCRIPTIONS,
+            path: ":beneficiaryId/manage-subscriptions",
+            component: () => import("@/views/beneficiary/EditAssociatedSubscriptions.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_BENEFICIARIES
+            }
+          },
+          {
+            name: urls.URL_BENEFICIARY_ADD,
+            path: "add",
+            component: () => import("@/views/beneficiary/AddBeneficiary.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_BENEFICIARIES
+            }
+          },
+          {
+            name: urls.URL_BENEFICIARY_EDIT,
+            path: ":beneficiaryId/edit",
+            component: () => import("@/views/beneficiary/EditBeneficiary.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_BENEFICIARIES
+            }
+          },
+          {
+            name: urls.URL_BENEFICIARY_DELETE,
+            path: ":beneficiaryId/delete",
+            component: () => import("@/views/beneficiary/DeleteBeneficiary.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_BENEFICIARIES
+            }
+          },
+          {
+            name: urls.URL_BENEFICIARY_MANUALLY_ADD_FUND,
+            path: ":beneficiaryId/add-fund",
+            component: () => import("@/views/beneficiary/ManuallyAddFund.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_BENEFICIARIES
+            }
+          },
+          {
+            name: urls.URL_BENEFICIARY_IMPORT_LIST,
+            path: "import",
+            component: () => import("@/views/beneficiary/ImportList.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_BENEFICIARIES
+            }
+          },
+          {
+            name: urls.URL_BENEFICIARY_OFF_PLATFORM_IMPORT_LIST,
+            path: "import-off-platform",
+            component: () => import("@/views/beneficiary/OffPlatformImportList.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_BENEFICIARIES
+            }
+          }
+        ]
       }
     ]
   },

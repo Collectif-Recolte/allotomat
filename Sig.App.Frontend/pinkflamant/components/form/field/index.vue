@@ -18,7 +18,7 @@
       </div>
 
       <!-- Labels for radio or checkbox -->
-      <div v-if="isRadioOrCheck" class="ml-3 text-sm h-remove-margin">
+      <div v-if="isRadioOrCheck && !hasHiddenLabel" class="ml-3 text-sm h-remove-margin">
         <FormFieldLabel
           :input-id="id"
           :label="label"

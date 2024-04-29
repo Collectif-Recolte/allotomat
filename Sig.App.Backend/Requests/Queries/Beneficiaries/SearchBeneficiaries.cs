@@ -48,7 +48,7 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
             if (request.Subscriptions != null)
             {
                 var withoutSubscription = request.WithoutSubscription?.Value ?? false;
-                query = query.Where(x => (withoutSubscription && x.Subscriptions.Count == 0) || (x.Subscriptions.Any(y => request.Subscriptions.Contains(y.SubscriptionId))));
+                query = query.Where(x => (withoutSubscription && x.Subscriptions.Count == 0) || x.Subscriptions.Any(y => request.Subscriptions.Contains(y.SubscriptionId)));
             }
             else if (request.WithoutSubscription.IsSet())
             {
@@ -62,9 +62,19 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
                 }
             }
 
+            if (request.WithoutSpecificSubscriptions != null)
+            {
+                query = query.Where(x => !x.Subscriptions.Any(y => request.WithoutSpecificSubscriptions.Contains(y.SubscriptionId)));
+            }
+
             if (request.Categories != null)
             {
                 query = query.Where(x => request.Categories.Contains(x.BeneficiaryTypeId.GetValueOrDefault()));
+            }
+
+            if (request.WithoutSpecificCategories != null)
+            {
+                query = query.Where(x => !request.WithoutSpecificCategories.Contains(x.BeneficiaryTypeId.GetValueOrDefault()));
             }
 
             if (request.WithCard.IsSet())
@@ -130,7 +140,9 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
             public Maybe<long> OrganizationId { get; set; }
             public Maybe<bool> WithoutSubscription { get; set; }
             public IEnumerable<long> Subscriptions { get; set; }
+            public IEnumerable<long> WithoutSpecificSubscriptions { get; set; }
             public IEnumerable<long> Categories { get; set; }
+            public IEnumerable<long> WithoutSpecificCategories { get; set; }
             public IEnumerable<BeneficiaryStatus> Status { get; set; }
             public Maybe<bool> WithCard { get; set; }
             public Maybe<bool> WithConflictPayment { get; set; }

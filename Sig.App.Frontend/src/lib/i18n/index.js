@@ -7,6 +7,13 @@ import { LOCAL_STORAGE_LOCALE } from "@/lib/consts/local-storage";
 const supportedLocales = [LANG_FR, LANG_EN];
 let initialLocale = localStorage.getItem(LOCAL_STORAGE_LOCALE);
 
+if (!initialLocale) {
+  const browserLang = navigator.language.slice(0, 2);
+  if (supportedLocales.includes(browserLang)) {
+    initialLocale = browserLang;
+  }
+}
+
 if (!supportedLocales.includes(initialLocale)) {
   initialLocale = supportedLocales[0];
 }

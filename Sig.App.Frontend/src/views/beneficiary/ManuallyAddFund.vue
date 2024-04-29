@@ -8,10 +8,11 @@
 		"amount-label": "Amount",
 		"amount-placeholder": "Ex. {amount}",
 		"subscription-label": "{name} - expires on {date}",
-		"manually-add-fund-success-notification": "{name} received {amount} on their card.",
+		"manually-add-fund-success-notification": "{name} has received {amount} on their card. The funds will expire on {expirationDate}.",
     "select-product-group-label": "Product group",
     "available-fund-cant-be-less-than-zero-error-notification": "The card balance cannot be negative.",
-    "card-current-balance": "Current balance: {amount}"
+    "card-current-balance": "Current balance: {amount}",
+    "select-subscription-description": "Subscriptions that have expired or subscriptions that are not assigned to the participant are not displayed and selectable for manual fund addition."
 	},
 	"fr": {
 		"title": "Ajouter manuellement des fonds",
@@ -20,11 +21,12 @@
 		"add-amount": "Ajouter le montant",
 		"amount-label": "Montant",
 		"amount-placeholder": "Ex. {amount}",
-		"subscription-label": "{name} - expire {date}",
-		"manually-add-fund-success-notification": "{name} a reçu {amount} sur sa carte.",
+		"subscription-label": "{name} - expire le {date}",
+		"manually-add-fund-success-notification": "{name} a reçu {amount} sur sa carte. Les fonds vont expirer le {expirationDate}.",
     "select-product-group-label": "Groupe de produits",
     "available-fund-cant-be-less-than-zero-error-notification": "Le solde de la carte ne peut pas être négatif.",
-    "card-current-balance": "Solde actuel: {amount}"
+    "card-current-balance": "Solde actuel: {amount}",
+    "select-subscription-description": "Les abonnements qui ont expiré ou les abonnements qui ne sont pas assignés au participant ne sont pas affichés et sélectionnables pour l'ajout manuel de fonds."
 	}
 }
 </i18n>
@@ -55,6 +57,7 @@
               v-bind="field"
               :label="t('select-subscription-label')"
               :options="subscriptionOptions"
+              :description="t('select-subscription-description')"
               :errors="fieldErrors"
               @input="onSubscriptionSelected" />
           </Field>
@@ -278,7 +281,11 @@ async function onSubmit({ amount, subscription, productGroup }) {
   addSuccess(
     t("manually-add-fund-success-notification", {
       name: `${result.data.createManuallyAddingFundTransaction.transaction.card.beneficiary.firstname} ${result.data.createManuallyAddingFundTransaction.transaction.card.beneficiary.lastname}`,
-      amount: getMoneyFormat(parseFloat(amount))
+      amount: getMoneyFormat(parseFloat(amount)),
+      expirationDate: formatDate(
+        dateUtc(result.data.createManuallyAddingFundTransaction.transaction.expirationDate),
+        textualFormat
+      )
     })
   );
 }

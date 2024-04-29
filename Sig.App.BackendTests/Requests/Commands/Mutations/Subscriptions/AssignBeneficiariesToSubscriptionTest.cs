@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using GraphQL.Conventions;
-using MediatR;
 using Microsoft.Extensions.Logging.Abstractions;
 using NodaTime;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
@@ -25,10 +24,21 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
     {
         private readonly AssignBeneficiariesToSubscription handler;
 
+        private readonly Project project;
+        
         private readonly Organization organization;
 
         private readonly Subscription subscription1;
         private readonly Subscription subscription2;
+
+        private readonly Beneficiary beneficiary1;
+        private readonly Beneficiary beneficiary2;
+        private readonly Beneficiary beneficiary3;
+        private readonly Beneficiary beneficiary4;
+        private readonly Beneficiary beneficiary5;
+        private readonly Beneficiary beneficiary6;
+        private readonly Beneficiary beneficiary7;
+        private readonly Beneficiary beneficiary8;
 
         private readonly BeneficiaryType beneficiaryType1;
         private readonly BeneficiaryType beneficiaryType2;
@@ -38,7 +48,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
         public AssignBeneficiariesToSubscriptionTest()
         {
-            var project = new Project()
+            project = new Project()
             {
                 Name = "Project 1"
             };
@@ -59,7 +69,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             };
             DbContext.BeneficiaryTypes.Add(beneficiaryType1);
 
-            var beneficiary1 = new Beneficiary()
+            beneficiary1 = new Beneficiary()
             {
                 SortOrder = 0,
                 Organization = organization,
@@ -71,7 +81,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 BeneficiaryType = beneficiaryType1
             };
             DbContext.Beneficiaries.Add(beneficiary1);
-            var beneficiary2 = new Beneficiary()
+            beneficiary2 = new Beneficiary()
             {
                 SortOrder = 2,
                 Organization = organization,
@@ -83,7 +93,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 BeneficiaryType = beneficiaryType1
             };
             DbContext.Beneficiaries.Add(beneficiary2);
-            var beneficiary3 = new Beneficiary()
+            beneficiary3 = new Beneficiary()
             {
                 SortOrder = 4,
                 Organization = organization,
@@ -95,7 +105,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 BeneficiaryType = beneficiaryType1
             };
             DbContext.Beneficiaries.Add(beneficiary3);
-            var beneficiary4 = new Beneficiary()
+            beneficiary4 = new Beneficiary()
             {
                 SortOrder = 6,
                 Organization = organization,
@@ -116,7 +126,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             };
             DbContext.BeneficiaryTypes.Add(beneficiaryType2);
 
-            var beneficiary5 = new Beneficiary()
+            beneficiary5 = new Beneficiary()
             {
                 SortOrder = 1,
                 Organization = organization,
@@ -128,7 +138,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 BeneficiaryType = beneficiaryType2
             };
             DbContext.Beneficiaries.Add(beneficiary5);
-            var beneficiary6 = new Beneficiary()
+            beneficiary6 = new Beneficiary()
             {
                 SortOrder = 3,
                 Organization = organization,
@@ -140,7 +150,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 BeneficiaryType = beneficiaryType2
             };
             DbContext.Beneficiaries.Add(beneficiary6);
-            var beneficiary7 = new Beneficiary()
+            beneficiary7 = new Beneficiary()
             {
                 SortOrder = 5,
                 Organization = organization,
@@ -152,7 +162,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 BeneficiaryType = beneficiaryType2
             };
             DbContext.Beneficiaries.Add(beneficiary7);
-            var beneficiary8 = new Beneficiary()
+            beneficiary8 = new Beneficiary()
             {
                 SortOrder = 7,
                 Organization = organization,
@@ -270,8 +280,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             {
                 OrganizationId = organization.GetIdentifier(),
                 SubscriptionId = subscription1.GetIdentifier(),
-                WithSubscriptions = new Id[0],
-                Amount = 700
+                Beneficiaries = [beneficiary1.GetIdentifier(), beneficiary2.GetIdentifier(), beneficiary3.GetIdentifier(), beneficiary4.GetIdentifier(), beneficiary5.GetIdentifier(), beneficiary6.GetIdentifier(), beneficiary7.GetIdentifier(), beneficiary8.GetIdentifier()]
             };
 
             await handler.Handle(input, CancellationToken.None);
@@ -292,9 +301,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             {
                 OrganizationId = organization.GetIdentifier(),
                 SubscriptionId = subscription2.GetIdentifier(),
-                Amount = 700,
-                WithSubscriptions = new Id[0],
-                WithCategories = new Id[1] { beneficiaryType2.GetIdentifier() }
+                Beneficiaries = [beneficiary5.GetIdentifier(), beneficiary6.GetIdentifier(), beneficiary7.GetIdentifier(), beneficiary8.GetIdentifier()]
             };
 
             await handler.Handle(input, CancellationToken.None);
@@ -337,10 +344,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             {
                 OrganizationId = organization.GetIdentifier(),
                 SubscriptionId = subscription1.GetIdentifier(),
-                Amount = 700,
-                WithSubscriptions = new Id[1] { subscription2.GetIdentifier() },
-                WithoutSubscription = false,
-                WithCategories = new Id[1] { beneficiaryType2.GetIdentifier() }
+                Beneficiaries = [beneficiary9.GetIdentifier()]
             };
 
             await handler.Handle(input, CancellationToken.None);
@@ -361,9 +365,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             {
                 OrganizationId = organization.GetIdentifier(),
                 SubscriptionId = subscription1.GetIdentifier(),
-                Amount = 700,
-                WithSubscriptions = new Id[2] { subscription1.GetIdentifier(), subscription2.GetIdentifier()},
-                WithoutSubscription = false
+                Beneficiaries = []
             };
 
             await handler.Handle(input, CancellationToken.None);
@@ -378,35 +380,12 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         }
 
         [Fact]
-        public async Task AssignSubscriptionWithMaximumAmount()
-        {
-            var input = new AssignBeneficiariesToSubscription.Input()
-            {
-                OrganizationId = organization.GetIdentifier(),
-                SubscriptionId = subscription1.GetIdentifier(),
-                WithSubscriptions = new Id[0],
-                Amount = 200
-            };
-
-            await handler.Handle(input, CancellationToken.None);
-
-            var localBudgetAllowance = DbContext.BudgetAllowances.First();
-            var localSubscription = DbContext.Subscriptions.First();
-            var subscriptionBeneficiaries = DbContext.SubscriptionBeneficiaries.ToList();
-
-            localBudgetAllowance.AvailableFund.Should().Be(540);
-            localSubscription.Beneficiaries.Count.Should().Be(2);
-            subscriptionBeneficiaries.Count().Should().Be(2);
-        }
-
-        [Fact]
         public async Task ThrowsIfOrganizationNotFound()
         {
             var input = new AssignBeneficiariesToSubscription.Input()
             {
                 OrganizationId = Id.New<Organization>(123456),
-                SubscriptionId = subscription1.GetIdentifier(),
-                Amount = 100
+                SubscriptionId = subscription1.GetIdentifier()
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
@@ -420,7 +399,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             {
                 OrganizationId = organization.GetIdentifier(),
                 SubscriptionId = Id.New<Subscription>(123456),
-                Amount = 100
+                Beneficiaries = []
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
@@ -438,7 +417,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             {
                 OrganizationId = organization.GetIdentifier(),
                 SubscriptionId = subscription1.GetIdentifier(),
-                Amount = 100
+                Beneficiaries = []
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
@@ -455,11 +434,107 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             {
                 OrganizationId = organization.GetIdentifier(),
                 SubscriptionId = subscription1.GetIdentifier(),
-                Amount = 100
+                Beneficiaries = []
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<AssignBeneficiariesToSubscription.MissingBudgetAllowanceException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfBeneficiaryNotFound()
+        {
+            var input = new AssignBeneficiariesToSubscription.Input()
+            {
+                OrganizationId = organization.GetIdentifier(),
+                SubscriptionId = subscription1.GetIdentifier(),
+                Beneficiaries = [Id.New<Beneficiary>(123456)]
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<AssignBeneficiariesToSubscription.BeneficiaryNotFoundException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfBeneficiaryAlreadyGotSubscription()
+        {
+            var input = new AssignBeneficiariesToSubscription.Input()
+            {
+                OrganizationId = organization.GetIdentifier(),
+                SubscriptionId = subscription1.GetIdentifier(),
+                Beneficiaries = [beneficiary1.GetIdentifier()]
+            };
+            await handler.Handle(input, CancellationToken.None);
+
+            var inputError = new AssignBeneficiariesToSubscription.Input()
+            {
+                OrganizationId = organization.GetIdentifier(),
+                SubscriptionId = subscription1.GetIdentifier(),
+                Beneficiaries = [beneficiary1.GetIdentifier()]
+            };
+
+            await F(() => handler.Handle(inputError, CancellationToken.None))
+                .Should().ThrowAsync<AssignBeneficiariesToSubscription.BeneficiaryAlreadyGotSubscriptionException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfBeneficiaryTypeNotInSubscription()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            var subscription3 = new Subscription()
+            {
+                Name = "Subscription 3",
+                StartDate = new DateTime(today.Year, today.Month, 1),
+                EndDate = new DateTime(today.Year, today.Month, 2).AddMonths(1),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth,
+                Types = new List<SubscriptionType>()
+                {
+                    new SubscriptionType()
+                    {
+                        Amount = 50,
+                        BeneficiaryType = beneficiaryType2
+                    }
+                },
+                Project = project
+            };
+            DbContext.Subscriptions.Add(subscription3);
+
+            var budgetAllowance3 = new BudgetAllowance()
+            {
+                AvailableFund = 700,
+                Organization = organization,
+                Subscription = subscription3,
+                OriginalFund = 700
+            };
+            DbContext.BudgetAllowances.Add(budgetAllowance3);
+            DbContext.SaveChanges();
+
+            var input = new AssignBeneficiariesToSubscription.Input()
+            {
+                OrganizationId = organization.GetIdentifier(),
+                SubscriptionId = subscription3.GetIdentifier(),
+                Beneficiaries = [beneficiary1.GetIdentifier()]
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<AssignBeneficiariesToSubscription.BeneficiaryTypeNotInSubscriptionException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfNotEnoughBudgetAllowance()
+        {
+            budgetAllowance1.AvailableFund = 1;
+            DbContext.SaveChanges();
+
+            var input = new AssignBeneficiariesToSubscription.Input()
+            {
+                OrganizationId = organization.GetIdentifier(),
+                SubscriptionId = subscription1.GetIdentifier(),
+                Beneficiaries = [beneficiary1.GetIdentifier()]
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<AssignBeneficiariesToSubscription.NotEnoughBudgetAllowanceException>();
         }
     }
 }

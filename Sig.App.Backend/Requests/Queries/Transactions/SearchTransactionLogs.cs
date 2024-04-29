@@ -49,8 +49,9 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             var currentUserCanSeeAllBeneficiaryInfo = await beneficiaryService.CurrentUserCanSeeAllBeneficiaryInfo();
             var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
             var longProjectId = request.ProjectId.LongIdentifierForType<Project>();
-            var startDate = new DateTime(request.StartDate.Year, request.StartDate.Month, request.StartDate.Day, 0, 0, 0);
-            var endDate = new DateTime(request.EndDate.Year, request.EndDate.Month, request.EndDate.Day, 23, 59, 59);
+
+            var startDate = request.StartDate.ToUniversalTime();
+            var endDate = request.EndDate.ToUniversalTime();
 
             IQueryable<TransactionLog> query = db.TransactionLogs.Include(x => x.TransactionLogProductGroups).Where(x =>
                 x.CreatedAtUtc > startDate && x.CreatedAtUtc < endDate && x.ProjectId == longProjectId)
@@ -115,7 +116,7 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
                 }
             }
 
-            var sorted = Sort(query, TransactionLogSort.Default, SortOrder.Asc);
+            var sorted = Sort(query, TransactionLogSort.Default, SortOrder.Desc);
             return await Pagination.For(sorted, request.Page);
         }
 
@@ -131,6 +132,7 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             public IEnumerable<Id> Categories { get; set; }
             public IEnumerable<string> TransactionTypes { get; set; }
             public Maybe<string> SearchText { get; set; }
+            public string TimeZoneId { get; set; }
         }
 
         private static IOrderedQueryable<TransactionLog> Sort(IQueryable<TransactionLog> query, TransactionLogSort sort, SortOrder order)
