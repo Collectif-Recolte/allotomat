@@ -135,13 +135,17 @@ const { result: resultBeneficiary } = useQuery(
           totalFund
         }
         ... on BeneficiaryGraphType {
-          subscriptions {
-            id
+          beneficiarySubscriptions {
+            subscription {
+              id
+            }
           }
         }
         ... on OffPlatformBeneficiaryGraphType {
-          subscriptions {
-            id
+          beneficiarySubscriptions {
+            subscription {
+              id
+            }
           }
         }
       }
@@ -207,7 +211,7 @@ const project = useResult(resultOrganization, null, (data) => {
 });
 
 const subscriptionOptions = useResult(resultOrganization, null, (data) => {
-  const availableSubscriptionIds = beneficiary.value.subscriptions.map((x) => x.id);
+  const availableSubscriptionIds = beneficiary.value.beneficiarySubscriptions.map((x) => x.subscription.id);
   return data.organization.budgetAllowances
     .filter(
       (x) =>

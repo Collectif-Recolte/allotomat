@@ -521,8 +521,11 @@ const {
                 id
                 name
               }
-              subscriptions {
-                id
+              beneficiarySubscriptions {
+                subscription {
+                  id
+                  name
+                }
               }
             }
           }

@@ -520,14 +520,21 @@ const {
                 id
                 name
               }
-              subscriptions {
-                id
-                name
-                endDate
-                types {
+              beneficiarySubscriptions {
+                beneficiaryType {
                   id
-                  beneficiaryType {
+                  name
+                }
+                subscription {
+                  id
+                  name
+                  endDate
+                  types {
                     id
+                    beneficiaryType {
+                      id
+                      name
+                    }
                   }
                 }
               }
@@ -545,9 +552,14 @@ const {
               }
               isActive
               monthlyPaymentMoment
-              subscriptions {
-                id
-                name
+              beneficiarySubscriptions {
+                beneficiaryType {
+                  id
+                }
+                subscription {
+                  id
+                  name
+                }
               }
             }
           }

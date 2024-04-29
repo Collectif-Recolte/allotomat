@@ -20,8 +20,8 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
 
         public override async Task<ILookup<long, BeneficiarySubscriptionTypeGraphType>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var results = await db.SubscriptionBeneficiaries.Include(x => x.Subscription).Include(x => x.Beneficiary).Where(x => request.Ids.Contains(x.BeneficiaryId)).ToListAsync();
-            return results.ToLookup(x => x.BeneficiaryId, x => new BeneficiarySubscriptionTypeGraphType(x.Beneficiary, x.Subscription));
+            var results = await db.SubscriptionBeneficiaries.Include(x => x.Subscription).Include(x => x.Beneficiary).Include(x => x.BeneficiaryType).Where(x => request.Ids.Contains(x.BeneficiaryId)).ToListAsync();
+            return results.ToLookup(x => x.BeneficiaryId, x => new BeneficiarySubscriptionTypeGraphType(x.Beneficiary, x.Subscription, x.BeneficiaryType));
         }
     }
 }

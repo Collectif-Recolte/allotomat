@@ -128,9 +128,11 @@ const { result: resultBeneficiaries, refetch } = useQuery(
                 id
                 name
               }
-              subscriptions {
-                id
-                name
+              beneficiarySubscriptions {
+                subscription {
+                  id
+                  name
+                }
               }
             }
             ... on OffPlatformBeneficiaryGraphType {
