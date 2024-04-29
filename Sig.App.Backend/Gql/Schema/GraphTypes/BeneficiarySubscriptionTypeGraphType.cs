@@ -9,11 +9,13 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
     {
         private readonly Beneficiary beneficiary;
         private readonly Subscription subscription;
+        private readonly BeneficiaryType beneficiaryType;
 
-        public BeneficiarySubscriptionTypeGraphType(Beneficiary beneficiary, Subscription subscription)
+        public BeneficiarySubscriptionTypeGraphType(Beneficiary beneficiary, Subscription subscription, BeneficiaryType beneficiaryType)
         {
             this.beneficiary = beneficiary;
             this.subscription = subscription;
+            this.beneficiaryType = beneficiaryType;
         }
 
         public IDataLoaderResult<IBeneficiaryGraphType> Beneficiary(IAppUserContext ctx)
@@ -24,6 +26,10 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<SubscriptionGraphType> Subscription(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadSubscriptionById(subscription.Id);
+        }
+        public IDataLoaderResult<BeneficiaryTypeGraphType> BeneficiaryType(IAppUserContext ctx)
+        {
+            return ctx.DataLoader.LoadBeneficiaryType(beneficiaryType.Id);
         }
 
         public IDataLoaderResult<SubscriptionTypeGraphType> Type(IAppUserContext ctx)

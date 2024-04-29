@@ -14,6 +14,7 @@ using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Services.Beneficiaries;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
+using NodaTime;
 
 namespace Sig.App.Backend.Requests.Queries.Beneficiaries
 {
@@ -21,16 +22,22 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
     {
         private readonly AppDbContext db;
         private readonly IBeneficiaryService beneficiaryService;
+        private readonly IClock clock;
 
-        public SearchBeneficiaries(AppDbContext db, IBeneficiaryService beneficiaryService)
+        public SearchBeneficiaries(AppDbContext db, IBeneficiaryService beneficiaryService, IClock clock)
         {
             this.db = db;
             this.beneficiaryService = beneficiaryService;
+            this.clock = clock;
         }
 
         public async Task<PaymentConflictPagination<Beneficiary>> Handle(Query request, CancellationToken cancellationToken)
         {
             IQueryable<Beneficiary> query = db.Beneficiaries.Include(x => x.Card.Funds).ThenInclude(x => x.ProductGroup).Include(x => x.Subscriptions).ThenInclude(x => x.BeneficiaryType);
+
+            var today = clock
+                .GetCurrentInstant()
+                .ToDateTimeUtc();
 
             if (request.OrganizationId.IsSet())
             {
@@ -76,11 +83,11 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
             {
                 if (request.WithConflictPayment.Value)
                 {
-                    query = query.Where(x => x.Subscriptions.Any(y => y.BeneficiaryType != x.BeneficiaryType));
+                    query = query.Where(x => x.Subscriptions.Any(y => y.BeneficiaryType != x.BeneficiaryType && y.Subscription.EndDate > today));
                 }
                 else
                 {
-                    query = query.Where(x => !x.Subscriptions.Any(y => y.BeneficiaryType != x.BeneficiaryType));
+                    query = query.Where(x => !x.Subscriptions.Any(y => y.BeneficiaryType != x.BeneficiaryType && y.Subscription.EndDate > today));
                 }
             }
 
@@ -101,16 +108,16 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
                 {
                     if (currentUserCanSeeAllBeneficiaryInfo)
                     {
-                        query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text) || x.Email.Contains(text) || x.Firstname.Contains(text) || x.Lastname.Contains(text));
+                        query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text) || x.Email.Contains(text) || x.Firstname.Contains(text) || x.Lastname.Contains(text) || (x.Card != null && x.Card.CardNumber.Contains(text) || x.Card.ProgramCardId.ToString().Contains(text)));
                     }
                     else
                     {
-                        query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text));
+                        query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text) || (x.Card != null && x.Card.CardNumber.Contains(text) || x.Card.ProgramCardId.ToString().Contains(text)));
                     }
                 }
             }
 
-            var conflictPaymentCount = await query.Where(x => x.Subscriptions.Any(y => y.BeneficiaryType != x.BeneficiaryType)).CountAsync();
+            var conflictPaymentCount = await query.Where(x => x.Subscriptions.Any(y => y.BeneficiaryType != x.BeneficiaryType && y.Subscription.EndDate > today)).CountAsync();
 
             var sorted = Sort(query, request.Sort?.Field ?? BeneficiarySort.Default, request.Sort?.Order ?? SortOrder.Asc);
             return await PaymentConflictPagination.For(sorted, request.Page, conflictPaymentCount);

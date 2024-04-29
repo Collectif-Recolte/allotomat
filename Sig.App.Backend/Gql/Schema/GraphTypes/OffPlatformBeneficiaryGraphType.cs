@@ -41,9 +41,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return ctx.DataLoader.LoadBeneficiaryTypeByBeneficiaryId(Id.LongIdentifierForType<OffPlatformBeneficiary>());
         }
 
-        public IDataLoaderResult<IEnumerable<SubscriptionGraphType>> Subscriptions(IAppUserContext ctx)
+        public IDataLoaderResult<IEnumerable<BeneficiarySubscriptionTypeGraphType>> BeneficiarySubscriptions(IAppUserContext ctx)
         {
-            return ctx.DataLoader.LoadBeneficiarySubscriptions(Id.LongIdentifierForType<OffPlatformBeneficiary>());
+            return ctx.DataLoader.LoadBeneficiarySubscriptionsGraphType(Id.LongIdentifierForType<OffPlatformBeneficiary>());
         }
 
         public IDataLoaderResult<CardGraphType> Card(IAppUserContext ctx)

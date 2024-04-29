@@ -40,7 +40,7 @@ import { useI18n } from "vue-i18n";
 import { computed, defineEmits, defineProps, watch } from "vue";
 import { useQuery, useResult } from "@vue/apollo-composable";
 
-import { CHECK_CARD_STEPS_START } from "@/lib/consts/enums";
+import { CHECK_CARD_STEPS_START, PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 
@@ -67,9 +67,10 @@ const { result, loading } = useQuery(
           name
         }
         totalFund
-        funds {
-          id
-          amount
+        addingFundTransactions {
+          expirationDate
+          availableFund
+          status
           productGroup {
             id
             name
@@ -103,7 +104,7 @@ watch(loading, (loading) => {
 
 const fund = computed(() => {
   var total = 0;
-  if (card.value !== undefined) {
+  if (card.value !== undefined && card.value !== null) {
     total = card.value.totalFund;
     if (card.value.loyaltyFund) {
       total += card.value.loyaltyFund.amount;
@@ -120,16 +121,17 @@ const cardId = computed(() => {
 });
 
 const allFunds = computed(() => {
-  if (card.value && card.value.funds) {
-    let funds = [...card.value.funds];
+  let funds = [];
+  if (card.value !== undefined && card.value !== null) {
     if (card.value.loyaltyFund) {
       funds.push(card.value.loyaltyFund);
     }
-
-    return funds;
+    if (card.value.addingFundTransactions) {
+      funds = [...card.value.addingFundTransactions];
+    }
   }
 
-  return [];
+  return funds;
 });
 
 const programName = computed(() => {
@@ -142,11 +144,14 @@ const programName = computed(() => {
 const getProductGroups = (funds) => {
   const productGroups = [];
   for (let fund of funds) {
-    productGroups.push({
-      color: fund.productGroup.color,
-      label: fund.productGroup.name,
-      fund: fund.amount
-    });
+    if (fund.expirationDate > new Date().toISOString() || fund.productGroup.name === PRODUCT_GROUP_LOYALTY) {
+      productGroups.push({
+        color: fund.productGroup.color,
+        label: fund.productGroup.name,
+        fund: fund.amount ?? fund.availableFund,
+        expirationDate: fund.expirationDate
+      });
+    }
   }
   return productGroups;
 };

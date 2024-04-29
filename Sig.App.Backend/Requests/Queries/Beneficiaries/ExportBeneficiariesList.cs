@@ -16,12 +16,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.Migrations;
 using Sig.App.Backend.Services.Beneficiaries;
-using static Sig.App.Backend.Helpers.ExcelGenerator;
 using Organization = Sig.App.Backend.DbModel.Entities.Organizations.Organization;
+using Sig.App.Backend.Gql.Schema.Enums;
+using System.Globalization;
 
 namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
 {
@@ -95,8 +95,8 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
             }
             
             dataWorksheet.Column("Catégorie/Category", x => x.BeneficiaryType.GetKeys().First());
-            dataWorksheet.Column("Solde total/Total balance", x => x.Card != null ? x.Card.TotalFund() : "");
-            dataWorksheet.Column("Solde abonnement/Subscription balance", x => x.Card != null ? x.Card.TotalSubscriptionFund() : "");
+            dataWorksheet.Column("Solde total/Total balance", x => x.Card != null ? x.Card.TotalFund().ToString("C", request.Language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA")) : "");
+            dataWorksheet.Column("Solde abonnement/Subscription balance", x => x.Card != null ? x.Card.TotalSubscriptionFund().ToString("C", request.Language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA")) : "");
 
             foreach (var productGroup in productGroups)
             {
@@ -105,20 +105,20 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
                     dataWorksheet.Column("Montant/Amount - " + productGroup.Name, x => {
                         if (x.Card != null)
                         {
-                            return x.Card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroup.Id)?.Amount;
+                            return x.Card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroup.Id)?.Amount.ToString("C", request.Language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA"));
                         }
                         return null;
                     });
                 }
             }
 
-            dataWorksheet.Column("Solde carte-cadeau/Gift card balance", x => x.Card != null ? x.Card.LoyaltyFund() : "");
+            dataWorksheet.Column("Solde carte-cadeau/Gift card balance", x => x.Card != null ? x.Card.LoyaltyFund().ToString("C", request.Language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA")) : "");
             dataWorksheet.Column("Dépenses/Expenses", x =>
             {
                 if (x.Card != null)
                 {
                     var transactions = db.Transactions.Where(y => y.BeneficiaryId == x.Id).ToList();
-                    return transactions.Where(x => x.GetType() == typeof(PaymentTransaction)).Sum(x => x.Amount);
+                    return transactions.Where(x => x.GetType() == typeof(PaymentTransaction)).Sum(x => x.Amount).ToString("C", request.Language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA"));
                 }
                 else
                 {
@@ -172,6 +172,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
         {
             public Id Id { get; set; }
             public string TimeZoneId { get; set; }
+            public Language Language { get; set; }
         }
 
         public class Payload

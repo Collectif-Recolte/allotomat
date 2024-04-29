@@ -20,6 +20,7 @@ using Sig.App.Backend.Services.Permission;
 using Microsoft.AspNetCore.Identity;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.Services.Permission.Enums;
+using Sig.App.Backend.Gql.Schema.Enums;
 
 namespace Sig.App.Backend.Services.Reports
 {
@@ -132,13 +133,13 @@ namespace Sig.App.Backend.Services.Reports
             dataWorksheet.Column("Participant-e hors plateforme/Participant off platform", x => x.BeneficiaryIsOffPlatform ? "Oui/Yes" : "Non/No");
             dataWorksheet.Column("Type", GetOperationTypeText);
             dataWorksheet.Column("Marché/Market", x => x.MarketName);
-            dataWorksheet.Column("Montant total/Total amount", GetAmountText);
+            dataWorksheet.Column("Montant total/Total amount", x => GetAmountText(x, request.Language));
 
             foreach (var productGroup in productGroupDictionary)
             {
                 if (productGroup.Value != ProductGroupType.LOYALTY)
                 {
-                    dataWorksheet.Column("Montant/Amount - " + productGroup.Value, x => GetAmountByProductGroup(productGroup.Key, x));
+                    dataWorksheet.Column("Montant/Amount - " + productGroup.Value, x => GetAmountByProductGroup(productGroup.Key, x, request.Language));
                 }
             }
 
@@ -199,9 +200,9 @@ namespace Sig.App.Backend.Services.Reports
             }
         }
 
-        private string GetAmountText(TransactionLog transactionLog)
+        private string GetAmountText(TransactionLog transactionLog, Language language)
         {
-            var amount = transactionLog.TotalAmount.ToString("C", CultureInfo.CreateSpecificCulture("fr-CA"));
+            var amount = transactionLog.TotalAmount.ToString("C", language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA"));
             if (transactionLog.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog || transactionLog.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog)
             {
                 return $"-{amount}";
@@ -210,12 +211,12 @@ namespace Sig.App.Backend.Services.Reports
             return amount;
         }
 
-        private string GetAmountByProductGroup(long productGroupId, TransactionLog transactionLog)
+        private string GetAmountByProductGroup(long productGroupId, TransactionLog transactionLog, Language language)
         {
             var transactionByProduct = transactionLog.TransactionLogProductGroups.FirstOrDefault(x => x.ProductGroupId == productGroupId);
             if (transactionByProduct != null)
             {
-                return transactionByProduct.Amount.ToString("C", CultureInfo.CreateSpecificCulture("fr-CA"));
+                return transactionByProduct.Amount.ToString("C", language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA"));
             }
             
             return "";
