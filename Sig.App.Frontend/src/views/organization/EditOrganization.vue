@@ -2,13 +2,13 @@
 {
 	"en": {
 		"edit-organization": "Edit",
-		"edit-organization-success-notification": "Editing organization {organizationName} was successful.",
-		"title": "Edit an organization"
+		"edit-organization-success-notification": "Editing group {organizationName} was successful.",
+		"title": "Edit an group"
 	},
 	"fr": {
 		"edit-organization": "Modifier",
-		"edit-organization-success-notification": "L’édition de l'organisation {organizationName} a été un succès.",
-		"title": "Modifier une organisation"
+		"edit-organization-success-notification": "L’édition du groupe {organizationName} a été un succès.",
+		"title": "Modifier un groupe"
 	}
 }
 </i18n>

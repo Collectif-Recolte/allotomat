@@ -1,14 +1,14 @@
 <i18n>
   {
     "en": {
-      "add-user": "Add a organization manager",
-      "cant-remove-self-info": "It is impossible to remove yourself from the manager list of an organization",
+      "add-user": "Add a group manager",
+      "cant-remove-self-info": "It is impossible to remove yourself from the manager list of an group",
       "title": "User management",
       "manager-count": "{count} manager | {count} managers"
     },
     "fr": {
-      "add-user": "Ajouter un gestionnaire d'organisation",
-      "cant-remove-self-info": "Il est impossible de se retirer soi-même de la liste de gestionnaire d'une organisation",
+      "add-user": "Ajouter un gestionnaire de groupe",
+      "cant-remove-self-info": "Il est impossible de se retirer soi-même de la liste de gestionnaire d'un groupe",
       "title": "Gestion des utilisateurs",
       "manager-count": "{count} gestionnaire | {count} gestionnaires"
     }

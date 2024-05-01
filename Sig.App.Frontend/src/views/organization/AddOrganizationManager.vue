@@ -2,21 +2,21 @@
 {
 	"en": {
 		"add-organization-manager": "Add manager",
-		"add-organization-manager-success-notification": "The addition of the organization manager was a success. The manager will receive an email for the creation of his account in the next few minutes.",
+		"add-organization-manager-success-notification": "The addition of the group manager was a success. The manager will receive an email for the creation of his account in the next few minutes.",
 		"cancel": "Cancel",
 		"organization-manager-email": "Email",
 		"organization-manager-email-placeholder": "Ex. john.doe{'@'}exemple.com",
-		"title": "Add an organization manager",
+		"title": "Add a group manager",
 		"user-already-manager": "One of the managers is already the manager of a program.",
 		"user-not-organization-manager": "One of the managers is not an program manager."
 	},
 	"fr": {
 		"add-organization-manager": "Ajouter le gestionnaire",
-		"add-organization-manager-success-notification": "L’ajout du gestionnaire de l'organisation a été un succès. Le gestionnaire va recevoir un courriel pour la création de son compte dans les prochaines minutes.",
+		"add-organization-manager-success-notification": "L’ajout du gestionnaire de groupe a été un succès. Le gestionnaire va recevoir un courriel pour la création de son compte dans les prochaines minutes.",
 		"cancel": "Annuler",
 		"organization-manager-email": "Courriel",
 		"organization-manager-email-placeholder": "Ex. john.doe{'@'}example.com",
-		"title": "Ajouter un gestionnaire de l'organisation",
+		"title": "Ajouter un gestionnaire de groupe",
 		"user-already-manager": "Un des gestionnaires est déjà gestionnaire d'un programme.",
 		"user-not-organization-manager": "Un des gestionnaires n'est pas du type gestionnaire de programme."
 	}
