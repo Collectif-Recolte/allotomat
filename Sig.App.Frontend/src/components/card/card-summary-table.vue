@@ -10,7 +10,6 @@
     "card-number":"N°",
     "card-assigned": "Assigned",
     "card-unassigned": "Unassigned",
-    "card-deactivated": "Deactivated",
     "card-disabled": "Temporarily disabled",
 	},
 	"fr": {
@@ -23,7 +22,6 @@
     "card-number":"N°",
     "card-assigned": "Assignée",
     "card-unassigned": "Non assignée",
-    "card-deactivated": "Désactivée",
     "card-disabled": "Désactivée temporairement",
   }
 }
@@ -78,13 +76,7 @@ import { defineProps, computed, ref, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
-import {
-  CARD_STATUS_ASSIGNED,
-  CARD_STATUS_UNASSIGNED,
-  CARD_STATUS_DEACTIVATED,
-  CARD_STATUS_LOST,
-  CARD_STATUS_GIFT
-} from "@/lib/consts/enums";
+import { CARD_STATUS_ASSIGNED, CARD_STATUS_UNASSIGNED, CARD_STATUS_LOST, CARD_STATUS_GIFT } from "@/lib/consts/enums";
 
 const { t } = useI18n();
 
@@ -172,25 +164,17 @@ function getCardStatus(card) {
   if (card.status === CARD_STATUS_UNASSIGNED) {
     return t("card-unassigned");
   }
-  if (card.status === CARD_STATUS_DEACTIVATED) {
-    return t("card-deactivated");
-  }
   return "";
 }
 
 function isCardTagDarkTheme(card) {
-  return (
-    card.status === CARD_STATUS_ASSIGNED ||
-    card.status === CARD_STATUS_GIFT ||
-    card.status === CARD_STATUS_DEACTIVATED ||
-    card.status === CARD_STATUS_LOST
-  );
+  return card.status === CARD_STATUS_ASSIGNED || card.status === CARD_STATUS_GIFT || card.status === CARD_STATUS_LOST;
 }
 
 function getCardTagBgColor(card) {
   if (card.status === CARD_STATUS_ASSIGNED) return "bg-primary-700";
   if (card.status === CARD_STATUS_UNASSIGNED) return "bg-primary-300";
-  if (card.status === CARD_STATUS_LOST || card.status === CARD_STATUS_DEACTIVATED) return "bg-red-500";
+  if (card.status === CARD_STATUS_LOST) return "bg-red-500";
   if (card.status === CARD_STATUS_GIFT) return "bg-yellow-500";
   return "";
 }
