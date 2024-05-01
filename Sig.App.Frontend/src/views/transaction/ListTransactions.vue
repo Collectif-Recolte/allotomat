@@ -55,20 +55,22 @@
       </template>
       <div v-if="transactionLogs">
         <UiTableHeader :title="t('transaction-count', transactionLogs.totalCount)" />
-        <ProgramTransactionTable :transactions="transactions" />
-        <UiPagination
-          v-if="transactionLogs && transactionLogs.totalPages > 1"
-          v-model:page="page"
-          class="mb-6"
-          :total-pages="transactionLogs.totalPages" />
-        <div
-          v-if="canCreateTransaction"
-          class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
-          <PfButtonLink tag="routerLink" :to="{ name: URL_TRANSACTION_ADD }" btn-style="secondary" class="rounded-full">
-            <span class="inline-flex items-center">
-              {{ t("create-transaction") }}
-            </span>
-          </PfButtonLink>
+        <div class="flex flex-col relative mb-6">
+          <ProgramTransactionTable :transactions="transactions" />
+          <UiPagination
+            v-if="transactionLogs && transactionLogs.totalPages > 1"
+            v-model:page="page"
+            class="mb-6"
+            :total-pages="transactionLogs.totalPages" />
+          <div
+            v-if="canCreateTransaction"
+            class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
+            <PfButtonLink tag="routerLink" :to="{ name: URL_TRANSACTION_ADD }" btn-style="secondary" class="rounded-full">
+              <span class="inline-flex items-center">
+                {{ t("create-transaction") }}
+              </span>
+            </PfButtonLink>
+          </div>
         </div>
       </div>
       <Component :is="Component" />
