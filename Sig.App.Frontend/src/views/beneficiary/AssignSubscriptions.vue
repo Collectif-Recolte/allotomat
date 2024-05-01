@@ -4,7 +4,7 @@
       "selected-organization": "Group",
       "title": "Participants",
       "available-amount-for-allocation": "Budget allowance",
-      "amount-of-payment-remaining": "Payment remaining",
+      "amount-of-payment-remaining": "Remaining payments",
       "manage-participants": "Manage",
       "assign-subscriptions": "Assignments",
       "auto-select-participants": "Auto select",
@@ -34,7 +34,7 @@
       "selected-organization": "Groupe",
       "title": "Participant-e-s",
       "available-amount-for-allocation": "Enveloppe",
-      "amount-of-payment-remaining": "Versements",
+      "amount-of-payment-remaining": "Versements restants",
       "manage-participants": "Gestion",
       "assign-subscriptions": "Attribution",
       "auto-select-participants": "Sélection automatique",
@@ -214,7 +214,7 @@
       </div>
     </div>
 
-    <template v-if="selectedOrganization !== '' && beneficiaries.length > 0">
+    <div v-if="selectedOrganization !== '' && beneficiaries.length > 0" class="flex flex-col relative mb-6">
       <BeneficiaryTable
         show-associated-card
         :beneficiaries="beneficiaries"
@@ -247,7 +247,8 @@
           </span>
         </PfButtonAction>
       </div>
-    </template>
+    </div>
+
     <UiEmptyPage v-else-if="selectedSubscription && anyFiltersActive">
       <UiCta
         :img-src="require('@/assets/img/participants.jpg')"
