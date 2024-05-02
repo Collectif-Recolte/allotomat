@@ -20,7 +20,7 @@
 		"login": "Connexion",
 		"logo": "Logo de Tomat",
 		"market-manager-without-market-warning": "Aucun commerce n'est associé à votre compte. Si vous croyez qu'il y a eu une erreur, communiquez avec l'équipe de Tomat.",
-		"organization-manager-without-organization-warning": "Aucun groupe n'est associée à votre compte. Si vous croyez qu'il y a eu une erreur, communiquez avec l'équipe de Tomat.",
+		"organization-manager-without-organization-warning": "Aucun groupe n'est associé à votre compte. Si vous croyez qu'il y a eu une erreur, communiquez avec l'équipe de Tomat.",
 		"password": "Mot de passe",
 		"project-manager-without-project-warning": "Aucun programme n'est associé à votre compte. Si vous croyez qu'il y a eu une erreur, communiquez avec l'équipe de Tomat.",
 		"title": "Connexion",
