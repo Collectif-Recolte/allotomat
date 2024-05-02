@@ -17,8 +17,8 @@
       "beneficiary-delete-disabled-anonymous": "You can't delete an anonymous beneficiary",
       "beneficiary-add-funds-disabled-anonymous": "You can't add funds if the beneficiary is anonymous",
       "beneficiary-add-funds-disabled-no-subscription": "You can't add funds if the beneficiary doesn't have a subscription",
-      "beneficiary-disable-card": "Disable card",
-      "beneficiary-enable-card": "Enable card"
+      "beneficiary-disable-card": "Deactivate card",
+      "beneficiary-enable-card": "Re-enable card"
     },
     "fr": {
       "beneficiary-edit": "Modifier les détails",
