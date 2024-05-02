@@ -18,7 +18,7 @@
 		"description": "Avertissement ! Si vous continuez, la carte sera désactiver et le-la participant-e ne pourra plus utiliser la carte tant qu'elle n'est pas réactivé.",
 		"title": "Désactiver la carte - {beneficiaryName}",
 		"disable-btn-label": "Désactiver",
-		"disable-card-success-notification": "La carte a été désactiver avec succès."
+		"disable-card-success-notification": "La carte a été désactivée avec succès."
 	}
 }
 </i18n>

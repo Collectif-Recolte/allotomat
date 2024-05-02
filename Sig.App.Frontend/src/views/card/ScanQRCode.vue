@@ -29,8 +29,7 @@ import { usePageTitle } from "@/lib/helpers/page-title";
 
 import { URL_CARD_ERROR, URL_CARD_CHECK } from "@/lib/consts/urls";
 import { CHECK_CARD_STEPS_START, CHECK_CARD_STEPS_COMPLETE } from "@/lib/consts/enums";
-import { CARD_STATUS_DEACTIVATED } from "@/lib/consts/enums";
-import { CARD_NOT_FOUND, CARD_DEACTIVATED } from "@/lib/consts/qr-code-error";
+import { CARD_NOT_FOUND } from "@/lib/consts/qr-code-error";
 
 import QRCodeScanner from "@/components/transaction/qr-code-scanner.vue";
 
@@ -62,10 +61,6 @@ async function checkQRCode(cardId) {
   if (!card) {
     emit("onUpdateStep", CHECK_CARD_STEPS_START);
     router.push({ name: URL_CARD_ERROR, query: { error: CARD_NOT_FOUND, returnRoute: URL_CARD_CHECK } });
-    return;
-  } else if (card.status === CARD_STATUS_DEACTIVATED) {
-    emit("onUpdateStep", CHECK_CARD_STEPS_START);
-    router.push({ name: URL_CARD_ERROR, query: { error: CARD_DEACTIVATED, returnRoute: URL_CARD_CHECK } });
     return;
   }
 

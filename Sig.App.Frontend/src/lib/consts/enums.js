@@ -8,7 +8,6 @@ export const WITHOUT_SUBSCRIPTION = "withoutSubscription";
 
 export const CARD_STATUS_ASSIGNED = "ASSIGNED";
 export const CARD_STATUS_UNASSIGNED = "UNASSIGNED";
-export const CARD_STATUS_DEACTIVATED = "DEACTIVATED";
 export const CARD_STATUS_LOST = "LOST";
 export const CARD_STATUS_GIFT = "GIFT_CARD";
 

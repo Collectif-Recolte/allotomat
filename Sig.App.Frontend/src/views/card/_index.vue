@@ -17,10 +17,9 @@
     "lost-card-label": "Lost card",
     "card-assigned": "Assigned",
     "card-unassigned": "Unassigned",
-    "card-deactivated": "Deactivated",
     "search-placeholder": "Search by ID or card number",
     "beneficiary-disable-card": "Disable card",
-    "beneficiary-enable-card": "Réactiver la carte",
+    "beneficiary-enable-card": "Enable card",
     "card-disabled-status": "Card status",
     "card-is-disabled": "Temporarily disabled",
     "card-is-enabled": "Card is enabled"
@@ -42,7 +41,6 @@
     "lost-card-label": "Carte perdue",
     "card-assigned": "Assignée",
     "card-unassigned": "Non assignée",
-    "card-deactivated": "Désactivée",
     "search-placeholder": "Chercher par ID ou n° de carte",
     "beneficiary-disable-card": "Désactiver la carte",
     "beneficiary-enable-card": "Réactiver la carte",
@@ -180,7 +178,6 @@ import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
 import {
   CARD_STATUS_ASSIGNED,
   CARD_STATUS_UNASSIGNED,
-  CARD_STATUS_DEACTIVATED,
   CARD_STATUS_LOST,
   CARD_STATUS_GIFT,
   CARD_IS_DISABLED,
@@ -208,7 +205,6 @@ const selectedCardDisabled = ref([]);
 const availableCardStatus = [
   { value: CARD_STATUS_ASSIGNED, label: t("card-assigned") },
   { value: CARD_STATUS_UNASSIGNED, label: t("card-unassigned") },
-  { value: CARD_STATUS_DEACTIVATED, label: t("card-deactivated") },
   { value: CARD_STATUS_LOST, label: t("lost-card-label") },
   { value: CARD_STATUS_GIFT, label: t("gift-card-label") }
 ];
@@ -356,7 +352,7 @@ const getAfterBtnGroup = (card) => {
           }
         },
         {
-          label: t("beneficiary-enable-card"),
+          label: t("remove-card"),
           icon: ICON_MINUS,
           route: {
             name: URL_CARDS_UNASSIGN,
