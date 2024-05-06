@@ -286,7 +286,7 @@
         <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
         <p
           class="text-primary-700"
-          v-html="t('usage-amount', { amount: amountThatWillBeAllocatedMoneyFormat, detail: usageAmountDetail })"></p>
+          v-html="t('usage-amount', { amount: amountThatWillBeAllocatedModalMoneyFormat, detail: usageAmountDetail })"></p>
         <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
         <p
           class="text-primary-700"
@@ -610,6 +610,11 @@ const selectedBeneficiaries = computed(() => {
 const amountThatWillBeAllocatedMoneyFormat = computed(() => {
   let amount = amountThatWillBeAllocated.value;
   return amount !== 0 ? getMoneyFormat(amount) : "-";
+});
+
+const amountThatWillBeAllocatedModalMoneyFormat = computed(() => {
+  let amount = amountThatWillBeAllocated.value;
+  return amount !== 0 ? getMoneyFormat(amount) : "0$";
 });
 
 const amountThatWillBeAllocated = computed(() => {
