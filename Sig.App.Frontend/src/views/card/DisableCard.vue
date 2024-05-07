@@ -15,7 +15,7 @@
     "delete-text-card-number-error": "Le texte doit correspondre au numéro de la carte",
 		"delete-text-beneficiary-name-label": "Taper le nom du-de la participant-e pour confirmer",
     "delete-text-card-number-label": "Taper le numéro de la carte pour confirmer",
-		"description": "Avertissement ! Si vous continuez, la carte sera désactiver et le-la participant-e ne pourra plus utiliser la carte tant qu'elle n'est pas réactivé.",
+		"description": "Avertissement ! Si vous continuez, la carte sera désactivée et le-la participant-e ne pourra plus utiliser la carte tant qu'elle n'est pas réactivé.",
 		"title": "Désactiver la carte - {beneficiaryName}",
 		"disable-btn-label": "Désactiver",
 		"disable-card-success-notification": "La carte a été désactivée avec succès."

@@ -15,10 +15,10 @@
     "delete-text-card-number-error": "Le texte doit correspondre au numéro de la carte",
 		"delete-text-beneficiary-name-label": "Taper le nom du-de la participant-e pour confirmer",
     "delete-text-card-number-label": "Taper le numéro de la carte pour confirmer",
-		"description": "Avertissement ! Si vous continuez, la carte sera réactiver et le-la participant-e ne pourra plus utiliser la carte.",
+		"description": "Avertissement ! Si vous continuez, la carte sera réactivée et le-la participant-e ne pourra plus utiliser la carte.",
 		"title": "Activer la carte - {beneficiaryName}",
 		"enable-btn-label": "Activer",
-		"enable-card-success-notification": "La carte a été réactiver avec succès."
+		"enable-card-success-notification": "La carte a été réactivée avec succès."
 	}
 }
 </i18n>
