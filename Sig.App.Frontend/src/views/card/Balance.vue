@@ -1,13 +1,15 @@
 <i18n>
 {
 	"en": {
-		"card-description": "Program {programName} — Card #{cardId}",
+		"card-description": "Program {programName}",
+    "card-id": "Card #{cardId}",
 		"done": "Check another card",
 		"title": "Card balance",
     "card-is-disabled": "The card is disabled."
 	},
 	"fr": {
-		"card-description": "Programme {programName} — Carte #{cardId}",
+		"card-description": "Programme {programName}",
+    "card-id": "Carte #{cardId}",
 		"done": "Vérifier une autre carte",
 		"title": "Solde de la carte",
     "card-is-disabled": "La carte est désactivée."
@@ -17,23 +19,21 @@
 
 <template>
   <div class="min-h-app px-8 py-10 flex items-center justify-center">
-    <div class="bg-white rounded-2xl p-6 h-remove-margin relative text-center">
+    <div class="bg-white rounded-2xl min-w-80 p-6 h-remove-margin relative text-center">
       <UiIconComplete />
       <h1 class="font-semibold mt-4 mb-2 text-h2 xs:text-h1">{{ t("title") }}</h1>
       <p v-if="card" class="text-p3">
-        {{ t("card-description", { programName, cardId }) }}
+        {{ t("card-description", { programName }) }}<br />
+        {{ t("card-id", { cardId }) }}
       </p>
       <p v-if="card && card.isDisabled" class="text-red-500 font-bold">{{ t("card-is-disabled") }}</p>
-      <p v-if="card" class="font-bold text-primary-700 text-h1 xs:text-d2 my-6">
+      <p v-if="card" class="font-bold text-primary-700 text-h1 leading-none xs:text-d2 mt-6 mb-8">
         {{ getMoneyFormat(fund) }}
       </p>
 
-      <ProductGroupFundList
-        display-expiration-date
-        class="flex justify-center mb-6"
-        :product-groups="getProductGroups(allFunds)" />
+      <ProductGroupFundList display-expiration-date class="mb-6" :product-groups="getProductGroups(allFunds)" />
 
-      <div class="border-t border-grey-100 pt-4">
+      <div class="mt-4">
         <PfButtonAction btn-style="link" size="sm" :label="t('done')" @click="emit('onUpdateStep', CHECK_CARD_STEPS_START)" />
       </div>
     </div>
