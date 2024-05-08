@@ -24,7 +24,7 @@
       <div class="flex-1 pr-4 flex justify-between md:px-4">
         <div>
           <div class="shrink-0 flex items-center pr-4 h-16 md:hidden">
-            <img class="h-8 relative -top-0.5" :src="require('@/assets/logo/logo-white.svg')" :alt="t('logo')" />
+            <img class="h-8" :src="require('@/assets/logo/logo-white.svg')" :alt="t('logo')" />
           </div>
         </div>
 
