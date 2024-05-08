@@ -152,12 +152,16 @@ const getProductGroups = (funds) => {
   const productGroups = [];
   for (let fund of funds) {
     if (fund.expirationDate > new Date().toISOString() || fund.productGroup.name === PRODUCT_GROUP_LOYALTY) {
-      productGroups.push({
-        color: fund.productGroup.color,
-        label: fund.productGroup.name,
-        fund: fund.amount ?? fund.availableFund,
-        expirationDate: fund.expirationDate
-      });
+      if (productGroups.find((pg) => pg.label === fund.productGroup.name && pg.expirationDate === fund.expirationDate)) {
+        productGroups.find((pg) => pg.label === fund.productGroup.name).fund += fund.amount ?? fund.availableFund;
+      } else {
+        productGroups.push({
+          color: fund.productGroup.color,
+          label: fund.productGroup.name,
+          fund: fund.amount ?? fund.availableFund,
+          expirationDate: fund.expirationDate
+        });
+      }
     }
   }
   return productGroups;
