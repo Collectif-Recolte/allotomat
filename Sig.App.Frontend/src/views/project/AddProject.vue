@@ -1,20 +1,20 @@
 <i18n>
 {
 	"en": {
-    "add-project": "Add the program",
+    "add-project": "Add",
 		"add-project-success-notification": "Adding program {projectName} was successful. Managers will receive an email for the creation of their account in the next few minutes.",
 		"manager-email": "Email",
-		"project-name": "Program name",
+		"project-name": "Name",
 		"title": "Add a program",
 		"user-already-manager": "One of the managers is already the manager of an program.",
 		"user-not-project-manager": "One of the managers is not an program manager.",
 		"project-url": "Program website"
 	},
 	"fr": {
-    "add-project": "Ajouter le programme",
+    "add-project": "Ajouter",
 		"add-project-success-notification": "L’ajout du programme {projectName} a été un succès. Les gestionnaires vont recevoir un courriel pour la création de leur compte dans les prochaines minutes.",
 		"manager-email": "Courriel",
-		"project-name": "Nom du programme",
+		"project-name": "Nom",
 		"title": "Ajouter un programme",
 		"user-already-manager": "Un des gestionnaires est déjà gestionnaire d'un programme.",
 		"user-not-project-manager": "Un des gestionnaires n'est pas du type gestionnaire de programme.",

@@ -2,12 +2,12 @@
 {
 	"en": {
 		"cancel": "Cancel",
-		"market-name": "Market name",
+		"market-name": "Name",
 		"market-name-placeholder": "Ex. Central market"
 	},
 	"fr": {
 		"cancel": "Annuler",
-		"market-name": "Nom du commerce",
+		"market-name": "Nom",
 		"market-name-placeholder": "Ex. Marché centrale",
 	}
 }
