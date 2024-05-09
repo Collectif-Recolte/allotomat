@@ -1,13 +1,13 @@
 <i18n>
 {
 	"en": {
-		"add-organization": "Add a group",
+		"add-organization": "Add",
 		"title": "Management of group",
     "empty-list": "No group is associated with the program.",
     "organization-count": "{count} group | {count} groups"
 	},
 	"fr": {
-		"add-organization": "Ajouter un groupe",
+		"add-organization": "Ajouter",
 		"title": "Gestion des groupes",
     "empty-list": "Aucun groupe n'est associé au programme.",
     "organization-count": "{count} groupe | {count} groupes"

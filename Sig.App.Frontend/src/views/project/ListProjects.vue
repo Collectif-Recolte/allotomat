@@ -1,14 +1,14 @@
 <i18n>
 {
 	"en": {
-		"add-project": "Add a program",
+		"add-project": "Add",
 		"title": "Program management",
     "create-project": "Create a program",
     "empty-list": "No programs have been created yet.",
     "project-count": "{count} program | {count} programs"
 	},
 	"fr": {
-		"add-project": "Ajouter un programme",
+		"add-project": "Ajouter",
 		"title": "Gestion des programmes",
     "create-project": "Créer un programme",
     "empty-list": "Aucun programme n'a encore été créé.",

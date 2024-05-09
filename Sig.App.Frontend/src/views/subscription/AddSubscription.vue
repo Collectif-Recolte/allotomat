@@ -1,7 +1,7 @@
 <i18n>
 {
 	"en": {
-		"add-subscription": "Add subscription",
+		"add-subscription": "Add",
 		"add-subscription-success-notification": "Adding subscription {subscriptionName} was successful. You can now assign the new subscription to participants.",
 		"title": "Add a subscription",
     "confirm-title": "Subscription added!",
@@ -11,7 +11,7 @@
     "product-group-type-can-only-be-assign-once-by-beneficiary-type": "A product group cannot be linked to more than one type."
 	},
 	"fr": {
-		"add-subscription": "Ajouter l'abonnement",
+		"add-subscription": "Ajouter",
 		"add-subscription-success-notification": "L’ajout de l’abonnement {subscriptionName} a été un succès. Vous pouvez maintenant assigner le nouvel abonnement à des participant-e-s.",
 		"title": "Ajouter un abonnement",
     "confirm-title": "Abonnement ajouté!",
