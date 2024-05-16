@@ -187,6 +187,7 @@
           v-model="searchInput"
           hide-conflict-filter
           hide-card-is-disabled-filter
+          hide-sort-order
           :available-beneficiary-types="availableBeneficiaryTypes"
           :available-subscriptions="availableSubscriptions"
           :selected-beneficiary-types="beneficiaryTypesFilter"

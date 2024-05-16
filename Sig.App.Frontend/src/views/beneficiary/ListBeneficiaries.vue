@@ -140,6 +140,7 @@
             :card-is-disabled="CARD_IS_DISABLED"
             :card-is-enabled="CARD_IS_ENABLED"
             :selected-card-disabled="cardDisabled"
+            :sort-order="sortOrder"
             @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
             @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
             @subscriptionsUnchecked="onSubscriptionsUnchecked"
@@ -152,6 +153,7 @@
             @paymentConflictStatusUnchecked="onPaymentConflictStatusUnchecked"
             @cardIsDisabledChecked="onCardDisabledChecked"
             @cardIsDisabledUnchecked="onCardDisabledUnchecked"
+            @sortOrderChanged="onSortOrderChanged"
             @resetFilters="onResetFilters"
             @search="onSearch" />
         </div>
@@ -253,6 +255,7 @@ import {
 } from "@/lib/consts/enums";
 import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
 import { LANG_EN } from "@/lib/consts/langs";
+import { SORT_ORDER } from "@/lib/consts/beneficiary-sort-order";
 
 import ICON_UPLOAD from "@/lib/icons/upload-file.json";
 import ICON_TABLE from "@/lib/icons/table.json";
@@ -324,6 +327,7 @@ const cardDisabled = ref([]);
 const selectedOrganization = ref(currentOrganization);
 const searchInput = ref("");
 const searchText = ref("");
+const sortOrder = ref(SORT_ORDER);
 
 const filteredQuery = computed(() => {
   return {
@@ -334,7 +338,8 @@ const filteredQuery = computed(() => {
     cardStatus: cardStatus.value.length > 0 ? cardStatus.value.toString() : undefined,
     paymentConflict: conflictPaymentStatus.value.length > 0 ? conflictPaymentStatus.value.toString() : undefined,
     cardDisabled: cardDisabled.value.length > 0 ? cardDisabled.value.toString() : undefined,
-    text: searchText.value ? searchText.value : undefined
+    text: searchText.value ? searchText.value : undefined,
+    sortOrder: sortOrder.value
   };
 });
 
@@ -366,6 +371,10 @@ if (route.query.text) {
 
 if (route.query.organizationId) {
   selectedOrganization.value = route.query.organizationId;
+}
+
+if (route.query.sortOrder) {
+  sortOrder.value = route.query.sortOrder;
 }
 
 const { result, loading: projectsLoading } = useQuery(
@@ -458,6 +467,7 @@ const {
       $withCard: Boolean
       $withConflictPayment: Boolean
       $withCardDisabled: Boolean
+      $sort: BeneficiarySortSort
     ) {
       organization(id: $id) {
         id
@@ -472,6 +482,7 @@ const {
           withCard: $withCard
           withConflictPayment: $withConflictPayment
           withCardDisabled: $withCardDisabled
+          sort: $sort
         ) {
           conflictPaymentCount
           totalCount
@@ -652,6 +663,11 @@ function onSubscriptionsUnchecked(value) {
   updateUrl();
 }
 
+function onSortOrderChanged(value) {
+  sortOrder.value = value;
+  updateUrl();
+}
+
 function onResetFilters() {
   subscriptions.value = [];
   beneficiaryTypes.value = [];
@@ -683,7 +699,8 @@ function beneficiariesVariables() {
         ? conflictPaymentStatus.value.indexOf(BENEFICIARY_WITH_PAYMENT_CONFLICT) !== -1
         : null,
     withCardDisabled: cardDisabled.value.length === 1 ? cardDisabled.value.indexOf(CARD_IS_DISABLED) !== -1 : null,
-    searchText: searchText.value
+    searchText: searchText.value,
+    sort: { field: sortOrder.value, order: "ASC" }
   };
 }
 

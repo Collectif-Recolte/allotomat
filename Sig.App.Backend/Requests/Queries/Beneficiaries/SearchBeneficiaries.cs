@@ -141,7 +141,7 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
 
             var conflictPaymentCount = await query.Where(x => x.Subscriptions.Any(y => y.BeneficiaryType != x.BeneficiaryType && y.Subscription.EndDate > today)).CountAsync();
 
-            var sorted = Sort(query, request.Sort?.Field ?? BeneficiarySort.Default, request.Sort?.Order ?? SortOrder.Asc);
+            var sorted = Sort(query, request.Sort?.Field ?? BeneficiarySort.Default);
             return await PaymentConflictPagination.For(sorted, request.Page, conflictPaymentCount);
         }
 
@@ -162,16 +162,23 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
             public Maybe<bool> WithCardDisabled { get; set; }
         }
 
-        private static IOrderedQueryable<Beneficiary> Sort(IQueryable<Beneficiary> query, BeneficiarySort sort, SortOrder order)
+        private static IOrderedQueryable<Beneficiary> Sort(IQueryable<Beneficiary> query, BeneficiarySort sort)
         {
             switch (sort)
             {
+                case BeneficiarySort.SortOrder:
                 case BeneficiarySort.Default:
                     return query
-                        .SortBy(x => x.SortOrder, order);
+                        .SortBy(x => x.SortOrder, SortOrder.Asc);
+                case BeneficiarySort.ID1:
+                    return query
+                        .SortBy(x => x.ID1, SortOrder.Asc);
+                case BeneficiarySort.LastName:
+                    return query
+                        .SortBy(x => x.Lastname, SortOrder.Asc);
                 case BeneficiarySort.ByFundAvailableOnCard:
                     return query
-                        .SortBy(x => x.Card != null ? x.Card.Funds.Where(x => x.ProductGroup.Name != ProductGroupType.LOYALTY).Sum(x => x.Amount) : 0, order);
+                        .SortBy(x => x.Card != null ? x.Card.Funds.Where(x => x.ProductGroup.Name != ProductGroupType.LOYALTY).Sum(x => x.Amount) : 0, SortOrder.Desc);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -181,6 +188,9 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
     public enum BeneficiarySort
     {
         Default,
-        ByFundAvailableOnCard
+        ByFundAvailableOnCard,
+        ID1,
+        LastName,
+        SortOrder
     }
 }
