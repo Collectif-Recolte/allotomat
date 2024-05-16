@@ -1,6 +1,7 @@
 <i18n>
 {
 	"en": {
+    "fund": "Fund",
     "card-status": "Status",
     "qr-code": "QR",
     "card": "ID",
@@ -13,6 +14,7 @@
     "card-disabled": "Temporarily disabled",
 	},
 	"fr": {
+    "fund": "Fonds",
     "card-status": "Statut",
     "qr-code": "QR",
     "card": "ID",
@@ -62,6 +64,9 @@
           }" />
       </td>
       <td :class="CELL_CLASSES" :style="slotProps.item.rowPaddingBottom">
+        {{ getCardFundTotal(slotProps.item) }}
+      </td>
+      <td :class="CELL_CLASSES" :style="slotProps.item.rowPaddingBottom">
         {{ getBeneficiaryOrganization(slotProps.item) }}
       </td>
       <td :class="CELL_CLASSES" :style="slotProps.item.rowPaddingBottom">
@@ -74,6 +79,8 @@
 <script setup>
 import { defineProps, computed, ref, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
+
+import { getMoneyFormat } from "@/lib/helpers/money";
 
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
 import { CARD_STATUS_ASSIGNED, CARD_STATUS_UNASSIGNED, CARD_STATUS_LOST, CARD_STATUS_GIFT } from "@/lib/consts/enums";
@@ -137,6 +144,7 @@ const cols = computed(() => {
   cols.push({ label: t("card") });
   cols.push({ label: t("card-number") });
   cols.push({ label: t("card-status") });
+  cols.push({ label: t("fund") });
   cols.push({ label: t("card-beneficiary-organization") });
   cols.push({ label: "" });
 
@@ -165,6 +173,11 @@ function getCardStatus(card) {
     return t("card-unassigned");
   }
   return "";
+}
+
+function getCardFundTotal(card) {
+  var loyaltyFund = card.loyaltyFund !== null ? card.loyaltyFund.amount : 0;
+  return getMoneyFormat(card.totalFund + loyaltyFund);
 }
 
 function isCardTagDarkTheme(card) {

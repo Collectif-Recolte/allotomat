@@ -246,6 +246,11 @@ const {
             programCardId
             cardNumber
             status
+            totalFund
+            loyaltyFund {
+              id
+              amount
+            }
             beneficiary {
               id
               id1
