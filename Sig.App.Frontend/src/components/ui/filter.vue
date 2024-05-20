@@ -2,10 +2,12 @@
   {
     "en": {
       "filter": "Filter",
+      "sort": "Sort order",
       "reset-filters": "Reset"
     },
     "fr": {
       "filter": "Filtrer",
+      "sort": "Ordre de tri",
       "reset-filters": "Réinitialiser"
     }
   }
@@ -36,6 +38,16 @@
         :placeholder="props.placeholder"
         @search="onSearch"
         @update:modelValue="(e) => emit('update:modelValue', e)" />
+      <div v-if="props.hasSort" class="relative inline-block group pf-transition-visibility pf-transition-visibility--focus-only">
+        <button class="pf-button pf-button--outline px-3 min-h-11">
+          {{ t("sort") }}
+          <PfIcon :icon="ICON_ARROW_BOTTOM" size="xxs" :class="activeFiltersCount > 0 ? 'ml-2' : 'ml-12'" />
+        </button>
+        <div
+          class="text-left absolute z-50 bottom-1 right-0 translate-y-full min-w-64 max-h-60 overflow-auto bg-white rounded-md border rounded-tr-none border-primary-700 px-4 py-3 transition ease-in-out duration-300 pf-transition-visibility__content h-remove-margin">
+          <slot name="sortOrder"></slot>
+        </div>
+      </div>
       <div
         v-if="props.hasFilters"
         class="relative inline-block group pf-transition-visibility pf-transition-visibility--focus-only">
@@ -72,6 +84,7 @@ const props = defineProps({
   },
   hasSearch: Boolean,
   hasFilters: Boolean,
+  hasSort: Boolean,
   activeFiltersCount: {
     type: Number,
     default: 0,
