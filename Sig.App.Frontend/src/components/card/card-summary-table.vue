@@ -1,7 +1,7 @@
 <i18n>
 {
 	"en": {
-    "fund": "Fund",
+    "fund": "Balances",
     "card-status": "Status",
     "qr-code": "QR",
     "card": "ID",
@@ -14,7 +14,7 @@
     "card-disabled": "Temporarily disabled",
 	},
 	"fr": {
-    "fund": "Fonds",
+    "fund": "Soldes",
     "card-status": "Statut",
     "qr-code": "QR",
     "card": "ID",
