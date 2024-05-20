@@ -72,6 +72,7 @@ export const URL_BENEFICIARY_QRCODE_PREVIEW = "beneficiary-qrcode-preview-url";
 export const URL_BENEFICIARY_CARD_LOST = "beneficiary-card-lost-url";
 export const URL_BENEFICIARY_CARD_UNASSIGN = "beneficiary-card-unassign-url";
 export const URL_BENEFICIARY_CARD_ASSIGN = "beneficiary-card-assign-url";
+export const URL_BENEFICIARY_MANAGE = "beneficiary-manage-url";
 
 export const URL_PROJECT_MANAGER_ADMIN = "project-manager-list-url";
 export const URL_PROJECT_MANAGER_ADD = "project-manager-add-url";

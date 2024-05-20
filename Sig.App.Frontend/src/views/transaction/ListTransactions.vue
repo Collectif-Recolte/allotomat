@@ -55,20 +55,22 @@
       </template>
       <div v-if="transactionLogs">
         <UiTableHeader :title="t('transaction-count', transactionLogs.totalCount)" />
-        <ProgramTransactionTable :transactions="transactions" />
-        <UiPagination
-          v-if="transactionLogs && transactionLogs.totalPages > 1"
-          v-model:page="page"
-          class="mb-6"
-          :total-pages="transactionLogs.totalPages" />
-        <div
-          v-if="canCreateTransaction"
-          class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
-          <PfButtonLink tag="routerLink" :to="{ name: URL_TRANSACTION_ADD }" btn-style="secondary" class="rounded-full">
-            <span class="inline-flex items-center">
-              {{ t("create-transaction") }}
-            </span>
-          </PfButtonLink>
+        <div class="flex flex-col relative mb-6">
+          <ProgramTransactionTable :transactions="transactions" />
+          <UiPagination
+            v-if="transactionLogs && transactionLogs.totalPages > 1"
+            v-model:page="page"
+            class="mb-6"
+            :total-pages="transactionLogs.totalPages" />
+          <div
+            v-if="canCreateTransaction"
+            class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
+            <PfButtonLink tag="routerLink" :to="{ name: URL_TRANSACTION_ADD }" btn-style="secondary" class="rounded-full">
+              <span class="inline-flex items-center">
+                {{ t("create-transaction") }}
+              </span>
+            </PfButtonLink>
+          </div>
         </div>
       </div>
       <Component :is="Component" />
@@ -277,18 +279,26 @@ const {
       }
     }
   `,
-  () => ({
-    page: page.value,
-    projectId: projectId.value,
-    startDate: dateFrom.value,
-    endDate: dateTo.value,
-    organizations: organizations.value,
-    subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
-    withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
-    categories: beneficiaryTypes.value,
-    transactionTypes: transactionTypes.value,
-    searchText: searchText.value
-  }),
+  () => {
+    var dateFromLocal = new Date(dateFrom.value);
+    dateFromLocal.setHours(0, 0, 0, 0);
+
+    var dateToLocal = new Date(dateTo.value);
+    dateToLocal.setHours(23, 59, 59, 999);
+
+    return {
+      page: page.value,
+      projectId: projectId.value,
+      startDate: dateFromLocal,
+      endDate: dateToLocal,
+      organizations: organizations.value,
+      subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
+      withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
+      categories: beneficiaryTypes.value,
+      transactionTypes: transactionTypes.value,
+      searchText: searchText.value
+    };
+  },
   {
     enabled: projectsOrOrganizationLoaded
   }

@@ -46,8 +46,8 @@ namespace Sig.App.Backend.Services.Reports
             var currentUserCanSeeAllBeneficiaryInfo = await beneficiaryService.CurrentUserCanSeeAllBeneficiaryInfo();
             var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
             var longProjectId = request.ProjectId.LongIdentifierForType<Project>();
-            var startDate = new DateTime(request.StartDate.Year, request.StartDate.Month, request.StartDate.Day, 0, 0, 0);
-            var endDate = new DateTime(request.EndDate.Year, request.EndDate.Month, request.EndDate.Day, 23, 59, 59);
+            var startDate = new DateTime(request.StartDate.Year, request.StartDate.Month, request.StartDate.Day, 0, 0, 0).ToUniversalTime();
+            var endDate = new DateTime(request.EndDate.Year, request.EndDate.Month, request.EndDate.Day, 23, 59, 59).ToUniversalTime();
 
             IQueryable<TransactionLog> query = db.TransactionLogs.Include(x => x.TransactionLogProductGroups).Where(x =>
                 x.CreatedAtUtc > startDate && x.CreatedAtUtc < endDate && x.ProjectId == longProjectId);
@@ -151,7 +151,7 @@ namespace Sig.App.Backend.Services.Reports
             dataWorksheet.Column(
                 "Transfert de fond depuis le numéro de carte/Transferred fund from card number",
                 x => x.FundTransferredFromCardNumber);
-            dataWorksheet.Column("Organisme/Organization", x => x.OrganizationName);
+            dataWorksheet.Column("Groupe/Group", x => x.OrganizationName);
             dataWorksheet.Column("Abonnement/Subscription", x => x.SubscriptionName);
             dataWorksheet.Column("Initiateur transaction/Transaction initiator", GetTransactionInitiatorName);
             dataWorksheet.Column("Courriel initiateur transaction/Transaction initiator email", x => x.TransactionInitiatorEmail);

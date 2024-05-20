@@ -31,7 +31,6 @@ using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
-using Sig.App.Backend.Requests.Commands.Queries.Subscriptions;
 using Sig.App.Backend.Requests.Commands.Queries.Cards;
 using Sig.App.Backend.Requests.Commands.Queries.Transactions;
 using Sig.App.Backend.Requests.Queries.Transactions;
@@ -272,21 +271,6 @@ namespace Sig.App.Backend.Gql.Schema
             return ctx.DataLoader.LoadBeneficiaryType(id.LongIdentifierForType<BeneficiaryType>());
         }
 
-        public static async Task<ForecastAssignBeneficiariesToSubscription.Payload> ForecastAssignBeneficiariesToSubscription(this GqlQuery _, Id organizationId, Id subscriptionId, int amount, bool withoutSubscription, Id[] withSubscriptions, Id[] withCategories, string searchText, bool? withCard, [Inject] IMediator mediator)
-        {
-            return await mediator.Send(new ForecastAssignBeneficiariesToSubscription.Input()
-            {
-                Amount = amount,
-                OrganizationId = organizationId,
-                SubscriptionId = subscriptionId,
-                WithCategories = withCategories,
-                WithoutSubscription = withoutSubscription,
-                WithSubscriptions = withSubscriptions,
-                WithCard = withCard,
-                SearchText = searchText
-            });
-        }
-
         public static async Task<long> ForecastNextUnassignedCard(this GqlQuery _, Id projectId, [Inject] IMediator mediator)
         {
             return await mediator.Send(new ForecastNextUnassignedCard.Input()
@@ -395,7 +379,7 @@ namespace Sig.App.Backend.Gql.Schema
         [RequirePermission(GlobalPermission.ManageTransactions)]
         [Description("All transactions")]
         public static async Task<Pagination<TransactionLogGraphType>> TransactionLogs(this GqlQuery _, [Inject] IMediator mediator,
-            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText)
+            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText, string timeZoneId)
         {
             var results = await mediator.Send(new SearchTransactionLogs.Query
             {
@@ -408,7 +392,8 @@ namespace Sig.App.Backend.Gql.Schema
                 WithoutSubscription = withoutSubscription,
                 Categories = categories,
                 TransactionTypes = transactionTypes,
-                SearchText = searchText
+                SearchText = searchText,
+                TimeZoneId = timeZoneId,
             });
 
             return results.Map(x => new TransactionLogGraphType(x));

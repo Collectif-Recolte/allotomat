@@ -16,8 +16,8 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Gql.Bases;
+using System.Collections.Generic;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 {
@@ -36,7 +36,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
-            logger.LogInformation($"[Mutation] AssignBeneficiariesToSubscription({request.OrganizationId}, {request.SubscriptionId}, {request.Amount}, {request.WithoutSubscription}, {request.WithSubscriptions}, {request.WithCategories}, {request.SearchText}, {request.Sort})");
+            logger.LogInformation($"[Mutation] AssignBeneficiariesToSubscription({request.OrganizationId}, {request.SubscriptionId}, {request.Beneficiaries})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
             var organization = await db.Organizations.Include(x => x.BudgetAllowances).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
@@ -53,6 +53,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             {
                 logger.LogWarning("[Mutation] AssignBeneficiariesToSubscription - SubscriptionNotFoundException");
                 throw new SubscriptionNotFoundException();
+            }
+
+            var beneficiariesLongIdentifiers = request.Beneficiaries.Select(x => x.LongIdentifierForType<Beneficiary>());
+            if (subscription.Beneficiaries.Select(x => x.BeneficiaryId).Intersect(beneficiariesLongIdentifiers).Any())
+            {
+                logger.LogWarning("[Mutation] AssignBeneficiariesToSubscription - BeneficiaryAlreadyGotSubscriptionException");
+                throw new BeneficiaryAlreadyGotSubscriptionException();
             }
 
             var today = clock
@@ -73,47 +80,21 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 throw new MissingBudgetAllowanceException();
             }
 
-            IQueryable<Beneficiary> query = db.Beneficiaries.Include(x => x.BeneficiaryType).Where(x => x.OrganizationId == organizationId);
+            IQueryable<Beneficiary> query = db.Beneficiaries.Include(x => x.BeneficiaryType).Where(x => beneficiariesLongIdentifiers.Contains(x.Id));
 
-            if (request.WithCategories?.Length > 0)
+            Beneficiary[] beneficiaries = query.ToArray();
+
+            if (beneficiaries.Length != beneficiariesLongIdentifiers.Count())
             {
-                var categories = request.WithCategories.Select(x => x.LongIdentifierForType<BeneficiaryType>());
-                query = query.Where(x => categories.Contains(x.BeneficiaryTypeId.GetValueOrDefault()));
+                logger.LogWarning("[Mutation] AssignBeneficiariesToSubscription - BeneficiaryNotFoundException");
+                throw new BeneficiaryNotFoundException();
             }
 
-            if (request.WithSubscriptions?.Length > 0 || request.WithoutSubscription)
+            var beneficiariesType = beneficiaries.Select(x => x.BeneficiaryTypeId).Distinct();
+            if (subscription.Types.Select(x => x.BeneficiaryTypeId).Intersect(beneficiariesType).Count() != beneficiariesType.Count())
             {
-                var subscriptions = request.WithSubscriptions.Select(x => x.LongIdentifierForType<Subscription>());
-                query = query.Where(x => (request.WithoutSubscription && x.Subscriptions.Count == 0) || (subscriptions != null && x.Subscriptions.Any(y => subscriptions.Contains(y.SubscriptionId))));
-            }
-
-            if (!string.IsNullOrEmpty(request.SearchText))
-            {
-                var searchText = request.SearchText.Split(' ').AsEnumerable();
-
-                foreach (var text in searchText)
-                {
-                    query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text) || x.Email.Contains(text) || x.Firstname.Contains(text) || x.Lastname.Contains(text));
-                }
-            }
-
-            // Exclude beneficiary that already got this subscription
-            query = query.Where(x => !x.Subscriptions.Any(y => y.SubscriptionId == subscriptionId));
-            
-            // Exclude beneficiary with beneficiaryType that are not include in the subcription
-            var availableCategories = subscription.Types.Select(x => x.BeneficiaryTypeId).ToList();
-            query = query.Where(x => availableCategories.Contains(x.BeneficiaryTypeId.GetValueOrDefault()));
-
-            Beneficiary[] beneficiaries;
-
-            if (request.Sort == AttributionSort.Default)
-            {
-                beneficiaries = query.OrderBy(x => x.SortOrder).ToArray();
-            }
-            else
-            {
-                //Random sort by new GUID to generate a new random order each time
-                beneficiaries = query.OrderBy(_ => Guid.NewGuid()).ToArray();
+                logger.LogWarning("[Mutation] AssignBeneficiariesToSubscription - BeneficiaryTypeNotInSubscriptionException");
+                throw new BeneficiaryTypeNotInSubscriptionException();
             }
 
             var paymentRemaining = subscription.GetPaymentRemaining(clock);
@@ -147,7 +128,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId)
                             .Sum(x => x.Amount) * paymentRemaining;
 
-                    if (budgetAllowance.AvailableFund >= amount && totalAmount + amount <= request.Amount)
+                    if (budgetAllowance.AvailableFund >= amount)
                     {
                         subscription.Beneficiaries.Add(new SubscriptionBeneficiary()
                         {
@@ -166,6 +147,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                     }
                     else
                     {
+                        logger.LogWarning("[Mutation] AssignBeneficiariesToSubscription - NotEnoughBudgetAllowanceException");
+                        throw new NotEnoughBudgetAllowanceException();
                         break;
                     }
                 }
@@ -187,16 +170,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         [MutationInput]
         public class Input : HaveOrganizationIdAndSubscriptionId, IRequest<Payload>
         {
-            public decimal Amount { get; set; }
-
-            //Filters
-            public bool WithoutSubscription { get; set; } = true;
-            public Id[] WithSubscriptions { get; set; }
-            public Id[] WithCategories { get; set; }
-            public string SearchText { get; set; }
-
-            //Sort
-            public AttributionSort Sort { get; set; } = AttributionSort.Default;
+            public IEnumerable<Id> Beneficiaries { get; set; }
         }
 
         [MutationPayload]
@@ -212,6 +186,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         public class SubscriptionNotFoundException : RequestValidationException { }
         public class SubscriptionAlreadyExpiredException : RequestValidationException { }
         public class MissingBudgetAllowanceException : RequestValidationException { }
+        public class BeneficiaryNotFoundException : RequestValidationException { }
+        public class BeneficiaryAlreadyGotSubscriptionException : RequestValidationException { }
+        public class BeneficiaryTypeNotInSubscriptionException : RequestValidationException { }
+        public class NotEnoughBudgetAllowanceException : RequestValidationException { }
 
         public enum AttributionSort
         {

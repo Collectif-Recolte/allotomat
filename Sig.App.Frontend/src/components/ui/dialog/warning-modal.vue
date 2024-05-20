@@ -12,7 +12,12 @@
 </i18n>
 
 <template>
-  <UiDialogModal :title="props.title" :return-route="props.returnRoute" :description="props.description" is-overflowing>
+  <UiDialogModal
+    :title="props.title"
+    :return-route="props.returnRoute"
+    :description="props.description"
+    is-overflowing
+    @onClose="goBack">
     <template #body>
       <DialogTitle as="h1" class="text-h2 font-semibold mt-0 mb-8 xs:mb-12">
         <slot name="title">

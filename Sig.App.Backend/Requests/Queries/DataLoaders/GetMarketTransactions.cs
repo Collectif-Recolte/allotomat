@@ -27,7 +27,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
 
             var results = paymentTransactions.OfType<Transaction>().Concat(refundTransactions.OfType<Transaction>());
 
-            return results.OrderBy(x => x.CreatedAtUtc).ToLookup(x => x is PaymentTransaction ? (x as PaymentTransaction).MarketId : (x as RefundTransaction).InitialTransaction.MarketId,
+            return results.OrderByDescending(x => x.CreatedAtUtc).ToLookup(x => x is PaymentTransaction ? (x as PaymentTransaction).MarketId : (x as RefundTransaction).InitialTransaction.MarketId,
                 x => x is PaymentTransaction ? new PaymentTransactionGraphType(x as PaymentTransaction) as ITransactionGraphType : new RefundTransactionGraphType(x as RefundTransaction));
         }
     }

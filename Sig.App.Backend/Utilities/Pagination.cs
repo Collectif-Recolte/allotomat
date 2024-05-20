@@ -25,7 +25,6 @@ namespace Sig.App.Backend.Utilities
         public static Task<Pagination<T>> For<T>(IOrderedQueryable<T> query, int page, int limit)
             => For(query, new Page(page, limit));
 
-
         public static Pagination<T> ForSync<T>(IOrderedQueryable<T> query, int page, int limit)
         {
             var result = For(query, new Page(page, limit));

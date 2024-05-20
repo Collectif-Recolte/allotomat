@@ -73,8 +73,8 @@ public class DevDataSeeder : IDataSeeder
         await userManager.CreateOrUpdateAsync(db, "outils+project1@sigmund.ca", "Project1", "Example", UserType.ProjectManager, defaultPassword);
         await userManager.CreateOrUpdateAsync(db, "outils+project2@sigmund.ca", "Project2", "Example", UserType.ProjectManager, defaultPassword);
 
-        await userManager.CreateOrUpdateAsync(db, "outils+organization1@sigmund.ca", "Organization1", "Example", UserType.OrganizationManager, defaultPassword);
-        await userManager.CreateOrUpdateAsync(db, "outils+organization2@sigmund.ca", "Organization2", "Example", UserType.OrganizationManager, defaultPassword);
+        await userManager.CreateOrUpdateAsync(db, "outils+group1@sigmund.ca", "Group1", "Example", UserType.OrganizationManager, defaultPassword);
+        await userManager.CreateOrUpdateAsync(db, "outils+group2@sigmund.ca", "Group2", "Example", UserType.OrganizationManager, defaultPassword);
 
         await userManager.CreateOrUpdateAsync(db, "outils+merchant1@sigmund.ca", "Merchant1", "Example", UserType.Merchant, defaultPassword);
         await userManager.CreateOrUpdateAsync(db, "outils+merchant2@sigmund.ca", "Merchant2", "Example", UserType.Merchant, defaultPassword);
@@ -153,17 +153,17 @@ public class DevDataSeeder : IDataSeeder
 
     private async Task SeedDevOrganizations()
     {
-        if (db.Organizations.Any(x => x.Name == "SeedDev - Organisme 1"))
+        if (db.Organizations.Any(x => x.Name == "SeedDev - Groupe 1"))
         {
             return;
         }
 
         var organization = new Organization()
         {
-            Name = "SeedDev - Organisme 1",
+            Name = "SeedDev - Groupe 1",
             Project = db.Projects.First(x => x.Name == "SeedDev - Programme 1")
         };
-        string[] managerEmails = { "outils+organization1@sigmund.ca", "outils+organization2@sigmund.ca" };
+        string[] managerEmails = { "outils+group1@sigmund.ca", "outils+group2@sigmund.ca" };
         await db.Organizations.AddAsync(organization);
 
         await db.SaveChangesAsync();
@@ -258,7 +258,7 @@ public class DevDataSeeder : IDataSeeder
 
     private async Task SeedDevBudgetAllowance()
     {
-        var organization = await db.Organizations.FirstAsync(x => x.Name == "SeedDev - Organisme 1");
+        var organization = await db.Organizations.FirstAsync(x => x.Name == "SeedDev - Groupe 1");
         var subscription = await db.Subscriptions.FirstAsync(x => x.Name == "SeedDev - Période 1");
 
         if (db.BudgetAllowances.Where(x => x.OrganizationId == organization.Id && x.SubscriptionId == subscription.Id).Count() == 1)
@@ -286,7 +286,7 @@ public class DevDataSeeder : IDataSeeder
             return;
         }
 
-        var organization = db.Organizations.First(x => x.Name == "SeedDev - Organisme 1");
+        var organization = db.Organizations.First(x => x.Name == "SeedDev - Groupe 1");
         var subscription = db.Subscriptions.Include(x => x.Types).First(x => x.Name == "SeedDev - Période 1");
         var beneficiary1 = new Beneficiary()
         {
@@ -414,8 +414,8 @@ public class DevDataSeeder : IDataSeeder
             AvailableFund = 70,
             SubscriptionType = db.SubscriptionTypes.First(),
             Transactions = new List<PaymentTransaction>(),
-            ExpirationDate = DateTime.Now.AddMonths(3),
-            CreatedAtUtc = DateTime.Now.AddMonths(-1),
+            ExpirationDate = DateTime.UtcNow.AddMonths(3),
+            CreatedAtUtc = DateTime.UtcNow.AddMonths(-1),
             ProductGroup = productGroup
         };
         card.Transactions.Add(transaction);
@@ -448,7 +448,7 @@ public class DevDataSeeder : IDataSeeder
             CardNumber = card.CardNumber,
             ProjectId = card.ProjectId,
             ProjectName = card.Project.Name,
-            CreatedAtUtc = DateTime.Now.AddMonths(-1),
+            CreatedAtUtc = DateTime.UtcNow.AddMonths(-1),
             SubscriptionId = beneficiary.Subscriptions.First().SubscriptionId,
             SubscriptionName = beneficiary.Subscriptions.First().Subscription.Name,
             OrganizationId = beneficiary.OrganizationId,
@@ -486,7 +486,7 @@ public class DevDataSeeder : IDataSeeder
             return;
         }
 
-        var transaction1 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 25.75m, CreatedAtUtc = DateTime.Now.AddMonths(-1), Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>() };
+        var transaction1 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 25.75m, CreatedAtUtc = DateTime.UtcNow.AddMonths(-1), Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>() };
         transaction1.TransactionByProductGroups = new List<PaymentTransactionProductGroup>() { new PaymentTransactionProductGroup() { Amount = 25.75m, ProductGroup = productGroup, PaymentTransaction = transaction1 } };
         addingFundsTransaction.AvailableFund -= transaction1.Amount;
         var fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroup.Id);
@@ -524,7 +524,7 @@ public class DevDataSeeder : IDataSeeder
             CardNumber = card.CardNumber,
             ProjectId = card.ProjectId,
             ProjectName = card.Project.Name,
-            CreatedAtUtc = DateTime.Now.AddMonths(-1),
+            CreatedAtUtc = DateTime.UtcNow.AddMonths(-1),
             SubscriptionId = beneficiary.Subscriptions.First().SubscriptionId,
             SubscriptionName = beneficiary.Subscriptions.First().Subscription.Name,
             OrganizationId = beneficiary.OrganizationId,
@@ -534,7 +534,7 @@ public class DevDataSeeder : IDataSeeder
             TransactionLogProductGroups = transactionLogProductGroups
         });
         
-        var transaction2 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 32.33m, CreatedAtUtc = DateTime.Now, Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>() };
+        var transaction2 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 32.33m, CreatedAtUtc = DateTime.UtcNow, Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>() };
         transaction2.TransactionByProductGroups = new List<PaymentTransactionProductGroup>() { new PaymentTransactionProductGroup() { Amount = 32.33m, ProductGroup = productGroup, PaymentTransaction = transaction1 } };
         addingFundsTransaction.AvailableFund -= transaction2.Amount;
         fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroup.Id);
@@ -572,7 +572,7 @@ public class DevDataSeeder : IDataSeeder
             CardNumber = card.CardNumber,
             ProjectId = card.ProjectId,
             ProjectName = card.Project.Name,
-            CreatedAtUtc = DateTime.Now.AddMonths(-1),
+            CreatedAtUtc = DateTime.UtcNow.AddMonths(-1),
             SubscriptionId = beneficiary.Subscriptions.First().SubscriptionId,
             SubscriptionName = beneficiary.Subscriptions.First().Subscription.Name,
             OrganizationId = beneficiary.OrganizationId,
