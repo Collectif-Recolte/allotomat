@@ -1,21 +1,21 @@
 <i18n>
 {
 	"en": {
-		"add-subscription": "Add subscription",
+		"add-subscription": "Add",
 		"add-subscription-success-notification": "Adding subscription {subscriptionName} was successful. You can now assign the new subscription to participants.",
 		"title": "Add a subscription",
     "confirm-title": "Subscription added!",
-    "confirm-desc": "Do you want to configure the monetary envelopes available to organizations right away?",
+    "confirm-desc": "Do you want to configure the monetary envelopes available to groups right away?",
     "configure-envelopes": "Configure envelopes",
     "later": "Later",
     "product-group-type-can-only-be-assign-once-by-beneficiary-type": "A product group cannot be linked to more than one type."
 	},
 	"fr": {
-		"add-subscription": "Ajouter l'abonnement",
+		"add-subscription": "Ajouter",
 		"add-subscription-success-notification": "L’ajout de l’abonnement {subscriptionName} a été un succès. Vous pouvez maintenant assigner le nouvel abonnement à des participant-e-s.",
 		"title": "Ajouter un abonnement",
     "confirm-title": "Abonnement ajouté!",
-    "confirm-desc": "Désirez-vous configurer les enveloppes monétaires disponibles pour les organismes tout de suite ?",
+    "confirm-desc": "Désirez-vous configurer les enveloppes monétaires disponibles pour les groupes tout de suite ?",
     "configure-envelopes": "Configurer les enveloppes",
     "later": "Plus tard",
     "product-group-type-can-only-be-assign-once-by-beneficiary-type": "Un groupe de produit ne peut pas être liée à plus d'un type."
@@ -109,12 +109,16 @@ const { mutate: createSubscriptionInProject } = useMutation(
 
 async function onSubmit({
   subscriptionName,
-  monthlyPaymentMoment,
-  fundsExpirationDate,
   startDate,
   endDate,
-  productGroupSubscriptionTypes,
-  isFundsAccumulable
+  monthlyPaymentMoment,
+  isSubscriptionPaymentBasedCardUsage,
+  maxNumberOfPayments,
+  isFundsAccumulable,
+  fundsExpirationDate,
+  triggerFundExpiration,
+  numberDaysUntilFundsExpire,
+  productGroupSubscriptionTypes
 }) {
   let types = [];
   for (var i = 0; i < productGroupSubscriptionTypes.length; i++) {
@@ -136,6 +140,14 @@ async function onSubmit({
       monthlyPaymentMoment,
       startDate: formatDate(startDate, serverFormat),
       endDate: formatDate(endDate, serverFormat),
+      isSubscriptionPaymentBasedCardUsage,
+      maxNumberOfPayments:
+        maxNumberOfPayments !== null && maxNumberOfPayments !== undefined ? { value: maxNumberOfPayments } : undefined,
+      triggerFundExpiration,
+      numberDaysUntilFundsExpire:
+        numberDaysUntilFundsExpire !== null && numberDaysUntilFundsExpire !== undefined
+          ? { value: numberDaysUntilFundsExpire }
+          : undefined,
       types,
       fundsExpirationDate: isFundsAccumulable ? { value: formatDate(fundsExpirationDate, serverFormat) } : undefined,
       isFundsAccumulable

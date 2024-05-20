@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "selected-organization": "Organization",
+      "selected-organization": "Group",
       "title": "Participants",
       "available-amount-for-allocation": "Budget allowance",
       "amount-of-payment-remaining": "Remaining payments",
@@ -27,11 +27,11 @@
       "randomize": "Randomize list",
       "chronological-order": "Chronological",
       "random-order": "Random",
-      "no-participants": "No participants in the selected organization",
+      "no-participants": "No participants in the selected group",
       "no-participants-in-subscription": "No participants found for this subscription"
     },
     "fr": {
-      "selected-organization": "Organisme",
+      "selected-organization": "Groupe",
       "title": "Participant-e-s",
       "available-amount-for-allocation": "Enveloppe",
       "amount-of-payment-remaining": "Versements restants",
@@ -57,7 +57,7 @@
       "randomize": "Trier la liste aléatoirement",
       "chronological-order": "Chronologique",
       "random-order": "Aléatoire",
-      "no-participants": "Aucun participant dans l'organisme sélectionné",
+      "no-participants": "Aucun participant dans le groupe sélectionné",
       "no-participants-in-subscription": "Aucun participant n'a été trouvé pour cet abonnement"
     }
   }
@@ -186,6 +186,7 @@
           v-if="selectedOrganization !== ''"
           v-model="searchInput"
           hide-conflict-filter
+          hide-card-is-disabled-filter
           :available-beneficiary-types="availableBeneficiaryTypes"
           :available-subscriptions="availableSubscriptions"
           :selected-beneficiary-types="beneficiaryTypesFilter"
@@ -285,7 +286,7 @@
         <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
         <p
           class="text-primary-700"
-          v-html="t('usage-amount', { amount: amountThatWillBeAllocatedMoneyFormat, detail: usageAmountDetail })"></p>
+          v-html="t('usage-amount', { amount: amountThatWillBeAllocatedModalMoneyFormat, detail: usageAmountDetail })"></p>
         <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
         <p
           class="text-primary-700"
@@ -420,6 +421,8 @@ const { result: resultOrganizations, refetch: refetchOrganizations } = useQuery(
             budgetAllowancesTotal
             totalPayment
             paymentRemaining
+            isSubscriptionPaymentBasedCardUsage
+            maxNumberOfPayments
             types {
               id
               amount
@@ -465,6 +468,8 @@ const subscriptions = useResult(resultOrganizations, null, (data) => {
     budgetAllowance: x.budgetAllowancesTotal,
     totalPayment: x.totalPayment,
     paymentRemaining: x.paymentRemaining,
+    isSubscriptionPaymentBasedCardUsage: x.isSubscriptionPaymentBasedCardUsage,
+    maxNumberOfPayments: x.maxNumberOfPayments,
     types: x.types
   }));
 });
@@ -575,6 +580,12 @@ let administrationSubscriptionsOffPlatform = useResult(resultOrganizations, null
 const budgetAllowanceBySubscription = computed(() => {
   if (selectedSubscription.value === null) return "-";
   var selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
+  if (selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage) {
+    return `${Math.min(selectedSubscriptionData.paymentRemaining, selectedSubscriptionData.maxNumberOfPayments)}/${Math.min(
+      selectedSubscriptionData.totalPayment,
+      selectedSubscriptionData.maxNumberOfPayments
+    )}`;
+  }
   return getShortMoneyFormat(selectedSubscriptionData.budgetAllowance);
 });
 
@@ -601,6 +612,11 @@ const amountThatWillBeAllocatedMoneyFormat = computed(() => {
   return amount !== 0 ? getMoneyFormat(amount) : "-";
 });
 
+const amountThatWillBeAllocatedModalMoneyFormat = computed(() => {
+  let amount = amountThatWillBeAllocated.value;
+  return amount !== 0 ? getMoneyFormat(amount) : "0$";
+});
+
 const amountThatWillBeAllocated = computed(() => {
   if (selectedSubscription.value === null) return 0;
 
@@ -615,6 +631,11 @@ const amountThatWillBeAllocated = computed(() => {
 
     amount += beneficiaryPaymentAmount;
   });
+
+  if (selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage) {
+    return amount * Math.min(selectedSubscriptionData.paymentRemaining, selectedSubscriptionData.maxNumberOfPayments);
+  }
+
   return amount * selectedSubscriptionData.paymentRemaining;
 });
 
@@ -769,13 +790,20 @@ function onAutoSelect() {
   var amount = 0;
   var selectedBeneficiaries = [];
 
+  var paymentRemaining = selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage
+    ? Math.min(selectedSubscriptionData.paymentRemaining, selectedSubscriptionData.maxNumberOfPayments)
+    : selectedSubscriptionData.paymentRemaining;
+
   beneficiariesToSelect.forEach((x) => {
     var beneficiaryPaymentAmount = selectedSubscriptionData.types
       .filter((y) => y.beneficiaryType.id === x.beneficiaryType.id)
       .reduce((accumulator, type) => accumulator + type.amount, 0);
     if (amount + beneficiaryPaymentAmount * selectedSubscriptionData.paymentRemaining <= maxAllocation.value) {
       amount += beneficiaryPaymentAmount * selectedSubscriptionData.paymentRemaining;
-      selectedBeneficiaries.push(x);
+      if (amount + beneficiaryPaymentAmount * paymentRemaining <= maxAllocation.value) {
+        amount += beneficiaryPaymentAmount * paymentRemaining;
+        selectedBeneficiaries.push(x);
+      }
     }
   });
 

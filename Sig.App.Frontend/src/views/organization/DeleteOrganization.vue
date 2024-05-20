@@ -1,17 +1,17 @@
 <i18n>
 {
 	"en": {
-		"delete-organization-success-notification": "The organization {organizationName} has been successfully deleted.",
-		"delete-text-error": "The text must match the name of the organization",
-		"delete-text-label": "Type the name of the organization to confirm",
-		"description": "Warning ! The deletion of <strong>{organizationName}</strong> cannot be undone. If you continue, the organization will be permanently deleted along with all the elements it contains. Card payments can no longer be traced. However, the funds of the cards will remain unchanged.",
+		"delete-organization-success-notification": "The group {organizationName} has been successfully deleted.",
+		"delete-text-error": "The text must match the name of the group",
+		"delete-text-label": "Type the name of the group to confirm",
+		"description": "Warning ! The deletion of <strong>{organizationName}</strong> cannot be undone. If you continue, the group will be permanently deleted along with all the elements it contains. Card payments can no longer be traced. However, the funds of the cards will remain unchanged.",
 		"title": "Delete - {organizationName}"
 	},
 	"fr": {
-		"delete-organization-success-notification": "L'organisation {organizationName} a été supprimé avec succès.",
-		"delete-text-error": "Le texte doit correspondre au nom de l'organisation",
-		"delete-text-label": "Taper le nom de l'organisation pour confirmer",
-		"description": "Avertissement ! La suppression de <strong>{organizationName}</strong> ne peut pas être annulée. Si vous continuez, l'organisation sera supprimé ainsi que tous les éléments qu'il contient de façon définitive. Les paiements sur les cartes ne pourront plus être retracés. Par contre, les fonds des cartes vont rester inchangés.",
+		"delete-organization-success-notification": "Le groupe {organizationName} a été supprimé avec succès.",
+		"delete-text-error": "Le texte doit correspondre au nom du groupe",
+		"delete-text-label": "Taper le nom du groupe pour confirmer",
+		"description": "Avertissement ! La suppression de <strong>{organizationName}</strong> ne peut pas être annulée. Si vous continuez, le groupe sera supprimé ainsi que tous les éléments qu'il contient de façon définitive. Les paiements sur les cartes ne pourront plus être retracés. Par contre, les fonds des cartes vont rester inchangés.",
 		"title": "Supprimer - {organizationName}"
 	}
 }

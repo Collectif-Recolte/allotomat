@@ -1,12 +1,12 @@
 <i18n>
 {
 	"en": {
-		"add-organization-manager-success-notification": "The addition of the organization manager was a success. The manager will receive an email for the creation of his account in the next few minutes.",
+		"add-organization-manager-success-notification": "The addition of the group manager was a success. The manager will receive an email for the creation of his account in the next few minutes.",
 		"remove-manager-success-notification": "The manager {email} has been successfully removed.",
 		"title": "Managers - {organizationName}"
 	},
 	"fr": {
-		"add-organization-manager-success-notification": "L’ajout du gestionnaire de l'organisation a été un succès. Le gestionnaire va recevoir un courriel pour la création de son compte dans les prochaines minutes.",
+		"add-organization-manager-success-notification": "L’ajout du gestionnaire de groupe a été un succès. Le gestionnaire va recevoir un courriel pour la création de son compte dans les prochaines minutes.",
 		"remove-manager-success-notification": "Le gestionnaire {email} a été enlevé avec succès.",
 		"title": "Gestionnaires - {organizationName}"
 	}

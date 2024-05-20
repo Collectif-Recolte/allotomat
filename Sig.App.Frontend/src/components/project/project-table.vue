@@ -1,21 +1,21 @@
 <i18n>
   {
     "en": {
-      "edit-project": "Edit program",
+      "edit-project": "Edit",
       "options": "Options",
       "project-delete": "Delete",
       "project-edit-associated-merchants": "Edit associated merchants",
       "project-edit-managers": "Edit managers",
-      "project-name": "Program name",
+      "project-name": "Name",
       "project-beneficiaries-are-anonymous-tooltip": "Anonymous beneficiaries"
     },
     "fr": {
-      "edit-project": "Modifier le programme",
+      "edit-project": "Modifier",
       "options": "Options",
       "project-delete": "Supprimer",
       "project-edit-associated-merchants": "Modifier les commerces associés",
       "project-edit-managers": "Modifier les gestionnaires",
-      "project-name": "Nom du programme",
+      "project-name": "Nom",
       "project-beneficiaries-are-anonymous-tooltip": "Participant-e-s anonymes"
     }
   }

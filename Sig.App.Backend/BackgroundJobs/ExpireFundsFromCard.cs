@@ -44,7 +44,7 @@ namespace Sig.App.Backend.BackgroundJobs
 
         public async Task Run()
         {
-            var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
+            var today = clock.GetCurrentInstant().ToDateTimeUtc();
 
             var dbTransactions = await db.Transactions.OfType<AddingFundTransaction>()
                 .Include(x => x.ProductGroup)

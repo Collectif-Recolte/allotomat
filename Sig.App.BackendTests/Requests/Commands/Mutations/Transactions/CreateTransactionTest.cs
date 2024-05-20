@@ -164,7 +164,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 Project = project,
                 Types = new List<SubscriptionType>()
                 {
-                    new SubscriptionType() { Amount = 25 } , new SubscriptionType() { Amount = 50 } , new SubscriptionType() { Amount = 100 }
+                    new SubscriptionType() { Amount = 25, ProductGroup = productGroup } , new SubscriptionType() { Amount = 50 } , new SubscriptionType() { Amount = 100 }
                 },
                 MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
                 EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(1),
@@ -486,7 +486,89 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         }
 
         [Fact]
+        public async Task CreateTransactionAndChangeExpirationDate()
+        {
+            SetupRequestHandler(new VerifyCardCanBeUsedInMarket(DbContext));
+
+            subscription.TriggerFundExpiration = FundsExpirationTrigger.NumberOfDays;
+            subscription.NumberDaysUntilFundsExpire = 60;
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            card.Transactions = new List<Transaction>()
+            {
+                new SubscriptionAddingFundTransaction()
+                {
+                    TransactionUniqueId = "SubscriptionAddingFundTransaction1",
+                    Amount = 20,
+                    Card = beneficiary.Card,
+                    Beneficiary = beneficiary,
+                    OrganizationId = beneficiary.OrganizationId,
+                    CreatedAtUtc = today,
+                    ExpirationDate = today.AddMonths(4),
+                    SubscriptionType = subscription.Types.First(),
+                    AvailableFund = 20,
+                    Status = FundTransactionStatus.Actived,
+                    ProductGroup = productGroup
+                }
+            };
+
+            DbContext.SaveChanges();
+
+            var input = new CreateTransaction.Input()
+            {
+                MarketId = market.GetIdentifier(),
+                Transactions = new List<CreateTransaction.TransactionInput>(),
+                CardId = card.GetIdentifier(),
+            };
+            input.Transactions.Add(new CreateTransaction.TransactionInput()
+            {
+                Amount = 10,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transaction = await DbContext.Transactions.FirstAsync();
+
+            transaction.CardId.Should().Be(card.Id);
+            transaction.Amount.Should().Be(10);
+
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync();
+            transactionLog.TransactionUniqueId.Should().Be(transaction.TransactionUniqueId);
+
+            card.Funds.First().Amount.Should().Be(30);
+
+            var initialTransaction = await DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().FirstAsync(x => x.TransactionUniqueId == "SubscriptionAddingFundTransaction1");
+            initialTransaction.AvailableFund.Should().Be(10);
+            initialTransaction.Amount.Should().Be(20);
+            initialTransaction.Transactions.Count.Should().Be(1);
+            initialTransaction.ExpirationDate.Should().Be(today.AddDays(60));
+        }
+
+        [Fact]
         public async Task ThrowsIfCardNotFound()
+        {
+            card.IsDisabled = true;
+
+            DbContext.SaveChanges();
+
+            var input = new CreateTransaction.Input()
+            {
+                MarketId = market.GetIdentifier(),
+                Transactions = new List<CreateTransaction.TransactionInput>(),
+                CardId = card.GetIdentifier(),
+            };
+            input.Transactions.Add(new CreateTransaction.TransactionInput()
+            {
+                Amount = 30,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<CreateTransaction.CardIsDisabledException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfCardDisabled()
         {
             var input = new CreateTransaction.Input()
             {

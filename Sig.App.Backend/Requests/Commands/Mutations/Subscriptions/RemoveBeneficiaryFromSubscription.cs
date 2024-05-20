@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Http;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Gql.Bases;
+using Sig.App.Backend.DbModel.Entities.Transactions;
+using System;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 {
@@ -40,8 +42,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             logger.LogInformation($"[Mutation] RemoveBeneficiaryFromSubscription({request.BeneficiaryId}, {request.SubscriptionId})");
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
             var subscription = await db.Subscriptions.Include(x => x.Types).ThenInclude(x => x.ProductGroup)
-                .Include(x => x.Beneficiaries)
-                .ThenInclude(x => x.BudgetAllowance)
+                .Include(x => x.Beneficiaries).ThenInclude(x => x.BudgetAllowance)
                 .FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
             if (subscription == null)
@@ -51,8 +52,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             var beneficiaryId = request.BeneficiaryId.LongIdentifierForType<Beneficiary>();
-            var beneficiary = await db.Beneficiaries.Include(x => x.Organization).ThenInclude(x => x.Project).Include(x => x.Card)
-                .FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
+            var beneficiary = await db.Beneficiaries.Include(x => x.Organization).ThenInclude(x => x.Project).Include(x => x.Card).ThenInclude(x => x.Transactions).FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
             if (beneficiary == null)
             {
@@ -67,7 +67,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 throw new BeneficiaryNotInSubscriptionException();
             }
             
-            var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
+            var today = clock.GetCurrentInstant().ToDateTimeUtc();
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             var currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
 
@@ -76,6 +76,19 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             var paymentsRemaining = subscription.GetPaymentRemaining(clock);
             var subscriptionTypes = subscription.Types.Where(x => x.BeneficiaryTypeId == subscriptionBeneficiary.BeneficiaryTypeId).ToList();
             var totalRefund = paymentsRemaining * subscriptionTypes.Sum(x => x.Amount);
+            
+            if (subscription.IsSubscriptionPaymentBasedCardUsage)
+            {
+                var subscriptionAddingFundTransactionCount = 0;
+                if (beneficiary.Card != null)
+                {
+                    subscriptionAddingFundTransactionCount = beneficiary.Card.Transactions.OfType<SubscriptionAddingFundTransaction>().Where(x => x.SubscriptionType.SubscriptionId == subscription.Id).Count();
+                }
+
+                paymentsRemaining = Math.Min(paymentsRemaining, subscription.MaxNumberOfPayments.Value - subscriptionAddingFundTransactionCount);
+                totalRefund = paymentsRemaining * subscriptionTypes.Sum(x => x.Amount);
+            }
+
             subscriptionBeneficiary.BudgetAllowance.AvailableFund += totalRefund;
 
             var transactionLogProductGroups = new List<TransactionLogProductGroup>();

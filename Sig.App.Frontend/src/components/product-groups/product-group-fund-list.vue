@@ -15,22 +15,23 @@
 
 <template>
   <div v-if="props.productGroups">
-    <ul class="mb-0 w-36">
-      <li v-for="(product, index) in props.productGroups" :key="index" class="mb-1 last:mb-0 mt-3 first:mt-0">
-        <div class="text-p2 flex items-center w-full">
-          <div class="w-7/12 text-right">
-            <PfTag
-              class="max-w-full"
-              :label="getProductGroupName(product.label)"
-              :bg-color-class="`${getColorBgClass(product.color)} ${getIsGiftCard(product.label) ? 'bg-diagonal-pattnern' : ''}`"
-              :is-dark-theme="!getIsGiftCard(product.label)"
-              is-squared />
-          </div>
-          <div class="w-5/12 text-right">
-            <div class="ml-2">{{ getMoneyFormat(product.fund) }}</div>
+    <ul class="mb-0 min-w-48 sm:min-w-36">
+      <li v-for="(product, index) in props.productGroups" :key="index" class="mb-2 last:mb-0 border-b border-grey-300 pb-2">
+        <div :class="displayExpirationDate ? 'items-start' : 'items-center'" class="text-p2 flex justify-between gap-x-2 w-full">
+          <PfTag
+            :class="{ 'mt-0.5': displayExpirationDate }"
+            class="max-w-full"
+            :label="getProductGroupName(product.label)"
+            :bg-color-class="`${getColorBgClass(product.color)} ${getIsGiftCard(product.label) ? 'bg-diagonal-pattnern' : ''}`"
+            :is-dark-theme="!getIsGiftCard(product.label)"
+            is-squared />
+          <div class="text-right">
+            <div :class="displaySmall ? 'text-p2' : 'text-h3'" class="leading-none whitespace-nowrap">
+              {{ getMoneyFormat(product.fund) }}
+            </div>
           </div>
         </div>
-        <div v-if="props.displayExpirationDate" class="text-p2 align-middle w-full mb-1 last:mb-0">
+        <div v-if="displayExpirationDate" class="text-right text-p4 mt-1.5 leading-none">
           <template v-if="product && product.expirationDate">
             {{ t("expiration-date", { date: formatDate(dateUtc(product.expirationDate), textualFormat) }) }}
           </template>
@@ -56,7 +57,8 @@ const { t } = useI18n();
 
 const props = defineProps({
   productGroups: { type: Object, default: null },
-  displayExpirationDate: { type: Boolean, default: false }
+  displayExpirationDate: { type: Boolean, default: false },
+  displaySmall: Boolean
 });
 
 function getProductGroupName(label) {

@@ -20,7 +20,8 @@
     "gift-card": "Gift card",
     "no-product-group-transaction":"At least one product group must have an amount to create a transaction.",
     "no-funds-message": "There are no available funds on this card.",
-    "product-group-amount-isnan": "The amount must be a number."
+    "product-group-amount-isnan": "The amount must be a number.",
+    "card-is-disabled": "The card is disabled."
 	},
 	"fr": {
 		"amount-label": "{productGroupName}",
@@ -41,7 +42,8 @@
     "gift-card": "Carte-cadeau",
     "no-product-group-transaction":"Au minimum un groupe de produit doit avoir un montant pour créer une transaction.",
     "no-funds-message": "Il n'y a pas de fonds disponibles sur cette carte.",
-    "product-group-amount-isnan": "Le montant doit être un nombre."
+    "product-group-amount-isnan": "Le montant doit être un nombre.",
+    "card-is-disabled": "La carte est désactivée."
 	}
 }
 </i18n>
@@ -55,6 +57,7 @@
       })
     }}
   </p>
+  <p v-if="card && card.isDisabled" class="text-red-500 font-bold">{{ t("card-is-disabled") }}</p>
   <Form
     v-if="funds"
     v-slot="{ isSubmitting, errors: formErrors }"
@@ -68,7 +71,7 @@
         has-footer
         footer-alt-style
         can-cancel
-        :disable-submit="Object.keys(formErrors).length > 0"
+        :disable-submit="Object.keys(formErrors).length > 0 || card.isDisabled"
         :submit-label="t('create-transaction')"
         :cancel-label="t('cancel')"
         :processing="isSubmitting"
@@ -204,6 +207,7 @@ const { result } = useQuery(
     query Card($id: ID!) {
       card(id: $id) {
         id
+        isDisabled
         totalFund
         programCardId
         beneficiary {

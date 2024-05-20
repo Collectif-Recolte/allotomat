@@ -15,6 +15,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Xunit;
+using Sig.App.Backend.DbModel.Entities.Transactions;
+using Sig.App.Backend.Helpers;
 
 namespace Sig.App.BackendTests.BackgroundJobs
 {
@@ -71,7 +73,8 @@ namespace Sig.App.BackendTests.BackgroundJobs
                 Status = CardStatus.Assigned,
                 Project = project,
                 Beneficiary = beneficiary,
-                Funds = new List<Fund>()
+                Funds = new List<Fund>(),
+                Transactions = new List<Transaction>()
             };
 
             var fund = new Fund()
@@ -241,6 +244,148 @@ namespace Sig.App.BackendTests.BackgroundJobs
             budgetAllowance = DbContext.BudgetAllowances.First();
             var addedFunds = budgetAllowance.AvailableFund - availableFundsInitially;
             addedFunds.Should().Be(25);
+        }
+
+        [Fact]
+        public async Task RefundBudgetAllowanceWhenParticipantMissAPayment()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 2;
+
+            beneficiary.Card.Transactions.Add(new SubscriptionAddingFundTransaction()
+            {
+                TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(),
+                Amount = 1,
+                Card = beneficiary.Card,
+                Beneficiary = beneficiary,
+                OrganizationId = beneficiary.OrganizationId,
+                CreatedAtUtc = today,
+                ExpirationDate = today.AddMonths(1),
+                SubscriptionType = subscription.Types.First(),
+                AvailableFund = 1,
+            });
+
+            DbContext.SaveChanges();
+
+            var budgetAllowance = DbContext.BudgetAllowances.First();
+            var availableFundsInitially = budgetAllowance.AvailableFund;
+
+            await job.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            var card = DbContext.Cards.Include(x => x.Funds).First();
+            card.Funds.First().Amount.Should().Be(20);
+
+            budgetAllowance = DbContext.BudgetAllowances.First();
+            var addedFunds = budgetAllowance.AvailableFund - availableFundsInitially;
+            addedFunds.Should().Be(25);
+        }
+
+        [Fact]
+        public async Task DontRefundBudgetAllowanceWhenParticipantMissAPaymentButStillHaveTimeToGetAllPayment()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 1;
+            subscription.EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(2);
+
+            var budgetAllowance = DbContext.BudgetAllowances.First();
+            var availableFundsInitially = budgetAllowance.AvailableFund;
+
+            beneficiary.Card.Transactions.Add(new SubscriptionAddingFundTransaction()
+            {
+                TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(),
+                Amount = 1,
+                Card = beneficiary.Card,
+                Beneficiary = beneficiary,
+                OrganizationId = beneficiary.OrganizationId,
+                CreatedAtUtc = today,
+                ExpirationDate = today.AddMonths(1),
+                SubscriptionType = subscription.Types.First(),
+                AvailableFund = 1
+            });
+
+            DbContext.SaveChanges();
+
+            await job.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            var card = DbContext.Cards.Include(x => x.Funds).First();
+            card.Funds.First().Amount.Should().Be(20);
+
+            budgetAllowance = DbContext.BudgetAllowances.First();
+            var addedFunds = budgetAllowance.AvailableFund - availableFundsInitially;
+            addedFunds.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task DontAddFundIfParticipantsDidntUseIsCardSinceLastPayment()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 1;
+
+            var budgetAllowance = DbContext.BudgetAllowances.First();
+            var availableFundsInitially = budgetAllowance.AvailableFund;
+
+            beneficiary.Card.Transactions.Add(new SubscriptionAddingFundTransaction()
+            {
+                TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(),
+                Amount = 1,
+                Card = beneficiary.Card,
+                Beneficiary = beneficiary,
+                OrganizationId = beneficiary.OrganizationId,
+                CreatedAtUtc = today,
+                ExpirationDate = today.AddMonths(1),
+                SubscriptionType = subscription.Types.First(),
+                AvailableFund = 1
+            });
+
+            DbContext.SaveChanges();
+
+            await job.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            var card = DbContext.Cards.Include(x => x.Funds).First();
+            card.Funds.First().Amount.Should().Be(20);
+        }
+
+        [Fact]
+        public async Task AddFundIfParticipantsUseIsCardSinceLastPayment()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 2;
+
+            var budgetAllowance = DbContext.BudgetAllowances.First();
+            var availableFundsInitially = budgetAllowance.AvailableFund;
+
+            beneficiary.Card.Transactions.Add(new PaymentTransaction()
+            {
+                TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(),
+                Amount = 1,
+                Card = beneficiary.Card,
+                Beneficiary = beneficiary,
+                OrganizationId = beneficiary.OrganizationId,
+                CreatedAtUtc = today
+            });
+
+            DbContext.SaveChanges();
+
+            await job.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            var card = DbContext.Cards.Include(x => x.Funds).First();
+            card.Funds.First().Amount.Should().Be(45);
+
+            budgetAllowance = DbContext.BudgetAllowances.First();
+            var addedFunds = budgetAllowance.AvailableFund - availableFundsInitially;
+            addedFunds.Should().Be(0);
+
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync(x =>
+                x.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog);
+            transactionLog.TotalAmount.Should().Be(25);
         }
     }
 }

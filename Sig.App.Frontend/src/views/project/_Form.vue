@@ -2,21 +2,21 @@
 {
 	"en": {
 		"cancel": "Cancel",
-		"project-name": "Program name",
+		"project-name": "Name",
 		"project-name-placeholder": "Ex. Proximity card",
-    "project-url": "Program website",
+    "project-url": "Website",
     "project-url-description": "Ex. https://carteproximite.org/",
-    "project-allow-organizations-assign-cards": "Allow organizations to assign cards",
+    "project-allow-organizations-assign-cards": "Allow groups to assign cards",
     "project-beneficiaries-are-anonymous": "Anonymous beneficiaries",
     "project-administration-subscriptions-off-platform": "The administration of participants is done off-platform"
 	},
 	"fr": {
 		"cancel": "Annuler",
-		"project-name": "Nom du programme",
+		"project-name": "Nom",
 		"project-name-placeholder": "Ex. Carte proximité",
-    "project-url": "Site web du programme",
+    "project-url": "Site web",
     "project-url-description": "Ex. https://carteproximite.org/",
-    "project-allow-organizations-assign-cards": "Permettre aux organismes d’assigner des cartes",
+    "project-allow-organizations-assign-cards": "Permettre aux groupes d’assigner des cartes",
     "project-beneficiaries-are-anonymous": "Participant-e-s anonymes",
     "project-administration-subscriptions-off-platform": "L'administration des participant-e-s se fait hors plateforme"
   }

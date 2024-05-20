@@ -3,14 +3,14 @@
 	"en": {
 		"delete-text-error": "Text must match manager email",
 		"delete-text-label": "Type the manager's email to confirm",
-		"description": "Warning ! The removal of the manager <strong>{managerName}</strong> cannot be undone. If you continue, the handler will be permanently removed from the organization.",
+		"description": "Warning ! The removal of the manager <strong>{managerName}</strong> cannot be undone. If you continue, the handler will be permanently removed from the group.",
 		"remove-manager-success-notification": "Manager {managerName} has been successfully removed.",
 		"title": "Remove - {managerEmail}"
 	},
 	"fr": {
 		"delete-text-error": "Le texte doit correspondre au courriel du gestionnaire",
 		"delete-text-label": "Taper le courriel du gestionnaire pour confirmer",
-		"description": "Avertissement ! Le retrait du gestionnaire <strong>{managerName}</strong> ne peut pas être annulé. Si vous continuez, le gestionnaire sera retiré de l'organisme de façon définitive.",
+		"description": "Avertissement ! Le retrait du gestionnaire <strong>{managerName}</strong> ne peut pas être annulé. Si vous continuez, le gestionnaire sera retiré du groupe de façon définitive.",
 		"remove-manager-success-notification": "Le gestionnaire {managerName} a été retiré avec succès.",
 		"title": "Retirer - {managerEmail}"
 	}

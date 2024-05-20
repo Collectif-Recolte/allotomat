@@ -13,7 +13,7 @@
 
 <template>
   <div class="relative">
-    <div class="flex items-center w-36 ml-auto">
+    <div class="flex items-center min-w-48 sm:min-w-36 ml-auto">
       <div class="w-7/12 text-right">
         <PfTag
           v-if="showTotal && props.beneficiary.card.funds?.length > 0"
@@ -38,7 +38,7 @@
       class="absolute -bottom-1 translate-y-full right-0 overflow-hidden transition-max-height ease-in-out duration-300"
       :class="props.beneficiary.dropdownIsOpen ? 'max-h-full' : 'max-h-0'">
       <div class="h-full">
-        <ProductGroupFundList :product-groups="getProductGroups()" />
+        <ProductGroupFundList :product-groups="getProductGroups()" display-small />
       </div>
     </div>
   </div>
@@ -66,7 +66,7 @@ const props = defineProps({
   }
 });
 
-const elInsideDropdownHeight = 30;
+const elInsideDropdownHeight = 31;
 const getProductGroups = () => {
   const productGroups = [];
 
@@ -94,7 +94,7 @@ const getDropdownMaxHeight = () => {
   if (props.beneficiary.card.loyaltyFund !== null) {
     productGroupNb++;
   }
-  return productGroupNb * elInsideDropdownHeight;
+  return (productGroupNb + 1) * elInsideDropdownHeight;
 };
 
 const getRowPaddingBottom = () => {

@@ -17,6 +17,7 @@ using Sig.App.Backend.Requests.Commands.Mutations.Cards;
 using Sig.App.Backend.Requests.Commands.Mutations.Transactions;
 using Sig.App.Backend.Requests.Commands.Mutations.ProductGroups;
 using Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances;
+using Sig.App.Backend.DbModel.Entities.Cards;
 
 namespace Sig.App.Backend.Gql.Schema
 {
@@ -640,6 +641,28 @@ namespace Sig.App.Backend.Gql.Schema
             await mediator.Send(input.Value);
 
             return true;
+        }
+
+        [RequirePermission(CardPermission.EnableDisableCard)]
+        [AnnotateErrorCodes(typeof(DisableCard))]
+        public static Task<DisableCard.Payload> DisableCard(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<DisableCard.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(CardPermission.EnableDisableCard)]
+        [AnnotateErrorCodes(typeof(EnableCard))]
+        public static Task<EnableCard.Payload> EnableCard(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<EnableCard.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
         }
     }
 }

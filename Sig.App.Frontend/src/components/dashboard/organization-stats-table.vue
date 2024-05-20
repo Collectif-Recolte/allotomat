@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "organization-name": "Organization",
+      "organization-name": "Group",
       "organization-total-active-subscriptions-envelopes": "Budget allowance (before allocation)",
       "organization-total-allocated-on-cards": "Total allocated on cards",
       "organization-remaining-per-envelope": "Remaining per envelope",
@@ -11,7 +11,7 @@
       "organization-totals": "Total"
     },
     "fr": {
-      "organization-name": "Organisme",
+      "organization-name": "Groupe",
       "organization-total-active-subscriptions-envelopes": "Enveloppe (avant allocation)",
       "organization-total-allocated-on-cards": "Total alloué sur les cartes",
       "organization-remaining-per-envelope":"Restants par enveloppe",

@@ -10,9 +10,7 @@ using Sig.App.Backend.Requests.Commands.Mutations.Cards;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Moq;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
@@ -147,7 +145,33 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Cards
                 x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromUnassignedCardTransactionLog).ToListAsync();
             transactionLogCreated.Count.Should().Be(2);
         }
-        
+
+        [Fact]
+        public async Task UnassignDisabledCardToBeneficiary()
+        {
+            card.IsDisabled = true;
+
+            DbContext.SaveChanges();
+
+            var input = new UnassignCardFromBeneficiary.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                CardId = card.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBeneficiary = DbContext.Beneficiaries.First();
+            localBeneficiary.CardId.Should().Be(null);
+
+            var transactionLogCreated = await DbContext.TransactionLogs.Where(x =>
+                x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromUnassignedCardTransactionLog).ToListAsync();
+            transactionLogCreated.Count.Should().Be(2);
+
+            var localCard = DbContext.Cards.First();
+            localCard.IsDisabled.Should().Be(false);
+        }
+
         [Fact]
         public async Task UnassignCardRefundsBudgetAllowance()
         {

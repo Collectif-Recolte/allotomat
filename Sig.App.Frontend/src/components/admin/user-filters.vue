@@ -5,7 +5,7 @@
     "search-placeholder": "Search by email or name",
     "user-type-admin": "Administrator",
     "user-type-projectmanager": "Program manager",
-    "user-type-organizationmanager": "Organization manager",
+    "user-type-organizationmanager": "Group manager",
     "user-type-merchant": "Merchant"
 	},
 	"fr": {
@@ -13,7 +13,7 @@
     "search-placeholder": "Chercher par courriel ou nom",
     "user-type-admin": "Administrateur",
     "user-type-projectmanager": "Gestionnaire de projet",
-    "user-type-organizationmanager": "Gestionnaire d'organisation",
+    "user-type-organizationmanager": "Gestionnaire de groupe",
     "user-type-merchant": "Marchand"
 	}
 }
