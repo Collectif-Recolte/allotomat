@@ -176,7 +176,7 @@ function getCardStatus(card) {
 }
 
 function getCardFundTotal(card) {
-  var loyaltyFund = card.loyaltyFund !== null ? card.loyaltyFund.amount : 0;
+  const loyaltyFund = card.loyaltyFund?.amount ?? 0;
   return getMoneyFormat(card.totalFund + loyaltyFund);
 }
 
