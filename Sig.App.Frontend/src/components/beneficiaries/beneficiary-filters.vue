@@ -270,7 +270,6 @@ const props = defineProps({
   }
 });
 
-// Options du radio group des push notifications
 const sortOrderOptions = [
   {
     id: "by-fund-available-on-card",

@@ -22,7 +22,10 @@
     "beneficiary-enable-card": "Enable card",
     "card-disabled-status": "Card status",
     "card-is-disabled": "Temporarily disabled",
-    "card-is-enabled": "Card is enabled"
+    "card-is-enabled": "Card is enabled",
+    "sort-by-balance": "Balances",
+    "sort-by-id": "ID",
+    "sort-order": "Sort order"
 	},
 	"fr": {
 		"generate-cards": "Générer de nouvelles cartes",
@@ -46,7 +49,10 @@
     "beneficiary-enable-card": "Réactiver la carte",
     "card-disabled-status": "État de la carte",
     "card-is-disabled": "Désactivée temporairement",
-    "card-is-enabled": "Carte activée"
+    "card-is-enabled": "Carte activée",
+    "sort-by-balance": "Soldes",
+    "sort-by-id": "ID",
+    "sort-order": "Ordre de tri"
 	}
 }
 </i18n>
@@ -86,12 +92,21 @@
               v-model="searchInput"
               has-search
               has-filters
+              has-sort
               :placeholder="t('search-placeholder')"
               :has-active-filters="!!searchText || activeFiltersCount > 0"
               :active-filters-count="activeFiltersCount"
               :beneficiaries-are-anonymous="project.beneficiariesAreAnonymous && canManageOrganizations"
               @resetFilters="resetSearch"
               @search="onSearch">
+              <template #sortOrder>
+                <PfFormInputRadioGroup
+                  id="sortOrder"
+                  :value="sortOrder"
+                  :label="t('sort-order')"
+                  :options="sortOrderOptions"
+                  @input="onSortOrderChanged" />
+              </template>
               <PfFormInputCheckboxGroup
                 v-if="availableCardStatus.length > 0"
                 id="card-status"
@@ -183,6 +198,7 @@ import {
   CARD_IS_DISABLED,
   CARD_IS_ENABLED
 } from "@/lib/consts/enums";
+import { BY_ID, BY_BALANCE } from "@/lib/consts/card-sort-order";
 
 import Title from "@/components/app/title";
 import CardSummaryTable from "@/components/card/card-summary-table.vue";
@@ -201,6 +217,7 @@ const searchInput = ref("");
 const searchText = ref("");
 const selectedCardStatus = ref([]);
 const selectedCardDisabled = ref([]);
+const sortOrder = ref(BY_ID);
 
 const availableCardStatus = [
   { value: CARD_STATUS_ASSIGNED, label: t("card-assigned") },
@@ -214,6 +231,19 @@ const cardDisabled = ref([
   { value: CARD_IS_ENABLED, label: t("card-is-enabled") }
 ]);
 
+const sortOrderOptions = [
+  {
+    id: "by-id",
+    value: BY_ID,
+    label: t("sort-by-id")
+  },
+  {
+    id: "by-balance",
+    value: BY_BALANCE,
+    label: t("sort-by-balance")
+  }
+];
+
 usePageTitle(t("title"));
 
 const canManageOrganizations = () => {
@@ -226,7 +256,7 @@ const {
   refetch: refetchCards
 } = useQuery(
   gql`
-    query Projects($page: Int!, $status: [CardStatus!], $searchText: String, $withCardDisabled: Boolean) {
+    query Projects($page: Int!, $status: [CardStatus!], $searchText: String, $withCardDisabled: Boolean, $sort: CardSortSort) {
       projects {
         id
         name
@@ -235,7 +265,14 @@ const {
         cardStats {
           cardsUnassigned
         }
-        cards(page: $page, limit: 30, status: $status, searchText: $searchText, withCardDisabled: $withCardDisabled) {
+        cards(
+          page: $page
+          limit: 30
+          status: $status
+          searchText: $searchText
+          withCardDisabled: $withCardDisabled
+          sort: $sort
+        ) {
           pageNumber
           pageSize
           totalCount
@@ -278,7 +315,8 @@ function projectsVariables() {
     status: selectedCardStatus.value,
     withCardDisabled:
       selectedCardDisabled.value.length === 1 ? selectedCardDisabled.value.indexOf(CARD_IS_DISABLED) !== -1 : null,
-    searchText: searchText.value
+    searchText: searchText.value,
+    sort: { field: sortOrder.value, order: "ASC" }
   };
 }
 
@@ -420,6 +458,10 @@ function onCardIsDisabledChecked(input) {
   } else {
     selectedCardDisabled.value = selectedCardDisabled.value.filter((x) => x !== input.value);
   }
+}
+
+function onSortOrderChanged(input) {
+  sortOrder.value = input;
 }
 
 const activeFiltersCount = computed(() => {

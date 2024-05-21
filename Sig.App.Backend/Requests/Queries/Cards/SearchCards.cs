@@ -49,7 +49,7 @@ namespace Sig.App.Backend.Requests.Queries.Cards
                 query = query.Where(x => x.IsDisabled == request.WithCardDisabled.Value);
             }
 
-            var sorted = Sort(query, CardSort.Default, SortOrder.Asc);
+            var sorted = Sort(query, request.Sort?.Field ?? CardSort.Default, SortOrder.Asc);
             return await Pagination.For(sorted, request.Page);
         }
 
@@ -60,15 +60,20 @@ namespace Sig.App.Backend.Requests.Queries.Cards
             public IEnumerable<CardStatus> Status { get; set; }
             public Maybe<string> SearchText { get; set; }
             public Maybe<bool> WithCardDisabled { get; set; }
+            public Sort<CardSort> Sort { get; set; }
         }
 
         private static IOrderedQueryable<Card> Sort(IQueryable<Card> query, CardSort sort, SortOrder order)
         {
             switch (sort)
             {
+                case CardSort.ID:
                 case CardSort.Default:
                     return query
                         .SortBy(x => x.Id, order);
+                case CardSort.Funds:
+                    return query
+                        .SortBy(x => x.Funds.Sum(x => x.Amount), SortOrder.Desc);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -76,7 +81,9 @@ namespace Sig.App.Backend.Requests.Queries.Cards
 
         public enum CardSort
         {
-            Default
+            Default,
+            ID,
+            Funds
         }
     }
 }
