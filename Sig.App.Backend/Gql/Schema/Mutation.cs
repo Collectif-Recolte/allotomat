@@ -664,5 +664,10 @@ namespace Sig.App.Backend.Gql.Schema
         {
             return mediator.Send(input.Value);
         }
+
+        public static Task<AdjustBeneficiarySubscription.Payload> AdjustBeneficiarySubscription(this GqlMutation _, [Inject] IMediator mediator, NonNull<AdjustBeneficiarySubscription.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
     }
 }

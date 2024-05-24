@@ -18,7 +18,9 @@
       "beneficiary-add-funds-disabled-anonymous": "You can't add funds if the beneficiary is anonymous",
       "beneficiary-add-funds-disabled-no-subscription": "You can't add funds if the beneficiary doesn't have a subscription",
       "beneficiary-disable-card": "Deactivate card",
-      "beneficiary-enable-card": "Re-enable card"
+      "beneficiary-enable-card": "Re-enable card",
+      "beneficiary-payment-conflict": "Fix conflicts",
+      "beneficiary-payment-conflict-disabled": "The beneficiary doesn't have a payment conflict"
     },
     "fr": {
       "beneficiary-edit": "Modifier les détails",
@@ -38,7 +40,9 @@
       "beneficiary-add-funds-disabled-anonymous": "Vous ne pouvez pas ajouter des fonds si le participant-e est anonyme",
       "beneficiary-add-funds-disabled-no-subscription": "Vous ne pouvez pas ajouter des fonds si le participant-e n'a pas d'abonnement",
       "beneficiary-disable-card": "Désactiver la carte",
-      "beneficiary-enable-card": "Réactiver la carte"
+      "beneficiary-enable-card": "Réactiver la carte",
+      "beneficiary-payment-conflict": "Corriger les conflits",
+      "beneficiary-payment-conflict-disabled": "Le participant-e n'a pas de conflit de paiement"
     }
   }
   </i18n>
@@ -65,6 +69,7 @@ import ICON_TRASH from "@/lib/icons/trash.json";
 import ICON_CARD_LINK from "@/lib/icons/card-link.json";
 import ICON_CLOCK from "@/lib/icons/clock.json";
 import ICON_CLOSE from "@/lib/icons/close.json";
+import ICON_CONFLICT from "@/lib/icons/exclamation-circle.json";
 
 import {
   URL_BENEFICIARY_EDIT,
@@ -76,7 +81,8 @@ import {
   URL_BENEFICIARY_CARD_ASSIGN,
   URL_TRANSACTION_ADMIN,
   URL_BENEFICIARY_CARD_DISABLE,
-  URL_BENEFICIARY_CARD_ENABLE
+  URL_BENEFICIARY_CARD_ENABLE,
+  URL_BENEFICIARY_MANAGE_CONFLICT
 } from "@/lib/consts/urls";
 
 import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
@@ -176,6 +182,14 @@ function updateItems() {
       },
       {
         isExtra: true,
+        icon: ICON_CONFLICT,
+        label: t("beneficiary-payment-conflict"),
+        disabled: !props.haveSubscriptionConflict,
+        route: { name: URL_BENEFICIARY_MANAGE_CONFLICT, params: { beneficiaryId: props.beneficiary.id } },
+        reason: t("beneficiary-payment-conflict-disabled")
+      },
+      {
+        isExtra: true,
         icon: ICON_TRASH,
         label: t("beneficiary-delete", { firstname: props.beneficiary.firstname }),
         route: { name: URL_BENEFICIARY_DELETE, params: { beneficiaryId: props.beneficiary.id } },
@@ -221,6 +235,10 @@ const props = defineProps({
     required: true
   },
   beneficiariesAreAnonymous: {
+    type: Boolean,
+    default: false
+  },
+  haveSubscriptionConflict: {
     type: Boolean,
     default: false
   }
