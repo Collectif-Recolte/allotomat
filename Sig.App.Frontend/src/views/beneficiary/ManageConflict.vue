@@ -6,16 +6,14 @@
     "confirm": "Confirm",
     "adjustment-amount-positif": "The amount <b>{amount}</b> will go back to the envelope",
     "adjustment-amount-negatif": "The amount <b>{amount}</b> will go out of the envelope",
-    "conflict-label": "{subscritionName} - {paymentRemaining} payments remaining",
     "confirm-message": "The adjustments have been made for the participant {beneficiary}"
 	},
 	"fr": {
 		"title": "Résoudre les conflits de paiement(s)",
     "cancel": "Annuler",
     "confirm": "Confirmer",
-    "adjustment-amount-positif": "L'enveloppe va recevoir un montant de <b>{amount}</b> suite à l'ajustement. Le participant ne va pas recevoir ce montant.",
-    "adjustment-amount-negatif": "Un montant de <b>{amount}</b> va être retiré de l'enveloppe suite à l'ajustement. Le participant va recevoir ce montant.",
-    "conflict-label": "{subscritionName} ({paymentRemaining} versements restants)",
+    "adjustment-amount-positif": "→ L'enveloppe va recevoir un montant de <b>{amount}</b> suite à l'ajustement.",
+    "adjustment-amount-negatif": "→ Un montant de <b>{amount}</b> va être retiré de l'enveloppe suite à l'ajustement.",
     "confirm-message": "Les ajustements ont été effectués pour le participant {beneficiary}"
 	}
 }
@@ -115,10 +113,12 @@ const { result: resultBeneficiary } = useQuery(
         ... on BeneficiaryGraphType {
           beneficiaryType {
             id
+            name
           }
           beneficiarySubscriptions {
             beneficiaryType {
               id
+              name
             }
             subscription {
               id
@@ -220,7 +220,7 @@ const beneficiarySubscriptionsWithConflict = computed(() => {
       );
 
       subscriptions.push({
-        label: t("conflict-label", { subscritionName: beneficiarySubscription.subscription.name, paymentRemaining }),
+        label: beneficiarySubscription.subscription.name,
         value: beneficiarySubscription.subscription.id,
         previousPaymentAmount,
         newPaymentAmount,
@@ -228,7 +228,11 @@ const beneficiarySubscriptionsWithConflict = computed(() => {
         numberOfPaymentToReceive,
         budgetAllowanceAvailableFund: budgetAllowanceSubscription.availableFund,
         disabled:
-          budgetAllowanceSubscription.availableFund + (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive <= 0
+          budgetAllowanceSubscription.availableFund + (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive <= 0,
+        previousCategoryName: beneficiarySubscription.beneficiaryType.name,
+        previousCategoryAmount: previousPaymentAmount,
+        newCategoryName: beneficiary.value.beneficiaryType.name,
+        newCategoryAmount: newPaymentAmount
       });
     }
   }
