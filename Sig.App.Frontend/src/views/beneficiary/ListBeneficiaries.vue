@@ -679,6 +679,7 @@ function onResetFilters() {
 }
 
 function updateUrl() {
+  page.value = 1;
   router.push({
     name: URL_BENEFICIARY_ADMIN,
     query: filteredQuery.value
