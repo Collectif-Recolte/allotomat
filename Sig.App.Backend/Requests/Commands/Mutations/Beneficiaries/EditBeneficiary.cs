@@ -11,6 +11,7 @@ using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -37,6 +38,24 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             {
                 logger.LogWarning("[Mutation] EditBeneficiary - BeneficiaryNotFoundException");
                 throw new BeneficiaryNotFoundException();
+            }
+
+            if (request.Id1.IsSet())
+            {
+                if (db.Beneficiaries.Any(x => x.ID1 == request.Id1.Value.Trim() && x.OrganizationId == beneficiary.OrganizationId && x.Id != beneficiary.Id))
+                {
+                    logger.LogWarning("[Mutation] EditBeneficiary - Beneficiary with ID1 already exists");
+                    throw new BeneficiaryWithSameID1AlreadyExistsException();
+                }
+            }
+
+            if (request.Id2.IsSet() && request.Id2.Value.Trim() != "")
+            {
+                if (db.Beneficiaries.Any(x => x.ID2 == request.Id2.Value.Trim() && x.OrganizationId == beneficiary.OrganizationId && x.Id != beneficiary.Id))
+                {
+                    logger.LogWarning("[Mutation] EditBeneficiary - Beneficiary with ID2 already exists");
+                    throw new BeneficiaryWithSameID2AlreadyExistsException();
+                }
             }
 
             request.Firstname.IfSet(v => beneficiary.Firstname = v.Trim());
@@ -94,5 +113,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
         public class BeneficiaryNotFoundException : RequestValidationException { }
         public class BeneficiaryTypeNotFoundException : RequestValidationException { }
+        public class BeneficiaryWithSameID1AlreadyExistsException : RequestValidationException { }
+        public class BeneficiaryWithSameID2AlreadyExistsException : RequestValidationException { }
+
     }
 }

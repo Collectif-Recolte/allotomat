@@ -392,6 +392,7 @@ if (route.query.cardStatus) {
 
 if (route.query.text) {
   searchText.value = route.query.text;
+  searchInput.value = route.query.text;
 }
 
 if (route.query.organizationId) {
@@ -957,6 +958,7 @@ onBeforeRouteUpdate((to) => {
     }
     if (to.query.text) {
       searchText.value = to.query.text;
+      searchInput.value = to.query.text;
     }
     if (to.query.organizationId) {
       selectedOrganization.value = to.query.organizationId;
