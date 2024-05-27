@@ -224,29 +224,5 @@ namespace Sig.App.BackendTests.BackgroundJobs
             var budgetAllowance = DbContext.BudgetAllowances.First();
             budgetAllowance.AvailableFund.Should().Be(711);
         }
-
-        [Fact]
-        public async Task ExpiredFundsFromCardButDontReturnBudgetAllowanceIfSubscriptionIsExpired()
-        {
-            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
-            subscription1.FundsExpirationDate = new DateTime(today.Year, today.Month, 1);
-
-            DbContext.SaveChanges();
-
-            await job.Run();
-
-            var card = DbContext.Cards.Include(x => x.Funds).First();
-            card.Funds.First().Amount.Should().Be(19);
-            card.Transactions.Where(x => x.GetType() == typeof(SubscriptionAddingFundTransaction) && (x as SubscriptionAddingFundTransaction).Status == FundTransactionStatus.Expired).Should().HaveCount(2);
-            card.Transactions.Where(x => x.GetType() == typeof(ManuallyAddingFundTransaction) && (x as ManuallyAddingFundTransaction).Status == FundTransactionStatus.Expired).Should().HaveCount(1);
-
-            var transactionLogCreated = await DbContext.TransactionLogs.Where(x => x.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog).ToListAsync();
-            transactionLogCreated.Count.Should().Be(2);
-            transactionLogCreated.Any(x => x.TotalAmount == 10).Should().BeTrue();
-            transactionLogCreated.Any(x => x.TotalAmount == 1).Should().BeTrue();
-
-            var budgetAllowance = DbContext.BudgetAllowances.First();
-            budgetAllowance.AvailableFund.Should().Be(700);
-        }
     }
 }

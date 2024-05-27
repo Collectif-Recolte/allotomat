@@ -81,7 +81,7 @@ namespace Sig.App.Backend.BackgroundJobs
                         subscription = saftSubscriptionTypes.FirstOrDefault(x => x.Id == saft.SubscriptionTypeId)?.Subscription;
                     fund.Amount -= transaction.AvailableFund;
 
-                    if (subscription != null && subscription.FundsExpirationDate > today)
+                    if (subscription != null)
                     {
                         var budgetAllowance = subscription.BudgetAllowances.First(x => x.Organization == transaction.Beneficiary.Organization);
                         budgetAllowance.AvailableFund += transaction.AvailableFund;
