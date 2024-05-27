@@ -18,6 +18,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
     {
         private readonly EditBeneficiary handler;
         private readonly Beneficiary beneficiary;
+        private readonly Beneficiary beneficiary2;
         private readonly BeneficiaryType beneficiaryType;
 
         public EditBeneficiaryTest()
@@ -52,6 +53,18 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
                 Address = "123, Example Street"
             };
             DbContext.Beneficiaries.Add(beneficiary);
+
+            beneficiary2 = new Beneficiary()
+            {
+                Firstname = "John",
+                Lastname = "Doe",
+                Email = "john.doe@example.com",
+                Phone = "555-555-1234",
+                Address = "123, Example Street",
+                ID1 = "ID1",
+                ID2 = "ID2"
+            };
+            DbContext.Beneficiaries.Add(beneficiary2);
 
             DbContext.SaveChanges();
 
@@ -129,6 +142,32 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
 
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<EditBeneficiary.BeneficiaryNotFoundException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfBeneficiaryWithSameID1AlreadyExists()
+        {
+            var input = new EditBeneficiary.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                Id1 = new Maybe<NonNull<string>>(beneficiary2.ID1)
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<EditBeneficiary.BeneficiaryWithSameID1AlreadyExistsException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfBeneficiaryWithSameID2AlreadyExists()
+        {
+            var input = new EditBeneficiary.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                Id2 = new Maybe<NonNull<string>>(beneficiary2.ID2)
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<EditBeneficiary.BeneficiaryWithSameID2AlreadyExistsException>();
         }
     }
 }
