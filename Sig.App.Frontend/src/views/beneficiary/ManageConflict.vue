@@ -120,6 +120,7 @@ const { result: resultBeneficiary } = useQuery(
               id
               name
             }
+            paymentReceived
             subscription {
               id
               name
@@ -194,12 +195,11 @@ const beneficiarySubscriptionsWithConflict = computed(() => {
         beneficiarySubscription.beneficiaryType.id
       );
       const newPaymentAmount = getAmountPayment(beneficiarySubscription.subscription, beneficiary.value.beneficiaryType.id);
-      const paymentReceived = getSubscriptionPaymentReceivedCount(beneficiarySubscription.subscription.id);
       const paymentRemaining = beneficiarySubscription.subscription.paymentRemaining;
 
       const numberOfPaymentToReceive = Math.min(
         beneficiarySubscription.subscription.maxNumberOfPayments !== null
-          ? beneficiarySubscription.subscription.maxNumberOfPayments - paymentReceived
+          ? beneficiarySubscription.subscription.maxNumberOfPayments - beneficiarySubscription.paymentReceived
           : paymentRemaining,
         paymentRemaining
       );
@@ -249,25 +249,6 @@ function getAmountPayment(subscription, beneficiaryTypeId) {
     }
   }
   return amount;
-}
-
-function getSubscriptionPaymentReceivedCount(subscriptionId) {
-  var paymentReceivedCount = 0;
-
-  if (beneficiary.value && beneficiary.value.card && beneficiary.value.card.addingFundTransactions) {
-    paymentReceivedCount = beneficiary.value.card.addingFundTransactions.reduce((count, transaction) => {
-      if (
-        transaction.subscription !== null &&
-        transaction.subscription !== undefined &&
-        transaction.subscription.subscription.id === subscriptionId
-      ) {
-        return count + 1;
-      }
-      return count;
-    }, 0);
-  }
-
-  return paymentReceivedCount;
 }
 
 function onSubscriptionConflictChecked(input) {
