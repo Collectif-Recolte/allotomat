@@ -54,7 +54,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             foreach (var subscriptionId in subscriptionIds)
             {
-                var subscriptionBeneficiary = beneficiary.Subscriptions.Where(x => x.SubscriptionId == subscriptionId).FirstOrDefault();
+                var subscriptionBeneficiary = beneficiary.Subscriptions.FirstOrDefault(x => x.SubscriptionId == subscriptionId);
 
                 if (subscriptionBeneficiary == null)
                 {
