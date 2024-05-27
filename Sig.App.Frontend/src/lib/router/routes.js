@@ -613,6 +613,14 @@ export default [
             meta: {
               claim: GLOBAL_MANAGE_BENEFICIARIES
             }
+          },
+          {
+            name: urls.URL_BENEFICIARY_MANAGE_CONFLICT,
+            path: ":beneficiaryId/manage-conflict",
+            component: () => import("@/views/beneficiary/ManageConflict.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_BENEFICIARIES
+            }
           }
         ]
       }

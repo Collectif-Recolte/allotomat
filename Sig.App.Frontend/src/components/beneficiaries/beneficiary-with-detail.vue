@@ -122,7 +122,10 @@
       </div>
     </div>
     <div class="absolute right-3 top-3">
-      <BeneficiaryActions :beneficiary="beneficiary" :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous" />
+      <BeneficiaryActions
+        :beneficiary="beneficiary"
+        :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous"
+        :have-subscription-conflict="isBeneficiaryPaymentConflict()" />
     </div>
   </div>
 </template>

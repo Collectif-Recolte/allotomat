@@ -75,6 +75,7 @@ export const URL_BENEFICIARY_CARD_ASSIGN = "beneficiary-card-assign-url";
 export const URL_BENEFICIARY_CARD_DISABLE = "beneficiary-card-disable-url";
 export const URL_BENEFICIARY_CARD_ENABLE = "beneficiary-card-enable-url";
 export const URL_BENEFICIARY_MANAGE = "beneficiary-manage-url";
+export const URL_BENEFICIARY_MANAGE_CONFLICT = "beneficiary-manage-conflict-url";
 
 export const URL_PROJECT_MANAGER_ADMIN = "project-manager-list-url";
 export const URL_PROJECT_MANAGER_ADD = "project-manager-add-url";
