@@ -54,9 +54,10 @@
           </div>
         </dl>
         <template v-if="haveAnySubscriptions()">
-          <ul class="inline-flex flex-col justify-start items-start gap-y-1 mb-4 sm:mb-0">
-            <li v-for="item in getBeneficiarySubscriptions()" :key="item.subscription.id">
+          <ul class="inline-flex flex-col justify-start items-start gap-y-1 mb-4 sm:mb-0 max-w-full">
+            <li v-for="item in getBeneficiarySubscriptions()" :key="item.subscription.id" class="max-w-full">
               <PfTag
+                class="max-w-full"
                 :label="item.subscription.name"
                 is-dark-theme
                 :bg-color-class="isSubscriptionPaymentConflict(item) ? 'bg-red-500' : 'bg-primary-700'"
