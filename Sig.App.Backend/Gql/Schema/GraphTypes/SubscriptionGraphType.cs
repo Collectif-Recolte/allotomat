@@ -27,6 +27,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public int TotalPayment => subscription.GetTotalPayment();
 
+        public bool HasMissedPayment([Inject] IClock clock)
+        {
+            return subscription.GetPaymentRemaining(clock) < subscription.GetTotalPayment();
+        }
+
         public SubscriptionGraphType(Subscription subscription)
         {
             this.subscription = subscription;

@@ -15,6 +15,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
+using Newtonsoft.Json.Bson;
+using Sig.App.Backend.Requests.Commands.Mutations.Transactions;
+using GraphQL.Conventions;
+using Sig.App.Backend.Extensions;
 
 namespace Sig.App.Backend.BackgroundJobs
 {
@@ -81,115 +85,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 foreach (var subscriptionBeneficiary in subscription.Beneficiaries)
                 {
                     var beneficiary = subscriptionBeneficiary.Beneficiary;
-                    var beneficiaryType = subscriptionBeneficiary.BeneficiaryType;
-                    var subscriptionTypes = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiaryType.Id);
-
-                    if (subscriptionBeneficiary.Beneficiary.Card != null)
-                    {
-                        var card = beneficiary.Card;
-                        if (subscription.IsSubscriptionPaymentBasedCardUsage)
-                        {
-                            var subscriptionAddedFundCount = beneficiary.Card.Transactions.OfType<SubscriptionAddingFundTransaction>().Count(x => x.SubscriptionType.SubscriptionId == subscription.Id);
-
-                            // The beneficiary already received all the funds
-                            if (subscription.MaxNumberOfPayments.Value == subscriptionAddedFundCount * subscriptionTypes.Count()) continue;
-
-                            var previousPaymentDateTime = SubscriptionHelper.GetPreviousPaymentDateTime(clock, subscription.MonthlyPaymentMoment);
-                            if (subscriptionAddedFundCount != 0 && !beneficiary.Card.Transactions.Where(x => x is PaymentTransaction).Any(x => x.CreatedAtUtc >= previousPaymentDateTime))
-                            {
-                                if (subscription.MaxNumberOfPayments - subscriptionAddedFundCount >= subscription.GetPaymentRemaining(clock))
-                                {
-                                    RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
-                                }
-                                continue;
-                            }
-                        }
-
-                        foreach (var subscriptionType in subscriptionTypes)
-                        {
-                            var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
-
-                            var now = clock.GetCurrentInstant().ToDateTimeUtc();
-                            card.Transactions.Add(new SubscriptionAddingFundTransaction()
-                            {
-                                TransactionUniqueId = transactionUniqueId,
-                                Card = card,
-                                Beneficiary = beneficiary,
-                                OrganizationId = beneficiary.OrganizationId,
-                                SubscriptionType = subscriptionType,
-                                Amount = subscriptionType.Amount,
-                                AvailableFund = subscriptionType.Amount,
-                                CreatedAtUtc = now,
-                                ExpirationDate = subscription.GetExpirationDate(clock),
-                                ProductGroup = subscriptionType.ProductGroup
-                            });
-
-                            var transactionLogProductGroups = new List<TransactionLogProductGroup>()
-                            {
-                                new()
-                                {
-                                   Amount = subscriptionType.Amount,
-                                   ProductGroupId = subscriptionType.ProductGroupId,
-                                   ProductGroupName = subscriptionType.ProductGroup.Name
-                                }
-                            };
-                            
-                            db.TransactionLogs.Add(new TransactionLog()
-                            {
-                                Discriminator = TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog,
-                                TransactionUniqueId = transactionUniqueId,
-                                CreatedAtUtc = now,
-                                TotalAmount = subscriptionType.Amount,
-                                CardProgramCardId = card.ProgramCardId,
-                                CardNumber = card.CardNumber,
-                                BeneficiaryId = beneficiary.Id,
-                                BeneficiaryID1 = beneficiary.ID1,
-                                BeneficiaryID2 = beneficiary.ID2,
-                                BeneficiaryFirstname = beneficiary.Firstname,
-                                BeneficiaryLastname = beneficiary.Lastname,
-                                BeneficiaryEmail = beneficiary.Email,
-                                BeneficiaryPhone = beneficiary.Phone,
-                                BeneficiaryIsOffPlatform = beneficiary is OffPlatformBeneficiary,
-                                BeneficiaryTypeId = beneficiary.BeneficiaryTypeId,
-                                OrganizationId = beneficiary.OrganizationId,
-                                OrganizationName = beneficiary.Organization.Name,
-                                SubscriptionId = subscription.Id,
-                                SubscriptionName = subscription.Name,
-                                ProjectId = beneficiary.Organization.ProjectId,
-                                ProjectName = beneficiary.Organization.Project.Name,
-                                TransactionLogProductGroups = transactionLogProductGroups
-                            });
-
-                            var fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == subscriptionType.ProductGroupId);
-                            if (fund == null)
-                            {
-                                fund = new Fund()
-                                {
-                                    Card = card,
-                                    ProductGroup = subscriptionType.ProductGroup
-                                };
-
-                                db.Funds.Add(fund);
-                            }
-
-                            fund.Amount += subscriptionType.Amount;
-
-                            logger.LogInformation($"Adding fund {subscriptionType.Amount} for product group {subscriptionType.ProductGroupId} to ({subscriptionBeneficiary.BeneficiaryId}) card");
-                        }
-                    }
-                    else
-                    {
-                        if (subscription.IsSubscriptionPaymentBasedCardUsage)
-                        {
-                            if (subscription.MaxNumberOfPayments >= subscription.GetPaymentRemaining(clock))
-                            {
-                                RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
-                            }
-                            continue;
-                        }
-
-                        RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
-                    }
+                    CreateTransaction(beneficiary, subscription);
                 }
             }
 
@@ -276,6 +172,145 @@ namespace Sig.App.Backend.BackgroundJobs
             }
 
             await db.SaveChangesAsync();
+        }
+
+        public async Task AddFundToSpecificBeneficiary(Id beneficiaryId, Id subscriptionId)
+        {
+            var today = clock
+                .GetCurrentInstant()
+                .ToDateTimeUtc();
+
+            var beneficiaryIdLong = beneficiaryId.LongIdentifierForType<Beneficiary>();
+            var subscriptionIdLong = subscriptionId.LongIdentifierForType<Subscription>();
+
+            var subscription = await db.Subscriptions
+                .Include(x => x.BudgetAllowances)
+                .AsSplitQuery().Include(x => x.Types).ThenInclude(x => x.ProductGroup)
+                .Where(x => x.Id == subscriptionIdLong).FirstAsync();
+
+            var beneficiary = await db.Beneficiaries
+                .Include(x => x.Card).ThenInclude(x => x.Transactions)
+                .Include(x => x.Card).ThenInclude(x => x.Funds)
+                .Include(x => x.Organization).ThenInclude(x => x.Project)
+                .Where(x => x.Id== beneficiaryIdLong)
+                .FirstAsync();
+
+            CreateTransaction(beneficiary, subscription);
+            await db.SaveChangesAsync();
+        }
+
+        private void CreateTransaction(Beneficiary beneficiary, Subscription subscription)
+        {
+            var beneficiaryType = beneficiary.BeneficiaryType;
+            var subscriptionTypes = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiaryType.Id);
+
+            if (beneficiary.Card != null)
+            {
+                var card = beneficiary.Card;
+                if (subscription.IsSubscriptionPaymentBasedCardUsage)
+                {
+                    var subscriptionAddedFundCount = beneficiary.Card.Transactions.OfType<SubscriptionAddingFundTransaction>().Count(x => x.SubscriptionType.SubscriptionId == subscription.Id);
+
+                    // The beneficiary already received all the funds
+                    if (subscription.MaxNumberOfPayments.Value == subscriptionAddedFundCount * subscriptionTypes.Count()) return;
+
+                    var previousPaymentDateTime = SubscriptionHelper.GetPreviousPaymentDateTime(clock, subscription.MonthlyPaymentMoment);
+                    if (subscriptionAddedFundCount != 0 && !beneficiary.Card.Transactions.Where(x => x is PaymentTransaction).Any(x => x.CreatedAtUtc >= previousPaymentDateTime))
+                    {
+                        if (subscription.MaxNumberOfPayments - subscriptionAddedFundCount >= subscription.GetPaymentRemaining(clock))
+                        {
+                            RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
+                        }
+                        return;
+                    }
+                }
+
+                foreach (var subscriptionType in subscriptionTypes)
+                {
+                    var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
+
+                    var now = clock.GetCurrentInstant().ToDateTimeUtc();
+                    card.Transactions.Add(new SubscriptionAddingFundTransaction()
+                    {
+                        TransactionUniqueId = transactionUniqueId,
+                        Card = card,
+                        Beneficiary = beneficiary,
+                        OrganizationId = beneficiary.OrganizationId,
+                        SubscriptionType = subscriptionType,
+                        Amount = subscriptionType.Amount,
+                        AvailableFund = subscriptionType.Amount,
+                        CreatedAtUtc = now,
+                        ExpirationDate = subscription.GetExpirationDate(clock),
+                        ProductGroup = subscriptionType.ProductGroup
+                    });
+
+                    var transactionLogProductGroups = new List<TransactionLogProductGroup>()
+                    {
+                        new()
+                        {
+                            Amount = subscriptionType.Amount,
+                            ProductGroupId = subscriptionType.ProductGroupId,
+                            ProductGroupName = subscriptionType.ProductGroup.Name
+                        }
+                    };
+
+                    db.TransactionLogs.Add(new TransactionLog()
+                    {
+                        Discriminator = TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog,
+                        TransactionUniqueId = transactionUniqueId,
+                        CreatedAtUtc = now,
+                        TotalAmount = subscriptionType.Amount,
+                        CardProgramCardId = card.ProgramCardId,
+                        CardNumber = card.CardNumber,
+                        BeneficiaryId = beneficiary.Id,
+                        BeneficiaryID1 = beneficiary.ID1,
+                        BeneficiaryID2 = beneficiary.ID2,
+                        BeneficiaryFirstname = beneficiary.Firstname,
+                        BeneficiaryLastname = beneficiary.Lastname,
+                        BeneficiaryEmail = beneficiary.Email,
+                        BeneficiaryPhone = beneficiary.Phone,
+                        BeneficiaryIsOffPlatform = beneficiary is OffPlatformBeneficiary,
+                        BeneficiaryTypeId = beneficiary.BeneficiaryTypeId,
+                        OrganizationId = beneficiary.OrganizationId,
+                        OrganizationName = beneficiary.Organization.Name,
+                        SubscriptionId = subscription.Id,
+                        SubscriptionName = subscription.Name,
+                        ProjectId = beneficiary.Organization.ProjectId,
+                        ProjectName = beneficiary.Organization.Project.Name,
+                        TransactionLogProductGroups = transactionLogProductGroups
+                    });
+
+                    var fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == subscriptionType.ProductGroupId);
+                    if (fund == null)
+                    {
+                        fund = new Fund()
+                        {
+                            Card = card,
+                            ProductGroup = subscriptionType.ProductGroup
+                        };
+
+                        db.Funds.Add(fund);
+                    }
+
+                    fund.Amount += subscriptionType.Amount;
+
+                    logger.LogInformation($"Adding fund {subscriptionType.Amount} for product group {subscriptionType.ProductGroupId} to ({beneficiary.Id}) card");
+                }
+            }
+            else
+            {
+                if (subscription.IsSubscriptionPaymentBasedCardUsage)
+                {
+                    if (subscription.MaxNumberOfPayments >= subscription.GetPaymentRemaining(clock))
+                    {
+                        RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
+                    }
+                }
+                else
+                {
+                    RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
+                }
+            }
         }
 
         private void RefundBudgetAllowance(Subscription subscription, Beneficiary beneficiary, IEnumerable<SubscriptionType> subscriptionTypes)
