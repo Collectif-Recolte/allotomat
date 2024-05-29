@@ -43,8 +43,13 @@
           v-if="props.confirmRoute"
           tag="RouterLink"
           :label="props.confirmButtonLabel ?? defaultConfirmLabel"
-          :to="confirmRoute" />
-        <PfButtonAction v-else :label="props.confirmButtonLabel ?? defaultConfirmLabel" @click="confirm" />
+          :to="confirmRoute"
+          :isDisabled="props.isDisabled" />
+        <PfButtonAction
+          v-else
+          :label="props.confirmButtonLabel ?? defaultConfirmLabel"
+          @click="confirm"
+          :isDisabled="props.isDisabled" />
       </div>
     </template>
   </UiDialogModal>
@@ -66,7 +71,8 @@ const props = defineProps({
   cancelButtonLabel: { type: String, default: null },
   icon: { type: Object, default: null },
   returnRoute: { type: Object, default: null },
-  confirmRoute: { type: Object, default: null }
+  confirmRoute: { type: Object, default: null },
+  isDisabled: { type: Boolean, default: false }
 });
 
 const modal = ref(null);
