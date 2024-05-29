@@ -85,7 +85,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 foreach (var subscriptionBeneficiary in subscription.Beneficiaries)
                 {
                     var beneficiary = subscriptionBeneficiary.Beneficiary;
-                    CreateTransaction(beneficiary, subscription);
+                    CreateTransaction(beneficiary, subscriptionBeneficiary.BeneficiaryType, subscription);
                 }
             }
 
@@ -174,7 +174,7 @@ namespace Sig.App.Backend.BackgroundJobs
             await db.SaveChangesAsync();
         }
 
-        public async Task AddFundToSpecificBeneficiary(Id beneficiaryId, Id subscriptionId)
+        public async Task AddFundToSpecificBeneficiary(Id beneficiaryId, BeneficiaryType beneficiaryType, Id subscriptionId)
         {
             var today = clock
                 .GetCurrentInstant()
@@ -195,13 +195,12 @@ namespace Sig.App.Backend.BackgroundJobs
                 .Where(x => x.Id== beneficiaryIdLong)
                 .FirstAsync();
 
-            CreateTransaction(beneficiary, subscription);
+            CreateTransaction(beneficiary, beneficiaryType, subscription);
             await db.SaveChangesAsync();
         }
 
-        private void CreateTransaction(Beneficiary beneficiary, Subscription subscription)
+        private void CreateTransaction(Beneficiary beneficiary, BeneficiaryType beneficiaryType, Subscription subscription)
         {
-            var beneficiaryType = beneficiary.BeneficiaryType;
             var subscriptionTypes = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiaryType.Id);
 
             if (beneficiary.Card != null)

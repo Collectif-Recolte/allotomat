@@ -2,6 +2,7 @@
 using GraphQL.Conventions;
 using Microsoft.Extensions.Logging.Abstractions;
 using NodaTime;
+using Sig.App.Backend.BackgroundJobs;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Sig.App.Backend.DbModel.Entities.Organizations;
@@ -305,7 +306,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
             DbContext.SaveChanges();
 
-            handler = new AssignBeneficiariesToSubscription(NullLogger<AssignBeneficiariesToSubscription>.Instance, Clock, DbContext);
+            handler = new AssignBeneficiariesToSubscription(NullLogger<AssignBeneficiariesToSubscription>.Instance, Clock, DbContext, NullLogger<AddingFundToCard>.Instance);
 
             Clock.Reset(Instant.FromUtc(today.Year, today.Month, 4, 0, 0));
         }

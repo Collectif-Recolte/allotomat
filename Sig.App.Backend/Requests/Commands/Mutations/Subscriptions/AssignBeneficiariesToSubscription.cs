@@ -27,14 +27,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         private readonly ILogger<AssignBeneficiariesToSubscription> logger;
         private IClock clock;
         private readonly AppDbContext db;
-        private readonly ILoggerFactory loggerFactory;
+        private readonly ILogger<AddingFundToCard> addingFundLogger;
 
-        public AssignBeneficiariesToSubscription(ILogger<AssignBeneficiariesToSubscription> logger, IClock clock, AppDbContext db, ILoggerFactory loggerFactory)
+        public AssignBeneficiariesToSubscription(ILogger<AssignBeneficiariesToSubscription> logger, IClock clock, AppDbContext db, ILogger<AddingFundToCard> addingFundLogger)
         {
             this.logger = logger;
             this.clock = clock;
             this.db = db;
-            this.loggerFactory = loggerFactory;
+            this.addingFundLogger = addingFundLogger;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -91,7 +91,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             if (request.ReplicatePaymentOnAttribution)
             {
                 query = query.Include(x => x.Card);
-                addingFundToCardJob = new AddingFundToCard(db, clock, loggerFactory.CreateLogger<AddingFundToCard>());
+                addingFundToCardJob = new AddingFundToCard(db, clock, addingFundLogger);
             }
 
             Beneficiary[] beneficiaries = query.ToArray();
@@ -162,7 +162,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
                         if (request.ReplicatePaymentOnAttribution && beneficiary.Card != null)
                         {
-                            await addingFundToCardJob.AddFundToSpecificBeneficiary(beneficiary.GetIdentifier(), subscription.GetIdentifier());
+                            await addingFundToCardJob.AddFundToSpecificBeneficiary(beneficiary.GetIdentifier(), beneficiary.BeneficiaryType, subscription.GetIdentifier());
                         }
 
                         logger.LogInformation(
