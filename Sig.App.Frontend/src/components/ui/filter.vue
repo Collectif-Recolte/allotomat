@@ -40,7 +40,8 @@
         @update:modelValue="(e) => emit('update:modelValue', e)" />
       <div v-if="props.hasSort" class="relative inline-block group pf-transition-visibility pf-transition-visibility--focus-only">
         <button class="pf-button pf-button--outline px-3 min-h-11">
-          {{ t("sort") }}
+          <PfIcon :icon="iconSortOrder" size="s" />
+          {{ sortLabel }}
           <PfIcon :icon="ICON_ARROW_BOTTOM" size="xxs" :class="activeFiltersCount > 0 ? 'ml-2' : 'ml-12'" />
         </button>
         <div
@@ -70,11 +71,16 @@
 </template>
 
 <script setup>
-import { defineEmits, defineProps } from "vue";
+import { defineEmits, defineProps, computed } from "vue";
 import { useI18n } from "vue-i18n";
+
+import { ASC } from "@/lib/consts/card-sort-order";
 
 import ICON_ARROW_BOTTOM from "@/lib/icons/arrow-bottom.json";
 import ICON_RESET from "@/lib/icons/reset.json";
+
+import ICON_CHEVRON_DOWN from "@/lib/icons/chevron-down.json";
+import ICON_CHEVRON_UP from "@/lib/icons/chevron-right.json";
 
 const emit = defineEmits(["resetFilters", "search", "update:modelValue"]);
 
@@ -85,6 +91,14 @@ const props = defineProps({
   hasSearch: Boolean,
   hasFilters: Boolean,
   hasSort: Boolean,
+  sortLabel: {
+    type: String,
+    default: ""
+  },
+  sortOrder: {
+    type: String,
+    default: ASC
+  },
   activeFiltersCount: {
     type: Number,
     default: 0,
@@ -108,6 +122,14 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
+
+const sortLabel = computed(() => {
+  return props.sortLabel !== "" ? props.sortLabel : t("sort");
+});
+
+const iconSortOrder = computed(() => {
+  return props.sortOrder === ASC ? ICON_CHEVRON_UP : ICON_CHEVRON_DOWN;
+});
 
 function onResetFilters() {
   emit("resetFilters");

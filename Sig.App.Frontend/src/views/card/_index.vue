@@ -25,7 +25,9 @@
     "card-is-enabled": "Card is enabled",
     "sort-by-balance": "Balances",
     "sort-by-id": "ID",
-    "sort-order": "Sort order"
+    "sort-order": "Sort order",
+    "sort-order-by-id": "Sort by ID",
+    "sort-order-by-balance": "Sort by balance"
 	},
 	"fr": {
 		"generate-cards": "Générer de nouvelles cartes",
@@ -52,7 +54,9 @@
     "card-is-enabled": "Carte activée",
     "sort-by-balance": "Soldes",
     "sort-by-id": "ID",
-    "sort-order": "Ordre de tri"
+    "sort-order": "Ordre de tri",
+    "sort-order-by-id": "Trier par ID",
+    "sort-order-by-balance": "Trier par solde"
 	}
 }
 </i18n>
@@ -93,6 +97,8 @@
               has-search
               has-filters
               has-sort
+              :sort-order="sortOrderDirection"
+              :sort-label="sortLabel"
               :placeholder="t('search-placeholder')"
               :has-active-filters="!!searchText || activeFiltersCount > 0"
               :active-filters-count="activeFiltersCount"
@@ -198,7 +204,7 @@ import {
   CARD_IS_DISABLED,
   CARD_IS_ENABLED
 } from "@/lib/consts/enums";
-import { BY_ID, BY_BALANCE } from "@/lib/consts/card-sort-order";
+import { BY_ID, BY_BALANCE, ASC, DESC } from "@/lib/consts/card-sort-order";
 
 import Title from "@/components/app/title";
 import CardSummaryTable from "@/components/card/card-summary-table.vue";
@@ -316,7 +322,7 @@ function projectsVariables() {
     withCardDisabled:
       selectedCardDisabled.value.length === 1 ? selectedCardDisabled.value.indexOf(CARD_IS_DISABLED) !== -1 : null,
     searchText: searchText.value,
-    sort: { field: sortOrder.value, order: "ASC" }
+    sort: { field: sortOrder.value, order: ASC }
   };
 }
 
@@ -334,6 +340,14 @@ const cards = useResult(resultProjects, null, (data) => {
 
 const showCreateGiftCardBtn = computed(() => {
   return project.value ? { name: URL_GIFT_CARD_ADD, query: { projectId: project.value.id } } : null;
+});
+
+const sortLabel = computed(() => {
+  return sortOrder.value === BY_ID ? t("sort-order-by-id") : t("sort-order-by-balance");
+});
+
+const sortOrderDirection = computed(() => {
+  return sortOrder.value === BY_ID ? ASC : DESC;
 });
 
 const getBeforeBtnGroup = (card) => [
