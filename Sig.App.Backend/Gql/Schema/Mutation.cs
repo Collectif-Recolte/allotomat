@@ -399,7 +399,7 @@ namespace Sig.App.Backend.Gql.Schema
             return mediator.Send(input.Value);
         }
 
-        [RequirePermission(BeneficiaryPermission.ManageBeneficiary)]
+        [RequirePermission(OrganizationPermission.ManageOrganization)]
         [AnnotateErrorCodes(typeof(RemoveBeneficiaryFromSubscription))]
         public static async Task<bool> RemoveBeneficiaryFromSubscription(
             this GqlMutation _,

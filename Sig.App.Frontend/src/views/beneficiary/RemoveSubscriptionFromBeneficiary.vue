@@ -2,7 +2,7 @@
 {
 	"en": {
 		"description": "Warning ! The withdrawal of <strong>{beneficiaryName}</strong> in subscription <strong>{subscriptionName}</strong> cannot be undone. If you continue, <strong>{beneficiaryName}</strong> will no longer receive a transfer for subscription <strong>{subscriptionName}</strong>.",
-		"remove-beneficiary-from-subscription-success-notification": "{beneficiaryName} has been successfully remove from subscription {subscriptionName}.",
+		"remove-beneficiary-from-subscription-success-notification": "The participant has been successfully removed from subscription {subscriptionName}.",
 		"remove-text-error": "Text must match subscription name",
 		"remove-text-label": "Type the subscription name to confirm",
 		"title": "Unsubscribe {subscriptionName} - {beneficiaryName}",
@@ -10,7 +10,7 @@
 	},
 	"fr": {
 		"description": "Avertissement ! Le retrait de <strong>{beneficiaryName}</strong> dans l'abonnement <strong>{subscriptionName}</strong> ne peut pas être annulé. Si vous continuez, <strong>{beneficiaryName}</strong> ne recevra plus de virement pour l'abonnement <strong>{subscriptionName}</strong>.",
-		"remove-beneficiary-from-subscription-success-notification": "{beneficiaryName} a été retiré-e avec succès de l'abonnement {subscriptionName}.",
+		"remove-beneficiary-from-subscription-success-notification": "Le participant a été retiré-e avec succès de l'abonnement {subscriptionName}.",
 		"remove-text-error": "Le texte doit correspondre au nom de l'abonnement",
 		"remove-text-label": "Taper le nom de l'abonnement",
 		"title": "Retirer l'abonnement {subscriptionName}",
@@ -119,12 +119,7 @@ async function removeBeneficiaryFromSubscription() {
     }
   });
 
-  addSuccess(
-    t("remove-beneficiary-from-subscription-success-notification", {
-      beneficiaryName: `${beneficiary.value.firstname} ${beneficiary.value.lastname}`,
-      subscriptionName: subscription.value.name
-    })
-  );
+  addSuccess(t("remove-beneficiary-from-subscription-success-notification", { subscriptionName: subscription.value.name }));
   router.push({
     name: URL_BENEFICIARY_ADMIN
   });
