@@ -21,7 +21,11 @@
       "beneficiary-enable-card": "Re-enable card",
       "beneficiary-payment-conflict": "Fix conflicts",
       "beneficiary-payment-conflict-disabled": "The beneficiary doesn't have a payment conflict",
-      "beneficiary-assign-subscription": "Assign subscription"
+      "beneficiary-assign-subscription": "Assign subscription",
+      "beneficiary-add-missed-payment": "Add missed payment",
+      "beneficiary-add-missed-payment-no-card": "You can't add a missed payment if the beneficiary doesn't have a card",
+      "beneficiary-add-missed-payment-no-subscription": "You can't add a missed payment if the beneficiary doesn't have a subscription",
+      "beneficiary-add-missed-payment-no-missed-payment": "You can't add a missed payment if the beneficiary doesn't have a missed payment"
     },
     "fr": {
       "beneficiary-edit": "Modifier les détails",
@@ -44,7 +48,12 @@
       "beneficiary-enable-card": "Réactiver la carte",
       "beneficiary-payment-conflict": "Corriger les conflits",
       "beneficiary-payment-conflict-disabled": "Le participant-e n'a pas de conflit de paiement",
-      "beneficiary-assign-subscription": "Attribuer un abonnement"
+      "beneficiary-assign-subscription": "Attribuer un abonnement",
+      "beneficiary-add-missed-payment": "Versement d’un paiement manqué",
+      "beneficiary-add-missed-payment-no-card": "Vous ne pouvez pas ajouter un paiement manqué si le participant-e n'a pas de carte",
+      "beneficiary-add-missed-payment-no-subscription": "Vous ne pouvez pas ajouter un paiement manqué si le participant-e n'a pas d'abonnement",
+      "beneficiary-add-missed-payment-no-missed-payment": "Vous ne pouvez pas ajouter un paiement manqué si le participant-e n'a pas de paiement manqué"
+
     }
   }
   </i18n>
@@ -86,7 +95,8 @@ import {
   URL_BENEFICIARY_CARD_DISABLE,
   URL_BENEFICIARY_CARD_ENABLE,
   URL_BENEFICIARY_MANAGE_CONFLICT,
-  URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS
+  URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS,
+  URL_BENEFICIARY_ADD_MISSED_PAYMENT
 } from "@/lib/consts/urls";
 
 import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
@@ -145,6 +155,18 @@ function updateItems() {
           : !haveSubscriptions()
           ? t("beneficiary-add-funds-disabled-no-subscription")
           : t("beneficiary-add-funds-disabled-anonymous")
+      },
+      {
+        isExtra: true,
+        icon: ICON_ADD_CASH,
+        label: t("beneficiary-add-missed-payment"),
+        route: { name: URL_BENEFICIARY_ADD_MISSED_PAYMENT, params: { beneficiaryId: props.beneficiary.id } },
+        disabled: !haveCard() || !haveSubscriptions() || !haveMissedPayment(),
+        reason: !haveCard()
+          ? t("beneficiary-add-missed-payment-no-card")
+          : !haveSubscriptions()
+          ? t("beneficiary-add-missed-payment-no-subscription")
+          : t("beneficiary-add-missed-payment-no-missed-payment")
       },
       {
         isExtra: true,
@@ -234,6 +256,18 @@ function updateItems() {
           : !haveSubscriptions()
           ? t("beneficiary-add-funds-disabled-no-subscription")
           : t("beneficiary-add-funds-disabled-anonymous")
+      },
+      {
+        isExtra: true,
+        icon: ICON_ADD_CASH,
+        label: t("beneficiary-add-missed-payment"),
+        route: { name: URL_BENEFICIARY_ADD_MISSED_PAYMENT, params: { beneficiaryId: props.beneficiary.id } },
+        disabled: !haveCard() || !haveSubscriptions() || !haveMissedPayment(),
+        reason: !haveCard()
+          ? t("beneficiary-add-missed-payment-no-card")
+          : !haveSubscriptions()
+          ? t("beneficiary-add-missed-payment-no-subscription")
+          : t("beneficiary-add-missed-payment-no-missed-payment")
       }
     ];
   }
@@ -264,6 +298,10 @@ function isCardDisabled() {
 
 function haveSubscriptions() {
   return props.beneficiary.beneficiarySubscriptions.length > 0;
+}
+
+function haveMissedPayment() {
+  return props.beneficiary.beneficiarySubscriptions.some((x) => x.hasMissedPayment);
 }
 
 function qrCodeLink() {

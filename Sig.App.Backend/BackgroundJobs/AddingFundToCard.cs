@@ -15,8 +15,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
-using Newtonsoft.Json.Bson;
-using Sig.App.Backend.Requests.Commands.Mutations.Transactions;
 using GraphQL.Conventions;
 using Sig.App.Backend.Extensions;
 
@@ -174,7 +172,7 @@ namespace Sig.App.Backend.BackgroundJobs
             await db.SaveChangesAsync();
         }
 
-        public async Task AddFundToSpecificBeneficiary(Id beneficiaryId, BeneficiaryType beneficiaryType, Id subscriptionId)
+        public async Task AddFundToSpecificBeneficiary(Id beneficiaryId, BeneficiaryType beneficiaryType, Id subscriptionId, InitiatedBy initiatedBy = null)
         {
             var today = clock
                 .GetCurrentInstant()
@@ -195,11 +193,11 @@ namespace Sig.App.Backend.BackgroundJobs
                 .Where(x => x.Id== beneficiaryIdLong)
                 .FirstAsync();
 
-            CreateTransaction(beneficiary, beneficiaryType, subscription);
+            CreateTransaction(beneficiary, beneficiaryType, subscription, initiatedBy);
             await db.SaveChangesAsync();
         }
 
-        private void CreateTransaction(Beneficiary beneficiary, BeneficiaryType beneficiaryType, Subscription subscription)
+        private void CreateTransaction(Beneficiary beneficiary, BeneficiaryType beneficiaryType, Subscription subscription, InitiatedBy initiatedBy = null)
         {
             var subscriptionTypes = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiaryType.Id);
 
@@ -276,7 +274,12 @@ namespace Sig.App.Backend.BackgroundJobs
                         SubscriptionName = subscription.Name,
                         ProjectId = beneficiary.Organization.ProjectId,
                         ProjectName = beneficiary.Organization.Project.Name,
-                        TransactionLogProductGroups = transactionLogProductGroups
+                        TransactionLogProductGroups = transactionLogProductGroups,
+                        TransactionInitiatorId = initiatedBy != null? initiatedBy.TransactionInitiatorId : null,
+                        TransactionInitiatorFirstname = initiatedBy != null ? initiatedBy.TransactionInitiatorFirstname : null,
+                        TransactionInitiatorLastname = initiatedBy != null ? initiatedBy.TransactionInitiatorLastname : null,
+                        TransactionInitiatorEmail = initiatedBy != null ? initiatedBy.TransactionInitiatorEmail : null,
+                        InitiatedByProject = initiatedBy != null ? true : false
                     });
 
                     var fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == subscriptionType.ProductGroupId);
@@ -354,6 +357,14 @@ namespace Sig.App.Backend.BackgroundJobs
                 ProjectName = beneficiary.Organization.Project.Name,
                 TransactionLogProductGroups = transactionLogProductGroups
             });
+        }
+
+        public class InitiatedBy()
+        {
+            public string TransactionInitiatorId { get; set; }
+            public string TransactionInitiatorFirstname { get; set; }
+            public string TransactionInitiatorLastname { get; set; }
+            public string TransactionInitiatorEmail { get; set; }
         }
     }
 }

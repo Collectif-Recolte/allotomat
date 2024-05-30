@@ -19,6 +19,8 @@ using System.Threading.Tasks;
 using Sig.App.Backend.Gql.Bases;
 using System.Collections.Generic;
 using Sig.App.Backend.BackgroundJobs;
+using Microsoft.AspNetCore.Http;
+using Sig.App.Backend.DbModel.Entities;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 {
@@ -28,13 +30,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         private IClock clock;
         private readonly AppDbContext db;
         private readonly ILogger<AddingFundToCard> addingFundLogger;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
-        public AssignBeneficiariesToSubscription(ILogger<AssignBeneficiariesToSubscription> logger, IClock clock, AppDbContext db, ILogger<AddingFundToCard> addingFundLogger)
+        public AssignBeneficiariesToSubscription(ILogger<AssignBeneficiariesToSubscription> logger, IClock clock, IHttpContextAccessor httpContextAccessor, AppDbContext db, ILogger<AddingFundToCard> addingFundLogger)
         {
             this.logger = logger;
             this.clock = clock;
             this.db = db;
             this.addingFundLogger = addingFundLogger;
+            this.httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -88,10 +92,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 .Where(x => beneficiariesLongIdentifiers.Contains(x.Id));
 
             AddingFundToCard addingFundToCardJob = null;
+            string currentUserId = null;
+            AppUser currentUser = null;
             if (request.ReplicatePaymentOnAttribution)
             {
                 query = query.Include(x => x.Card);
                 addingFundToCardJob = new AddingFundToCard(db, clock, addingFundLogger);
+                currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
+                currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
             }
 
             Beneficiary[] beneficiaries = query.ToArray();
@@ -162,7 +170,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
                         if (request.ReplicatePaymentOnAttribution && beneficiary.Card != null)
                         {
-                            await addingFundToCardJob.AddFundToSpecificBeneficiary(beneficiary.GetIdentifier(), beneficiary.BeneficiaryType, subscription.GetIdentifier());
+                            await addingFundToCardJob.AddFundToSpecificBeneficiary(beneficiary.GetIdentifier(), beneficiary.BeneficiaryType, subscription.GetIdentifier(), new AddingFundToCard.InitiatedBy()
+                            {
+                                TransactionInitiatorId = currentUserId,
+                                TransactionInitiatorEmail = currentUser?.Email,
+                                TransactionInitiatorFirstname = currentUser?.Profile.FirstName,
+                                TransactionInitiatorLastname = currentUser?.Profile.LastName
+                            });
                         }
 
                         logger.LogInformation(

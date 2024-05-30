@@ -44,12 +44,12 @@
           tag="RouterLink"
           :label="props.confirmButtonLabel ?? defaultConfirmLabel"
           :to="confirmRoute"
-          :isDisabled="props.isDisabled" />
+          :is-disabled="props.isDisabled" />
         <PfButtonAction
           v-else
           :label="props.confirmButtonLabel ?? defaultConfirmLabel"
-          @click="confirm"
-          :isDisabled="props.isDisabled" />
+          :is-disabled="props.isDisabled"
+          @click="confirm" />
       </div>
     </template>
   </UiDialogModal>
