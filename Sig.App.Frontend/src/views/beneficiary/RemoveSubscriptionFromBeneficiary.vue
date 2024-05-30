@@ -5,14 +5,16 @@
 		"remove-beneficiary-from-subscription-success-notification": "{beneficiaryName} has been successfully remove from subscription {subscriptionName}.",
 		"remove-text-error": "Text must match subscription name",
 		"remove-text-label": "Type the subscription name to confirm",
-		"title": "Unsubscribe {subscriptionName} - {beneficiaryName}"
+		"title": "Unsubscribe {subscriptionName} - {beneficiaryName}",
+    "anonymous-beneficiary": "Beneficiary {beneficiaryId1}",
 	},
 	"fr": {
 		"description": "Avertissement ! Le retrait de <strong>{beneficiaryName}</strong> dans l'abonnement <strong>{subscriptionName}</strong> ne peut pas être annulé. Si vous continuez, <strong>{beneficiaryName}</strong> ne recevra plus de virement pour l'abonnement <strong>{subscriptionName}</strong>.",
 		"remove-beneficiary-from-subscription-success-notification": "{beneficiaryName} a été retiré-e avec succès de l'abonnement {subscriptionName}.",
 		"remove-text-error": "Le texte doit correspondre au nom de l'abonnement",
 		"remove-text-label": "Taper le nom de l'abonnement",
-		"title": "Retirer l'abonnement {subscriptionName} - {beneficiaryName}"
+		"title": "Retirer l'abonnement {subscriptionName}",
+    "anonymous-beneficiary": "Bénéficiaire {beneficiaryId1}",
 	}
 }
 </i18n>
@@ -22,7 +24,7 @@
     :return-route="{
       name: URL_BENEFICIARY_ADMIN
     }"
-    :title="t('title', { beneficiaryName: getBeneficiaryName(), subscriptionName: getSubscriptionName() })"
+    :title="t('title', { beneficiaryName: ` - ${getBeneficiaryName()}`, subscriptionName: getSubscriptionName() })"
     :description="t('description', { beneficiaryName: getBeneficiaryName(), subscriptionName: getSubscriptionName() })"
     :validation-text="getSubscriptionName()"
     :delete-text-label="t('remove-text-label')"
@@ -32,25 +34,39 @@
 
 <script setup>
 import gql from "graphql-tag";
+import { computed } from "vue";
 import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
+import { storeToRefs } from "pinia";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
+import { useAuthStore } from "@/lib/store/auth";
+
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
+import { USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const { addSuccess } = useNotificationsStore();
+const { userType } = storeToRefs(useAuthStore());
 
 const { result: resultBeneficiary } = useQuery(
   gql`
     query Beneficiary($id: ID!) {
       beneficiary(id: $id) {
         id
+        id1
         firstname
         lastname
+        organization {
+          id
+          project {
+            id
+            beneficiariesAreAnonymous
+          }
+        }
       }
     }
   `,
@@ -84,6 +100,10 @@ const { mutate: removeBeneficiaryFromSubscriptionMutation } = useMutation(
 );
 
 function getBeneficiaryName() {
+  if (!beneficiary.value) return "";
+  if (isProjectManager.value && beneficiary.value.organization.project.beneficiariesAreAnonymous) {
+    return t("anonymous-beneficiary", { beneficiaryId1: beneficiary.value.id1 });
+  }
   return beneficiary.value ? `${beneficiary.value.firstname} ${beneficiary.value.lastname}` : "";
 }
 
@@ -109,4 +129,8 @@ async function removeBeneficiaryFromSubscription() {
     name: URL_BENEFICIARY_ADMIN
   });
 }
+
+const isProjectManager = computed(() => {
+  return userType.value === USER_TYPE_PROJECTMANAGER;
+});
 </script>
