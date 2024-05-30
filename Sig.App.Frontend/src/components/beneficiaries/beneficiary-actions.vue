@@ -8,6 +8,7 @@
       "beneficiary-assign-card": "Assign a card",
       "beneficiary-unassign-card": "Unassign card",
       "beneficiary-delete": "Delete {firstname}",
+      "beneficiary-delete-participant-anonymous": "the participant",
       "beneficiary-transactions-history": "Transactions history",
       "beneficiary-edit-disabled": "You don't have the permission to edit this beneficiary",
       "beneficiary-add-funds-disabled": "You can't add funds if the beneficiary doesn't have a card",
@@ -31,6 +32,7 @@
       "beneficiary-assign-card": "Assigner une carte",
       "beneficiary-unassign-card": "Désassigner la carte",
       "beneficiary-delete": "Supprimer {firstname}",
+      "beneficiary-delete-participant-anonymous": "le participant",
       "beneficiary-transactions-history": "Historique de transactions",
       "beneficiary-edit-disabled": "Vous n'avez pas la permission de modifier ce participant-e-",
       "beneficiary-add-funds-disabled": "Vous ne pouvez pas ajouter des fonds si le participant-e n'a pas de carte",
@@ -201,7 +203,9 @@ function updateItems() {
       {
         isExtra: true,
         icon: ICON_TRASH,
-        label: t("beneficiary-delete", { firstname: props.beneficiary.firstname }),
+        label: t("beneficiary-delete", {
+          firstname: props.beneficiariesAreAnonymous ? t("beneficiary-delete-participant-anonymous") : props.beneficiary.firstname
+        }),
         route: { name: URL_BENEFICIARY_DELETE, params: { beneficiaryId: props.beneficiary.id } },
         disabled: haveCard() || props.beneficiariesAreAnonymous,
         reason: haveCard() ? t("beneficiary-delete-disabled") : t("beneficiary-delete-disabled-anonymous")
