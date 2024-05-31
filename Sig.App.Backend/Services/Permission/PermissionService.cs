@@ -335,7 +335,7 @@ namespace Sig.App.Backend.Services.Permission
             var projectId = db.Organizations.Where(x => x.Id == beneficiary.OrganizationId).FirstOrDefault().ProjectId;
             var project = db.Projects.FirstOrDefault(x => x.Id == projectId);
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectId.ToString()) && (!project?.BeneficiariesAreAnonymous ?? true))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectId.ToString()))
             {
                 return Task.FromResult(ProjectManagerBeneficiaryPermissions);
             }
