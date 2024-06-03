@@ -807,12 +807,10 @@ function onAutoSelect() {
     var beneficiaryPaymentAmount = selectedSubscriptionData.types
       .filter((y) => y.beneficiaryType.id === x.beneficiaryType.id)
       .reduce((accumulator, type) => accumulator + type.amount, 0);
-    if (amount + beneficiaryPaymentAmount * selectedSubscriptionData.paymentRemaining <= maxAllocation.value) {
-      amount += beneficiaryPaymentAmount * selectedSubscriptionData.paymentRemaining;
-      if (amount + beneficiaryPaymentAmount * paymentRemaining <= maxAllocation.value) {
-        amount += beneficiaryPaymentAmount * paymentRemaining;
-        selectedBeneficiaries.push(x);
-      }
+
+    if (amount + beneficiaryPaymentAmount * paymentRemaining <= parseFloat(maxAllocation.value)) {
+      amount += beneficiaryPaymentAmount * paymentRemaining;
+      selectedBeneficiaries.push(x);
     }
   });
 
