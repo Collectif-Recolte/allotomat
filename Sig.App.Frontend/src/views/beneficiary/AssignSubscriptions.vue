@@ -418,7 +418,13 @@ const { result: resultOrganizations, refetch: refetchOrganizations } = useQuery(
           subscriptions {
             id
             name
-            budgetAllowancesTotal
+            budgetAllowances {
+              id
+              availableFund
+              organization {
+                id
+              }
+            }
             totalPayment
             paymentRemaining
             isSubscriptionPaymentBasedCardUsage
@@ -462,16 +468,18 @@ let organizationSubscriptions = useResult(resultOrganizations, null, (data) => {
 });
 
 const subscriptions = useResult(resultOrganizations, null, (data) => {
-  return data.organizations[0].project.subscriptions.map((x) => ({
-    label: x.name,
-    value: x.id,
-    budgetAllowance: x.budgetAllowancesTotal,
-    totalPayment: x.totalPayment,
-    paymentRemaining: x.paymentRemaining,
-    isSubscriptionPaymentBasedCardUsage: x.isSubscriptionPaymentBasedCardUsage,
-    maxNumberOfPayments: x.maxNumberOfPayments,
-    types: x.types
-  }));
+  return data.organizations[0].project.subscriptions
+    .filter((x) => x.budgetAllowances.find((y) => y.organization.id === selectedOrganization.value))
+    .map((x) => ({
+      label: x.name,
+      value: x.id,
+      budgetAllowance: x.budgetAllowances.find((y) => y.organization.id === selectedOrganization.value)?.availableFund,
+      totalPayment: x.totalPayment,
+      paymentRemaining: x.paymentRemaining,
+      isSubscriptionPaymentBasedCardUsage: x.isSubscriptionPaymentBasedCardUsage,
+      maxNumberOfPayments: x.maxNumberOfPayments,
+      types: x.types
+    }));
 });
 
 const {
@@ -706,6 +714,7 @@ const anyFiltersActive = computed(() => {
 
 function onOrganizationSelected(e) {
   selectedOrganization.value = e;
+  selectedSubscription.value = null;
   changeOrganization(e);
 }
 
@@ -830,7 +839,6 @@ const { mutate: assignBeneficiariesToSubscription } = useMutation(
         totalBeneficiaries
         organization {
           id
-          budgetAllowancesTotal
         }
       }
     }
