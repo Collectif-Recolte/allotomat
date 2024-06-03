@@ -25,7 +25,6 @@
   <PfFormFieldset :id="props.id" :name="props.id" :has-error-state="props.hasErrorState" :errors="props.errors">
     <div v-for="(option, index) in props.options" :key="index">
       <PfFormInputCheckbox
-        :id="option.value"
         :value="isChecked(option.value)"
         :label="option.label"
         :checked="isChecked(option.value)"

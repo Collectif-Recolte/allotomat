@@ -6,7 +6,7 @@
     "confirm": "Confirm",
     "adjustment-amount-positif": "The amount <b>{amount}</b> will go back to the envelope",
     "adjustment-amount-negatif": "The amount <b>{amount}</b> will go out of the envelope",
-    "confirm-message": "The adjustments have been made for the participant {beneficiary}"
+    "confirm-message": "The adjustments have been made for the participant"
 	},
 	"fr": {
 		"title": "Résoudre les conflits de paiement(s)",
@@ -14,7 +14,7 @@
     "confirm": "Confirmer",
     "adjustment-amount-positif": "→ L'enveloppe va recevoir un montant de <b>{amount}</b> suite à l'ajustement.",
     "adjustment-amount-negatif": "→ Un montant de <b>{amount}</b> va être retiré de l'enveloppe suite à l'ajustement.",
-    "confirm-message": "Les ajustements ont été effectués pour le participant {beneficiary}"
+    "confirm-message": "Les ajustements ont été effectués pour le participant"
 	}
 }
 </i18n>
@@ -276,7 +276,8 @@ async function onSubmit() {
       subscriptionIds: subscriptionChecked.value
     }
   });
-  addSuccess(t("confirm-message", { beneficiary: `${beneficiary.value.firstname} ${beneficiary.value.lastname}` }));
+
+  addSuccess(t("confirm-message"));
   router.push({ name: URL_BENEFICIARY_ADMIN });
 }
 </script>
