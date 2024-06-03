@@ -63,7 +63,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
             }
 
             db.SubscriptionBeneficiaries.RemoveRange(organization.Beneficiaries.SelectMany(x => x.Subscriptions));
-            db.Transactions.RemoveRange(organization.Beneficiaries.SelectMany(x => x.Card.Transactions));
+            db.Transactions.RemoveRange(organization.Beneficiaries.Where(x => x.Card != null).SelectMany(x => x.Card.Transactions));
 
             db.Organizations.Remove(organization);
 
