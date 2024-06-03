@@ -536,6 +536,7 @@ const {
                   id
                   name
                 }
+                hasMissedPayment
                 subscription {
                   id
                   name

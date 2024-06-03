@@ -669,5 +669,10 @@ namespace Sig.App.Backend.Gql.Schema
         {
             return mediator.Send(input.Value);
         }
+
+        public static Task<AddMissingPayment.Payload> AddMissingPayment(this GqlMutation _, [Inject] IMediator mediator, NonNull<AddMissingPayment.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
     }
 }
