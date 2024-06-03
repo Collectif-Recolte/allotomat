@@ -85,7 +85,7 @@
             </template>
           </PfFormInputText>
         </Field>
-        <span class="py-8 text-sm">{{ t("card-current-balance", { amount: getMoneyFormat(beneficiary.card.totalFund) }) }}</span>
+        <span class="py-8 text-sm">{{ t("card-current-balance", { amount: availableCardFund }) }}</span>
       </PfForm>
     </Form>
   </UiDialogModal>
@@ -351,4 +351,11 @@ const maxBudgetAllowance = computed(() =>
     ? Number.MAX_SAFE_INTEGER
     : budgetAllowances.value.find((x) => x.subscription.id === selectedSubscription.value).availableFund
 );
+
+const availableCardFund = computed(() => {
+  if (beneficiary.value === null) {
+    return 0;
+  }
+  return getMoneyFormat(beneficiary.value.card.totalFund);
+});
 </script>
