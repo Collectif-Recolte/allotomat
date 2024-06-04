@@ -174,9 +174,9 @@ export default [
   {
     name: urls.URL_PROJECT_ADMIN_DASHBOARD,
     path: "/dashboard",
-    component: () => import("@/views/dashboard/Dashboard.vue"),
+    component: () => import("@/views/dashboard/index.vue"),
     meta: {
-      claim: GLOBAL_MANAGE_ORGANIZATIONS
+      claim: GLOBAL_MANAGE_BENEFICIARIES
     }
   },
   {
