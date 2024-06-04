@@ -40,7 +40,7 @@
         @update:modelValue="(e) => emit('update:modelValue', e)" />
       <div v-if="props.hasSort" class="relative inline-block group pf-transition-visibility pf-transition-visibility--focus-only">
         <button class="pf-button pf-button--outline px-3 min-h-11">
-          <PfIcon :icon="iconSortOrder" size="s" />
+          <PfIcon :icon="iconSortOrder" size="s" class="mr-2" />
           {{ sortLabel }}
           <PfIcon :icon="ICON_ARROW_BOTTOM" size="xxs" :class="activeFiltersCount > 0 ? 'ml-2' : 'ml-12'" />
         </button>
@@ -78,9 +78,8 @@ import { ASC } from "@/lib/consts/card-sort-order";
 
 import ICON_ARROW_BOTTOM from "@/lib/icons/arrow-bottom.json";
 import ICON_RESET from "@/lib/icons/reset.json";
-
-import ICON_CHEVRON_DOWN from "@/lib/icons/chevron-down.json";
-import ICON_CHEVRON_UP from "@/lib/icons/chevron-right.json";
+import ICON_SORT_ASC from "@/lib/icons/sort-asc.json";
+import ICON_SORT_DESC from "@/lib/icons/sort-desc.json";
 
 const emit = defineEmits(["resetFilters", "search", "update:modelValue"]);
 
@@ -128,7 +127,7 @@ const sortLabel = computed(() => {
 });
 
 const iconSortOrder = computed(() => {
-  return props.sortOrder === ASC ? ICON_CHEVRON_UP : ICON_CHEVRON_DOWN;
+  return props.sortOrder === ASC ? ICON_SORT_ASC : ICON_SORT_DESC;
 });
 
 function onResetFilters() {
