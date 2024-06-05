@@ -7,7 +7,7 @@
       "subscription-expiration": "Expiration",
       "subscription-total-budget-allowance" : "Total budget allowance",
       "subscription-available-fund": "Available fund",
-      "subscription-amount-allocated": "Amount allocated",
+      "subscription-amount-allocated": "Allocated amount ",
       "subscription-totals": "Total"
     },
     "fr": {
