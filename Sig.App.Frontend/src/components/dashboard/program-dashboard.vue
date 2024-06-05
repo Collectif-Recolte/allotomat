@@ -1,7 +1,6 @@
 <i18n>
   {
     "en": {
-      "title": "Dashboard",
       "beneficiary-count-label": "Number of participants",
       "manage-beneficiary-btn": "Manage participants",
       "unspend-loyalty-fund-label": "Unspent amount on gift cards",
@@ -11,7 +10,6 @@
       "subscription-filter": "Subscriptions"
     },
     "fr": {
-      "title": "Tableau de bord",
       "beneficiary-count-label": "Nombre de participants",
       "manage-beneficiary-btn": "Gérer les participants",
       "unspend-loyalty-fund-label": "Montant non-dépensé sur les cartes-cadeaux",
@@ -24,50 +22,48 @@
   </i18n>
 
 <template>
-  <AppShell :title="t('title')" :loading="loading">
-    <div class="flex flex-col gap-6 sm:flex-row mt-4 mb-12">
-      <UiStat
-        class="sm:w-1/3"
-        :stat="project?.projectStats.beneficiaryCount"
-        :label="t('beneficiary-count-label')"
-        :secondary-btn-route="{ name: URL_BENEFICIARY_ADMIN }"
-        :secondary-btn-label="t('manage-beneficiary-btn')" />
-      <UiStat
-        class="sm:w-1/3"
-        :stat="getMoneyFormat(project?.projectStats.unspentLoyaltyFund)"
-        :label="t('unspend-loyalty-fund-label')" />
-      <UiStat
-        class="sm:w-1/3"
-        :stat="getMoneyFormat(project?.projectStats.totalActiveSubscriptionsEnvelopes)"
-        :label="t('total-active-subscriptions-envelopes-label')" />
-    </div>
-    <div v-if="organizationsStats">
-      <UiTableHeader :title="t('organization-list-stats')">
-        <template #right>
-          <UiFilter
-            has-filters
-            :has-active-filters="hasActiveFilters"
-            :active-filters-count="activeFiltersCount"
-            @resetFilters="onResetFilters">
-            <PfFormInputCheckboxGroup
-              v-if="availableSubscriptions.length > 0"
-              class="mt-3"
-              is-filter
-              :value="selectedSubscriptions"
-              :label="t('subscription-filter')"
-              :options="availableSubscriptions"
-              @input="onSubscriptionsChecked" />
-          </UiFilter>
-        </template>
-      </UiTableHeader>
-      <template v-if="organizationsStats.length > 0">
-        <OrganizationStatsTable :organizations-stats="organizationsStats" />
+  <div class="flex flex-col gap-6 sm:flex-row mt-4 mb-12">
+    <UiStat
+      class="sm:w-1/3"
+      :stat="project?.projectStats.beneficiaryCount"
+      :label="t('beneficiary-count-label')"
+      :secondary-btn-route="{ name: URL_BENEFICIARY_ADMIN }"
+      :secondary-btn-label="t('manage-beneficiary-btn')" />
+    <UiStat
+      class="sm:w-1/3"
+      :stat="getMoneyFormat(project?.projectStats.unspentLoyaltyFund)"
+      :label="t('unspend-loyalty-fund-label')" />
+    <UiStat
+      class="sm:w-1/3"
+      :stat="getMoneyFormat(project?.projectStats.totalActiveSubscriptionsEnvelopes)"
+      :label="t('total-active-subscriptions-envelopes-label')" />
+  </div>
+  <div v-if="organizationsStats">
+    <UiTableHeader :title="t('organization-list-stats')">
+      <template #right>
+        <UiFilter
+          has-filters
+          :has-active-filters="hasActiveFilters"
+          :active-filters-count="activeFiltersCount"
+          @resetFilters="onResetFilters">
+          <PfFormInputCheckboxGroup
+            v-if="availableSubscriptions.length > 0"
+            class="mt-3"
+            is-filter
+            :value="selectedSubscriptions"
+            :label="t('subscription-filter')"
+            :options="availableSubscriptions"
+            @input="onSubscriptionsChecked" />
+        </UiFilter>
       </template>
-      <div v-else class="flex items-center justify-center my-8 lg:my-16">
-        <UiCta :img-src="require('@/assets/img/organismes.jpg')" :description="t('empty-list')" />
-      </div>
+    </UiTableHeader>
+    <template v-if="organizationsStats.length > 0">
+      <OrganizationStatsTable :organizations-stats="organizationsStats" />
+    </template>
+    <div v-else class="flex items-center justify-center my-8 lg:my-16">
+      <UiCta :img-src="require('@/assets/img/organismes.jpg')" :description="t('empty-list')" />
     </div>
-  </AppShell>
+  </div>
 </template>
 
 <script setup>
@@ -79,17 +75,14 @@ import { ref, computed } from "vue";
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
-import { usePageTitle } from "@/lib/helpers/page-title";
 
 import OrganizationStatsTable from "@/components/dashboard/organization-stats-table.vue";
 
 const { t } = useI18n();
 
-usePageTitle(t("title"));
-
 const selectedSubscriptions = ref([]);
 
-const { result: resultProjects, loading } = useQuery(
+const { result: resultProjects } = useQuery(
   gql`
     query Projects($subscriptions: [ID!]) {
       projects {
