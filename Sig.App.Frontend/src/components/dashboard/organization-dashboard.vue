@@ -7,7 +7,8 @@
       "total-active-subscriptions-envelopes-label": "Budget allowance total (active subscriptions)",
       "organization-list-stats": "By subscription",
       "empty-list": "No group is associated with the program.",
-      "funds-expiration-trigger-number-of-days":"{numberOfDays} days after the first use"
+      "funds-expiration-trigger-number-of-days":"{numberOfDays} days after the first use",
+      "funds-not-accumulable": "Expiration at the next payment period"
     },
     "fr": {
       "beneficiary-count-label": "Nombre de participants",
@@ -16,7 +17,8 @@
       "total-active-subscriptions-envelopes-label": "Total des enveloppes (abonnements actifs)",
       "organization-list-stats": "Par abonnement",
       "empty-list": "Aucun abonnement n'est associé au groupe.",
-      "funds-expiration-trigger-number-of-days": "{numberOfDays} jours après la première utilisation"
+      "funds-expiration-trigger-number-of-days": "{numberOfDays} jours après la première utilisation",
+      "funds-not-accumulable-expiration": "Expiration lors de la prochaine période de versement"
     }
   }
   </i18n>
@@ -79,6 +81,7 @@ const { result: resultOrganizations } = useQuery(
             endDate
             fundsExpirationDate
             triggerFundExpiration
+            isFundsAccumulable
             numberDaysUntilFundsExpire
           }
         }
@@ -96,14 +99,15 @@ const subscriptionStats = useResult(resultOrganizations, null, (data) => {
       name: budgetAllowance.subscription.name,
       startDate: budgetAllowance.subscription.startDate,
       endDate: budgetAllowance.subscription.endDate,
-      expiration:
-        budgetAllowance.subscription.triggerFundExpiration === SPECIFIC_DATE
-          ? formatDate(new Date(budgetAllowance.subscription.fundsExpirationDate), textualFormat)
-          : budgetAllowance.subscription.triggerFundExpiration === NUMBER_OF_DAYS
-          ? t("funds-expiration-trigger-number-of-days", {
-              numberOfDays: budgetAllowance.subscription.numberDaysUntilFundsExpire
-            })
-          : "",
+      expiration: !budgetAllowance.subscription.isFundsAccumulable
+        ? t("funds-not-accumulable-expiration")
+        : budgetAllowance.subscription.triggerFundExpiration === SPECIFIC_DATE
+        ? formatDate(new Date(budgetAllowance.subscription.fundsExpirationDate), textualFormat)
+        : budgetAllowance.subscription.triggerFundExpiration === NUMBER_OF_DAYS
+        ? t("funds-expiration-trigger-number-of-days", {
+            numberOfDays: budgetAllowance.subscription.numberDaysUntilFundsExpire
+          })
+        : "",
       originalFund: budgetAllowance.originalFund,
       availableFund: budgetAllowance.availableFund,
       amountAllocated: budgetAllowance.originalFund - budgetAllowance.availableFund
