@@ -8,7 +8,7 @@
       "organization-list-stats": "By subscription",
       "empty-list": "No group is associated with the program.",
       "funds-expiration-trigger-number-of-days":"{numberOfDays} days after the first use",
-      "funds-not-accumulable": "Expiration at the next payment period"
+      "funds-not-accumulable-expiration": "Expiration at the next payment period"
     },
     "fr": {
       "beneficiary-count-label": "Nombre de participants",
