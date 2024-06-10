@@ -9,10 +9,15 @@
 		"organization-manager-without-organization-warning": "No group is associated with your account. If you believe there has been an error, contact the Tomat team.",
 		"password": "Password",
 		"project-manager-without-project-warning": "No program is associated with your account. If you believe there has been an error, contact the Tomat team.",
-		"title": "Login",
+		"title": "Tomat",
+    "subtitle": "Manage your funds in real time.",
 		"username": "Email",
     "check-my-balance": "Check my card balance",
-    "support": "Support"
+    "support": "Help and support",
+    "about": "About Tomat",
+    "about-link": "https://info.allotomat.com/home/",
+    "form-title": "Welcome to Tomat",
+    "form-subtitle": "Enter your login credentials"
 	},
 	"fr": {
 		"forgot-password": "Mot de passe oublié ?",
@@ -23,114 +28,164 @@
 		"organization-manager-without-organization-warning": "Aucun groupe n'est associé à votre compte. Si vous croyez qu'il y a eu une erreur, communiquez avec l'équipe de Tomat.",
 		"password": "Mot de passe",
 		"project-manager-without-project-warning": "Aucun programme n'est associé à votre compte. Si vous croyez qu'il y a eu une erreur, communiquez avec l'équipe de Tomat.",
-		"title": "Connexion",
+		"title": "Tomat",
+    "subtitle": "Gérez vos fonds en temps réel.",
 		"username": "Courriel",
     "check-my-balance": "Vérification du solde de ma carte",
-    "support": "Support"
+    "support": "Aide et support",
+    "about": "À propos de Tomat",
+    "about-link": "https://info.allotomat.com/accueil/",
+    "form-title": "Bienvenue sur Tomat",
+    "form-subtitle": "Entrez vos identifiants de connexion"
 	}
 }
 </i18n>
 
 <template>
-  <div class="min-h-screen relative flex items-center justify-center md:block md:h-screen bg-primary-100 dark:bg-grey-900">
-    <div class="min-h-full flex w-full">
-      <!-- Left col -->
-      <div class="flex-1 flex flex-col justify-center h-screen overflow-hidden md:w-1/2 md:flex-none">
-        <div
-          class="flex-grow flex flex-col justify-between items-start h-full px-section py-4 xs:py-8 md:px-8 overflow-y-scroll lg:overflow-y-visible">
-          <!-- Top row (logo) should have the same height as the bottom row -->
-          <div class="h-14 xs:h-8 flex items-start w-full mb-12 justify-between gap-x-4">
-            <img class="h-8" :src="require('@/assets/logo/logo-color.svg')" :alt="t('logo')" />
+  <div class="bg-primary-100 flex flex-col min-h-[100dvh]">
+    <div class="dark absolute sm:relative w-full h-[45dvh] min-h-[240px] after:absolute after:inset-0 after:bg-primary-900/50">
+      <img class="absolute inset-0 h-full w-full object-cover" :src="require('@/assets/img/bg-login.jpg')" alt="" />
+      <LangSwitch class="absolute top-6 right-section z-10 sm:hidden" />
+      <nav class="hidden relative z-10 sm:block px-section py-6">
+        <ul class="flex items-center gap-x-4 md:gap-x-8 leading-none">
+          <li>
             <PfButtonLink
-              class="no-underline text-tertiary-500 hover:text-primary-700"
+              class="no-underline"
               btn-style="link"
               has-icon-left
-              :icon="ICON_QUESTION"
+              :icon="ICON_INFO"
+              :href="t('about-link')"
+              :label="t('about')"
+              target="_blank" />
+          </li>
+          <li>
+            <PfButtonLink
+              class="no-underline"
+              btn-style="link"
+              has-icon-left
+              :icon="ICON_SUPPORT"
               href="https://allotomat.notion.site/Support-Tomat-c1f01ce94bd549aa92e0a64b624c5507"
               :label="t('support')"
               target="_blank" />
-          </div>
-
-          <!-- Middle row (form) -->
-          <div class="mx-auto w-full max-w-sm lg:w-96">
-            <h1 class="text-3xl max-w-xs mt-0">{{ t("title") }}</h1>
-
-            <div class="mt-8">
-              <div class="mt-6">
-                <Form
-                  v-slot="{ isSubmitting }"
-                  class="space-y-6"
-                  :validation-schema="validationSchema"
-                  :initial-values="initialFormValues"
-                  @submit="onSubmit">
-                  <PfFormSection>
-                    <Field v-slot="{ field, errors }" name="email">
-                      <PfFormInputText
-                        id="email"
-                        v-bind="field"
-                        :label="t('username')"
-                        :errors="errors"
-                        input-type="email"></PfFormInputText>
-                    </Field>
-
-                    <Field v-slot="{ field, errors }" name="password">
-                      <PfFormInputText
-                        id="password"
-                        v-bind="field"
-                        :label="t('password')"
-                        :errors="errors"
-                        input-type="password"></PfFormInputText>
-                    </Field>
-                  </PfFormSection>
-
-                  <RouterLink
-                    class="relative h-extend-cursor-area pf-button pf-button--link"
-                    :to="{ name: URL_ACCOUNT_FORGOT_PASSWORD }"
-                    >{{ t("forgot-password") }}</RouterLink
-                  >
-
-                  <div>
-                    <div class="inline-block relative">
-                      <PfButtonAction
-                        btn-style="primary"
-                        class="px-8"
-                        type="submit"
-                        size="lg"
-                        :label="t('login')"
-                        :is-disabled="isSubmitting" />
-                      <div class="absolute -translate-y-1/2 top-1/2 right-1">
-                        <PfSpinner v-if="isSubmitting" text-color-class="text-white" :loading-label="t('loading')" is-small />
-                      </div>
-                    </div>
-                  </div>
-                </Form>
-              </div>
-            </div>
-          </div>
-
-          <!-- Bottom row (Secondary links) -->
-          <div
-            class="h-14 xs:h-8 flex flex-col items-start gap-y-4 w-full mt-12 xs:flex-row-reverse xs:justify-between xs:items-end xs:gap-y-0 xs:gap-x-4">
+          </li>
+          <li class="ml-auto">
             <PfButtonLink
-              class="no-underline"
+              class="rounded-full"
               tag="RouterLink"
-              btn-style="link"
+              btn-style="secondary"
               has-icon-left
               :icon="ICON_HAND_CARD"
               :to="{ name: URL_CARD_CHECK }"
               :label="t('check-my-balance')" />
+          </li>
+          <li>
             <LangSwitch />
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <div
+      class="relative px-section pt-16 pb-8 w-xl max-w-full mx-auto sm:flex flex-row-reverse justify-end gap-x-16 md:gap-x-20 sm:-mt-56 md:-mt-60">
+      <div>
+        <h1 class="mt-0 sm:mt-14">
+          <span class="sr-only">{{ t("title") }}</span>
+          <img
+            class="h-16 sm:h-20 md:h-24 mx-auto sm:mx-0 relative sm:-left-[6.5rem] md:-left-32"
+            :src="require('@/assets/logo/logo-white.svg')"
+            :alt="t('logo')" />
+        </h1>
+        <p class="hidden sm:block text-h2 font-semibold mt-14">{{ t("subtitle") }}</p>
+      </div>
+      <div class="bg-white rounded-2xl p-8 sm:mt-5 md:p-12 pb-5 md:pb-5 sm:min-w-96 sm:w-5/12">
+        <Form
+          v-slot="{ isSubmitting }"
+          :validation-schema="validationSchema"
+          :initial-values="initialFormValues"
+          @submit="onSubmit">
+          <PfFormSection>
+            <div class="sm:mb-4">
+              <h2 class="text-h1 leading-6 font-bold text-primary-900 mt-0 mb-3" aria-describedby="connexionFormDesc">
+                {{ t("form-title") }}
+              </h2>
+              <p id="connexionFormDesc" class="mt-1 mb-0 text-p2 text-primary-700">{{ t("form-subtitle") }}</p>
+            </div>
+            <Field v-slot="{ field, errors }" name="email">
+              <PfFormInputText
+                id="email"
+                v-bind="field"
+                :label="t('username')"
+                :errors="errors"
+                input-type="email"></PfFormInputText>
+            </Field>
+
+            <Field v-slot="{ field, errors }" name="password">
+              <PfFormInputText
+                id="password"
+                v-bind="field"
+                :label="t('password')"
+                :errors="errors"
+                input-type="password"></PfFormInputText>
+            </Field>
+          </PfFormSection>
+
+          <div class="flex items-center justify-between border-t border-grey-300 pt-5 mt-8">
+            <RouterLink
+              class="relative h-extend-cursor-area pf-button pf-button--link text-p3"
+              :to="{ name: URL_ACCOUNT_FORGOT_PASSWORD }">
+              {{ t("forgot-password") }}
+            </RouterLink>
+
+            <div>
+              <div class="inline-block relative">
+                <PfButtonAction btn-style="primary" class="px-8" type="submit" :label="t('login')" :is-disabled="isSubmitting" />
+                <div class="absolute -translate-y-1/2 top-1/2 right-1">
+                  <PfSpinner v-if="isSubmitting" text-color-class="text-white" :loading-label="t('loading')" is-small />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </Form>
       </div>
-      <div class="hidden md:block relative w-0 flex-1 after:absolute after:inset-0 dark:after:bg-grey-900/50">
-        <!-- Résolutions d'images différentes pour écran md & xl -->
-        <img class="absolute inset-0 h-full w-full object-cover lg:hidden" :src="require('@/assets/img/bg-login.jpg')" alt="" />
-        <img
-          class="absolute inset-0 h-full w-full object-cover hidden lg:inline"
-          :src="require('@/assets/img/bg-login.jpg')"
-          alt="" />
-      </div>
+    </div>
+
+    <nav class="sm:hidden px-section mb-6">
+      <ul class="mb-0 text-center">
+        <li class="mb-5">
+          <PfButtonLink
+            class="rounded-full"
+            tag="RouterLink"
+            btn-style="secondary"
+            has-icon-left
+            :icon="ICON_HAND_CARD"
+            :to="{ name: URL_CARD_CHECK }"
+            :label="t('check-my-balance')" />
+        </li>
+        <li class="mb-4">
+          <PfButtonLink
+            class="no-underline"
+            btn-style="link"
+            has-icon-left
+            :icon="ICON_INFO"
+            :href="t('about-link')"
+            :label="t('about')"
+            target="_blank" />
+        </li>
+        <li>
+          <PfButtonLink
+            class="no-underline"
+            btn-style="link"
+            has-icon-left
+            :icon="ICON_SUPPORT"
+            href="https://allotomat.notion.site/Support-Tomat-c1f01ce94bd549aa92e0a64b624c5507"
+            :label="t('support')"
+            target="_blank" />
+        </li>
+      </ul>
+    </nav>
+
+    <div class="bg-white mt-auto">
+      <AppFooter />
     </div>
   </div>
 </template>
@@ -146,10 +201,12 @@ import { URL_ACCOUNT_FORGOT_PASSWORD, URL_CARD_CHECK } from "@/lib/consts/urls";
 import AuthenticationService from "@/lib/services/authentication";
 import { usePageTitle } from "@/lib/helpers/page-title";
 
+import AppFooter from "@/components/app/footer";
 import LangSwitch from "@/components/app/lang-switch";
 
 import ICON_HAND_CARD from "@/lib/icons/hand-card.json";
-import ICON_QUESTION from "@/lib/icons/question-mark-circle-2.json";
+import ICON_SUPPORT from "@/lib/icons/support.json";
+import ICON_INFO from "@/lib/icons/info-2.json";
 
 import {
   ProjectManagerWithoutProjectError,

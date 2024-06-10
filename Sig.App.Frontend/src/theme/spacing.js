@@ -37,6 +37,7 @@ module.exports = {
   section: "var(--pf-section-padding)",
   // App's height without top bar and footer
   app: "var(--ui-app-height)",
+  footer: "var(--pf-footer-height)",
   "1/1": "100%",
   "3/4": "75%",
   "9/16": "56.25%",
