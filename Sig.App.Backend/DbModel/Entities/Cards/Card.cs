@@ -18,6 +18,7 @@ namespace Sig.App.Backend.DbModel.Entities.Cards
         public IList<Fund> Funds { get; set; }
 
         public CardStatus Status { get; set; }
+        public bool IsDisabled { get; set; } = false;
 
         public Beneficiary Beneficiary { get; set; }
 

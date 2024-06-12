@@ -3,16 +3,16 @@
     "en": {
       "options": "Options",
       "organization-delete": "Delete",
-      "organization-edit": "Edit organization",
+      "organization-edit": "Edit",
       "organization-edit-managers": "Edit managers",
-      "organization-name": "Organization name"
+      "organization-name": "Name"
     },
     "fr": {
       "options": "Options",
       "organization-delete": "Supprimer",
-      "organization-edit": "Modifier l'organisation",
+      "organization-edit": "Modifier",
       "organization-edit-managers": "Modifier les gestionnaires",
-      "organization-name": "Nom de l'organisation"
+      "organization-name": "Nom"
     }
   }
   </i18n>

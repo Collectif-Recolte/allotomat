@@ -1,14 +1,14 @@
 <i18n>
   {
     "en": {
-      "add-subscription": "Add a subscription",
+      "add-subscription": "Add",
       "title": "Subscription management",
       "subscription-count": "{count} subscription | {count} subscriptions",
       "empty-list": "There is no subscription for this program",
       "create-subscription": "Create a subscription"
     },
     "fr": {
-      "add-subscription": "Ajouter un abonnement",
+      "add-subscription": "Ajouter",
       "title": "Gestion des abonnements",
       "subscription-count": "{count} abonnement | {count} abonnements",
       "empty-list": "Il n'existe aucun abonnement pour ce programme.",

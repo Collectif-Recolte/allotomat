@@ -22,11 +22,16 @@ namespace Sig.App.Backend.DbModel.Entities.Subscriptions
         public SubscriptionMonthlyPaymentMoment MonthlyPaymentMoment { get; set; }
         public bool IsFundsAccumulable { get; set; }
 
+        public bool IsSubscriptionPaymentBasedCardUsage { get; set; } = false;
+        public int? MaxNumberOfPayments { get; set; }
+        public FundsExpirationTrigger TriggerFundExpiration { get; set; } = FundsExpirationTrigger.SpecificDate;
+        public int? NumberDaysUntilFundsExpire { get; set; }
+
         public IList<SubscriptionType> Types { get; set; }
         public IList<SubscriptionBeneficiary> Beneficiaries { get; set; }
         public IList<BudgetAllowance> BudgetAllowances { get; set; }
 
-        public DateTime GetExpirationDate(IClock clock, SubscriptionMonthlyPaymentMoment moment)
+        public DateTime GetExpirationDate(IClock clock)
         {
             if (IsFundsAccumulable && FundsExpirationDate.HasValue)
             {
@@ -34,7 +39,7 @@ namespace Sig.App.Backend.DbModel.Entities.Subscriptions
             }
             else
             {
-                return SubscriptionHelper.GetNextPaymentDateTime(clock, moment);
+                return SubscriptionHelper.GetNextPaymentDateTime(clock, MonthlyPaymentMoment);
             }
         }
         

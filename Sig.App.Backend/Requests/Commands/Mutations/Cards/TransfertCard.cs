@@ -1,5 +1,4 @@
-﻿using GraphQL.Conventions;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
@@ -87,7 +86,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
                 throw new NewCardNotInProjectException();
             }
 
-            var today = clock.GetCurrentInstant().InUtc().ToDateTimeUtc();
+            var today = clock.GetCurrentInstant().ToDateTimeUtc();
 
             foreach (var transaction in originalCard.Transactions)
             {
@@ -103,6 +102,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             newCard.Transactions = originalCard.Transactions;
             newCard.Status = CardStatus.Assigned;
             newCard.Beneficiary = originalCard.Beneficiary;
+            newCard.IsDisabled = originalCard.IsDisabled;
 
             var addingFundTransactionsBySubscriptionId =
                 await TransactionHelper.GroupAddingFundTransactionsBySubscriptionId(db,
@@ -168,6 +168,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             originalCard.Beneficiary = null;
             originalCard.Status = CardStatus.Lost;
             originalCard.Transactions = new List<Transaction>();
+            originalCard.IsDisabled = false;
 
             await db.SaveChangesAsync(cancellationToken);
 

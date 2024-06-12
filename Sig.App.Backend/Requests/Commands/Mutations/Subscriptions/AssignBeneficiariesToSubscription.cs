@@ -98,6 +98,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             var paymentRemaining = subscription.GetPaymentRemaining(clock);
+
+            if (subscription.IsSubscriptionPaymentBasedCardUsage)
+            {
+                paymentRemaining = Math.Min(subscription.MaxNumberOfPayments.Value, paymentRemaining);
+            }
+
             decimal totalAmount = 0;
             var beneficiariesWhoGetSubscriptions = 0;
 
@@ -149,7 +155,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                     {
                         logger.LogWarning("[Mutation] AssignBeneficiariesToSubscription - NotEnoughBudgetAllowanceException");
                         throw new NotEnoughBudgetAllowanceException();
-                        break;
                     }
                 }
             }

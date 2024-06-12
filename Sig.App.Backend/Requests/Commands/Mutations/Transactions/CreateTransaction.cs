@@ -77,6 +77,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 throw new CardNotFoundException();
             }
 
+            if (card.IsDisabled)
+            {
+                logger.LogWarning("[Mutation] CreateTransaction - CardIsDisabledException");
+                throw new CardIsDisabledException();
+            }
+
             var martketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == martketId, cancellationToken);
 
@@ -153,10 +159,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                         throw new NotEnoughtFundException();
                     }
 
-                    var addingFundTransactions = card.Transactions
-                        .Where(x => x is SubscriptionAddingFundTransaction or ManuallyAddingFundTransaction)
+                    var addingFundTransactions = db.Transactions
                         .OfType<AddingFundTransaction>()
-                        .Where(x => x.Status == FundTransactionStatus.Actived && x.AvailableFund > 0 && x.ProductGroupId == productGroupId)
+                        .Include(x => x.Transactions)
+                        .Where(x => x.Status == FundTransactionStatus.Actived && x.AvailableFund > 0 && x.ProductGroupId == productGroupId && x.CardId == card.Id)
+                        .Where(x => x.GetType() == typeof(ManuallyAddingFundTransaction) || x.GetType() == typeof(SubscriptionAddingFundTransaction))
                         .ToList();
 
                     var fundToRemove = Math.Min(fund.Amount, amount);
@@ -193,6 +200,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                                 addingFundTransaction.AvailableFund -= tempAmount;
                                 loyaltyFundToRemove -= tempAmount;
                                 tempAmount = 0;
+                            }
+
+                            if (subscription.TriggerFundExpiration == FundsExpirationTrigger.NumberOfDays && !addingFundTransaction.IsAlreadyUsed())
+                            {
+                                var expirationAfterNumbersOfDays = today.AddDays(subscription.NumberDaysUntilFundsExpire.Value);
+
+                                if (expirationAfterNumbersOfDays < addingFundTransaction.ExpirationDate) addingFundTransaction.ExpirationDate = expirationAfterNumbersOfDays;
                             }
 
                             affectedAddingFundTransactions.Add(addingFundTransaction);
@@ -388,6 +402,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         }
 
         public class CardNotFoundException : RequestValidationException { }
+        public class CardIsDisabledException : RequestValidationException { }
         public class MarketNotFoundException : RequestValidationException { }
         public class ProductGroupNotFoundException : RequestValidationException { }
         public class CardCantBeUsedInMarketException : RequestValidationException { }

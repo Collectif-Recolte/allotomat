@@ -1,19 +1,19 @@
 <i18n>
   {
       "en": {
-          "edit-market": "Edit market",
+          "edit-market": "Edit",
           "market-archive": "Archive",
           "market-delete": "Delete",
           "market-edit-managers": "Edit managers",
-          "market-name": "Market name",
+          "market-name": "Name",
           "options": "Options",
       },
       "fr": {
-          "edit-market": "Modifier le commerce",
+          "edit-market": "Modifier",
           "market-archive": "Archiver",
           "market-delete": "Supprimer",
           "market-edit-managers": "Modifier les gestionnaires",
-          "market-name": "Nom du commerce",
+          "market-name": "Nom",
           "options": "Options",
       }
   }

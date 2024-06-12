@@ -189,5 +189,61 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<EditSubscription.CantEditSubscriptionWithBeneficiaries>();
         }
+
+        [Fact]
+        public async Task ThrowsIfMaxNumberOfPaymentsCantBeZero()
+        {
+            var localBeneficiaryType = await DbContext.BeneficiaryTypes.FirstAsync();
+            var input = new Input()
+            {
+                SubscriptionId = subscription.GetIdentifier(),
+                Name = "Subscription 1 test",
+                StartDate = new LocalDate(2022, 2, 1),
+                EndDate = new LocalDate(2022, 4, 30),
+                FundsExpirationDate = new LocalDate(2022, 5, 1),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
+                Types = new List<EditSubscriptionTypeInput>() {
+                    new EditSubscriptionTypeInput
+                    {
+                        BeneficiaryTypeId = localBeneficiaryType.GetIdentifier(),
+                        Amount = 50,
+                        ProductGroupId = productGroup.GetIdentifier()
+                    }
+                },
+                MaxNumberOfPayments = 0,
+                IsSubscriptionPaymentBasedCardUsage = true
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<EditSubscription.MaxNumberOfPaymentsCantBeZeroException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfNumberDaysUntilFundsExpireCantBe()
+        {
+            var localBeneficiaryType = await DbContext.BeneficiaryTypes.FirstAsync();
+            var input = new Input()
+            {
+                SubscriptionId = subscription.GetIdentifier(),
+                Name = "Subscription 1 test",
+                StartDate = new LocalDate(2022, 2, 1),
+                EndDate = new LocalDate(2022, 4, 30),
+                FundsExpirationDate = new LocalDate(2022, 5, 1),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
+                Types = new List<EditSubscriptionTypeInput>() {
+                    new EditSubscriptionTypeInput
+                    {
+                        BeneficiaryTypeId = localBeneficiaryType.GetIdentifier(),
+                        Amount = 50,
+                        ProductGroupId = productGroup.GetIdentifier()
+                    }
+                },
+                TriggerFundExpiration = FundsExpirationTrigger.NumberOfDays,
+                NumberDaysUntilFundsExpire = 0
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<EditSubscription.NumberDaysUntilFundsExpireCantBeZeroException>();
+        }
     }
 }

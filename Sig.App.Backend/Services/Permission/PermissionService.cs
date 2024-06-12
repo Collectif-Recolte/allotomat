@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
+using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Projects;
@@ -159,6 +160,16 @@ namespace Sig.App.Backend.Services.Permission
             BeneficiaryPermission.DeleteBeneficiary,
             BeneficiaryPermission.ManuallyAddingFund,
             BeneficiaryPermission.AssignCard
+        };
+
+        private static readonly CardPermission[] ProjectManagerCardPermissions = new[]
+        {
+            CardPermission.EnableDisableCard
+        };
+
+        private static readonly CardPermission[] OrganizationManagerCardPermissionsWithAssignCard = new[]
+        {
+            CardPermission.EnableDisableCard
         };
 
         private static readonly SubscriptionPermission[] ProjectManagerSubscriptionPermission = new []
@@ -340,6 +351,31 @@ namespace Sig.App.Backend.Services.Permission
             }
 
             return Task.FromResult(Array.Empty<BeneficiaryPermission>());
+        }
+
+        public Task<CardPermission[]> GetCardPermissions(ClaimsPrincipal claimsPrincipal, string cardId)
+        {
+            var cardLongId = Id.New<Card>(cardId).LongIdentifierForType<Card>();
+
+            var card = db.Cards
+                .Include(x => x.Beneficiary)
+                .Include(x => x.Project)
+                .FirstOrDefault(x => x.Id == cardLongId);
+
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, card.ProjectId.ToString()) && (!card.Project?.BeneficiariesAreAnonymous ?? true))
+            {
+                return Task.FromResult(ProjectManagerCardPermissions);
+            }
+
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.OrganizationManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.OrganizationManagerOf, card.Beneficiary.OrganizationId.ToString()))
+            {
+                if (db.Projects.First(x => x.Organizations.Any(y => y.Id == (long)Convert.ToDouble(card.Beneficiary.OrganizationId))).AllowOrganizationsAssignCards)
+                {
+                    return Task.FromResult(OrganizationManagerCardPermissionsWithAssignCard);
+                }
+            }
+
+            return Task.FromResult(Array.Empty<CardPermission>());
         }
 
         public Task<SubscriptionPermission[]> GetSubscriptionPermissions(ClaimsPrincipal claimsPrincipal, string subscriptionId)

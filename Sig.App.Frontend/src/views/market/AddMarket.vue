@@ -1,7 +1,7 @@
 <i18n>
 {
 	"en": {
-		"add-market": "Add the market",
+		"add-market": "Add",
 		"add-market-success-notification": "Adding market {marketName} was successful. Managers will receive an email for the creation of their account in the next few minutes.",
 		"title": "Add a market",
 		"user-already-manager": "One of the managers is already the manager of a market.",
@@ -10,7 +10,7 @@
     "market-name": "Market name"
 	},
 	"fr": {
-		"add-market": "Ajouter le commerce",
+		"add-market": "Ajouter",
 		"add-market-success-notification": "L’ajout du commerce {marketName} a été un succès. Les gestionnaires vont recevoir un courriel pour la création de leur compte dans les prochaines minutes.",
 		"title": "Ajouter un commerce",
 		"user-already-manager": "Un des gestionnaires est déjà gestionnaire d'un commerce.",

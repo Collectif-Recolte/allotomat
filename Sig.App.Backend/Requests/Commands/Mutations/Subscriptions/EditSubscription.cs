@@ -34,7 +34,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
-            logger.LogInformation($"[Mutation] EditSubscription({request.SubscriptionId}, {request.Name}, {request.MonthlyPaymentMoment}, {request.StartDate}, {request.EndDate}, {request.FundsExpirationDate}, {request.Types}, {request.IsFundsAccumulable})");
+            logger.LogInformation($"[Mutation] EditSubscription({request.SubscriptionId}, {request.Name}, {request.StartDate}, {request.EndDate}, {request.MonthlyPaymentMoment}, {request.IsSubscriptionPaymentBasedCardUsage}, {request.MaxNumberOfPayments}, {request.IsFundsAccumulable}, {request.FundsExpirationDate}, {request.TriggerFundExpiration}, {request.NumberDaysUntilFundsExpire}, {request.Types})");
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
             var subscription = await db.Subscriptions.Include(x => x.Types).FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
@@ -68,13 +68,45 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 throw new EndDateMustBeAfterStartDateException();
             }
 
+            if (request.IsSubscriptionPaymentBasedCardUsage && (!request.MaxNumberOfPayments.IsSet() || request.MaxNumberOfPayments.Value <= 0))
+            {
+                logger.LogWarning("[Mutation] EditSubscription - MaxNumberOfPaymentsCantBeZeroException");
+                throw new MaxNumberOfPaymentsCantBeZeroException();
+            }
+
+            if (request.TriggerFundExpiration == FundsExpirationTrigger.NumberOfDays && (!request.NumberDaysUntilFundsExpire.IsSet() || request.NumberDaysUntilFundsExpire.Value <= 0))
+            {
+                logger.LogWarning("[Mutation] EditSubscription - NumberDaysUntilFundsExpireCantBeZeroException");
+                throw new NumberDaysUntilFundsExpireCantBeZeroException();
+            }
+
             subscription.Name = request.Name;
             subscription.MonthlyPaymentMoment = request.MonthlyPaymentMoment;
             subscription.StartDate = request.StartDate.AtMidnight().InUtc().ToDateTimeUtc();
             subscription.EndDate = request.EndDate.AtMidnight().InUtc().ToDateTimeUtc();
             subscription.FundsExpirationDate = request.FundsExpirationDate.IfSet(x => subscription.FundsExpirationDate = x.AtMidnight().InUtc().ToDateTimeUtc());
             subscription.IsFundsAccumulable = request.IsFundsAccumulable;
-            
+            subscription.IsSubscriptionPaymentBasedCardUsage = request.IsSubscriptionPaymentBasedCardUsage;
+            subscription.TriggerFundExpiration = request.TriggerFundExpiration;
+
+            if (request.MaxNumberOfPayments.IsSet())
+            {
+                subscription.MaxNumberOfPayments = request.MaxNumberOfPayments.Value;
+            }
+            else
+            {
+                subscription.MaxNumberOfPayments = null;
+            }
+
+            if (request.NumberDaysUntilFundsExpire.IsSet())
+            {
+                subscription.NumberDaysUntilFundsExpire = request.NumberDaysUntilFundsExpire.Value;
+            }
+            else
+            {
+                subscription.NumberDaysUntilFundsExpire = null;
+            }
+
             UpdateTypes(subscription, request.Types);
 
             await db.SaveChangesAsync(cancellationToken);
@@ -103,12 +135,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         public class Input : HaveSubscriptionId, IRequest<Payload>
         {
             public string Name { get; set; }
-            public SubscriptionMonthlyPaymentMoment MonthlyPaymentMoment { get; set; }
             public LocalDate StartDate { get; set; }
             public LocalDate EndDate { get; set; }
-            public Maybe<LocalDate> FundsExpirationDate { get; set; }
-            public List<EditSubscriptionTypeInput> Types { get; set; }
+            public SubscriptionMonthlyPaymentMoment MonthlyPaymentMoment { get; set; }
+            public bool IsSubscriptionPaymentBasedCardUsage { get; set; }
+            public Maybe<int> MaxNumberOfPayments { get; set; }
             public bool IsFundsAccumulable { get; set; }
+            public Maybe<LocalDate> FundsExpirationDate { get; set; }
+            public FundsExpirationTrigger TriggerFundExpiration { get; set; }
+            public Maybe<int> NumberDaysUntilFundsExpire { get; set; }
+            public List<EditSubscriptionTypeInput> Types { get; set; }
         }
 
         [MutationPayload]
@@ -131,5 +167,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         public class BeneficiaryTypeCanOnlyBeAssignOnce : RequestValidationException { }
         public class EndDateMustBeAfterStartDateException : RequestValidationException { }
         public class CantEditSubscriptionWithBeneficiaries : RequestValidationException { }
+        public class MaxNumberOfPaymentsCantBeZeroException : RequestValidationException { }
+        public class NumberDaysUntilFundsExpireCantBeZeroException : RequestValidationException { }
     }
 }

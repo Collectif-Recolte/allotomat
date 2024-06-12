@@ -1,14 +1,14 @@
 <i18n>
   {
     "en": {
-      "add-market": "Add a market",
+      "add-market": "Add",
       "title": "Market management",
       "empty-list": "No markets have been created yet.",
       "create-market": "Create a market",
       "market-count": "{count} market | {count} markets"
     },
     "fr": {
-      "add-market": "Ajouter un commerce",
+      "add-market": "Ajouter",
       "title": "Gestion des commerces",
       "empty-list": "Aucun commerce n'a encore été créé.",
       "create-market": "Créer un commerce",

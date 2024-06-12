@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GraphQL.Conventions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -169,7 +168,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     Amount = request.Amount,
                     AvailableFund = request.Amount,
                     CreatedAtUtc = today,
-                    ExpirationDate = subscription.GetExpirationDate(clock, subscription.MonthlyPaymentMoment),
+                    ExpirationDate = subscription.GetExpirationDate(clock),
                     Subscription = subscription,
                     ProductGroup = productGroup
                 };

@@ -31,6 +31,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         private readonly Subscription subscription1;
         private readonly Subscription subscription2;
 
+        private readonly Subscription subscription3;
+
         private readonly Beneficiary beneficiary1;
         private readonly Beneficiary beneficiary2;
         private readonly Beneficiary beneficiary3;
@@ -45,6 +47,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
         private readonly BudgetAllowance budgetAllowance1;
         private readonly BudgetAllowance budgetAllowance2;
+        private readonly BudgetAllowance budgetAllowance3;
 
         public AssignBeneficiariesToSubscriptionTest()
         {
@@ -248,6 +251,31 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             };
             DbContext.Subscriptions.Add(subscription2);
 
+            subscription3 = new Subscription()
+            {
+                Name = "Subscription 3",
+                StartDate = new DateTime(today.Year, today.Month, 1),
+                EndDate = new DateTime(today.Year, today.Month, 2).AddMonths(4),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth,
+                Types = new List<SubscriptionType>()
+                {
+                    new SubscriptionType()
+                    {
+                        Amount = 25,
+                        BeneficiaryType = beneficiaryType1
+                    },
+                    new SubscriptionType()
+                    {
+                        Amount = 50,
+                        BeneficiaryType = beneficiaryType2
+                    }
+                },
+                Project = project,
+                IsSubscriptionPaymentBasedCardUsage = true,
+                MaxNumberOfPayments = 4
+            };
+            DbContext.Subscriptions.Add(subscription3);
+
             budgetAllowance1 = new BudgetAllowance()
             {
                 AvailableFund = 700,
@@ -265,6 +293,15 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 OriginalFund = 700
             };
             DbContext.BudgetAllowances.Add(budgetAllowance2);
+
+            budgetAllowance3 = new BudgetAllowance()
+            {
+                AvailableFund = 700,
+                Organization = organization,
+                Subscription = subscription3,
+                OriginalFund = 700
+            };
+            DbContext.BudgetAllowances.Add(budgetAllowance3);
 
             DbContext.SaveChanges();
 
@@ -306,8 +343,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
             await handler.Handle(input, CancellationToken.None);
 
-            var localBudgetAllowance = DbContext.BudgetAllowances.Last();
-            var localSubscription = DbContext.Subscriptions.Last();
+            var localBudgetAllowance = DbContext.BudgetAllowances.First(x => x.Id == budgetAllowance2.Id);
+            var localSubscription = DbContext.Subscriptions.First(x => x.Name == "Subscription 2");
             var subscriptionBeneficiaries = DbContext.SubscriptionBeneficiaries.ToList();
 
             localBudgetAllowance.AvailableFund.Should().Be(300);
@@ -377,6 +414,27 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             localBudgetAllowance.AvailableFund.Should().Be(700);
             localSubscription.Beneficiaries.Count.Should().Be(0);
             subscriptionBeneficiaries.Count().Should().Be(0);
+        }
+
+        [Fact]
+        public async Task AssignSubscriptionWithMaxNumberOfPaymentToOneBeneficiary()
+        {
+            var input = new AssignBeneficiariesToSubscription.Input()
+            {
+                OrganizationId = organization.GetIdentifier(),
+                SubscriptionId = subscription3.GetIdentifier(),
+                Beneficiaries = [beneficiary1.GetIdentifier(), beneficiary2.GetIdentifier()]
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBudgetAllowance = DbContext.BudgetAllowances.Last();
+            var localSubscription = DbContext.Subscriptions.Last();
+            var subscriptionBeneficiaries = DbContext.SubscriptionBeneficiaries.ToList();
+
+            localBudgetAllowance.AvailableFund.Should().Be(500);
+            localSubscription.Beneficiaries.Count.Should().Be(2);
+            subscriptionBeneficiaries.Count().Should().Be(2);
         }
 
         [Fact]

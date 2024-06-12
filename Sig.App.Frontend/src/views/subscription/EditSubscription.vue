@@ -20,7 +20,7 @@
 <template>
   <UiDialogModal v-slot="{ closeModal }" :return-route="{ name: URL_SUBSCRIPTION_ADMIN }" :title="t('title')" :has-footer="false">
     <SubscriptionForm
-      v-if="subscription"
+      v-if="!loading"
       :project-id="subscription.project.id"
       :subscription-name="subscription.name"
       :monthly-payment-moment="subscription.monthlyPaymentMoment"
@@ -29,6 +29,12 @@
       :funds-expiration-date="formattedDate(subscription.fundsExpirationDate)"
       :is-funds-accumulable="subscription.isFundsAccumulable"
       :product-group-subscription-types="productGroupSubscriptionTypes"
+      :subscription-payment-based-card-usage="subscription.isSubscriptionPaymentBasedCardUsage"
+      :trigger-fund-expiration="subscription.triggerFundExpiration"
+      :max-number-of-payments="subscription.isSubscriptionPaymentBasedCardUsage ? subscription.maxNumberOfPayments : null"
+      :number-days-until-funds-expire="
+        subscription.triggerFundExpiration === NUMBER_OF_DAYS ? subscription.numberDaysUntilFundsExpire : null
+      "
       :submit-btn="t('edit-subscription')"
       @closeModal="closeModal"
       @submit="onSubmit" />
@@ -42,11 +48,13 @@ import { useI18n } from "vue-i18n";
 import { useRouter, useRoute } from "vue-router";
 import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
 
+import { URL_SUBSCRIPTION_ADMIN } from "@/lib/consts/urls";
+import { NUMBER_OF_DAYS } from "@/lib/consts/funds-expiration-trigger";
+
 import { formatDate, serverFormat } from "@/lib/helpers/date";
+import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
-import { URL_SUBSCRIPTION_ADMIN } from "@/lib/consts/urls";
-import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 
 import SubscriptionForm from "@/views/subscription/_Form.vue";
 
@@ -64,7 +72,7 @@ useGraphQLErrorMessages({
   }
 });
 
-const { result } = useQuery(
+const { result, loading } = useQuery(
   gql`
     query Subscription($id: ID!) {
       subscription(id: $id) {
@@ -72,9 +80,13 @@ const { result } = useQuery(
         name
         startDate
         endDate
-        isFundsAccumulable
         monthlyPaymentMoment
+        isSubscriptionPaymentBasedCardUsage
+        maxNumberOfPayments
+        isFundsAccumulable
         fundsExpirationDate
+        triggerFundExpiration
+        numberDaysUntilFundsExpire
         types {
           id
           productGroup {
@@ -87,6 +99,7 @@ const { result } = useQuery(
         }
         project {
           id
+          name
         }
       }
     }
@@ -104,15 +117,15 @@ const { mutate: editSubscription } = useMutation(
         subscription {
           id
           name
-          isFundsAccumulable
-          monthlyPaymentMoment
-          project {
-            id
-            name
-          }
           startDate
           endDate
+          monthlyPaymentMoment
+          isSubscriptionPaymentBasedCardUsage
+          maxNumberOfPayments
+          isFundsAccumulable
           fundsExpirationDate
+          triggerFundExpiration
+          numberDaysUntilFundsExpire
           types {
             id
             productGroup {
@@ -122,6 +135,10 @@ const { mutate: editSubscription } = useMutation(
             beneficiaryType {
               id
             }
+          }
+          project {
+            id
+            name
           }
         }
       }
@@ -151,12 +168,16 @@ const productGroupSubscriptionTypes = computed(() => {
 
 async function onSubmit({
   subscriptionName,
-  monthlyPaymentMoment,
-  fundsExpirationDate,
   startDate,
   endDate,
-  productGroupSubscriptionTypes,
-  isFundsAccumulable
+  monthlyPaymentMoment,
+  isSubscriptionPaymentBasedCardUsage,
+  maxNumberOfPayments,
+  isFundsAccumulable,
+  fundsExpirationDate,
+  triggerFundExpiration,
+  numberDaysUntilFundsExpire,
+  productGroupSubscriptionTypes
 }) {
   let types = [];
   for (var i = 0; i < productGroupSubscriptionTypes.length; i++) {
@@ -179,6 +200,14 @@ async function onSubmit({
       monthlyPaymentMoment,
       startDate: formatDate(startDate, serverFormat),
       endDate: formatDate(endDate, serverFormat),
+      isSubscriptionPaymentBasedCardUsage: isSubscriptionPaymentBasedCardUsage || false,
+      maxNumberOfPayments:
+        maxNumberOfPayments !== null && maxNumberOfPayments !== undefined ? { value: maxNumberOfPayments } : undefined,
+      triggerFundExpiration,
+      numberDaysUntilFundsExpire:
+        numberDaysUntilFundsExpire !== null && numberDaysUntilFundsExpire !== undefined
+          ? { value: numberDaysUntilFundsExpire }
+          : undefined,
       isFundsAccumulable,
       types,
       fundsExpirationDate: isFundsAccumulable ? { value: formatDate(fundsExpirationDate, serverFormat) } : undefined

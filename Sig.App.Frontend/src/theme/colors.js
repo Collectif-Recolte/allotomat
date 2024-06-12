@@ -27,8 +27,8 @@ module.exports = {
   },
   // Coral
   tertiary: {
-    500: "#DC7A5D", // Style guide
-    800: "#CB5633" // Style guide
+    500: "#CF4520", // Style guide
+    800: "#8D2C1F"
   },
   grey: {
     50: "#F9FAFB",

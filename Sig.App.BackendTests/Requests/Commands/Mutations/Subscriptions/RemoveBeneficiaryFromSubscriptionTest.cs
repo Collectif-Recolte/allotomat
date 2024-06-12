@@ -19,6 +19,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Sig.App.Backend.DbModel.Entities.Cards;
 using Xunit;
+using Sig.App.Backend.DbModel.Entities.Transactions;
 
 namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 {
@@ -149,6 +150,48 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             localBeneficiary.Subscriptions.Should().HaveCount(0);
             localSubscription.Beneficiaries.Should().HaveCount(0);
             localBudgetAllowance.AvailableFund.Should().Be(50);
+            transactionLogCreated.Should().Be(true);
+        }
+
+        [Fact]
+        public async Task RemoveBeneficiaryFromSubscriptionWithMaximumPaymentCount()
+        {
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 1;
+            beneficiary.Card = new Card()
+            {
+                Transactions = new List<Transaction>() {
+                    new SubscriptionAddingFundTransaction()
+                    {
+                        Amount = 25,
+                        SubscriptionType = new SubscriptionType()
+                        {
+                            Subscription = subscription,
+                            ProductGroup = subscription.Types.First(x => x.BeneficiaryType == beneficiary.BeneficiaryType).ProductGroup,
+                            BeneficiaryType = beneficiary.BeneficiaryType
+                        }
+                    }
+                }
+            };
+
+            DbContext.SaveChanges();
+
+            var input = new RemoveBeneficiaryFromSubscription.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBeneficiary = await DbContext.Beneficiaries.FirstAsync();
+            var localSubscription = await DbContext.Subscriptions.FirstAsync();
+            var localBudgetAllowance = await DbContext.BudgetAllowances.FirstAsync();
+            var transactionLogCreated = await DbContext.TransactionLogs.AnyAsync(x => x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog);
+
+            localBeneficiary.Subscriptions.Should().HaveCount(0);
+            localSubscription.Beneficiaries.Should().HaveCount(0);
+            localBudgetAllowance.AvailableFund.Should().Be(25);
             transactionLogCreated.Should().Be(true);
         }
 
