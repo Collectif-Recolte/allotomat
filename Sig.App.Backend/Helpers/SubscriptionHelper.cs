@@ -16,6 +16,7 @@ namespace Sig.App.Backend.Helpers
 
             var startDate = today > subscription.StartDate ? today : subscription.StartDate;
             var endDate = subscription.EndDate;
+            var needExtraDay = false;
 
             if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth ||
                 subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth)
@@ -24,7 +25,7 @@ namespace Sig.App.Backend.Helpers
 
                 cardPaymentRemaining += monthsApart;
 
-                if (startDate > today && startDate.Day == 1) cardPaymentRemaining++;
+                if (startDate > today && startDate.Day == 1) needExtraDay = true;
             }
 
             if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth ||
@@ -42,8 +43,10 @@ namespace Sig.App.Backend.Helpers
 
                 cardPaymentRemaining += monthsApart;
 
-                if (startDate > today && startDate.Day <= 15) cardPaymentRemaining++;
+                if (startDate > today && startDate.Day <= 15) needExtraDay = true;
             }
+
+            if (needExtraDay) cardPaymentRemaining++;
 
             return Math.Max(0, cardPaymentRemaining);
         }

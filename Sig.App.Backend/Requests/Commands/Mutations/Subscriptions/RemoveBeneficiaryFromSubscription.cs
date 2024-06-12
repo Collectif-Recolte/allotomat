@@ -52,7 +52,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             var beneficiaryId = request.BeneficiaryId.LongIdentifierForType<Beneficiary>();
-            var beneficiary = await db.Beneficiaries.Include(x => x.Organization).ThenInclude(x => x.Project).Include(x => x.Card).ThenInclude(x => x.Transactions).FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
+            var beneficiary = await db.Beneficiaries
+                .Include(x => x.Organization).ThenInclude(x => x.Project)
+                .Include(x => x.Card).ThenInclude(x => x.Transactions).ThenInclude(x => (x as SubscriptionAddingFundTransaction).SubscriptionType)
+                .FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
             if (beneficiary == null)
             {

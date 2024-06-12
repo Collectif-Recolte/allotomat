@@ -11,6 +11,7 @@ using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.Gql.Bases;
+using System;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 {
@@ -48,23 +49,30 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             var transactions = await db.Transactions.ToListAsync();
             var addingFundTransactions = transactions.Where(x => x.GetType() == typeof(SubscriptionAddingFundTransaction) && subscriptionTypeIds.Contains((x as SubscriptionAddingFundTransaction).SubscriptionTypeId)).ToList();
             var manuallyAddingFundTransactions = transactions.Where(x => x.GetType() == typeof(ManuallyAddingFundTransaction) && subscription.Id  == (x as ManuallyAddingFundTransaction).SubscriptionId).ToList();
+            var expiredTransactions = transactions.Where(x => x.GetType() == typeof(ExpireFundTransaction) && subscription.Id == (x as ExpireFundTransaction).ExpiredSubscriptionId).ToList();
 
             if (addingFundTransactions.Count() > 0)
             {
-                db.Transactions.RemoveRange(transactions);
+                db.Transactions.RemoveRange(addingFundTransactions);
             }
 
             if (manuallyAddingFundTransactions.Count() > 0)
             {
-                db.Transactions.RemoveRange(transactions);
+                db.Transactions.RemoveRange(manuallyAddingFundTransactions);
+            }
+
+            if (expiredTransactions.Count() > 0)
+            {
+                db.Transactions.RemoveRange(expiredTransactions);
             }
 
             db.SubscriptionBeneficiaries.RemoveRange(subscription.Beneficiaries);
             db.SubscriptionTypes.RemoveRange(subscription.Types);
             db.BudgetAllowances.RemoveRange(subscription.BudgetAllowances);
             db.Subscriptions.Remove(subscription);
-
+            
             await db.SaveChangesAsync();
+            
             logger.LogInformation($"[Mutation] DeleteSubscription - Subscription deleted ({subscriptionId}, {subscription.Name})");
         }
 

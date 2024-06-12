@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Sig.App.Backend.BackgroundJobs;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
+using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.Projects;
+using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using System;
@@ -25,9 +27,12 @@ namespace Sig.App.BackendTests.BackgroundJobs
         private readonly Organization organization;
         private readonly ExpireFundsFromCard job;
         private readonly ProductGroup productGroup;
+        private readonly Subscription subscription1;
 
         public ExpireFundsFromCardTest()
         {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
             project = new Project()
             {
                 Name = "Project 1"
@@ -55,7 +60,42 @@ namespace Sig.App.BackendTests.BackgroundJobs
             };
             DbContext.ProductGroups.Add(productGroup);
 
-            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            var beneficiaryType1 = new BeneficiaryType()
+            {
+                Name = "Type 1",
+                Project = project,
+                Keys = "bliblou1"
+            };
+
+            subscription1 = new Subscription()
+            {
+                Name = "Subscription 1",
+                StartDate = new DateTime(today.Year, today.Month, 1),
+                EndDate = new DateTime(today.Year, today.Month, 2).AddMonths(1),
+                FundsExpirationDate = new DateTime(today.Year, today.Month, 2).AddMonths(2),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
+                Types = new List<SubscriptionType>()
+                {
+                    new SubscriptionType()
+                    {
+                        Amount = 50,
+                        BeneficiaryType = beneficiaryType1,
+                        ProductGroup = productGroup
+                    }
+                },
+                Project = project
+            };
+            DbContext.Subscriptions.Add(subscription1);
+
+            var budgetAllowance1 = new BudgetAllowance()
+            {
+                AvailableFund = 700,
+                Organization = organization,
+                Subscription = subscription1,
+                OriginalFund = 700
+            };
+            DbContext.BudgetAllowances.Add(budgetAllowance1);
+
             card = new Card()
             {
                 Funds = new List<Fund>(),
@@ -71,7 +111,14 @@ namespace Sig.App.BackendTests.BackgroundJobs
                         Status = FundTransactionStatus.Expired,
                         ExpirationDate = new DateTime(today.Year - 1, today.Month, today.Day),
                         ProductGroup = productGroup,
-                        Beneficiary = beneficiary
+                        Beneficiary = beneficiary,
+                        SubscriptionType = new SubscriptionType()
+                        {
+                            
+                            Amount = 50,
+                            ProductGroup = productGroup,
+                            Subscription = subscription1,
+                        }
                     },
                     new ManuallyAddingFundTransaction()
                     {
@@ -80,7 +127,8 @@ namespace Sig.App.BackendTests.BackgroundJobs
                         Status = FundTransactionStatus.Actived,
                         ExpirationDate = new DateTime(today.Year - 1, today.Month, today.Day),
                         ProductGroup = productGroup,
-                        Beneficiary = beneficiary
+                        Beneficiary = beneficiary,
+                        Subscription = subscription1
                     },
                     new SubscriptionAddingFundTransaction()
                     {
@@ -89,7 +137,19 @@ namespace Sig.App.BackendTests.BackgroundJobs
                         Status = FundTransactionStatus.Actived,
                         ExpirationDate = new DateTime(today.Year - 1, today.Month, today.Day),
                         ProductGroup = productGroup,
-                        Beneficiary = beneficiary
+                        Beneficiary = beneficiary,
+                        SubscriptionType = new SubscriptionType()
+                        {
+                            BeneficiaryType = new BeneficiaryType()
+                            {
+                                Name = "Type 2",
+                                Project = project,
+                                Keys = "bliblou2"
+                            },
+                            Amount = 50,
+                            ProductGroup = productGroup,
+                            Subscription = subscription1,
+                        }
                     },
                     new ManuallyAddingFundTransaction()
                     {
@@ -98,7 +158,8 @@ namespace Sig.App.BackendTests.BackgroundJobs
                         Status = FundTransactionStatus.Actived,
                         ExpirationDate = new DateTime(today.Year + 1, today.Month, today.Day),
                         ProductGroup = productGroup,
-                        Beneficiary = beneficiary
+                        Beneficiary = beneficiary,
+                        Subscription = subscription1
                     }
                 }
             };
@@ -143,6 +204,25 @@ namespace Sig.App.BackendTests.BackgroundJobs
             transactionLogCreated.Count.Should().Be(2);
             transactionLogCreated.Any(x => x.TotalAmount == 10).Should().BeTrue();
             transactionLogCreated.Any(x => x.TotalAmount == 1).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task ExpireFundsFromCardAndReturnToBudgetAllowance()
+        {
+            await job.Run();
+
+            var card = DbContext.Cards.Include(x => x.Funds).First();
+            card.Funds.First().Amount.Should().Be(19);
+            card.Transactions.Where(x => x.GetType() == typeof(SubscriptionAddingFundTransaction) && (x as SubscriptionAddingFundTransaction).Status == FundTransactionStatus.Expired).Should().HaveCount(2);
+            card.Transactions.Where(x => x.GetType() == typeof(ManuallyAddingFundTransaction) && (x as ManuallyAddingFundTransaction).Status == FundTransactionStatus.Expired).Should().HaveCount(1);
+
+            var transactionLogCreated = await DbContext.TransactionLogs.Where(x => x.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog).ToListAsync();
+            transactionLogCreated.Count.Should().Be(2);
+            transactionLogCreated.Any(x => x.TotalAmount == 10).Should().BeTrue();
+            transactionLogCreated.Any(x => x.TotalAmount == 1).Should().BeTrue();
+
+            var budgetAllowance = DbContext.BudgetAllowances.First();
+            budgetAllowance.AvailableFund.Should().Be(711);
         }
     }
 }

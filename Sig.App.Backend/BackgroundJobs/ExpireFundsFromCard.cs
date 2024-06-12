@@ -56,12 +56,14 @@ namespace Sig.App.Backend.BackgroundJobs
                 x is ManuallyAddingFundTransaction or SubscriptionAddingFundTransaction
                     or OffPlatformAddingFundTransaction).ToList();
             var maftSubscriptions = await db.Subscriptions
+                .Include(x => x.BudgetAllowances)
                 .Where(x => transactions.OfType<ManuallyAddingFundTransaction>().Select(y => y.SubscriptionId).Contains(x.Id))
                 .ToListAsync();
             var saftSubscriptionTypes = await db.SubscriptionTypes
-                .Include(x => x.Subscription)
+                .Include(x => x.Subscription).ThenInclude(x => x.BudgetAllowances)
                 .Where(x => transactions.OfType<SubscriptionAddingFundTransaction>().Select(x => x.SubscriptionTypeId)
                     .Contains(x.Id)).ToListAsync();
+
             foreach (var transaction in transactions)
             {
                 if (transaction.AvailableFund <= 0)
@@ -78,7 +80,13 @@ namespace Sig.App.Backend.BackgroundJobs
                     if (transaction is SubscriptionAddingFundTransaction saft)
                         subscription = saftSubscriptionTypes.FirstOrDefault(x => x.Id == saft.SubscriptionTypeId)?.Subscription;
                     fund.Amount -= transaction.AvailableFund;
-                    
+
+                    if (subscription != null)
+                    {
+                        var budgetAllowance = subscription.BudgetAllowances.First(x => x.Organization == transaction.Beneficiary.Organization);
+                        budgetAllowance.AvailableFund += transaction.AvailableFund;
+                    }
+
                     var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
                     
                     var transactionLogProductGroups = new List<TransactionLogProductGroup>()

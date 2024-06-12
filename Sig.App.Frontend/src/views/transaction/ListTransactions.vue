@@ -56,7 +56,9 @@
       <div v-if="transactionLogs">
         <UiTableHeader :title="t('transaction-count', transactionLogs.totalCount)" />
         <div class="flex flex-col relative mb-6">
-          <ProgramTransactionTable :transactions="transactions" />
+          <ProgramTransactionTable
+            :transactions="transactions"
+            :beneficiaries-are-anonymous="project.beneficiariesAreAnonymous" />
           <UiPagination
             v-if="transactionLogs && transactionLogs.totalPages > 1"
             v-model:page="page"
@@ -172,6 +174,7 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
           name
         }
         administrationSubscriptionsOffPlatform
+        beneficiariesAreAnonymous
       }
     }
   `

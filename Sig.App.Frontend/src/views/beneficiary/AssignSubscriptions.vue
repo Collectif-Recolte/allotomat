@@ -28,7 +28,9 @@
       "chronological-order": "Chronological",
       "random-order": "Random",
       "no-participants": "No participants in the selected group",
-      "no-participants-in-subscription": "No participants found for this subscription"
+      "no-participants-in-subscription": "No participants found for this subscription",
+      "replicate-payment-on-attribution": "Automatically transfer the latest payment to participants who have a card ({totalParticipantWithCard} of {totalParticipant} selected participants)",
+      "replicate-payment-on-attribution-desc": "Participants who do not yet have a card will not receive a payment immediately. It is possible to transfer funds manually once they have received a card, or to wait for the next automated payment date. If the subscription has a maximum number of payments, this will count towards that maximum."
     },
     "fr": {
       "selected-organization": "Groupe",
@@ -58,7 +60,9 @@
       "chronological-order": "Chronologique",
       "random-order": "Aléatoire",
       "no-participants": "Aucun participant dans le groupe sélectionné",
-      "no-participants-in-subscription": "Aucun participant n'a été trouvé pour cet abonnement"
+      "no-participants-in-subscription": "Aucun participant n'a été trouvé pour cet abonnement",
+      "replicate-payment-on-attribution": "Verser automatiquement le dernier versement aux participant-es qui possèdent une carte ({totalParticipantWithCard} des {totalParticipant} participant-es sélectionné-es)",
+      "replicate-payment-on-attribution-desc": "Les participant-es n'ayant pas encore de carte ne recevront pas de versement immédiatement. Il est possible de transférer manuellement des fonds une fois qu'il-elles auront reçu une carte, ou d'attendre la prochaine date de versement automatisé. Si l'abonnement a un nombre maximum de paiements, celui-ci sera pris en compte dans le calcul de ce maximum."
     }
   }
 </i18n>
@@ -187,6 +191,7 @@
           v-model="searchInput"
           hide-conflict-filter
           hide-card-is-disabled-filter
+          hide-sort-order
           :available-beneficiary-types="availableBeneficiaryTypes"
           :available-subscriptions="availableSubscriptions"
           :selected-beneficiary-types="beneficiaryTypesFilter"
@@ -271,6 +276,7 @@
     :title="t('title-confirm')"
     :cancel-button-label="t('cancel-confirmation')"
     :confirm-button-label="t('submit-confirmation')"
+    :is-disabled="budgetAllowanceAvailableAfterAllocation < 0"
     @goBack="closeConfirmDialog"
     @confirm="confirmAssignation">
     <template #description>
@@ -289,8 +295,21 @@
           v-html="t('usage-amount', { amount: amountThatWillBeAllocatedModalMoneyFormat, detail: usageAmountDetail })"></p>
         <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
         <p
-          class="text-primary-700"
+          :class="{
+            'text-red-500': budgetAllowanceAvailableAfterAllocation < 0,
+            'text-primary-700': budgetAllowanceAvailableAfterAllocation >= 0
+          }"
           v-html="t('remaining-amount', { amount: budgetAllowanceAvailableAfterAllocationMoneyFormat })"></p>
+        <PfFormInputCheckbox
+          v-if="selectedSubscriptionHasMissedPayment && selectedBeneficiariesWithCard.length > 0"
+          :label="
+            t('replicate-payment-on-attribution', {
+              totalParticipantWithCard: selectedBeneficiariesWithCard.length,
+              totalParticipant: selectedBeneficiaries.length
+            })
+          "
+          :description="t('replicate-payment-on-attribution-desc')"
+          @input="onReplicatePaymentOnAttributionChecked" />
       </div>
     </template>
   </UiDialogWarningModal>
@@ -374,6 +393,7 @@ const maxAllocation = ref(null);
 const displayConfirmDialog = ref(false);
 const loadMoreBeneficiaries = ref(false);
 const displayLoadMoreBeneficiaries = ref(false);
+const replicatePaymentOnAttribution = ref(false);
 
 if (route.query.beneficiaryTypes) {
   beneficiaryTypesFilter.value = route.query.beneficiaryTypes.split(",");
@@ -391,6 +411,7 @@ if (route.query.cardStatus) {
 
 if (route.query.text) {
   searchText.value = route.query.text;
+  searchInput.value = route.query.text;
 }
 
 if (route.query.organizationId) {
@@ -429,6 +450,7 @@ const { result: resultOrganizations, refetch: refetchOrganizations } = useQuery(
             paymentRemaining
             isSubscriptionPaymentBasedCardUsage
             maxNumberOfPayments
+            hasMissedPayment
             types {
               id
               amount
@@ -478,7 +500,8 @@ const subscriptions = useResult(resultOrganizations, null, (data) => {
       paymentRemaining: x.paymentRemaining,
       isSubscriptionPaymentBasedCardUsage: x.isSubscriptionPaymentBasedCardUsage,
       maxNumberOfPayments: x.maxNumberOfPayments,
-      types: x.types
+      types: x.types,
+      hasMissedPayment: x.hasMissedPayment
     }));
 });
 
@@ -525,6 +548,9 @@ const {
             lastname
             id1
             id2
+            card {
+              id
+            }
             ... on BeneficiaryGraphType {
               beneficiaryType {
                 id
@@ -615,6 +641,10 @@ const selectedBeneficiaries = computed(() => {
   return beneficiaries.value.filter((x) => x.isSelected);
 });
 
+const selectedBeneficiariesWithCard = computed(() => {
+  return selectedBeneficiaries.value.filter((x) => x.card !== null);
+});
+
 const amountThatWillBeAllocatedMoneyFormat = computed(() => {
   let amount = amountThatWillBeAllocated.value;
   return amount !== 0 ? getMoneyFormat(amount) : "-";
@@ -637,19 +667,24 @@ const amountThatWillBeAllocated = computed(() => {
       .filter((y) => y.beneficiaryType.id === x.beneficiaryType.id)
       .reduce((accumulator, type) => accumulator + type.amount, 0);
 
-    amount += beneficiaryPaymentAmount;
+    var paymentRemaining = selectedSubscriptionData.paymentRemaining;
+    if (replicatePaymentOnAttribution.value && x.card) {
+      paymentRemaining++;
+    }
+
+    if (selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage) {
+      amount += beneficiaryPaymentAmount * Math.min(paymentRemaining, selectedSubscriptionData.maxNumberOfPayments);
+    } else {
+      amount += beneficiaryPaymentAmount * paymentRemaining;
+    }
   });
 
-  if (selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage) {
-    return amount * Math.min(selectedSubscriptionData.paymentRemaining, selectedSubscriptionData.maxNumberOfPayments);
-  }
-
-  return amount * selectedSubscriptionData.paymentRemaining;
+  return amount;
 });
 
 const budgetAllowanceAvailableAfterAllocationMoneyFormat = computed(() => {
   var amount = budgetAllowanceAvailableAfterAllocation.value;
-  return amount !== 0 ? getMoneyFormat(amount) : "-";
+  return selectedSubscription.value !== null ? getMoneyFormat(amount) : "-";
 });
 
 const budgetAllowanceAvailableAfterAllocation = computed(() => {
@@ -684,6 +719,11 @@ const isConfirmButtonDisabled = computed(() => {
 const selectedSubscriptionName = computed(() => {
   if (selectedSubscription.value === null) return "-";
   return subscriptions.value.find((x) => x.value === selectedSubscription.value).label;
+});
+
+const selectedSubscriptionHasMissedPayment = computed(() => {
+  if (selectedSubscription.value === null) return "-";
+  return subscriptions.value.find((x) => x.value === selectedSubscription.value).hasMissedPayment;
 });
 
 const usageAmountDetail = computed(() => {
@@ -848,7 +888,8 @@ async function confirmAssignation() {
     input: {
       organizationId: selectedOrganization.value,
       subscriptionId: selectedSubscription.value,
-      beneficiaries: selectedBeneficiaries.value.map((x) => x.id)
+      beneficiaries: selectedBeneficiaries.value.map((x) => x.id),
+      replicatePaymentOnAttribution: replicatePaymentOnAttribution.value
     }
   });
 
@@ -962,6 +1003,7 @@ onBeforeRouteUpdate((to) => {
     }
     if (to.query.text) {
       searchText.value = to.query.text;
+      searchInput.value = to.query.text;
     }
     if (to.query.organizationId) {
       selectedOrganization.value = to.query.organizationId;
@@ -971,4 +1013,8 @@ onBeforeRouteUpdate((to) => {
     refetchOrganizations();
   }
 });
+
+function onReplicatePaymentOnAttributionChecked(input) {
+  replicatePaymentOnAttribution.value = input;
+}
 </script>

@@ -153,7 +153,7 @@ namespace Sig.App.Backend.Authorization
         {
             if (input is HaveInitialTransactionId hiti)
             {
-                var transaction = db.Transactions.OfType<PaymentTransaction>().Include(x => x.Market).Where(x => x.Id == (input as HaveInitialTransactionId).InitialTransactionId.LongIdentifierForType<PaymentTransaction>()).FirstOrDefault();
+                var transaction = db.Transactions.OfType<PaymentTransaction>().Include(x => x.Market).Where(x => x.Id == hiti.InitialTransactionId.LongIdentifierForType<PaymentTransaction>()).FirstOrDefault();
                 return transaction.Market.GetIdentifier().IdentifierForType<Market>();
             }
             if (input is HaveMarketId hmi)
@@ -193,6 +193,11 @@ namespace Sig.App.Backend.Authorization
             if (input is OrganizationGraphType ogt)
             {
                 return ogt.Id.IdentifierForType<Organization>();
+            }
+            if (input is HaveSubscriptionIdAndBeneficiaryId hsiabi)
+            {
+                var beneficiary = db.Beneficiaries.Include(x => x.Organization).Where(x => x.Id == hsiabi.BeneficiaryId.LongIdentifierForType<Beneficiary>()).FirstOrDefault();
+                return beneficiary.Organization.GetIdentifier().IdentifierForType<Organization>();
             }
             if (input is Id id)
             {
