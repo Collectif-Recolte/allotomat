@@ -155,9 +155,15 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Projects
                 Card = card,
                 Market = market,
                 Organization = organization,
-                Transactions = new List<AddingFundTransaction>() { addingFundTransaction },
+                PaymentTransactionAddingFundTransactions = new List<PaymentTransactionAddingFundTransaction>(),
+                Transactions = new List<AddingFundTransaction>(),
                 TransactionUniqueId = "00000003"
             };
+
+            var paymentTransactionAddingFundTransaction = new PaymentTransactionAddingFundTransaction() { AddingFundTransaction = addingFundTransaction, PaymentTransaction = payment1Transaction, Amount = 10 };
+
+            payment1Transaction.Transactions.Add(addingFundTransaction);
+            payment1Transaction.PaymentTransactionAddingFundTransactions.Add(paymentTransactionAddingFundTransaction);
             payment1Transaction.TransactionByProductGroups = new List<PaymentTransactionProductGroup>()
             {
                 new PaymentTransactionProductGroup()

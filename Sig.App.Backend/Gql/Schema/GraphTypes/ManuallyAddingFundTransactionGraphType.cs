@@ -8,7 +8,7 @@ using Sig.App.Backend.Gql.Interfaces;
 
 namespace Sig.App.Backend.Gql.Schema.GraphTypes
 {
-    public class ManuallyAddingFundTransactionGraphType : IAddingFundTransactionGraphType
+    public class ManuallyAddingFundTransactionGraphType : IAddingFundTransactionWithSubscriptionGraphType
     {
         private readonly ManuallyAddingFundTransaction transaction;
 
@@ -42,6 +42,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public OffsetDateTime CreatedAt()
         {
             return transaction.CreatedAtUtc.FromUtcToOffsetDateTime();
+        }
+
+        public IDataLoaderResult<SubscriptionGraphType> Subscription(IAppUserContext ctx)
+        {
+            return ctx.DataLoader.LoadSubscriptionById(transaction.SubscriptionId);
         }
     }
 }

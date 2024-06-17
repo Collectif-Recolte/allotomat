@@ -71,6 +71,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .Include(x => x.RefundTransactions)
                 .Include(x => x.Organization)
                 .Include(x => x.Transactions)
+                .Include(x => x.PaymentTransactionAddingFundTransactions).ThenInclude(x => x.AddingFundTransaction)
                 .FirstOrDefaultAsync(x => x.Id == initialTransactionId, cancellationToken);
 
             if (initialTransaction == null)
@@ -142,8 +143,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             {
                 var productGroupId = refund.ProductGroupId.LongIdentifierForType<ProductGroup>();
                 var paymentTransactionProductGroup = initialTransaction.TransactionByProductGroups.Where(x => x.ProductGroupId == productGroupId).FirstOrDefault();
-                var fund = initialTransaction.Card.Funds.Where(x => x.ProductGroupId == productGroupId).FirstOrDefault();
-                var addingFundTransaction = initialTransaction.Transactions.Where(x => x.ProductGroupId == productGroupId).FirstOrDefault();
 
                 if (paymentTransactionProductGroup == null)
                 {
@@ -157,6 +156,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     throw new TooMuchRefundException();
                 }
 
+                var fund = initialTransaction.Card.Funds.Where(x => x.ProductGroupId == productGroupId).FirstOrDefault();
+
                 var refundTransactionProductGroup = new RefundTransactionProductGroup()
                 {
                     Amount = refund.Amount,
@@ -167,11 +168,40 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 refundTransaction.RefundByProductGroups.Add(refundTransactionProductGroup);
 
                 paymentTransactionProductGroup.RefundAmount += refund.Amount;
-                if (addingFundTransaction.Status == FundTransactionStatus.Actived)
+
+                if (initialTransaction.PaymentTransactionAddingFundTransactions.Any())
                 {
-                    addingFundTransaction.AvailableFund += refund.Amount;
-                    fund.Amount += refund.Amount;
-                    refundTransactionProductGroup.AmountRefunded += refund.Amount;
+                    var paymentTransactionAddingFundTransactions = initialTransaction.PaymentTransactionAddingFundTransactions.Where(x => x.AddingFundTransaction.ProductGroupId == productGroupId).ToList();
+                    var amountToRefund = refund.Amount;
+                    
+                    foreach (var paymentTransactionAddingFundTransaction in paymentTransactionAddingFundTransactions)
+                    {
+                        if (paymentTransactionAddingFundTransaction.AddingFundTransaction.Status == FundTransactionStatus.Actived)
+                        {
+                            var amount = Math.Min(amountToRefund, paymentTransactionAddingFundTransaction.Amount - paymentTransactionAddingFundTransaction.RefundAmount);
+                            paymentTransactionAddingFundTransaction.AddingFundTransaction.AvailableFund += amount;
+                            fund.Amount += amount;
+                            refundTransactionProductGroup.AmountRefunded += amount;
+                            paymentTransactionAddingFundTransaction.RefundAmount += amount;
+                            amountToRefund -= amount;
+                        }
+                    }
+
+                    if (amountToRefund > 0)
+                    {
+                        logger.LogWarning("[Mutation] RefundTransaction - TooMuchRefundException");
+                        throw new TooMuchRefundException();
+                    }
+                }
+                else
+                {
+                    var addingFundTransaction = initialTransaction.Transactions.Where(x => x.ProductGroupId == productGroupId).FirstOrDefault();
+                    if (addingFundTransaction.Status == FundTransactionStatus.Actived)
+                    {
+                        addingFundTransaction.AvailableFund += refund.Amount;
+                        fund.Amount += refund.Amount;
+                        refundTransactionProductGroup.AmountRefunded += refund.Amount;
+                    }
                 }
 
                 baseTransactionLog.TotalAmount += refund.Amount;
