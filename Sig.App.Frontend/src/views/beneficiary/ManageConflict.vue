@@ -4,16 +4,18 @@
 		"title": "Fix payment conflict(s)",
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "adjustment-amount-positif": "The amount <b>{amount}</b> will go back to the envelope",
-    "adjustment-amount-negatif": "The amount <b>{amount}</b> will go out of the envelope",
+    "adjustment-amount-positif": "→ The envelope will be credited with an amount of <b>{amount}</b> following the adjustment",
+    "adjustment-amount-negatif": "→ The envelope will be debited with an amount of <b>{amount}</b> following the adjustment",
+    "adjustement-amount-not-enought": "→ This change would require a total of <b>{amount}</b>, but there are not enough funds available in the envelope",
     "confirm-message": "The adjustments have been made for the participant"
 	},
 	"fr": {
 		"title": "Résoudre les conflits de paiement(s)",
     "cancel": "Annuler",
     "confirm": "Confirmer",
-    "adjustment-amount-positif": "→ L'enveloppe va recevoir un montant de <b>{amount}</b> suite à l'ajustement.",
-    "adjustment-amount-negatif": "→ Un montant de <b>{amount}</b> va être retiré de l'enveloppe suite à l'ajustement.",
+    "adjustment-amount-positif": "→ L'enveloppe sera créditée d'un montant de <b>{amount}</b> suite à l'ajustement",
+    "adjustment-amount-negatif": "→ L'enveloppe sera débitée d'un montant de <b>{amount}</b> suite à l'ajustement",
+    "adjustement-amount-not-enought": "→ Ce changement nécessiterait un total de <b>{amount}</b>, mais il n'y a pas assez de fonds disponibles dans l'enveloppe",
     "confirm-message": "Les ajustements ont été effectués pour le participant"
 	}
 }
@@ -204,8 +206,19 @@ const beneficiarySubscriptionsWithConflict = computed(() => {
         paymentRemaining
       );
 
+      const budgetAllowanceSubscription = beneficiary.value.organization.budgetAllowances.find(
+        (budgetAllowance) => budgetAllowance.subscription.id === beneficiarySubscription.subscription.id
+      );
+
       var description = "";
-      if (previousPaymentAmount > newPaymentAmount) {
+      if (
+        previousPaymentAmount < newPaymentAmount &&
+        newPaymentAmount * numberOfPaymentToReceive > budgetAllowanceSubscription.availableFund
+      ) {
+        description = t("adjustement-amount-not-enought", {
+          amount: getMoneyFormat((newPaymentAmount - previousPaymentAmount) * numberOfPaymentToReceive)
+        });
+      } else if (previousPaymentAmount > newPaymentAmount) {
         description = t("adjustment-amount-positif", {
           amount: getMoneyFormat((previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive)
         });
@@ -214,10 +227,6 @@ const beneficiarySubscriptionsWithConflict = computed(() => {
           amount: getMoneyFormat((newPaymentAmount - previousPaymentAmount) * numberOfPaymentToReceive)
         });
       }
-
-      const budgetAllowanceSubscription = beneficiary.value.organization.budgetAllowances.find(
-        (budgetAllowance) => budgetAllowance.subscription.id === beneficiarySubscription.subscription.id
-      );
 
       subscriptions.push({
         label: beneficiarySubscription.subscription.name,

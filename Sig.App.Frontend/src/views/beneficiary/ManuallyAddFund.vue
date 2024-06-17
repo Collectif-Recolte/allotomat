@@ -353,7 +353,6 @@ const maxBudgetAllowance = computed(() =>
 );
 
 const availableCardFund = computed(() => {
-  console.log(beneficiary.value);
   if (
     beneficiary.value === null ||
     beneficiary.value === undefined ||

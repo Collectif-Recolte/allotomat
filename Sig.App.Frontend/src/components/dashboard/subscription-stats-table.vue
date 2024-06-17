@@ -7,7 +7,7 @@
       "subscription-expiration": "Expiration",
       "subscription-total-budget-allowance" : "Total budget allowance",
       "subscription-available-fund": "Available fund",
-      "subscription-amount-allocated": "Allocated amount ",
+      "subscription-amount-allocated": "Funds removed from budget allowance",
       "subscription-totals": "Total"
     },
     "fr": {
@@ -17,7 +17,7 @@
       "subscription-expiration": "Expiration",
       "subscription-total-budget-allowance" : "Budget total",
       "subscription-available-fund": "Fonds disponibles",
-      "subscription-amount-allocated": "Montant alloué",
+      "subscription-amount-allocated": "Fonds retirés de l'enveloppe",
       "subscription-totals": "Total"
     }
   }
