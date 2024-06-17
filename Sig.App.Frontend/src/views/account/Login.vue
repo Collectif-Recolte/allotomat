@@ -15,7 +15,7 @@
     "check-my-balance": "Check my card balance",
     "support": "Help and support",
     "about": "About Tomat",
-    "about-link": "https://info.allotomat.com/home/",
+    "about-link": "https://info.allotomat.com/about/",
     "form-title": "Welcome to Tomat",
     "form-subtitle": "Enter your login credentials"
 	},
@@ -34,7 +34,7 @@
     "check-my-balance": "Vérification du solde de ma carte",
     "support": "Aide et support",
     "about": "À propos de Tomat",
-    "about-link": "https://info.allotomat.com/accueil/",
+    "about-link": "https://info.allotomat.com/a-propos/",
     "form-title": "Bienvenue sur Tomat",
     "form-subtitle": "Entrez vos identifiants de connexion"
 	}
