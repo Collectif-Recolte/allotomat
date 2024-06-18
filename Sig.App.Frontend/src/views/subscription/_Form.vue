@@ -126,20 +126,20 @@
         </Field>
         <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
         <div class="flex sm:col-span-12" v-html="t('subscription-name-desc')"></div>
-        <Field v-slot="{ errors: fieldErrors }" name="startDate">
+        <Field v-slot="{ field, errors: fieldErrors }" name="startDate">
           <DatePicker
             id="startDate"
-            v-model="startDateValue"
+            v-bind="field"
             class="sm:col-span-6"
             :label="t('subscription-start-date')"
             :errors="fieldErrors"
             is-inside-modal
             @update:modelValue="forceValidation(values, validateField)" />
         </Field>
-        <Field v-slot="{ errors: fieldErrors }" name="endDate">
+        <Field v-slot="{ field, errors: fieldErrors }" name="endDate">
           <DatePicker
             id="endDate"
-            v-model="endDateValue"
+            v-bind="field"
             class="sm:col-span-6"
             :label="t('subscription-end-date')"
             :errors="fieldErrors"
@@ -773,9 +773,11 @@ function updateMonthlyPaymentMoment(setFieldValue, validateField, value) {
 
 async function forceValidation(values, validateField) {
   if (values.endDate) {
+    endDateValue.value = values.endDate;
     validateField("endDate");
   }
   if (values.startDate) {
+    startDateValue.value = values.startDate;
     validateField("startDate");
   }
   if (values.fundsExpirationDate) {
