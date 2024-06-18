@@ -307,10 +307,15 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             await handler.Handle(input, CancellationToken.None);
 
-            var transaction = await DbContext.Transactions.FirstAsync();
+            var transaction = await DbContext.Transactions.OfType<PaymentTransaction>().Include(x => x.PaymentTransactionAddingFundTransactions).FirstAsync();
 
             transaction.CardId.Should().Be(card.Id);
             transaction.Amount.Should().Be(10);
+
+            transaction.PaymentTransactionAddingFundTransactions.Count.Should().Be(1);
+            transaction.PaymentTransactionAddingFundTransactions.First().AddingFundTransactionId.Should().Be(initialTransaction1.Id);
+            transaction.PaymentTransactionAddingFundTransactions.First().PaymentTransactionId.Should().Be(transaction.Id);
+            transaction.PaymentTransactionAddingFundTransactions.First().Amount.Should().Be(10);
 
             var transactionLog = await DbContext.TransactionLogs.FirstAsync();
             transactionLog.TransactionUniqueId.Should().Be(transaction.TransactionUniqueId);

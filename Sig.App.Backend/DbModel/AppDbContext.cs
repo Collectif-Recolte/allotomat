@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
+using Sig.App.Backend.Gql.Schema.GraphTypes;
 
 namespace Sig.App.Backend.DbModel
 {
@@ -75,6 +76,8 @@ namespace Sig.App.Backend.DbModel
         public DbSet<RefundTransactionProductGroup> RefundTransactionProductGroups { get; set; }
 
         public DbSet<PaymentFund> PaymentFunds { get; set; }
+
+        public DbSet<PaymentTransactionAddingFundTransaction> PaymentTransactionAddingFundTransactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -265,11 +268,22 @@ namespace Sig.App.Backend.DbModel
 
                 _.HasOne(x => x.Organization);
 
+                _.HasMany(x => x.PaymentTransactionAddingFundTransactions)
+                    .WithOne(x => x.PaymentTransaction)
+                    .OnDelete(DeleteBehavior.NoAction);
+
                 _.HasMany(x => x.Transactions)
                     .WithMany(x => x.Transactions)
                     .UsingEntity<Dictionary<string, object>>(
                         j => j.HasOne<AddingFundTransaction>().WithMany().OnDelete(DeleteBehavior.Cascade),
                         j => j.HasOne<PaymentTransaction>().WithMany().OnDelete(DeleteBehavior.ClientCascade));
+            });
+
+            Configure<AddingFundTransaction>(_ =>
+            {
+                _.HasMany(x => x.PaymentTransactionAddingFundTransactions)
+                    .WithOne(x => x.AddingFundTransaction)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
 
             Configure<RefundTransaction>(_ => {

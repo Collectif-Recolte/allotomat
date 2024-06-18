@@ -89,6 +89,9 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<PaymentTransactionGraphType> LoadPaymentTransactionById(long paymentTransactionId) =>
             LoadOne<GetPaymentTransactionById.Query, PaymentTransactionGraphType, long>(paymentTransactionId);
 
+        public IDataLoaderResult<IAddingFundTransactionGraphType> LoadAddingFundTransactionById(long addingFundTransactionId) =>
+            LoadOne<GetAddingFundTransactionById.Query, IAddingFundTransactionGraphType, long>(addingFundTransactionId);
+
         public IDataLoaderResult<RefundTransactionGraphType> LoadRefundTransactionById(long refundTransactionId) =>
             LoadOne<GetRefundTransactionById.Query, RefundTransactionGraphType, long>(refundTransactionId);
 
@@ -101,8 +104,8 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<ProjectStatsGraphType> LoadProjectStats(long projectId) =>
             LoadOne<GetProjectStatsByIds.Query, ProjectStatsGraphType, long>(projectId);
 
-        public IDataLoaderResult<TransactionGraphType> LoadTransactionByUniqueId(string transactionUniqueId) =>
-            LoadOne<GetTransactionByUniqueId.Query, TransactionGraphType, string>(transactionUniqueId);
+        public IDataLoaderResult<ITransactionGraphType> LoadTransactionByUniqueId(string transactionUniqueId) =>
+            LoadOne<GetTransactionByUniqueId.Query, ITransactionGraphType, string>(transactionUniqueId);
 
         public IDataLoaderResult<IEnumerable<ProjectGraphType>> LoadProjectOwnedByUser(string userId) =>
             LoadCollection<GetProjectOwnedByUserId.Query, ProjectGraphType, string>(userId);
@@ -178,6 +181,9 @@ namespace Sig.App.Backend.Gql
 
         public IDataLoaderResult<IEnumerable<TransactionGraphType>> LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(long beneficiaryId, long subscriptionId) =>
             LoadCollection<GetSubscriptionTransactionsByBeneficiaryAndSubscriptionId.Query, TransactionGraphType, long, long>(beneficiaryId, subscriptionId, x => x.ToString());
+
+        public IDataLoaderResult<IEnumerable<PaymentTransactionAddingFundTransactionGraphType>> LoadPaymentTransactionAddingFundTransactionsByTransactionId(long transactionId) =>
+            LoadCollection<GetPaymentTransactionAddingFundTransactionsByTransactionId.Query, PaymentTransactionAddingFundTransactionGraphType, long>(transactionId);
 
         private IDataLoaderResult<TResult> LoadOne<TQuery, TResult, TKey>(TKey id) where TQuery : IRequest<IDictionary<TKey, TResult>>, IIdListQuery<TKey>, new()
         {

@@ -12,7 +12,8 @@
     "gift-card": "Gift card",
     "password": "Password",
     "no-amount-to-refund": "No amount to refund.",
-    "wrong-password-error-notification": "The password is invalid."
+    "wrong-password-error-notification": "The password is invalid.",
+    "expired-funds":"Some of the funds used in this transaction have expired and can no longer be reimbursed."
 	},
 	"fr": {
 		"title": "Remboursement",
@@ -26,7 +27,8 @@
     "gift-card": "Carte-cadeau",
     "password": "Mot de passe",
     "no-amount-to-refund": "Aucun montant à rembourser.",
-    "wrong-password-error-notification": "Le mot de passe est invalide."
+    "wrong-password-error-notification": "Le mot de passe est invalide.",
+    "expired-funds":"Certains des fonds utilisés dans cette transaction ont expiré et ne peuvent plus être remboursés."
 	}
 }
 </i18n>
@@ -35,6 +37,9 @@
   <div v-if="!loading">
     <UiDialogModal v-if="refundTransactionId === null" :title="t('title')" hide-main-btn="false" :return-route="returnRoute()">
       <div>
+        <p v-if="haveExpiredFunds">
+          <b>{{ t("expired-funds") }}</b>
+        </p>
         <p>
           {{
             t("subtitle", {
@@ -128,7 +133,12 @@ import { FieldArray } from "vee-validate";
 import { number, object, lazy, array, string } from "yup";
 import { storeToRefs } from "pinia";
 
-import { PRODUCT_GROUP_LOYALTY, USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
+import {
+  PRODUCT_GROUP_LOYALTY,
+  USER_TYPE_PROJECTMANAGER,
+  ADDING_FUND_TRANSACTION_STATUS_ACTIVED,
+  ADDING_FUND_TRANSACTION_STATUS_EXPIRED
+} from "@/lib/consts/enums";
 import { URL_TRANSACTION_LIST, URL_TRANSACTION_ADMIN } from "@/lib/consts/urls";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
@@ -177,6 +187,18 @@ const { result, loading } = useQuery(
               id
               name
               color
+            }
+          }
+          paymentTransactionAddingFundTransactions {
+            id
+            amount
+            refundAmount
+            addingFundTransaction {
+              id
+              status
+              productGroup {
+                id
+              }
             }
           }
           createdAt
@@ -248,6 +270,25 @@ const validationSchema = object({
               var transactionProductGroupId = context.parent.transactionProductGroupId;
               var transactionProductGroup = productGroups.value.find((x) => x.id === transactionProductGroupId);
 
+              if (transaction.value.paymentTransactionAddingFundTransactions.length > 0) {
+                var paymentTransactionAddingFundTransactions = transaction.value.paymentTransactionAddingFundTransactions;
+
+                var availableAmount = 0;
+                var refundedAmount = 0;
+
+                paymentTransactionAddingFundTransactions.forEach((x) => {
+                  if (
+                    x.addingFundTransaction.productGroup.id === transactionProductGroup.productGroup.id &&
+                    x.addingFundTransaction.status === ADDING_FUND_TRANSACTION_STATUS_ACTIVED
+                  ) {
+                    availableAmount += x.amount;
+                    refundedAmount += x.refundAmount;
+                  }
+                });
+
+                return value <= parseFloat(availableAmount - refundedAmount).toFixed(2);
+              }
+
               if (transactionProductGroup)
                 return value <= parseFloat(transactionProductGroup.amount - transactionProductGroup.refundAmount).toFixed(2);
               return false;
@@ -293,8 +334,32 @@ function productGroupLabel(productGroup) {
 }
 
 function availableAmountLabel(productGroup, key) {
+  if (transaction.value.paymentTransactionAddingFundTransactions.length > 0) {
+    var paymentTransactionAddingFundTransactions = transaction.value.paymentTransactionAddingFundTransactions;
+
+    var availableAmount = 0;
+    var refundedAmount = 0;
+
+    paymentTransactionAddingFundTransactions.forEach((x) => {
+      if (
+        x.addingFundTransaction.productGroup.id === productGroup.productGroup.id &&
+        x.addingFundTransaction.status === ADDING_FUND_TRANSACTION_STATUS_ACTIVED
+      ) {
+        availableAmount += x.amount;
+        refundedAmount += x.refundAmount;
+      }
+    });
+
+    return t(key, { amountAvailable: getMoneyFormat(availableAmount - refundedAmount) });
+  }
   return t(key, { amountAvailable: getMoneyFormat(productGroup.amount - productGroup.refundAmount) });
 }
+
+const haveExpiredFunds = computed(() => {
+  return transaction.value.paymentTransactionAddingFundTransactions.some(
+    (x) => x.addingFundTransaction.status === ADDING_FUND_TRANSACTION_STATUS_EXPIRED
+  );
+});
 
 const goToTransactionList = () => {
   if (userType.value === USER_TYPE_PROJECTMANAGER) router.push({ name: URL_TRANSACTION_ADMIN });

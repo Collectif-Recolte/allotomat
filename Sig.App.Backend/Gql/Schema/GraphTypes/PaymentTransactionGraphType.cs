@@ -41,6 +41,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         {
             return ctx.DataLoader.LoadPaymentTransactionsProductGroupByTransactionId(transaction.Id);
         }
+
+        public IDataLoaderResult<IEnumerable<PaymentTransactionAddingFundTransactionGraphType>> PaymentTransactionAddingFundTransactions(IAppUserContext ctx)
+        {
+            return ctx.DataLoader.LoadPaymentTransactionAddingFundTransactionsByTransactionId(transaction.Id);
+        }
     }
 
     public class PaymentTransactionProductGroupGraphType
