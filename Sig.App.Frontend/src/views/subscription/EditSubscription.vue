@@ -218,10 +218,17 @@ async function onSubmit({
 }
 
 function formattedDate(date) {
-  if (date === null) {
+  try {
+    if (date === null || date === undefined) {
+      return null;
+    }
+
+    let formattedDate = date.substring(0, 10).split("-");
+    return new Date(formattedDate[0], formattedDate[1] - 1, formattedDate[2]);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log("Error while formatting date", e);
     return null;
   }
-  let formattedDate = date.substring(0, 10).split("-");
-  return new Date(formattedDate[0], formattedDate[1] - 1, formattedDate[2]);
 }
 </script>
