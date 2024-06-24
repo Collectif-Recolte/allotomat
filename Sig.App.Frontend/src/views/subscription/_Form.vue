@@ -14,7 +14,7 @@
 		"subscription-end-date": "End of payment period",
 		"subscription-end-date-error": "The “End date” field must be greater than the “Start date” field",
 		"subscription-name": "Name",
-    "subscription-name-desc": "These settings will determine the dates on which funds will be automatically added onto cards. (In later steps, you will define expiration dates and the amounts the cards will receive.) Note that subscriptions <b>cannot be modified</b> once they have been assigned to participants!",
+    "subscription-name-desc": "<p>These settings will determine the dates on which funds will be automatically added onto cards. (In later steps, you will define expiration dates and the amounts the cards will receive.) Note that subscriptions <b>cannot be modified</b> once they have been assigned to participants!</p>",
 		"subscription-name-placeholder": "Ex. Winter 2022",
 		"subscription-start-date": "Beginning of payment period",
     "subscription-funds-expiration-date": "Fund expiry date",
