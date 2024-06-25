@@ -15,7 +15,12 @@
     "without-payment-conflict": "Without payment conflict",
     "card-is-disabled": "Temporarily disabled",
     "card-is-enabled": "Card is enabled",
-    "card-disabled-status": "Card status"
+    "card-disabled-status": "Card status",
+    "sort-by-fund": "Balance",
+    "sort-by-id1": "ID1",
+    "sort-by-lastname": "Last name",
+    "sort-by-importorder": "Import order",
+    "sort-order": "Sort order"
 	},
 	"fr": {
 		"beneficiary-type": "Catégories",
@@ -32,80 +37,98 @@
     "without-payment-conflict": "Sans conflit de versement",
     "card-is-disabled": "Désactivée temporairement",
     "card-is-enabled": "Carte activée",
-    "card-disabled-status": "État de la carte"
+    "card-disabled-status": "État de la carte",
+    "sort-by-fund": "Solde",
+    "sort-by-id1": "ID1",
+    "sort-by-lastname": "Nom de famille",
+    "sort-by-importorder": "Ordre d'importation",
+    "sort-order": "Ordre de tri"
 	}
 }
 </i18n>
 
 <template>
-  <UiFilter
-    :model-value="modelValue"
-    has-search
-    has-filters
-    :has-active-filters="hasActiveFilters"
-    :active-filters-count="activeFiltersCount"
-    :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous"
-    @resetFilters="onResetFilters"
-    @search="onSearch"
-    @update:modelValue="(e) => emit('update:modelValue', e)">
-    <PfFormInputCheckboxGroup
-      v-if="availableBeneficiaryTypes.length > 0"
-      id="beneficiary-types"
-      is-filter
-      :value="selectedBeneficiaryTypes"
-      :label="t('beneficiary-type')"
-      :options="availableBeneficiaryTypes"
-      @input="onBeneficiaryTypesChecked" />
-    <PfFormInputCheckboxGroup
-      v-if="availableSubscriptions.length > 0"
-      id="subscriptions"
-      class="mt-3"
-      is-filter
-      :value="selectedSubscriptions"
-      :label="t('subscription')"
-      :options="availableSubscriptions"
-      @input="onSubscriptionsChecked" />
-    <PfFormInputCheckboxGroup
-      v-if="availableStatus.length > 0"
-      id="status"
-      class="mt-3"
-      is-filter
-      :value="selectedStatus"
-      :label="t('status')"
-      :options="availableStatus"
-      @input="onStatusChecked" />
-    <PfFormInputCheckboxGroup
-      id="cardStatus"
-      class="mt-3"
-      is-filter
-      :value="selectedCardStatus"
-      :label="t('cards')"
-      :options="cardStatus"
-      @input="onCardStatusChecked" />
-    <PfFormInputCheckboxGroup
-      v-if="!props.hideConflictFilter"
-      id="paymentConflictStatus"
-      class="mt-3"
-      is-filter
-      :value="selectedPaymentConflictStatus"
-      :label="t('payment-conflicts')"
-      :options="paymentConflictStatus"
-      @input="onPaymentConflictStatusChecked" />
-    <PfFormInputCheckboxGroup
-      v-if="!props.hideCardIsDisabledFilter"
-      id="cardDisabled"
-      class="mt-3"
-      is-filter
-      :value="selectedCardDisabled"
-      :label="t('card-disabled-status')"
-      :options="cardDisabled"
-      @input="onCardIsDisabledChecked" />
-  </UiFilter>
+  <div>
+    <UiFilter
+      :model-value="modelValue"
+      has-search
+      has-filters
+      :has-sort="!props.hideSortOrder"
+      :has-active-filters="hasActiveFilters"
+      :active-filters-count="activeFiltersCount"
+      :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous"
+      @resetFilters="onResetFilters"
+      @search="onSearch"
+      @update:modelValue="(e) => emit('update:modelValue', e)">
+      <template #sortOrder>
+        <PfFormInputRadioGroup
+          id="sortOrder"
+          :value="sortOrder"
+          :label="t('sort-order')"
+          :options="sortOrderOptions"
+          @input="onSortOrderChanged" />
+      </template>
+      <PfFormInputCheckboxGroup
+        v-if="availableBeneficiaryTypes.length > 0"
+        id="beneficiary-types"
+        is-filter
+        :value="selectedBeneficiaryTypes"
+        :label="t('beneficiary-type')"
+        :options="availableBeneficiaryTypes"
+        @input="onBeneficiaryTypesChecked" />
+      <PfFormInputCheckboxGroup
+        v-if="availableSubscriptions.length > 0"
+        id="subscriptions"
+        class="mt-3"
+        is-filter
+        :value="selectedSubscriptions"
+        :label="t('subscription')"
+        :options="availableSubscriptions"
+        @input="onSubscriptionsChecked" />
+      <PfFormInputCheckboxGroup
+        v-if="availableStatus.length > 0"
+        id="status"
+        class="mt-3"
+        is-filter
+        :value="selectedStatus"
+        :label="t('status')"
+        :options="availableStatus"
+        @input="onStatusChecked" />
+      <PfFormInputCheckboxGroup
+        id="cardStatus"
+        class="mt-3"
+        is-filter
+        :value="selectedCardStatus"
+        :label="t('cards')"
+        :options="cardStatus"
+        @input="onCardStatusChecked" />
+      <PfFormInputCheckboxGroup
+        v-if="!props.hideConflictFilter"
+        id="paymentConflictStatus"
+        class="mt-3"
+        is-filter
+        :value="selectedPaymentConflictStatus"
+        :label="t('payment-conflicts')"
+        :options="paymentConflictStatus"
+        @input="onPaymentConflictStatusChecked" />
+      <PfFormInputCheckboxGroup
+        v-if="!props.hideCardIsDisabledFilter"
+        id="cardDisabled"
+        class="mt-3"
+        is-filter
+        :value="selectedCardDisabled"
+        :label="t('card-disabled-status')"
+        :options="cardDisabled"
+        @input="onCardIsDisabledChecked" />
+    </UiFilter>
+  </div>
 </template>
 
 <script setup>
 import { defineProps, defineEmits, computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+
+import { BY_FUND_AVAILABLE_ON_CARD, ID1, LAST_NAME, SORT_ORDER } from "@/lib/consts/beneficiary-sort-order";
 
 const { t } = useI18n();
 
@@ -124,7 +147,8 @@ const emit = defineEmits([
   "paymentConflictStatusChecked",
   "paymentConflictStatusUnchecked",
   "cardIsDisabledChecked",
-  "cardIsDisabledUnchecked"
+  "cardIsDisabledUnchecked",
+  "sortOrderChanged"
 ]);
 
 const props = defineProps({
@@ -163,6 +187,10 @@ const props = defineProps({
     default() {
       return [];
     }
+  },
+  sortOrder: {
+    type: String,
+    default: ""
   },
   withoutSubscriptionId: {
     type: String,
@@ -235,8 +263,35 @@ const props = defineProps({
   hideCardIsDisabledFilter: {
     type: Boolean,
     default: false
+  },
+  hideSortOrder: {
+    type: Boolean,
+    default: false
   }
 });
+
+const sortOrderOptions = [
+  {
+    id: "by-fund-available-on-card",
+    value: BY_FUND_AVAILABLE_ON_CARD,
+    label: t("sort-by-fund")
+  },
+  {
+    id: "id1",
+    value: ID1,
+    label: t("sort-by-id1")
+  },
+  {
+    id: "last-name",
+    value: LAST_NAME,
+    label: t("sort-by-lastname")
+  },
+  {
+    id: "beneficiary-sort-order",
+    value: SORT_ORDER,
+    label: t("sort-by-importorder")
+  }
+];
 
 const hasActiveFilters = computed(() => {
   return (
@@ -356,6 +411,10 @@ function onCardIsDisabledChecked(input) {
   } else {
     emit("cardIsDisabledUnchecked", input.value);
   }
+}
+
+function onSortOrderChanged(input) {
+  emit("sortOrderChanged", input);
 }
 
 function onResetFilters() {

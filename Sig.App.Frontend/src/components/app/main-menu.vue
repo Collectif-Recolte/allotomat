@@ -42,7 +42,7 @@
       :label="t('manage-markets')"
       :icon="OFFICE_BUILDING" />
     <MenuItem
-      v-if="manageOrganizations"
+      v-if="manageBeneficiaries"
       :router-link="{ name: $consts.urls.URL_PROJECT_ADMIN_DASHBOARD }"
       :label="t('dashboard')"
       :icon="DASHBOARD" />

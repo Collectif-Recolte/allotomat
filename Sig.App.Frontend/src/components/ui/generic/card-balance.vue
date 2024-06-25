@@ -25,7 +25,7 @@
       <div class="w-5/12 text-right">
         <div class="ml-2">{{ getCardFund() }}</div>
       </div>
-      <div v-if="props.beneficiary.card.funds?.length > 0" class="absolute -top-0.5 -right-9">
+      <div v-if="getProductGroups().length > 0" class="absolute -top-0.5 -right-9">
         <button class="pf-button pf-button--outline min-h-7 min-w-7 p-0" @click="() => toggleDropdown()">
           <span class="sr-only">{{ t("open-product-group") }}</span>
           <PfIcon :class="props.beneficiary.dropdownIsOpen ? 'rotate-180' : 'rotate-0'" :icon="ICON_CHEVRON" size="sm" />
@@ -33,7 +33,7 @@
       </div>
     </div>
     <div
-      v-if="props.beneficiary.card.funds?.length > 0"
+      v-if="getProductGroups()?.length > 0"
       :style="props.beneficiary.dropdownIsOpen ? { maxHeight: `${props.beneficiary.dropdownMaxHeight}px` } : null"
       class="absolute -bottom-1 translate-y-full right-0 overflow-hidden transition-max-height ease-in-out duration-300"
       :class="props.beneficiary.dropdownIsOpen ? 'max-h-full' : 'max-h-0'">

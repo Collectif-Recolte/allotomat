@@ -7,14 +7,17 @@ using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Requests.Queries.Beneficiaries;
 using Sig.App.Backend.Requests.Queries.Cards;
 using Sig.App.Backend.Requests.Queries.Organizations;
 using Sig.App.Backend.Requests.Queries.Projects;
 using Sig.App.Backend.Services.Permission.Enums;
 using Sig.App.Backend.Utilities;
+using Sig.App.Backend.Utilities.Sorting;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Sig.App.Backend.Requests.Queries.Cards.SearchCards;
 
 namespace Sig.App.Backend.Gql.Schema.GraphTypes
 {
@@ -107,8 +110,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             [Description("If specified, only card with specific status are returned")] CardStatus[] status = null,
             [Description("If specified, only card enabled or disabled is returned.")] bool? withCardDisabled = null,
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-            [Description("If specified, only that match text is returned.")] string? searchText = "")
+            [Description("If specified, only that match text is returned.")] string? searchText = "",
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+            Sort<CardSort> sort = null)
         {
             var results = await mediator.Send(new SearchCards.Query
             {
@@ -116,7 +120,8 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
                 Page = new Page(page, limit),
                 Status = status,
                 SearchText = searchText,
-                WithCardDisabled = withCardDisabled
+                WithCardDisabled = withCardDisabled,
+                Sort = sort
             });
 
             return results.Map(x =>

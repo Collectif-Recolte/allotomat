@@ -399,7 +399,7 @@ namespace Sig.App.Backend.Gql.Schema
             return mediator.Send(input.Value);
         }
 
-        [RequirePermission(BeneficiaryPermission.ManageBeneficiary)]
+        [RequirePermission(OrganizationPermission.ManageOrganization)]
         [AnnotateErrorCodes(typeof(RemoveBeneficiaryFromSubscription))]
         public static async Task<bool> RemoveBeneficiaryFromSubscription(
             this GqlMutation _,
@@ -661,6 +661,16 @@ namespace Sig.App.Backend.Gql.Schema
             [Inject] IMediator mediator,
             NonNull<EnableCard.Input> input
             )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        public static Task<AdjustBeneficiarySubscription.Payload> AdjustBeneficiarySubscription(this GqlMutation _, [Inject] IMediator mediator, NonNull<AdjustBeneficiarySubscription.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
+
+        public static Task<AddMissingPayment.Payload> AddMissingPayment(this GqlMutation _, [Inject] IMediator mediator, NonNull<AddMissingPayment.Input> input)
         {
             return mediator.Send(input.Value);
         }

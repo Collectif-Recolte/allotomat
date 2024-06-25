@@ -27,9 +27,7 @@
           :is-filter="isFilter" />
         <div v-if="description || $slots.description" class="mt-1" :class="hasErrorState ? 'text-red-500' : 'text-grey-500'">
           <slot name="description">
-            <p v-if="description" :id="`${id}-description`" class="mb-0 text-p4 leading-none">
-              {{ description }}
-            </p>
+            <p v-if="description" :id="`${id}-description`" class="mb-0 text-p4 leading-none">{{ description }}</p>
           </slot>
         </div>
       </div>
@@ -42,9 +40,7 @@
         class="mt-2"
         :class="hasErrorState ? 'text-red-600 dark:text-white' : 'text-grey-500'">
         <slot name="description">
-          <p v-if="description" :id="`${id}-description`" class="mb-0 text-p4 leading-none">
-            {{ description }}
-          </p>
+          <p v-if="description" :id="`${id}-description`" class="mb-0 text-p4 leading-none">{{ description }}</p>
         </slot>
       </div>
     </template>

@@ -63,7 +63,7 @@
       <td>
         {{ getTransactionDate(slotProps.item) }}
       </td>
-      <td>
+      <td v-if="!props.beneficiariesAreAnonymous">
         {{ getBeneficiaryName(slotProps.item) }}
       </td>
       <td>
@@ -114,24 +114,44 @@ const { t } = useI18n();
 const { getGlobalPermissions } = storeToRefs(useAuthStore());
 
 const props = defineProps({
-  transactions: { type: Array, required: true }
+  transactions: { type: Array, required: true },
+  beneficiariesAreAnonymous: {
+    type: Boolean,
+    default: false
+  }
 });
 
-const cols = computed(() => [
-  {
-    label: t("transaction-date-hour")
-  },
-  {
-    label: t("transaction-beneficiary-name")
-  },
-  {
-    label: t("transaction-operation")
-  },
-  {
-    label: t("transaction-amount")
-  },
-  { label: "" }
-]);
+const cols = computed(() => {
+  if (props.beneficiariesAreAnonymous) {
+    return [
+      {
+        label: t("transaction-date-hour")
+      },
+      {
+        label: t("transaction-operation")
+      },
+      {
+        label: t("transaction-amount")
+      },
+      { label: "" }
+    ];
+  }
+  return [
+    {
+      label: t("transaction-date-hour")
+    },
+    {
+      label: t("transaction-beneficiary-name")
+    },
+    {
+      label: t("transaction-operation")
+    },
+    {
+      label: t("transaction-amount")
+    },
+    { label: "" }
+  ];
+});
 
 const canRefundTransaction = computed(() => {
   return getGlobalPermissions.value.includes(GLOBAL_REFUND_TRANSACTION);

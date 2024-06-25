@@ -176,6 +176,9 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<IEnumerable<PaymentFundGraphType>> LoadPaymentFundsByBeneficiary(long offPlatformBeneficiaryId) =>
             LoadCollection<GetPaymentFundsByBeneficiaryId.Query, PaymentFundGraphType, long>(offPlatformBeneficiaryId);
 
+        public IDataLoaderResult<IEnumerable<TransactionGraphType>> LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(long beneficiaryId, long subscriptionId) =>
+            LoadCollection<GetSubscriptionTransactionsByBeneficiaryAndSubscriptionId.Query, TransactionGraphType, long, long>(beneficiaryId, subscriptionId, x => x.ToString());
+
         private IDataLoaderResult<TResult> LoadOne<TQuery, TResult, TKey>(TKey id) where TQuery : IRequest<IDictionary<TKey, TResult>>, IIdListQuery<TKey>, new()
         {
             return LoadOne(typeof(TQuery).FullName, DoLoad, id);

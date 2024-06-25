@@ -2,10 +2,12 @@
   {
     "en": {
       "filter": "Filter",
+      "sort": "Sort order",
       "reset-filters": "Reset"
     },
     "fr": {
       "filter": "Filtrer",
+      "sort": "Ordre de tri",
       "reset-filters": "Réinitialiser"
     }
   }
@@ -36,6 +38,17 @@
         :placeholder="props.placeholder"
         @search="onSearch"
         @update:modelValue="(e) => emit('update:modelValue', e)" />
+      <div v-if="props.hasSort" class="relative inline-block group pf-transition-visibility pf-transition-visibility--focus-only">
+        <button class="pf-button pf-button--outline px-3 min-h-11">
+          <PfIcon :icon="iconSortOrder" size="s" class="mr-2" />
+          {{ sortLabel }}
+          <PfIcon :icon="ICON_ARROW_BOTTOM" size="xxs" :class="activeFiltersCount > 0 ? 'ml-2' : 'ml-12'" />
+        </button>
+        <div
+          class="text-left absolute z-50 bottom-1 right-0 translate-y-full min-w-64 max-h-60 overflow-auto bg-white rounded-md border rounded-tr-none border-primary-700 px-4 py-3 transition ease-in-out duration-300 pf-transition-visibility__content h-remove-margin">
+          <slot name="sortOrder"></slot>
+        </div>
+      </div>
       <div
         v-if="props.hasFilters"
         class="relative inline-block group pf-transition-visibility pf-transition-visibility--focus-only">
@@ -58,11 +71,15 @@
 </template>
 
 <script setup>
-import { defineEmits, defineProps } from "vue";
+import { defineEmits, defineProps, computed } from "vue";
 import { useI18n } from "vue-i18n";
+
+import { ASC } from "@/lib/consts/card-sort-order";
 
 import ICON_ARROW_BOTTOM from "@/lib/icons/arrow-bottom.json";
 import ICON_RESET from "@/lib/icons/reset.json";
+import ICON_SORT_ASC from "@/lib/icons/sort-asc.json";
+import ICON_SORT_DESC from "@/lib/icons/sort-desc.json";
 
 const emit = defineEmits(["resetFilters", "search", "update:modelValue"]);
 
@@ -72,6 +89,15 @@ const props = defineProps({
   },
   hasSearch: Boolean,
   hasFilters: Boolean,
+  hasSort: Boolean,
+  sortLabel: {
+    type: String,
+    default: ""
+  },
+  sortOrder: {
+    type: String,
+    default: ASC
+  },
   activeFiltersCount: {
     type: Number,
     default: 0,
@@ -95,6 +121,14 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
+
+const sortLabel = computed(() => {
+  return props.sortLabel !== "" ? props.sortLabel : t("sort");
+});
+
+const iconSortOrder = computed(() => {
+  return props.sortOrder === ASC ? ICON_SORT_ASC : ICON_SORT_DESC;
+});
 
 function onResetFilters() {
   emit("resetFilters");

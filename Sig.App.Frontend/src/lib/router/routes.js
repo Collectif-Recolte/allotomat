@@ -174,9 +174,9 @@ export default [
   {
     name: urls.URL_PROJECT_ADMIN_DASHBOARD,
     path: "/dashboard",
-    component: () => import("@/views/dashboard/Dashboard.vue"),
+    component: () => import("@/views/dashboard/index.vue"),
     meta: {
-      claim: GLOBAL_MANAGE_ORGANIZATIONS
+      claim: GLOBAL_MANAGE_BENEFICIARIES
     }
   },
   {
@@ -599,6 +599,14 @@ export default [
             }
           },
           {
+            name: urls.URL_BENEFICIARY_ADD_MISSED_PAYMENT,
+            path: ":beneficiaryId/add-missed-payment",
+            component: () => import("@/views/beneficiary/AddMissedPayment.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_BENEFICIARIES
+            }
+          },
+          {
             name: urls.URL_BENEFICIARY_IMPORT_LIST,
             path: "import",
             component: () => import("@/views/beneficiary/ImportList.vue"),
@@ -610,6 +618,14 @@ export default [
             name: urls.URL_BENEFICIARY_OFF_PLATFORM_IMPORT_LIST,
             path: "import-off-platform",
             component: () => import("@/views/beneficiary/OffPlatformImportList.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_BENEFICIARIES
+            }
+          },
+          {
+            name: urls.URL_BENEFICIARY_MANAGE_CONFLICT,
+            path: ":beneficiaryId/manage-conflict",
+            component: () => import("@/views/beneficiary/ManageConflict.vue"),
             meta: {
               claim: GLOBAL_MANAGE_BENEFICIARIES
             }

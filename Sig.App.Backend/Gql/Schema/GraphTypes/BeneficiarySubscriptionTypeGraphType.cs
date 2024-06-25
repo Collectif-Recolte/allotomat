@@ -1,7 +1,12 @@
-﻿using GraphQL.DataLoader;
+﻿using GraphQL.Conventions;
+using GraphQL.DataLoader;
+using NodaTime;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Helpers;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Sig.App.Backend.Gql.Schema.GraphTypes
 {
@@ -35,6 +40,20 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<SubscriptionTypeGraphType> Type(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadSubscriptionTypeByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id);
+        }
+
+        public async Task<int> PaymentReceived(IAppUserContext ctx)
+        {
+            var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
+            return transactions.Count();
+        }
+
+        public async Task<bool> HasMissedPayment(IAppUserContext ctx, [Inject] IClock clock) {
+            var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
+            var subscriptionTotalPayment = subscription.GetTotalPayment();
+            var subscriptionPaymentRemaining = subscription.GetPaymentRemaining(clock);
+
+            return transactions.Count() < subscriptionTotalPayment - subscriptionPaymentRemaining;
         }
     }
 }
