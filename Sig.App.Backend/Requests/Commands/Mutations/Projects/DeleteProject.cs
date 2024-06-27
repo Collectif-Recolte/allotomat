@@ -102,12 +102,18 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
             var refundTransactionsProductGroup = new List<RefundTransactionProductGroup>();
             var paymentTransactionsProductGroup = new List<PaymentTransactionProductGroup>();
+            var paymentTransactionAddingFundTransactions = new List<PaymentTransactionAddingFundTransaction>();
+
             foreach (var transaction in project.Cards.SelectMany(x => x.Transactions))
             {
                 var type = transaction.GetType();
                 if (type == typeof(PaymentTransaction))
                 {
-                    var paymentTransaction = db.Transactions.OfType<PaymentTransaction>().Include(x => x.TransactionByProductGroups).ThenInclude(x => x.RefundTransactionsProductGroup).First(x => x.Id == transaction.Id);
+                    var paymentTransaction = db.Transactions.OfType<PaymentTransaction>()
+                        .Include(x => x.TransactionByProductGroups).ThenInclude(x => x.RefundTransactionsProductGroup)
+                        .Include(x => x.PaymentTransactionAddingFundTransactions).ThenInclude(x => x.AddingFundTransaction)
+                        .First(x => x.Id == transaction.Id);
+
                     paymentTransaction.Card = null;
                     paymentTransaction.RefundTransactions = null;
                     paymentTransaction.Beneficiary = null;
@@ -129,6 +135,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                         transactionProductGroup.RefundTransactionsProductGroup = null;
                     }
                     paymentTransaction.TransactionByProductGroups = null;
+
+                    foreach (var paymentTransactionAddingFundTransaction in paymentTransaction.PaymentTransactionAddingFundTransactions)
+                    {
+                        paymentTransactionAddingFundTransaction.PaymentTransaction = null;
+                        paymentTransactionAddingFundTransaction.AddingFundTransaction = null;
+                        paymentTransactionAddingFundTransactions.Add(paymentTransactionAddingFundTransaction);
+                    }
+                    paymentTransaction.PaymentTransactionAddingFundTransactions = null;
+
                 }
                 else if (type == typeof(SubscriptionAddingFundTransaction))
                 {
@@ -187,6 +202,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             var transactionLogs = db.TransactionLogs.Include(x => x.TransactionLogProductGroups).Where(x => x.ProjectId == projectId);
             db.TransactionLogProductGroups.RemoveRange(transactionLogs.SelectMany(x => x.TransactionLogProductGroups));
             db.TransactionLogs.RemoveRange(transactionLogs);
+            db.PaymentTransactionAddingFundTransactions.RemoveRange(paymentTransactionAddingFundTransactions);
             db.Transactions.RemoveRange(transactions);
             db.RefundTransactionProductGroups.RemoveRange(refundTransactionsProductGroup);
             db.PaymentTransactionProductGroups.RemoveRange(paymentTransactionsProductGroup);

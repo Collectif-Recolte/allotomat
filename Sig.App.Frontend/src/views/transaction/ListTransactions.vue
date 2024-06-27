@@ -276,8 +276,37 @@ const {
           totalAmount
           transaction {
             id
+            ... on PaymentTransactionGraphType {
+              paymentTransactionAddingFundTransactions {
+                id
+                amount
+                refundAmount
+                addingFundTransaction {
+                  ... on ManuallyAddingFundTransactionGraphType {
+                    id
+                    subscription {
+                      id
+                    }
+                  }
+                  ... on SubscriptionAddingFundTransactionGraphType {
+                    id
+                    subscription {
+                      id
+                      subscription {
+                        id
+                      }
+                    }
+                  }
+                  productGroup {
+                    id
+                  }
+                  status
+                }
+              }
+            }
           }
           subscriptionName
+          subscriptionId
         }
       }
     }

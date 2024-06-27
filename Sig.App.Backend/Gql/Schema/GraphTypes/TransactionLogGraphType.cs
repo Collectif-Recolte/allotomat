@@ -2,6 +2,7 @@
 using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using NodaTime;
+using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
@@ -33,7 +34,14 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public string MarketName => transactionLog.MarketName;
         public long? OrganizationId => transactionLog.OrganizationId;
         public string OrganizationName => transactionLog.OrganizationName;
-        public long? SubscriptionId => transactionLog.SubscriptionId;
+        public Id? SubscriptionId()
+        {
+            if (transactionLog.SubscriptionId != null && transactionLog.SubscriptionId.HasValue)
+            {
+                return Id.New<Subscription>(transactionLog.SubscriptionId.Value);
+            }
+            return null;
+        }
         public string SubscriptionName => transactionLog.SubscriptionName;
         public string TransactionInitiatorId => transactionLog.TransactionInitiatorId;
         public string TransactionInitiatorFirstname => transactionLog.TransactionInitiatorFirstname;
@@ -58,7 +66,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return ctx.DataLoader.LoadTransactionLogProductGroupByTransactionLogId(transactionLog.Id);
         }
 
-        public IDataLoaderResult<TransactionGraphType> Transaction(IAppUserContext ctx)
+        public IDataLoaderResult<ITransactionGraphType> Transaction(IAppUserContext ctx)
         {
             if (transactionLog.TransactionUniqueId == null)
                 return null;

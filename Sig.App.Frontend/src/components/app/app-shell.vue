@@ -2,11 +2,13 @@
 {
 	"en": {
 		"close-sidebar": "Close sidebar",
-		"logo": "Tomat logo"
+		"logo": "Tomat logo",
+    "support": "Help and support",
 	},
 	"fr": {
 		"close-sidebar": "Fermer le panneau",
-		"logo": "Logo de Tomat"
+		"logo": "Logo de Tomat",
+    "support": "Aide et support",
 	}
 }
 </i18n>
@@ -44,9 +46,17 @@
             </div>
 
             <SecondaryMenu />
-            <div class="shrink-0 flex flex-col items-start border-t border-primary-300 dark:border-grey-900 p-4">
+            <div class="shrink-0 flex flex-col gap-y-4 items-start border-t border-primary-300 dark:border-grey-900 p-4">
               <LangSwitch />
-              <LogoutBtn class="mt-4" />
+              <LogoutBtn />
+              <PfButtonLink
+                class="no-underline"
+                btn-style="link"
+                has-icon-left
+                :icon="ICON_SUPPORT"
+                href="https://allotomat.notion.site/Support-Tomat-c1f01ce94bd549aa92e0a64b624c5507"
+                :label="t('support')"
+                target="_blank" />
             </div>
           </div>
         </TransitionChild>
@@ -67,9 +77,17 @@
         </div>
 
         <SecondaryMenu />
-        <div class="shrink-0 flex flex-col items-start border-t border-primary-300 dark:border-grey-900 p-4 pb-8">
+        <div class="shrink-0 flex flex-col gap-y-4 items-start border-t border-primary-300 dark:border-grey-900 p-4 pb-8">
           <LangSwitch />
-          <LogoutBtn class="mt-4" />
+          <LogoutBtn />
+          <PfButtonLink
+            class="no-underline"
+            btn-style="link"
+            has-icon-left
+            :icon="ICON_SUPPORT"
+            href="https://allotomat.notion.site/Support-Tomat-c1f01ce94bd549aa92e0a64b624c5507"
+            :label="t('support')"
+            target="_blank" />
         </div>
       </div>
     </div>
@@ -118,6 +136,7 @@ import Title from "@/components/app/title";
 import TopBar from "@/components/app/top-bar";
 import Footer from "@/components/app/footer";
 
+import ICON_SUPPORT from "@/lib/icons/support.json";
 import CloseIcon from "@/lib/icons/close.json";
 
 const props = defineProps({

@@ -1,13 +1,14 @@
 <template>
   <a
-    class="pf-sigmund absolute flex items-end right-0 text-p4 text-[10px] leading-tight text-right transition-colors duration-200 ease-in-out"
+    class="pf-sigmund flex items-end text-[8px] xs:text-[10px] leading-tight text-right transition-colors duration-200 ease-in-out"
     :class="textColorClasses"
     href="https://www.sigmund.ca/"
     target="_blank"
     rel="nofollow">
     <!-- eslint-disable-next-line vue/no-v-html -->
-    <span class="sr-only xs:not-sr-only" v-html="htmlLabel"></span>
-    <Icon :icon="ICON_SIGMUND" size="xl" class="ml-2.5" aria-hidden="true" />
+    <span v-html="htmlLabel"></span>
+    <Icon :icon="ICON_SIGMUND" size="lg" class="xs:hidden ml-2" aria-hidden="true" />
+    <Icon :icon="ICON_SIGMUND" size="xl" class="hidden xs:inline ml-2.5" aria-hidden="true" />
   </a>
 </template>
 
