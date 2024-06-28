@@ -87,7 +87,7 @@
     "subscription-trigger-fund-expiration-specific-date": "Une date spécifique",
     "subscription-trigger-fund-expiration-number-of-days": "Un nombre de jours après la première utilisation",
     "subscription-days-until-funds-expire-after-first-use": "Échéance des fonds après l'usage initial",
-    "subscription-trigger-fund-expiration-number-of-days-desc": "Les fonds d'une carte expireront <b>X jours après la première utilisation de la carte</b> pour un achat, ou à la <b>Date maximale d'expiration des fonds</b>, selon la première éventualité.",
+    "subscription-trigger-fund-expiration-number-of-days-desc": "Les fonds d'une carte expireront <b>{numberOfDays} jours après la première utilisation de la carte</b> pour un achat, ou à la <b>Date maximale d'expiration des fonds</b>, selon la première éventualité.",
     "subscription-payment-dates-desc":"<b>Dates de versement ({count})</b> : {dates}"
 	}
 }
@@ -275,7 +275,12 @@
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <span
             class="text-sm text-grey-500 dark:text-grey-400"
-            v-html="t('subscription-trigger-fund-expiration-number-of-days-desc')"></span>
+            v-html="
+              t('subscription-trigger-fund-expiration-number-of-days-desc', {
+                numberOfDays:
+                  numberDaysUntilFundsExpire !== '' && numberDaysUntilFundsExpire !== null ? numberDaysUntilFundsExpire : '-'
+              })
+            "></span>
           <!-- eslint-enable vue/no-v-html @intlify/vue-i18n/no-v-html -->
         </div>
         <Field v-slot="{ field: inputField, errors: fieldErrors }" v-model="fundsExpirationDateValue" name="fundsExpirationDate">
@@ -289,16 +294,17 @@
             is-inside-modal
             @update:modelValue="forceValidation(values, validateField)" />
         </Field>
-        <Field v-slot="{ field, errors: fieldErrors }" name="numberDaysUntilFundsExpire">
+        <Field v-slot="{ errors: fieldErrors }" name="numberDaysUntilFundsExpire">
           <PfFormInputText
             id="numberDaysUntilFundsExpire"
             class="sm:col-span-6"
-            v-bind="field"
+            :value="numberDaysUntilFundsExpire"
             :label="t('subscription-days-until-funds-expire-after-first-use')"
             :errors="fieldErrors"
             input-type="number"
             min="0"
-            :disabled="triggerFundExpirationValue !== NUMBER_OF_DAYS">
+            :disabled="triggerFundExpirationValue !== NUMBER_OF_DAYS"
+            @input="(e) => updateNumberDaysUntilFundsExpireValue(setFieldValue, validateField, e)">
           </PfFormInputText>
         </Field>
       </PfFormSection>
@@ -491,6 +497,7 @@ const startDateValue = ref(props.startDate);
 const endDateValue = ref(props.endDate);
 const triggerFundExpirationValue = ref(props.triggerFundExpiration);
 const monthlyPaymentMomentValue = ref(props.monthlyPaymentMoment);
+const numberDaysUntilFundsExpire = ref(props.numberDaysUntilFundsExpire);
 
 const monthlyPaymentMomentOptions = [
   {
@@ -717,7 +724,6 @@ async function onSubmit({
   monthlyPaymentMoment,
   maxNumberOfPayments,
   fundsExpirationDate,
-  numberDaysUntilFundsExpire,
   productGroupSubscriptionTypes
 }) {
   emit("submit", {
@@ -730,7 +736,8 @@ async function onSubmit({
     isFundsAccumulable: isFundsAccumulableValue.value,
     fundsExpirationDate,
     triggerFundExpiration: triggerFundExpirationValue.value,
-    numberDaysUntilFundsExpire: triggerFundExpirationValue.value === NUMBER_OF_DAYS ? parseInt(numberDaysUntilFundsExpire) : null,
+    numberDaysUntilFundsExpire:
+      triggerFundExpirationValue.value === NUMBER_OF_DAYS ? parseInt(numberDaysUntilFundsExpire.value) : null,
     productGroupSubscriptionTypes
   });
 }
@@ -769,6 +776,12 @@ function updateMonthlyPaymentMoment(setFieldValue, validateField, value) {
     setFieldValue("monthlyPaymentMoment", value);
     validateField("monthlyPaymentMoment");
   }
+}
+
+function updateNumberDaysUntilFundsExpireValue(setFieldValue, validateField, value) {
+  numberDaysUntilFundsExpire.value = value;
+  setFieldValue("numberDaysUntilFundsExpire", value);
+  validateField("numberDaysUntilFundsExpire");
 }
 
 async function forceValidation(values, validateField) {
