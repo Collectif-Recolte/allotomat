@@ -14,6 +14,7 @@
 		"username": "Email",
     "check-my-balance": "Check my card balance",
     "support": "Help and support",
+    "support-link": "https://www.notion.so/allotomat/Tomat-Support-Center-fbf571e40909463db20b3a0160a65b3a",
     "about": "About Tomat",
     "about-link": "https://info.allotomat.com/about/",
     "form-title": "Welcome to Tomat",
@@ -33,6 +34,7 @@
 		"username": "Courriel",
     "check-my-balance": "Vérification du solde de ma carte",
     "support": "Aide et support",
+    "support-link": "https://allotomat.notion.site/",
     "about": "À propos de Tomat",
     "about-link": "https://info.allotomat.com/a-propos/",
     "form-title": "Bienvenue sur Tomat",
@@ -64,7 +66,7 @@
               btn-style="link"
               has-icon-left
               :icon="ICON_SUPPORT"
-              href="https://allotomat.notion.site/Support-Tomat-c1f01ce94bd549aa92e0a64b624c5507"
+              :href="t('support-link')"
               :label="t('support')"
               target="_blank" />
           </li>
@@ -177,7 +179,7 @@
             btn-style="link"
             has-icon-left
             :icon="ICON_SUPPORT"
-            href="https://allotomat.notion.site/Support-Tomat-c1f01ce94bd549aa92e0a64b624c5507"
+            :href="t('support-link')"
             :label="t('support')"
             target="_blank" />
         </li>

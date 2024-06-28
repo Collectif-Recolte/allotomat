@@ -4,11 +4,13 @@
 		"close-sidebar": "Close sidebar",
 		"logo": "Tomat logo",
     "support": "Help and support",
+    "support-link": "https://www.notion.so/allotomat/Tomat-Support-Center-fbf571e40909463db20b3a0160a65b3a"
 	},
 	"fr": {
 		"close-sidebar": "Fermer le panneau",
 		"logo": "Logo de Tomat",
     "support": "Aide et support",
+    "support-link": "https://allotomat.notion.site/"
 	}
 }
 </i18n>
@@ -54,7 +56,7 @@
                 btn-style="link"
                 has-icon-left
                 :icon="ICON_SUPPORT"
-                href="https://allotomat.notion.site/Support-Tomat-c1f01ce94bd549aa92e0a64b624c5507"
+                :href="t('support-link')"
                 :label="t('support')"
                 target="_blank" />
             </div>
@@ -85,7 +87,7 @@
             btn-style="link"
             has-icon-left
             :icon="ICON_SUPPORT"
-            href="https://allotomat.notion.site/Support-Tomat-c1f01ce94bd549aa92e0a64b624c5507"
+            :href="t('support-link')"
             :label="t('support')"
             target="_blank" />
         </div>
