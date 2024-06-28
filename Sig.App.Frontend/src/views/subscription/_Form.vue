@@ -666,13 +666,18 @@ const getSubscriptionPaymentDates = computed(() => {
   const dates = [];
 
   if (startDateValue.value && endDateValue.value) {
+    const startMonth =
+      (monthlyPaymentMomentValue.value === FIRST_DAY_OF_THE_MONTH && startDateValue.value.getDate() === 1) ||
+      (monthlyPaymentMomentValue.value === FIRST_AND_FIFTEENTH_DAY_OF_THE_MONTH && startDateValue.value.getDate() <= 15)
+        ? startDateValue.value.getMonth()
+        : startDateValue.value.getMonth() + 1;
     let currentDate = new Date(
       startDateValue.value.getFullYear(),
-      startDateValue.value.getMonth(),
-      monthlyPaymentMomentValue.value === FIRST_DAY_OF_THE_MONTH ||
-      monthlyPaymentMomentValue.value === FIRST_AND_FIFTEENTH_DAY_OF_THE_MONTH
-        ? 1
-        : 15
+      startMonth,
+      monthlyPaymentMomentValue.value === FIFTEENTH_DAY_OF_THE_MONTH ||
+      (monthlyPaymentMomentValue.value === FIRST_AND_FIFTEENTH_DAY_OF_THE_MONTH && startDateValue.value.getDate() <= 15)
+        ? 15
+        : 1
     );
     while (currentDate <= endDateValue.value) {
       dates.push(currentDate.toLocaleDateString());
