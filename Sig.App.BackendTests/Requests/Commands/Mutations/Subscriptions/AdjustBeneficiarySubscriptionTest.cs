@@ -112,12 +112,11 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             };
             DbContext.Beneficiaries.Add(beneficiary);
 
-            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
             subscription1 = new Subscription()
             {
                 Name = "Subscription 1",
-                StartDate = new DateTime(today.Year, today.Month, 1),
-                EndDate = new DateTime(today.Year, today.Month, 2).AddMonths(1),
+                StartDate = new DateTime(2024, 7, 1),
+                EndDate = new DateTime(2024, 8, 2),
                 MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
                 Types = new List<SubscriptionType>()
                 {
@@ -146,8 +145,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             subscription2 = new Subscription()
             {
                 Name = "Subscription 2",
-                StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(1),
-                EndDate = new DateTime(today.Year, today.Month, 16).AddMonths(2),
+                StartDate = new DateTime(2024, 8, 1),
+                EndDate = new DateTime(2024, 9, 16),
                 MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth,
                 Types = new List<SubscriptionType>()
                 {
@@ -168,8 +167,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             subscription3 = new Subscription()
             {
                 Name = "Subscription 3",
-                StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(1),
-                EndDate = new DateTime(today.Year, today.Month, 2).AddMonths(4),
+                StartDate = new DateTime(2024, 8, 1).AddMonths(1),
+                EndDate = new DateTime(2024, 11, 2).AddMonths(4),
                 MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth,
                 Types = new List<SubscriptionType>()
                 {
@@ -238,7 +237,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                         Amount = 20,
                         AvailableFund = 10,
                         Status = FundTransactionStatus.Actived,
-                        ExpirationDate = new DateTime(today.Year + 1, today.Month, today.Day),
+                        ExpirationDate = new DateTime(2025, 7, 2),
                         ProductGroup = productGroup1,
                         Beneficiary = beneficiary,
                         SubscriptionType = subscription1.Types.First(x => x.BeneficiaryType == beneficiaryType1)
@@ -302,7 +301,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 .FirstAsync();
 
             var localSubscriptionBeneficiary = localBeneficiary.Subscriptions.First(x => x.SubscriptionId == subscription2.Id);
-            localSubscriptionBeneficiary.BudgetAllowance.AvailableFund.Should().Be(550);
+            localSubscriptionBeneficiary.BudgetAllowance.AvailableFund.Should().Be(525);
             localSubscriptionBeneficiary.BeneficiaryTypeId.Should().Be(beneficiaryType2.Id);
         }
 
