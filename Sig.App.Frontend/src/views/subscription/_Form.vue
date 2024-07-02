@@ -679,8 +679,9 @@ const getSubscriptionPaymentDates = computed(() => {
         ? 15
         : 1
     );
+
     while (currentDate <= endDateValue.value) {
-      dates.push(currentDate.toLocaleDateString());
+      dates.push(new Date(currentDate));
       if (
         monthlyPaymentMomentValue.value === FIRST_DAY_OF_THE_MONTH ||
         monthlyPaymentMomentValue.value === FIFTEENTH_DAY_OF_THE_MONTH
@@ -695,7 +696,7 @@ const getSubscriptionPaymentDates = computed(() => {
     }
   }
 
-  return dates.map((x) => formatDate(new Date(x), textualFormat));
+  return dates.map((x) => formatDate(x, textualFormat));
 });
 
 function createNewProductGroupSubscriptionTypes(push) {
