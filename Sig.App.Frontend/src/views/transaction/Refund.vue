@@ -245,6 +245,7 @@ const validationSchema = object({
     object({
       amount: lazy((value) => {
         if (value === undefined || value === "" || value === null) return string().notRequired();
+        value = value.toString().replace(/,/, ".");
         if (isNaN(value)) {
           return string().test({
             name: "productGroupAmountMustBeNumber",
@@ -374,10 +375,11 @@ function haveRefundAmount() {
   for (var prop in productGroupsValue.value) {
     if (Object.prototype.hasOwnProperty.call(productGroupsValue.value, prop)) {
       if (productGroupsValue.value[prop] === null || productGroupsValue.value[prop] === "") continue;
-      if (isNaN(productGroupsValue.value[prop])) {
+      let value = productGroupsValue.value[prop].toString().replace(/,/, ".");
+      if (isNaN(value)) {
         return false;
       }
-      if (parseFloat(productGroupsValue.value[prop]) > 0) {
+      if (parseFloat(value) > 0) {
         return true;
       }
     }
@@ -386,8 +388,8 @@ function haveRefundAmount() {
 
 async function onSubmit({ productGroups, password }) {
   const transactions = productGroups
-    .filter((x) => parseFloat(x.amount) > 0)
-    .map((x) => ({ amount: parseFloat(x.amount), productGroupId: x.productGroupId }));
+    .filter((x) => parseFloat(x.amount.toString().replace(/,/, ".")) > 0)
+    .map((x) => ({ amount: parseFloat(x.amount.toString().replace(/,/, ".")), productGroupId: x.productGroupId }));
 
   if (transactions.length === 0) {
     addWarning(t("no-amount-to-refund"));

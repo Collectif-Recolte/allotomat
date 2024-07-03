@@ -319,6 +319,7 @@ const validationSchemas = computed(() => {
         object({
           amount: lazy((value) => {
             if (value === undefined || value === "" || value === null) return string().notRequired();
+            value = value.toString().replace(/,/, ".");
             if (isNaN(value)) {
               return string().test({
                 name: "productGroupAmountMustBeNumber",
