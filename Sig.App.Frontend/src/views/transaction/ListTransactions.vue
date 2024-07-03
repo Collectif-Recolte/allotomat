@@ -297,6 +297,7 @@ const {
                       }
                     }
                   }
+                  expirationDate
                   productGroup {
                     id
                   }

@@ -23,7 +23,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             this.transaction = transaction;
         }
 
-        public OffsetDateTime ExpirationDate()
+        public OffsetDateTime? ExpirationDate()
         {
             return transaction.ExpirationDate.FromUtcToOffsetDateTime();
         }

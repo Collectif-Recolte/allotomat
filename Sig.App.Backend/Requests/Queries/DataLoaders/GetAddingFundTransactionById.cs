@@ -36,7 +36,9 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
                     case SubscriptionAddingFundTransaction saft:
                         return new SubscriptionAddingFundTransactionGraphType(saft);
                     case OffPlatformAddingFundTransaction opaft:
-                        return new OffPlatformAddingFundTransactionGraphType(opaft) as IAddingFundTransactionGraphType;
+                        return new OffPlatformAddingFundTransactionGraphType(opaft);
+                    case LoyaltyAddingFundTransaction laft:
+                        return new LoyaltyAddingFundTransactionGraphType(laft) as IAddingFundTransactionGraphType;
                 }
 
                 return null;

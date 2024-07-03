@@ -263,8 +263,9 @@ function hasAnyActiveSubscription(item) {
     if (
       transaction.addingFundTransaction.status === ADDING_FUND_TRANSACTION_STATUS_ACTIVED &&
       transaction.amount > transaction.refundAmount &&
-      ((transaction.addingFundTransaction.subscription.subscription !== null &&
-        item.subscriptionId === transaction.addingFundTransaction.subscription.subscription.id) ||
+      (transaction.addingFundTransaction.expirationDate === null ||
+        (transaction.addingFundTransaction.subscription.subscription !== null &&
+          item.subscriptionId === transaction.addingFundTransaction.subscription.subscription.id) ||
         (transaction.addingFundTransaction.subscription !== null &&
           item.subscriptionId === transaction.addingFundTransaction.subscription.id))
     )
