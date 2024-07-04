@@ -11,6 +11,7 @@ namespace Sig.App.Backend.DbModel.Entities.Transactions
 
         public IList<PaymentTransactionAddingFundTransaction> PaymentTransactionAddingFundTransactions { get; set; }
         public IList<PaymentTransaction> Transactions { get; set; }
+        public IList<ManuallyAddingFundTransaction> ManuallNegativeFundTransactions { get; set; }
 
         public decimal AvailableFund { get; set; }
         public FundTransactionStatus Status { get; set; }
