@@ -39,6 +39,7 @@
     "subscription-payment-based-card-usage-disabled": "Disabled",
     "subscription-max-number-of-payments": "Maximum total number of payments",
     "subscription-trigger-fund-expiration": "Funds expiration trigger",
+    "subscription-trigger-fund-expiration-desc": "Funds from this subscription will expire at the start of the selected date (12:01 am Eastern Time)",
     "subscription-trigger-fund-expiration-specific-date": "A specific date",
     "subscription-trigger-fund-expiration-number-of-days": "A number of days after the first use",
     "subscription-days-until-funds-expire-after-first-use": "Funds expiry after initial use",
@@ -84,6 +85,7 @@
     "subscription-payment-based-card-usage-disabled": "Désactivé",
     "subscription-max-number-of-payments": "Nombre total maximum de versements",
     "subscription-trigger-fund-expiration": "Déclencheur de l’expiration des fonds",
+    "subscription-trigger-fund-expiration-desc": "Les fonds de cet abonnement expireront au début de la date sélectionnée (12h01 heure de l'Est)",
     "subscription-trigger-fund-expiration-specific-date": "Une date spécifique",
     "subscription-trigger-fund-expiration-number-of-days": "Un nombre de jours après la première utilisation",
     "subscription-days-until-funds-expire-after-first-use": "Échéance des fonds après l'usage initial",
@@ -269,6 +271,7 @@
             :value="triggerFundExpirationValue"
             :label="t('subscription-trigger-fund-expiration')"
             :options="triggerFundExpirationOptions"
+            :description="t('subscription-trigger-fund-expiration-desc')"
             @input="(e) => updateTriggerFundExpirationValue(setFieldValue, validateField, e)" />
         </Field>
         <div v-if="triggerFundExpirationValue === NUMBER_OF_DAYS" class="flex sm:col-span-12">
