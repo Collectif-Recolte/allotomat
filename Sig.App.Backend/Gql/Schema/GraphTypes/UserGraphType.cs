@@ -8,6 +8,10 @@ using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Gql.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
+using Sig.App.Backend.Helpers;
+using Microsoft.Extensions.Configuration;
 
 namespace Sig.App.Backend.Gql.Schema.GraphTypes
 {
@@ -44,6 +48,33 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public PermissionsGraphType Permissions(IAppUserContext ctx)
         {
             return new PermissionsGraphType(ctx.CurrentUser);
+        }
+
+        public async Task<string> ConfirmationLink([Inject] UserManager<AppUser> userManager, [Inject] IConfiguration config)
+        {
+            if (user.EmailConfirmed)
+            {
+                return null;
+            }
+
+            string token;
+            switch (user.Type)
+            {
+                case UserType.PCAAdmin:
+                    token = await userManager.GenerateUserTokenAsync(user, TokenProviders.EmailInvites, TokenPurposes.AdminInvite);
+                    return $"{config["Mailer:BaseUrl"]}/{UrlHelper.RegistrationAdmin(user.Email, token)}";
+                case UserType.ProjectManager:
+                    token = await userManager.GenerateUserTokenAsync(user, TokenProviders.EmailInvites, TokenPurposes.ProjectManagerInvite);
+                    return $"{config["Mailer:BaseUrl"]}/{UrlHelper.RegistrationProjectManager(user.Email, token)}";
+                case UserType.OrganizationManager:
+                    token = await userManager.GenerateUserTokenAsync(user, TokenProviders.EmailInvites, TokenPurposes.OrganizationManagerInvite);
+                    return $"{config["Mailer:BaseUrl"]}/{UrlHelper.RegistrationOrganizationManager(user.Email, token)}";
+                case UserType.Merchant:
+                    token = await userManager.GenerateUserTokenAsync(user, TokenProviders.EmailInvites, TokenPurposes.MerchantInvite);
+                    return $"{config["Mailer:BaseUrl"]}/{UrlHelper.RegistrationMarketManager(user.Email, token)}";
+            }
+
+            return null;
         }
     }
 }

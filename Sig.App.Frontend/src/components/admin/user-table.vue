@@ -14,7 +14,9 @@
       "status": "Status",
       "user-confirmed": "User confirmed",
       "user-not-confirmed": "User not confirmed",
-      "username": "Username"
+      "username": "Username",
+      "copy-confirmation-email": "Copy confirmation email",
+      "confirmation-link-copied": "Confirmation link copied to clipboard."
     },
     "fr": {
       "admin-pca": "Administrateur",
@@ -30,7 +32,9 @@
       "status": "Statut",
       "user-confirmed": "Utilisateur confirmé",
       "user-not-confirmed": "Utilisateur non confirmé",
-      "username": "Nom d'utilisateur"
+      "username": "Nom d'utilisateur",
+      "copy-confirmation-email": "Copier le courriel de confirmation",
+      "confirmation-link-copied": "Lien de confirmation copié dans le presse-papiers."
     }
   }
   </i18n>
@@ -68,10 +72,13 @@ import { useMutation } from "@vue/apollo-composable";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 
+import { copyTextToClipboard } from "@/lib/helpers/clipboard";
+
 import { USER_TYPE_PCAADMIN, USER_TYPE_PROJECTMANAGER, USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
 import { URL_ADMIN_USER_PROFILE } from "@/lib/consts/urls";
 import PENCIL_ICON from "@/lib/icons/pencil.json";
 import MAIL_ICON from "@/lib/icons/mail.json";
+import LINK_ICON from "@/lib/icons/download.json";
 
 const { addSuccess } = useNotificationsStore();
 const { t } = useI18n();
@@ -95,13 +102,19 @@ function getBtnGroup(user) {
   return [
     {
       icon: MAIL_ICON,
-      label: t("resend-confirmation-email", { name: getUserName(user) }),
+      label: t("resend-confirmation-email"),
       onClick: () => resendConfirmationEmail(user),
       if: !user.isConfirmed
     },
     {
+      icon: LINK_ICON,
+      label: t("copy-confirmation-email"),
+      onClick: () => copyConfirmationLink(user),
+      if: !user.isConfirmed
+    },
+    {
       icon: PENCIL_ICON,
-      label: t("edit-profile", { name: getUserName(user) }),
+      label: t("edit-profile"),
       route: { name: URL_ADMIN_USER_PROFILE, params: { id: user.id } }
     }
   ];
@@ -132,6 +145,11 @@ function getUserStatus(item) {
 async function resendConfirmationEmail(item) {
   await resendConfirmationEmailMutation({ input: { email: item.email } });
   addSuccess(t("resend-complete", { email: item.email }));
+}
+
+async function copyConfirmationLink(item) {
+  copyTextToClipboard(item.confirmationLink);
+  addSuccess(t("confirmation-link-copied"));
 }
 
 function getUserLastConnectionTime(item) {
