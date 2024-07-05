@@ -300,7 +300,7 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
+        public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, Id[] markets, string[] transactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
         {
             return await mediator.Send(new GenerateTransactionsReport.Input()
             {
@@ -309,6 +309,7 @@ namespace Sig.App.Backend.Gql.Schema
                 EndDate = endDate,
                 Organizations = organizations,
                 Subscriptions = subscriptions,
+                Markets = markets,
                 WithoutSubscription = withoutSubscription,
                 Categories = categories,
                 TransactionTypes = transactionTypes,
@@ -379,7 +380,7 @@ namespace Sig.App.Backend.Gql.Schema
         [RequirePermission(GlobalPermission.ManageTransactions)]
         [Description("All transactions")]
         public static async Task<Pagination<TransactionLogGraphType>> TransactionLogs(this GqlQuery _, [Inject] IMediator mediator,
-            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText, string timeZoneId)
+            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, Id[] markets, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText, string timeZoneId)
         {
             var results = await mediator.Send(new SearchTransactionLogs.Query
             {
@@ -389,6 +390,7 @@ namespace Sig.App.Backend.Gql.Schema
                 EndDate = endDate,
                 Organizations = organizations,
                 Subscriptions = subscriptions,
+                Markets = markets,
                 WithoutSubscription = withoutSubscription,
                 Categories = categories,
                 TransactionTypes = transactionTypes,

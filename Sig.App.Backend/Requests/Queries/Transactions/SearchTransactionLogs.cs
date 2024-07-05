@@ -24,6 +24,7 @@ using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.DbModel.Entities.Markets;
 
 namespace Sig.App.Backend.Requests.Queries.Transactions
 {
@@ -59,9 +60,7 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
 
             if(!globalPermissions.Contains(GlobalPermission.ManageOrganizations))
             {
-                var user = await db.Users
-                .Where(c => c.Id == ctx.CurrentUserId)
-                .FirstAsync(cancellationToken: cancellationToken);
+                var user = await db.Users.Where(c => c.Id == ctx.CurrentUserId).FirstAsync(cancellationToken: cancellationToken);
 
                 var existingClaims = await userManager.GetClaimsAsync(user);
                 var existingOrganizationsClaims = existingClaims.Where(x => x.Type == AppClaimTypes.OrganizationManagerOf).Select(x => x.Value).FirstOrDefault();
@@ -88,6 +87,12 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             {
                 var categoriesLongIdentifiers = request.Categories.Select(x => x.LongIdentifierForType<BeneficiaryType>());
                 query = query.Where(x => categoriesLongIdentifiers.Contains(x.BeneficiaryTypeId.GetValueOrDefault()));
+            }
+
+            if (request.Markets?.Any() ?? false)
+            {
+                var marketsLongIdentifiers = request.Markets.Select(x => x.LongIdentifierForType<Market>());
+                query = query.Where(x => marketsLongIdentifiers.Contains(x.MarketId.GetValueOrDefault()));
             }
 
             if (request.TransactionTypes?.Any() ?? false)
@@ -128,6 +133,7 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             public DateTime EndDate { get; set; }
             public IEnumerable<Id> Organizations { get; set; }
             public IEnumerable<Id> Subscriptions { get; set; }
+            public IEnumerable<Id> Markets { get; set; }
             public Maybe<bool> WithoutSubscription { get; set; }
             public IEnumerable<Id> Categories { get; set; }
             public IEnumerable<string> TransactionTypes { get; set; }
