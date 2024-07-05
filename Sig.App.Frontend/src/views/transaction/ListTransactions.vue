@@ -2,13 +2,13 @@
   {
     "en": {
       "title": "Transaction history",
-      "transaction-count": "No transaction | {count} transaction | {count} transactions",   
+      "transaction-count": "No transaction | {count} transaction / Amount due to markets {amount} | {count} transactions / Amount due to markets {amount}",   
       "export-btn": "Export report",
       "create-transaction": "New transaction"
     },
     "fr": {
       "title": "Historique des transactions",
-      "transaction-count": "Aucune transaction | {count} transaction | {count} transactions",
+      "transaction-count": "Aucune transaction | {count} transaction / Montant dû aux marché(s) : {amount} | {count} transactions / Montant dû aux marchés : {amount}",
       "export-btn": "Exporter un rapport",
       "create-transaction": "Nouvelle transaction"
     }
@@ -58,7 +58,13 @@
         </Title>
       </template>
       <div v-if="transactionLogs">
-        <UiTableHeader :title="t('transaction-count', transactionLogs.totalCount)" />
+        <UiTableHeader
+          :title="
+            t('transaction-count', {
+              count: transactionLogs.totalCount,
+              amount: getMoneyFormat(transactionLogs.amountDueToMarkets)
+            })
+          " />
         <div class="flex flex-col relative mb-6">
           <ProgramTransactionTable
             :transactions="transactions"
@@ -107,6 +113,7 @@ import ICON_DOWNLOAD from "@/lib/icons/download.json";
 import { useAuthStore } from "@/lib/store/auth";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
+import { getMoneyFormat } from "@/lib/helpers/money";
 
 const route = useRoute();
 const router = useRouter();
@@ -282,6 +289,7 @@ const {
         pageNumber
         pageSize
         totalPages
+        amountDueToMarkets
         items {
           id
           beneficiaryFirstname

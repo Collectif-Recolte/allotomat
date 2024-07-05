@@ -25,10 +25,11 @@ using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.DbModel.Entities.Markets;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Queries.Transactions
 {
-    public class SearchTransactionLogs : IRequestHandler<SearchTransactionLogs.Query, Pagination<TransactionLog>>
+    public class SearchTransactionLogs : IRequestHandler<SearchTransactionLogs.Query, TransactionLogsPagination<TransactionLog>>
     {
         private readonly IAppUserContext ctx;
         private readonly AppDbContext db;
@@ -45,7 +46,7 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             this.permissionService = permissionService;
         }
 
-        public async Task<Pagination<TransactionLog>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<TransactionLogsPagination<TransactionLog>> Handle(Query request, CancellationToken cancellationToken)
         {
             var currentUserCanSeeAllBeneficiaryInfo = await beneficiaryService.CurrentUserCanSeeAllBeneficiaryInfo();
             var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
@@ -122,10 +123,10 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             }
 
             var sorted = Sort(query, TransactionLogSort.Default, SortOrder.Desc);
-            return await Pagination.For(sorted, request.Page);
+            return await TransactionLogsPagination.For(sorted, request.Page);
         }
 
-        public class Query : IRequest<Pagination<TransactionLog>>
+        public class Query : IRequest<TransactionLogsPagination<TransactionLog>>
         {
             public Page Page { get; set; }
             public Id ProjectId { get; set; }
