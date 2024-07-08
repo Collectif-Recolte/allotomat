@@ -41,7 +41,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                 throw new BeneficiaryNotFoundException();
             }
             
-            if (HaveAnyActiveSubscription(beneficiary))
+            if (HaveAnySubscriptionNotExpired(beneficiary))
             {
                 logger.LogWarning("[Mutation] DeleteBeneficiary - BeneficiaryCantHaveActiveSubscriptionException");
                 throw new BeneficiaryCantHaveActiveSubscriptionException();
@@ -68,9 +68,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             logger.LogInformation($"[Mutation] DeleteBeneficiary - Beneficiary deleted ({beneficiaryId}, {beneficiary.Firstname} {beneficiary.Lastname})");
         }
 
-        private bool HaveAnyActiveSubscription(Beneficiary beneficiary)
+        private bool HaveAnySubscriptionNotExpired(Beneficiary beneficiary)
         {
-            var haveAnyActiveSubscription = false;
+            var haveAnySubscriptionNotExpired = false;
             var today = clock
                 .GetCurrentInstant()
                 .ToDateTimeUtc();
@@ -79,11 +79,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             {
                 if (sub.Subscription.EndDate >= today)
                 {
-                    haveAnyActiveSubscription = true;
+                    haveAnySubscriptionNotExpired = true;
                 }
             }
 
-            return haveAnyActiveSubscription;
+            return haveAnySubscriptionNotExpired;
         }
 
         [MutationInput]
