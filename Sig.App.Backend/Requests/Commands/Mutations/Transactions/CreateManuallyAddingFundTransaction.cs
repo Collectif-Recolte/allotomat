@@ -163,10 +163,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 var affectedNegativeFundTransactions = new List<AddingFundTransaction>();
                 if (request.Amount < 0)
                 {
-                    var safts = await db.Transactions.OfType<SubscriptionAddingFundTransaction>().Where(x => x.BeneficiaryId == beneficiaryId && x.ProductGroupId == productGroupId && x.SubscriptionType.SubscriptionId == subscriptionId && x.Status == FundTransactionStatus.Actived).ToListAsync();
-                    var mafts = await db.Transactions.OfType<ManuallyAddingFundTransaction>().Where(x => x.BeneficiaryId == beneficiaryId && x.ProductGroupId == productGroupId && x.SubscriptionId == subscriptionId && x.Status == FundTransactionStatus.Actived).ToListAsync();
-
-                    var afts = (safts as IEnumerable<AddingFundTransaction>).Concat(mafts as IEnumerable<AddingFundTransaction>).OrderBy(x => x.ExpirationDate);
+                    var afts = await db.Transactions
+                        .OfType<AddingFundTransaction>()
+                        .Where(x => x.BeneficiaryId == beneficiaryId &&
+                                    x.ProductGroupId == productGroupId &&
+                                    x.Status == FundTransactionStatus.Actived &&
+                                    ((x is SubscriptionAddingFundTransaction && (x as SubscriptionAddingFundTransaction).SubscriptionType.SubscriptionId == subscriptionId) ||
+                                    (x is ManuallyAddingFundTransaction && (x as ManuallyAddingFundTransaction).SubscriptionId == subscriptionId)))
+                        .OrderBy(x => x.ExpirationDate)
+                        .ToListAsync();
 
                     var negatifAmount = request.Amount;
                     var i = 0;
