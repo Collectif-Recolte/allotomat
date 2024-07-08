@@ -12,7 +12,7 @@
 <template>
   <div>
     <!-- eslint-disable-next-line -->
-    <p class="text-p2 mb-2 font-semibold">{{ t("step") }} {{ stepNumber }} : {{ props.stepLabel }}</p>
+    <p class="text-p1 mb-2 font-semibold">{{ t("step") }} {{ stepNumber }} : {{ props.stepLabel }}</p>
     <div class="rounded-full bg-primary-100 overflow-hidden w-full">
       <div
         class="h-2 bg-yellow-500 rounded-full transition-width duration-300 ease-in-out"

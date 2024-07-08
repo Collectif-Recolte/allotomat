@@ -12,7 +12,6 @@ using Sig.App.Backend.Services.Mailer;
 using Sig.App.Backend.DbModel.Enums;
 using System.Collections.Generic;
 using System;
-using Sig.App.Backend.Requests.Commands.Mutations.Transactions;
 using System.Threading.Tasks;
 using System.Threading;
 using Xunit;
@@ -20,9 +19,7 @@ using GraphQL.Conventions;
 using Sig.App.Backend.Extensions;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Sig.App.Backend.Requests.Queries.Cards;
 using System.Linq;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 using Sig.App.Backend.DbModel.Entities.Profiles;
 
 namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
@@ -41,7 +38,12 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         private readonly ManuallyAddingFundTransaction initialTransaction1;
         private readonly LoyaltyAddingFundTransaction initialTransaction2;
         private readonly ManuallyAddingFundTransaction initialTransaction3;
-        private readonly PaymentTransaction initialPaymentTransaction;
+        
+        private readonly ManuallyAddingFundTransaction initialTransaction4;
+
+        private readonly PaymentTransaction initialPaymentTransaction1;
+        private readonly PaymentTransaction initialPaymentTransaction2;
+
         private readonly ProductGroup productGroup;
         private readonly ProductGroup loyaltyProductgroup;
 
@@ -178,7 +180,20 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 ProductGroup = productGroup
             };
 
-            initialPaymentTransaction = new PaymentTransaction()
+            initialTransaction4 = new ManuallyAddingFundTransaction()
+            {
+                TransactionUniqueId = "initialTransaction4",
+                Amount = 20,
+                Card = card,
+                Beneficiary = beneficiary,
+                OrganizationId = beneficiary.OrganizationId,
+                AvailableFund = 20,
+                ExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(1),
+                Subscription = subscription,
+                ProductGroup = productGroup
+            };
+
+            initialPaymentTransaction1 = new PaymentTransaction()
             {
                 Amount = 20,
                 Card = card,
@@ -198,12 +213,49 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                         ProductGroup = loyaltyProductgroup
                     }
                 },
-                Transactions = new List<AddingFundTransaction>()
+                TransactionUniqueId = "initialPaymentTransaction",
+            };
+            initialPaymentTransaction1.Transactions = new List<AddingFundTransaction>()
+            {
+                initialTransaction1,
+                initialTransaction2
+            };
+
+            initialPaymentTransaction2 = new PaymentTransaction()
+            {
+                Amount = 20,
+                Card = card,
+                Beneficiary = beneficiary,
+                Market = market,
+                Organization = organization,
+                TransactionByProductGroups = new List<PaymentTransactionProductGroup>()
                 {
-                    initialTransaction1,
-                    initialTransaction2
+                    new PaymentTransactionProductGroup()
+                    {
+                        Amount = 20,
+                        ProductGroup = productGroup
+                    }
                 },
                 TransactionUniqueId = "initialPaymentTransaction",
+            };
+            initialPaymentTransaction2.Transactions = new List<AddingFundTransaction>()
+            {
+                initialTransaction3,
+                initialTransaction4
+            };
+            initialPaymentTransaction2.PaymentTransactionAddingFundTransactions = new List<PaymentTransactionAddingFundTransaction>()
+            {
+                new PaymentTransactionAddingFundTransaction() {
+                    AddingFundTransaction = initialTransaction3,
+                    PaymentTransaction = initialPaymentTransaction2,
+                    Amount = 10
+                },
+                new PaymentTransactionAddingFundTransaction()
+                {
+                    AddingFundTransaction = initialTransaction4,
+                    PaymentTransaction = initialPaymentTransaction2,
+                    Amount = 10
+                }
             };
 
             card.Transactions = new List<Transaction>()
@@ -211,7 +263,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 initialTransaction1,
                 initialTransaction2,
                 initialTransaction3,
-                initialPaymentTransaction
+                initialTransaction4,
+                initialPaymentTransaction1,
+                initialPaymentTransaction2
             };
 
             organization.Beneficiaries = new List<Beneficiary>() { beneficiary };
@@ -233,7 +287,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             DbContext.Transactions.Add(initialTransaction1);
             DbContext.Transactions.Add(initialTransaction2);
             DbContext.Transactions.Add(initialTransaction3);
-            DbContext.Transactions.Add(initialPaymentTransaction);
+            DbContext.Transactions.Add(initialTransaction4);
+            DbContext.Transactions.Add(initialPaymentTransaction1);
+            DbContext.Transactions.Add(initialPaymentTransaction2);
 
             DbContext.SaveChanges();
 
@@ -246,11 +302,137 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         }
 
         [Fact]
+        public async Task CreateRefundTransactionWithFundFromMultipleSubscription()
+        {
+            var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
+            {
+                InitialTransactionId = initialPaymentTransaction2.GetIdentifier(),
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
+                Password = "Abcd1234!!"
+            };
+            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
+            {
+                Amount = 20,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localInitialPaymentTransaction = await DbContext.Transactions
+                .Where(x => x.Id == initialPaymentTransaction2.Id)
+                .OfType<PaymentTransaction>()
+                .Include(x => x.Transactions)
+                .Include(x => x.PaymentTransactionAddingFundTransactions)
+                .Include(x => x.RefundTransactions).ThenInclude(x => x.RefundByProductGroups)
+                .FirstAsync();
+
+            localInitialPaymentTransaction.Amount.Should().Be(20);
+
+            localInitialPaymentTransaction.Transactions.Count.Should().Be(2);
+            localInitialPaymentTransaction.RefundTransactions.Count.Should().Be(1);
+            localInitialPaymentTransaction.RefundTransactions.First().RefundByProductGroups.Count.Should().Be(1);
+
+            var refundTransaction = localInitialPaymentTransaction.RefundTransactions.First();
+            refundTransaction.Amount.Should().Be(20);
+            refundTransaction.BeneficiaryId.Should().Be(beneficiary.Id);
+            refundTransaction.CardId.Should().Be(card.Id);
+            refundTransaction.InitialTransaction.Id.Should().Be(initialPaymentTransaction2.Id);
+            refundTransaction.OrganizationId.Should().Be(organization.Id);
+            refundTransaction.RefundByProductGroups.Count.Should().Be(1);
+
+            var refundByProductGroup = refundTransaction.RefundByProductGroups.Where(x => x.ProductGroupId == productGroup.Id).First();
+            refundByProductGroup.Amount.Should().Be(20);
+            refundByProductGroup.ProductGroupId.Should().Be(productGroup.Id);
+            refundByProductGroup.PaymentTransactionProductGroupId.Should().Be(localInitialPaymentTransaction.TransactionByProductGroups.First(x => x.ProductGroupId == productGroup.Id­­­­­).Id);
+            refundByProductGroup.RefundTransactionId.Should().Be(refundTransaction.Id);
+
+            var transactionByProductGroup = localInitialPaymentTransaction.TransactionByProductGroups.First(x => x.ProductGroupId == productGroup.Id);
+            transactionByProductGroup.RefundAmount.Should().Be(20);
+            transactionByProductGroup.Amount.Should().Be(20);
+
+            var productGroupFund = await DbContext.Funds.Where(x => x.ProductGroupId == productGroup.Id).FirstOrDefaultAsync();
+            productGroupFund.Amount.Should().Be(40);
+
+            var paymentTransactionAddingFundTransactions = localInitialPaymentTransaction.PaymentTransactionAddingFundTransactions.ToList();
+            paymentTransactionAddingFundTransactions.Count.Should().Be(2);
+            paymentTransactionAddingFundTransactions.Where(x => x.AddingFundTransactionId == initialTransaction3.Id).First().Amount.Should().Be(10);
+            paymentTransactionAddingFundTransactions.Where(x => x.AddingFundTransactionId == initialTransaction3.Id).First().RefundAmount.Should().Be(10);
+
+            paymentTransactionAddingFundTransactions.Count.Should().Be(2);
+            paymentTransactionAddingFundTransactions.Where(x => x.AddingFundTransactionId == initialTransaction4.Id).First().Amount.Should().Be(10);
+            paymentTransactionAddingFundTransactions.Where(x => x.AddingFundTransactionId == initialTransaction4.Id).First().RefundAmount.Should().Be(10);
+        }
+
+        [Fact]
+        public async Task CreateRefundTransactionForFullAmountFund()
+        {
+            var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
+            {
+                InitialTransactionId = initialPaymentTransaction1.GetIdentifier(),
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
+                Password = "Abcd1234!!"
+            };
+            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
+            {
+                Amount = 10,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
+            {
+                Amount = 10,
+                ProductGroupId = loyaltyProductgroup.GetIdentifier()
+            });
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localInitialPaymentTransaction = await DbContext.Transactions
+                .Where(x => x.Id == initialPaymentTransaction1.Id)
+                .OfType<PaymentTransaction>()
+                .Include(x => x.Transactions)
+                .Include(x => x.RefundTransactions).ThenInclude(x => x.RefundByProductGroups)
+                .FirstAsync();
+
+            localInitialPaymentTransaction.Amount.Should().Be(20);
+
+            localInitialPaymentTransaction.Transactions.Count.Should().Be(2);
+            localInitialPaymentTransaction.RefundTransactions.Count.Should().Be(1);
+            localInitialPaymentTransaction.RefundTransactions.First().RefundByProductGroups.Count.Should().Be(2);
+
+            var refundTransaction = localInitialPaymentTransaction.RefundTransactions.First();
+            refundTransaction.Amount.Should().Be(20);
+            refundTransaction.BeneficiaryId.Should().Be(beneficiary.Id);
+            refundTransaction.CardId.Should().Be(card.Id);
+            refundTransaction.InitialTransaction.Id.Should().Be(initialPaymentTransaction1.Id);
+            refundTransaction.OrganizationId.Should().Be(organization.Id);
+            refundTransaction.RefundByProductGroups.Count.Should().Be(2);
+
+            var refundByProductGroup = refundTransaction.RefundByProductGroups.Where(x => x.ProductGroupId == productGroup.Id).First();
+            refundByProductGroup.Amount.Should().Be(10);
+            refundByProductGroup.ProductGroupId.Should().Be(productGroup.Id);
+            refundByProductGroup.PaymentTransactionProductGroupId.Should().Be(localInitialPaymentTransaction.TransactionByProductGroups.First(x => x.ProductGroupId == productGroup.Id­­­­­).Id);
+            refundByProductGroup.RefundTransactionId.Should().Be(refundTransaction.Id);
+
+            var refundByLoyaltyProductGroup = refundTransaction.RefundByProductGroups.Where(x => x.ProductGroupId == loyaltyProductgroup.Id).First();
+            refundByLoyaltyProductGroup.Amount.Should().Be(10);
+            refundByLoyaltyProductGroup.ProductGroupId.Should().Be(loyaltyProductgroup.Id);
+            refundByLoyaltyProductGroup.PaymentTransactionProductGroupId.Should().Be(localInitialPaymentTransaction.TransactionByProductGroups.First(x => x.ProductGroupId == loyaltyProductgroup.Id­­­­­).Id);
+            refundByLoyaltyProductGroup.RefundTransactionId.Should().Be(refundTransaction.Id);
+
+            var transactionByProductGroup = localInitialPaymentTransaction.TransactionByProductGroups.First(x => x.ProductGroupId == productGroup.Id);
+            transactionByProductGroup.RefundAmount.Should().Be(10);
+            transactionByProductGroup.Amount.Should().Be(10);
+
+            var productGroupFund = await DbContext.Funds.Where(x => x.ProductGroupId == productGroup.Id).FirstOrDefaultAsync();
+            productGroupFund.Amount.Should().Be(30);
+        }
+
+
+        [Fact]
         public async Task CreateRefundTransactionWithProductGroupFund()
         {
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
-                InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
+                InitialTransactionId = initialPaymentTransaction1.GetIdentifier(),
                 Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
                 Password = "Abcd1234!!"
             };
@@ -263,7 +445,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             await handler.Handle(input, CancellationToken.None);
 
             var localInitialPaymentTransaction = await DbContext.Transactions
-                .Where(x => x.Id == initialPaymentTransaction.Id)
+                .Where(x => x.Id == initialPaymentTransaction1.Id)
                 .OfType<PaymentTransaction>()
                 .Include(x => x.Transactions)
                 .Include(x => x.RefundTransactions).ThenInclude(x => x.RefundByProductGroups)
@@ -278,7 +460,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             refundTransaction.Amount.Should().Be(10);
             refundTransaction.BeneficiaryId.Should().Be(beneficiary.Id);
             refundTransaction.CardId.Should().Be(card.Id);
-            refundTransaction.InitialTransaction.Id.Should().Be(initialPaymentTransaction.Id);
+            refundTransaction.InitialTransaction.Id.Should().Be(initialPaymentTransaction1.Id);
             refundTransaction.OrganizationId.Should().Be(organization.Id);
             refundTransaction.RefundByProductGroups.Count.Should().Be(1);
 
@@ -305,7 +487,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
-                InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
+                InitialTransactionId = initialPaymentTransaction1.GetIdentifier(),
                 Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
                 Password = "Abcd1234!!"
             };
@@ -318,7 +500,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             await handler.Handle(input, CancellationToken.None);
 
             var localInitialPaymentTransaction = await DbContext.Transactions
-                .Where(x => x.Id == initialPaymentTransaction.Id)
+                .Where(x => x.Id == initialPaymentTransaction1.Id)
                 .OfType<PaymentTransaction>()
                 .Include(x => x.Transactions)
                 .Include(x => x.RefundTransactions).ThenInclude(x => x.RefundByProductGroups)
@@ -333,7 +515,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             refundTransaction.Amount.Should().Be(10);
             refundTransaction.BeneficiaryId.Should().Be(beneficiary.Id);
             refundTransaction.CardId.Should().Be(card.Id);
-            refundTransaction.InitialTransaction.Id.Should().Be(initialPaymentTransaction.Id);
+            refundTransaction.InitialTransaction.Id.Should().Be(initialPaymentTransaction1.Id);
             refundTransaction.OrganizationId.Should().Be(organization.Id);
             refundTransaction.RefundByProductGroups.Count.Should().Be(1);
 
@@ -356,7 +538,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         {
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
-                InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
+                InitialTransactionId = initialPaymentTransaction1.GetIdentifier(),
                 Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
                 Password = "Abcd1234!!"
             };
@@ -369,7 +551,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             await handler.Handle(input, CancellationToken.None);
 
             var localInitialPaymentTransaction = await DbContext.Transactions
-                .Where(x => x.Id == initialPaymentTransaction.Id)
+                .Where(x => x.Id == initialPaymentTransaction1.Id)
                 .OfType<PaymentTransaction>()
                 .Include(x => x.Transactions)
                 .Include(x => x.RefundTransactions).ThenInclude(x => x.RefundByProductGroups)
@@ -384,7 +566,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             refundTransaction.Amount.Should().Be(10);
             refundTransaction.BeneficiaryId.Should().Be(beneficiary.Id);
             refundTransaction.CardId.Should().Be(card.Id);
-            refundTransaction.InitialTransaction.Id.Should().Be(initialPaymentTransaction.Id);
+            refundTransaction.InitialTransaction.Id.Should().Be(initialPaymentTransaction1.Id);
             refundTransaction.OrganizationId.Should().Be(organization.Id);
             refundTransaction.RefundByProductGroups.Count.Should().Be(1);
 
@@ -426,7 +608,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         {
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
-                InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
+                InitialTransactionId = initialPaymentTransaction1.GetIdentifier(),
                 Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
                 Password = "Abcd1234!!"
             };
@@ -445,7 +627,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         {
             var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
             {
-                InitialTransactionId = initialPaymentTransaction.GetIdentifier(),
+                InitialTransactionId = initialPaymentTransaction1.GetIdentifier(),
                 Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
                 Password = "Abcd1234!!"
             };

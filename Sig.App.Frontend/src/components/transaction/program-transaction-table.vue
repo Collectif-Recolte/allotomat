@@ -105,7 +105,8 @@ import {
   REFUND_BUDGET_ALLOWANCE_FROM_UNASSIGNED_CARD_TRANSACTION_LOG,
   REFUND_PAYMENT_TRANSACTION_LOG,
   SUBSCRIPTION_ADDING_FUND_TRANSACTION_LOG,
-  TRANSFER_FUND_TRANSACTION_LOG
+  TRANSFER_FUND_TRANSACTION_LOG,
+  ADDING_FUND_TRANSACTION_STATUS_ACTIVED
 } from "@/lib/consts/enums";
 
 import { GLOBAL_REFUND_TRANSACTION } from "@/lib/consts/permissions";
@@ -239,6 +240,7 @@ function getBtnGroup(item) {
   if (item.discriminator !== PAYMENT_TRANSACTION_LOG || !canRefundTransaction.value) {
     return [];
   }
+  if (!hasAnyActiveSubscription(item)) return [];
   return [
     {
       isExtra: true,
@@ -247,5 +249,29 @@ function getBtnGroup(item) {
       route: { name: URL_TRANSACTION_ADMIN_REFUND, params: { transactionId: item.transaction.id } }
     }
   ];
+}
+
+function hasAnyActiveSubscription(item) {
+  //  In this case, we don't know if the transaction have any active Subscription since it's the old way
+  if (
+    item.transaction.paymentTransactionAddingFundTransactions === null ||
+    item.transaction.paymentTransactionAddingFundTransactions.length === 0
+  )
+    return true;
+
+  for (const transaction of item.transaction.paymentTransactionAddingFundTransactions) {
+    if (
+      transaction.addingFundTransaction.status === ADDING_FUND_TRANSACTION_STATUS_ACTIVED &&
+      transaction.amount > transaction.refundAmount &&
+      (transaction.addingFundTransaction.expirationDate === null ||
+        (transaction.addingFundTransaction.subscription.subscription !== null &&
+          item.subscriptionId === transaction.addingFundTransaction.subscription.subscription.id) ||
+        (transaction.addingFundTransaction.subscription !== null &&
+          item.subscriptionId === transaction.addingFundTransaction.subscription.id))
+    )
+      return true;
+  }
+
+  return false;
 }
 </script>

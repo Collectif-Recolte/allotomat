@@ -9,6 +9,7 @@ namespace Sig.App.Backend.DbModel.Entities.Transactions
     {
         public DateTime ExpirationDate { get; set; }
 
+        public IList<PaymentTransactionAddingFundTransaction> PaymentTransactionAddingFundTransactions { get; set; }
         public IList<PaymentTransaction> Transactions { get; set; }
 
         public decimal AvailableFund { get; set; }

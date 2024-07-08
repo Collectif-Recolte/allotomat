@@ -111,7 +111,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
 
-            var affectedAddingFundTransactions = new List<AddingFundTransaction>();
+            var affectedAddingFundTransactions = new List<PaymentTransactionAddingFundTransaction>();
 
             var beneficiary = card.Beneficiary;
             var organizationId = beneficiary?.OrganizationId;
@@ -185,12 +185,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                             var subscriptionId = addingFundTransactionsBySubscriptionId.First(x =>
                                 x.Any(y => y.Id == addingFundTransaction.Id)).Key;
                             var subscription = subscriptions.First(x => x.Id == subscriptionId);
+                            decimal affectedAddingFuncTransactionAmount = 0;
+
                             if (tempAmount > addingFundTransaction.AvailableFund)
                             {
                                 AddAmountToTransactionLog(transaction, card, market, subscription, productGroup,
                                     addingFundTransaction.AvailableFund);
                                 tempAmount -= addingFundTransaction.AvailableFund;
                                 loyaltyFundToRemove -= addingFundTransaction.AvailableFund;
+                                affectedAddingFuncTransactionAmount = addingFundTransaction.AvailableFund;
                                 addingFundTransaction.AvailableFund = 0;
                             }
                             else
@@ -199,6 +202,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                                     tempAmount);
                                 addingFundTransaction.AvailableFund -= tempAmount;
                                 loyaltyFundToRemove -= tempAmount;
+                                affectedAddingFuncTransactionAmount = tempAmount;
                                 tempAmount = 0;
                             }
 
@@ -209,7 +213,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                                 if (expirationAfterNumbersOfDays < addingFundTransaction.ExpirationDate) addingFundTransaction.ExpirationDate = expirationAfterNumbersOfDays;
                             }
 
-                            affectedAddingFundTransactions.Add(addingFundTransaction);
+                            affectedAddingFundTransactions.Add(new PaymentTransactionAddingFundTransaction()
+                            {
+                                AddingFundTransaction = addingFundTransaction,
+                                PaymentTransaction = transaction,
+                                Amount = affectedAddingFuncTransactionAmount
+                            });
 
                             if (tempAmount == 0)
                             {
@@ -243,11 +252,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     foreach (var loyaltyFundTransaction in loyaltyFundTransactions)
                     {
                         decimal fundToRemove;
+                        decimal affectedAddingFuncTransactionAmount = 0;
+
                         if (loyaltyFundToRemove > loyaltyFundTransaction.AvailableFund)
                         {
                             fundToRemove = loyaltyFundTransaction.AvailableFund;
                             loyaltyFundToRemove -= loyaltyFundTransaction.AvailableFund;
                             loyaltyFund.Amount -= loyaltyFundTransaction.AvailableFund;
+                            affectedAddingFuncTransactionAmount = loyaltyFundTransaction.AvailableFund;
                             loyaltyFundTransaction.AvailableFund = 0;
                         }
                         else
@@ -255,10 +267,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                             fundToRemove = loyaltyFundToRemove;
                             loyaltyFundTransaction.AvailableFund -= loyaltyFundToRemove;
                             loyaltyFund.Amount -= loyaltyFundToRemove;
+                            affectedAddingFuncTransactionAmount = loyaltyFundToRemove;
                             loyaltyFundToRemove = 0;
                         }
 
-                        affectedAddingFundTransactions.Add(loyaltyFundTransaction);
+                        affectedAddingFundTransactions.Add(new PaymentTransactionAddingFundTransaction()
+                        {
+                            AddingFundTransaction = loyaltyFundTransaction,
+                            PaymentTransaction = transaction,
+                            Amount = affectedAddingFuncTransactionAmount
+                        });
 
                         transactionByProductGroups.Add(new PaymentTransactionProductGroup()
                         {
@@ -283,7 +301,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 throw new NotEnoughtFundException();
             }
 
-            transaction.Transactions = affectedAddingFundTransactions;
+            transaction.PaymentTransactionAddingFundTransactions = affectedAddingFundTransactions;
+            transaction.Transactions = affectedAddingFundTransactions.Select(x => x.AddingFundTransaction).ToList();
             transaction.TransactionByProductGroups = transactionByProductGroups;
             card.Transactions.Add(transaction);
             db.TransactionLogs.AddRange(transactionLogs);

@@ -39,7 +39,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return ctx.DataLoader.LoadProductGroup(transaction.ProductGroupId);
         }
 
-        public OffsetDateTime ExpirationDate()
+        public OffsetDateTime? ExpirationDate()
         {
             return transaction.ExpirationDate.FromUtcToOffsetDateTime();
         }

@@ -9,7 +9,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
     {
         decimal AvailableFund { get; }
         FundTransactionStatus Status { get; }
-        OffsetDateTime ExpirationDate();
+        OffsetDateTime? ExpirationDate();
         IDataLoaderResult<ProductGroupGraphType> ProductGroup(IAppUserContext ctx);
     }
 }
