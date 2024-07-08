@@ -10,6 +10,7 @@ using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
+using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Requests.Commands.Mutations.Transactions;
@@ -82,7 +83,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 Funds = new List<Fund>(),
                 Status = CardStatus.Assigned,
                 Project = project,
-                Beneficiary = beneficiary
+                Beneficiary = beneficiary,
+                Transactions = new List<Transaction>()
             };
 
             var today = Clock.GetCurrentInstant().ToDateTimeUtc();
@@ -486,6 +488,90 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<CreateManuallyAddingFundTransaction.SubscriptionDontHaveEnoughtAvailableAmount>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfAvailableFundCantBeLessThanZero()
+        {
+            var input = new CreateManuallyAddingFundTransaction.Input()
+            {
+                Amount = -99,
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier(),
+                ProductGroupId = productGroup.GetIdentifier()
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<CreateManuallyAddingFundTransaction.AvailableFundCantBeLessThanZero>();
+        }
+
+        [Fact]
+        public async Task CreateNegatifTransaction()
+        {
+            var fund = new Fund()
+            {
+                Amount = 10,
+                ProductGroupId = productGroup.Id
+            };
+            card.Funds.Add(fund);
+
+            var saft1 = new SubscriptionAddingFundTransaction()
+            {
+                Amount = 25,
+                AvailableFund = 5,
+                Beneficiary = beneficiary,
+                Card = card,
+                CreatedAtUtc = Clock.GetCurrentInstant().ToDateTimeUtc(),
+                ExpirationDate = Clock.GetCurrentInstant().ToDateTimeUtc(),
+                Organization = organization,
+                ProductGroup = productGroup,
+                Status = FundTransactionStatus.Actived,
+                SubscriptionType = subscription.Types.First(),
+            };
+            
+            var saft2 = new SubscriptionAddingFundTransaction()
+            {
+                Amount = 5,
+                AvailableFund = 5,
+                Beneficiary = beneficiary,
+                Card = card,
+                CreatedAtUtc = Clock.GetCurrentInstant().ToDateTimeUtc(),
+                ExpirationDate = subscription.GetExpirationDate(Clock),
+                Organization = organization,
+                ProductGroup = productGroup,
+                Status = FundTransactionStatus.Actived,
+                SubscriptionType = subscription.Types.First(),
+            };
+
+            card.Transactions.Add(saft1);
+            DbContext.Transactions.Add(saft1);
+            card.Transactions.Add(saft2);
+            DbContext.Transactions.Add(saft2);
+
+            DbContext.Funds.Add(fund);
+            DbContext.SaveChanges();
+
+            var input = new CreateManuallyAddingFundTransaction.Input()
+            {
+                Amount = -8,
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier(),
+                ProductGroupId = productGroup.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transaction = await DbContext.Transactions.OfType<ManuallyAddingFundTransaction>().Include(x => x.AffectedNegativeFundTransactions).LastAsync();
+
+            transaction.AffectedNegativeFundTransactions.Should().HaveCount(2);
+            transaction.Amount.Should().Be(-8);
+            var saft1Locale = await DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().Where(x => x.Amount == 25).FirstAsync();
+            saft1Locale.AvailableFund.Should().Be(0);
+            var saft2Locale = await DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().Where(x => x.Amount == 5).LastAsync();
+            saft2Locale.AvailableFund.Should().Be(2);
+
+            var localFund = await DbContext.Funds.FirstAsync();
+            localFund.Amount.Should().Be(2);
         }
     }
 }

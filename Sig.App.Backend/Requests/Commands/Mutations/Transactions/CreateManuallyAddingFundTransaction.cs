@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.Gql.Bases;
+using System;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 {
@@ -109,7 +110,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             if (fund.Amount + request.Amount < 0)
             {
                 logger.LogWarning("[Mutation] CreateManuallyAddingFundTransaction - AvailableFundCantBeLessThanZero");
-                throw new AvailableFundCantBeLessThanZero();
+                throw new AvailableFundCantBeLessThanZero(); 
             }
 
             fund.Amount += request.Amount;
@@ -118,7 +119,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
             if (!isOffPlatformBeneficiary)
             {
-                var subscriptionId = request.SubscriptionId.Value.LongIdentifierForType<Subscription>();
+                var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
                 var subscription = await db.Subscriptions.Include(x => x.Types).ThenInclude(x => x.ProductGroup).FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
                 if (subscription == null)
@@ -159,6 +160,36 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     throw new ProductGroupNotFoundInSubscriptionException();
                 }
 
+                var affectedNegativeFundTransactions = new List<AddingFundTransaction>();
+                if (request.Amount < 0)
+                {
+                    var afts = await db.Transactions
+                        .OfType<AddingFundTransaction>()
+                        .Where(x => x.BeneficiaryId == beneficiaryId &&
+                                    x.ProductGroupId == productGroupId &&
+                                    x.Status == FundTransactionStatus.Actived &&
+                                    ((x is SubscriptionAddingFundTransaction && (x as SubscriptionAddingFundTransaction).SubscriptionType.SubscriptionId == subscriptionId) ||
+                                    (x is ManuallyAddingFundTransaction && (x as ManuallyAddingFundTransaction).SubscriptionId == subscriptionId)))
+                        .OrderBy(x => x.ExpirationDate)
+                        .ToListAsync();
+
+                    var negatifAmount = request.Amount;
+                    var i = 0;
+                    do
+                    {
+                        var aft = afts.ElementAt(i);
+                        if (aft.AvailableFund > 0)
+                        {
+                            var amountToRemove = Math.Min(-negatifAmount, aft.AvailableFund);
+                            aft.AvailableFund -= amountToRemove;
+                            negatifAmount += amountToRemove;
+                            affectedNegativeFundTransactions.Add(aft);
+                        }
+                        i++;
+                    }
+                    while (negatifAmount < 0 || i > afts.Count());
+                }
+
                 transaction = new ManuallyAddingFundTransaction()
                 {
                     TransactionUniqueId = transactionUniqueId,
@@ -170,7 +201,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     CreatedAtUtc = today,
                     ExpirationDate = subscription.GetExpirationDate(clock),
                     Subscription = subscription,
-                    ProductGroup = productGroup
+                    ProductGroup = productGroup,
+                    AffectedNegativeFundTransactions = affectedNegativeFundTransactions
                 };
                 beneficiary.Card.Transactions.Add(transaction);
                 budgetAllowance.AvailableFund -= request.Amount;
@@ -254,7 +286,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         [MutationInput]
         public class Input : HaveBeneficiaryId, IRequest<Payload>
         {
-            public Maybe<Id> SubscriptionId { get; set; }
+            public Id SubscriptionId { get; set; }
             public decimal Amount { get; set; }
             public Id ProductGroupId { get; set; }
         }

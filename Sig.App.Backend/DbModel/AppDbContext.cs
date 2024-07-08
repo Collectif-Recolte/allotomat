@@ -18,7 +18,6 @@ using System.Collections.Generic;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
-using Sig.App.Backend.Gql.Schema.GraphTypes;
 
 namespace Sig.App.Backend.DbModel
 {
@@ -239,6 +238,8 @@ namespace Sig.App.Backend.DbModel
                 _.HasOne(x => x.Subscription).WithMany().OnDelete(DeleteBehavior.NoAction);
 
                 _.HasOne(x => x.ProductGroup).WithMany().OnDelete(DeleteBehavior.NoAction);
+
+                _.HasMany(x => x.AffectedNegativeFundTransactions).WithMany(x => x.ManuallNegativeFundTransactions);
             });
 
             Configure<ExpireFundTransaction>(_ => {
