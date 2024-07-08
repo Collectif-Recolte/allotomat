@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Identity;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.Services.Permission.Enums;
 using Sig.App.Backend.Gql.Schema.Enums;
+using Sig.App.Backend.DbModel.Entities.Markets;
 
 namespace Sig.App.Backend.Services.Reports
 {
@@ -83,6 +84,12 @@ namespace Sig.App.Backend.Services.Reports
             {
                 var categoriesLongIdentifiers = request.Categories.Select(x => x.LongIdentifierForType<BeneficiaryType>());
                 query = query.Where(x => categoriesLongIdentifiers.Contains(x.BeneficiaryTypeId.GetValueOrDefault()));
+            }
+
+            if (request.Markets?.Any() ?? false)
+            {
+                var marketsLongIdentifiers = request.Markets.Select(x => x.LongIdentifierForType<Market>());
+                query = query.Where(x => marketsLongIdentifiers.Contains(x.MarketId.GetValueOrDefault()));
             }
 
             if (request.TransactionTypes?.Any() ?? false)

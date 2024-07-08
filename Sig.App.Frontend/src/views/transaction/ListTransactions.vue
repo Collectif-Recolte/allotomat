@@ -2,13 +2,13 @@
   {
     "en": {
       "title": "Transaction history",
-      "transaction-count": "No transaction | {count} transaction | {count} transactions",   
+      "transaction-count": "No transaction | {count} transaction / Amount due to markets {amount} | {count} transactions / Amount due to markets {amount}",   
       "export-btn": "Export report",
       "create-transaction": "New transaction"
     },
     "fr": {
       "title": "Historique des transactions",
-      "transaction-count": "Aucune transaction | {count} transaction | {count} transactions",
+      "transaction-count": "Aucune transaction | {count} transaction / Montant dû aux marché(s) : {amount} | {count} transactions / Montant dû aux marchés : {amount}",
       "export-btn": "Exporter un rapport",
       "create-transaction": "Nouvelle transaction"
     }
@@ -27,9 +27,11 @@
                 :available-organizations="availableOrganizations"
                 :available-beneficiary-types="availableBeneficiaryTypes"
                 :available-subscriptions="availableSubscriptions"
+                :available-markets="availableMarkets"
                 :selected-organizations="organizations"
                 :selected-beneficiary-types="beneficiaryTypes"
                 :selected-subscriptions="subscriptions"
+                :selected-markets="markets"
                 :selected-transaction-types="transactionTypes"
                 :without-subscription-id="WITHOUT_SUBSCRIPTION"
                 :date-from="dateFrom"
@@ -42,6 +44,8 @@
                 @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
                 @subscriptionsUnchecked="onSubscriptionsUnchecked"
                 @subscriptionsChecked="onSubscriptionsChecked"
+                @marketsUnchecked="onMarketsUnchecked"
+                @marketsChecked="onMarketsChecked"
                 @transactionTypesChecked="onTransactionTypesChecked"
                 @transactionTypesUnchecked="onTransactionTypesUnchecked"
                 @dateFromUpdated="onDateFromUpdated"
@@ -54,7 +58,13 @@
         </Title>
       </template>
       <div v-if="transactionLogs">
-        <UiTableHeader :title="t('transaction-count', transactionLogs.totalCount)" />
+        <UiTableHeader
+          :title="
+            t('transaction-count', {
+              count: transactionLogs.totalCount,
+              amount: getMoneyFormat(transactionLogs.amountDueToMarkets)
+            })
+          " />
         <div class="flex flex-col relative mb-6">
           <ProgramTransactionTable
             :transactions="transactions"
@@ -103,6 +113,7 @@ import ICON_DOWNLOAD from "@/lib/icons/download.json";
 import { useAuthStore } from "@/lib/store/auth";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
+import { getMoneyFormat } from "@/lib/helpers/money";
 
 const route = useRoute();
 const router = useRouter();
@@ -117,6 +128,7 @@ const dateTo = ref(new Date(Date.now()));
 const organizations = ref([]);
 const beneficiaryTypes = ref([]);
 const subscriptions = ref([]);
+const markets = ref([]);
 const transactionTypes = ref([]);
 const searchInput = ref("");
 const searchText = ref("");
@@ -133,6 +145,9 @@ if (route.query.beneficiaryTypes) {
 }
 if (route.query.subscriptions) {
   subscriptions.value = route.query.subscriptions.split(",");
+}
+if (route.query.markets) {
+  markets.value = route.query.markets.split(",");
 }
 if (route.query.transactionTypes) {
   transactionTypes.value = route.query.transactionTypes.split(",");
@@ -162,6 +177,10 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
         id
         name
         organizations {
+          id
+          name
+        }
+        markets {
           id
           name
         }
@@ -197,6 +216,10 @@ const { result: resultOrganizations } = useQuery(
             name
           }
           subscriptions {
+            id
+            name
+          }
+          markets {
             id
             name
           }
@@ -243,6 +266,7 @@ const {
       $organizations: [ID!]
       $categories: [ID!]
       $subscriptions: [ID!]
+      $markets: [ID!]
       $withoutSubscription: Boolean
       $transactionTypes: [String]
       $searchText: String
@@ -256,6 +280,7 @@ const {
         organizations: $organizations
         categories: $categories
         subscriptions: $subscriptions
+        markets: $markets
         withoutSubscription: $withoutSubscription
         transactionTypes: $transactionTypes
         searchText: $searchText
@@ -264,6 +289,7 @@ const {
         pageNumber
         pageSize
         totalPages
+        amountDueToMarkets
         items {
           id
           beneficiaryFirstname
@@ -326,6 +352,7 @@ const {
       endDate: dateToLocal,
       organizations: organizations.value,
       subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
+      markets: markets.value,
       withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
       categories: beneficiaryTypes.value,
       transactionTypes: transactionTypes.value,
@@ -345,6 +372,7 @@ const filteredQuery = computed(() => {
   return {
     organizations: organizations.value.length > 0 ? organizations.value.toString() : undefined,
     subscriptions: subscriptions.value.length > 0 ? subscriptions.value.toString() : undefined,
+    markets: markets.value.length > 0 ? markets.value.toString() : undefined,
     beneficiaryTypes: beneficiaryTypes.value.length > 0 ? beneficiaryTypes.value.toString() : undefined,
     transactionTypes: transactionTypes.value.length > 0 ? transactionTypes.value.toString() : undefined,
     text: searchText.value ? searchText.value : undefined,
@@ -363,6 +391,10 @@ let availableBeneficiaryTypes = computed(() => {
 
 let availableSubscriptions = computed(() => {
   return project.value?.subscriptions;
+});
+
+let availableMarkets = computed(() => {
+  return project.value?.markets;
 });
 
 let administrationSubscriptionsOffPlatform = computed(() => {
@@ -399,6 +431,16 @@ function onSubscriptionsUnchecked(value) {
   subscriptions.value = subscriptions.value.filter((x) => x !== value);
 }
 
+function onMarketsChecked(value) {
+  page.value = 1;
+  markets.value.push(value);
+}
+
+function onMarketsUnchecked(value) {
+  page.value = 1;
+  markets.value = markets.value.filter((x) => x !== value);
+}
+
 function onTransactionTypesChecked(value) {
   page.value = 1;
   transactionTypes.value.push(value);
@@ -428,6 +470,7 @@ function onResetFilters() {
   page.value = 1;
   organizations.value = [];
   subscriptions.value = [];
+  markets.value = [];
   beneficiaryTypes.value = [];
   transactionTypes.value = [];
   searchText.value = "";
@@ -458,6 +501,7 @@ async function onExportReport() {
         $organizations: [ID!]
         $categories: [ID!]
         $subscriptions: [ID!]
+        $markets: [ID!]
         $withoutSubscription: Boolean
         $transactionTypes: [String]
         $searchText: String
@@ -471,6 +515,7 @@ async function onExportReport() {
           organizations: $organizations
           categories: $categories
           subscriptions: $subscriptions
+          markets: $markets
           withoutSubscription: $withoutSubscription
           transactionTypes: $transactionTypes
           searchText: $searchText
@@ -485,6 +530,7 @@ async function onExportReport() {
       timeZoneId: timeZone,
       organizations: organizations.value,
       subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
+      markets: markets.value,
       withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
       categories: beneficiaryTypes.value,
       transactionTypes: transactionTypes.value,

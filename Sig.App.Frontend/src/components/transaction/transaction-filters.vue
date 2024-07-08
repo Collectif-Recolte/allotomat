@@ -20,7 +20,8 @@
     "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Budget allowance refund from unassigned card",
     "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Budget allowances refund from participant having no cards",
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Budget allowance refund from participant removed from subscription",
-    "transaction-log-type-refund-payment": "Payment refund"
+    "transaction-log-type-refund-payment": "Payment refund",
+    "market": "Markets"
 	},
 	"fr": {
     "date-selector-from": "Intervalle du",
@@ -42,7 +43,8 @@
     "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Enveloppe remboursées après la désassignation d'une carte",
     "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Enveloppe remboursée en raison d'un participant sans carte",
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppe remboursée après avoir retiré un participant d'un abonnement",
-    "transaction-log-type-refund-payment": "Remboursement d'un paiement"
+    "transaction-log-type-refund-payment": "Remboursement d'un paiement",
+    "market": "Commerces"
 	}
 }
 </i18n>
@@ -110,6 +112,15 @@
       :options="availableSubscriptions"
       @input="onSubscriptionsChecked" />
     <PfFormInputCheckboxGroup
+      v-if="availableMarkets.length > 0"
+      id="markets"
+      class="mt-3"
+      is-filter
+      :value="selectedMarkets"
+      :label="t('market')"
+      :options="availableMarkets"
+      @input="onMarketsChecked" />
+    <PfFormInputCheckboxGroup
       v-if="availableTransactionTypes.length > 0"
       id="transactionTypes"
       class="mt-3"
@@ -140,7 +151,9 @@ const emit = defineEmits([
   "transactionTypesChecked",
   "transactionTypesUnchecked",
   "dateFromUpdated",
-  "dateToUpdated"
+  "dateToUpdated",
+  "marketsChecked",
+  "marketsUnchecked"
 ]);
 
 const props = defineProps({
@@ -175,6 +188,18 @@ const props = defineProps({
     }
   },
   selectedSubscriptions: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
+  availableMarkets: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
+  selectedMarkets: {
     type: Array,
     default() {
       return [];
@@ -264,6 +289,11 @@ const availableSubscriptions = computed(() => {
   return subscriptions;
 });
 
+const availableMarkets = computed(() => {
+  if (!props.availableMarkets || props.availableMarkets?.length <= 0) return [];
+  return props.availableMarkets.map((x) => ({ value: x.id, label: x.name }));
+});
+
 const availableTransactionTypes = computed(() => {
   return [
     { value: "ExpireFundTransactionLog", label: t("transaction-log-type-expired") },
@@ -302,6 +332,14 @@ function onSubscriptionsChecked(input) {
     emit("subscriptionsChecked", input.value);
   } else {
     emit("subscriptionsUnchecked", input.value);
+  }
+}
+
+function onMarketsChecked(input) {
+  if (input.isChecked) {
+    emit("marketsChecked", input.value);
+  } else {
+    emit("marketsUnchecked", input.value);
   }
 }
 

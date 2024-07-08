@@ -24,10 +24,12 @@ using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.DbModel.Entities.Markets;
+using Sig.App.Backend.Gql.Bases;
 
 namespace Sig.App.Backend.Requests.Queries.Transactions
 {
-    public class SearchTransactionLogs : IRequestHandler<SearchTransactionLogs.Query, Pagination<TransactionLog>>
+    public class SearchTransactionLogs : IRequestHandler<SearchTransactionLogs.Query, TransactionLogsPagination<TransactionLog>>
     {
         private readonly IAppUserContext ctx;
         private readonly AppDbContext db;
@@ -44,7 +46,7 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             this.permissionService = permissionService;
         }
 
-        public async Task<Pagination<TransactionLog>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<TransactionLogsPagination<TransactionLog>> Handle(Query request, CancellationToken cancellationToken)
         {
             var currentUserCanSeeAllBeneficiaryInfo = await beneficiaryService.CurrentUserCanSeeAllBeneficiaryInfo();
             var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
@@ -59,9 +61,7 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
 
             if(!globalPermissions.Contains(GlobalPermission.ManageOrganizations))
             {
-                var user = await db.Users
-                .Where(c => c.Id == ctx.CurrentUserId)
-                .FirstAsync(cancellationToken: cancellationToken);
+                var user = await db.Users.Where(c => c.Id == ctx.CurrentUserId).FirstAsync(cancellationToken: cancellationToken);
 
                 var existingClaims = await userManager.GetClaimsAsync(user);
                 var existingOrganizationsClaims = existingClaims.Where(x => x.Type == AppClaimTypes.OrganizationManagerOf).Select(x => x.Value).FirstOrDefault();
@@ -88,6 +88,12 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             {
                 var categoriesLongIdentifiers = request.Categories.Select(x => x.LongIdentifierForType<BeneficiaryType>());
                 query = query.Where(x => categoriesLongIdentifiers.Contains(x.BeneficiaryTypeId.GetValueOrDefault()));
+            }
+
+            if (request.Markets?.Any() ?? false)
+            {
+                var marketsLongIdentifiers = request.Markets.Select(x => x.LongIdentifierForType<Market>());
+                query = query.Where(x => marketsLongIdentifiers.Contains(x.MarketId.GetValueOrDefault()));
             }
 
             if (request.TransactionTypes?.Any() ?? false)
@@ -117,10 +123,10 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             }
 
             var sorted = Sort(query, TransactionLogSort.Default, SortOrder.Desc);
-            return await Pagination.For(sorted, request.Page);
+            return await TransactionLogsPagination.For(sorted, request.Page);
         }
 
-        public class Query : IRequest<Pagination<TransactionLog>>
+        public class Query : IRequest<TransactionLogsPagination<TransactionLog>>
         {
             public Page Page { get; set; }
             public Id ProjectId { get; set; }
@@ -128,6 +134,7 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             public DateTime EndDate { get; set; }
             public IEnumerable<Id> Organizations { get; set; }
             public IEnumerable<Id> Subscriptions { get; set; }
+            public IEnumerable<Id> Markets { get; set; }
             public Maybe<bool> WithoutSubscription { get; set; }
             public IEnumerable<Id> Categories { get; set; }
             public IEnumerable<string> TransactionTypes { get; set; }
