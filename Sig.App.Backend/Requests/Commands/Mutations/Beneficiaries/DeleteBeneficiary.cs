@@ -77,7 +77,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
             foreach (var sub in beneficiary.Subscriptions)
             {
-                if (sub.Subscription.StartDate <= today && sub.Subscription.EndDate >= today)
+                if (sub.Subscription.EndDate >= today)
                 {
                     haveAnyActiveSubscription = true;
                 }
