@@ -8,26 +8,46 @@
   /* To be used with Tailwind custom width utility 'width-{screen}' */
   --pf-section-padding: theme("spacing.5");
 
-  --pf-top-bar-height: 4.25rem;
-  --pf-top-header-height: 5.25rem;
-  --pf-table-header-height: 7.5rem;
-  --pf-footer-height: theme("spacing.24");
+  --pf-top-bar-height: theme("spacing.16");
+  --pf-footer-height: 78px;
 
   /* Define app's main section height */
-  --ui-app-height: calc(100dvh - theme("spacing.16") - var(--pf-footer-height));
+  --ui-app-height: calc(100dvh - var(--pf-top-bar-height) - var(--pf-footer-height));
+
+  /* Helpers to define table max height */
+  --pf-top-header-height: 66px;
+  --pf-table-header-height: 86px;
+  --ui-table-height: calc(
+    100dvh -
+      (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2rem)
+  );
 
   @media screen("xs") {
     --pf-section-padding: theme("spacing.12");
-    --pf-footer-height: theme("spacing.12");
-    --ui-app-height: calc(100dvh - theme("spacing.16") - var(--pf-footer-height));
-  }
-
-  @media screen("sm") {
-    --pf-table-header-height: 18.5rem;
+    --pf-footer-height: 2.813rem;
+    --ui-app-height: calc(100dvh - var(--pf-top-bar-height) - var(--pf-footer-height));
+    --pf-top-header-height: 75px;
+    --pf-table-header-height: 61px;
+    --ui-table-height: calc(
+      100dvh -
+        (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem)
+    );
   }
 
   @media screen("md") {
     --pf-grid-gap: theme("spacing.8");
+  }
+
+  @media screen("lg") {
+    --pf-top-header-height: 84px;
+    --pf-table-header-height: 81px;
+    --ui-table-height: calc(
+      100dvh -
+        (
+          var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) +
+            3.6rem
+        )
+    );
   }
 }
 
