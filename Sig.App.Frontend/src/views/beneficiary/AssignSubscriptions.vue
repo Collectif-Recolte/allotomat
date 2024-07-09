@@ -177,7 +177,7 @@
     </template>
   </Title>
 
-  <div v-if="beneficiaries" class="px-section md:px-8 py-5">
+  <div v-if="beneficiaries" class="assign-subscription-list-vue px-section md:px-8 py-5">
     <div class="flex flex-col gap-y-4 sm:flex-row sm:gap-x-4 sm:justify-between sm:items-center pb-5">
       <div class="flex flex-wrap gap-x-4">
         <h2 class="my-0">{{ t("amount-allocated", { amount: amountThatWillBeAllocatedMoneyFormat }) }}</h2>
@@ -1018,3 +1018,44 @@ function onReplicatePaymentOnAttributionChecked(input) {
   replicatePaymentOnAttribution.value = input;
 }
 </script>
+
+<style scoped lang="postcss">
+.assign-subscription-list-vue {
+  --pf-top-header-height: 170px;
+  --pf-table-header-height: 67px;
+  --ui-table-height: calc(
+    100dvh -
+      (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2rem)
+  );
+
+  @media screen("xs") {
+    --pf-top-header-height: 123px;
+    --pf-table-header-height: 72px;
+    --ui-table-height: calc(
+      100dvh -
+        (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2rem)
+    );
+  }
+
+  @media screen("sm") {
+    --pf-top-header-height: 139px;
+    --pf-table-header-height: 61px;
+    --ui-table-height: calc(
+      100dvh -
+        (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem)
+    );
+  }
+
+  @media screen("lg") {
+    --pf-top-header-height: 152px;
+    --pf-table-header-height: 77px;
+    --ui-table-height: calc(
+      100dvh -
+        (
+          var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) +
+            3.6rem
+        )
+    );
+  }
+}
+</style>

@@ -68,7 +68,7 @@
       </td>
       <td>
         <b>{{ getOperationName(slotProps.item) }}</b>
-        <p>{{ getOperationDetail(slotProps.item) }}</p>
+        <p class="mb-0">{{ getOperationDetail(slotProps.item) }}</p>
       </td>
       <td>
         {{ getTransactionAmount(slotProps.item) }}

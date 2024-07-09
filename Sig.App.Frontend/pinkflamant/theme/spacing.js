@@ -39,6 +39,5 @@ module.exports = {
   "3/4": "75%",
   "9/16": "56.25%",
   "1/2": "50%",
-  "simple-table-height":
-    "calc(100vh - (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height)))"
+  "simple-table-height": "var(--ui-table-height)"
 };

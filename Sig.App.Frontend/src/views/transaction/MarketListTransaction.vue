@@ -23,7 +23,7 @@
 
 <template>
   <RouterView v-slot="{ Component }">
-    <AppShell :title="t('title')" :loading="loading">
+    <AppShell :title="t('title')" :loading="loading" class="market-list-transaction-vue">
       <template #title>
         <Title :title="t('title')">
           <template #center>
@@ -138,3 +138,41 @@ function getTotalTransactionAmount(transactions) {
   return getMoneyFormat(parseFloat(amount));
 }
 </script>
+
+<style scoped lang="postcss">
+.market-list-transaction-vue {
+  --pf-top-header-height: 170px;
+  --pf-table-header-height: 67px;
+  --ui-table-height: calc(
+    100dvh -
+      (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2rem)
+  );
+
+  @media screen("xs") {
+    --pf-top-header-height: 123px;
+    --pf-table-header-height: 72px;
+    --ui-table-height: calc(
+      100dvh -
+        (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2rem)
+    );
+  }
+
+  @media screen("sm") {
+    --pf-top-header-height: 139px;
+    --pf-table-header-height: 61px;
+    --ui-table-height: calc(
+      100dvh -
+        (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2rem)
+    );
+  }
+
+  @media screen("lg") {
+    --pf-top-header-height: 78px;
+    --pf-table-header-height: 66px;
+    --ui-table-height: calc(
+      100dvh -
+        (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2rem)
+    );
+  }
+}
+</style>

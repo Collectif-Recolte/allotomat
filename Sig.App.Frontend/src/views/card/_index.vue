@@ -63,7 +63,7 @@
 
 <template>
   <RouterView v-slot="{ Component }">
-    <AppShell :loading="loadingProjects">
+    <AppShell :loading="loadingProjects" class="card-list-vue">
       <template #title>
         <Title :title="t('title')">
           <template v-if="project" #bottom>
@@ -488,3 +488,44 @@ onBeforeRouteUpdate((to) => {
   }
 });
 </script>
+
+<style scoped lang="postcss">
+.card-list-vue {
+  --pf-top-header-height: 170px;
+  --pf-table-header-height: 67px;
+  --ui-table-height: calc(
+    100dvh -
+      (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2rem)
+  );
+
+  @media screen("xs") {
+    --pf-top-header-height: 123px;
+    --pf-table-header-height: 72px;
+    --ui-table-height: calc(
+      100dvh -
+        (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2rem)
+    );
+  }
+
+  @media screen("sm") {
+    --pf-top-header-height: 139px;
+    --pf-table-header-height: 61px;
+    --ui-table-height: calc(
+      100dvh -
+        (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem)
+    );
+  }
+
+  @media screen("lg") {
+    --pf-top-header-height: 156px;
+    --pf-table-header-height: 84px;
+    --ui-table-height: calc(
+      100dvh -
+        (
+          var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) +
+            3.6rem
+        )
+    );
+  }
+}
+</style>
