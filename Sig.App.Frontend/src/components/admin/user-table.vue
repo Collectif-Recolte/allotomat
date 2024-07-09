@@ -15,7 +15,7 @@
       "user-confirmed": "User confirmed",
       "user-not-confirmed": "User not confirmed",
       "username": "Username",
-      "copy-confirmation-email": "Copy confirmation email",
+      "copy-confirmation-email": "Copy confirmation link",
       "confirmation-link-copied": "Confirmation link copied to clipboard."
     },
     "fr": {
@@ -33,7 +33,7 @@
       "user-confirmed": "Utilisateur confirmé",
       "user-not-confirmed": "Utilisateur non confirmé",
       "username": "Nom d'utilisateur",
-      "copy-confirmation-email": "Copier le courriel de confirmation",
+      "copy-confirmation-email": "Copier le lien de confirmation",
       "confirmation-link-copied": "Lien de confirmation copié dans le presse-papiers."
     }
   }
