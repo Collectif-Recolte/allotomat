@@ -71,7 +71,7 @@
     <!-- Static sidebar for desktop -->
     <div class="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
       <div class="flex-1 flex flex-col min-h-0 bg-primary-100">
-        <div class="flex-1 flex flex-col pb-8 overflow-y-auto">
+        <div class="flex-1 flex flex-col pb-6 overflow-y-auto">
           <div class="flex items-center shrink-0 px-4 h-16">
             <img class="h-8" :src="require('@/assets/logo/logo-color.svg')" :alt="t('logo')" />
           </div>

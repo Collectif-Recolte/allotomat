@@ -68,7 +68,7 @@
       </td>
       <td>
         <b>{{ getOperationName(slotProps.item) }}</b>
-        <p>{{ getOperationDetail(slotProps.item) }}</p>
+        <p class="mb-0">{{ getOperationDetail(slotProps.item) }}</p>
       </td>
       <td>
         {{ getTransactionAmount(slotProps.item) }}
@@ -264,9 +264,9 @@ function hasAnyActiveSubscription(item) {
       transaction.addingFundTransaction.status === ADDING_FUND_TRANSACTION_STATUS_ACTIVED &&
       transaction.amount > transaction.refundAmount &&
       (transaction.addingFundTransaction.expirationDate === null ||
-        (transaction.addingFundTransaction.subscription.subscription !== null &&
+        (transaction.addingFundTransaction.__typename === "SubscriptionAddingFundTransactionGraphType" &&
           item.subscriptionId === transaction.addingFundTransaction.subscription.subscription.id) ||
-        (transaction.addingFundTransaction.subscription !== null &&
+        (transaction.addingFundTransaction.__typename === "ManuallyAddingFundTransactionGraphType" &&
           item.subscriptionId === transaction.addingFundTransaction.subscription.id))
     )
       return true;
