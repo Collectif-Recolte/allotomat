@@ -272,7 +272,7 @@ async function onSubmit({ amount, subscription, productGroup }) {
   var result = await createManuallyAddingFundTransaction({
     input: {
       amount: parseFloat(amount),
-      subscriptionId: subscription === undefined ? undefined : { value: subscription },
+      subscriptionId: subscription,
       beneficiaryId: route.params.beneficiaryId,
       productGroupId: productGroup
     }

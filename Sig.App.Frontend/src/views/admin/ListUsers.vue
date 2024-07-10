@@ -67,6 +67,7 @@ const { result, loading } = useQuery(
           id
           email
           isConfirmed
+          confirmationLink
           lastConnectionTime
           profile {
             id

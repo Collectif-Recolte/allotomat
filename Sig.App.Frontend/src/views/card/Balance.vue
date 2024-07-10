@@ -151,7 +151,10 @@ const programName = computed(() => {
 const getProductGroups = (funds) => {
   const productGroups = [];
   for (let fund of funds) {
-    if (fund.expirationDate > new Date().toISOString() || fund.productGroup.name === PRODUCT_GROUP_LOYALTY) {
+    if (
+      fund.availableFund > 0 &&
+      (fund.expirationDate > new Date().toISOString() || fund.productGroup.name === PRODUCT_GROUP_LOYALTY)
+    ) {
       if (productGroups.find((pg) => pg.label === fund.productGroup.name && pg.expirationDate === fund.expirationDate)) {
         productGroups.find((pg) => pg.label === fund.productGroup.name).fund += fund.amount ?? fund.availableFund;
       } else {
