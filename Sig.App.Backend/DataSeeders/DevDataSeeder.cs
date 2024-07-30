@@ -541,7 +541,7 @@ public class DevDataSeeder : IDataSeeder
             TransactionLogProductGroups = transactionLogProductGroups
         });
         
-        var transaction2 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 32.33m, CreatedAtUtc = DateTime.UtcNow, Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>(), PaymentTransactionAddingFundTransactions = new List<PaymentTransactionAddingFundTransaction>() };
+        var transaction2 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 32.33m, CreatedAtUtc = DateTime.UtcNow.AddMonths(-1), Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>(), PaymentTransactionAddingFundTransactions = new List<PaymentTransactionAddingFundTransaction>() };
         transaction2.TransactionByProductGroups = new List<PaymentTransactionProductGroup>() { new PaymentTransactionProductGroup() { Amount = 32.33m, ProductGroup = productGroup, PaymentTransaction = transaction1 } };
         addingFundsTransaction.AvailableFund -= transaction2.Amount;
         fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroup.Id);
