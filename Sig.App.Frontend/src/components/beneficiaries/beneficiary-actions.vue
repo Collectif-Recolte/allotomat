@@ -38,7 +38,7 @@
       "beneficiary-delete": "Supprimer {firstname}",
       "beneficiary-delete-participant-anonymous": "le participant",
       "beneficiary-transactions-history": "Historique de transactions",
-      "beneficiary-edit-disabled": "Vous n'avez pas la permission de modifier ce participant-e-",
+      "beneficiary-edit-disabled": "Vous n'avez pas la permission de modifier ce participant-e",
       "beneficiary-add-funds-disabled": "Vous ne pouvez pas ajouter des fonds si le participant-e n'a pas de carte",
       "beneficiary-display-qrcode-disabled": "Vous ne pouvez pas afficher un code QR si le participant-e n'a pas de carte",
       "beneficiary-lost-card-disabled": "Vous ne pouvez pas déclarer une carte perdue si le participant-e n'a pas de carte",
