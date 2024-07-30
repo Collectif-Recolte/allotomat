@@ -27,7 +27,7 @@
             can-edit
             show-subscription-period
             show-budget-allowance-total
-            :subscriptions="projects[0].subscriptions" />
+            :subscriptions="subscriptionsOrderByDate" />
         </template>
 
         <UiEmptyPage v-else>
@@ -71,6 +71,8 @@ const { result, loading, refetch } = useQuery(
           name
           startDate
           endDate
+          fundsExpirationDate
+          isFundsAccumulable
           budgetAllowances {
             id
             originalFund
@@ -89,6 +91,19 @@ const addSubscriptionRoute = computed(() => {
 });
 
 const subscriptionCount = computed(() => t("subscription-count", { count: projects.value[0].subscriptions.length }));
+
+const subscriptionsOrderByDate = computed(() => {
+  if (projects.value.length === 0) {
+    return [];
+  }
+  let subscriptions = [...projects.value[0].subscriptions];
+
+  return subscriptions.sort((a, b) => {
+    const dateA = a.isFundsAccumulable ? new Date(a.fundsExpirationDate) : new Date(a.endDate);
+    const dateB = b.isFundsAccumulable ? new Date(b.fundsExpirationDate) : new Date(b.endDate);
+    return dateB - dateA;
+  });
+});
 
 onBeforeRouteUpdate((to) => {
   if (to.name === URL_SUBSCRIPTION_ADMIN) {
