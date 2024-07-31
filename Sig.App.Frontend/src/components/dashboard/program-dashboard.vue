@@ -22,67 +22,74 @@
   </i18n>
 
 <template>
-  <div class="flex flex-col gap-6 sm:flex-row mt-4 mb-12">
-    <UiStat
-      class="sm:w-1/3"
-      :stat="project?.projectStats.beneficiaryCount"
-      :label="t('beneficiary-count-label')"
-      :secondary-btn-route="{ name: URL_BENEFICIARY_ADMIN }"
-      :secondary-btn-label="t('manage-beneficiary-btn')" />
-    <UiStat
-      class="sm:w-1/3"
-      :stat="getMoneyFormat(project?.projectStats.unspentLoyaltyFund)"
-      :label="t('unspend-loyalty-fund-label')" />
-    <UiStat
-      class="sm:w-1/3"
-      :stat="getMoneyFormat(project?.projectStats.totalActiveSubscriptionsEnvelopes)"
-      :label="t('total-active-subscriptions-envelopes-label')" />
-  </div>
-  <div v-if="organizationsStats">
-    <UiTableHeader :title="t('organization-list-stats')">
-      <template #right>
-        <UiFilter
-          has-filters
-          :has-active-filters="hasActiveFilters"
-          :active-filters-count="activeFiltersCount"
-          @resetFilters="onResetFilters">
-          <PfFormInputCheckboxGroup
-            v-if="availableSubscriptions.length > 0"
-            class="mt-3"
-            is-filter
-            :value="selectedSubscriptions"
-            :label="t('subscription-filter')"
-            :options="availableSubscriptions"
-            @input="onSubscriptionsChecked" />
-        </UiFilter>
-      </template>
-    </UiTableHeader>
-    <template v-if="organizationsStats.length > 0">
-      <OrganizationStatsTable :organizations-stats="organizationsStats" />
-    </template>
-    <div v-else class="flex items-center justify-center my-8 lg:my-16">
-      <UiCta :img-src="require('@/assets/img/organismes.jpg')" :description="t('empty-list')" />
+  <Loading :loading="loading" is-full-height>
+    <div class="flex flex-col gap-6 sm:flex-row mt-4 mb-12">
+      <UiStat
+        class="sm:w-1/3"
+        :stat="project?.projectStats.beneficiaryCount"
+        :label="t('beneficiary-count-label')"
+        :secondary-btn-route="{ name: URL_BENEFICIARY_ADMIN }"
+        :secondary-btn-label="t('manage-beneficiary-btn')" />
+      <UiStat
+        class="sm:w-1/3"
+        :stat="getMoneyFormat(project?.projectStats.unspentLoyaltyFund)"
+        :label="t('unspend-loyalty-fund-label')" />
+      <UiStat
+        class="sm:w-1/3"
+        :stat="getMoneyFormat(project?.projectStats.totalActiveSubscriptionsEnvelopes)"
+        :label="t('total-active-subscriptions-envelopes-label')" />
     </div>
-  </div>
+    <div v-if="organizationsStats">
+      <UiTableHeader :title="t('organization-list-stats')">
+        <template #right>
+          <UiFilter
+            has-filters
+            :has-active-filters="hasActiveFilters"
+            :active-filters-count="activeFiltersCount"
+            @resetFilters="onResetFilters">
+            <PfFormInputCheckboxGroup
+              v-if="availableSubscriptions.length > 0"
+              class="mt-3"
+              is-filter
+              :value="selectedSubscriptions"
+              :label="t('subscription-filter')"
+              :options="availableSubscriptions"
+              @input="onSubscriptionsChecked" />
+          </UiFilter>
+        </template>
+      </UiTableHeader>
+      <template v-if="organizationsStats.length > 0">
+        <OrganizationStatsTable :organizations-stats="organizationsStats" />
+      </template>
+      <div v-else class="flex items-center justify-center my-8 lg:my-16">
+        <UiCta :img-src="require('@/assets/img/organismes.jpg')" :description="t('empty-list')" />
+      </div>
+    </div>
+  </Loading>
 </template>
 
 <script setup>
 import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
-import { useQuery, useResult } from "@vue/apollo-composable";
-import { ref, computed } from "vue";
+import { useQuery } from "@vue/apollo-composable";
+import { ref, computed, watch } from "vue";
 
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 
+import Loading from "@/components/app/loading";
 import OrganizationStatsTable from "@/components/dashboard/organization-stats-table.vue";
 
 const { t } = useI18n();
 
 const selectedSubscriptions = ref([]);
 
-const { result: resultProjects } = useQuery(
+const organizationsStats = ref([]);
+const project = ref(null);
+const availableSubscriptions = ref([]);
+
+const { result: resultProjects, loading } = useQuery(
   gql`
     query Projects($subscriptions: [ID!]) {
       projects {
@@ -113,16 +120,13 @@ const { result: resultProjects } = useQuery(
   `,
   projectsStatsVariables
 );
-const project = useResult(resultProjects, null, (data) => {
-  return data.projects[0];
-});
 
-const organizationsStats = useResult(resultProjects, null, (data) => {
-  return data.projects[0].organizationsStats;
-});
+watch(resultProjects, (value) => {
+  if (value === undefined) return;
 
-const availableSubscriptions = useResult(resultProjects, null, (data) => {
-  return data.projects[0].subscriptions.map((subscription) => {
+  project.value = value.projects[0];
+  organizationsStats.value = value.projects[0].organizationsStats;
+  availableSubscriptions.value = value.projects[0].subscriptions.map((subscription) => {
     return {
       value: subscription.id,
       label: subscription.name
