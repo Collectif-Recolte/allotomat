@@ -146,7 +146,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             {
                 Name = "Subscription 2",
                 StartDate = new DateTime(2024, 8, 1),
-                EndDate = new DateTime(2024, 9, 16),
+                EndDate = new DateTime(2024, 9, 20),
                 MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth,
                 Types = new List<SubscriptionType>()
                 {

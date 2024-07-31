@@ -28,6 +28,8 @@ namespace Sig.App.Backend.Helpers
                 if (startDate > today && startDate.Day == 1) needExtraDay = true;
             }
 
+            if (needExtraDay) cardPaymentRemaining++;
+
             if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth ||
                 subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth)
             {
