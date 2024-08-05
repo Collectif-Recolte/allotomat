@@ -1,9 +1,7 @@
 <i18n>
 {
 	"en": {
-		"delete-text-beneficiary-name-error": "Text must match recipient's first name and recipient's last name",
     "delete-text-card-number-error": "Text must match card number",
-		"delete-text-beneficiary-name-label": "Type the participant name to confirm",
     "delete-text-card-number-label": "Type the card number to confirm",
 		"description": "Warning! If you continue, the card will be available for assignment. Make sure you have found the card before marking it as found.",
     "title": "Mark card as found - {cardId}",
@@ -11,9 +9,7 @@
 		"unlock-card-success-notification": "The card is now available for assignment."
 	},
 	"fr": {
-		"delete-text-beneficiary-name-error": "Le texte doit correspondre au numéro à 16 chiffres de la carte",
     "delete-text-card-number-error": "Le texte doit correspondre au numéro de la carte",
-		"delete-text-beneficiary-name-label": "Taper le nom du-de la participant-e pour confirmer",
     "delete-text-card-number-label": "Taper le numéro de la carte pour confirmer",
 		"description": "Avertissement ! Si vous continuez, la carte sera disponible pour l'attribution. Assurez-vous d'avoir retrouvé la carte avant de la marquer comme retrouvée.",
 		"title": "Marquer la carte comme retrouvée - {cardId}",
