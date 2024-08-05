@@ -691,6 +691,14 @@ export default [
         }
       },
       {
+        name: urls.URL_CARDS_UNLOCK,
+        path: ":cardId/unlock-card",
+        component: () => import("@/views/card/UnlockCard.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
         name: urls.URL_CARDS_ENABLE,
         path: ":cardId/enable-card",
         component: () => import("@/views/card/EnableCard.vue"),
