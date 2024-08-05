@@ -665,6 +665,17 @@ namespace Sig.App.Backend.Gql.Schema
             return mediator.Send(input.Value);
         }
 
+        [RequirePermission(CardPermission.EnableDisableCard)]
+        [AnnotateErrorCodes(typeof(UnlockCard))]
+        public static Task<UnlockCard.Payload> UnlockCard(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<UnlockCard.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
         public static Task<AdjustBeneficiarySubscription.Payload> AdjustBeneficiarySubscription(this GqlMutation _, [Inject] IMediator mediator, NonNull<AdjustBeneficiarySubscription.Input> input)
         {
             return mediator.Send(input.Value);
