@@ -7,7 +7,8 @@
 		"email-desc": "Example: you{'@'}example.com",
 		"loading": "We are processing your form, please wait...",
 		"submit": "Send an email",
-		"title": "Forgot your password?"
+		"title": "Forgot your password?",
+    "reset-password-troubleshooting": "If you do not receive your password reset email, please contact <b><a href=\"mailto:support{'@'}allotomat.com\">support{'@'}allotomat.com</a></b>"
 	},
 	"fr": {
 		"back": "Annuler",
@@ -16,7 +17,8 @@
 		"email-desc": "Exemple: vous{'@'}exemple.com",
 		"loading": "Nous traitons votre formulaire, veuillez patienter...",
 		"submit": "Envoyer un courriel",
-		"title": "Mot de passe oublié?"
+		"title": "Mot de passe oublié?",
+    "reset-password-troubleshooting": "Si vous ne recevez pas le courriel de réinitialisation de votre mot de passe, veuillez contacter <b><a href=\"mailto:support{'@'}allotomat.com\">support{'@'}allotomat.com</a></b>"
 	}
 }
 </i18n>
@@ -54,6 +56,8 @@
               input-type="email"
               :description="t('email-desc')"></PfFormInputText>
           </Field>
+          <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
+          <p v-html="t('reset-password-troubleshooting')"></p>
         </PfFormSection>
       </PfForm>
     </Form>

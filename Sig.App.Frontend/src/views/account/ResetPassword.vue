@@ -22,7 +22,7 @@
 		"password-rules": "Le mot de passe doit contenir un minimum de 10 caractères, une majuscule, un chiffre et un caractère spécial (par exemple: %, {'@'}, #, $ et &).",
 		"resend-reset-password": "M'envoyer le lien de nouveau",
 		"submit": "Réinitialiser le mot de passe",
-		"title": "Réinitialisation du mot de passe"
+		"title": "Réinitialisation du mot de passe",
 	}
 }
 </i18n>
