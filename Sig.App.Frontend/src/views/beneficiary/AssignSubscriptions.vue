@@ -68,208 +68,211 @@
 </i18n>
 
 <template>
-  <Title :title="t('title')" :subpages="subpages">
-    <template v-if="organizations && !administrationSubscriptionsOffPlatform" #left>
-      <div class="text-left flex flex-col gap-x-4 text-primary-700">
-        <span class="text-md">{{ t("available-amount-for-allocation") }}</span>
-        <span class="text-4xl font-bold text-center">{{ budgetAllowanceBySubscription }}</span>
-      </div>
-    </template>
-    <template v-if="organizations && !administrationSubscriptionsOffPlatform" #center>
-      <div class="text-left flex flex-col gap-x-4 text-primary-700">
-        <span class="text-md">{{ t("amount-of-payment-remaining") }}</span>
-        <span class="text-4xl font-bold text-center">{{ subscriptionPaymentRemainingCount }}</span>
-      </div>
-    </template>
-    <template v-if="organizations && manageOrganizations" #right>
-      <div class="flex items-center gap-x-4">
-        <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-organization") }}</span>
-        <PfFormInputSelect
-          id="selectedOrganization"
-          has-hidden-label
-          col-span-class="sm:col-span-3"
-          :label="t('selected-organization')"
-          :value="selectedOrganization"
-          :options="organizations"
-          @input="onOrganizationSelected" />
-      </div>
-    </template>
-    <template v-if="organizations" #subpagesCta>
-      <div class="sm:ml-6 flex flex-right gap-x-4 gap-y-3 justify-end">
+  <Loading :loading="loadingOrganization || loadingBeneficiaries" is-full-height>
+    <Title :title="t('title')" :subpages="subpages">
+      <template v-if="organizations && !administrationSubscriptionsOffPlatform" #left>
+        <div class="text-left flex flex-col gap-x-4 text-primary-700">
+          <span class="text-md">{{ t("available-amount-for-allocation") }}</span>
+          <span class="text-4xl font-bold text-center">{{ budgetAllowanceBySubscription }}</span>
+        </div>
+      </template>
+      <template v-if="organizations && !administrationSubscriptionsOffPlatform" #center>
+        <div class="text-left flex flex-col gap-x-4 text-primary-700">
+          <span class="text-md">{{ t("amount-of-payment-remaining") }}</span>
+          <span class="text-4xl font-bold text-center">{{ subscriptionPaymentRemainingCount }}</span>
+        </div>
+      </template>
+      <template v-if="organizations && manageOrganizations" #right>
         <div class="flex items-center gap-x-4">
-          <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-subscription") }}</span>
+          <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-organization") }}</span>
           <PfFormInputSelect
-            id="selectedSubscription"
+            id="selectedOrganization"
             has-hidden-label
             col-span-class="sm:col-span-3"
-            :label="t('selected-subscription')"
-            :value="selectedSubscription"
-            :options="subscriptions"
-            @input="onSubscriptionSelected" />
+            :label="t('selected-organization')"
+            :value="selectedOrganization"
+            :options="organizations"
+            @input="onOrganizationSelected" />
         </div>
-        <div class="flex items-center gap-x-4">
-          <span class="text-sm text-primary-700" aria-hidden>{{ t("max-allocation") }}</span>
-          <PfFormInputText
-            id="maxAllocation"
-            has-hidden-label
-            input-type="number"
-            input-mode="decimal"
-            col-span-class="sm:col-span-3"
-            :disabled="isMaxAllocationInputDisabled"
-            :label="t('max-allocation')"
-            :value="maxAllocation"
-            @input="updateMaxAllocation">
-            <template #trailingIcon>
-              <UiDollarSign />
+      </template>
+      <template v-if="organizations" #subpagesCta>
+        <div class="sm:ml-6 flex flex-right gap-x-4 gap-y-3 justify-end">
+          <div class="flex items-center gap-x-4">
+            <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-subscription") }}</span>
+            <PfFormInputSelect
+              id="selectedSubscription"
+              has-hidden-label
+              col-span-class="sm:col-span-3"
+              :label="t('selected-subscription')"
+              :value="selectedSubscription"
+              :options="subscriptions"
+              @input="onSubscriptionSelected" />
+          </div>
+          <div class="flex items-center gap-x-4">
+            <span class="text-sm text-primary-700" aria-hidden>{{ t("max-allocation") }}</span>
+            <PfFormInputText
+              id="maxAllocation"
+              has-hidden-label
+              input-type="number"
+              input-mode="decimal"
+              col-span-class="sm:col-span-3"
+              :disabled="isMaxAllocationInputDisabled"
+              :label="t('max-allocation')"
+              :value="maxAllocation"
+              @input="updateMaxAllocation">
+              <template #trailingIcon>
+                <UiDollarSign />
+              </template>
+            </PfFormInputText>
+          </div>
+          <div class="flex items-center">
+            <template v-if="isMaxAllocationInputDisabled">
+              <PfButtonAction
+                class="pf-button px-0 border-primary-700 border rounded-r-none"
+                :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                type="button"
+                :disabled="isMaxAllocationInputDisabled"
+                :title="t('chronological-order')"
+                @click="isRandomized = false">
+                <PfIcon :icon="SortIcon" size="lg" />
+                <span class="sr-only">{{ t("sort") }}</span>
+              </PfButtonAction>
+              <PfButtonAction
+                class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
+                :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                type="button"
+                :disabled="isMaxAllocationInputDisabled"
+                :title="t('random-order')"
+                @click="isRandomized = true">
+                <PfIcon :icon="RandomIcon" size="lg" />
+                <span class="sr-only">{{ t("randomize") }}</span>
+              </PfButtonAction>
             </template>
-          </PfFormInputText>
+            <template v-else>
+              <button
+                class="pf-button px-0 border-primary-700 border rounded-r-none"
+                :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                type="button"
+                :title="t('chronological-order')"
+                @click="isRandomized = false">
+                <PfIcon :icon="SortIcon" size="lg" />
+                <span class="sr-only">{{ t("sort") }}</span>
+              </button>
+              <button
+                class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
+                :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
+                type="button"
+                :title="t('random-order')"
+                @click="isRandomized = true">
+                <PfIcon :icon="RandomIcon" size="lg" />
+                <span class="sr-only">{{ t("randomize") }}</span>
+              </button>
+            </template>
+          </div>
+          <PfButtonAction
+            btn-style="primary"
+            :disabled="isAutoSelectBtnDisabled"
+            :label="t('auto-select-participants')"
+            @click="onAutoSelect" />
         </div>
-        <div class="flex items-center">
-          <template v-if="isMaxAllocationInputDisabled">
-            <PfButtonAction
-              class="pf-button px-0 border-primary-700 border rounded-r-none"
-              :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
-              type="button"
-              :disabled="isMaxAllocationInputDisabled"
-              :title="t('chronological-order')"
-              @click="isRandomized = false">
-              <PfIcon :icon="SortIcon" size="lg" />
-              <span class="sr-only">{{ t("sort") }}</span>
-            </PfButtonAction>
-            <PfButtonAction
-              class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
-              :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
-              type="button"
-              :disabled="isMaxAllocationInputDisabled"
-              :title="t('random-order')"
-              @click="isRandomized = true">
-              <PfIcon :icon="RandomIcon" size="lg" />
-              <span class="sr-only">{{ t("randomize") }}</span>
-            </PfButtonAction>
-          </template>
-          <template v-else>
-            <button
-              class="pf-button px-0 border-primary-700 border rounded-r-none"
-              :class="!isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
-              type="button"
-              :title="t('chronological-order')"
-              @click="isRandomized = false">
-              <PfIcon :icon="SortIcon" size="lg" />
-              <span class="sr-only">{{ t("sort") }}</span>
-            </button>
-            <button
-              class="pf-button px-0 border-primary-700 border rounded-l-none border-l-0"
-              :class="isRandomized ? 'cursor-default bg-green-300 text-white' : 'hover:bg-primary-700 hover:text-white'"
-              type="button"
-              :title="t('random-order')"
-              @click="isRandomized = true">
-              <PfIcon :icon="RandomIcon" size="lg" />
-              <span class="sr-only">{{ t("randomize") }}</span>
-            </button>
-          </template>
-        </div>
-        <PfButtonAction
-          btn-style="primary"
-          :disabled="isAutoSelectBtnDisabled"
-          :label="t('auto-select-participants')"
-          @click="onAutoSelect" />
-      </div>
-    </template>
-  </Title>
+      </template>
+    </Title>
 
-  <div v-if="beneficiaries" class="assign-subscription-list-vue px-section md:px-8 py-5">
-    <div class="flex flex-col gap-y-4 sm:flex-row sm:gap-x-4 sm:justify-between sm:items-center pb-5">
-      <div class="flex flex-wrap gap-x-4">
-        <h2 class="my-0">{{ t("amount-allocated", { amount: amountThatWillBeAllocatedMoneyFormat }) }}</h2>
-        <p class="my-1" :class="{ 'text-red-500 font-bold': budgetAllowanceAvailableAfterAllocation < 0 }">
-          {{ t("budget-allowance-available", { amount: budgetAllowanceAvailableAfterAllocationMoneyFormat }) }}
-        </p>
+    <div v-if="beneficiaries" class="assign-subscription-list-vue px-section md:px-8 py-5">
+      <div class="flex flex-col gap-y-4 sm:flex-row sm:gap-x-4 sm:justify-between sm:items-center pb-5">
+        <div class="flex flex-wrap gap-x-4">
+          <h2 class="my-0">{{ t("amount-allocated", { amount: amountThatWillBeAllocatedMoneyFormat }) }}</h2>
+          <p class="my-1" :class="{ 'text-red-500 font-bold': budgetAllowanceAvailableAfterAllocation < 0 }">
+            {{ t("budget-allowance-available", { amount: budgetAllowanceAvailableAfterAllocationMoneyFormat }) }}
+          </p>
+        </div>
+        <div class="lg:flex lg:items-center">
+          <BeneficiaryFilters
+            v-if="selectedOrganization !== ''"
+            v-model="searchInput"
+            hide-conflict-filter
+            hide-card-is-disabled-filter
+            hide-sort-order
+            :available-beneficiary-types="availableBeneficiaryTypes"
+            :available-subscriptions="availableSubscriptions"
+            :selected-beneficiary-types="beneficiaryTypesFilter"
+            :selected-subscriptions="subscriptionsFilter"
+            :selected-status="status"
+            :selected-card-status="cardStatus"
+            :without-subscription-id="WITHOUT_SUBSCRIPTION"
+            :beneficiary-status-inactive="BENEFICIARY_STATUS_INACTIVE"
+            :beneficiary-status-active="BENEFICIARY_STATUS_ACTIVE"
+            :card-status-with="BENEFICIARY_WITH_CARD"
+            :card-status-without="BENEFICIARY_WITHOUT_CARD"
+            :search-filter="searchText"
+            :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
+            :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
+            @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
+            @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
+            @subscriptionsUnchecked="onSubscriptionsUnchecked"
+            @subscriptionsChecked="onSubscriptionsChecked"
+            @statusChecked="onStatusChecked"
+            @statusUnchecked="onStatusUnchecked"
+            @cardStatusChecked="onCardStatusChecked"
+            @cardStatusUnchecked="onCardStatusUnchecked"
+            @resetFilters="onResetFilters"
+            @search="onSearch" />
+        </div>
       </div>
-      <div class="lg:flex lg:items-center">
-        <BeneficiaryFilters
-          v-if="selectedOrganization !== ''"
-          v-model="searchInput"
-          hide-conflict-filter
-          hide-card-is-disabled-filter
-          hide-sort-order
-          :available-beneficiary-types="availableBeneficiaryTypes"
-          :available-subscriptions="availableSubscriptions"
-          :selected-beneficiary-types="beneficiaryTypesFilter"
-          :selected-subscriptions="subscriptionsFilter"
-          :selected-status="status"
-          :selected-card-status="cardStatus"
-          :without-subscription-id="WITHOUT_SUBSCRIPTION"
-          :beneficiary-status-inactive="BENEFICIARY_STATUS_INACTIVE"
-          :beneficiary-status-active="BENEFICIARY_STATUS_ACTIVE"
-          :card-status-with="BENEFICIARY_WITH_CARD"
-          :card-status-without="BENEFICIARY_WITHOUT_CARD"
-          :search-filter="searchText"
-          :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
+
+      <div v-if="selectedOrganization !== '' && beneficiaries.length > 0" class="flex flex-col relative mb-6">
+        <BeneficiaryTable
+          show-associated-card
+          :beneficiaries="beneficiaries"
           :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
-          @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
-          @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
-          @subscriptionsUnchecked="onSubscriptionsUnchecked"
-          @subscriptionsChecked="onSubscriptionsChecked"
-          @statusChecked="onStatusChecked"
-          @statusUnchecked="onStatusUnchecked"
-          @cardStatusChecked="onCardStatusChecked"
-          @cardStatusUnchecked="onCardStatusUnchecked"
-          @resetFilters="onResetFilters"
-          @search="onSearch" />
+          :subscriptions="subscriptions"
+          :selected-subscription="selectedSubscription"
+          @beneficiarySelectedChecked="onSelectedBeneficiaryChecked"
+          @beneficiarySelectedUnchecked="onSelectedBeneficiaryUnchecked">
+        </BeneficiaryTable>
+        <div
+          class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
+          <PfButtonAction
+            tag="routerLink"
+            btn-style="secondary"
+            class="rounded-full"
+            :disabled="isConfirmButtonDisabled"
+            @click="onConfirmSubscription">
+            <span class="inline-flex items-center">
+              {{ t("assign-subscription-btn") }}
+              <span
+                class="bg-primary-700 w-6 h-6 flex items-center justify-center rounded-full text-p3 leading-none ml-2 -mr-2"
+                >{{ selectedBeneficiaries.length }}</span
+              >
+            </span>
+          </PfButtonAction>
+        </div>
+        <div v-if="displayLoadMoreBeneficiaries" class="sticky items-center justify-center py-4 px-4 text-center sm:block sm:p-0">
+          <PfButtonAction tag="routerLink" btn-style="primary" class="rounded-full" @click="onFetchMoreBeneficiaries">
+            <span class="inline-flex items-center">
+              {{ t("load-more-beneficiaries") }}
+            </span>
+          </PfButtonAction>
+        </div>
       </div>
-    </div>
 
-    <div v-if="selectedOrganization !== '' && beneficiaries.length > 0" class="flex flex-col relative mb-6">
-      <BeneficiaryTable
-        show-associated-card
-        :beneficiaries="beneficiaries"
-        :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
-        :subscriptions="subscriptions"
-        :selected-subscription="selectedSubscription"
-        @beneficiarySelectedChecked="onSelectedBeneficiaryChecked"
-        @beneficiarySelectedUnchecked="onSelectedBeneficiaryUnchecked">
-      </BeneficiaryTable>
-      <div
-        class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
-        <PfButtonAction
-          tag="routerLink"
-          btn-style="secondary"
-          class="rounded-full"
-          :disabled="isConfirmButtonDisabled"
-          @click="onConfirmSubscription">
-          <span class="inline-flex items-center">
-            {{ t("assign-subscription-btn") }}
-            <span class="bg-primary-700 w-6 h-6 flex items-center justify-center rounded-full text-p3 leading-none ml-2 -mr-2">{{
-              selectedBeneficiaries.length
-            }}</span>
-          </span>
-        </PfButtonAction>
-      </div>
-      <div v-if="displayLoadMoreBeneficiaries" class="sticky items-center justify-center py-4 px-4 text-center sm:block sm:p-0">
-        <PfButtonAction tag="routerLink" btn-style="primary" class="rounded-full" @click="onFetchMoreBeneficiaries">
-          <span class="inline-flex items-center">
-            {{ t("load-more-beneficiaries") }}
-          </span>
-        </PfButtonAction>
-      </div>
+      <UiEmptyPage v-else-if="selectedSubscription && anyFiltersActive">
+        <UiCta
+          :img-src="require('@/assets/img/participants.jpg')"
+          :description="t('no-results')"
+          :primary-btn-label="t('reset-search')"
+          primary-btn-is-action
+          @onPrimaryBtnClick="onResetFilters">
+        </UiCta>
+      </UiEmptyPage>
+      <UiEmptyPage v-else-if="selectedSubscription">
+        <UiCta :img-src="require('@/assets/img/participants.jpg')" :description="t('no-participants-in-subscription')"> </UiCta>
+      </UiEmptyPage>
+      <UiEmptyPage v-else>
+        <UiCta :img-src="require('@/assets/img/participants.jpg')" :description="t('no-participants')"> </UiCta>
+      </UiEmptyPage>
     </div>
-
-    <UiEmptyPage v-else-if="selectedSubscription && anyFiltersActive">
-      <UiCta
-        :img-src="require('@/assets/img/participants.jpg')"
-        :description="t('no-results')"
-        :primary-btn-label="t('reset-search')"
-        primary-btn-is-action
-        @onPrimaryBtnClick="onResetFilters">
-      </UiCta>
-    </UiEmptyPage>
-    <UiEmptyPage v-else-if="selectedSubscription">
-      <UiCta :img-src="require('@/assets/img/participants.jpg')" :description="t('no-participants-in-subscription')"> </UiCta>
-    </UiEmptyPage>
-    <UiEmptyPage v-else>
-      <UiCta :img-src="require('@/assets/img/participants.jpg')" :description="t('no-participants')"> </UiCta>
-    </UiEmptyPage>
-  </div>
+  </Loading>
 
   <UiDialogWarningModal
     v-if="displayConfirmDialog"
@@ -317,7 +320,7 @@
 
 <script setup>
 import gql from "graphql-tag";
-import { ref, computed, reactive } from "vue";
+import { ref, computed, reactive, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { onBeforeRouteUpdate } from "vue-router";
 import { storeToRefs } from "pinia";
@@ -347,6 +350,7 @@ import RandomIcon from "@/lib/icons/random.json";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 
+import Loading from "@/components/app/loading";
 import Title from "@/components/app/title";
 import BeneficiaryFilters from "@/components/beneficiaries/beneficiary-filters";
 import BeneficiaryTable from "@/components/beneficiaries/beneficiary-table";
@@ -394,6 +398,8 @@ const displayConfirmDialog = ref(false);
 const loadMoreBeneficiaries = ref(false);
 const displayLoadMoreBeneficiaries = ref(false);
 const replicatePaymentOnAttribution = ref(false);
+const beneficiaries = ref([]);
+const beneficiariesPagination = ref(null);
 
 if (route.query.beneficiaryTypes) {
   beneficiaryTypesFilter.value = route.query.beneficiaryTypes.split(",");
@@ -418,7 +424,11 @@ if (route.query.organizationId) {
   selectedOrganization.value = route.query.organizationId;
 }
 
-const { result: resultOrganizations, refetch: refetchOrganizations } = useQuery(
+const {
+  result: resultOrganizations,
+  refetch: refetchOrganizations,
+  loading: loadingOrganization
+} = useQuery(
   gql`
     query Organizations {
       organizations {
@@ -508,7 +518,8 @@ const subscriptions = useResult(resultOrganizations, null, (data) => {
 const {
   result: resultBeneficiaries,
   refetch: refetchBeneficiaries,
-  fetchMore: fetchMoreBeneficiaries
+  fetchMore: fetchMoreBeneficiaries,
+  loading: loadingBeneficiaries
 } = useQuery(
   gql`
     query Organization(
@@ -574,29 +585,28 @@ const {
   })
 );
 
-const beneficiaries = useResult(resultBeneficiaries, null, (data) => {
+watch(resultBeneficiaries, (value) => {
+  if (value === undefined) return;
+
   if (
-    data.organization.beneficiaries.totalPages > 1 &&
-    data.organization.beneficiaries.pageNumber < data.organization.beneficiaries.totalPages
+    value.organization.beneficiaries.totalPages > 1 &&
+    value.organization.beneficiaries.pageNumber < value.organization.beneficiaries.totalPages
   ) {
     displayLoadMoreBeneficiaries.value = true;
   } else if (
-    data.organization.beneficiaries.totalPages === 1 ||
-    data.organization.beneficiaries.pageNumber === data.organization.beneficiaries.totalPages
+    value.organization.beneficiaries.totalPages === 1 ||
+    value.organization.beneficiaries.pageNumber === value.organization.beneficiaries.totalPages
   ) {
     displayLoadMoreBeneficiaries.value = false;
   }
 
   loadMoreBeneficiaries.value = false;
 
-  return data.organization.beneficiaries.items.map((x) => reactive({ ...x, isSelected: false }));
-});
-
-const beneficiariesPagination = useResult(resultBeneficiaries, null, (data) => {
-  return {
-    totalCount: data.organization.beneficiaries.totalCount,
-    totalPages: data.organization.beneficiaries.totalPages,
-    pageNumber: data.organization.beneficiaries.pageNumber
+  beneficiaries.value = value.organization.beneficiaries.items.map((x) => reactive({ ...x, isSelected: false }));
+  beneficiariesPagination.value = {
+    totalCount: value.organization.beneficiaries.totalCount,
+    totalPages: value.organization.beneficiaries.totalPages,
+    pageNumber: value.organization.beneficiaries.pageNumber
   };
 });
 

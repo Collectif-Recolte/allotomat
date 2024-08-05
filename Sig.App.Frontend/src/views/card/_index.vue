@@ -176,10 +176,10 @@
 
 <script setup>
 import gql from "graphql-tag";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { onBeforeRouteUpdate } from "vue-router";
-import { useQuery, useResult } from "@vue/apollo-composable";
+import { useQuery } from "@vue/apollo-composable";
 import { storeToRefs } from "pinia";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
@@ -224,6 +224,9 @@ const searchText = ref("");
 const selectedCardStatus = ref([]);
 const selectedCardDisabled = ref([]);
 const sortOrder = ref(BY_ID);
+const project = ref(null);
+const cardsPagination = ref(null);
+const cards = ref(null);
 
 const availableCardStatus = [
   { value: CARD_STATUS_ASSIGNED, label: t("card-assigned") },
@@ -326,16 +329,12 @@ function projectsVariables() {
   };
 }
 
-const project = useResult(resultProjects, null, (data) => {
-  return data.projects[0];
-});
+watch(resultProjects, (value) => {
+  if (value === undefined) return;
 
-const cardsPagination = useResult(resultProjects, null, (data) => {
-  return data.projects[0]?.cards;
-});
-
-const cards = useResult(resultProjects, null, (data) => {
-  return data.projects[0]?.cards.items;
+  project.value = value.projects[0];
+  cardsPagination.value = value.projects[0]?.cards;
+  cards.value = value.projects[0]?.cards.items;
 });
 
 const showCreateGiftCardBtn = computed(() => {

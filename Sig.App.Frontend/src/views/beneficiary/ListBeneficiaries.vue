@@ -40,186 +40,189 @@
 </i18n>
 
 <template>
-  <RouterView v-slot="{ Component }">
-    <Title :title="t('title')" :subpages="subpages">
-      <template v-if="organizations && !administrationSubscriptionsOffPlatform" #center>
-        <div class="xs:text-right flex items-center gap-x-4 text-primary-700">
-          <span class="text-sm">{{ t("available-amount-for-allocation") }}</span>
-          <span class="text-4xl font-bold">{{ getShortMoneyFormat(budgetAllowancesTotal) }}</span>
-        </div>
-      </template>
-      <template v-if="organizations && manageOrganizations" #right>
-        <div class="flex items-center gap-x-4">
-          <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-organization") }}</span>
-          <PfFormInputSelect
-            id="selectedOrganization"
-            has-hidden-label
-            :label="t('selected-organization')"
-            :value="selectedOrganization"
-            :options="organizations"
-            col-span-class="sm:col-span-3"
-            @input="onOrganizationSelected" />
-        </div>
-      </template>
-      <template v-if="organizations" #subpagesCta>
-        <div class="flex flex-right gap-x-4 gap-y-3 justify-end">
-          <PfButtonLink
-            v-if="!beneficiariesAreAnonymous"
-            :label="t('import-beneficiaries-list')"
-            tag="routerLink"
-            :to="importBeneficiariesListRoute"
-            :icon="ICON_UPLOAD"
-            has-icon-left />
-          <PfButtonAction
-            btn-style="outline"
-            :label="t('export-beneficiaries-list')"
-            :icon="ICON_DOWNLOAD"
-            has-icon-left
-            @click="onExportReport" />
-          <template v-if="!beneficiariesAreAnonymous">
+  <Loading :loading="loading || projectsLoading || organizationsLoading" is-full-height>
+    <RouterView v-slot="{ Component }">
+      <Title :title="t('title')" :subpages="subpages">
+        <template v-if="organizations && !administrationSubscriptionsOffPlatform" #center>
+          <div class="xs:text-right flex items-center gap-x-4 text-primary-700">
+            <span class="text-sm">{{ t("available-amount-for-allocation") }}</span>
+            <span class="text-4xl font-bold">{{ getShortMoneyFormat(budgetAllowancesTotal) }}</span>
+          </div>
+        </template>
+        <template v-if="organizations && manageOrganizations" #right>
+          <div class="flex items-center gap-x-4">
+            <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-organization") }}</span>
+            <PfFormInputSelect
+              id="selectedOrganization"
+              has-hidden-label
+              :label="t('selected-organization')"
+              :value="selectedOrganization"
+              :options="organizations"
+              col-span-class="sm:col-span-3"
+              @input="onOrganizationSelected" />
+          </div>
+        </template>
+        <template v-if="organizations" #subpagesCta>
+          <div class="flex flex-right gap-x-4 gap-y-3 justify-end">
             <PfButtonLink
-              v-if="!administrationSubscriptionsOffPlatform"
-              btn-style="outline"
-              :label="t('download-template-file')"
-              href="/files/Template_Upload.xlsx"
-              file-name="Template_Upload.xlsx"
-              is-downloadable
-              :icon="ICON_TABLE"
+              v-if="!beneficiariesAreAnonymous"
+              :label="t('import-beneficiaries-list')"
+              tag="routerLink"
+              :to="importBeneficiariesListRoute"
+              :icon="ICON_UPLOAD"
               has-icon-left />
             <PfButtonAction
-              v-else
               btn-style="outline"
-              :label="t('download-template-file')"
-              :icon="ICON_TABLE"
+              :label="t('export-beneficiaries-list')"
+              :icon="ICON_DOWNLOAD"
               has-icon-left
-              @click="onDownloadTemplateFile" />
-          </template>
-        </div>
-      </template>
-    </Title>
-    <div v-if="beneficiariesPagination" class="px-section md:px-8 py-5">
-      <div class="flex flex-col gap-y-4 sm:flex-row sm:gap-x-4 sm:justify-between sm:items-center pb-5">
-        <div class="flex flex-wrap gap-x-4">
-          <h2 class="my-0">{{ t("participant-count", { count: beneficiariesPagination.totalCount }) }}</h2>
-          <PfButtonLink
-            v-if="beneficiariesPagination.conflictPaymentCount > 0"
-            class="ml-2 text-red-500"
-            btn-style="link"
-            tag="routerLink"
-            :to="{
-              name: URL_BENEFICIARY_ADMIN,
-              query: { paymentConflict: BENEFICIARY_WITH_PAYMENT_CONFLICT }
-            }">
-            <span class="inline-flex items-center underline mt-1">
-              <PfIcon :icon="ICON_INFO" class="shrink-0 mr-1" size="xs" />
-              {{ t("payment-conflicts-alert", { count: beneficiariesPagination.conflictPaymentCount }) }}
-            </span>
-          </PfButtonLink>
-        </div>
-        <div class="lg:flex lg:items-center">
-          <BeneficiaryFilters
-            v-if="selectedOrganization !== ''"
-            v-model="searchInput"
-            :available-beneficiary-types="availableBeneficiaryTypes"
-            :available-subscriptions="availableSubscriptions"
-            :selected-beneficiary-types="beneficiaryTypes"
-            :selected-subscriptions="subscriptions"
-            :selected-status="status"
-            :selected-card-status="cardStatus"
-            :selected-payment-conflict-status="conflictPaymentStatus"
-            :without-subscription-id="WITHOUT_SUBSCRIPTION"
-            :beneficiary-status-inactive="BENEFICIARY_STATUS_INACTIVE"
-            :beneficiary-status-active="BENEFICIARY_STATUS_ACTIVE"
-            :card-status-with="BENEFICIARY_WITH_CARD"
-            :card-status-without="BENEFICIARY_WITHOUT_CARD"
-            :payment-conflict-status-with="BENEFICIARY_WITH_PAYMENT_CONFLICT"
-            :payment-conflict-status-without="BENEFICIARY_WITHOUT_PAYMENT_CONFLICT"
-            :search-filter="searchText"
-            :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
-            :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
-            :card-is-disabled="CARD_IS_DISABLED"
-            :card-is-enabled="CARD_IS_ENABLED"
-            :selected-card-disabled="cardDisabled"
-            :sort-order="sortOrder"
-            @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
-            @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
-            @subscriptionsUnchecked="onSubscriptionsUnchecked"
-            @subscriptionsChecked="onSubscriptionsChecked"
-            @statusChecked="onStatusChecked"
-            @statusUnchecked="onStatusUnchecked"
-            @cardStatusChecked="onCardStatusChecked"
-            @cardStatusUnchecked="onCardStatusUnchecked"
-            @paymentConflictStatusChecked="onPaymentConflictStatusChecked"
-            @paymentConflictStatusUnchecked="onPaymentConflictStatusUnchecked"
-            @cardIsDisabledChecked="onCardDisabledChecked"
-            @cardIsDisabledUnchecked="onCardDisabledUnchecked"
-            @sortOrderChanged="onSortOrderChanged"
-            @resetFilters="onResetFilters"
-            @search="onSearch" />
-        </div>
-      </div>
-
-      <template v-if="selectedOrganization !== '' && beneficiariesPagination.items.length > 0">
-        <ListBeneficiariesWithDetailed
-          :product-groups="productGroups"
-          :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
-          :beneficiaries-pagination="beneficiariesPagination"
-          :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
-          :filtered-query="filteredQuery" />
-        <UiPagination
-          v-if="beneficiariesPagination.totalPages > 1"
-          v-model:page="page"
-          :total-pages="beneficiariesPagination.totalPages">
-        </UiPagination>
-      </template>
-
-      <UiEmptyPage v-else>
-        <UiCta
-          v-if="searchText"
-          :img-src="require('@/assets/img/swan.jpg')"
-          :description="t('no-results')"
-          :primary-btn-label="t('reset-search')"
-          primary-btn-is-action
-          @onPrimaryBtnClick="onResetSearch">
-        </UiCta>
-        <UiCta
-          v-else-if="beneficiariesAreAnonymous"
-          :img-src="require('@/assets/img/participants.jpg')"
-          :description="t('empty-list')" />
-        <UiCta
-          v-else
-          :img-src="require('@/assets/img/participants.jpg')"
-          :description="t('empty-list')"
-          :primary-btn-icon="ICON_UPLOAD"
-          :primary-btn-label="t('import-new-list')"
-          :primary-btn-route="importBeneficiariesListRoute">
-          <template #secondaryBtn>
+              @click="onExportReport" />
+            <template v-if="!beneficiariesAreAnonymous">
+              <PfButtonLink
+                v-if="!administrationSubscriptionsOffPlatform"
+                btn-style="outline"
+                :label="t('download-template-file')"
+                href="/files/Template_Upload.xlsx"
+                file-name="Template_Upload.xlsx"
+                is-downloadable
+                :icon="ICON_TABLE"
+                has-icon-left />
+              <PfButtonAction
+                v-else
+                btn-style="outline"
+                :label="t('download-template-file')"
+                :icon="ICON_TABLE"
+                has-icon-left
+                @click="onDownloadTemplateFile" />
+            </template>
+          </div>
+        </template>
+      </Title>
+      <div v-if="beneficiariesPagination" class="px-section md:px-8 py-5">
+        <div class="flex flex-col gap-y-4 sm:flex-row sm:gap-x-4 sm:justify-between sm:items-center pb-5">
+          <div class="flex flex-wrap gap-x-4">
+            <h2 class="my-0">{{ t("participant-count", { count: beneficiariesPagination.totalCount }) }}</h2>
             <PfButtonLink
-              v-if="!administrationSubscriptionsOffPlatform"
+              v-if="beneficiariesPagination.conflictPaymentCount > 0"
+              class="ml-2 text-red-500"
               btn-style="link"
-              :label="t('download-template-file')"
-              href="/files/Template_Upload.xlsx"
-              file-name="Template_Upload.xlsx" />
-            <PfButtonAction v-else btn-style="link" :label="t('download-template-file')" @click="onDownloadTemplateFile" />
-          </template>
+              tag="routerLink"
+              :to="{
+                name: URL_BENEFICIARY_ADMIN,
+                query: { paymentConflict: BENEFICIARY_WITH_PAYMENT_CONFLICT }
+              }">
+              <span class="inline-flex items-center underline mt-1">
+                <PfIcon :icon="ICON_INFO" class="shrink-0 mr-1" size="xs" />
+                {{ t("payment-conflicts-alert", { count: beneficiariesPagination.conflictPaymentCount }) }}
+              </span>
+            </PfButtonLink>
+          </div>
+          <div class="lg:flex lg:items-center">
+            <BeneficiaryFilters
+              v-if="selectedOrganization !== ''"
+              v-model="searchInput"
+              :selected-beneficiary-types="beneficiaryTypes"
+              :selected-subscriptions="subscriptions"
+              :selected-status="status"
+              :selected-card-status="cardStatus"
+              :selected-payment-conflict-status="conflictPaymentStatus"
+              :selected-card-disabled="cardDisabled"
+              à
+              :search-filter="searchText"
+              :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
+              :without-subscription-id="WITHOUT_SUBSCRIPTION"
+              :beneficiary-status-inactive="BENEFICIARY_STATUS_INACTIVE"
+              :beneficiary-status-active="BENEFICIARY_STATUS_ACTIVE"
+              :card-status-with="BENEFICIARY_WITH_CARD"
+              :card-status-without="BENEFICIARY_WITHOUT_CARD"
+              :payment-conflict-status-with="BENEFICIARY_WITH_PAYMENT_CONFLICT"
+              :payment-conflict-status-without="BENEFICIARY_WITHOUT_PAYMENT_CONFLICT"
+              :card-is-disabled="CARD_IS_DISABLED"
+              :card-is-enabled="CARD_IS_ENABLED"
+              :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
+              :sort-order="sortOrder"
+              :available-beneficiary-types="availableBeneficiaryTypes"
+              :available-subscriptions="availableSubscriptions"
+              @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
+              @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
+              @subscriptionsUnchecked="onSubscriptionsUnchecked"
+              @subscriptionsChecked="onSubscriptionsChecked"
+              @statusChecked="onStatusChecked"
+              @statusUnchecked="onStatusUnchecked"
+              @cardStatusChecked="onCardStatusChecked"
+              @cardStatusUnchecked="onCardStatusUnchecked"
+              @paymentConflictStatusChecked="onPaymentConflictStatusChecked"
+              @paymentConflictStatusUnchecked="onPaymentConflictStatusUnchecked"
+              @cardIsDisabledChecked="onCardDisabledChecked"
+              @cardIsDisabledUnchecked="onCardDisabledUnchecked"
+              @sortOrderChanged="onSortOrderChanged"
+              @resetFilters="onResetFilters"
+              @search="onSearch" />
+          </div>
+        </div>
+
+        <template v-if="selectedOrganization !== '' && beneficiariesPagination.items.length > 0">
+          <ListBeneficiariesWithDetailed
+            :product-groups="productGroups"
+            :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
+            :beneficiaries-pagination="beneficiariesPagination"
+            :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
+            :filtered-query="filteredQuery" />
+          <UiPagination
+            v-if="beneficiariesPagination.totalPages > 1"
+            v-model:page="page"
+            :total-pages="beneficiariesPagination.totalPages">
+          </UiPagination>
+        </template>
+
+        <UiEmptyPage v-else>
+          <UiCta
+            v-if="searchText"
+            :img-src="require('@/assets/img/swan.jpg')"
+            :description="t('no-results')"
+            :primary-btn-label="t('reset-search')"
+            primary-btn-is-action
+            @onPrimaryBtnClick="onResetSearch">
+          </UiCta>
+          <UiCta
+            v-else-if="beneficiariesAreAnonymous"
+            :img-src="require('@/assets/img/participants.jpg')"
+            :description="t('empty-list')" />
+          <UiCta
+            v-else
+            :img-src="require('@/assets/img/participants.jpg')"
+            :description="t('empty-list')"
+            :primary-btn-icon="ICON_UPLOAD"
+            :primary-btn-label="t('import-new-list')"
+            :primary-btn-route="importBeneficiariesListRoute">
+            <template #secondaryBtn>
+              <PfButtonLink
+                v-if="!administrationSubscriptionsOffPlatform"
+                btn-style="link"
+                :label="t('download-template-file')"
+                href="/files/Template_Upload.xlsx"
+                file-name="Template_Upload.xlsx" />
+              <PfButtonAction v-else btn-style="link" :label="t('download-template-file')" @click="onDownloadTemplateFile" />
+            </template>
+          </UiCta>
+        </UiEmptyPage>
+      </div>
+      <UiEmptyPage v-else-if="!loading && !projectsLoading && !organizationsLoading">
+        <UiCta
+          :img-src="require('@/assets/img/organismes.jpg')"
+          :description="t('empty-organizations-list')"
+          :primary-btn-label="t('add-organization')"
+          :primary-btn-route="addOrganizationRoute">
         </UiCta>
       </UiEmptyPage>
-    </div>
-    <UiEmptyPage v-else-if="!loading && !projectsLoading && !organizationsLoading">
-      <UiCta
-        :img-src="require('@/assets/img/organismes.jpg')"
-        :description="t('empty-organizations-list')"
-        :primary-btn-label="t('add-organization')"
-        :primary-btn-route="addOrganizationRoute">
-      </UiCta>
-    </UiEmptyPage>
-    <Component :is="Component" />
-  </RouterView>
+      <Component :is="Component" />
+    </RouterView>
+  </Loading>
 </template>
 
 <script setup>
 import gql from "graphql-tag";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { onBeforeRouteUpdate } from "vue-router";
 import { storeToRefs } from "pinia";
@@ -262,6 +265,7 @@ import ICON_TABLE from "@/lib/icons/table.json";
 import ICON_DOWNLOAD from "@/lib/icons/download.json";
 import ICON_INFO from "@/lib/icons/info.json";
 
+import Loading from "@/components/app/loading";
 import Title from "@/components/app/title";
 import BeneficiaryFilters from "@/components/beneficiaries/beneficiary-filters";
 import ListBeneficiariesWithDetailed from "@/components/beneficiaries/list-beneficiaries-detailed";
@@ -328,6 +332,12 @@ const selectedOrganization = ref(currentOrganization);
 const searchInput = ref("");
 const searchText = ref("");
 const sortOrder = ref(SORT_ORDER);
+const availableBeneficiaryTypes = ref([]);
+const availableSubscriptions = ref([]);
+const administrationSubscriptionsOffPlatform = ref(false);
+const organizations = ref([]);
+const productGroups = ref([]);
+const beneficiariesPagination = ref(null);
 
 const filteredQuery = computed(() => {
   return {
@@ -421,33 +431,26 @@ const {
     }
   `
 );
-const organizations = useResult(resultOrganizations, null, (data) => {
+
+watch(resultOrganizations, (value) => {
+  if (value === undefined) return;
+
   if (!selectedOrganization.value) {
-    selectedOrganization.value = data.organizations[0].id;
-    changeOrganization(data.organizations[0].id);
+    selectedOrganization.value = value.organizations[0].id;
+    changeOrganization(value.organizations[0].id);
   }
-  return data.organizations.map((x) => ({
+
+  organizations.value = value.organizations.map((x) => ({
     label: x.name,
     value: x.id,
     budgetAllowancesTotal: x.budgetAllowancesTotal,
     beneficiariesAreAnonymous: x.project.beneficiariesAreAnonymous
   }));
-});
 
-let administrationSubscriptionsOffPlatform = useResult(resultOrganizations, null, (data) => {
-  return data.organizations[0].project.administrationSubscriptionsOffPlatform;
-});
-
-let availableBeneficiaryTypes = useResult(resultOrganizations, null, (data) => {
-  return data.organizations[0].project.beneficiaryTypes;
-});
-
-let availableSubscriptions = useResult(resultOrganizations, null, (data) => {
-  return data.organizations[0].project.subscriptions;
-});
-
-let productGroups = useResult(resultOrganizations, null, (data) => {
-  return data.organizations[0].project.productGroups.filter((x) => x.name !== PRODUCT_GROUP_LOYALTY);
+  availableBeneficiaryTypes.value = value.organizations[0].project.beneficiaryTypes;
+  availableSubscriptions.value = value.organizations[0].project.subscriptions;
+  administrationSubscriptionsOffPlatform.value = value.organizations[0].project.administrationSubscriptionsOffPlatform;
+  productGroups.value = value.organizations[0].project.productGroups.filter((x) => x.name !== PRODUCT_GROUP_LOYALTY);
 });
 
 const {
@@ -585,8 +588,10 @@ const {
   })
 );
 
-let beneficiariesPagination = useResult(resultBeneficiaries, null, (data) => {
-  return data.organization.beneficiaries;
+watch(resultBeneficiaries, (value) => {
+  if (value === undefined) return;
+
+  beneficiariesPagination.value = value.organization.beneficiaries;
 });
 
 let beneficiariesAreAnonymous = computed(() => {
