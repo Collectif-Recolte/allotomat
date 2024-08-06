@@ -36,8 +36,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
                 Type = UserType.PCAAdmin,
                 Profile = new UserProfile
                 {
-                    FirstName = request.FirstName,
-                    LastName = request.LastName
+                    FirstName = request.FirstName.Trim(),
+                    LastName = request.LastName.Trim()
                 }
             };
 

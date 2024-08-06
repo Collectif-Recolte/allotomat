@@ -44,7 +44,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             logger.LogInformation($"[Mutation] CreateMarket({request.Name}, {request.ManagerEmails})");
             var market = new Market()
             {
-                Name = request.Name
+                Name = request.Name.Trim()
             };
 
             var managers = new List<AppUser>();

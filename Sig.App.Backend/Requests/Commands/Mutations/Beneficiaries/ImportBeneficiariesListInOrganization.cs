@@ -78,17 +78,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                     currentBeneficiaries.Remove(beneficiary);
                 }
 
-                beneficiary.Firstname = item.Firstname;
-                beneficiary.Lastname = item.Lastname;
-                beneficiary.Email = item.Email;
-                beneficiary.Address = item.Address;
-                beneficiary.Phone = item.Phone;
-                beneficiary.Notes = item.Notes;
+                beneficiary.Firstname = item.Firstname != null ? item.Firstname.Trim() : null;
+                beneficiary.Lastname = item.Lastname != null ? item.Lastname.Trim() : null;
+                beneficiary.Email = item.Email != null ? item.Email.Trim() : null;
+                beneficiary.Address = item.Address != null ? item.Address.Trim() : null;
+                beneficiary.Phone = item.Phone != null ? item.Phone.Trim() : null;
+                beneficiary.Notes = item.Notes != null ? item.Notes.Trim() : null;
                 beneficiary.BeneficiaryType = beneficiaryType;
                 beneficiary.SortOrder = sortOrder++;
-                beneficiary.PostalCode = item.PostalCode;
-                beneficiary.ID1 = item.Id1;
-                beneficiary.ID2 = item.Id2;
+                beneficiary.PostalCode = item.PostalCode != null ? item.PostalCode.Trim() : null;
+                beneficiary.ID1 = item.Id1 != null ? item.Id1.Trim() : null;
+                beneficiary.ID2 = item.Id2 != null ? item.Id2.Trim() : null;
 
                 beneficiaries.Add(beneficiary);
             }
