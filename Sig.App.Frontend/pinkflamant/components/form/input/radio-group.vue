@@ -9,6 +9,7 @@
       :col-span-class="colSpanClass"
       :errors="errors"
       :disabled="disabled"
+      :required="required"
       is-radio>
       <input
         :id="option.id"

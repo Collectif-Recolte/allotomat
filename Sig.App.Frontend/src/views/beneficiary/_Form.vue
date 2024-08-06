@@ -66,6 +66,7 @@
         <Field v-slot="{ field, errors: fieldErrors }" name="firstname">
           <PfFormInputText
             id="firstname"
+            required
             v-bind="field"
             :label="t('beneficiary-firstname')"
             :placeholder="t('beneficiary-firstname-placeholder')"
@@ -75,6 +76,7 @@
         <Field v-slot="{ field, errors: fieldErrors }" name="lastname">
           <PfFormInputText
             id="lastname"
+            required
             v-bind="field"
             :label="t('beneficiary-lastname')"
             :placeholder="t('beneficiary-lastname-placeholder')"
@@ -96,7 +98,8 @@
             :label="t('beneficiary-category')"
             :options="beneficiaryTypes"
             col-span-class="sm:col-span-3"
-            :errors="fieldErrors" />
+            :errors="fieldErrors"
+            required />
         </Field>
       </PfFormSection>
       <PfFormSection :title="t('communication-means')">
@@ -141,6 +144,7 @@
         <Field v-slot="{ field, errors: fieldErrors }" name="id1">
           <PfFormInputText
             id="id1"
+            required
             v-bind="field"
             :label="t('unique-id-id1')"
             :errors="fieldErrors"
