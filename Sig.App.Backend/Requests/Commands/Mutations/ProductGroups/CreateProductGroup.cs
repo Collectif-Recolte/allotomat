@@ -48,7 +48,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
             {
                 Project = project,
                 Color = request.Color,
-                Name = request.Name,
+                Name = request.Name.Trim(),
                 OrderOfAppearance = request.OrderOfAppearance
             };
 
