@@ -55,16 +55,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             var beneficiary = new Beneficiary()
             {
                 ID1 = request.Id1 != null ? request.Id1.Trim() : Guid.NewGuid().ToString(),
-                Firstname = request.Firstname != null ? request.Firstname.Trim() : null,
-                Lastname = request.Lastname != null ? request.Lastname.Trim() : null,
-                Email = request.Email != null ? request.Email.Trim() : null,
-                Address = request.Address != null ? request.Address.Trim() : null,
-                Phone = request.Phone != null ? request.Phone.Trim() : null,
+                Firstname = request.Firstname?.Trim(),
+                Lastname = request.Lastname?.Trim(),
+                Email = request.Email?.Trim(),
+                Address = request.Address?.Trim(),
+                Phone = request.Phone?.Trim(),
                 Organization = organization,
-                Notes = request.Notes != null ? request.Notes.Trim() : null,
+                Notes = request.Notes?.Trim(),
                 BeneficiaryType = beneficiaryType,
-                PostalCode = request.PostalCode != null ? request.PostalCode.Trim() : null,
-                ID2 = request.Id2 != null ? request.Id2.Trim() : null,
+                PostalCode = request.PostalCode?.Trim(),
+                ID2 = request.Id2?.Trim(),
                 SortOrder = sortOrder
             };
 

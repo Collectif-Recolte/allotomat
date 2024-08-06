@@ -53,7 +53,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
             var input = new CreateBeneficiaryInOrganization.Input()
             {
                 Firstname = "John",
-                Lastname = "Doe",
+                Lastname = " Doe ",
                 Email = "john.doe@example.com",
                 Phone = "555-555-1234",
                 Address = "123, Example Street",
@@ -70,6 +70,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
             beneficiary.Email.Should().Be("john.doe@example.com");
             beneficiary.Phone.Should().Be("555-555-1234");
             beneficiary.Address.Should().Be("123, Example Street");
+            beneficiary.Notes.Should().Be(null);
             beneficiary.BeneficiaryTypeId.Should().Be(beneficiaryType.Id);
             beneficiary.ID1.Length.Should().Be(36);
         }
