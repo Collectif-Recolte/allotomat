@@ -5,7 +5,7 @@
     "set-subscription": "Assign subscriptions",
     "set-card": "Assign card",
     "next-step-btn-add-beneficiary": "Add participant and assign subscriptions",
-    "next-step-btn-set-subscription": "Add subscription(s) and assign card",
+    "next-step-btn-add-subscription": "Add subscription(s) and assign card",
 		"add-beneficiary-success-notification": "Adding {firstname} {lastname} was successful.",
 		"title": "Add a participant",
     "set-beneficiary": "Set participant information",
@@ -13,14 +13,12 @@
 	"fr": {
 		"add-beneficiary": "Ajouter le-la participant-e",
     "set-subscription": "Assigner les abonnements",
-    "set-card": "Assigner la carte",
+    "set-card": "Définir la carte",
     "next-step-btn-add-beneficiary": "Ajouter le-la participant-e et assigner des abonnements",
-    "next-step-btn-set-subscription": "Ajouter des abonnements et assigner une carte",
+    "next-step-btn-add-subscription": "Ajouter des abonnements et assigner une carte",
 		"add-beneficiary-success-notification": "L’ajout de {firstname} {lastname} a été un succès.",
 		"title": "Ajouter un-e participant-e",
-    "set-beneficiary": "Définir les informations du participant-e",
-    "set-subscription": "Définir les abonnements",
-    "set-card": "Définir la carte"
+    "set-beneficiary": "Définir les informations du participant-e"
 	}
 }
 </i18n>
@@ -37,10 +35,10 @@
       :submit-btn="submitBtnLabel"
       :next-step-btn="nextStepBtnLabel"
       :organization-id="currentOrganization"
+      is-new
       @submit="onBeneficiaryFormSubmit"
       @next-step="onBeneficiaryFormNextStep"
-      @closeModal="closeModal"
-      is-new />
+      @closeModal="closeModal" />
     <AssignSubscriptionForm v-else-if="currentStep === 1" />
     <AssignCardForm v-else />
   </UiDialogModal>
@@ -150,7 +148,7 @@ const nextStepBtnLabel = computed(() => {
     case 0:
       return t("next-step-btn-add-beneficiary");
     case 1:
-      return t("next-step-btn-set-card");
+      return t("next-step-btn-add-subscription");
     default:
       return null;
   }

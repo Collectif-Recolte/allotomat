@@ -163,7 +163,7 @@
           <div class="flex gap-x-6 items-center justify-end">
             <PfButtonAction btn-style="link" :label="t('cancel')" @click="closeModal" />
             <PfButtonAction class="px-8" :label="submitBtn" type="submit" />
-            <PfButtonAction class="px-8" :label="nextStepBtn" type="submit" @click="onNextStepBtn" />
+            <PfButtonAction v-if="isNew" class="px-8" :label="nextStepBtn" type="submit" @click="onNextStepBtn" />
           </div>
         </div>
       </template>
