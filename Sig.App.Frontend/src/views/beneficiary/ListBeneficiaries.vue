@@ -1,6 +1,7 @@
 <i18n>
   {
     "en": {
+      "add-beneficiary": "Add a participant",
       "import-beneficiaries-list": "Import a list",
       "selected-organization": "Group",
       "title": "Participants",
@@ -19,6 +20,7 @@
       "assign-subscriptions": "Assignments"
     },
     "fr": {
+      "add-beneficiary": "Ajouter un participant",
       "import-beneficiaries-list": "Importer une liste",
       "selected-organization": "Groupe",
       "title": "Participant-e-s",
@@ -64,6 +66,13 @@
         </template>
         <template v-if="organizations" #subpagesCta>
           <div class="flex flex-right gap-x-4 gap-y-3 justify-end">
+            <PfButtonLink
+              v-if="!beneficiariesAreAnonymous"
+              :label="t('add-beneficiary')"
+              tag="routerLink"
+              :to="{ name: URL_BENEFICIARY_ADD }"
+              :icon="ICON_PLUS"
+              has-icon-left />
             <PfButtonLink
               v-if="!beneficiariesAreAnonymous"
               :label="t('import-beneficiaries-list')"
@@ -239,7 +248,8 @@ import {
   URL_BENEFICIARY_IMPORT_LIST,
   URL_BENEFICIARY_OFF_PLATFORM_IMPORT_LIST,
   URL_ORGANIZATION_ADD,
-  URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS
+  URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS,
+  URL_BENEFICIARY_ADD
 } from "@/lib/consts/urls";
 import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
 import {
@@ -264,6 +274,7 @@ import ICON_UPLOAD from "@/lib/icons/upload-file.json";
 import ICON_TABLE from "@/lib/icons/table.json";
 import ICON_DOWNLOAD from "@/lib/icons/download.json";
 import ICON_INFO from "@/lib/icons/info.json";
+import ICON_PLUS from "@/lib/icons/plus.json";
 
 import Loading from "@/components/app/loading";
 import Title from "@/components/app/title";

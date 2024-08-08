@@ -55,10 +55,8 @@
     @submit="onSubmit">
     <PfForm
       has-footer
-      can-cancel
       :disable-submit="Object.keys(formErrors).length > 0"
       :submit-label="props.submitBtn"
-      :cancel-label="t('cancel')"
       :processing="isSubmitting"
       :warning-message="props.warningMessage"
       @cancel="closeModal">
@@ -144,11 +142,12 @@
         <Field v-slot="{ field, errors: fieldErrors }" name="id1">
           <PfFormInputText
             id="id1"
-            required
+            :required="!props.isNew"
             v-bind="field"
             :label="t('unique-id-id1')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            :disabled="props.isNew" />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="id2">
           <PfFormInputText
@@ -159,6 +158,15 @@
             col-span-class="sm:col-span-4" />
         </Field>
       </PfFormSection>
+      <template #footer>
+        <div class="pt-5">
+          <div class="flex gap-x-6 items-center justify-end">
+            <PfButtonAction btn-style="link" :label="t('cancel')" @click="closeModal" />
+            <PfButtonAction class="px-8" :label="submitBtn" type="submit" />
+            <PfButtonAction v-if="isNew" class="px-8" :label="nextStepBtn" type="submit" @click="onNextStepBtn" />
+          </div>
+        </div>
+      </template>
     </PfForm>
   </Form>
 </template>
@@ -166,15 +174,21 @@
 <script setup>
 import gql from "graphql-tag";
 import { useQuery, useResult } from "@vue/apollo-composable";
-import { defineEmits, defineProps, computed } from "vue";
+import { defineEmits, defineProps, computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { string, object } from "yup";
+import { string, object, lazy, mixed } from "yup";
 
 const { t } = useI18n();
-const emit = defineEmits(["submit", "closeModal"]);
+const emit = defineEmits(["submit", "closeModal", "nextStep"]);
+
+const isNextStepBtnClicked = ref(false);
 
 const props = defineProps({
   submitBtn: {
+    type: String,
+    default: ""
+  },
+  nextStepBtn: {
     type: String,
     default: ""
   },
@@ -225,6 +239,10 @@ const props = defineProps({
   warningMessage: {
     type: String,
     default: ""
+  },
+  isNew: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -289,7 +307,17 @@ const validationSchema = computed(() =>
         }
       }),
     beneficiaryTypeId: string().label(t("beneficiary-category")).required(),
-    id1: string().label(t("unique-id-id1")).required()
+    id1: lazy(() => {
+      if (props.isNew) {
+        return mixed().test({
+          test: function () {
+            return true;
+          }
+        });
+      }
+
+      return string().label(t("unique-id-id1")).required();
+    })
   })
 );
 
@@ -297,7 +325,15 @@ function closeModal() {
   emit("closeModal");
 }
 
-async function onSubmit({ firstname, lastname, email, phone, address, notes, postalCode, id1, id2, beneficiaryTypeId }) {
-  emit("submit", { firstname, lastname, email, phone, address, notes, postalCode, id1, id2, beneficiaryTypeId });
+async function onSubmit(event) {
+  if (isNextStepBtnClicked.value) {
+    emit("nextStep", event);
+  } else {
+    emit("submit", event);
+  }
+}
+
+async function onNextStepBtn() {
+  isNextStepBtnClicked.value = true;
 }
 </script>
