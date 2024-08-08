@@ -7,6 +7,7 @@
     "next-step-btn-add-beneficiary": "Add participant and assign subscriptions",
     "next-step-btn-add-subscription": "Add subscription(s) and assign card",
 		"add-beneficiary-success-notification": "Adding {firstname} {lastname} was successful.",
+    "add-subscriptions-success-notification": "Adding subscriptions was successful.",
 		"title": "Add a participant",
     "set-beneficiary": "Set participant information",
 	},
@@ -15,8 +16,9 @@
     "set-subscription": "Assigner les abonnements",
     "set-card": "Définir la carte",
     "next-step-btn-add-beneficiary": "Ajouter le-la participant-e et assigner des abonnements",
-    "next-step-btn-add-subscription": "Ajouter des abonnements et assigner une carte",
+    "next-step-btn-add-subscription": "Assigner les abonnements et assigner une carte",
 		"add-beneficiary-success-notification": "L’ajout de {firstname} {lastname} a été un succès.",
+    "add-subscriptions-success-notification": "L’ajout des abonnements a été un succès.",
 		"title": "Ajouter un-e participant-e",
     "set-beneficiary": "Définir les informations du participant-e"
 	}
@@ -39,7 +41,14 @@
       @submit="onBeneficiaryFormSubmit"
       @next-step="onBeneficiaryFormNextStep"
       @closeModal="closeModal" />
-    <AssignSubscriptionForm v-else-if="currentStep === 1" />
+    <AssignSubscriptionForm
+      v-else-if="currentStep === 1"
+      :beneficiary-id="createBeneficiary.id"
+      :submit-btn="submitBtnLabel"
+      :next-step-btn="nextStepBtnLabel"
+      @submit="onSubscriptionFormSubmit"
+      @next-step="onSubscriptionFormNextStep"
+      @closeModal="closeModal" />
     <AssignCardForm v-else />
   </UiDialogModal>
 </template>
@@ -56,8 +65,11 @@ import { useNotificationsStore } from "@/lib/store/notifications";
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
 
 import BeneficiaryForm from "@/views/beneficiary/_Form";
+import AssignSubscriptionForm from "@/views/beneficiary/_AssignSubscriptionForm";
+import AssignCardForm from "@/views/beneficiary/_AssignCardForm";
 
 const currentStep = ref(0);
+const createBeneficiary = ref(null);
 
 const { t } = useI18n();
 const router = useRouter();
@@ -70,11 +82,18 @@ const { mutate: createBeneficiaryInOrganization } = useMutation(
       createBeneficiaryInOrganization(input: $input) {
         beneficiary {
           id
-          ... on BeneficiaryGraphType {
-            beneficiaryType {
-              id
-            }
-          }
+        }
+      }
+    }
+  `
+);
+
+const { mutate: assignSubscriptionsToBeneficiary } = useMutation(
+  gql`
+    mutation AssignSubscriptionsToBeneficiary($input: AssignSubscriptionsToBeneficiaryInput!) {
+      assignSubscriptionsToBeneficiary(input: $input) {
+        beneficiary {
+          id
         }
       }
     }
@@ -139,7 +158,30 @@ async function onBeneficiaryFormNextStep({
       beneficiaryTypeId
     }
   });
-  console.log(result);
+  createBeneficiary.value = result.data.createBeneficiaryInOrganization.beneficiary;
+  currentStep.value++;
+}
+
+async function onSubscriptionFormSubmit(subscriptions) {
+  await assignSubscriptionsToBeneficiary({
+    input: {
+      organizationId: currentOrganization,
+      beneficiaryId: createBeneficiary.value.id,
+      subscriptions
+    }
+  });
+  router.push({ name: URL_BENEFICIARY_ADMIN });
+  addSuccess(t("add-subscriptions-success-notification"));
+}
+
+async function onSubscriptionFormNextStep(subscriptions) {
+  await assignSubscriptionsToBeneficiary({
+    input: {
+      organizationId: currentOrganization,
+      beneficiaryId: createBeneficiary.value.id,
+      subscriptions
+    }
+  });
   currentStep.value++;
 }
 
