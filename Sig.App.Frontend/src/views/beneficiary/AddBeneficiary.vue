@@ -54,7 +54,11 @@
       @next-step="onSubscriptionFormNextStep"
       @closeModal="closeModal" />
     <template v-else>
-      <AssignCardForm :beneficiary="createBeneficiary" :close-modal="closeModal" @cardAssignSuccess="onCardAssignSuccess" />
+      <AssignCardForm
+        show-number
+        :beneficiary="createBeneficiary"
+        :close-modal="closeModal"
+        @cardAssignSuccess="onCardAssignSuccess" />
       <template v-if="cardAssignSuccess">
         <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
         <p v-html="t('assign-card-description')"></p>

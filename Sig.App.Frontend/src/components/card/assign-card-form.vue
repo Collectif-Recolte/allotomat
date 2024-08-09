@@ -164,7 +164,7 @@ const client = resolveClient();
 const cardAssignSuccess = ref(false);
 const cardAssignId = ref(0);
 const project = ref(undefined);
-const isScanning = ref(true);
+const isScanning = ref(props.showNumber);
 const showError = ref(false);
 const existingCardId = ref("");
 
@@ -176,6 +176,10 @@ const props = defineProps({
   beneficiary: {
     type: Object,
     required: true
+  },
+  showNumber: {
+    type: Boolean,
+    default: false
   }
 });
 
