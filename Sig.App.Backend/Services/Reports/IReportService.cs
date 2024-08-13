@@ -11,6 +11,7 @@ namespace Sig.App.Backend.Services.Reports
     public interface IReportService
     {
         Task<Stream> GenerateTransactionReport(IReportInput request);
+        Task<Stream> GenerateTransactionReportForMarket(IReportForMarketInput request);
     }
 
     public interface IReportInput
@@ -25,6 +26,15 @@ namespace Sig.App.Backend.Services.Reports
         public IEnumerable<Id> Markets { get; set; }
         public IEnumerable<string> TransactionTypes { get; set; }
         public Maybe<string> SearchText { get; set; }
+        public string TimeZoneId { get; set; }
+        public Language Language { get; set; }
+    }
+
+    public interface IReportForMarketInput
+    {
+        public Id MarketId { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public string TimeZoneId { get; set; }
         public Language Language { get; set; }
     }

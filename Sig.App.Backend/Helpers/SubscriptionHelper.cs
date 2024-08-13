@@ -42,8 +42,6 @@ namespace Sig.App.Backend.Helpers
                 }
 
                 cardPaymentRemaining += monthsApart;
-
-                if (startDate > today && startDate.Day <= 15) needExtraDay = true;
             }
 
             if (needExtraDay) cardPaymentRemaining++;

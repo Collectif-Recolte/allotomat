@@ -7,7 +7,8 @@
       "date-selector-to": "to",
       "date-start-label": "Start date of transactions",
       "date-end-label": "End date of transactions",
-      "empty-list": "There are no transactions for the chosen dates."
+      "empty-list": "There are no transactions for the chosen dates.",
+      "export-btn": "Export report",
     },
     "fr": {
       "title": "Historique des transactions",
@@ -17,6 +18,7 @@
       "date-start-label": "Date de début des transactions",
       "date-end-label": "Date de fin des transactions",
       "empty-list": "Il n'existe aucune transaction pour les dates choisies.",
+      "export-btn": "Exporter un rapport",
     }
   }
 </i18n>
@@ -49,6 +51,11 @@
                 has-hidden-label />
             </div>
           </template>
+          <template #subpagesCta>
+            <div class="text-right">
+              <PfButtonAction class="mt-2" :label="t('export-btn')" :icon="ICON_DOWNLOAD" has-icon-left @click="onExportReport" />
+            </div>
+          </template>
         </Title>
       </template>
 
@@ -76,7 +83,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { useQuery, useResult } from "@vue/apollo-composable";
+import { useQuery, useResult, useApolloClient } from "@vue/apollo-composable";
 import gql from "graphql-tag";
 
 import MarketTransactionTable from "@/components/transaction/market-transaction-table";
@@ -85,10 +92,15 @@ import Title from "@/components/app/title";
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { usePageTitle } from "@/lib/helpers/page-title";
 
+import { LANG_EN } from "@/lib/consts/langs";
+import { LANGUAGE_FILTER_EN, LANGUAGE_FILTER_FR } from "@/lib/consts/enums";
+
 const dateFrom = ref(new Date(Date.now()));
 const dateTo = ref(new Date(Date.now()));
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const { resolveClient } = useApolloClient();
+const client = resolveClient();
 
 usePageTitle(t("title"));
 
@@ -136,6 +148,39 @@ function getTotalTransactionAmount(transactions) {
   }
 
   return getMoneyFormat(parseFloat(amount));
+}
+
+async function onExportReport() {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  let result = await client.query({
+    query: gql`
+      query GenerateTransactionsReportsForMarket(
+        $marketId: ID!
+        $startDate: DateTime!
+        $endDate: DateTime!
+        $timeZoneId: String!
+        $language: Language!
+      ) {
+        generateTransactionsReportForMarket(
+          marketId: $marketId
+          startDate: $startDate
+          endDate: $endDate
+          timeZoneId: $timeZoneId
+          language: $language
+        )
+      }
+    `,
+    variables: {
+      marketId: markets.value[0].id,
+      startDate: dateFrom.value,
+      endDate: dateTo.value,
+      timeZoneId: timeZone,
+      language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR
+    }
+  });
+
+  window.open(result.data.generateTransactionsReportForMarket, "_blank");
 }
 </script>
 

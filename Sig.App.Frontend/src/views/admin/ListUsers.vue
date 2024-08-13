@@ -68,6 +68,7 @@ const { result, loading } = useQuery(
           email
           isConfirmed
           confirmationLink
+          resetPasswordLink
           lastConnectionTime
           profile {
             id

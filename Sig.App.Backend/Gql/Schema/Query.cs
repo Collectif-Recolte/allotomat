@@ -321,6 +321,18 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
+        public static async Task<string> GenerateTransactionsReportForMarket(this GqlQuery _, Id marketId, DateTime startDate, DateTime endDate, string timeZoneId, Language language, [Inject] IMediator mediator)
+        {
+            return await mediator.Send(new GenerateTransactionsReportForMarket.Input()
+            {
+                MarketId = marketId,
+                StartDate = startDate,
+                EndDate = endDate,
+                TimeZoneId = timeZoneId,
+                Language = language
+            });
+        }
+
         public static async Task<string> ExportBeneficiariesList(this GqlQuery _, Id id, string timeZoneId, Language language, [Inject] IMediator mediator)
         {
             return await mediator.Send(new ExportBeneficiariesList.Input()

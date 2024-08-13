@@ -76,5 +76,16 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
             return null;
         }
+
+        public async Task<string> ResetPasswordLink([Inject] UserManager<AppUser> userManager, [Inject] IConfiguration config)
+        {
+            if (!user.EmailConfirmed)
+            {
+                return null;
+            }
+
+            string token = await userManager.GeneratePasswordResetTokenAsync(user);
+            return $"{config["Mailer:BaseUrl"]}/{UrlHelper.ResetPassword(user.UserName, token)}";
+        }
     }
 }
