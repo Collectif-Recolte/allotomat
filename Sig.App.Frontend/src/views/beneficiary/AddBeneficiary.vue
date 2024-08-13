@@ -1,6 +1,7 @@
 <i18n>
 {
 	"en": {
+    "close": "Close",
 		"add-beneficiary": "Add participant",
     "set-subscription": "Assign subscriptions",
     "set-card": "Assign card",
@@ -10,8 +11,10 @@
     "add-subscriptions-success-notification": "Adding subscriptions was successful.",
 		"title": "Add a participant",
     "set-beneficiary": "Set participant information",
+    "assign-card-description": "This card <b>has no funds on it</b>, and will remain empty until the next payment date."
 	},
 	"fr": {
+    "close": "Fermer",
 		"add-beneficiary": "Ajouter le-la participant-e",
     "set-subscription": "Assigner les abonnements",
     "set-card": "Définir la carte",
@@ -20,7 +23,8 @@
 		"add-beneficiary-success-notification": "L’ajout de {firstname} {lastname} a été un succès.",
     "add-subscriptions-success-notification": "L’ajout des abonnements a été un succès.",
 		"title": "Ajouter un-e participant-e",
-    "set-beneficiary": "Définir les informations du participant-e"
+    "set-beneficiary": "Définir les informations du participant-e",
+    "assign-card-description": "Cette carte <b>n'a pas de fonds</b> et restera vide jusqu'à la prochaine date de paiement."
 	}
 }
 </i18n>
@@ -49,7 +53,18 @@
       @submit="onSubscriptionFormSubmit"
       @next-step="onSubscriptionFormNextStep"
       @closeModal="closeModal" />
-    <AssignCardForm v-else />
+    <template v-else>
+      <AssignCardForm
+        show-number
+        :beneficiary="createBeneficiary"
+        :close-modal="closeModal"
+        @cardAssignSuccess="onCardAssignSuccess" />
+      <template v-if="cardAssignSuccess">
+        <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
+        <p v-html="t('assign-card-description')"></p>
+        <PfButtonAction :label="t('close')" class="px-8" @click="closeModal" />
+      </template>
+    </template>
   </UiDialogModal>
 </template>
 
@@ -66,10 +81,11 @@ import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
 
 import BeneficiaryForm from "@/views/beneficiary/_Form";
 import AssignSubscriptionForm from "@/views/beneficiary/_AssignSubscriptionForm";
-import AssignCardForm from "@/views/beneficiary/_AssignCardForm";
+import AssignCardForm from "@/components/card/assign-card-form";
 
 const currentStep = ref(0);
 const createBeneficiary = ref(null);
+const cardAssignSuccess = ref(false);
 
 const { t } = useI18n();
 const router = useRouter();
@@ -82,6 +98,13 @@ const { mutate: createBeneficiaryInOrganization } = useMutation(
       createBeneficiaryInOrganization(input: $input) {
         beneficiary {
           id
+          firstname
+          lastname
+          notes
+          address
+          phone
+          email
+          postalCode
         }
       }
     }
@@ -160,6 +183,7 @@ async function onBeneficiaryFormNextStep({
   });
   createBeneficiary.value = result.data.createBeneficiaryInOrganization.beneficiary;
   currentStep.value++;
+  addSuccess(t("add-beneficiary-success-notification", { firstname, lastname }));
 }
 
 async function onSubscriptionFormSubmit(subscriptions) {
@@ -183,6 +207,7 @@ async function onSubscriptionFormNextStep(subscriptions) {
     }
   });
   currentStep.value++;
+  addSuccess(t("add-subscriptions-success-notification"));
 }
 
 const nextStepBtnLabel = computed(() => {
@@ -208,4 +233,8 @@ const submitBtnLabel = computed(() => {
       return null;
   }
 });
+
+function onCardAssignSuccess() {
+  cardAssignSuccess.value = true;
+}
 </script>
