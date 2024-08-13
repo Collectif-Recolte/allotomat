@@ -19,7 +19,7 @@
       "scan-card-btn": "or scan the card with my camera"
   },
   "fr": {
-    "assign-card-success-detail": "{beneficiaryName} est maintenant lié à la carte {cardAssignId}.",
+    "assign-card-success-detail": "{beneficiaryName} est maintenant lié-e à la carte {cardAssignId}.",
     "assign-card": "Assigner",
     "cancel": "Annuler",
 		"card-deactivated":"La carte que vous essayez d'attribuer est désactivée",
