@@ -111,7 +111,6 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
                 Address = "123, Example Street",
                 Notes = "Notes 1234",
                 PostalCode = "A0A 0A0",
-                Id1 = "ID1 1234",
                 Id2 = "ID2 1234",
                 OrganizationId = organization.GetIdentifier(),
                 BeneficiaryTypeId = beneficiaryType.GetIdentifier()
@@ -128,7 +127,6 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
             beneficiary.Address.Should().Be("123, Example Street");
             beneficiary.Notes.Should().Be("Notes 1234");
             beneficiary.PostalCode.Should().Be("A0A 0A0");
-            beneficiary.ID1.Should().Be("ID1 1234");
             beneficiary.ID2.Should().Be("ID2 1234");
             beneficiary.BeneficiaryTypeId.Should().Be(beneficiaryType.Id);
         }
