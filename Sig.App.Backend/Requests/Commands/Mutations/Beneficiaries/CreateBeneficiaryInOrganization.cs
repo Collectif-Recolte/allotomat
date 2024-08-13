@@ -54,7 +54,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
             var beneficiary = new Beneficiary()
             {
-                ID1 = request.Id1 != null ? request.Id1.Trim() : Guid.NewGuid().ToString(),
+                ID1 = "TID_" + Guid.NewGuid().ToString(),
                 Firstname = request.Firstname?.Trim(),
                 Lastname = request.Lastname?.Trim(),
                 Email = request.Email?.Trim(),
