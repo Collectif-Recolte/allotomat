@@ -34,7 +34,7 @@
     <UiStepper
       class="mb-6"
       :step-label="currentStep === 0 ? t('set-beneficiary') : currentStep === 1 ? t('set-subscription') : t('set-card')"
-      :step-count="3"
+      :step-count="manageCards ? 3 : 2"
       :step-number="currentStep + 1" />
     <BeneficiaryForm
       v-if="currentStep === 0"
@@ -48,6 +48,7 @@
     <AssignSubscriptionForm
       v-else-if="currentStep === 1"
       :beneficiary-id="createBeneficiary.id"
+      :organization-id="currentOrganization"
       :submit-btn="submitBtnLabel"
       :next-step-btn="nextStepBtnLabel"
       @submit="onSubscriptionFormSubmit"
@@ -74,10 +75,14 @@ import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useMutation } from "@vue/apollo-composable";
 import { ref, computed } from "vue";
+import { storeToRefs } from "pinia";
 
+import { useAuthStore } from "@/lib/store/auth";
 import { useOrganizationStore } from "@/lib/store/organization";
 import { useNotificationsStore } from "@/lib/store/notifications";
+
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
+import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
 
 import BeneficiaryForm from "@/views/beneficiary/_Form";
 import AssignSubscriptionForm from "@/views/beneficiary/_AssignSubscriptionForm";
@@ -91,6 +96,11 @@ const { t } = useI18n();
 const router = useRouter();
 const { addSuccess } = useNotificationsStore();
 const { currentOrganization } = useOrganizationStore();
+const { getGlobalPermissions } = storeToRefs(useAuthStore());
+
+const manageCards = computed(() => {
+  return getGlobalPermissions.value.includes(GLOBAL_MANAGE_CARDS);
+});
 
 const { mutate: createBeneficiaryInOrganization } = useMutation(
   gql`

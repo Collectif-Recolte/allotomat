@@ -32,6 +32,7 @@
             <PfButtonAction btn-style="link" :label="t('close')" @click="closeModal" />
             <PfButtonAction :is-disabled="subscriptionChecked.length === 0" :label="submitBtn" class="px-8" type="submit" />
             <PfButtonAction
+              v-if="manageCards"
               :is-disabled="subscriptionChecked.length === 0"
               :label="nextStepBtn"
               class="px-8"
@@ -50,11 +51,17 @@ import { defineProps } from "vue";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult } from "@vue/apollo-composable";
 import { ref, computed, defineEmits } from "vue";
+import { storeToRefs } from "pinia";
+
+import { useAuthStore } from "@/lib/store/auth";
+
+import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
 
 import AssignSubscription from "@/components/beneficiaries/assign-subscription";
 
 const { t } = useI18n();
 const emit = defineEmits(["submit", "closeModal", "nextStep"]);
+const { getGlobalPermissions } = storeToRefs(useAuthStore());
 
 const props = defineProps({
   beneficiaryId: {
@@ -68,7 +75,15 @@ const props = defineProps({
   nextStepBtn: {
     type: String,
     required: true
+  },
+  organizationId: {
+    type: String,
+    required: true
   }
+});
+
+const manageCards = computed(() => {
+  return getGlobalPermissions.value.includes(GLOBAL_MANAGE_CARDS);
 });
 
 const { result: resultBeneficiary } = useQuery(
@@ -95,51 +110,56 @@ const beneficiary = useResult(resultBeneficiary);
 
 const { result } = useQuery(
   gql`
-    query Projects {
-      projects {
-        id
-        subscriptions {
+    query Organization($id: ID!) {
+      organization(id: $id) {
+        project {
           id
-          name
-          monthlyPaymentMoment
-          startDate
-          endDate
-          maxNumberOfPayments
-          isSubscriptionPaymentBasedCardUsage
-          isFundsAccumulable
-          fundsExpirationDate
-          numberDaysUntilFundsExpire
-          paymentRemaining
-          totalPayment
-          types {
+          subscriptions {
             id
-            amount
-            beneficiaryType {
+            name
+            monthlyPaymentMoment
+            startDate
+            endDate
+            maxNumberOfPayments
+            isSubscriptionPaymentBasedCardUsage
+            isFundsAccumulable
+            fundsExpirationDate
+            numberDaysUntilFundsExpire
+            paymentRemaining
+            totalPayment
+            types {
               id
+              amount
+              beneficiaryType {
+                id
+              }
             }
-          }
-          budgetAllowances {
-            id
-            availableFund
-            organization {
+            budgetAllowances {
               id
+              availableFund
+              organization {
+                id
+              }
             }
           }
         }
       }
     }
-  `
+  `,
+  {
+    id: props.organizationId
+  }
 );
 
-const projects = useResult(result);
+const organization = useResult(result);
 const subscriptionChecked = ref([]);
 const isNextStepBtnClicked = ref(false);
 
 const subscriptionsOrderByDate = computed(() => {
-  if (projects.value === undefined || projects.value.length === 0 || beneficiary.value === null) {
+  if (organization.value === undefined || beneficiary.value === null) {
     return [];
   }
-  let subscriptions = [...projects.value[0].subscriptions];
+  let subscriptions = [...organization.value.project.subscriptions];
 
   subscriptions.sort((a, b) => {
     const dateA = a.isFundsAccumulable ? new Date(a.fundsExpirationDate) : new Date(a.endDate);
