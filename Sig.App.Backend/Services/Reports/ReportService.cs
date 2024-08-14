@@ -190,13 +190,13 @@ namespace Sig.App.Backend.Services.Reports
             }
 
             dataWorksheet.Column("Id de la carte/Card id", x => x.CardProgramCardId);
-            dataWorksheet.Column("Numéro de la carte/Card number", x => x.CardNumber);
+            dataWorksheet.Column("Numéro de la carte/Card number", x => x.CardNumber.Replace('-', ' '));
             dataWorksheet.Column(
                 "Transfert de fond depuis l'id de carte/Transferred fund from card id",
                 x => x.FundTransferredFromProgramCardId);
             dataWorksheet.Column(
                 "Transfert de fond depuis le numéro de carte/Transferred fund from card number",
-                x => x.FundTransferredFromCardNumber);
+                x => x.FundTransferredFromCardNumber.Replace('-', ' '));
             dataWorksheet.Column("Groupe/Group", x => x.OrganizationName);
             dataWorksheet.Column("Abonnement/Subscription", x => x.SubscriptionName);
             dataWorksheet.Column("Initiateur transaction/Transaction initiator", GetTransactionInitiatorName);

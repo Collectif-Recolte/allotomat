@@ -79,7 +79,7 @@ const updateStep = (currentStep, values) => {
   switch (currentStep) {
     case TRANSACTION_STEPS_ADD:
       marketId.value = values.marketId;
-      cardNumber.value = values.cardNumber;
+      cardNumber.value = values.cardNumber.replaceAll("-", " ");
       cardId.value = values.cardId;
       activeStep.value = TRANSACTION_STEPS_ADD;
       break;

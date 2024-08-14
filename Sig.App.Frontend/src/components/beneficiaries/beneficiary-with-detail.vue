@@ -225,7 +225,9 @@ function getCardProgramId() {
 }
 
 function getCardNumber() {
-  return beneficiary.value.card && beneficiary.value.card.cardNumber ? beneficiary.value.card.cardNumber : "";
+  return beneficiary.value.card && beneficiary.value.card.cardNumber
+    ? beneficiary.value.card.cardNumber.replaceAll("-", " ")
+    : "";
 }
 
 function getCardLastUsage() {

@@ -103,7 +103,7 @@ function getBeneficiaryName() {
   return card.value
     ? card.value.beneficiary
       ? `${card.value.beneficiary.firstname} ${card.value.beneficiary.lastname}`
-      : card.value.cardNumber
+      : card.value.cardNumber.replaceAll("-", " ")
     : "";
 }
 

@@ -156,7 +156,7 @@ function getCardId(card) {
 }
 
 function getCardNumber(card) {
-  return `${card.cardNumber}`;
+  return `${card.cardNumber.replaceAll("-", " ")}`;
 }
 
 function getCardStatus(card) {
