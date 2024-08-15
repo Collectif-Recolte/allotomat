@@ -39,12 +39,13 @@
 
 <template>
   <PfFormFieldset :id="props.id" :name="props.id" :has-error-state="props.hasErrorState" :errors="props.errors">
+    {{ props.options }}
     <div v-for="(option, index) in props.options" :key="index">
       <PfFormInputCheckbox
         :value="isChecked(option.id)"
         :label="option.name"
         :checked="isChecked(option.id)"
-        :disabled="option.dontHaveBudgetAllowance || option.dontHaveBeneficiaryType || !isBudgetAllowanceIsEnough(option)"
+        :disabled="option.dontHaveBudgetAllowance || option.dontHaveBeneficiaryType || !option.isBudgetAllowanceIsEnough"
         @input="(e) => updateCheckbox(option.id, e)">
         <template #description>
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
@@ -72,7 +73,7 @@
 
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <p
-            v-if="!option.dontHaveBudgetAllowance && !isBudgetAllowanceIsEnough(option)"
+            v-if="!option.dontHaveBudgetAllowance && !option.isBudgetAllowanceIsEnough"
             class="mb-2 text-p2 leading-none text-red-500"
             v-html="t('budget-allowance-not-enought')"></p>
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
@@ -164,19 +165,6 @@ const getExpirationDate = (option) => {
   return t("expiration-date", { definition });
 };
 
-const isBudgetAllowanceIsEnough = (option) => {
-  const amountByPayment = option.types
-    .filter((x) => x.beneficiaryType.id === props.beneficiary.beneficiaryType.id)
-    .reduce((acc, x) => acc + x.amount, 0);
-  const remainingPaymentCount = option.paymentRemaining;
-  const budgetAllowanceNeeded = amountByPayment * remainingPaymentCount;
-
-  return (
-    budgetAllowanceNeeded <=
-    option.budgetAllowances.filter((x) => x.organization.id === props.beneficiary.organization.id)[0].availableFund
-  );
-};
-
 const getBudgetAllowanceNeeded = (option) => {
   if (option.dontHaveBudgetAllowance) return "";
 
@@ -192,7 +180,7 @@ const getBudgetAllowanceNeeded = (option) => {
 
 const anyOptionEnabled = (options) => {
   return options.some(
-    (option) => !option.dontHaveBudgetAllowance && !option.dontHaveBeneficiaryType && isBudgetAllowanceIsEnough(option)
+    (option) => !option.dontHaveBudgetAllowance && !option.dontHaveBeneficiaryType && option.isBudgetAllowanceIsEnough
   );
 };
 

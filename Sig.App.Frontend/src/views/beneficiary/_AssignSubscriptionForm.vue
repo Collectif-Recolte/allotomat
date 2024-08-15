@@ -155,6 +155,18 @@ const organization = useResult(result);
 const subscriptionChecked = ref([]);
 const isNextStepBtnClicked = ref(false);
 
+const isBudgetAllowanceIsEnough = (subscription) => {
+  const amountByPayment = subscription.types
+    .filter((x) => x.beneficiaryType.id === beneficiary.value.beneficiaryType.id)
+    .reduce((acc, x) => acc + x.amount, 0);
+  const remainingPaymentCount = subscription.paymentRemaining;
+  const budgetAllowanceNeeded = amountByPayment * remainingPaymentCount;
+
+  return (
+    budgetAllowanceNeeded <=
+    subscription.budgetAllowances.filter((x) => x.organization.id === beneficiary.value.organization.id)[0].availableFund
+  );
+};
 const subscriptionsOrderByDate = computed(() => {
   if (organization.value === undefined || beneficiary.value === null) {
     return [];
@@ -182,6 +194,7 @@ const subscriptionsOrderByDate = computed(() => {
       dontHaveBudgetAllowance: !subscription.budgetAllowances.some((budgetAllowance) => {
         return budgetAllowance.organization.id === beneficiary.value.organization.id;
       }),
+      isBudgetAllowanceIsEnough: isBudgetAllowanceIsEnough(subscription),
       dontHaveBeneficiaryType: !subscription.types.some((type) => {
         return type.beneficiaryType.id === beneficiary.value.beneficiaryType.id;
       }),
@@ -220,7 +233,10 @@ function onSubscriptionConflictChecked(input) {
 function onSubscriptionConflictCheckAll(checked) {
   if (checked) {
     subscriptionChecked.value = subscriptionsOrderByDate.value
-      .filter((subscription) => !subscription.dontHaveBudgetAllowance)
+      .filter(
+        (subscription) =>
+          !subscription.dontHaveBudgetAllowance && !subscription.dontHaveBeneficiaryType && subscription.isBudgetAllowanceIsEnough
+      )
       .map((subscription) => subscription.id);
   } else {
     subscriptionChecked.value = [];
