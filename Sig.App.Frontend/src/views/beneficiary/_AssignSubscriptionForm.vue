@@ -156,6 +156,8 @@ const subscriptionChecked = ref([]);
 const isNextStepBtnClicked = ref(false);
 
 const isBudgetAllowanceIsEnough = (subscription) => {
+  if (subscription.budgetAllowances.filter((x) => x.organization.id === beneficiary.value.organization.id).length === 0) return false;
+
   const amountByPayment = subscription.types
     .filter((x) => x.beneficiaryType.id === beneficiary.value.beneficiaryType.id)
     .reduce((acc, x) => acc + x.amount, 0);

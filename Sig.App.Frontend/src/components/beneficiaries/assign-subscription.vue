@@ -39,7 +39,6 @@
 
 <template>
   <PfFormFieldset :id="props.id" :name="props.id" :has-error-state="props.hasErrorState" :errors="props.errors">
-    {{ props.options }}
     <div v-for="(option, index) in props.options" :key="index">
       <PfFormInputCheckbox
         :value="isChecked(option.id)"
