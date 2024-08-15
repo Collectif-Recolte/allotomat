@@ -81,10 +81,9 @@ import { copyTextToClipboard } from "@/lib/helpers/clipboard";
 import { USER_TYPE_PCAADMIN, USER_TYPE_PROJECTMANAGER, USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
 import { URL_ADMIN_USER_PROFILE } from "@/lib/consts/urls";
 
-import PASSWORD_ICON from "@/lib/icons/reset.json";
 import PENCIL_ICON from "@/lib/icons/pencil.json";
 import MAIL_ICON from "@/lib/icons/mail.json";
-import LINK_ICON from "@/lib/icons/download.json";
+import COPY_ICON from "@/lib/icons/copy.json";
 
 const { addSuccess } = useNotificationsStore();
 const { t } = useI18n();
@@ -113,13 +112,13 @@ function getBtnGroup(user) {
       if: !user.isConfirmed
     },
     {
-      icon: LINK_ICON,
+      icon: COPY_ICON,
       label: t("copy-confirmation-email"),
       onClick: () => copyConfirmationLink(user),
       if: !user.isConfirmed
     },
     {
-      icon: PASSWORD_ICON,
+      icon: COPY_ICON,
       label: t("copy-reset-password-email"),
       onClick: () => copyResetPasswordLink(user),
       if: user.isConfirmed

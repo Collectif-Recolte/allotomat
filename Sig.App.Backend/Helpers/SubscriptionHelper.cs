@@ -32,7 +32,7 @@ namespace Sig.App.Backend.Helpers
                 subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth)
             {
                 int monthsApart = 12 * (endDate.Year - startDate.Year) + endDate.Month - startDate.Month;
-                if (today.Day < 15 && endDate.Day >= 15)
+                if (startDate.Day < 15 && endDate.Day >= 15)
                 {
                     monthsApart++;
                 }

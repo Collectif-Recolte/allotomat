@@ -456,6 +456,7 @@ const {
                 id
               }
             }
+            getLastDateToAssignBeneficiary
             totalPayment
             paymentRemaining
             isSubscriptionPaymentBasedCardUsage
@@ -501,7 +502,11 @@ let organizationSubscriptions = useResult(resultOrganizations, null, (data) => {
 
 const subscriptions = useResult(resultOrganizations, null, (data) => {
   return data.organizations[0].project.subscriptions
-    .filter((x) => x.budgetAllowances.find((y) => y.organization.id === selectedOrganization.value))
+    .filter(
+      (x) =>
+        x.budgetAllowances.find((y) => y.organization.id === selectedOrganization.value) &&
+        new Date(x.getLastDateToAssignBeneficiary) >= new Date()
+    )
     .map((x) => ({
       label: x.name,
       value: x.id,
