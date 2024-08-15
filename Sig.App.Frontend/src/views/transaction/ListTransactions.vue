@@ -191,6 +191,10 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
         subscriptions {
           id
           name
+          startDate
+          endDate
+          fundsExpirationDate
+          isFundsAccumulable
         }
         administrationSubscriptionsOffPlatform
         beneficiariesAreAnonymous
@@ -218,6 +222,10 @@ const { result: resultOrganizations } = useQuery(
           subscriptions {
             id
             name
+            startDate
+            endDate
+            fundsExpirationDate
+            isFundsAccumulable
           }
           markets {
             id
@@ -390,7 +398,15 @@ let availableBeneficiaryTypes = computed(() => {
 });
 
 let availableSubscriptions = computed(() => {
-  return project.value?.subscriptions;
+  if (project.value === undefined) return [];
+  var subscriptions = [...project.value?.subscriptions];
+  subscriptions = subscriptions.sort((a, b) => {
+    const dateA = a.isFundsAccumulable ? new Date(a.fundsExpirationDate) : new Date(a.endDate);
+    const dateB = b.isFundsAccumulable ? new Date(b.fundsExpirationDate) : new Date(b.endDate);
+    return dateB - dateA;
+  });
+
+  return subscriptions;
 });
 
 let availableMarkets = computed(() => {
