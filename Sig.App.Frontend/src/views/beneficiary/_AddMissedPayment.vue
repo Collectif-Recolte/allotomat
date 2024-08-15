@@ -15,7 +15,7 @@
       "close":"Fermer",
       "budget-allowance-needed": "<b>{amountByPayment} $ requis pour l'attribution</b>",
       "submit": "Ajouter des paiements manqué",
-      "add-missed-payment-success-notification": "Les paiements manquée ont été ajoutés avec succès.",
+      "add-missed-payment-success-notification": "Les paiements manqués ont été ajoutés avec succès.",
       "assign-card-description": "Cette carte <b>n'a pas de fonds</b> et restera vide jusqu'à la prochaine date de paiement."
     }
   }
