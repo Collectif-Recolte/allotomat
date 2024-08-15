@@ -54,7 +54,7 @@ namespace Sig.App.Backend.Gql
             LoadOne<GetCardByIds.Query, CardGraphType, long>(cardId);
 
         public IDataLoaderResult<CardGraphType> LoadCardByCardNumber(string cardNumber) =>
-            LoadOne<GetCardByCardNumbers.Query, CardGraphType, string>(cardNumber);
+            LoadOne<GetCardByCardNumbers.Query, CardGraphType, string>(cardNumber.Replace("-", string.Empty).Replace(" ", string.Empty));
 
         public IDataLoaderResult<CardGraphType> LoadBeneficiaryCard(long beneficiaryId) =>
             LoadOne<GetCardByBeneficiaryIds.Query, CardGraphType, long>(beneficiaryId);

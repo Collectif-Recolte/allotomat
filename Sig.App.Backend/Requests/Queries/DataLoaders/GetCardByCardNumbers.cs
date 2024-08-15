@@ -22,10 +22,10 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
         public override async Task<IDictionary<string, CardGraphType>> Handle(Query request, CancellationToken cancellationToken)
         {
             var cards = await db.Cards
-                .Where(c => request.Ids.Contains(c.CardNumber))
+                .Where(c => request.Ids.Contains(c.CardNumber.Replace("-", string.Empty)))
                 .ToListAsync(cancellationToken);
 
-            return cards.ToDictionary(x => x.CardNumber, x => new CardGraphType(x));
+            return cards.ToDictionary(x => x.CardNumber.Replace("-", string.Empty), x => new CardGraphType(x));
         }
     }
 }

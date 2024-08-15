@@ -96,7 +96,12 @@ const validationSchema = computed(() =>
         params: {},
         message: t("card-number-error"),
         test: function (value) {
-          var regex = /\b(?:\d{4}[ -]?){3}\d{4}\b/;
+          if (value === undefined) {
+            return false;
+          }
+          value = value.replaceAll("-", "");
+          value = value.replaceAll(" ", "");
+          var regex = /\b^\d{16}$\b/;
           return regex.test(value);
         }
       })
