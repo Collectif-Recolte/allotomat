@@ -436,6 +436,10 @@ const {
           subscriptions {
             id
             name
+            startDate
+            endDate
+            fundsExpirationDate
+            isFundsAccumulable
           }
         }
       }
@@ -459,7 +463,14 @@ watch(resultOrganizations, (value) => {
   }));
 
   availableBeneficiaryTypes.value = value.organizations[0].project.beneficiaryTypes;
-  availableSubscriptions.value = value.organizations[0].project.subscriptions;
+
+  var subscriptions = [...value.organizations[0].project.subscriptions];
+  availableSubscriptions.value = subscriptions.sort((a, b) => {
+    const dateA = a.isFundsAccumulable ? new Date(a.fundsExpirationDate) : new Date(a.endDate);
+    const dateB = b.isFundsAccumulable ? new Date(b.fundsExpirationDate) : new Date(b.endDate);
+    return dateB - dateA;
+  });
+
   administrationSubscriptionsOffPlatform.value = value.organizations[0].project.administrationSubscriptionsOffPlatform;
   productGroups.value = value.organizations[0].project.productGroups.filter((x) => x.name !== PRODUCT_GROUP_LOYALTY);
 });

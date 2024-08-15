@@ -97,6 +97,10 @@ const { result: resultProjects, loading } = useQuery(
         subscriptions {
           id
           name
+          startDate
+          endDate
+          fundsExpirationDate
+          isFundsAccumulable
         }
         projectStats {
           beneficiaryCount
@@ -126,12 +130,20 @@ watch(resultProjects, (value) => {
 
   project.value = value.projects[0];
   organizationsStats.value = value.projects[0].organizationsStats;
-  availableSubscriptions.value = value.projects[0].subscriptions.map((subscription) => {
-    return {
-      value: subscription.id,
-      label: subscription.name
-    };
-  });
+
+  var subscriptions = [...value.projects[0].subscriptions];
+  availableSubscriptions.value = subscriptions
+    .sort((a, b) => {
+      const dateA = a.isFundsAccumulable ? new Date(a.fundsExpirationDate) : new Date(a.endDate);
+      const dateB = b.isFundsAccumulable ? new Date(b.fundsExpirationDate) : new Date(b.endDate);
+      return dateB - dateA;
+    })
+    .map((subscription) => {
+      return {
+        value: subscription.id,
+        label: subscription.name
+      };
+    });
 });
 
 const hasActiveFilters = computed(() => {
