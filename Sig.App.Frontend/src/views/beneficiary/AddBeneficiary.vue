@@ -5,26 +5,26 @@
 		"add-beneficiary": "Add participant",
     "set-subscription": "Assign subscriptions",
     "set-card": "Assign card",
+    "set-missed-payment": "Add missed payment", 
     "next-step-btn-add-beneficiary": "Add participant and assign subscriptions",
     "next-step-btn-add-subscription": "Add subscription(s) and assign card",
 		"add-beneficiary-success-notification": "Adding {firstname} {lastname} was successful.",
     "add-subscriptions-success-notification": "Adding subscriptions was successful.",
 		"title": "Add a participant",
-    "set-beneficiary": "Set participant information",
-    "assign-card-description": "This card <b>has no funds on it</b>, and will remain empty until the next payment date."
+    "set-beneficiary": "Set participant information"
 	},
 	"fr": {
     "close": "Fermer",
 		"add-beneficiary": "Ajouter le-la participant-e",
     "set-subscription": "Assigner les abonnements",
     "set-card": "Définir la carte",
+    "set-missed-payment": "Ajouter un paiement manqué",    
     "next-step-btn-add-beneficiary": "Ajouter le-la participant-e et assigner des abonnements",
     "next-step-btn-add-subscription": "Assigner les abonnements et assigner une carte",
 		"add-beneficiary-success-notification": "L’ajout de {firstname} {lastname} a été un succès.",
     "add-subscriptions-success-notification": "L’ajout des abonnements a été un succès.",
 		"title": "Ajouter un-e participant-e",
-    "set-beneficiary": "Définir les informations du participant-e",
-    "assign-card-description": "Cette carte <b>n'a pas de fonds</b> et restera vide jusqu'à la prochaine date de paiement."
+    "set-beneficiary": "Définir les informations du participant-e"
 	}
 }
 </i18n>
@@ -33,8 +33,16 @@
   <UiDialogModal v-slot="{ closeModal }" :title="t('title')" :has-footer="false" :return-route="{ name: URL_BENEFICIARY_ADMIN }">
     <UiStepper
       class="mb-6"
-      :step-label="currentStep === 0 ? t('set-beneficiary') : currentStep === 1 ? t('set-subscription') : t('set-card')"
-      :step-count="manageCards ? 3 : 2"
+      :step-label="
+        currentStep === 0
+          ? t('set-beneficiary')
+          : currentStep === 1
+          ? t('set-subscription')
+          : currentStep === 2
+          ? t('set-card')
+          : t('set-missed-payment')
+      "
+      :step-count="manageCards ? 4 : 2"
       :step-number="currentStep + 1" />
     <BeneficiaryForm
       v-if="currentStep === 0"
@@ -54,17 +62,15 @@
       @submit="onSubscriptionFormSubmit"
       @next-step="onSubscriptionFormNextStep"
       @closeModal="closeModal" />
-    <template v-else>
+    <template v-else-if="currentStep === 2">
       <AssignCardForm
         show-number
         :beneficiary="createBeneficiary"
         :close-modal="closeModal"
         @cardAssignSuccess="onCardAssignSuccess" />
-      <template v-if="cardAssignSuccess">
-        <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
-        <p v-html="t('assign-card-description')"></p>
-        <PfButtonAction :label="t('close')" class="px-8" @click="closeModal" />
-      </template>
+    </template>
+    <template v-else-if="currentStep === 3">
+      <AddMissedPayment :subscriptions="beneficiarySubscriptions" :beneficiary="createBeneficiary" @closeModal="closeModal" />
     </template>
   </UiDialogModal>
 </template>
@@ -87,10 +93,11 @@ import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
 import BeneficiaryForm from "@/views/beneficiary/_Form";
 import AssignSubscriptionForm from "@/views/beneficiary/_AssignSubscriptionForm";
 import AssignCardForm from "@/components/card/assign-card-form";
+import AddMissedPayment from "@/views/beneficiary/_AddMissedPayment";
 
 const currentStep = ref(0);
 const createBeneficiary = ref(null);
-const cardAssignSuccess = ref(false);
+const beneficiarySubscriptions = ref([]);
 
 const { t } = useI18n();
 const router = useRouter();
@@ -115,6 +122,12 @@ const { mutate: createBeneficiaryInOrganization } = useMutation(
           phone
           email
           postalCode
+          beneficiaryType {
+            id
+          }
+          organization {
+            id
+          }
         }
       }
     }
@@ -127,6 +140,31 @@ const { mutate: assignSubscriptionsToBeneficiary } = useMutation(
       assignSubscriptionsToBeneficiary(input: $input) {
         beneficiary {
           id
+          beneficiarySubscriptions {
+            hasMissedPayment
+            subscription {
+              id
+              name
+              types {
+                id
+                amount
+                beneficiaryType {
+                  id
+                }
+                productGroup {
+                  id
+                  name
+                  orderOfAppearance
+                }
+              }
+              budgetAllowances {
+                availableFund
+                organization {
+                  id
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -204,18 +242,21 @@ async function onSubscriptionFormSubmit(subscriptions) {
       subscriptions
     }
   });
+
   router.push({ name: URL_BENEFICIARY_ADMIN });
   addSuccess(t("add-subscriptions-success-notification"));
 }
 
 async function onSubscriptionFormNextStep(subscriptions) {
-  await assignSubscriptionsToBeneficiary({
+  var result = await assignSubscriptionsToBeneficiary({
     input: {
       organizationId: currentOrganization,
       beneficiaryId: createBeneficiary.value.id,
       subscriptions
     }
   });
+
+  beneficiarySubscriptions.value = result.data.assignSubscriptionsToBeneficiary.beneficiary.beneficiarySubscriptions;
   currentStep.value++;
   addSuccess(t("add-subscriptions-success-notification"));
 }
@@ -245,6 +286,6 @@ const submitBtnLabel = computed(() => {
 });
 
 function onCardAssignSuccess() {
-  cardAssignSuccess.value = true;
+  currentStep.value++;
 }
 </script>
