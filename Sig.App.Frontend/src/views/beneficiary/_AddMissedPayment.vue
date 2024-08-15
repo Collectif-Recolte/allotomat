@@ -14,7 +14,7 @@
       "budget-allowance-not-enought": "<b>L'enveloppe budgétaire n'est pas suffisante pour couvrir le versement supplémentaire</b>",
       "close":"Fermer",
       "budget-allowance-needed": "<b>{amountByPayment} $ requis pour l'attribution</b>",
-      "submit": "Ajouter des paiements manqué",
+      "submit": "Ajouter des paiements manqués",
       "add-missed-payment-success-notification": "Les paiements manqués ont été ajoutés avec succès.",
       "assign-card-description": "Cette carte <b>n'a pas de fonds</b> et restera vide jusqu'à la prochaine date de paiement."
     }
@@ -51,11 +51,7 @@
           <p v-html="t('assign-card-description')"></p>
           <div class="flex gap-x-6 items-center justify-end">
             <PfButtonAction btn-style="link" :label="t('close')" @click="closeModal" />
-            <PfButtonAction
-              :is-disabled="subscriptionChecked.length === 0"
-              label="Ajouter des paiements manqué"
-              class="px-8"
-              type="submit" />
+            <PfButtonAction :is-disabled="subscriptionChecked.length === 0" :label="t('submit')" class="px-8" type="submit" />
           </div>
         </div>
       </template>
