@@ -16,7 +16,9 @@
       "user-not-confirmed": "User not confirmed",
       "username": "Username",
       "copy-confirmation-email": "Copy confirmation link",
-      "confirmation-link-copied": "Confirmation link copied to clipboard."
+      "confirmation-link-copied": "Confirmation link copied to clipboard.",
+      "copy-reset-password-email": "Copy reset password link",
+      "confirmation-reset-password-link-copied": "Reset password link copied to clipboard.",
     },
     "fr": {
       "admin-pca": "Administrateur",
@@ -34,7 +36,9 @@
       "user-not-confirmed": "Utilisateur non confirmé",
       "username": "Nom d'utilisateur",
       "copy-confirmation-email": "Copier le lien de confirmation",
-      "confirmation-link-copied": "Lien de confirmation copié dans le presse-papiers."
+      "confirmation-link-copied": "Lien de confirmation copié dans le presse-papiers.",
+      "copy-reset-password-email": "Copier le lien de réinitialisation du mot de passe",
+      "confirmation-reset-password-link-copied": "Lien de réinitialisation du mot de passe copié dans le presse-papiers."
     }
   }
   </i18n>
@@ -76,9 +80,10 @@ import { copyTextToClipboard } from "@/lib/helpers/clipboard";
 
 import { USER_TYPE_PCAADMIN, USER_TYPE_PROJECTMANAGER, USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
 import { URL_ADMIN_USER_PROFILE } from "@/lib/consts/urls";
+
 import PENCIL_ICON from "@/lib/icons/pencil.json";
 import MAIL_ICON from "@/lib/icons/mail.json";
-import LINK_ICON from "@/lib/icons/download.json";
+import COPY_ICON from "@/lib/icons/copy.json";
 
 const { addSuccess } = useNotificationsStore();
 const { t } = useI18n();
@@ -107,10 +112,16 @@ function getBtnGroup(user) {
       if: !user.isConfirmed
     },
     {
-      icon: LINK_ICON,
+      icon: COPY_ICON,
       label: t("copy-confirmation-email"),
       onClick: () => copyConfirmationLink(user),
       if: !user.isConfirmed
+    },
+    {
+      icon: COPY_ICON,
+      label: t("copy-reset-password-email"),
+      onClick: () => copyResetPasswordLink(user),
+      if: user.isConfirmed
     },
     {
       icon: PENCIL_ICON,
@@ -150,6 +161,11 @@ async function resendConfirmationEmail(item) {
 async function copyConfirmationLink(item) {
   copyTextToClipboard(item.confirmationLink);
   addSuccess(t("confirmation-link-copied"));
+}
+
+async function copyResetPasswordLink(item) {
+  copyTextToClipboard(item.resetPasswordLink);
+  addSuccess(t("confirmation-reset-password-link-copied"));
 }
 
 function getUserLastConnectionTime(item) {

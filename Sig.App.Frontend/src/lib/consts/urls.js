@@ -94,6 +94,7 @@ export const URL_GIFT_CARD_ADD = "cards-gift-card-add-url";
 export const URL_CARDS_BRANDING = "cards-branding-url";
 export const URL_CARDS_ENABLE = "cards-enable-url";
 export const URL_CARDS_DISABLE = "cards-disable-url";
+export const URL_CARDS_UNLOCK = "cards-unlock-url";
 
 export const URL_CARD_CHECK = "card-check-url";
 export const URL_CARD_ERROR = "card-error-url";

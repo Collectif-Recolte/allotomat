@@ -27,7 +27,8 @@
     "sort-by-id": "ID",
     "sort-order": "Sort order",
     "sort-order-by-id": "Sort by ID",
-    "sort-order-by-balance": "Sort by balance"
+    "sort-order-by-balance": "Sort by balance",
+    "unlock-card": "Mark card as found"
 	},
 	"fr": {
 		"generate-cards": "Générer de nouvelles cartes",
@@ -56,7 +57,8 @@
     "sort-by-id": "ID",
     "sort-order": "Ordre de tri",
     "sort-order-by-id": "Trier par ID",
-    "sort-order-by-balance": "Trier par solde"
+    "sort-order-by-balance": "Trier par solde",
+    "unlock-card": "Marquer la carte comme retrouvée"
 	}
 }
 </i18n>
@@ -176,10 +178,10 @@
 
 <script setup>
 import gql from "graphql-tag";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { onBeforeRouteUpdate } from "vue-router";
-import { useQuery, useResult } from "@vue/apollo-composable";
+import { useQuery } from "@vue/apollo-composable";
 import { storeToRefs } from "pinia";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
@@ -193,7 +195,8 @@ import {
   URL_CARDS_UNASSIGN,
   URL_CARDS_LOST,
   URL_CARDS_ENABLE,
-  URL_CARDS_DISABLE
+  URL_CARDS_DISABLE,
+  URL_CARDS_UNLOCK
 } from "@/lib/consts/urls";
 import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
 import {
@@ -224,6 +227,9 @@ const searchText = ref("");
 const selectedCardStatus = ref([]);
 const selectedCardDisabled = ref([]);
 const sortOrder = ref(BY_ID);
+const project = ref(null);
+const cardsPagination = ref(null);
+const cards = ref(null);
 
 const availableCardStatus = [
   { value: CARD_STATUS_ASSIGNED, label: t("card-assigned") },
@@ -326,16 +332,12 @@ function projectsVariables() {
   };
 }
 
-const project = useResult(resultProjects, null, (data) => {
-  return data.projects[0];
-});
+watch(resultProjects, (value) => {
+  if (value === undefined) return;
 
-const cardsPagination = useResult(resultProjects, null, (data) => {
-  return data.projects[0]?.cards;
-});
-
-const cards = useResult(resultProjects, null, (data) => {
-  return data.projects[0]?.cards.items;
+  project.value = value.projects[0];
+  cardsPagination.value = value.projects[0]?.cards;
+  cards.value = value.projects[0]?.cards.items;
 });
 
 const showCreateGiftCardBtn = computed(() => {
@@ -438,6 +440,18 @@ const getAfterBtnGroup = (card) => {
         icon: ICON_CLOSE,
         route: {
           name: URL_CARDS_DISABLE,
+          params: { cardId: card.id }
+        }
+      }
+    ];
+  }
+  if (card.status === CARD_STATUS_LOST) {
+    return [
+      {
+        label: t("unlock-card"),
+        icon: ICON_CARD_LINK,
+        route: {
+          name: URL_CARDS_UNLOCK,
           params: { cardId: card.id }
         }
       }

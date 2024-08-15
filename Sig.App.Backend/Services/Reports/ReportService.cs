@@ -42,6 +42,45 @@ namespace Sig.App.Backend.Services.Reports
             this.permissionService = permissionService;
         }
 
+        public async Task<Stream> GenerateTransactionReportForMarket(IReportForMarketInput request)
+        {
+            var longMarketId = request.MarketId.LongIdentifierForType<Market>();
+            var startDate = new DateTime(request.StartDate.Year, request.StartDate.Month, request.StartDate.Day, 0, 0, 0).ToUniversalTime();
+            var endDate = new DateTime(request.EndDate.Year, request.EndDate.Month, request.EndDate.Day, 23, 59, 59).ToUniversalTime();
+
+            IQueryable<TransactionLog> query = db.TransactionLogs.Include(x => x.TransactionLogProductGroups).Where(x =>
+                x.CreatedAtUtc > startDate && x.CreatedAtUtc < endDate && x.MarketId == longMarketId);
+
+            var transactions = await query.OrderByDescending(x => x.CreatedAtUtc).ToListAsync();
+            var productGroupDictionary = transactions
+                .SelectMany(x => x.TransactionLogProductGroups).GroupBy(x => x.ProductGroupId).Select(x => x.First())
+                .ToDictionary(x => x.ProductGroupId, x => x.ProductGroupName);
+
+            var generator = new ExcelGenerator();
+            var dataWorksheet = generator.AddDataWorksheet("Rapport de transactions bruts", transactions);
+            dataWorksheet.Column("Date/Heure/Date/Hour", x => $"{TimeZoneInfo.ConvertTime(x.CreatedAtUtc, TimeZoneInfo.Utc, TimeZoneInfo.FindSystemTimeZoneById(request.TimeZoneId)).ToString(DateFormats.RegularWithTime)}");
+            dataWorksheet.Column("Id unique de transaction/Transaction unique id", x => x.TransactionUniqueId);
+            dataWorksheet.Column("Id 1 (participant)", x => x.BeneficiaryID1);
+            dataWorksheet.Column("Id 2 (participant)", x => x.BeneficiaryID2);
+
+            dataWorksheet.Column("Participant-e hors plateforme/Participant off platform", x => x.BeneficiaryIsOffPlatform ? "Oui/Yes" : "Non/No");
+            dataWorksheet.Column("Type", GetOperationTypeText);
+            dataWorksheet.Column("Montant total/Total amount", x => GetAmountText(x, request.Language));
+
+            foreach (var productGroup in productGroupDictionary)
+            {
+                if (productGroup.Value != ProductGroupType.LOYALTY)
+                {
+                    dataWorksheet.Column("Montant/Amount - " + productGroup.Value, x => GetAmountByProductGroup(productGroup.Key, x, request.Language));
+                }
+            }
+
+            dataWorksheet.Column("Id de la carte/Card id", x => x.CardProgramCardId);
+            dataWorksheet.Column("Numéro de la carte/Card number", x => x.CardNumber);
+            
+            return generator.Render();
+        }
+
         public async Task<Stream> GenerateTransactionReport(IReportInput request)
         {
             var currentUserCanSeeAllBeneficiaryInfo = await beneficiaryService.CurrentUserCanSeeAllBeneficiaryInfo();
@@ -201,7 +240,7 @@ namespace Sig.App.Backend.Services.Reports
                 case TransactionLogDiscriminator.RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog:
                     return $"Remboursement d'enveloppe, participant sans carte lors de l'ajout de fond automatique/Budget allowance refund, participant had no cards when automatically adding fund";
                 case TransactionLogDiscriminator.RefundPaymentTransactionLog:
-                    return $"Remboursement d'un paiement";
+                    return $"Remboursement d'un paiement/Refund of a payment";
                 default:
                     return "Type inconnu/Unknown type";
             }
