@@ -10,7 +10,7 @@
     "manage-subscriptions": "Subscriptions",
     "dashboard": "Dashboard",
     "primary-menu": "Main",
-    "check-balance": "Scan a card",
+    "check-balance": "Check card balance",
     "manage-transactions": "Transactions"
 	},
 	"fr": {
@@ -23,7 +23,7 @@
     "manage-subscriptions": "Abonnements",
     "dashboard": "Tableau de bord",
     "primary-menu": "Principal",
-    "check-balance": "Scanner une carte",
+    "check-balance": "Vérifier le solde d'une carte",
     "manage-transactions": "Transactions"
 	}
 }
@@ -77,7 +77,7 @@
       :label="t('manage-transactions')"
       :icon="CLOCK" />
     <MenuItem
-      v-if="route.meta.anonymous"
+      v-if="route.meta.anonymous || (canCreateTransaction && !isProjectManager)"
       :router-link="{ name: $consts.urls.URL_CARD_CHECK }"
       :label="t('check-balance')"
       :icon="HAND_CARD" />
