@@ -78,7 +78,7 @@ const { result, loading } = useQuery(
           name
         }
         totalFund
-        transactions(page: $page, limit: 15) {
+        transactions(page: $page, limit: 8) {
           totalCount
           totalPages
           items {
