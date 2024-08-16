@@ -21,7 +21,7 @@ namespace Sig.App.Backend.Services.Cards
             generator.AddDataWorksheet("Cartes générées", items)
                 .Column("QR Code", x => x.QrCode())
                 .Column("Id", x => x.Id)
-                .Column("Unique card Id", x => x.UniqueCardId);
+                .Column("Unique card Id", x => x.UniqueCardId.Replace("-", " "));
 
             return generator.Render();
         }
