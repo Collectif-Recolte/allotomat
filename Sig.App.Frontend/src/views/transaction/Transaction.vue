@@ -14,7 +14,7 @@
     <AppShell :class="appShellClass" no-padding :is-dark="isDark" :loading="loading">
       <NewScan v-if="activeStep === TRANSACTION_STEPS_START" @onUpdateStep="updateStep" />
       <ScanQRCode v-else-if="activeStep === TRANSACTION_STEPS_SCAN" @onUpdateStep="updateStep" />
-      <ManuallyEnterCardNumber
+      <MarketManuallyEnterCardNumber
         v-else-if="activeStep === TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER"
         @onUpdateStep="updateStep" />
       <AddTransaction
@@ -48,7 +48,7 @@ import {
 } from "@/lib/consts/enums";
 
 import ScanQRCode from "@/views/transaction/ScanQRCode";
-import ManuallyEnterCardNumber from "@/views/transaction/ManuallyEnterCardNumber";
+import MarketManuallyEnterCardNumber from "@/views/transaction/MarketManuallyEnterCardNumber";
 import AddTransaction from "@/views/transaction/Add";
 import CompleteTransaction from "@/views/transaction/Complete";
 import NewScan from "@/views/transaction/NewScan";

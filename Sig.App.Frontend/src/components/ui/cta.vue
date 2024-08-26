@@ -28,6 +28,15 @@
         tag="routerLink"
         :to="secondaryBtnRoute"
         :label="secondaryBtnLabel" />
+      <PfButtonAction
+        v-else-if="secondaryBtnIsAction"
+        class="w-full mb-6"
+        btn-style="secondary"
+        :label="secondaryBtnLabel"
+        :icon="secondaryBtnIcon"
+        has-icon-left
+        size="lg"
+        @click="() => emit('onSecondaryBtnClick')" />
     </slot>
   </div>
 </template>
@@ -45,8 +54,9 @@ const props = defineProps({
   primaryBtnIsAction: Boolean,
 
   secondaryBtnLabel: { type: String, default: "" },
-  secondaryBtnRoute: { type: Object, default: null }
+  secondaryBtnRoute: { type: Object, default: null },
+  secondaryBtnIsAction: Boolean
 });
 
-const emit = defineEmits(["onPrimaryBtnClick"]);
+const emit = defineEmits(["onPrimaryBtnClick", "onSecondaryBtnClick"]);
 </script>
