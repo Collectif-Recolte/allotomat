@@ -2,6 +2,7 @@
   {
     "en": {
       "add-missed-payment-description": "Select missed payments to add",
+      "no-missed-payment-description": "The subscriptions do not have any missed payments. It is possible to manually add funds to the cards in case of urgent need.",
       "budget-allowance-not-enought": "<b>The budget allowance is not sufficient to cover the additional payment</b>",
       "close":"Close",
       "budget-allowance-needed": "<b>{amountByPayment} $ required for assignment</b>",
@@ -11,6 +12,7 @@
     },
     "fr": {
       "add-missed-payment-description": "Sélectionnez les paiements manqués à ajouter",
+      "no-missed-payment-description": "Les abonnements ne comportent aucun paiement manqué. Il est possible d'ajouter manuellement des fonds sur les cartes en cas de besoin urgent.",
       "budget-allowance-not-enought": "<b>L'enveloppe budgétaire n'est pas suffisante pour couvrir le versement supplémentaire</b>",
       "close":"Fermer",
       "budget-allowance-needed": "<b>{amountByPayment} $ requis pour l'attribution</b>",
@@ -22,7 +24,8 @@
   </i18n>
 
 <template>
-  <p>{{ t("add-missed-payment-description") }}</p>
+  <p v-if="subscriptionsWithMissedPayment.length > 0">{{ t("add-missed-payment-description") }}</p>
+  <p v-else>{{ t("no-missed-payment-description") }}</p>
   <Form v-slot="{ isSubmitting }" @submit="onSubmit">
     <PfForm :processing="isSubmitting" :disable-submit="subscriptionChecked.length === 0" @cancel="closeModal">
       <PfFormFieldset :id="props.id" :name="props.id" :has-error-state="props.hasErrorState" :errors="props.errors">
@@ -51,7 +54,12 @@
           <p v-html="t('assign-card-description')"></p>
           <div class="flex gap-x-6 items-center justify-end">
             <PfButtonAction btn-style="link" :label="t('close')" @click="closeModal" />
-            <PfButtonAction :is-disabled="subscriptionChecked.length === 0" :label="t('submit')" class="px-8" type="submit" />
+            <PfButtonAction
+              v-if="subscriptionsWithMissedPayment.length > 0"
+              :is-disabled="subscriptionChecked.length === 0"
+              :label="t('submit')"
+              class="px-8"
+              type="submit" />
           </div>
         </div>
       </template>
