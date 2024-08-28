@@ -313,7 +313,7 @@ function getLast4Digit(cardNumber) {
   if (cardNumber === undefined || cardNumber === null) {
     return null;
   }
-  return `****-****-****-${cardNumber.slice(-4)}`;
+  return `**** **** **** ${cardNumber.slice(-4)}`;
 }
 
 const productGroups = computed(() => {

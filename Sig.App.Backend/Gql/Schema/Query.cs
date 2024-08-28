@@ -39,7 +39,6 @@ using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Requests.Queries.Beneficiaries;
 using Sig.App.Backend.Gql.Bases;
-using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 
 namespace Sig.App.Backend.Gql.Schema
 {

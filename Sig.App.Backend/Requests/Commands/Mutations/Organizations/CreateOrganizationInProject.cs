@@ -55,7 +55,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
 
             var organization = new Organization()
             {
-                Name = request.Name,
+                Name = request.Name.Trim(),
                 Project = project
             };
             

@@ -4,8 +4,8 @@
       "sub-title": "Purchase on behalf of program",
       "select-market": "Merchant",
       "card-number": "Card number",
-      "card-number-description": "Card number must be of format \"1234-5678-9012-3456\"",
-      "card-number-error": "Card number must be of format \"1234-5678-9012-3456\"",
+      "card-number-description": "Card number must be of format \"1234 5678 9012 3456\"",
+      "card-number-error": "Card number must be of format \"1234 5678 9012 3456\"",
       "choose-market": "Select",
       "next-step": "Next",
       "cancel": "Cancel",
@@ -16,8 +16,8 @@
       "sub-title": "Achat au nom du programme",
       "select-market": "Marchand",
       "card-number": "N° de carte",
-      "card-number-description": "Le numéro de carte doit être de format \"1234-5678-9012-3456\"",
-      "card-number-error": "Le numéro de carte doit être de format \"1234-5678-9012-3456\"",
+      "card-number-description": "Le numéro de carte doit être de format \"1234 5678 9012 3456\"",
+      "card-number-error": "Le numéro de carte doit être de format \"1234 5678 9012 3456\"",
       "choose-market": "Sélectionner",
       "next-step": "Suivant",
       "cancel": "Annuler",
@@ -96,7 +96,12 @@ const validationSchema = computed(() =>
         params: {},
         message: t("card-number-error"),
         test: function (value) {
-          var regex = /\b(?:\d{4}[ -]?){3}\d{4}\b/;
+          if (value === undefined) {
+            return false;
+          }
+          value = value.replaceAll("-", "");
+          value = value.replaceAll(" ", "");
+          var regex = /\b^\d{16}$\b/;
           return regex.test(value);
         }
       })

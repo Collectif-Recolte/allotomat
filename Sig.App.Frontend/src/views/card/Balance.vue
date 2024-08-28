@@ -32,6 +32,7 @@
       </p>
 
       <ProductGroupFundList display-expiration-date class="mb-6" :product-groups="getProductGroups(allFunds)" />
+      <TransactionList v-if="card" :transactions="card.transactions" :page="page" @update:page="updatePage" />
 
       <div class="mt-4">
         <PfButtonAction btn-style="link" size="sm" :label="t('done')" @click="emit('onUpdateStep', CHECK_CARD_STEPS_START)" />
@@ -43,16 +44,19 @@
 <script setup>
 import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
-import { computed, defineEmits, defineProps, watch } from "vue";
+import { ref, computed, defineEmits, defineProps, watch } from "vue";
 import { useQuery, useResult } from "@vue/apollo-composable";
 
 import { CHECK_CARD_STEPS_START, PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 
+import TransactionList from "@/components/transaction/transaction-list";
 import ProductGroupFundList from "@/components/product-groups/product-group-fund-list";
 
 const { t } = useI18n();
+
+const page = ref(1);
 
 const props = defineProps({
   cardId: {
@@ -65,7 +69,7 @@ const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState"]);
 
 const { result, loading } = useQuery(
   gql`
-    query Card($id: ID!) {
+    query Card($id: ID!, $page: Int!) {
       card(id: $id) {
         id
         isDisabled
@@ -74,6 +78,15 @@ const { result, loading } = useQuery(
           name
         }
         totalFund
+        transactions(page: $page, limit: 8) {
+          totalCount
+          totalPages
+          items {
+            id
+            amount
+            createdAt
+          }
+        }
         addingFundTransactions {
           expirationDate
           availableFund
@@ -100,7 +113,8 @@ const { result, loading } = useQuery(
     }
   `,
   {
-    id: props.cardId
+    id: props.cardId,
+    page: page
   }
 );
 const card = useResult(result, null, (data) => data.card);
@@ -169,4 +183,8 @@ const getProductGroups = (funds) => {
   }
   return productGroups;
 };
+
+function updatePage(value) {
+  page.value = value;
+}
 </script>

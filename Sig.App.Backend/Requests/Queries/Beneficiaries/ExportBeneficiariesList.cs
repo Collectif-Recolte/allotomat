@@ -126,7 +126,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
                 }
             });
             dataWorksheet.Column("ID carte/Card ID", x => x.Card != null ? x.Card.ProgramCardId : "");
-            dataWorksheet.Column("Numéro carte/Card Number", x => x.Card != null ? x.Card.CardNumber : "");
+            dataWorksheet.Column("Numéro carte/Card Number", x => x.Card != null ? x.Card.CardNumber.Replace('-', ' ') : "");
             dataWorksheet.Column("Abonnements/Subscriptions", x => GetActiveSubscriptions(x.Subscriptions));
             dataWorksheet.Column("Groupe/Group", x => x.Organization != null ? x.Organization.Name : "");
             dataWorksheet.Column("Dernier usage/Last use", x =>

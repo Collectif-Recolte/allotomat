@@ -54,17 +54,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
             var beneficiary = new Beneficiary()
             {
-                ID1 = request.Id1 ?? Guid.NewGuid().ToString(),
-                Firstname = request.Firstname,
-                Lastname = request.Lastname,
-                Email = request.Email,
-                Address = request.Address,
-                Phone = request.Phone,
+                ID1 = "TID_" + Guid.NewGuid().ToString(),
+                Firstname = request.Firstname?.Trim(),
+                Lastname = request.Lastname?.Trim(),
+                Email = request.Email?.Trim(),
+                Address = request.Address?.Trim(),
+                Phone = request.Phone?.Trim(),
                 Organization = organization,
-                Notes = request.Notes,
+                Notes = request.Notes?.Trim(),
                 BeneficiaryType = beneficiaryType,
-                PostalCode = request.PostalCode,
-                ID2 = request.Id2,
+                PostalCode = request.PostalCode?.Trim(),
+                ID2 = request.Id2?.Trim(),
                 SortOrder = sortOrder
             };
 

@@ -1,12 +1,16 @@
 ﻿using GraphQL.Conventions;
 using GraphQL.DataLoader;
+using MediatR;
 using NodaTime;
 using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Requests.Queries.Transactions;
 using Sig.App.Backend.Services.QRCode;
+using Sig.App.Backend.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -89,6 +93,38 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             }
 
             return null;
+        }
+
+        public async Task<Pagination<ITransactionGraphType>> Transactions([Inject] IMediator mediator, int page, int limit)
+        {
+            var results = await mediator.Send(new SearchTransactions.Query
+            {
+                CardId = card.Id,
+                Page = new Page(page, limit)
+            });
+            
+            return results.Map(x =>
+            {
+                switch (x)
+                {
+                    case PaymentTransaction pt:
+                        return new PaymentTransactionGraphType(pt);
+                    case ManuallyAddingFundTransaction maft:
+                        return new ManuallyAddingFundTransactionGraphType(maft);
+                    case SubscriptionAddingFundTransaction saft:
+                        return new SubscriptionAddingFundTransactionGraphType(saft);
+                    case OffPlatformAddingFundTransaction opaft:
+                        return new OffPlatformAddingFundTransactionGraphType(opaft);
+                    case LoyaltyAddingFundTransaction laft:
+                        return new LoyaltyAddingFundTransactionGraphType(laft);
+                    case RefundTransaction rt:
+                        return new RefundTransactionGraphType(rt);
+                    case ExpireFundTransaction eft:
+                        return new ExpireFundTransactionGraphType(eft) as ITransactionGraphType;
+                }
+
+                return null;
+            });
         }
 
         public IDataLoaderResult<IEnumerable<FundGraphType>> Funds(IAppUserContext ctx)

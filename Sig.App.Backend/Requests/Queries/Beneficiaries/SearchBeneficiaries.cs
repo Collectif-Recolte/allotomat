@@ -130,11 +130,11 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
                 {
                     if (currentUserCanSeeAllBeneficiaryInfo)
                     {
-                        query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text) || x.Email.Contains(text) || x.Firstname.Contains(text) || x.Lastname.Contains(text) || (x.Card != null && x.Card.CardNumber.Contains(text) || x.Card.ProgramCardId.ToString().Contains(text)));
+                        query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text) || x.Email.Contains(text) || x.Firstname.Contains(text) || x.Lastname.Contains(text) || (x.Card != null && x.Card.CardNumber.Contains(text) || x.Card.CardNumber.Replace("-", string.Empty).Contains(text) || x.Card.ProgramCardId.ToString().Contains(text)));
                     }
                     else
                     {
-                        query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text) || (x.Card != null && x.Card.CardNumber.Contains(text) || x.Card.ProgramCardId.ToString().Contains(text)));
+                        query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text) || (x.Card != null && x.Card.CardNumber.Contains(text) || x.Card.CardNumber.Replace("-", "").Contains(text) || x.Card.ProgramCardId.ToString().Contains(text)));
                     }
                 }
             }

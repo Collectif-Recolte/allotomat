@@ -41,9 +41,6 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<SubscriptionGraphType> LoadSubscriptionById(long subscriptionId) =>
             LoadOne<GetSubscriptionByIds.Query, SubscriptionGraphType, long>(subscriptionId);
 
-        public IDataLoaderResult<SubscriptionTypeGraphType> LoadSubscriptionTypeByBeneficiaryAndSubscriptionId(long beneficiaryId, long subscriptionId) =>
-            LoadOne<GetSubscriptionTypeByBeneficiaryAndSubscriptionId.Query, SubscriptionTypeGraphType, long, long>(beneficiaryId, subscriptionId, x => x.ToString());
-
         public IDataLoaderResult<IBeneficiaryGraphType> LoadBeneficiary(long beneficiaryId) =>
             LoadOne<GetBeneficiaryByIds.Query, IBeneficiaryGraphType, long>(beneficiaryId);
 
@@ -57,7 +54,7 @@ namespace Sig.App.Backend.Gql
             LoadOne<GetCardByIds.Query, CardGraphType, long>(cardId);
 
         public IDataLoaderResult<CardGraphType> LoadCardByCardNumber(string cardNumber) =>
-            LoadOne<GetCardByCardNumbers.Query, CardGraphType, string>(cardNumber);
+            LoadOne<GetCardByCardNumbers.Query, CardGraphType, string>(cardNumber.Replace("-", string.Empty).Replace(" ", string.Empty));
 
         public IDataLoaderResult<CardGraphType> LoadBeneficiaryCard(long beneficiaryId) =>
             LoadOne<GetCardByBeneficiaryIds.Query, CardGraphType, long>(beneficiaryId);
@@ -184,6 +181,9 @@ namespace Sig.App.Backend.Gql
 
         public IDataLoaderResult<IEnumerable<PaymentTransactionAddingFundTransactionGraphType>> LoadPaymentTransactionAddingFundTransactionsByTransactionId(long transactionId) =>
             LoadCollection<GetPaymentTransactionAddingFundTransactionsByTransactionId.Query, PaymentTransactionAddingFundTransactionGraphType, long>(transactionId);
+
+        public IDataLoaderResult<IEnumerable<SubscriptionTypeGraphType>> LoadSubscriptionTypeByBeneficiaryAndSubscriptionId(long beneficiaryId, long subscriptionId) =>
+            LoadCollection<GetSubscriptionTypeByBeneficiaryAndSubscriptionId.Query, SubscriptionTypeGraphType, long, long>(beneficiaryId, subscriptionId, x => x.ToString());
 
         private IDataLoaderResult<TResult> LoadOne<TQuery, TResult, TKey>(TKey id) where TQuery : IRequest<IDictionary<TKey, TResult>>, IIdListQuery<TKey>, new()
         {

@@ -44,7 +44,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.ProductGroups
                 throw new CantEditLoyaltyProductGroup();
             }
 
-            request.Name.IfSet(x => productGroup.Name = x.Value);
+            request.Name.IfSet(x => productGroup.Name = x.Value.Trim());
             request.Color.IfSet(x => productGroup.Color = x);
             request.OrderOfAppearance.IfSet(x => productGroup.OrderOfAppearance = x);
 

@@ -45,7 +45,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             var existingUserNotProjectManager = false;
 
             var project = new Project() {
-                Name = request.Name,
+                Name = request.Name.Trim(),
                 Url = request.Url,
                 AllowOrganizationsAssignCards = request.AllowOrganizationsAssignCards,
                 BeneficiariesAreAnonymous = request.BeneficiariesAreAnonymous,

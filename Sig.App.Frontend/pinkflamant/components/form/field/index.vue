@@ -9,7 +9,8 @@
       :label="label"
       :after-label="afterLabel"
       :has-error-state="hasErrorState"
-      :disabled="disabled" />
+      :disabled="disabled"
+      :required="required" />
 
     <div :class="{ 'relative flex items-start': isRadioOrCheck }">
       <!-- Input -->
@@ -24,7 +25,8 @@
           :label="label"
           :has-error-state="hasErrorState"
           :disabled="disabled"
-          :is-filter="isFilter" />
+          :is-filter="isFilter"
+          :required="required" />
         <div v-if="description || $slots.description" class="mt-1" :class="hasErrorState ? 'text-red-500' : 'text-grey-500'">
           <slot name="description">
             <p v-if="description" :id="`${id}-description`" class="mb-0 text-p4 leading-none">{{ description }}</p>

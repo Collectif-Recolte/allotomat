@@ -178,7 +178,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
 
             dataWorksheet.Column("Statut/Status", x => x.IsActive ? "Actif/Active" : "Inactif/Inactive");
             dataWorksheet.Column("ID carte/Card ID", x => x.Card != null ? x.CardId : "");
-            dataWorksheet.Column("Numéro carte/Card Number", x => x.Card != null ? x.Card.CardNumber : "");
+            dataWorksheet.Column("Numéro carte/Card Number", x => x.Card != null ? x.Card.CardNumber.Replace('-', ' ') : "");
             dataWorksheet.Column("Groupe/Group", x => x.Organization != null ? x.Organization.Name : "");
             dataWorksheet.Column("Dernier usage/Last use", x =>
             {
