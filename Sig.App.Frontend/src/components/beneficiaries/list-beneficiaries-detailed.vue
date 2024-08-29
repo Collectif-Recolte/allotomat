@@ -23,7 +23,8 @@
         tag="routerLink"
         :to="{ name: URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS, query: props.filteredQuery }"
         btn-style="secondary"
-        class="rounded-full">
+        class="rounded-full"
+        :is-disabled="props.isAllGroupSelected">
         <span class="inline-flex items-center">
           {{ t("assign-subscription-btn") }}
           <span class="bg-primary-700 w-6 h-6 flex items-center justify-center rounded-full text-p3 leading-none ml-2 -mr-2">{{
@@ -65,6 +66,10 @@ const props = defineProps({
   filteredQuery: {
     type: Object,
     required: true
+  },
+  isAllGroupSelected: {
+    type: Boolean,
+    default: false
   }
 });
 </script>
