@@ -17,7 +17,8 @@
       "add-organization": "Add a group",
       "payment-conflicts-alert": "{count} payment conflicts",
       "manage-participants": "Manage",
-      "assign-subscriptions": "Assignments"
+      "assign-subscriptions": "Assignments",
+      "all-group": "All groups"
     },
     "fr": {
       "add-beneficiary": "Ajouter un participant",
@@ -36,16 +37,17 @@
       "add-organization": "Ajouter un groupe",
       "payment-conflicts-alert":"{count} conflit de versement | {count} conflits de versements",
       "manage-participants": "Gestion",
-      "assign-subscriptions": "Attribution"
+      "assign-subscriptions": "Attribution",
+      "all-group": "Tous les Groupes"
     }
   }
 </i18n>
 
 <template>
-  <Loading :loading="loading || projectsLoading || organizationsLoading" is-full-height>
+  <Loading :loading="loading || projectsLoading || organizationsLoading || loadingAllBeneficiaries" is-full-height>
     <RouterView v-slot="{ Component }">
       <Title :title="t('title')" :subpages="subpages">
-        <template v-if="organizations && !administrationSubscriptionsOffPlatform" #center>
+        <template v-if="organizations && !administrationSubscriptionsOffPlatform && !isAllGroupSelected" #center>
           <div class="xs:text-right flex items-center gap-x-4 text-primary-700">
             <span class="text-sm">{{ t("available-amount-for-allocation") }}</span>
             <span class="text-4xl font-bold">{{ getShortMoneyFormat(budgetAllowancesTotal) }}</span>
@@ -72,6 +74,7 @@
               tag="routerLink"
               :to="{ name: URL_BENEFICIARY_ADD }"
               :icon="ICON_PLUS"
+              :is-disabled="isAllGroupSelected"
               has-icon-left />
             <PfButtonLink
               v-if="!beneficiariesAreAnonymous"
@@ -79,6 +82,7 @@
               tag="routerLink"
               :to="importBeneficiariesListRoute"
               :icon="ICON_UPLOAD"
+              :is-disabled="isAllGroupSelected"
               has-icon-left />
             <PfButtonAction
               btn-style="outline"
@@ -176,7 +180,8 @@
             :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
             :beneficiaries-pagination="beneficiariesPagination"
             :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
-            :filtered-query="filteredQuery" />
+            :filtered-query="filteredQuery"
+            :is-all-group-selected="isAllGroupSelected" />
           <UiPagination
             v-if="beneficiariesPagination.totalPages > 1"
             v-model:page="page"
@@ -281,6 +286,8 @@ import Title from "@/components/app/title";
 import BeneficiaryFilters from "@/components/beneficiaries/beneficiary-filters";
 import ListBeneficiariesWithDetailed from "@/components/beneficiaries/list-beneficiaries-detailed";
 
+const ALL_GROUP = "all-group";
+
 const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
@@ -348,7 +355,8 @@ const availableSubscriptions = ref([]);
 const administrationSubscriptionsOffPlatform = ref(false);
 const organizations = ref([]);
 const productGroups = ref([]);
-const beneficiariesPagination = ref(null);
+const organizationBeneficiariesPagination = ref(null);
+const projectBeneficiariesPagination = ref(null);
 
 const filteredQuery = computed(() => {
   return {
@@ -461,6 +469,7 @@ watch(resultOrganizations, (value) => {
     budgetAllowancesTotal: x.budgetAllowancesTotal,
     beneficiariesAreAnonymous: x.project.beneficiariesAreAnonymous
   }));
+  organizations.value.unshift({ label: t("all-group"), value: ALL_GROUP });
 
   availableBeneficiaryTypes.value = value.organizations[0].project.beneficiaryTypes;
 
@@ -474,6 +483,149 @@ watch(resultOrganizations, (value) => {
   administrationSubscriptionsOffPlatform.value = value.organizations[0].project.administrationSubscriptionsOffPlatform;
   productGroups.value = value.organizations[0].project.productGroups.filter((x) => x.name !== PRODUCT_GROUP_LOYALTY);
 });
+
+const isAllGroupSelected = computed(() => {
+  return selectedOrganization.value === ALL_GROUP;
+});
+
+const {
+  result: resultAllBeneficiaries,
+  loading: loadingAllBeneficiaries,
+  refetch: refetchAllBeneficiaries
+} = useQuery(
+  gql`
+    query Project(
+      $id: ID!
+      $page: Int!
+      $categories: [ID!]
+      $subscriptions: [ID!]
+      $status: [BeneficiaryStatus!]
+      $withoutSubscription: Boolean
+      $searchText: String
+      $withCard: Boolean
+      $withConflictPayment: Boolean
+      $withCardDisabled: Boolean
+      $sort: BeneficiarySortSort
+    ) {
+      project(id: $id) {
+        id
+        beneficiaries(
+          page: $page
+          categories: $categories
+          subscriptions: $subscriptions
+          withoutSubscription: $withoutSubscription
+          status: $status
+          limit: 30
+          searchText: $searchText
+          withCard: $withCard
+          withConflictPayment: $withConflictPayment
+          withCardDisabled: $withCardDisabled
+          sort: $sort
+        ) {
+          conflictPaymentCount
+          totalCount
+          totalPages
+          items {
+            id
+            firstname
+            lastname
+            email
+            phone
+            address
+            postalCode
+            notes
+            id1
+            id2
+            organization {
+              id
+              name
+            }
+            card {
+              id
+              cardNumber
+              programCardId
+              isDisabled
+              funds {
+                id
+                amount
+                productGroup {
+                  id
+                  name
+                  orderOfAppearance
+                  color
+                }
+              }
+              loyaltyFund {
+                id
+                amount
+                productGroup {
+                  id
+                  name
+                  orderOfAppearance
+                  color
+                }
+              }
+              totalFund
+              lastTransactionDate
+            }
+            ... on BeneficiaryGraphType {
+              beneficiaryType {
+                id
+                name
+              }
+              beneficiarySubscriptions {
+                beneficiaryType {
+                  id
+                  name
+                }
+                hasMissedPayment
+                subscription {
+                  id
+                  name
+                  endDate
+                  types {
+                    id
+                    beneficiaryType {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            }
+            ... on OffPlatformBeneficiaryGraphType {
+              startDate
+              endDate
+              funds {
+                id
+                amount
+                productGroup {
+                  id
+                  name
+                }
+              }
+              isActive
+              monthlyPaymentMoment
+              beneficiarySubscriptions {
+                beneficiaryType {
+                  id
+                }
+                subscription {
+                  id
+                  name
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `,
+  allBeneficiariesVariables,
+  () => ({
+    enabled: selectedOrganization.value !== null && isAllGroupSelected.value
+  })
+);
 
 const {
   result: resultBeneficiaries,
@@ -523,6 +675,10 @@ const {
             notes
             id1
             id2
+            organization {
+              id
+              name
+            }
             card {
               id
               cardNumber
@@ -606,14 +762,25 @@ const {
   `,
   beneficiariesVariables,
   () => ({
-    enabled: selectedOrganization.value !== null
+    enabled: selectedOrganization.value !== null && !isAllGroupSelected.value
   })
 );
 
 watch(resultBeneficiaries, (value) => {
   if (value === undefined) return;
+  organizationBeneficiariesPagination.value = value.organization.beneficiaries;
+});
 
-  beneficiariesPagination.value = value.organization.beneficiaries;
+watch(resultAllBeneficiaries, (value) => {
+  if (value === undefined) return;
+  projectBeneficiariesPagination.value = value.project.beneficiaries;
+});
+
+const beneficiariesPagination = computed(() => {
+  if (isAllGroupSelected.value) {
+    return projectBeneficiariesPagination.value;
+  }
+  return organizationBeneficiariesPagination.value;
 });
 
 let beneficiariesAreAnonymous = computed(() => {
@@ -733,6 +900,28 @@ function beneficiariesVariables() {
   };
 }
 
+function allBeneficiariesVariables() {
+  if (projects.value && projects.value.length > 0) {
+    return {
+      id: projects.value[0].id,
+      page: page.value,
+      subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
+      withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
+      categories: beneficiaryTypes.value.length > 0 ? beneficiaryTypes.value : null,
+      status: status.value.length > 0 ? status.value : null,
+      withCard: cardStatus.value.length === 1 ? cardStatus.value.indexOf(BENEFICIARY_WITH_CARD) !== -1 : null,
+      withConflictPayment:
+        conflictPaymentStatus.value.length === 1
+          ? conflictPaymentStatus.value.indexOf(BENEFICIARY_WITH_PAYMENT_CONFLICT) !== -1
+          : null,
+      withCardDisabled: cardDisabled.value.length === 1 ? cardDisabled.value.indexOf(CARD_IS_DISABLED) !== -1 : null,
+      searchText: searchText.value,
+      sort: { field: sortOrder.value, order: "ASC" }
+    };
+  }
+  return {};
+}
+
 function onSearch() {
   page.value = 1;
   searchText.value = searchInput.value;
@@ -763,14 +952,52 @@ async function onExportReport() {
   } else {
     result = await client.query({
       query: gql`
-        query ExportBeneficiariesList($organizationId: ID!, $timeZoneId: String!, $language: Language!) {
-          exportBeneficiariesList(id: $organizationId, timeZoneId: $timeZoneId, language: $language)
+        query ExportBeneficiariesList(
+          $id: ID!
+          $timeZoneId: String!
+          $language: Language!
+          $categories: [ID!]
+          $subscriptions: [ID!]
+          $status: [BeneficiaryStatus!]
+          $withoutSubscription: Boolean
+          $searchText: String
+          $withCard: Boolean
+          $withConflictPayment: Boolean
+          $withCardDisabled: Boolean
+          $sort: BeneficiarySortSort
+        ) {
+          exportBeneficiariesList(
+            id: $id
+            timeZoneId: $timeZoneId
+            language: $language
+            categories: $categories
+            subscriptions: $subscriptions
+            withoutSubscription: $withoutSubscription
+            status: $status
+            searchText: $searchText
+            withCard: $withCard
+            withConflictPayment: $withConflictPayment
+            withCardDisabled: $withCardDisabled
+            sort: $sort
+          )
         }
       `,
       variables: {
-        organizationId: selectedOrganization.value,
+        id: isAllGroupSelected.value ? projects.value[0].id : selectedOrganization.value,
         timeZoneId: timeZone,
-        language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR
+        language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR,
+        subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
+        withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
+        categories: beneficiaryTypes.value.length > 0 ? beneficiaryTypes.value : null,
+        status: status.value.length > 0 ? status.value : null,
+        withCard: cardStatus.value.length === 1 ? cardStatus.value.indexOf(BENEFICIARY_WITH_CARD) !== -1 : null,
+        withConflictPayment:
+          conflictPaymentStatus.value.length === 1
+            ? conflictPaymentStatus.value.indexOf(BENEFICIARY_WITH_PAYMENT_CONFLICT) !== -1
+            : null,
+        withCardDisabled: cardDisabled.value.length === 1 ? cardDisabled.value.indexOf(CARD_IS_DISABLED) !== -1 : null,
+        searchText: searchText.value,
+        sort: { field: sortOrder.value, order: "ASC" }
       }
     });
     window.open(result.data.exportBeneficiariesList, "_blank");
@@ -818,6 +1045,7 @@ onBeforeRouteUpdate((to) => {
 
     refetchBeneficiaries();
     refetchOrganizations();
+    refetchAllBeneficiaries();
   }
 });
 </script>

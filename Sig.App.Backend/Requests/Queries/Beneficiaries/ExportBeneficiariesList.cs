@@ -17,11 +17,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
-using Sig.App.Backend.Migrations;
 using Sig.App.Backend.Services.Beneficiaries;
 using Organization = Sig.App.Backend.DbModel.Entities.Organizations.Organization;
 using Sig.App.Backend.Gql.Schema.Enums;
 using System.Globalization;
+using Sig.App.Backend.Gql.Schema.Types;
+using Sig.App.Backend.Requests.Queries.Beneficiaries;
+using Sig.App.Backend.Utilities.Sorting;
+using Sig.App.Backend.DbModel.Entities.Projects;
 
 namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
 {
@@ -44,13 +47,110 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
         {
             var currentUserCanSeeAllBeneficiaryInfo = await beneficiaryService.CurrentUserCanSeeAllBeneficiaryInfo();
 
+            var today = clock
+                .GetCurrentInstant()
+                .ToDateTimeUtc();
+
             IQueryable<Beneficiary> query = db.Beneficiaries
                 .Include(x => x.Organization)
                 .Include(x => x.BeneficiaryType)
                 .Include(x => x.Card).ThenInclude(x => x.Transactions)
                 .Include(x => x.Card).ThenInclude(x => x.Funds).ThenInclude(x => x.ProductGroup)
                 .Include(x => x.Subscriptions).ThenInclude(x => x.Subscription);
-            
+
+            if (request.Subscriptions != null)
+            {
+                var withoutSubscription = request.WithoutSubscription?.Value ?? false;
+                query = query.Where(x => (withoutSubscription && x.Subscriptions.Count == 0) || x.Subscriptions.Any(y => request.Subscriptions.Contains(y.SubscriptionId)));
+            }
+            else if (request.WithoutSubscription.IsSet())
+            {
+                if (request.WithoutSubscription.Value)
+                {
+                    query = query.Where(x => x.Subscriptions.Count == 0);
+                }
+                else
+                {
+                    query = query.Where(x => x.Subscriptions.Count > 0);
+                }
+            }
+
+            if (request.WithoutSpecificSubscriptions != null)
+            {
+                query = query.Where(x => !x.Subscriptions.Any(y => request.WithoutSpecificSubscriptions.Contains(y.SubscriptionId)));
+            }
+
+            if (request.Categories != null)
+            {
+                query = query.Where(x => request.Categories.Contains(x.BeneficiaryTypeId.GetValueOrDefault()));
+            }
+
+            if (request.WithoutSpecificCategories != null)
+            {
+                query = query.Where(x => !request.WithoutSpecificCategories.Contains(x.BeneficiaryTypeId.GetValueOrDefault()));
+            }
+
+            if (request.WithCard.IsSet())
+            {
+                if (request.WithCard.Value)
+                {
+                    query = query.Where(x => x.CardId != null);
+                }
+                else
+                {
+                    query = query.Where(x => x.CardId == null);
+                }
+            }
+
+            if (request.WithConflictPayment.IsSet())
+            {
+                if (request.WithConflictPayment.Value)
+                {
+                    query = query.Where(x => x.Subscriptions.Any(y => y.BeneficiaryType != x.BeneficiaryType && y.Subscription.EndDate > today));
+                }
+                else
+                {
+                    query = query.Where(x => !x.Subscriptions.Any(y => y.BeneficiaryType != x.BeneficiaryType && y.Subscription.EndDate > today));
+                }
+            }
+
+            if (request.WithCardDisabled.IsSet())
+            {
+                if (request.WithCardDisabled.Value)
+                {
+                    query = query.Where(x => x.Card.IsDisabled == request.WithCardDisabled.Value);
+                }
+                else
+                {
+                    query = query.Where(x => x.Card.IsDisabled == request.WithCardDisabled.Value || x.Card == null);
+                }
+            }
+
+            if (request.Status != null)
+            {
+                var isActive = request.Status.Contains(BeneficiaryStatus.Active);
+                var isInactive = request.Status.Contains(BeneficiaryStatus.Inactive);
+
+                query = query.Where(x => ((x as OffPlatformBeneficiary).IsActive == true && isActive) || ((x as OffPlatformBeneficiary).IsActive == false && isInactive));
+            }
+
+            if (request.SearchText.IsSet() && !string.IsNullOrEmpty(request.SearchText.Value))
+            {
+                var searchText = request.SearchText.Value.Split(' ').AsEnumerable();
+
+                foreach (var text in searchText)
+                {
+                    if (currentUserCanSeeAllBeneficiaryInfo)
+                    {
+                        query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text) || x.Email.Contains(text) || x.Firstname.Contains(text) || x.Lastname.Contains(text) || (x.Card != null && x.Card.CardNumber.Contains(text) || x.Card.CardNumber.Replace("-", string.Empty).Contains(text) || x.Card.ProgramCardId.ToString().Contains(text)));
+                    }
+                    else
+                    {
+                        query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text) || (x.Card != null && x.Card.CardNumber.Contains(text) || x.Card.CardNumber.Replace("-", "").Contains(text) || x.Card.ProgramCardId.ToString().Contains(text)));
+                    }
+                }
+            }
+
             String fileName;
             if (request.Id.IsIdentifierForType<Organization>())
             {
@@ -72,9 +172,9 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
             {
                 throw new MustSpecifyOrganizationOrProjectException();
             }
-            
-            var beneficiaries = await query.OrderBy(x => x.SortOrder)
-                .ToListAsync(cancellationToken: cancellationToken);
+
+            var sorted = Sort(query, request.Sort?.Field ?? BeneficiarySort.Default);
+            var beneficiaries = await sorted.ToListAsync(cancellationToken: cancellationToken);
             
             var productGroups = beneficiaries.Where(x => x.Card != null).SelectMany(x => x.Card.Funds).Select(x => x.ProductGroup).DistinctBy(x => x.Id);
 
@@ -168,11 +268,44 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
             return string.Join(";", subscriptions.Select(x => x.Subscription.Name).ToArray());
         }
 
+        private static IOrderedQueryable<Beneficiary> Sort(IQueryable<Beneficiary> query, BeneficiarySort sort)
+        {
+            switch (sort)
+            {
+                case BeneficiarySort.SortOrder:
+                case BeneficiarySort.Default:
+                    return query
+                        .SortBy(x => x.SortOrder, SortOrder.Asc);
+                case BeneficiarySort.ID1:
+                    return query
+                        .SortBy(x => x.ID1, SortOrder.Asc);
+                case BeneficiarySort.LastName:
+                    return query
+                        .SortBy(x => x.Lastname, SortOrder.Asc);
+                case BeneficiarySort.ByFundAvailableOnCard:
+                    return query
+                        .SortBy(x => x.Card != null ? x.Card.Funds.Where(x => x.ProductGroup.Name != ProductGroupType.LOYALTY).Sum(x => x.Amount) : 0, SortOrder.Desc);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         public class Input : IRequest<string>
         {
             public Id Id { get; set; }
             public string TimeZoneId { get; set; }
             public Language Language { get; set; }
+            public Sort<BeneficiarySort> Sort { get; set; }
+            public Maybe<bool> WithoutSubscription { get; set; }
+            public IEnumerable<long> Subscriptions { get; set; }
+            public IEnumerable<long> WithoutSpecificSubscriptions { get; set; }
+            public IEnumerable<long> Categories { get; set; }
+            public IEnumerable<long> WithoutSpecificCategories { get; set; }
+            public IEnumerable<BeneficiaryStatus> Status { get; set; }
+            public Maybe<bool> WithCard { get; set; }
+            public Maybe<bool> WithConflictPayment { get; set; }
+            public Maybe<string> SearchText { get; set; }
+            public Maybe<bool> WithCardDisabled { get; set; }
         }
 
         public class Payload
