@@ -49,9 +49,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                 throw new BeneficiaryTypeNotFoundException();
             }
 
-            var lastBeneficiary = await db.Beneficiaries.Where(x => x.OrganizationId == organizationId).OrderBy(x => x.SortOrder).LastOrDefaultAsync();
-            var sortOrder = lastBeneficiary != null ? lastBeneficiary.SortOrder + 1 : 0;
-
+            var beneficiaries = await db.Beneficiaries.Where(x => x.OrganizationId == organizationId).ToListAsync(cancellationToken);
+            beneficiaries.ForEach(x => x.SortOrder++);
+            
             var id1 = request.Id1?.Trim();
             if (id1 == "")
             {
@@ -78,7 +78,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                 BeneficiaryType = beneficiaryType,
                 PostalCode = request.PostalCode?.Trim(),
                 ID2 = request.Id2?.Trim(),
-                SortOrder = sortOrder
+                SortOrder = 0
             };
 
             db.Beneficiaries.Add(beneficiary);
