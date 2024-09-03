@@ -53,7 +53,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             beneficiaries.ForEach(x => x.SortOrder++);
             
             var id1 = request.Id1?.Trim();
-            if (id1 == "")
+            if (id1 == "" || id1 == null)
             {
                 var guid = Guid.NewGuid().ToString();
                 id1 = "TID_" + guid.Split('-').First();
