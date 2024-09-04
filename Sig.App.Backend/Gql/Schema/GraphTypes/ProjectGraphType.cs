@@ -7,14 +7,17 @@ using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Requests.Queries.Beneficiaries;
 using Sig.App.Backend.Requests.Queries.Cards;
+using Sig.App.Backend.Requests.Queries.Markets;
 using Sig.App.Backend.Requests.Queries.Organizations;
 using Sig.App.Backend.Requests.Queries.Projects;
 using Sig.App.Backend.Services.Permission.Enums;
 using Sig.App.Backend.Utilities;
 using Sig.App.Backend.Utilities.Sorting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -175,6 +178,19 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
                         return new BeneficiaryGraphType(x);
                 }
             });
+        }
+
+        public async Task<MarketAmountOwedPagination<MarketAmountOwedGraphType>> MarketsAmountOwed([Inject] IMediator mediator, int page, int limit, DateTime startDate, DateTime endDate)
+        {
+            var results = await mediator.Send(new SearchMarketAmountOweds.Query
+            {
+                ProjectId = project.Id,
+                Page = new Page(page, limit),
+                StartDate = startDate,
+                EndDate = endDate
+            });
+
+            return results;
         }
     }
 }

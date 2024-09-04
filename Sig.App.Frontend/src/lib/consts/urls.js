@@ -81,6 +81,7 @@ export const URL_BENEFICIARY_ADD_MISSED_PAYMENT = "beneficiary-add-missed-paymen
 export const URL_PROJECT_MANAGER_ADMIN = "project-manager-list-url";
 export const URL_PROJECT_MANAGER_ADD = "project-manager-add-url";
 export const URL_PROJECT_SETTINGS = "project-settings-url";
+export const URL_RECONCILIATION_REPORT = "reconciliation-report-url";
 
 export const URL_ORGANIZATION_MANAGER_ADMIN = "organization-manager-list-url";
 export const URL_ORGANIZATION_MANAGER_ADD = "organization-manager-add-url";

@@ -366,6 +366,14 @@ export default [
     ]
   },
   {
+    name: urls.URL_RECONCILIATION_REPORT,
+    path: "/reconciliation-report",
+    component: () => import("@/views/report/ReconciliationReport.vue"),
+    meta: {
+      claim: GLOBAL_MANAGE_TRANSACTIONS
+    }
+  },
+  {
     name: urls.URL_PROJECT_MANAGER_ADMIN,
     path: "/project-managers",
     component: () => import("@/views/project/ListProjectManagers.vue"),
