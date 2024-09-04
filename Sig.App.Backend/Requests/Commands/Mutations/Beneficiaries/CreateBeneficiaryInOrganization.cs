@@ -49,23 +49,36 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                 throw new BeneficiaryTypeNotFoundException();
             }
 
-            var lastBeneficiary = await db.Beneficiaries.Where(x => x.OrganizationId == organizationId).OrderBy(x => x.SortOrder).LastOrDefaultAsync();
-            var sortOrder = lastBeneficiary != null ? lastBeneficiary.SortOrder + 1 : 0;
+            var beneficiaries = await db.Beneficiaries.Where(x => x.OrganizationId == organizationId).ToListAsync(cancellationToken);
+            beneficiaries.ForEach(x => x.SortOrder++);
+            
+            var id1 = request.Id1?.Trim();
+            if (id1 == "" || id1 == null)
+            {
+                var guid = Guid.NewGuid().ToString();
+                id1 = "TID_" + guid.Split('-').First();
+            }
+
+            if (await db.Beneficiaries.AnyAsync(x => x.OrganizationId == organizationId && x.ID1 == id1, cancellationToken))
+            {
+                logger.LogWarning("[Mutation] CreateBeneficiaryInOrganization - Id1AlreadyExistException");
+                throw new Id1AlreadyExistException();
+            }
 
             var beneficiary = new Beneficiary()
             {
-                ID1 = request.Id1 ?? Guid.NewGuid().ToString(),
-                Firstname = request.Firstname,
-                Lastname = request.Lastname,
-                Email = request.Email,
-                Address = request.Address,
-                Phone = request.Phone,
+                ID1 = id1,
+                Firstname = request.Firstname?.Trim(),
+                Lastname = request.Lastname?.Trim(),
+                Email = request.Email?.Trim(),
+                Address = request.Address?.Trim(),
+                Phone = request.Phone?.Trim(),
                 Organization = organization,
-                Notes = request.Notes,
+                Notes = request.Notes?.Trim(),
                 BeneficiaryType = beneficiaryType,
-                PostalCode = request.PostalCode,
-                ID2 = request.Id2,
-                SortOrder = sortOrder
+                PostalCode = request.PostalCode?.Trim(),
+                ID2 = request.Id2?.Trim(),
+                SortOrder = 0
             };
 
             db.Beneficiaries.Add(beneficiary);
@@ -103,5 +116,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
         public class OrganizationNotFoundException : RequestValidationException { }
         public class BeneficiaryTypeNotFoundException : RequestValidationException { }
+        public class Id1AlreadyExistException : RequestValidationException { }
     }
 }

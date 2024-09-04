@@ -80,7 +80,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 throw new NumberDaysUntilFundsExpireCantBeZeroException();
             }
 
-            subscription.Name = request.Name;
+            subscription.Name = request.Name.Trim();
             subscription.MonthlyPaymentMoment = request.MonthlyPaymentMoment;
             subscription.StartDate = request.StartDate.AtMidnight().InUtc().ToDateTimeUtc();
             subscription.EndDate = request.EndDate.AtMidnight().InUtc().ToDateTimeUtc();

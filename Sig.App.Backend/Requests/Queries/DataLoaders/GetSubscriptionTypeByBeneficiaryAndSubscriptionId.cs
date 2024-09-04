@@ -8,7 +8,7 @@ using Sig.App.Backend.Gql.Schema.GraphTypes;
 
 namespace Sig.App.Backend.Requests.Queries.DataLoaders
 {
-    public class GetSubscriptionTypeByBeneficiaryAndSubscriptionId : BatchQuery<GetSubscriptionTypeByBeneficiaryAndSubscriptionId.Query, long, SubscriptionTypeGraphType>
+    public class GetSubscriptionTypeByBeneficiaryAndSubscriptionId : BatchCollectionQuery<GetSubscriptionTypeByBeneficiaryAndSubscriptionId.Query, long, SubscriptionTypeGraphType>
     {
         public class Query : BaseQuery, IHaveGroup<long>
         {
@@ -22,7 +22,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
             this.db = db;
         }
 
-        public override async Task<IDictionary<long, SubscriptionTypeGraphType>> Handle(Query request, CancellationToken cancellationToken)
+        public override async Task<ILookup<long, SubscriptionTypeGraphType>> Handle(Query request, CancellationToken cancellationToken)
         {
             var beneficiary = await db.Beneficiaries.FirstAsync(x => x.Id == request.Group);
 
@@ -30,7 +30,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
                 .Where(c => request.Ids.Contains(c.SubscriptionId) && c.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId)
                 .ToListAsync(cancellationToken);
 
-            return types.ToDictionary(x => x.SubscriptionId, x => new SubscriptionTypeGraphType(x));
+            return types.ToLookup(x => x.SubscriptionId, x => new SubscriptionTypeGraphType(x));
         }
     }
 }

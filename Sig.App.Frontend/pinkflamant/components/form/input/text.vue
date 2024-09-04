@@ -8,7 +8,8 @@
     :col-span-class="colSpanClass"
     :errors="errors"
     :disabled="disabled"
-    :has-hidden-label="hasHiddenLabel">
+    :has-hidden-label="hasHiddenLabel"
+    :required="required">
     <div class="flex rounded-md shadow-sm relative">
       <span
         v-if="addOn || $slots.addOn"

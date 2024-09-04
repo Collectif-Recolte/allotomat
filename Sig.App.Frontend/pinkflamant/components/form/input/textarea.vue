@@ -6,7 +6,8 @@
     :description="description"
     :col-span-class="colSpanClass"
     :errors="errors"
-    :disabled="disabled">
+    :disabled="disabled"
+    :required="required">
     <textarea
       :id="id"
       :name="name"

@@ -85,7 +85,7 @@
     "subscription-payment-based-card-usage-disabled": "Désactivé",
     "subscription-max-number-of-payments": "Nombre total maximum de versements",
     "subscription-trigger-fund-expiration": "Déclencheur de l’expiration des fonds",
-    "subscription-trigger-fund-expiration-desc": "Les fonds de cet abonnement expireront au début de la date sélectionnée (12h01 heure de l'Est)",
+    "subscription-trigger-fund-expiration-desc": "Les fonds de cet abonnement expireront au début de la date sélectionnée (00h01 heure de l'Est)",
     "subscription-trigger-fund-expiration-specific-date": "Une date spécifique",
     "subscription-trigger-fund-expiration-number-of-days": "Un nombre de jours après la première utilisation",
     "subscription-days-until-funds-expire-after-first-use": "Échéance des fonds après l'usage initial",

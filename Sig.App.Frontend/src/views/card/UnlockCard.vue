@@ -80,7 +80,7 @@ const { mutate: unlockCard } = useMutation(
 
 function getCardNumber() {
   if (!card.value) return "";
-  return card.value.cardNumber;
+  return card.value.cardNumber.replaceAll("-", " ");
 }
 
 async function onUnlockCard() {

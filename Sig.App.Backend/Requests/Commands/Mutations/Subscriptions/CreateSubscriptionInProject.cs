@@ -72,7 +72,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             var subscription = new Subscription()
             {
-                Name = request.Name,
+                Name = request.Name.Trim(),
                 MonthlyPaymentMoment = request.MonthlyPaymentMoment,
                 ProjectId = projectId,
                 StartDate = request.StartDate.AtMidnight().InUtc().ToDateTimeUtc(),

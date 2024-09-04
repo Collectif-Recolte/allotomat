@@ -154,6 +154,5 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         public class SubscriptionExpiredException : RequestValidationException { }
         public class SubscriptionDontHaveEnoughtAvailableAmountException : RequestValidationException { }
         public class SubscriptionDontHaveMissedPaymentException : RequestValidationException { }
-
     }
 }

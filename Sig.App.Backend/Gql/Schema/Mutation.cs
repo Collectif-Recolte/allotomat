@@ -601,6 +601,16 @@ namespace Sig.App.Backend.Gql.Schema
             return mediator.Send(input.Value);
         }
 
+        [RequirePermission(OrganizationPermission.ManageOrganization)]
+        [AnnotateErrorCodes(typeof(AssignSubscriptionsToBeneficiary))]
+        public static Task<AssignSubscriptionsToBeneficiary.Payload> AssignSubscriptionsToBeneficiary(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<AssignSubscriptionsToBeneficiary.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
+
         [AnnotateErrorCodes(typeof(ExampleFormError))]
         public static Task<ExampleFormError.Payload> ExampleFormError(
             this GqlMutation _,
@@ -682,6 +692,11 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         public static Task<AddMissingPayment.Payload> AddMissingPayment(this GqlMutation _, [Inject] IMediator mediator, NonNull<AddMissingPayment.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
+
+        public static Task<AddMissingPayments.Payload> AddMissingPayments(this GqlMutation _, [Inject] IMediator mediator, NonNull<AddMissingPayments.Input> input)
         {
             return mediator.Send(input.Value);
         }

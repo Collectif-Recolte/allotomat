@@ -449,6 +449,10 @@ const {
           subscriptions {
             id
             name
+            startDate
+            endDate
+            fundsExpirationDate
+            isFundsAccumulable
             budgetAllowances {
               id
               availableFund
@@ -497,16 +501,30 @@ let beneficiaryTypes = useResult(resultOrganizations, null, (data) => {
 });
 
 let organizationSubscriptions = useResult(resultOrganizations, null, (data) => {
-  return data.organizations[0].project.subscriptions;
+  var value = [...data.organizations[0].project.subscriptions];
+
+  value.sort((a, b) => {
+    const dateA = a.isFundsAccumulable ? new Date(a.fundsExpirationDate) : new Date(a.endDate);
+    const dateB = b.isFundsAccumulable ? new Date(b.fundsExpirationDate) : new Date(b.endDate);
+    return dateB - dateA;
+  });
+
+  return value;
 });
 
 const subscriptions = useResult(resultOrganizations, null, (data) => {
-  return data.organizations[0].project.subscriptions
+  var subscriptions = data.organizations[0].project.subscriptions;
+  return subscriptions
     .filter(
       (x) =>
         x.budgetAllowances.find((y) => y.organization.id === selectedOrganization.value) &&
         new Date(x.getLastDateToAssignBeneficiary) >= new Date()
     )
+    .sort((a, b) => {
+      const dateA = a.isFundsAccumulable ? new Date(a.fundsExpirationDate) : new Date(a.endDate);
+      const dateB = b.isFundsAccumulable ? new Date(b.fundsExpirationDate) : new Date(b.endDate);
+      return dateB - dateA;
+    })
     .map((x) => ({
       label: x.name,
       value: x.id,

@@ -7,7 +7,8 @@
     :col-span-class="colSpanClass"
     :errors="errors"
     :disabled="disabled"
-    :has-hidden-label="hasHiddenLabel">
+    :has-hidden-label="hasHiddenLabel"
+    :required="required">
     <select
       :id="id"
       :value="value"

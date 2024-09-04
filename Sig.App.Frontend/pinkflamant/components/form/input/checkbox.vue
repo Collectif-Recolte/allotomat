@@ -8,7 +8,8 @@
     :disabled="disabled"
     :is-filter="isFilter"
     is-checkbox
-    :has-hidden-label="hasHiddenLabel">
+    :has-hidden-label="hasHiddenLabel"
+    :required="required">
     <template #default="{ hasErrorState }">
       <input
         :id="id"
