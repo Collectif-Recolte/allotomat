@@ -1,0 +1,58 @@
+<i18n>
+  {
+    "en": {
+      "market-name": "Name",
+      "market-amount-owed": "Amount owed"
+    },
+    "fr": {
+      "market-name": "Nom",
+      "market-amount-owed": "Montant dû"
+    }
+  }
+  </i18n>
+
+<template>
+  <UiTable :items="props.markets" :cols="cols">
+    <template #default="slotProps">
+      <td>
+        <div class="inline-flex items-center">
+          {{ getMarketName(slotProps.item) }}
+        </div>
+      </td>
+      <td>
+        <div class="inline-flex items-center">
+          {{ getAmountOwed(slotProps.item) }}
+        </div>
+      </td>
+    </template>
+  </UiTable>
+</template>
+
+<script setup>
+import { defineProps, computed } from "vue";
+import { useI18n } from "vue-i18n";
+
+import { getMoneyFormat } from "@/lib/helpers/money";
+
+const { t } = useI18n();
+
+const props = defineProps({
+  markets: { type: Array, required: true }
+});
+
+const cols = computed(() => [
+  { label: t("market-name") },
+  {
+    label: t("market-amount-owed"),
+    isRight: true
+  }
+]);
+
+function getMarketName(item) {
+  return `${item.market.name}`;
+}
+
+function getAmountOwed(item) {
+  return getMoneyFormat(item.amount);
+}
+</script>
