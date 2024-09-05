@@ -5,7 +5,7 @@
       "no-results": "No transactions for the selected period"
     },
     "fr": {
-      "title": "Rapport de reconciliation",
+      "title": "Rapport de réconciliation",
       "no-results": "Aucune transaction pour la période sélectionnée"
     }
   }
