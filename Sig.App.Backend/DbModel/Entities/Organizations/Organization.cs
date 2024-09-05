@@ -15,5 +15,6 @@ namespace Sig.App.Backend.DbModel.Entities.Organizations
 
         public IList<Beneficiary> Beneficiaries { get; set; }
         public IList<BudgetAllowance> BudgetAllowances { get; set; }
+        public IList<OrganizationMarket> Markets { get; set; }
     }
 }

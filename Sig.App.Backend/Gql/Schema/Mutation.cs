@@ -17,7 +17,6 @@ using Sig.App.Backend.Requests.Commands.Mutations.Cards;
 using Sig.App.Backend.Requests.Commands.Mutations.Transactions;
 using Sig.App.Backend.Requests.Commands.Mutations.ProductGroups;
 using Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances;
-using Sig.App.Backend.DbModel.Entities.Cards;
 
 namespace Sig.App.Backend.Gql.Schema
 {
@@ -275,6 +274,17 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         [RequirePermission(ProjectPermission.ManageProject)]
+        [AnnotateErrorCodes(typeof(RemoveMarketFromOrganization))]
+        public static Task<RemoveMarketFromOrganization.Payload> RemoveMarketFromOrganization(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<RemoveMarketFromOrganization.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(ProjectPermission.ManageProject)]
         [AnnotateErrorCodes(typeof(CreateOrganizationInProject))]
         public static Task<CreateOrganizationInProject.Payload> CreateOrganizationInProject(
             this GqlMutation _,
@@ -291,6 +301,17 @@ namespace Sig.App.Backend.Gql.Schema
             this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<AddManagerToOrganization.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(ProjectPermission.ManageProject)]
+        [AnnotateErrorCodes(typeof(AddMarketToOrganization))]
+        public static Task<AddMarketToOrganization.Payload> AddMarketToOrganization(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<AddMarketToOrganization.Input> input
             )
         {
             return mediator.Send(input.Value);

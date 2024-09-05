@@ -332,6 +332,24 @@ export default [
     },
     children: [
       {
+        name: urls.URL_ORGANIZATION_MANAGE_MERCHANTS,
+        path: ":organizationId/manage-merchants",
+        component: () => import("@/views/organization/EditAssociatedMerchants.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_ORGANIZATIONS
+        },
+        children: [
+          {
+            name: urls.URL_REMOVE_MERCHANTS_FROM_ORGANIZATION,
+            path: ":marketId/remove",
+            component: () => import("@/views/organization/RemoveMarketFromOrganization.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_ORGANIZATIONS
+            }
+          }
+        ]
+      },
+      {
         name: urls.URL_ORGANIZATION_ADD,
         path: "add",
         component: () => import("@/views/organization/AddOrganization.vue"),

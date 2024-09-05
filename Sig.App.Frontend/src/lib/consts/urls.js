@@ -50,6 +50,8 @@ export const URL_ORGANIZATION_DELETE = "organization-delete-url";
 export const URL_ORGANIZATION_MANAGE_MANAGERS = "organization-manage-managers-url";
 export const URL_ORGANIZATION_MANAGER_REMOVE = "organization-manage-managers-remove-url";
 export const URL_ORGANIZATION_EDIT = "organization-edit-url";
+export const URL_ORGANIZATION_MANAGE_MERCHANTS = "organization-manage-merchants-url";
+export const URL_REMOVE_MERCHANTS_FROM_ORGANIZATION = "organization-remove-market-url";
 
 export const URL_SUBSCRIPTION_ADMIN = "subscription-list-url";
 export const URL_SUBSCRIPTION_ADD = "subscription-add-url";
