@@ -138,8 +138,13 @@ const { result: resultBeneficiary } = useQuery(
 const beneficiary = useResult(resultBeneficiary, null, (data) => data.beneficiary);
 
 const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
+  console.log(data.beneficiary.beneficiarySubscriptions);
   return data.beneficiary.beneficiarySubscriptions
-    .filter((x) => x.hasMissedPayment && dateUtc(x.subscription.fundsExpirationDate) > Date.now())
+    .filter(
+      (x) =>
+        (x.hasMissedPayment && dateUtc(x.subscription.fundsExpirationDate) > Date.now()) ||
+        x.subscription.fundsExpirationDate === null
+    )
     .map((x) => {
       let label = "";
 
