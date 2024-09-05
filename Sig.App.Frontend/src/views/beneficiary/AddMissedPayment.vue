@@ -138,7 +138,6 @@ const { result: resultBeneficiary } = useQuery(
 const beneficiary = useResult(resultBeneficiary, null, (data) => data.beneficiary);
 
 const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
-  console.log(data.beneficiary.beneficiarySubscriptions);
   return data.beneficiary.beneficiarySubscriptions
     .filter(
       (x) =>
