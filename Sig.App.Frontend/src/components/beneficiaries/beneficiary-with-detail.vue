@@ -131,6 +131,7 @@
     <div class="absolute right-3 top-3">
       <BeneficiaryActions
         :beneficiary="beneficiary"
+        :organization="props.organization"
         :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous"
         :have-subscription-conflict="isBeneficiaryPaymentConflict()" />
     </div>
@@ -190,6 +191,10 @@ const props = defineProps({
   beneficiariesAreAnonymous: {
     type: Boolean,
     default: false
+  },
+  organization: {
+    type: Object,
+    default: null
   }
 });
 

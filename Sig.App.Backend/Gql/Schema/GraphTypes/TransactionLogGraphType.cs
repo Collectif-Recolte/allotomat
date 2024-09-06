@@ -50,6 +50,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public long ProjectId => transactionLog.ProjectId;
         public string ProjectName => transactionLog.ProjectName;
         public bool InitiatedByProject => transactionLog.InitiatedByProject;
+        public bool InitiatedByOrganization => transactionLog.InitiatedByOrganization;
 
         public TransactionLogGraphType(TransactionLog transactionLog)
         {

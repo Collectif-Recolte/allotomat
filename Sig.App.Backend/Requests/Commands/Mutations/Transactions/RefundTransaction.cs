@@ -135,7 +135,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 TransactionInitiatorLastname = currentUser?.Profile.LastName,
                 TransactionInitiatorEmail = currentUser?.Email,
                 TransactionLogProductGroups = new List<TransactionLogProductGroup>(),
-                InitiatedByProject = currentUser?.Type == UserType.ProjectManager
+                InitiatedByProject = currentUser?.Type == UserType.ProjectManager,
+                InitiatedByOrganization = currentUser?.Type == UserType.OrganizationManager
             };
             transactionLogs.Add(baseTransactionLog);
 

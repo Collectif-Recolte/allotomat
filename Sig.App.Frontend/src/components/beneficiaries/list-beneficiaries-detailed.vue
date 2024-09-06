@@ -15,7 +15,8 @@
       v-for="beneficiary in props.beneficiariesPagination.items"
       :key="beneficiary.id"
       :beneficiary="beneficiary"
-      :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous" />
+      :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous"
+      :organization="props.organization" />
     <div
       v-if="!administrationSubscriptionsOffPlatform"
       class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
@@ -70,6 +71,10 @@ const props = defineProps({
   isAllGroupSelected: {
     type: Boolean,
     default: false
+  },
+  organization: {
+    type: Object,
+    required: true
   }
 });
 </script>
