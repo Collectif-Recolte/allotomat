@@ -20,31 +20,33 @@
   </i18n>
 
 <template>
-  <p class="text-p1">
-    {{ t("transaction-in-organization-name") }}
-  </p>
-  <Form v-slot="{ errors: formErrors }" :validation-schema="validationSchema" keep-values @submit="nextStep">
-    <PfForm
-      has-footer
-      :disable-submit="Object.keys(formErrors).length > 0"
-      :submit-label="t('next-step')"
-      :cancel-label="t('cancel')"
-      footer-alt-style
-      can-cancel
-      @cancel="closeModal">
-      <PfFormSection>
-        <Field v-slot="{ field: inputField, errors: fieldErrors }" name="marketId">
-          <PfFormInputSelect
-            id="marketId"
-            v-bind="inputField"
-            :placeholder="t('choose-market')"
-            :label="t('select-market')"
-            :options="markets"
-            :errors="fieldErrors" />
-        </Field>
-      </PfFormSection>
-    </PfForm>
-  </Form>
+  <div v-if="markets != null && markets.length > 0">
+    <p class="text-p1">
+      {{ t("transaction-in-organization-name") }}
+    </p>
+    <Form v-slot="{ errors: formErrors }" :validation-schema="validationSchema" keep-values @submit="nextStep">
+      <PfForm
+        has-footer
+        :disable-submit="Object.keys(formErrors).length > 0"
+        :submit-label="t('next-step')"
+        :cancel-label="t('cancel')"
+        footer-alt-style
+        can-cancel
+        @cancel="closeModal">
+        <PfFormSection>
+          <Field v-slot="{ field: inputField, errors: fieldErrors }" name="marketId">
+            <PfFormInputSelect
+              id="marketId"
+              v-bind="inputField"
+              :placeholder="t('choose-market')"
+              :label="t('select-market')"
+              :options="markets"
+              :errors="fieldErrors" />
+          </Field>
+        </PfFormSection>
+      </PfForm>
+    </Form>
+  </div>
 </template>
 
 <script setup>
@@ -80,6 +82,12 @@ const { result: resultOrganizations } = useQuery(
   `
 );
 const markets = useResult(resultOrganizations, null, (data) => {
+  if (data.organizations[0].markets.length === 1) {
+    emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
+      marketId: data.organizations[0].markets[0].id
+    });
+    return [];
+  }
   return data.organizations[0].markets.map((x) => {
     return {
       label: x.name,

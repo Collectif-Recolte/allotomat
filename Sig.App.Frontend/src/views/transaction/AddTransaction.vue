@@ -1,14 +1,10 @@
 <i18n>
   {
     "en": {
-      "title-new-transaction": "New transaction",
-      "title-new-transaction-organization": "New transaction - {beneficiaryName}",
-      "title-add-transaction": "Transaction"
+      "title-new-transaction": "New transaction"
     },
     "fr": {
-      "title-new-transaction": "Nouvelle transaction",
-      "title-new-transaction-organization": "Nouvelle transaction - {beneficiaryName}",
-      "title-add-transaction": "Transaction"
+      "title-new-transaction": "Nouvelle transaction"
     }
   }
   </i18n>
@@ -16,12 +12,15 @@
 <template>
   <UiDialogModal
     v-slot="{ closeModal }"
-    :title="title"
+    :title="t('title-new-transaction')"
     :has-title="hasTitle"
     :has-footer="false"
     :return-route="{ name: userType === USER_TYPE_ORGANIZATIONMANAGER ? URL_BENEFICIARY_ADMIN : URL_TRANSACTION_ADMIN }">
     <template v-if="activeStep === TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER">
-      <SelectMarket v-if="userType === USER_TYPE_ORGANIZATIONMANAGER" @onUpdateStep="updateStep" @onCloseModal="closeModal" />
+      <SelectMarket
+        v-if="userType === USER_TYPE_ORGANIZATIONMANAGER && beneficiary"
+        @onUpdateStep="updateStep"
+        @onCloseModal="closeModal" />
       <ManuallyEnterCardNumber
         v-else-if="userType === USER_TYPE_PROJECTMANAGER"
         @onUpdateStep="updateStep"
@@ -79,9 +78,6 @@ async function loadBeneficiary() {
         query Beneficiary($id: ID!) {
           beneficiary(id: $id) {
             id
-            firstname
-            lastname
-            id1
             card {
               id
               cardNumber
@@ -108,25 +104,11 @@ const transactionId = ref("");
 const marketId = ref("");
 const beneficiary = ref(null);
 
-const title = computed(() => {
-  if (activeStep.value === TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER) {
-    if (userType.value === USER_TYPE_ORGANIZATIONMANAGER && beneficiary.value !== null) {
-      return t("title-new-transaction-organization", {
-        beneficiaryName: `${beneficiary.value.firstname} ${beneficiary.value.lastname}`
-      });
-    } else {
-      return t("title-new-transaction");
-    }
-  }
-  if (activeStep.value === TRANSACTION_STEPS_ADD) return t("title-add-transaction");
-  return "";
-});
-
 const hasTitle = computed(() => {
   return activeStep.value !== TRANSACTION_STEPS_COMPLETE;
 });
 
-usePageTitle(title);
+usePageTitle(t("title-new-transaction"));
 
 const updateStep = (currentStep, values) => {
   switch (currentStep) {
