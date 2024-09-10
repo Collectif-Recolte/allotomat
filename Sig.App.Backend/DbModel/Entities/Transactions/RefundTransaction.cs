@@ -8,5 +8,6 @@ namespace Sig.App.Backend.DbModel.Entities.Transactions
         public PaymentTransaction InitialTransaction { get; set; }
         public List<RefundTransactionProductGroup> RefundByProductGroups { get; set; }
         public bool InitiatedByProject { get; set; } = false;
+        public bool InitiatedByOrganization { get; set; } = false;
     }
 }

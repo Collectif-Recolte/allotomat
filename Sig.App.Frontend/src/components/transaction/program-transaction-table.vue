@@ -213,7 +213,11 @@ function getOperationDetail(transaction) {
       return t("operation-transaction-off-platform-adding-fund-desc");
     case PAYMENT_TRANSACTION_LOG:
       return t("operation-transaction-payment-desc", {
-        x: transaction.initiatedByProject ? transaction.projectName : transaction.marketName
+        x: transaction.initiatedByProject
+          ? transaction.projectName
+          : transaction.initiatedByOrganization
+          ? transaction.organizationName
+          : transaction.marketName
       });
     case REFUND_BUDGET_ALLOWANCE_FROM_NO_CARD_WHEN_ADDING_FUND_TRANSACTION_LOG:
       return t("operation-transaction-refund-budget-allowance-from-no-card-when-adding-fund-desc");
@@ -223,7 +227,11 @@ function getOperationDetail(transaction) {
       return t("operation-transaction-refund-budget-allowance-from-unassigned-card-desc");
     case REFUND_PAYMENT_TRANSACTION_LOG:
       return t("operation-transaction-refund-payment-desc", {
-        x: transaction.initiatedByProject ? transaction.projectName : transaction.marketName
+        x: transaction.initiatedByProject
+          ? transaction.projectName
+          : transaction.initiatedByOrganization
+          ? transaction.organizationName
+          : transaction.marketName
       });
     case SUBSCRIPTION_ADDING_FUND_TRANSACTION_LOG:
       return t("operation-transaction-subscription-adding-fund-desc");

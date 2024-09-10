@@ -42,6 +42,7 @@ public class TransactionLog : IHaveLongIdentifier
     public long ProjectId { get; set; }
     public string ProjectName { get; set; }
     public bool InitiatedByProject { get; set; }
+    public bool InitiatedByOrganization { get; set; }
 
     public List<TransactionLogProductGroup> TransactionLogProductGroups { get; set; }
 }

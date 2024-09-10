@@ -306,7 +306,9 @@ const {
           discriminator
           marketName
           projectName
+          organizationName
           initiatedByProject
+          initiatedByOrganization
           totalAmount
           transaction {
             id

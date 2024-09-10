@@ -15,6 +15,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public Id Id => transaction.GetIdentifier();
         public decimal Amount => transaction.Amount;
         public bool InitiatedByProject => transaction.InitiatedByProject;
+        public bool InitiatedByOrganization => transaction.InitiatedByOrganization;
 
         public PaymentTransactionGraphType(PaymentTransaction transaction)
         {

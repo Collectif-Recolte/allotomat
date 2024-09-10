@@ -655,6 +655,14 @@ export default [
             meta: {
               claim: GLOBAL_MANAGE_BENEFICIARIES
             }
+          },
+          {
+            name: urls.URL_BENEFICIARY_TRANSACTION_ADD,
+            path: ":beneficiaryId/add-transaction",
+            component: () => import("@/views/transaction/AddTransaction.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_TRANSACTIONS
+            }
           }
         ]
       }

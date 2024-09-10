@@ -140,7 +140,6 @@
               :selected-card-status="cardStatus"
               :selected-payment-conflict-status="conflictPaymentStatus"
               :selected-card-disabled="cardDisabled"
-              à
               :search-filter="searchText"
               :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
               :without-subscription-id="WITHOUT_SUBSCRIPTION"
@@ -181,7 +180,8 @@
             :beneficiaries-pagination="beneficiariesPagination"
             :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
             :filtered-query="filteredQuery"
-            :is-all-group-selected="isAllGroupSelected" />
+            :is-all-group-selected="isAllGroupSelected"
+            :organization="organization" />
           <UiPagination
             v-if="beneficiariesPagination.totalPages > 1"
             v-model:page="page"
@@ -429,6 +429,10 @@ const {
         id
         name
         budgetAllowancesTotal
+        markets {
+          id
+          name
+        }
         project {
           id
           beneficiariesAreAnonymous
@@ -467,7 +471,8 @@ watch(resultOrganizations, (value) => {
     label: x.name,
     value: x.id,
     budgetAllowancesTotal: x.budgetAllowancesTotal,
-    beneficiariesAreAnonymous: x.project.beneficiariesAreAnonymous
+    beneficiariesAreAnonymous: x.project.beneficiariesAreAnonymous,
+    markets: x.markets
   }));
   organizations.value.unshift({ label: t("all-group"), value: ALL_GROUP });
 
@@ -482,6 +487,10 @@ watch(resultOrganizations, (value) => {
 
   administrationSubscriptionsOffPlatform.value = value.organizations[0].project.administrationSubscriptionsOffPlatform;
   productGroups.value = value.organizations[0].project.productGroups.filter((x) => x.name !== PRODUCT_GROUP_LOYALTY);
+});
+
+const organization = computed(() => {
+  return organizations.value?.find((x) => x.value === selectedOrganization.value);
 });
 
 const isAllGroupSelected = computed(() => {

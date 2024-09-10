@@ -1,7 +1,6 @@
 <i18n>
   {
     "en": {
-      "sub-title": "Purchase on behalf of program",
       "select-market": "Merchant",
       "card-number": "Card number",
       "card-number-description": "Card number must be of format \"1234 5678 9012 3456\"",
@@ -13,7 +12,6 @@
       "transaction-in-program-name": "Purchase on behalf of program"
     },
     "fr": {
-      "sub-title": "Achat au nom du programme",
       "select-market": "Marchand",
       "card-number": "N° de carte",
       "card-number-description": "Le numéro de carte doit être de format \"1234 5678 9012 3456\"",
