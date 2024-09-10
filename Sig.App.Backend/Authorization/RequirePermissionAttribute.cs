@@ -137,6 +137,11 @@ namespace Sig.App.Backend.Authorization
             {
                 return hpiami.ProjectId.IdentifierForType<Project>();
             }
+            if (input is HaveOrganizationIdAndMarketId hoiami)
+            {
+                var organization = db.Organizations.Include(x => x.Project).Where(x => x.Id == hoiami.OrganizationId.LongIdentifierForType<Organization>()).FirstOrDefault();
+                return organization.Project.GetIdentifier().IdentifierForType<Project>();
+            }
             if (input is ProjectGraphType pgt)
             {
                 return pgt.Id.IdentifierForType<Project>();
@@ -168,6 +173,10 @@ namespace Sig.App.Backend.Authorization
             {
                 return hpiami.MarketId.IdentifierForType<Market>();
             }
+            if (input is HaveOrganizationIdAndMarketId hoiami)
+            {
+                return hoiami.MarketId.IdentifierForType<Market>();
+            }
             if (input is MarketGraphType mgt)
             {
                 return mgt.Id.IdentifierForType<Market>();
@@ -193,6 +202,10 @@ namespace Sig.App.Backend.Authorization
             if (input is OrganizationGraphType ogt)
             {
                 return ogt.Id.IdentifierForType<Organization>();
+            }
+            if (input is HaveOrganizationIdAndMarketId hoiami)
+            {
+                return hoiami.OrganizationId.IdentifierForType<Organization>();
             }
             if (input is HaveSubscriptionIdAndBeneficiaryId hsiabi)
             {

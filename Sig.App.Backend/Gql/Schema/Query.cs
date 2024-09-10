@@ -197,7 +197,7 @@ namespace Sig.App.Backend.Gql.Schema
             }
         }
 
-        [RequirePermission(GlobalPermission.ManageMarkets, GlobalPermission.ManageSpecificMarket)]
+        [RequirePermission(GlobalPermission.ManageMarkets, GlobalPermission.ManageSpecificMarket, GlobalPermission.ManageOrganizations)]
         [Description("All markets manageable by current user")]
         public static async Task<IEnumerable<MarketGraphType>> Markets(this GqlQuery _, IAppUserContext ctx, [Inject] AppDbContext db, [Inject] PermissionService permissionService)
         {
@@ -209,6 +209,11 @@ namespace Sig.App.Backend.Gql.Schema
             else if (globalPermissions.Contains(GlobalPermission.ManageSpecificMarket))
             {
                 return await ctx.DataLoader.LoadMarketOwnedByUser(ctx.CurrentUserId).GetResultAsync();
+            }
+            else if (globalPermissions.Contains(GlobalPermission.ManageOrganizations))
+            {
+                var project = await ctx.DataLoader.LoadProjectOwnedByUser(ctx.CurrentUserId).GetResultAsync();
+                return await ctx.DataLoader.LoadProjectMarkets(project.First().Id.LongIdentifierForType<Project>()).GetResultAsync();
             }
             else
             {
