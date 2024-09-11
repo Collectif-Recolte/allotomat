@@ -5,6 +5,7 @@
       "organization-delete": "Delete",
       "organization-edit": "Edit",
       "organization-edit-managers": "Edit managers",
+      "organization-edit-associated-merchants": "Edit associated merchants",
       "organization-name": "Name"
     },
     "fr": {
@@ -12,6 +13,7 @@
       "organization-delete": "Supprimer",
       "organization-edit": "Modifier",
       "organization-edit-managers": "Modifier les gestionnaires",
+      "organization-edit-associated-merchants": "Modifier les commerces associés",
       "organization-name": "Nom"
     }
   }
@@ -25,6 +27,12 @@
       </td>
       <td>
         <div class="inline-flex items-center gap-x-2">
+          <PfButtonLink
+            tag="routerLink"
+            btn-style="outline"
+            size="sm"
+            :label="t('organization-edit-associated-merchants')"
+            :to="{ name: URL_ORGANIZATION_MANAGE_MERCHANTS, params: { organizationId: slotProps.item.id } }" />
           <UiButtonGroup :items="getBtnGroup(slotProps.item.id)" tooltip-position="left" />
         </div>
       </td>
@@ -36,7 +44,12 @@
 import { defineProps, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
-import { URL_ORGANIZATION_DELETE, URL_ORGANIZATION_MANAGE_MANAGERS, URL_ORGANIZATION_EDIT } from "@/lib/consts/urls";
+import {
+  URL_ORGANIZATION_DELETE,
+  URL_ORGANIZATION_MANAGE_MANAGERS,
+  URL_ORGANIZATION_EDIT,
+  URL_ORGANIZATION_MANAGE_MERCHANTS
+} from "@/lib/consts/urls";
 
 import ICON_BRIEFCASE from "@/lib/icons/briefcase.json";
 import ICON_TRASH from "@/lib/icons/trash.json";

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Sig.App.Backend.DbModel;
 
@@ -11,9 +12,11 @@ using Sig.App.Backend.DbModel;
 namespace Sig.App.Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240905175250_MarketOrganizationLink")]
+    partial class MarketOrganizationLink
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -797,9 +800,6 @@ namespace Sig.App.Backend.Migrations
                     b.Property<long?>("FundTransferredFromProgramCardId")
                         .HasColumnType("bigint");
 
-                    b.Property<bool>("InitiatedByOrganization")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("InitiatedByProject")
                         .HasColumnType("bit");
 
@@ -1106,9 +1106,6 @@ namespace Sig.App.Backend.Migrations
                 {
                     b.HasBaseType("Sig.App.Backend.DbModel.Entities.Transactions.Transaction");
 
-                    b.Property<bool>("InitiatedByOrganization")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("InitiatedByProject")
                         .HasColumnType("bit");
 
@@ -1119,9 +1116,6 @@ namespace Sig.App.Backend.Migrations
 
                     b.ToTable("Transactions", t =>
                         {
-                            t.Property("InitiatedByOrganization")
-                                .HasColumnName("PaymentTransaction_InitiatedByOrganization");
-
                             t.Property("InitiatedByProject")
                                 .HasColumnName("PaymentTransaction_InitiatedByProject");
                         });
@@ -1135,9 +1129,6 @@ namespace Sig.App.Backend.Migrations
 
                     b.Property<long>("InitialTransactionId")
                         .HasColumnType("bigint");
-
-                    b.Property<bool>("InitiatedByOrganization")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("InitiatedByProject")
                         .HasColumnType("bit");

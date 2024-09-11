@@ -34,6 +34,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return ctx.DataLoader.LoadProject(organization.ProjectId);
         }
 
+        public IDataLoaderResult<IEnumerable<MarketGraphType>> Markets(IAppUserContext ctx)
+        {
+            return ctx.DataLoader.LoadOrganizationMarkets(Id.LongIdentifierForType<Organization>());
+        }
+
         public async Task<PaymentConflictPagination<IBeneficiaryGraphType>> Beneficiaries([Inject] IMediator mediator, int page, int limit,
             [Description("If specified, only beneficiaries without or with a subscription are returned.")] bool? withoutSubscription = null,
             [Description("If specified, only beneficiaries with one of those subscription are returned.")] Id[] subscriptions = null,
