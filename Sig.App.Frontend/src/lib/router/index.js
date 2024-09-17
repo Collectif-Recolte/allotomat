@@ -12,7 +12,8 @@ import {
   USER_TYPE_MERCHANT,
   USER_TYPE_ORGANIZATIONMANAGER,
   USER_TYPE_PROJECTMANAGER,
-  USER_TYPE_PCAADMIN
+  USER_TYPE_PCAADMIN,
+  USER_TYPE_MARKETGROUPMANAGER
 } from "@/lib/consts/enums";
 
 import routes from "./routes";
@@ -76,6 +77,8 @@ router.beforeEach(async (to, from, next) => {
         ? URL_BENEFICIARY_ADMIN
         : userType === USER_TYPE_MERCHANT
         ? URL_TRANSACTION
+        : userType === USER_TYPE_MARKETGROUPMANAGER
+        ? URL_BENEFICIARY_ADMIN
         : URL_ROOT;
 
     return next({

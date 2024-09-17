@@ -483,6 +483,45 @@ namespace Sig.App.Backend.Migrations
                     b.ToTable("Funds");
                 });
 
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroup", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("ProjectId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("MarketGroups");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroupMarket", b =>
+                {
+                    b.Property<long>("MarketId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("MarketGroupId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("MarketId", "MarketGroupId");
+
+                    b.HasIndex("MarketGroupId");
+
+                    b.ToTable("MarketGroupMarkets");
+                });
+
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Markets.Market", b =>
                 {
                     b.Property<long>("Id")
@@ -1369,6 +1408,36 @@ namespace Sig.App.Backend.Migrations
                     b.Navigation("ProductGroup");
                 });
 
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroup", b =>
+                {
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.Projects.Project", "Project")
+                        .WithMany("MarketGroups")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroupMarket", b =>
+                {
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroup", "MarketGroup")
+                        .WithMany("Markets")
+                        .HasForeignKey("MarketGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.Markets.Market", "Market")
+                        .WithMany("MarketGroups")
+                        .HasForeignKey("MarketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Market");
+
+                    b.Navigation("MarketGroup");
+                });
+
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Organizations.Organization", b =>
                 {
                     b.HasOne("Sig.App.Backend.DbModel.Entities.Projects.Project", "Project")
@@ -1715,8 +1784,15 @@ namespace Sig.App.Backend.Migrations
                     b.Navigation("Transactions");
                 });
 
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroup", b =>
+                {
+                    b.Navigation("Markets");
+                });
+
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Markets.Market", b =>
                 {
+                    b.Navigation("MarketGroups");
+
                     b.Navigation("Organizations");
 
                     b.Navigation("Projects");
@@ -1743,6 +1819,8 @@ namespace Sig.App.Backend.Migrations
                     b.Navigation("BeneficiaryTypes");
 
                     b.Navigation("Cards");
+
+                    b.Navigation("MarketGroups");
 
                     b.Navigation("Markets");
 

@@ -2,6 +2,6 @@
 {
     public enum UserType
     {
-        PCAAdmin, ProjectManager, OrganizationManager, Merchant
+        PCAAdmin, ProjectManager, OrganizationManager, Merchant, MarketGroupManager
     }
 }

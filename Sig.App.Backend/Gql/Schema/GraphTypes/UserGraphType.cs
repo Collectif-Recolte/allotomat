@@ -72,6 +72,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
                 case UserType.Merchant:
                     token = await userManager.GenerateUserTokenAsync(user, TokenProviders.EmailInvites, TokenPurposes.MerchantInvite);
                     return $"{config["Mailer:BaseUrl"]}/{UrlHelper.RegistrationMarketManager(user.Email, token)}";
+                case UserType.MarketGroupManager:
+                    token = await userManager.GenerateUserTokenAsync(user, TokenProviders.EmailInvites, TokenPurposes.MarketGroupManagerInvite);
+                    return $"{config["Mailer:BaseUrl"]}/{UrlHelper.RegistrationMarketGroupManager(user.Email, token)}";
             }
 
             return null;

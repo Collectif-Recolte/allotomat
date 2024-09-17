@@ -38,6 +38,9 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<MarketGraphType> LoadMarket(long marketId) =>
             LoadOne<GetMarketsByIds.Query, MarketGraphType, long>(marketId);
 
+        public IDataLoaderResult<MarketGroupGraphType> LoadMarketGroup(long marketGroupId) =>
+            LoadOne<GetMarketGroupsByIds.Query, MarketGroupGraphType, long>(marketGroupId);
+
         public IDataLoaderResult<SubscriptionGraphType> LoadSubscriptionById(long subscriptionId) =>
             LoadOne<GetSubscriptionByIds.Query, SubscriptionGraphType, long>(subscriptionId);
 
@@ -110,6 +113,9 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<IEnumerable<MarketGraphType>> LoadProjectMarkets(long projectId) =>
             LoadCollection<GetMarketByProjectId.Query, MarketGraphType, long>(projectId);
 
+        public IDataLoaderResult<IEnumerable<MarketGraphType>> LoadGroupMarketMarkets(long marketGroupId) =>
+            LoadCollection<GetMarketByGroupMarketId.Query, MarketGraphType, long>(marketGroupId);
+
         public IDataLoaderResult<IEnumerable<MarketGraphType>> LoadOrganizationMarkets(long organizationId) =>
             LoadCollection<GetMarketByOrganizationId.Query, MarketGraphType, long>(organizationId);
 
@@ -136,6 +142,9 @@ namespace Sig.App.Backend.Gql
 
         public IDataLoaderResult<IEnumerable<MarketGraphType>> LoadMarketOwnedByUser(string userId) =>
             LoadCollection<GetMarketOwnedByUserId.Query, MarketGraphType, string>(userId);
+
+        public IDataLoaderResult<IEnumerable<MarketGroupGraphType>> LoadMarketGroupOwnedByUser(string userId) =>
+            LoadCollection<GetMarketGroupOwnedByUserId.Query, MarketGroupGraphType, string>(userId);
 
         public IDataLoaderResult<IEnumerable<Transaction>> LoadTransactionByCardId(long cardId) =>
             LoadCollection<GetTransactionsByCardId.Query, Transaction, long>(cardId);

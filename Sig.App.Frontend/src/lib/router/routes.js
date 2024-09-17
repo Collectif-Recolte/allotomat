@@ -15,7 +15,8 @@ import {
   GLOBAL_CREATE_TRANSACTION,
   GLOBAL_MANAGE_TRANSACTIONS,
   GLOBAL_MANAGE_PRODUCT_GROUP,
-  GLOBAL_REFUND_TRANSACTION
+  GLOBAL_REFUND_TRANSACTION,
+  GLOBAL_MANAGE_MARKET_GROUPS
 } from "@/lib/consts/permissions";
 
 import { useAuthStore } from "@/lib/store/auth";
@@ -94,6 +95,16 @@ export default [
     name: urls.URL_ACCOUNT_ORGANIZATION_MANAGER_CONFIRM,
     path: "/registration/organization-manager",
     component: () => import("@/views/account/ConfirmOrganizationManager.vue"),
+    meta: {
+      fullscreen,
+      anonymous,
+      notConnected
+    }
+  },
+  {
+    name: urls.URL_ACCOUNT_MARKET_GROUP_MANAGER_CONFIRM,
+    path: "/registration/market-group-manager",
+    component: () => import("@/views/account/ConfirmMarketGroupManager.vue"),
     meta: {
       fullscreen,
       anonymous,
@@ -322,6 +333,56 @@ export default [
     meta: {
       claim: GLOBAL_MANAGE_CARDS
     }
+  },
+  {
+    name: urls.URL_MARKET_GROUPS_OVERVIEW,
+    path: "/market-groups-overview",
+    component: () => import("@/views/market-groups/ListMarketGroups.vue"),
+    meta: {
+      claim: GLOBAL_MANAGE_MARKET_GROUPS
+    },
+    children: [
+      {
+        name: urls.URL_MARKET_GROUP_ADD,
+        path: "add",
+        component: () => import("@/views/market-groups/AddMarketGroup.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_MARKET_GROUPS
+        }
+      },
+      {
+        name: urls.URL_MARKET_GROUP_EDIT,
+        path: ":marketGroupId/edit",
+        component: () => import("@/views/market-groups/EditMarketGroup.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_MARKET_GROUPS
+        }
+      },
+      {
+        name: urls.URL_MARKET_GROUP_DELETE,
+        path: ":marketGroupId/delete",
+        component: () => import("@/views/market-groups/DeleteMarketGroup.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_MARKET_GROUPS
+        }
+      },
+      {
+        name: urls.URL_MARKET_GROUP_ARCHIVE,
+        path: ":marketGroupId/archive",
+        component: () => import("@/views/market-groups/ArchiveMarketGroup.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_MARKET_GROUPS
+        }
+      },
+      {
+        name: urls.URL_MARKET_GROUP_MANAGE_MANAGERS,
+        path: ":marketGroupId/manage-managers",
+        component: () => import("@/views/market-groups/EditManagers.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_MARKET_GROUPS
+        }
+      }
+    ]
   },
   {
     name: urls.URL_ORGANIZATION_ADMIN,

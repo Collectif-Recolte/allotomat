@@ -6,5 +6,6 @@
         public const string ProjectManagerOf = "Sig.App:ProjectManagerOf";
         public const string MarketManagerOf = "Sig.App:MarketManagerOf";
         public const string OrganizationManagerOf = "Sig.App.OrganizationManagerOf";
+        public const string MarketGroupManagerOf = "Sig.App.MarketGroupManagerOf";
     }
 }

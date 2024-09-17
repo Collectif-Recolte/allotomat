@@ -27,6 +27,11 @@
             return $"registration/merchant?email={System.Net.WebUtility.UrlEncode(to)}&token={System.Net.WebUtility.UrlEncode(token)}";
         }
 
+        public static string RegistrationMarketGroupManager(string to, string token)
+        {
+            return $"registration/market-group-manager?email={System.Net.WebUtility.UrlEncode(to)}&token={System.Net.WebUtility.UrlEncode(token)}";
+        }   
+
         public static string RegistrationOrganizationManager(string to, string token)
         {
             return $"registration/organization-manager?email={System.Net.WebUtility.UrlEncode(to)}&token={System.Net.WebUtility.UrlEncode(token)}";
