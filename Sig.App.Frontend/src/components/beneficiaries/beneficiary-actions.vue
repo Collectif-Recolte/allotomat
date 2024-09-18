@@ -157,6 +157,18 @@ function updateItems() {
       },
       {
         isExtra: true,
+        icon: ICON_TRANSACTION,
+        label: t("beneficiary-create-transaction"),
+        route: { name: URL_BENEFICIARY_TRANSACTION_ADD, params: { beneficiaryId: props.beneficiary.id } },
+        disabled: !haveCard() || !haveMarketsInOrganization() || isCardDisabled(),
+        reason: !haveCard()
+          ? t("beneficiary-create-transaction-no-card")
+          : !haveMarketsInOrganization()
+          ? t("beneficiary-create-transaction-no-market")
+          : t("beneficiary-create-transaction-card-disabled")
+      },
+      {
+        isExtra: true,
         icon: ICON_ADD_CASH,
         label: t("beneficiary-add-funds"),
         route: { name: URL_BENEFICIARY_MANUALLY_ADD_FUND, params: { beneficiaryId: props.beneficiary.id } },
