@@ -6,7 +6,8 @@
     "user-type-admin": "Administrator",
     "user-type-projectmanager": "Program manager",
     "user-type-organizationmanager": "Group manager",
-    "user-type-merchant": "Merchant"
+    "user-type-merchant": "Merchant",
+    "user-type-marketmanager": "Market group manager"
 	},
 	"fr": {
 		"user-type": "Type d'utilisateur",
@@ -14,7 +15,8 @@
     "user-type-admin": "Administrateur",
     "user-type-projectmanager": "Gestionnaire de projet",
     "user-type-organizationmanager": "Gestionnaire de groupe",
-    "user-type-merchant": "Marchand"
+    "user-type-merchant": "Marchand",
+    "user-type-marketmanager": "Gestionnaire de groupe de commerce"
 	}
 }
 </i18n>
@@ -49,7 +51,8 @@ import {
   USER_TYPE_MERCHANT,
   USER_TYPE_ORGANIZATIONMANAGER,
   USER_TYPE_PROJECTMANAGER,
-  USER_TYPE_PCAADMIN
+  USER_TYPE_PCAADMIN,
+  USER_TYPE_MARKETGROUPMANAGER
 } from "@/lib/consts/enums";
 
 const { t } = useI18n();
@@ -82,7 +85,8 @@ const availableUserTypes = ref([
   { value: USER_TYPE_PCAADMIN, label: t("user-type-admin") },
   { value: USER_TYPE_PROJECTMANAGER, label: t("user-type-projectmanager") },
   { value: USER_TYPE_ORGANIZATIONMANAGER, label: t("user-type-organizationmanager") },
-  { value: USER_TYPE_MERCHANT, label: t("user-type-merchant") }
+  { value: USER_TYPE_MERCHANT, label: t("user-type-merchant") },
+  { value: USER_TYPE_MARKETGROUPMANAGER, label: t("user-type-marketmanager") }
 ]);
 
 function onUserTypesChecked(input) {

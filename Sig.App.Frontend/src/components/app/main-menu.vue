@@ -5,6 +5,7 @@
     "manage-beneficiaries": "Participants",
     "manage-cards": "Cards",
     "manage-markets": "Markets",
+    "manage-market-groups": "Market Groups",
     "manage-organizations": "Groups",
     "manage-programs": "Programs",
     "manage-subscriptions": "Subscriptions",
@@ -18,6 +19,7 @@
     "manage-beneficiaries": "Participant-e-s",
     "manage-cards": "Cartes",
     "manage-markets": "Commerces",
+    "manage-market-groups": "Groupes de commerces",
     "manage-organizations": "Groupes",
     "manage-programs": "Programmes",
     "manage-subscriptions": "Abonnements",
@@ -42,7 +44,7 @@
       :label="t('manage-markets')"
       :icon="OFFICE_BUILDING" />
     <MenuItem
-      v-if="manageBeneficiaries"
+      v-if="manageBeneficiaries && isProjectManager"
       :router-link="{ name: $consts.urls.URL_PROJECT_ADMIN_DASHBOARD }"
       :label="t('dashboard')"
       :icon="DASHBOARD" />
@@ -88,6 +90,11 @@
       :label="t('manage-markets')"
       :icon="OFFICE_BUILDING" />
     <MenuItem
+      v-if="manageMarketGroups"
+      :router-link="{ name: $consts.urls.URL_MARKET_GROUPS_OVERVIEW }"
+      :label="t('manage-market-groups')"
+      :icon="OFFICE_BUILDING" />
+    <MenuItem
       v-if="manageTransactions"
       :router-link="{ name: $consts.urls.URL_TRANSACTION_ADMIN }"
       :label="t('manage-transactions')"
@@ -113,7 +120,8 @@ import {
   GLOBAL_MANAGE_SUBSCRIPTIONS,
   GLOBAL_MANAGE_CARDS,
   GLOBAL_MANAGE_TRANSACTIONS,
-  GLOBAL_CREATE_TRANSACTION
+  GLOBAL_CREATE_TRANSACTION,
+  GLOBAL_MANAGE_MARKET_GROUPS
 } from "@/lib/consts/permissions";
 
 import { USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
@@ -167,6 +175,10 @@ const manageTransactions = computed(() => {
 
 const canCreateTransaction = computed(() => {
   return getGlobalPermissions.value.includes(GLOBAL_CREATE_TRANSACTION);
+});
+
+const manageMarketGroups = computed(() => {
+  return getGlobalPermissions.value.includes(GLOBAL_MANAGE_MARKET_GROUPS);
 });
 
 const { t } = useI18n();

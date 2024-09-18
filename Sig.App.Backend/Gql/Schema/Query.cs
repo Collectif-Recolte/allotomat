@@ -40,6 +40,7 @@ using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Requests.Queries.Beneficiaries;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Utilities.Sorting;
+using Sig.App.Backend.DbModel.Entities.MarketGroups;
 
 namespace Sig.App.Backend.Gql.Schema
 {
@@ -138,6 +139,8 @@ namespace Sig.App.Backend.Gql.Schema
                         return (TokenProviders.EmailInvites, TokenPurposes.MerchantInvite);
                     case TokenType.OrganizationManagerInvitation:
                         return (TokenProviders.EmailInvites, TokenPurposes.OrganizationManagerInvite);
+                    case TokenType.MarketGroupManagerInvitation:
+                        return (TokenProviders.EmailInvites, TokenPurposes.MarketGroupManagerInvite);
                     default: throw new ArgumentOutOfRangeException(nameof(type));
                 }
             }
@@ -221,9 +224,29 @@ namespace Sig.App.Backend.Gql.Schema
             }
         }
 
+        [RequirePermission(GlobalPermission.ManageMarketGroups)]
+        [Description("All market groups manageable by current user")]
+        public static async Task<IEnumerable<MarketGroupGraphType>> MarketGroups(this GqlQuery _, IAppUserContext ctx, [Inject] AppDbContext db, [Inject] PermissionService permissionService)
+        {
+            var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
+            if (globalPermissions.Contains(GlobalPermission.ManageMarketGroups))
+            {
+                return await ctx.DataLoader.LoadMarketGroupOwnedByUser(ctx.CurrentUserId).GetResultAsync();
+            }
+            else
+            {
+                return new MarketGroupGraphType[0];
+            }
+        }
+
         public static IDataLoaderResult<MarketGraphType> Market(this GqlQuery _, IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadMarket(id.LongIdentifierForType<Market>());
+        }
+
+        public static IDataLoaderResult<MarketGroupGraphType> MarketGroup(this GqlQuery _, IAppUserContext ctx, Id id)
+        {
+            return ctx.DataLoader.LoadMarketGroup(id.LongIdentifierForType<MarketGroup>());
         }
 
         [RequirePermission(BeneficiaryPermission.ManageBeneficiary)]

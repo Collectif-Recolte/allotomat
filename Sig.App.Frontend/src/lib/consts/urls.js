@@ -11,6 +11,7 @@ export const URL_ACCOUNT_ADMIN_CONFIRM = "confirm-admin-url";
 export const URL_ACCOUNT_PROJECT_MANAGER_CONFIRM = "confirm-project-manager-url";
 export const URL_ACCOUNT_MERCHANT_CONFIRM = "confirm-merchant-url";
 export const URL_ACCOUNT_ORGANIZATION_MANAGER_CONFIRM = "confirm-organization-manager-url";
+export const URL_ACCOUNT_MARKET_GROUP_MANAGER_CONFIRM = "confirm-market-group-manager-url";
 
 export const URL_PROFILE_EDIT = "edit-profile-url";
 
@@ -43,6 +44,13 @@ export const URL_MARKET_MANAGE_MANAGERS = "market-manage-managers-url";
 export const URL_MARKET_EDIT = "market-edit-url";
 export const URL_MARKET_ARCHIVE = "market-archive-url";
 export const URL_MARKET_OVERVIEW = "market-overview-url";
+
+export const URL_MARKET_GROUPS_OVERVIEW = "market-groups-overview-url";
+export const URL_MARKET_GROUP_ADD = "market-group-add-url";
+export const URL_MARKET_GROUP_EDIT = "market-group-edit-url";
+export const URL_MARKET_GROUP_DELETE = "market-group-delete-url";
+export const URL_MARKET_GROUP_ARCHIVE = "market-group-archive-url";
+export const URL_MARKET_GROUP_MANAGE_MANAGERS = "market-group-manage-managers-url";
 
 export const URL_ORGANIZATION_ADMIN = "organization-list-url";
 export const URL_ORGANIZATION_ADD = "organization-add-url";

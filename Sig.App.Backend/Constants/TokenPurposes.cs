@@ -7,5 +7,6 @@
         public const string ProjectManagerInvite = "ProjectManagerInvite";
         public const string MerchantInvite = "MerchantInvite";
         public const string OrganizationManagerInvite = "OrganizationManagerInvite";
+        public const string MarketGroupManagerInvite = "MarketGroupManagerInvite";
     }
 }

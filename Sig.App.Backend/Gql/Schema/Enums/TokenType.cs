@@ -7,6 +7,7 @@
         AdminInvitation,
         ProjectManagerInvitation,
         MerchantInvitation,
-        OrganizationManagerInvitation
+        OrganizationManagerInvitation,
+        MarketGroupManagerInvitation
     }
 }
