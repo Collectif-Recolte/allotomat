@@ -59,7 +59,7 @@
     "beneficiary-card-last-usage": "Dernier usage : {date}",
     "subscriptions-title": "Abonnements du participant-e",
     "amount-received-each-payment": "→ Montant(s) reçu(s) par cette carte à chaque versement : <b>{amountByPayment}</b>",
-    "remaining-payment-on-card": "→ <b>{remainingPayment}</b> versements restants sur cette carte",
+    "remaining-payment-on-card": "→ <b>{remainingPayment}</b> versement(s) restant(s) sur cette carte",
     "payment-dates": "→ Dates des versements : <b>Versements le {paymentMoment} du mois entre le {startDate} et le {endDate}</b>",
     "payment-moment-first-day-of-the-month": "1er",
     "payment-moment-fifteenth-day-of-the-month": "15",
