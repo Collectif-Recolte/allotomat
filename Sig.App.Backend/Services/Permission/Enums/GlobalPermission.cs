@@ -21,5 +21,6 @@
         ManageProductGroup,
         RefundTransaction,
         ManageMarketGroups,
+        ManageSpecificMarketGroup
     }
 }

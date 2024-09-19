@@ -5,6 +5,7 @@
           "market-group-archive": "Archive",
           "market-group-delete": "Delete",
           "market-group-edit-managers": "Edit managers",
+          "market-group-edit-associated-merchants": "Edit associated merchants",
           "market-group-name": "Name",
           "options": "Options",
       },
@@ -13,6 +14,7 @@
           "market-group-archive": "Archiver",
           "market-group-delete": "Supprimer",
           "market-group-edit-managers": "Modifier les gestionnaires",
+          "market-group-edit-associated-merchants": "Modifier les commerces associés",
           "market-group-name": "Nom",
           "options": "Options",
       }
@@ -26,7 +28,15 @@
         {{ getMarketGroupName(slotProps.item) }}
       </td>
       <td>
-        <UiButtonGroup :items="getBtnGroup(slotProps.item)" tooltip-position="left" />
+        <div class="inline-flex items-center gap-x-2">
+          <PfButtonLink
+            tag="routerLink"
+            btn-style="outline"
+            size="sm"
+            :label="t('market-group-edit-associated-merchants')"
+            :to="{ name: URL_MARKET_GROUP_MANAGE_MERCHANTS, params: { marketGroupId: slotProps.item.id } }" />
+          <UiButtonGroup :items="getBtnGroup(slotProps.item)" tooltip-position="left" />
+        </div>
       </td>
     </template>
   </UiTable>
@@ -41,7 +51,7 @@ import ICON_TRASH from "@/lib/icons/trash.json";
 import ICON_PENCIL from "@/lib/icons/pencil.json";
 import ICON_FOLDER from "@/lib/icons/folder.json";
 
-import { URL_MARKET_GROUP_MANAGE_MANAGERS, URL_MARKET_GROUP_EDIT } from "@/lib/consts/urls";
+import { URL_MARKET_GROUP_MANAGE_MANAGERS, URL_MARKET_GROUP_EDIT, URL_MARKET_GROUP_MANAGE_MERCHANTS } from "@/lib/consts/urls";
 
 const { t } = useI18n();
 

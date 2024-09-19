@@ -41,6 +41,13 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
 
                     return results.ToLookup(x => manager.Id, x => new MarketGroupGraphType(x));
                 }
+                case UserType.MarketGroupManager:
+                {
+                    var existingMarketGroupClaims = existingClaims.Where(x => x.Type == AppClaimTypes.MarketGroupManagerOf).Select(x => x.Value);
+                    var results = await db.MarketGroups.Where(x => existingMarketGroupClaims.Contains(x.Id.ToString())).ToListAsync();
+
+                    return results.ToLookup(x => manager.Id, x => new MarketGroupGraphType(x));
+                }
             }
 
             return new MarketGroupGraphType[0].ToLookup(x => manager.Id, x => x);

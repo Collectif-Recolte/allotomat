@@ -381,6 +381,24 @@ export default [
         meta: {
           claim: GLOBAL_MANAGE_MARKET_GROUPS
         }
+      },
+      {
+        name: urls.URL_MARKET_GROUP_MANAGE_MERCHANTS,
+        path: ":marketGroupId/manage-merchants",
+        component: () => import("@/views/market-groups/EditAssociatedMerchants.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_MARKET_GROUPS
+        },
+        children: [
+          {
+            name: urls.URL_REMOVE_MERCHANTS_FROM_MARKET_GROUP,
+            path: ":marketId/remove",
+            component: () => import("@/views/market-groups/RemoveMarketFromMarketGroup.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_MARKET_GROUPS
+            }
+          }
+        ]
       }
     ]
   },

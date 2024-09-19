@@ -22,9 +22,18 @@
 <template>
   <div v-if="showSecondaryMenu" class="shrink-0 flex flex-col items-start border-t border-primary-300 dark:border-grey-900 py-4">
     <nav class="px-2 space-y-0.5 w-full" aria-labelledby="secondaryMenuTitle">
-      <span v-if="projects" id="secondaryMenuTitle" class="text-p4 uppercase font-semibold inline-block px-2 mb-1">{{
-        t("menu-title", { name: projects[0].name })
-      }}</span>
+      <span
+        v-if="projects && projects.length > 0"
+        id="secondaryMenuTitle"
+        class="text-p4 uppercase font-semibold inline-block px-2 mb-1"
+        >{{ t("menu-title", { name: projects[0].name }) }}</span
+      >
+      <span
+        v-if="marketGroups && marketGroups.length > 0"
+        id="secondaryMenuTitle"
+        class="text-p4 uppercase font-semibold inline-block px-2 mb-1"
+        >{{ t("menu-title", { name: marketGroups[0].name }) }}</span
+      >
       <SecondaryMenuItem
         v-if="manageProgram"
         :router-link="{ name: $consts.urls.URL_PROJECT_SETTINGS }"
@@ -38,11 +47,11 @@
         :router-link="{ name: $consts.urls.URL_PROJECT_MANAGER_ADMIN }"
         :label="t('manage-project-managers')" />
       <SecondaryMenuItem
-        v-if="manageProjectManagers"
+        v-if="manageProjectManagers || manageSpecificMarketGroup"
         :router-link="{ name: $consts.urls.URL_RECONCILIATION_REPORT }"
         :label="t('reconciliation-report')" />
       <button
-        v-if="manageBeneficiaries"
+        v-if="manageProjectManagers && manageBeneficiaries"
         class="secondary-menu-item secondary-menu-item--is-inactive"
         style="width: 285px"
         @click="onExportReport">
@@ -70,7 +79,8 @@ import {
   GLOBAL_MANAGE_SPECIFIC_PROJECT,
   GLOBAL_MANAGE_CATEGORIES,
   GLOBAL_MANAGE_PRODUCT_GROUP,
-  GLOBAL_MANAGE_BENEFICIARIES
+  GLOBAL_MANAGE_BENEFICIARIES,
+  GLOBAL_MANAGE_SPECIFIC_MARKET_GROUP
 } from "@/lib/consts/permissions";
 import { LANG_EN } from "@/lib/consts/langs";
 import { LANGUAGE_FILTER_EN, LANGUAGE_FILTER_FR } from "@/lib/consts/enums";
@@ -84,6 +94,10 @@ const { getGlobalPermissions } = storeToRefs(useAuthStore());
 
 const manageSpecificProject = computed(() => {
   return getGlobalPermissions.value.includes(GLOBAL_MANAGE_SPECIFIC_PROJECT);
+});
+
+const manageSpecificMarketGroup = computed(() => {
+  return getGlobalPermissions.value.includes(GLOBAL_MANAGE_SPECIFIC_MARKET_GROUP);
 });
 
 const manageProjectManagers = computed(() => {
@@ -110,11 +124,12 @@ const manageBeneficiaries = computed(() => {
 });
 
 const showSecondaryMenu = computed(() => {
-  const showLink = manageProjectManagers.value || manageCards.value || manageOrganizationManagers.value;
-  return manageSpecificProject.value && showLink;
+  const showLink =
+    manageProjectManagers.value || manageCards.value || manageOrganizationManagers.value || manageSpecificMarketGroup.value;
+  return (manageSpecificProject.value || manageSpecificMarketGroup.value) && showLink;
 });
 
-const { result } = useQuery(
+const { result: resultProjects } = useQuery(
   gql`
     query SecondaryMenuProjects {
       projects {
@@ -127,7 +142,21 @@ const { result } = useQuery(
   {},
   { fetchPolicy: "cache-first" }
 );
-const projects = useResult(result);
+const projects = useResult(resultProjects);
+
+const { result: resultMarketGroups } = useQuery(
+  gql`
+    query SecondaryMenuMarketGroups {
+      marketGroups {
+        id
+        name
+      }
+    }
+  `,
+  {},
+  { fetchPolicy: "cache-first" }
+);
+const marketGroups = useResult(resultMarketGroups);
 
 async function onExportReport() {
   let result = null;

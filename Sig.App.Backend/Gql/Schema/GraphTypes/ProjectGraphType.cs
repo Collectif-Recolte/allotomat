@@ -182,7 +182,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public async Task<MarketAmountOwedPagination<MarketAmountOwedGraphType>> MarketsAmountOwed([Inject] IMediator mediator, int page, int limit, DateTime startDate, DateTime endDate)
         {
-            var results = await mediator.Send(new SearchMarketAmountOweds.Query
+            var results = await mediator.Send(new SearchProjectMarketAmountOweds.Query
             {
                 ProjectId = project.Id,
                 Page = new Page(page, limit),

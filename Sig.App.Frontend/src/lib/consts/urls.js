@@ -51,6 +51,8 @@ export const URL_MARKET_GROUP_EDIT = "market-group-edit-url";
 export const URL_MARKET_GROUP_DELETE = "market-group-delete-url";
 export const URL_MARKET_GROUP_ARCHIVE = "market-group-archive-url";
 export const URL_MARKET_GROUP_MANAGE_MANAGERS = "market-group-manage-managers-url";
+export const URL_MARKET_GROUP_MANAGE_MERCHANTS = "market-group-manage-merchants-url";
+export const URL_REMOVE_MERCHANTS_FROM_MARKET_GROUP = "market-group-remove-market-url";
 
 export const URL_ORGANIZATION_ADMIN = "organization-list-url";
 export const URL_ORGANIZATION_ADD = "organization-add-url";

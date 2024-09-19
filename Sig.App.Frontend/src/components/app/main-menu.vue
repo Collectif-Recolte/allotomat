@@ -59,7 +59,7 @@
       :label="t('manage-subscriptions')"
       :icon="IDENTIFICATION" />
     <MenuItem
-      v-if="manageBeneficiaries"
+      v-if="manageBeneficiaries && isProjectManager"
       :router-link="{ name: $consts.urls.URL_BENEFICIARY_MANAGE }"
       :label="t('manage-beneficiaries')"
       :icon="USER_GROUP" />
@@ -95,7 +95,7 @@
       :label="t('manage-market-groups')"
       :icon="OFFICE_BUILDING" />
     <MenuItem
-      v-if="manageTransactions"
+      v-if="manageTransactions && !isMarketGroupManager"
       :router-link="{ name: $consts.urls.URL_TRANSACTION_ADMIN }"
       :label="t('manage-transactions')"
       :icon="CLOCK" />
@@ -124,7 +124,7 @@ import {
   GLOBAL_MANAGE_MARKET_GROUPS
 } from "@/lib/consts/permissions";
 
-import { USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
+import { USER_TYPE_PROJECTMANAGER, USER_TYPE_MARKETGROUPMANAGER } from "@/lib/consts/enums";
 
 import BRIEFCASE from "@/lib/icons/briefcase.json";
 import CREDIT_CARD from "@/lib/icons/credit-card.json";
@@ -167,6 +167,10 @@ const manageCards = computed(() => {
 
 const isProjectManager = computed(() => {
   return userType.value === USER_TYPE_PROJECTMANAGER;
+});
+
+const isMarketGroupManager = computed(() => {
+  return userType.value === USER_TYPE_MARKETGROUPMANAGER;
 });
 
 const manageTransactions = computed(() => {

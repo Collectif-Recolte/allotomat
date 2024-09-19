@@ -224,12 +224,16 @@ namespace Sig.App.Backend.Gql.Schema
             }
         }
 
-        [RequirePermission(GlobalPermission.ManageMarketGroups)]
+        [RequirePermission(GlobalPermission.ManageMarketGroups, GlobalPermission.ManageSpecificMarketGroup)]
         [Description("All market groups manageable by current user")]
         public static async Task<IEnumerable<MarketGroupGraphType>> MarketGroups(this GqlQuery _, IAppUserContext ctx, [Inject] AppDbContext db, [Inject] PermissionService permissionService)
         {
             var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
-            if (globalPermissions.Contains(GlobalPermission.ManageMarketGroups))
+            if (globalPermissions.Contains(GlobalPermission.ManageMarketGroups) || globalPermissions.Contains(GlobalPermission.ManageSpecificMarketGroup))
+            {
+                return await ctx.DataLoader.LoadMarketGroupOwnedByUser(ctx.CurrentUserId).GetResultAsync();
+            }
+            else if (globalPermissions.Contains(GlobalPermission.ManageSpecificMarketGroup))
             {
                 return await ctx.DataLoader.LoadMarketGroupOwnedByUser(ctx.CurrentUserId).GetResultAsync();
             }

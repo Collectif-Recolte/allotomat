@@ -6,6 +6,7 @@ import {
   URL_PROJECT_ADMIN_DASHBOARD,
   URL_BENEFICIARY_ADMIN,
   URL_TRANSACTION,
+  URL_RECONCILIATION_REPORT,
   URL_ROOT
 } from "@/lib/consts/urls";
 import {
@@ -78,7 +79,7 @@ router.beforeEach(async (to, from, next) => {
         : userType === USER_TYPE_MERCHANT
         ? URL_TRANSACTION
         : userType === USER_TYPE_MARKETGROUPMANAGER
-        ? URL_BENEFICIARY_ADMIN
+        ? URL_RECONCILIATION_REPORT
         : URL_ROOT;
 
     return next({

@@ -13,7 +13,7 @@
 
 <template>
   <RouterView v-slot="{ Component }">
-    <AppShell :loading="loading" class="markets-list-vue">
+    <AppShell :loading="loadingProjects || loadingMarketGroups" class="markets-list-vue">
       <template #title>
         <Title :title="t('title')">
           <template #subpagesCta>
@@ -28,17 +28,17 @@
           </template>
         </Title>
       </template>
-      <div v-if="project">
+      <div v-if="marketsAmountOwed">
         <div class="flex flex-col relative mb-6">
-          <MarketAmountOwedTable v-if="project.marketsAmountOwed.totalCount > 0" :markets="project.marketsAmountOwed.items" />
+          <MarketAmountOwedTable v-if="marketsAmountOwed.totalCount > 0" :markets="marketsAmountOwed.items" />
           <UiEmptyPage v-else>
             <UiCta :img-src="require('@/assets/img/swan.jpg')" :description="t('no-results')"> </UiCta>
           </UiEmptyPage>
           <UiPagination
-            v-if="project.marketsAmountOwed.totalPages > 1"
+            v-if="marketsAmountOwed.totalPages > 1"
             v-model:page="page"
             class="mb-6"
-            :total-pages="project.marketsAmountOwed.totalPages" />
+            :total-pages="marketsAmountOwed.totalPages" />
         </div>
       </div>
       <Component :is="Component" />
@@ -52,13 +52,18 @@ import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult } from "@vue/apollo-composable";
 import { useRoute } from "vue-router";
+import { storeToRefs } from "pinia";
 
 import Title from "@/components/app/title";
 import ReportFilters from "@/components/report/report-filters";
 import MarketAmountOwedTable from "@/components/report/market-amount-owed-table";
 
+import { useAuthStore } from "@/lib/store/auth";
 import { usePageTitle } from "@/lib/helpers/page-title";
 
+import { USER_TYPE_PROJECTMANAGER, USER_TYPE_MARKETGROUPMANAGER } from "@/lib/consts/enums";
+
+const { userType } = storeToRefs(useAuthStore());
 const route = useRoute();
 
 let previousMonth = new Date();
@@ -87,7 +92,15 @@ const dateToEndOfDay = computed(
   () => new Date(dateTo.value.getFullYear(), dateTo.value.getMonth(), dateTo.value.getDate(), 23, 59, 59, 999)
 );
 
-const { result, loading } = useQuery(
+function marketsAmountOwedVariables() {
+  return {
+    page: page.value,
+    dateFrom: dateFromStartOfDay.value,
+    dateTo: dateToEndOfDay.value
+  };
+}
+
+const { result: resultProjects, loading: loadingProjects } = useQuery(
   gql`
     query Projects($page: Int!, $dateFrom: DateTime!, $dateTo: DateTime!) {
       projects {
@@ -107,19 +120,48 @@ const { result, loading } = useQuery(
       }
     }
   `,
-  marketsAmountOwedVariables
+  marketsAmountOwedVariables,
+  () => ({
+    enabled: userType.value === USER_TYPE_PROJECTMANAGER
+  })
 );
 
-function marketsAmountOwedVariables() {
-  return {
-    page: page.value,
-    dateFrom: dateFromStartOfDay.value,
-    dateTo: dateToEndOfDay.value
-  };
-}
-
-const project = useResult(result, null, (data) => {
+const project = useResult(resultProjects, null, (data) => {
   return data.projects[0];
+});
+
+const { result: resultMarketGroups, loading: loadingMarketGroups } = useQuery(
+  gql`
+    query MarketGroups($page: Int!, $dateFrom: DateTime!, $dateTo: DateTime!) {
+      marketGroups {
+        id
+        name
+        marketsAmountOwed(page: $page, limit: 30, startDate: $dateFrom, endDate: $dateTo) {
+          totalCount
+          totalPages
+          items {
+            market {
+              id
+              name
+            }
+            amount
+          }
+        }
+      }
+    }
+  `,
+  marketsAmountOwedVariables,
+  () => ({
+    enabled: userType.value === USER_TYPE_MARKETGROUPMANAGER
+  })
+);
+
+const marketGroup = useResult(resultMarketGroups, null, (data) => {
+  return data.marketGroups[0];
+});
+
+const marketsAmountOwed = computed(() => {
+  return project.value ? project.value.marketsAmountOwed : marketGroup.value ? marketGroup.value.marketsAmountOwed : null;
 });
 
 function onDateFromUpdated(value) {

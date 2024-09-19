@@ -85,7 +85,8 @@ namespace Sig.App.Backend.Services.Permission
         {
             GlobalPermission.ManageBeneficiaries,
             GlobalPermission.ManageTransactions,
-            GlobalPermission.RefundTransaction
+            GlobalPermission.RefundTransaction,
+            GlobalPermission.ManageSpecificMarketGroup
         };
 
         private static readonly ProjectPermission[] AdminProjectPermission = new[]
