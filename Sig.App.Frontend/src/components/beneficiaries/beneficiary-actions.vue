@@ -109,11 +109,12 @@ import {
   URL_BENEFICIARY_ADD_MISSED_PAYMENT,
   URL_BENEFICIARY_TRANSACTION_ADD
 } from "@/lib/consts/urls";
+import { USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
 
 import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
 
 const { t } = useI18n();
-const { getGlobalPermissions } = storeToRefs(useAuthStore());
+const { getGlobalPermissions, userType } = storeToRefs(useAuthStore());
 
 const items = ref([]);
 
@@ -130,6 +131,10 @@ watch(
 
 const manageCards = computed(() => {
   return getGlobalPermissions.value.includes(GLOBAL_MANAGE_CARDS);
+});
+
+const isOrganizationManager = computed(() => {
+  return userType.value === USER_TYPE_ORGANIZATIONMANAGER;
 });
 
 function updateItems() {
@@ -165,7 +170,8 @@ function updateItems() {
           ? t("beneficiary-create-transaction-no-card")
           : !haveMarketsInOrganization()
           ? t("beneficiary-create-transaction-no-market")
-          : t("beneficiary-create-transaction-card-disabled")
+          : t("beneficiary-create-transaction-card-disabled"),
+        if: isOrganizationManager.value
       },
       {
         isExtra: true,
