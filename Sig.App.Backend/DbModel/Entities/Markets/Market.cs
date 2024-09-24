@@ -1,4 +1,5 @@
-﻿using Sig.App.Backend.DbModel.Entities.Projects;
+﻿using Sig.App.Backend.DbModel.Entities.Organizations;
+using Sig.App.Backend.DbModel.Entities.Projects;
 using System.Collections.Generic;
 
 namespace Sig.App.Backend.DbModel.Entities.Markets
@@ -9,6 +10,7 @@ namespace Sig.App.Backend.DbModel.Entities.Markets
         public string Name { get; set; }
 
         public IList<ProjectMarket> Projects { get; set; }
+        public IList<OrganizationMarket> Organizations { get; set; }
 
         public bool IsArchived { get; set; }
     }

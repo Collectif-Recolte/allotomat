@@ -44,6 +44,8 @@ namespace Sig.App.Backend.DbModel
 
         public DbSet<ProjectMarket> ProjectMarkets { get; set; }
 
+        public DbSet<OrganizationMarket> OrganizationMarkets { get; set; }
+
         public DbSet<Organization> Organizations { get; set; }
 
         public DbSet<Subscription> Subscriptions { get; set; }
@@ -100,6 +102,18 @@ namespace Sig.App.Backend.DbModel
 
                 _.HasOne(x => x.Market)
                     .WithMany(x => x.Projects)
+                    .HasForeignKey(x => x.MarketId);
+            });
+
+            Configure<OrganizationMarket>(_ => {
+                _.HasKey(x => new { x.MarketId, x.OrganizationId});
+
+                _.HasOne(x => x.Organization)
+                    .WithMany(x => x.Markets)
+                    .HasForeignKey(x => x.OrganizationId);
+
+                _.HasOne(x => x.Market)
+                    .WithMany(x => x.Organizations)
                     .HasForeignKey(x => x.MarketId);
             });
 

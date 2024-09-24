@@ -15,5 +15,6 @@ namespace Sig.App.Backend.DbModel.Entities.Transactions
         public List<PaymentTransactionProductGroup> TransactionByProductGroups { get; set; }
 
         public bool InitiatedByProject { get; set; } = false;
+        public bool InitiatedByOrganization { get; set; } = false;
     }
 }

@@ -45,6 +45,12 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
                 query = query.Where(x => x.OrganizationId == organizationId);
             }
 
+            if (request.ProjectId.IsSet())
+            {
+                var projectId = request.ProjectId.Value;
+                query = query.Where(x => x.Organization.ProjectId == projectId);
+            }
+
             if (request.Subscriptions != null)
             {
                 var withoutSubscription = request.WithoutSubscription?.Value ?? false;
@@ -150,6 +156,7 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
             public Page Page { get; set; }
             public Sort<BeneficiarySort> Sort { get; set; }
             public Maybe<long> OrganizationId { get; set; }
+            public Maybe<long> ProjectId { get; set; }
             public Maybe<bool> WithoutSubscription { get; set; }
             public IEnumerable<long> Subscriptions { get; set; }
             public IEnumerable<long> WithoutSpecificSubscriptions { get; set; }

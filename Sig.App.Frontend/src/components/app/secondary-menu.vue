@@ -5,14 +5,16 @@
     "program-settings": "Program settings",
 		"manage-organization-managers": "User management",
 		"manage-project-managers": "User management",
-    "manage-project-export-all-participants": "Export all participants"
+    "manage-project-export-all-participants": "Export all participants",
+    "reconciliation-report": "Reconciliation report"
 	},
 	"fr": {
 		"menu-title": "Programme {name}",
     "program-settings": "Paramètres du programme",
 		"manage-organization-managers": "Gestion des utilisateurs",
 		"manage-project-managers": "Gestion des utilisateurs",
-    "manage-project-export-all-participants": "Exporter tous les participants"
+    "manage-project-export-all-participants": "Exporter tous les participants",
+    "reconciliation-report": "Rapport de réconciliation"
 	}
 }
 </i18n>
@@ -35,6 +37,10 @@
         v-if="manageProjectManagers"
         :router-link="{ name: $consts.urls.URL_PROJECT_MANAGER_ADMIN }"
         :label="t('manage-project-managers')" />
+      <SecondaryMenuItem
+        v-if="manageProjectManagers"
+        :router-link="{ name: $consts.urls.URL_RECONCILIATION_REPORT }"
+        :label="t('reconciliation-report')" />
       <button
         v-if="manageBeneficiaries"
         class="secondary-menu-item secondary-menu-item--is-inactive"
