@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using MoreLinq;
 using NodaTime;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Cards;
@@ -45,51 +46,31 @@ namespace Sig.App.Backend.BackgroundJobs
                 .GetCurrentInstant()
                 .ToDateTimeUtc();
 
-            var dbTransactions = await db.Transactions.OfType<AddingFundTransaction>()
-                .Include(x => x.ProductGroup)
-                .Include(x => x.Card).ThenInclude(x => x.Funds)
-                .Where(x => x.Status == FundTransactionStatus.Actived).ToListAsync();
+            var cards = await db.Cards
+                .Include(x => x.Funds)
+                .Include(x => x.Transactions)
+                .Where(x => x.Status == CardStatus.Assigned).ToListAsync();
 
-            var transactionsGroupByCard = dbTransactions.GroupBy(x => x.CardId);
-            var cardWithErrors = new List<CardWithError>();
-
-            foreach (var group in transactionsGroupByCard)
+            foreach (var card in cards)
             {
-                var card = group.First().Card;
-
-                if (card.Status != CardStatus.Assigned)
-                {
-                    continue;
-                }
-
-                var transactionGroupByProductGroup = group.GroupBy(x => x.ProductGroupId);
+                var transactionGroupByProductGroup = card.Transactions.OfType<AddingFundTransaction>().Where(x => x.Status == FundTransactionStatus.Actived).GroupBy(x => x.ProductGroupId);
 
                 foreach (var productGroup in transactionGroupByProductGroup)
                 {
                     var transactions = productGroup.ToList();
                     var fund = card.Funds.First(x => x.ProductGroupId == productGroup.Key);
-                    var shouldBe = transactions.Sum(x => x.AvailableFund);
-                    var isValue = fund.Amount;
+                    var expectedAmount = transactions.Sum(x => x.AvailableFund);
+                    var amount = fund.Amount;
 
-                    if (shouldBe > 0 && isValue != shouldBe)
+                    if (expectedAmount > 0 && amount != expectedAmount)
                     {
-                        fund.Amount = shouldBe;
-
-                        logger.LogInformation($"RefreshCardBalance :: Card with errors in balance (card : {card.Id} - fund : {fund.Id}) : {isValue} -> {shouldBe}");
+                        fund.Amount = expectedAmount;
+                        logger.LogInformation($"RefreshCardBalance :: Card with errors in balance (card : {card.Id} - fund : {fund.Id}) : {amount} -> {expectedAmount}");
                     }
                 }
             }
 
             await db.SaveChangesAsync();
-        }
-
-        private class CardWithError
-        {
-            public Card Card { get; set; }
-            public List<AddingFundTransaction> Transactions { get; set; }
-            public decimal ShouldBe { get; set; }
-            public decimal IsValue { get; set; }
-            public Fund Fund { get; set; }
         }
     }
 }
