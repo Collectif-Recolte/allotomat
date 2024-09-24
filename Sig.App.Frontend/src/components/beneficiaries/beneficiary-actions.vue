@@ -91,7 +91,8 @@ import ICON_CLOCK from "@/lib/icons/clock.json";
 import ICON_CLOSE from "@/lib/icons/close.json";
 import ICON_CONFLICT from "@/lib/icons/exclamation-circle.json";
 import ICON_IDENTIFICATION from "@/lib/icons/identification.json";
-import ICON_TRANSACTION from "@/lib/icons/clock.json";
+import ICON_TRANSACTION from "@/lib/icons/add-square.json";
+import ICON_MISSED_PAYMENT from "@/lib/icons/arrow-ricochet.json";
 
 import {
   URL_BENEFICIARY_EDIT,
@@ -187,7 +188,7 @@ function updateItems() {
       },
       {
         isExtra: true,
-        icon: ICON_ADD_CASH,
+        icon: ICON_MISSED_PAYMENT,
         label: t("beneficiary-add-missed-payment"),
         route: { name: URL_BENEFICIARY_ADD_MISSED_PAYMENT, params: { beneficiaryId: props.beneficiary.id } },
         disabled: !haveCard() || !haveSubscriptions() || !haveMissedPayment(),
@@ -290,7 +291,7 @@ function updateItems() {
       },
       {
         isExtra: true,
-        icon: ICON_ADD_CASH,
+        icon: ICON_MISSED_PAYMENT,
         label: t("beneficiary-add-missed-payment"),
         route: { name: URL_BENEFICIARY_ADD_MISSED_PAYMENT, params: { beneficiaryId: props.beneficiary.id } },
         disabled: !haveCard() || !haveSubscriptions() || !haveMissedPayment(),
