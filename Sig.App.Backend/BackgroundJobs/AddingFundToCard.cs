@@ -35,7 +35,7 @@ namespace Sig.App.Backend.BackgroundJobs
 
         public static void RegisterJob(IConfiguration config)
         {
-            var cronFirstDayOfMonth = Cron.Monthly();
+            var cronFirstDayOfMonth = Cron.Monthly(1, 4);
             RecurringJob.AddOrUpdate<AddingFundToCard>("AddingFundToCard:FirstDayOfTheMonth",
                 x => x.Run(new SubscriptionMonthlyPaymentMoment[2] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth, SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth }),
                 cronFirstDayOfMonth,
@@ -44,7 +44,7 @@ namespace Sig.App.Backend.BackgroundJobs
                     TimeZone = TimeZoneInfo.FindSystemTimeZoneById(config["systemLocalTimezone"])
                 });
 
-            var cronFifteenDayOfMonth = Cron.Monthly(15);
+            var cronFifteenDayOfMonth = Cron.Monthly(15, 4);
             RecurringJob.AddOrUpdate<AddingFundToCard>("AddingFundToCard:FifteenthDayOfTheMonth",
                 x => x.Run(new SubscriptionMonthlyPaymentMoment[2] { SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth, SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth }),
                 cronFifteenDayOfMonth,
@@ -53,7 +53,7 @@ namespace Sig.App.Backend.BackgroundJobs
                     TimeZone = TimeZoneInfo.FindSystemTimeZoneById(config["systemLocalTimezone"])
                 });
 
-            var cronWeekly = Cron.Weekly();
+            var cronWeekly = Cron.Weekly(DayOfWeek.Monday, 4);
             RecurringJob.AddOrUpdate<AddingFundToCard>("AddingFundToCard:FirstDayOfTheWeek",
                 x => x.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheWeek }),
                 cronWeekly,
