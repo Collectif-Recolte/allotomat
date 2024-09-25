@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Sig.App.Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class AddingFundToCard_BackgroundJob : Migration
+    public partial class AddingFundToCardRuns_BackgroundJob : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AddingFundToCards",
+                name: "AddingFundToCardRuns",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
@@ -23,7 +23,7 @@ namespace Sig.App.Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AddingFundToCards", x => x.Id);
+                    table.PrimaryKey("PK_AddingFundToCardRuns", x => x.Id);
                 });
         }
 
@@ -31,7 +31,7 @@ namespace Sig.App.Backend.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AddingFundToCards");
+                name: "AddingFundToCardRuns");
         }
     }
 }

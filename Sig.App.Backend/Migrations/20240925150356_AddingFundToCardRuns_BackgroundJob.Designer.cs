@@ -12,8 +12,8 @@ using Sig.App.Backend.DbModel;
 namespace Sig.App.Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240924192948_AddingFundToCard_BackgroundJob")]
-    partial class AddingFundToCard_BackgroundJob
+    [Migration("20240925150356_AddingFundToCardRuns_BackgroundJob")]
+    partial class AddingFundToCardRuns_BackgroundJob
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -279,7 +279,7 @@ namespace Sig.App.Backend.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.BackgroundJobs.AddingFundToCard", b =>
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.BackgroundJobs.AddingFundToCardRun", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -298,7 +298,7 @@ namespace Sig.App.Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AddingFundToCards");
+                    b.ToTable("AddingFundToCardRuns");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Beneficiaries.Beneficiary", b =>

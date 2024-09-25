@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Sig.App.Backend.DbModel.Entities.BackgroundJobs
 {
-    public class AddingFundToCard
+    public class AddingFundToCardRun
     {
         public long Id { get; set; }
 

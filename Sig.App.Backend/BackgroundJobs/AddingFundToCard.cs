@@ -69,7 +69,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 .GetCurrentInstant()
                 .ToDateTimeUtc();
 
-            var lastRun = await db.AddingFundToCards
+            var lastRun = await db.AddingFundToCardRuns
                 .Where(x => x.Name == name)
                 .OrderBy(x => x.Id)
                 .LastOrDefaultAsync();
@@ -210,7 +210,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 }
             }
 
-            db.AddingFundToCards.Add(new DbModel.Entities.BackgroundJobs.AddingFundToCard()
+            db.AddingFundToCardRuns.Add(new DbModel.Entities.BackgroundJobs.AddingFundToCardRun()
             {
                 Date = today,
                 Name = name,

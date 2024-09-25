@@ -79,7 +79,7 @@ namespace Sig.App.Backend.DbModel
 
         public DbSet<PaymentTransactionAddingFundTransaction> PaymentTransactionAddingFundTransactions { get; set; }
 
-        public DbSet<AddingFundToCard> AddingFundToCards { get; set; }
+        public DbSet<AddingFundToCardRun> AddingFundToCardRuns { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

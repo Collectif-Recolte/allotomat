@@ -276,7 +276,7 @@ namespace Sig.App.Backend.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.BackgroundJobs.AddingFundToCard", b =>
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.BackgroundJobs.AddingFundToCardRun", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -295,7 +295,7 @@ namespace Sig.App.Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AddingFundToCards");
+                    b.ToTable("AddingFundToCardRuns");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Beneficiaries.Beneficiary", b =>
