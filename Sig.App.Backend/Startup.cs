@@ -297,6 +297,7 @@ namespace Sig.App.Backend
             SendMonthlyBalanceReport.RegisterJob(configuration);
             ExpireFundsFromCard.RegisterJob(configuration);
             DeactivateOffPlatformBeneficiary.RegisterJob(configuration);
+            RefreshCardBalance.RegisterJob(configuration);
         }
 
         private void ConfigureDbContext(DbContextOptionsBuilder options)
