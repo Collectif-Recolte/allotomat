@@ -49,12 +49,25 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                 throw new BeneficiaryTypeNotFoundException();
             }
 
-            var lastBeneficiary = await db.Beneficiaries.Where(x => x.OrganizationId == organizationId).OrderBy(x => x.SortOrder).LastOrDefaultAsync();
-            var sortOrder = lastBeneficiary != null ? lastBeneficiary.SortOrder + 1 : 0;
+            var beneficiaries = await db.Beneficiaries.Where(x => x.OrganizationId == organizationId).ToListAsync(cancellationToken);
+            beneficiaries.ForEach(x => x.SortOrder++);
+            
+            var id1 = request.Id1?.Trim();
+            if (id1 == "" || id1 == null)
+            {
+                var guid = Guid.NewGuid().ToString();
+                id1 = "TID_" + guid.Split('-').First();
+            }
+
+            if (await db.Beneficiaries.AnyAsync(x => x.OrganizationId == organizationId && x.ID1 == id1, cancellationToken))
+            {
+                logger.LogWarning("[Mutation] CreateBeneficiaryInOrganization - Id1AlreadyExistException");
+                throw new Id1AlreadyExistException();
+            }
 
             var beneficiary = new Beneficiary()
             {
-                ID1 = "TID_" + Guid.NewGuid().ToString(),
+                ID1 = id1,
                 Firstname = request.Firstname?.Trim(),
                 Lastname = request.Lastname?.Trim(),
                 Email = request.Email?.Trim(),
@@ -65,7 +78,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                 BeneficiaryType = beneficiaryType,
                 PostalCode = request.PostalCode?.Trim(),
                 ID2 = request.Id2?.Trim(),
-                SortOrder = sortOrder
+                SortOrder = 0
             };
 
             db.Beneficiaries.Add(beneficiary);
@@ -103,5 +116,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
         public class OrganizationNotFoundException : RequestValidationException { }
         public class BeneficiaryTypeNotFoundException : RequestValidationException { }
+        public class Id1AlreadyExistException : RequestValidationException { }
     }
 }

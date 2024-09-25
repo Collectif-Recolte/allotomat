@@ -11,7 +11,8 @@
 		"add-beneficiary-success-notification": "Adding {firstname} {lastname} was successful.",
     "add-subscriptions-success-notification": "Adding subscriptions was successful.",
 		"title": "Add a participant",
-    "set-beneficiary": "Set participant information"
+    "set-beneficiary": "Set participant information",
+    "id1-already-exist": "ID1 already exists."
 	},
 	"fr": {
     "close": "Fermer",
@@ -24,7 +25,8 @@
 		"add-beneficiary-success-notification": "L’ajout de {firstname} {lastname} a été un succès.",
     "add-subscriptions-success-notification": "L’ajout des abonnements a été un succès.",
 		"title": "Ajouter un-e participant-e",
-    "set-beneficiary": "Définir les informations du participant-e"
+    "set-beneficiary": "Définir les informations du participant-e",
+    "id1-already-exist": "Le numéro d'identification 1 existe déjà."
 	}
 }
 </i18n>
@@ -90,10 +92,18 @@ import { useNotificationsStore } from "@/lib/store/notifications";
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
 import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
 
+import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
+
 import BeneficiaryForm from "@/views/beneficiary/_Form";
 import AssignSubscriptionForm from "@/views/beneficiary/_AssignSubscriptionForm";
 import AssignCardForm from "@/components/card/assign-card-form";
 import AddMissedPayment from "@/views/beneficiary/_AddMissedPayment";
+
+useGraphQLErrorMessages({
+  ID_1_ALREADY_EXIST: () => {
+    return t("id1-already-exist");
+  }
+});
 
 const currentStep = ref(0);
 const createBeneficiary = ref(null);

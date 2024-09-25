@@ -72,7 +72,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
             beneficiary.Address.Should().Be("123, Example Street");
             beneficiary.Notes.Should().Be(null);
             beneficiary.BeneficiaryTypeId.Should().Be(beneficiaryType.Id);
-            beneficiary.ID1.Length.Should().Be(40);
+            beneficiary.ID1.Length.Should().Be(12);
             beneficiary.ID1.Should().StartWith("TID_");
         }
 

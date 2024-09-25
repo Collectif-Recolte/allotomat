@@ -91,7 +91,8 @@ import ICON_CLOCK from "@/lib/icons/clock.json";
 import ICON_CLOSE from "@/lib/icons/close.json";
 import ICON_CONFLICT from "@/lib/icons/exclamation-circle.json";
 import ICON_IDENTIFICATION from "@/lib/icons/identification.json";
-import ICON_TRANSACTION from "@/lib/icons/clock.json";
+import ICON_TRANSACTION from "@/lib/icons/add-square.json";
+import ICON_MISSED_PAYMENT from "@/lib/icons/arrow-ricochet.json";
 
 import {
   URL_BENEFICIARY_EDIT,
@@ -109,11 +110,12 @@ import {
   URL_BENEFICIARY_ADD_MISSED_PAYMENT,
   URL_BENEFICIARY_TRANSACTION_ADD
 } from "@/lib/consts/urls";
+import { USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
 
 import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
 
 const { t } = useI18n();
-const { getGlobalPermissions } = storeToRefs(useAuthStore());
+const { getGlobalPermissions, userType } = storeToRefs(useAuthStore());
 
 const items = ref([]);
 
@@ -130,6 +132,10 @@ watch(
 
 const manageCards = computed(() => {
   return getGlobalPermissions.value.includes(GLOBAL_MANAGE_CARDS);
+});
+
+const isOrganizationManager = computed(() => {
+  return userType.value === USER_TYPE_ORGANIZATIONMANAGER;
 });
 
 function updateItems() {
@@ -157,6 +163,19 @@ function updateItems() {
       },
       {
         isExtra: true,
+        icon: ICON_TRANSACTION,
+        label: t("beneficiary-create-transaction"),
+        route: { name: URL_BENEFICIARY_TRANSACTION_ADD, params: { beneficiaryId: props.beneficiary.id } },
+        disabled: !haveCard() || !haveMarketsInOrganization() || isCardDisabled(),
+        reason: !haveCard()
+          ? t("beneficiary-create-transaction-no-card")
+          : !haveMarketsInOrganization()
+          ? t("beneficiary-create-transaction-no-market")
+          : t("beneficiary-create-transaction-card-disabled"),
+        if: isOrganizationManager.value
+      },
+      {
+        isExtra: true,
         icon: ICON_ADD_CASH,
         label: t("beneficiary-add-funds"),
         route: { name: URL_BENEFICIARY_MANUALLY_ADD_FUND, params: { beneficiaryId: props.beneficiary.id } },
@@ -169,7 +188,7 @@ function updateItems() {
       },
       {
         isExtra: true,
-        icon: ICON_ADD_CASH,
+        icon: ICON_MISSED_PAYMENT,
         label: t("beneficiary-add-missed-payment"),
         route: { name: URL_BENEFICIARY_ADD_MISSED_PAYMENT, params: { beneficiaryId: props.beneficiary.id } },
         disabled: !haveCard() || !haveSubscriptions() || !haveMissedPayment(),
@@ -272,7 +291,7 @@ function updateItems() {
       },
       {
         isExtra: true,
-        icon: ICON_ADD_CASH,
+        icon: ICON_MISSED_PAYMENT,
         label: t("beneficiary-add-missed-payment"),
         route: { name: URL_BENEFICIARY_ADD_MISSED_PAYMENT, params: { beneficiaryId: props.beneficiary.id } },
         disabled: !haveCard() || !haveSubscriptions() || !haveMissedPayment(),

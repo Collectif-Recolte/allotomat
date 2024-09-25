@@ -6,7 +6,8 @@
       "adding-fund-transaction": "{amount} transferred to the card",
       "loyalty-adding-fund-transaction": "{amount} of gift funds added to the card",
       "refund-transaction": "{amount} refunded",
-      "expire-fund-transaction": "{amount} expired"
+      "expire-fund-transaction": "{amount} expired",
+      "no-transactions": "No transactions"
     },
     "fr": {
       "title": "Historique des transactions",
@@ -14,7 +15,8 @@
       "adding-fund-transaction": "{amount} transférés sur la carte",
       "loyalty-adding-fund-transaction": "{amount} de fonds cadeaux ajoutés à la carte",
       "refund-transaction": "{amount} remboursés",
-      "expire-fund-transaction": "Expiration de {amount}"
+      "expire-fund-transaction": "Expiration de {amount}",
+      "no-transactions": "Aucune transactions"
     }
   }
   </i18n>
@@ -22,7 +24,7 @@
 <template>
   <div>
     <h1 class="font-semibold mt-4 mb-2 text-h2 xs:text-h1">{{ t("title") }}</h1>
-    <ul class="mb-0 min-w-48 sm:min-w-36">
+    <ul v-if="props.transactions.items.length > 0" class="mb-0 min-w-48 sm:min-w-36">
       <li
         v-for="transaction in props.transactions.items"
         :key="transaction.id"
@@ -31,6 +33,7 @@
         {{ formatDate(new Date(transaction.createdAt), textualFormat) }} - {{ getTransactionDescription(transaction) }}
       </li>
     </ul>
+    <p v-else>{{ t("no-transactions") }}</p>
     <UiPagination
       v-if="props.transactions && props.transactions.totalPages > 1"
       :page="props.page"

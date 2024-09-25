@@ -146,8 +146,7 @@
             v-bind="field"
             :label="t('unique-id-id1')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4"
-            :disabled="props.isNew" />
+            col-span-class="sm:col-span-4" />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="id2">
           <PfFormInputText

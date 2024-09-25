@@ -2,6 +2,7 @@
 {
   "en": {
     "payment-dates": "→ Payment dates : <b>{paymentDates}</b>",
+    "availables-amounts": "→ Available amounts : <b>{amounts}</b>",
     "payment-moment-first-day-of-the-month": "1st",
     "payment-moment-fifteenth-day-of-the-month": "15",
     "payment-moment-first-and-fifteenth-day-of-the-month": "1st & 15",
@@ -19,6 +20,7 @@
 	},
 	"fr": {
 		"payment-dates": "→ Dates des versements : <b>Versements le {paymentMoment} du mois entre le {startDate} et le {endDate}</b>",
+    "availables-amounts": "→ Montants disponibles : <b>{amounts}</b>",
     "payment-moment-first-day-of-the-month": "1er",
     "payment-moment-fifteenth-day-of-the-month": "15",
     "payment-moment-first-and-fifteenth-day-of-the-month": "1er et le 15",
@@ -48,16 +50,6 @@
         @input="(e) => updateCheckbox(option.id, e)">
         <template #description>
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <p
-            v-if="option.dontHaveBudgetAllowance"
-            class="mb-2 text-p2 leading-none text-red-500"
-            v-html="t('dont-have-budget-allowance')"></p>
-          <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <p
-            v-if="option.dontHaveBeneficiaryType"
-            class="mb-2 text-p2 leading-none text-red-500"
-            v-html="t('dont-have-beneficiary-type')"></p>
-          <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <p class="mb-2 text-p2 leading-none" v-html="getPaymentDates(option)"></p>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <p
@@ -69,14 +61,32 @@
           </p>
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <p class="mb-2 text-p2 leading-none" v-html="getExpirationDate(option)"></p>
-
+          <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
+          <p
+            v-if="!option.dontHaveBudgetAllowance"
+            class="mb-2 text-p2 leading-none"
+            v-html="getBudgetAllowanceNeeded(option)"></p>
+          <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
+          <p
+            v-if="option.dontHaveBudgetAllowance"
+            class="mb-2 text-p2 leading-none text-red-500"
+            v-html="t('dont-have-budget-allowance')"></p>
+          <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
+          <p
+            v-if="option.dontHaveBeneficiaryType"
+            class="mb-2 text-p2 leading-none text-red-500"
+            v-html="t('dont-have-beneficiary-type')"></p>
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <p
             v-if="!option.dontHaveBudgetAllowance && !option.isBudgetAllowanceIsEnough"
             class="mb-2 text-p2 leading-none text-red-500"
             v-html="t('budget-allowance-not-enought')"></p>
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <p v-else class="mb-2 text-p2 leading-none" v-html="getBudgetAllowanceNeeded(option)"></p>
+          <p
+            v-if="!option.dontHaveBudgetAllowance"
+            class="mb-2 text-p2 leading-none"
+            :class="!option.isBudgetAllowanceIsEnough ? 'text-red-500' : ''"
+            v-html="getBudgetAllowanceAvailable(option)"></p>
         </template>
       </PfFormInputCheckbox>
     </div>
@@ -94,6 +104,7 @@
 import { computed, defineProps, defineEmits } from "vue";
 import { useI18n } from "vue-i18n";
 
+import { getMoneyFormat } from "@/lib/helpers/money";
 import { formatDate, textualFormat } from "@/lib/helpers/date";
 
 import {
@@ -148,6 +159,20 @@ const getPaymentDates = (option) => {
     startDate: formatDate(new Date(option.startDate), textualFormat),
     endDate: formatDate(new Date(option.endDate), textualFormat)
   });
+};
+
+const getBudgetAllowanceAvailable = (option) => {
+  let amounts = "";
+
+  if (option.dontHaveBudgetAllowance) {
+    amounts = "-";
+  } else {
+    amounts = getMoneyFormat(
+      option.budgetAllowances.filter((x) => x.organization.id === props.beneficiary.organization.id)[0].availableFund
+    );
+  }
+
+  return t("availables-amounts", { amounts });
 };
 
 const getExpirationDate = (option) => {
