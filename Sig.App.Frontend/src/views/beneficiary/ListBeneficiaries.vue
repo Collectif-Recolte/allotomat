@@ -474,7 +474,7 @@ watch(resultOrganizations, (value) => {
     beneficiariesAreAnonymous: x.project.beneficiariesAreAnonymous,
     markets: x.markets
   }));
-  organizations.value.unshift({ label: t("all-group"), value: ALL_GROUP });
+  organizations.value.unshift({ label: t("all-group"), value: ALL_GROUP, markets: [] });
 
   availableBeneficiaryTypes.value = value.organizations[0].project.beneficiaryTypes;
 
