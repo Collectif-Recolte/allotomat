@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
+using Sig.App.Backend.DbModel.Entities.BackgroundJobs;
 
 namespace Sig.App.Backend.DbModel
 {
@@ -77,6 +78,8 @@ namespace Sig.App.Backend.DbModel
         public DbSet<PaymentFund> PaymentFunds { get; set; }
 
         public DbSet<PaymentTransactionAddingFundTransaction> PaymentTransactionAddingFundTransactions { get; set; }
+
+        public DbSet<AddingFundToCardRun> AddingFundToCardRuns { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
