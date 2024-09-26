@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Sig.App.Backend.DbModel;
 
@@ -11,9 +12,11 @@ using Sig.App.Backend.DbModel;
 namespace Sig.App.Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240925150356_AddingFundToCardRuns_BackgroundJob")]
+    partial class AddingFundToCardRuns_BackgroundJob
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -505,45 +508,6 @@ namespace Sig.App.Backend.Migrations
                     b.ToTable("Funds");
                 });
 
-            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroup", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<bool>("IsArchived")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("ProjectId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("MarketGroups");
-                });
-
-            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroupMarket", b =>
-                {
-                    b.Property<long>("MarketId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("MarketGroupId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("MarketId", "MarketGroupId");
-
-                    b.HasIndex("MarketGroupId");
-
-                    b.ToTable("MarketGroupMarkets");
-                });
-
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Markets.Market", b =>
                 {
                     b.Property<long>("Id")
@@ -582,21 +546,6 @@ namespace Sig.App.Backend.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("Organizations");
-                });
-
-            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Organizations.OrganizationMarket", b =>
-                {
-                    b.Property<long>("MarketId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("OrganizationId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("MarketId", "OrganizationId");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("OrganizationMarkets");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.ProductGroups.ProductGroup", b =>
@@ -857,9 +806,6 @@ namespace Sig.App.Backend.Migrations
 
                     b.Property<long?>("FundTransferredFromProgramCardId")
                         .HasColumnType("bigint");
-
-                    b.Property<bool>("InitiatedByOrganization")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("InitiatedByProject")
                         .HasColumnType("bit");
@@ -1167,9 +1113,6 @@ namespace Sig.App.Backend.Migrations
                 {
                     b.HasBaseType("Sig.App.Backend.DbModel.Entities.Transactions.Transaction");
 
-                    b.Property<bool>("InitiatedByOrganization")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("InitiatedByProject")
                         .HasColumnType("bit");
 
@@ -1180,9 +1123,6 @@ namespace Sig.App.Backend.Migrations
 
                     b.ToTable("Transactions", t =>
                         {
-                            t.Property("InitiatedByOrganization")
-                                .HasColumnName("PaymentTransaction_InitiatedByOrganization");
-
                             t.Property("InitiatedByProject")
                                 .HasColumnName("PaymentTransaction_InitiatedByProject");
                         });
@@ -1196,9 +1136,6 @@ namespace Sig.App.Backend.Migrations
 
                     b.Property<long>("InitialTransactionId")
                         .HasColumnType("bigint");
-
-                    b.Property<bool>("InitiatedByOrganization")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("InitiatedByProject")
                         .HasColumnType("bit");
@@ -1430,36 +1367,6 @@ namespace Sig.App.Backend.Migrations
                     b.Navigation("ProductGroup");
                 });
 
-            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroup", b =>
-                {
-                    b.HasOne("Sig.App.Backend.DbModel.Entities.Projects.Project", "Project")
-                        .WithMany("MarketGroups")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Project");
-                });
-
-            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroupMarket", b =>
-                {
-                    b.HasOne("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroup", "MarketGroup")
-                        .WithMany("Markets")
-                        .HasForeignKey("MarketGroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Sig.App.Backend.DbModel.Entities.Markets.Market", "Market")
-                        .WithMany("MarketGroups")
-                        .HasForeignKey("MarketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Market");
-
-                    b.Navigation("MarketGroup");
-                });
-
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Organizations.Organization", b =>
                 {
                     b.HasOne("Sig.App.Backend.DbModel.Entities.Projects.Project", "Project")
@@ -1469,25 +1376,6 @@ namespace Sig.App.Backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Project");
-                });
-
-            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Organizations.OrganizationMarket", b =>
-                {
-                    b.HasOne("Sig.App.Backend.DbModel.Entities.Markets.Market", "Market")
-                        .WithMany("Organizations")
-                        .HasForeignKey("MarketId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Sig.App.Backend.DbModel.Entities.Organizations.Organization", "Organization")
-                        .WithMany("Markets")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Market");
-
-                    b.Navigation("Organization");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.ProductGroups.ProductGroup", b =>
@@ -1806,17 +1694,8 @@ namespace Sig.App.Backend.Migrations
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroup", b =>
-                {
-                    b.Navigation("Markets");
-                });
-
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Markets.Market", b =>
                 {
-                    b.Navigation("MarketGroups");
-
-                    b.Navigation("Organizations");
-
                     b.Navigation("Projects");
                 });
 
@@ -1825,8 +1704,6 @@ namespace Sig.App.Backend.Migrations
                     b.Navigation("Beneficiaries");
 
                     b.Navigation("BudgetAllowances");
-
-                    b.Navigation("Markets");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.ProductGroups.ProductGroup", b =>
@@ -1841,8 +1718,6 @@ namespace Sig.App.Backend.Migrations
                     b.Navigation("BeneficiaryTypes");
 
                     b.Navigation("Cards");
-
-                    b.Navigation("MarketGroups");
 
                     b.Navigation("Markets");
 
