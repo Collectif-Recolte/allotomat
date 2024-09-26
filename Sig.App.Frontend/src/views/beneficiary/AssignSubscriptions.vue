@@ -647,18 +647,18 @@ let administrationSubscriptionsOffPlatform = useResult(resultOrganizations, null
 const budgetAllowanceBySubscription = computed(() => {
   if (selectedSubscription.value === null) return "-";
   var selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
-  if (selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage) {
-    return `${Math.min(selectedSubscriptionData.paymentRemaining, selectedSubscriptionData.maxNumberOfPayments)}/${Math.min(
-      selectedSubscriptionData.totalPayment,
-      selectedSubscriptionData.maxNumberOfPayments
-    )}`;
-  }
   return getShortMoneyFormat(selectedSubscriptionData.budgetAllowance);
 });
 
 const subscriptionPaymentRemainingCount = computed(() => {
   if (selectedSubscription.value === null) return "-";
   var selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
+  if (selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage) {
+    return `${Math.min(selectedSubscriptionData.paymentRemaining, selectedSubscriptionData.maxNumberOfPayments)}/${Math.min(
+      selectedSubscriptionData.totalPayment,
+      selectedSubscriptionData.maxNumberOfPayments
+    )}`;
+  }
   return `${selectedSubscriptionData.paymentRemaining}/${selectedSubscriptionData.totalPayment}`;
 });
 
