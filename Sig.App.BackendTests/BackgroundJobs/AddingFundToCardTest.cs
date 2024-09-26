@@ -17,6 +17,7 @@ using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Xunit;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.Helpers;
+using NodaTime;
 
 namespace Sig.App.BackendTests.BackgroundJobs
 {
@@ -170,10 +171,13 @@ namespace Sig.App.BackendTests.BackgroundJobs
         [Fact]
         public async Task AddFundToCard()
         {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
+
             var budgetAllowance = DbContext.BudgetAllowances.First();
             var availableFundsInitially = budgetAllowance.AvailableFund;
             
-            await job.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+            await job.Run("AddFundToCard", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
 
             var card = DbContext.Cards.Include(x => x.Funds).First();
             card.Funds.First().Amount.Should().Be(45);
@@ -190,7 +194,10 @@ namespace Sig.App.BackendTests.BackgroundJobs
         [Fact]
         public async Task DontAddFundWithWrongMoment()
         {
-            await job.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth });
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 15, 0, 0));
+
+            await job.Run("DontAddFundWithWrongMoment", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth });
 
             var card = DbContext.Cards.Include(x => x.Funds).First();
             card.Funds.First().Amount.Should().Be(20);
@@ -199,7 +206,10 @@ namespace Sig.App.BackendTests.BackgroundJobs
         [Fact]
         public async Task AddFundToCardWithBothMoment()
         {
-            await job.Run(new SubscriptionMonthlyPaymentMoment[2] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth, SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth });
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
+
+            await job.Run("AddFundToCardWithBothMoment", new SubscriptionMonthlyPaymentMoment[2] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth, SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth });
 
             var card = DbContext.Cards.Include(x => x.Funds).First();
             card.Funds.First().Amount.Should().Be(45);
@@ -208,6 +218,9 @@ namespace Sig.App.BackendTests.BackgroundJobs
         [Fact]
         public async Task AddFundWithCategoryRelatedToSubscription()
         {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
+
             var beneficiaryType2 = new BeneficiaryType()
             {
                 Name = "Type 2",
@@ -220,7 +233,7 @@ namespace Sig.App.BackendTests.BackgroundJobs
 
             DbContext.SaveChanges();
 
-            await job.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+            await job.Run("AddFundWithCategoryRelatedToSubscription", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
 
             var card = DbContext.Cards.Include(x => x.Funds).First();
             card.Funds.First().Amount.Should().Be(45);
@@ -229,6 +242,9 @@ namespace Sig.App.BackendTests.BackgroundJobs
         [Fact]
         public async Task RefundBudgetAllowanceWhenParticipantHasNoCards()
         {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
+
             beneficiary.Card = null;
             beneficiary.CardId = null;
             var budgetAllowance = DbContext.BudgetAllowances.First();
@@ -236,7 +252,7 @@ namespace Sig.App.BackendTests.BackgroundJobs
             
             DbContext.SaveChanges();
             
-            await job.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+            await job.Run("RefundBudgetAllowanceWhenParticipantHasNoCards", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
 
             var card = DbContext.Cards.Include(x => x.Funds).First();
             card.Funds.First().Amount.Should().Be(20);
@@ -250,6 +266,7 @@ namespace Sig.App.BackendTests.BackgroundJobs
         public async Task RefundBudgetAllowanceWhenParticipantMissAPayment()
         {
             var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
 
             subscription.IsSubscriptionPaymentBasedCardUsage = true;
             subscription.MaxNumberOfPayments = 2;
@@ -272,7 +289,7 @@ namespace Sig.App.BackendTests.BackgroundJobs
             var budgetAllowance = DbContext.BudgetAllowances.First();
             var availableFundsInitially = budgetAllowance.AvailableFund;
 
-            await job.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+            await job.Run("RefundBudgetAllowanceWhenParticipantMissAPayment", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
 
             var card = DbContext.Cards.Include(x => x.Funds).First();
             card.Funds.First().Amount.Should().Be(20);
@@ -286,6 +303,7 @@ namespace Sig.App.BackendTests.BackgroundJobs
         public async Task DontRefundBudgetAllowanceWhenParticipantMissAPaymentButStillHaveTimeToGetAllPayment()
         {
             var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
 
             subscription.IsSubscriptionPaymentBasedCardUsage = true;
             subscription.MaxNumberOfPayments = 1;
@@ -309,7 +327,7 @@ namespace Sig.App.BackendTests.BackgroundJobs
 
             DbContext.SaveChanges();
 
-            await job.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+            await job.Run("DontRefundBudgetAllowanceWhenParticipantMissAPaymentButStillHaveTimeToGetAllPayment", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
 
             var card = DbContext.Cards.Include(x => x.Funds).First();
             card.Funds.First().Amount.Should().Be(20);
@@ -323,6 +341,7 @@ namespace Sig.App.BackendTests.BackgroundJobs
         public async Task DontAddFundIfParticipantsDidntUseIsCardSinceLastPayment()
         {
             var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
 
             subscription.IsSubscriptionPaymentBasedCardUsage = true;
             subscription.MaxNumberOfPayments = 1;
@@ -345,7 +364,7 @@ namespace Sig.App.BackendTests.BackgroundJobs
 
             DbContext.SaveChanges();
 
-            await job.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+            await job.Run("DontAddFundIfParticipantsDidntUseIsCardSinceLastPayment", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
 
             var card = DbContext.Cards.Include(x => x.Funds).First();
             card.Funds.First().Amount.Should().Be(20);
@@ -355,6 +374,7 @@ namespace Sig.App.BackendTests.BackgroundJobs
         public async Task AddFundIfParticipantsUseIsCardSinceLastPayment()
         {
             var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
 
             subscription.IsSubscriptionPaymentBasedCardUsage = true;
             subscription.MaxNumberOfPayments = 2;
@@ -374,7 +394,7 @@ namespace Sig.App.BackendTests.BackgroundJobs
 
             DbContext.SaveChanges();
 
-            await job.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+            await job.Run("AddFundIfParticipantsUseIsCardSinceLastPayment", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
 
             var card = DbContext.Cards.Include(x => x.Funds).First();
             card.Funds.First().Amount.Should().Be(45);
