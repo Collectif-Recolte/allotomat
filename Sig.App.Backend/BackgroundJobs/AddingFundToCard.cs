@@ -235,7 +235,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 .Where(x => x.Id == subscriptionIdLong).FirstAsync();
 
             var beneficiary = await db.Beneficiaries
-                .Include(x => x.Card).ThenInclude(x => x.Transactions)
+                .Include(x => x.Card).ThenInclude(x => x.Transactions).ThenInclude(x => (x as SubscriptionAddingFundTransaction).SubscriptionType)
                 .Include(x => x.Card).ThenInclude(x => x.Funds)
                 .Include(x => x.Organization).ThenInclude(x => x.Project)
                 .Where(x => x.Id== beneficiaryIdLong)
