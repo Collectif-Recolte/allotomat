@@ -26,7 +26,7 @@
     "subscriptions-title": "Beneficiary subscriptions",
     "amount-received-each-payment": "→ Amount(s) received by this card at each payment: <b>{amountByPayment}</b>",
     "remaining-payment-on-card": "→ <b>{remainingPayment}</b> remaining payments on this card",
-    "payment-dates": "→ Payment dates : <b>{paymentDates}</b>",
+    "payment-dates": "→ Payment dates: <b>Payments on the {paymentMoment} of the month between {startDate} and {endDate}</b>",
     "payment-moment-first-day-of-the-month": "1st",
     "payment-moment-fifteenth-day-of-the-month": "15",
     "payment-moment-first-and-fifteenth-day-of-the-month": "1st & 15",
@@ -82,7 +82,7 @@
       </div>
       <h3 class="mb-2 mt-4">{{ t("subscriptions-title") }}</h3>
       <ul class="inline-flex flex-col justify-start items-start gap-y-1 mb-4 max-w-full">
-        <li v-for="subscription in beneficiary.beneficiarySubscriptions" :key="subscription.subscription.id">
+        <li class="mb-4" v-for="subscription in beneficiary.beneficiarySubscriptions" :key="subscription.subscription.id">
           <b>{{ subscription.subscription.name }}</b>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <div v-html="t('amount-received-each-payment', { amountByPayment: amountByPayment(subscription) })"></div>
