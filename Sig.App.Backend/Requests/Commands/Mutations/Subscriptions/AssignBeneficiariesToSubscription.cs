@@ -152,7 +152,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 {
                     var amount =
                         subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId)
-                            .Sum(x => x.Amount) * (request.ReplicatePaymentOnAttribution && beneficiary.Card != null ? paymentRemaining + 1 : paymentRemaining);
+                            .Sum(x => x.Amount) * (request.ReplicatePaymentOnAttribution && beneficiary.Card != null ? Math.Min(subscription.MaxNumberOfPayments.Value, paymentRemaining + 1) : paymentRemaining);
 
                     if (budgetAllowance.AvailableFund >= amount)
                     {
