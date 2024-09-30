@@ -37,7 +37,7 @@ namespace Sig.App.Backend.BackgroundJobs
         {
             var cronFirstDayOfMonth = Cron.Monthly(1, 4);
             RecurringJob.AddOrUpdate<AddingFundToCard>("AddingFundToCard:FirstDayOfTheMonth",
-                x => x.Run(new SubscriptionMonthlyPaymentMoment[2] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth, SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth }),
+                x => x.Run("AddingFundToCard:FirstDayOfTheMonth", new SubscriptionMonthlyPaymentMoment[2] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth, SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth }),
                 cronFirstDayOfMonth,
                 new RecurringJobOptions
                 {
@@ -46,7 +46,7 @@ namespace Sig.App.Backend.BackgroundJobs
 
             var cronFifteenDayOfMonth = Cron.Monthly(15, 4);
             RecurringJob.AddOrUpdate<AddingFundToCard>("AddingFundToCard:FifteenthDayOfTheMonth",
-                x => x.Run(new SubscriptionMonthlyPaymentMoment[2] { SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth, SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth }),
+                x => x.Run("AddingFundToCard:FifteenthDayOfTheMonth", new SubscriptionMonthlyPaymentMoment[2] { SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth, SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth }),
                 cronFifteenDayOfMonth,
                 new RecurringJobOptions
                 {
@@ -55,7 +55,7 @@ namespace Sig.App.Backend.BackgroundJobs
 
             var cronWeekly = Cron.Weekly(DayOfWeek.Monday, 4);
             RecurringJob.AddOrUpdate<AddingFundToCard>("AddingFundToCard:FirstDayOfTheWeek",
-                x => x.Run(new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheWeek }),
+                x => x.Run("AddingFundToCard:FirstDayOfTheWeek", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheWeek }),
                 cronWeekly,
                 new RecurringJobOptions
                 {
@@ -63,11 +63,52 @@ namespace Sig.App.Backend.BackgroundJobs
                 });
         }
 
-        public async Task Run(SubscriptionMonthlyPaymentMoment[] monthlyPaymentMoment)
+        public async Task Run(string name, SubscriptionMonthlyPaymentMoment[] monthlyPaymentMoment)
         {
             var today = clock
                 .GetCurrentInstant()
                 .ToDateTimeUtc();
+
+            var lastRun = await db.AddingFundToCardRuns
+                .Where(x => x.Name == name)
+                .OrderBy(x => x.Id)
+                .LastOrDefaultAsync();
+
+            if (lastRun != null)
+            {
+                if (lastRun.Date.Month == today.Month && lastRun.Date.Day == today.Day)
+                {
+                    //Can't add fund multiple time in the same day
+                    return;
+                }
+            }
+
+            if (monthlyPaymentMoment.First() == SubscriptionMonthlyPaymentMoment.FirstDayOfTheWeek)
+            {
+                if (today.DayOfWeek != DayOfWeek.Monday)
+                {
+                    //Can't add fund on the first day of the week when it's not Monday
+                    return;
+                }
+            }
+
+            if (monthlyPaymentMoment.First() == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth)
+            {
+                if (today.Day != 15)
+                {
+                    //Can't add fund on the fifteenth day of the month when it's not the 15th
+                    return;
+                }
+            }
+
+            if (monthlyPaymentMoment.First() == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth)
+            {
+                if (today.Day != 1)
+                {
+                    //Can't add fund on the fifteenth day of the month when it's not the 15th
+                    return;
+                }
+            }
 
             var activeSubscriptions = await db.Subscriptions
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary).ThenInclude(x => x.Card).ThenInclude(x => x.Transactions)
@@ -169,6 +210,13 @@ namespace Sig.App.Backend.BackgroundJobs
                 }
             }
 
+            db.AddingFundToCardRuns.Add(new DbModel.Entities.BackgroundJobs.AddingFundToCardRun()
+            {
+                Date = today,
+                Name = name,
+                Moments = monthlyPaymentMoment
+            });
+
             await db.SaveChangesAsync();
         }
 
@@ -187,7 +235,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 .Where(x => x.Id == subscriptionIdLong).FirstAsync();
 
             var beneficiary = await db.Beneficiaries
-                .Include(x => x.Card).ThenInclude(x => x.Transactions)
+                .Include(x => x.Card).ThenInclude(x => x.Transactions).ThenInclude(x => (x as SubscriptionAddingFundTransaction).SubscriptionType)
                 .Include(x => x.Card).ThenInclude(x => x.Funds)
                 .Include(x => x.Organization).ThenInclude(x => x.Project)
                 .Where(x => x.Id== beneficiaryIdLong)
