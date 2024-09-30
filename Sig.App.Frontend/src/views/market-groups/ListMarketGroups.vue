@@ -3,9 +3,9 @@
     "en": {
       "add-market-group": "Add",
       "title": "Manage Market Groups",
-      "empty-list": "No markets have been created yet.",
-      "create-market-group": "Create a market",
-      "market-group-count": "{count} market | {count} markets"
+      "empty-list": "No market groups have been created yet.",
+      "create-market-group": "Create a market group",
+      "market-group-count": "{count} market group | {count} market groups"
     },
     "fr": {
       "add-market-group": "Ajouter",
