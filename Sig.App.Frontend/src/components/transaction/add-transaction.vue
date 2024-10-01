@@ -388,7 +388,7 @@ function getIsGiftCard(productGroupName) {
   else return false;
 }
 
-function nextStep(values) {
+async function nextStep(values) {
   let haveAtLeastOneProductGroup = false;
   for (var i = 0; i < values.funds.length; i++) {
     const amount = values.funds[i].amount;
@@ -405,7 +405,7 @@ function nextStep(values) {
   }
 
   if (currentStep.value === 1) {
-    onSubmit(values);
+    await onSubmit(values);
     return;
   }
   currentStep.value++;
@@ -432,9 +432,7 @@ async function onSubmit() {
   });
 
   audio.play();
-  setTimeout(() => {
-    emit("onUpdateStep", TRANSACTION_STEPS_COMPLETE, { transactionId: result.data.createTransaction.transaction.id });
-  }, 200);
+  emit("onUpdateStep", TRANSACTION_STEPS_COMPLETE, { transactionId: result.data.createTransaction.transaction.id });
 }
 
 const goToAdminTransaction = () => {
