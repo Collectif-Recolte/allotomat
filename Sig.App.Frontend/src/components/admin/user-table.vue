@@ -5,6 +5,7 @@
       "edit-profile": "Edit user profile",
       "last-login-date": "Last login",
       "merchant": "Merchant",
+      "merchant-group-manager": "Merchant group manager",
       "options": "Options",
       "organization-manager": "Group manager",
       "project-manager": "Program manager",
@@ -25,6 +26,7 @@
       "edit-profile": "Modifier le profil de l'utilisateur",
       "last-login-date": "Dernière connexion",
       "merchant": "Marchand",
+      "merchant-group-manager": "Gestionnaire de groupe de marchands",
       "options": "Actions possibles",
       "organization-manager": "Gestionnaire de groupe",
       "project-manager": "Gestionnaire de programme",
@@ -78,7 +80,12 @@ import { useNotificationsStore } from "@/lib/store/notifications";
 
 import { copyTextToClipboard } from "@/lib/helpers/clipboard";
 
-import { USER_TYPE_PCAADMIN, USER_TYPE_PROJECTMANAGER, USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
+import {
+  USER_TYPE_PCAADMIN,
+  USER_TYPE_PROJECTMANAGER,
+  USER_TYPE_ORGANIZATIONMANAGER,
+  USER_TYPE_MARKETGROUPMANAGER
+} from "@/lib/consts/enums";
 import { URL_ADMIN_USER_PROFILE } from "@/lib/consts/urls";
 
 import PENCIL_ICON from "@/lib/icons/pencil.json";
@@ -176,12 +183,15 @@ function getUserLastConnectionTime(item) {
 }
 
 function getUserRole(item) {
+  console.log(item);
   return item?.type === USER_TYPE_PCAADMIN
     ? t("admin-pca")
     : item?.type === USER_TYPE_PROJECTMANAGER
     ? t("project-manager")
     : item?.type === USER_TYPE_ORGANIZATIONMANAGER
     ? t("organization-manager")
+    : item?.type === USER_TYPE_MARKETGROUPMANAGER
+    ? t("merchant-group-manager")
     : t("merchant");
 }
 </script>
