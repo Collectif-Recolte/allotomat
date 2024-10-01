@@ -388,7 +388,7 @@ function getIsGiftCard(productGroupName) {
   else return false;
 }
 
-function nextStep(values) {
+async function nextStep(values) {
   let haveAtLeastOneProductGroup = false;
   for (var i = 0; i < values.funds.length; i++) {
     const amount = values.funds[i].amount;
@@ -405,7 +405,7 @@ function nextStep(values) {
   }
 
   if (currentStep.value === 1) {
-    onSubmit(values);
+    await onSubmit(values);
     return;
   }
   currentStep.value++;
