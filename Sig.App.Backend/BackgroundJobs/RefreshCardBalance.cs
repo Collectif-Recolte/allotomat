@@ -62,7 +62,7 @@ namespace Sig.App.Backend.BackgroundJobs
                     var expectedAmount = transactions.Sum(x => x.AvailableFund);
                     var amount = fund.Amount;
 
-                    if (expectedAmount > 0 && amount != expectedAmount)
+                    if (expectedAmount >= 0 && amount != expectedAmount)
                     {
                         fund.Amount = expectedAmount;
                         logger.LogInformation($"RefreshCardBalance :: Card with errors in balance (card : {card.Id} - fund : {fund.Id}) : {amount} -> {expectedAmount}");
