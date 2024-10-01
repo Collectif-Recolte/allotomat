@@ -26,11 +26,7 @@
             :title="t('market-group-count', { count: marketGroups.length })"
             :cta-label="t('add-market-group')"
             :cta-route="addMarketGroupRoute" />
-          <MarketGroupTable
-            can-edit
-            :market-groups="marketGroups"
-            :url-name-market-group-archive="URL_MARKET_GROUP_ARCHIVE"
-            :url-name-market-group-delete="URL_MARKET_GROUP_DELETE" />
+          <MarketGroupTable can-edit :market-groups="marketGroups" :url-name-market-group-archive="URL_MARKET_GROUP_ARCHIVE" />
         </template>
 
         <UiEmptyPage v-else>
@@ -53,12 +49,7 @@ import { onBeforeRouteUpdate } from "vue-router";
 import { useQuery, useResult } from "@vue/apollo-composable";
 import { computed } from "vue";
 
-import {
-  URL_MARKET_GROUP_ADD,
-  URL_MARKET_GROUPS_OVERVIEW,
-  URL_MARKET_GROUP_ARCHIVE,
-  URL_MARKET_GROUP_DELETE
-} from "@/lib/consts/urls";
+import { URL_MARKET_GROUP_ADD, URL_MARKET_GROUPS_OVERVIEW, URL_MARKET_GROUP_ARCHIVE } from "@/lib/consts/urls";
 import { usePageTitle } from "@/lib/helpers/page-title";
 
 import MarketGroupTable from "@/components/market-groups/market-group-table";

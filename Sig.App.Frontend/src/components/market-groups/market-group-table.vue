@@ -3,7 +3,6 @@
       "en": {
           "edit-market-group": "Edit",
           "market-group-archive": "Archive",
-          "market-group-delete": "Delete",
           "market-group-edit-managers": "Edit managers",
           "market-group-edit-associated-merchants": "Edit associated merchants",
           "market-group-name": "Name",
@@ -12,7 +11,6 @@
       "fr": {
           "edit-market-group": "Modifier",
           "market-group-archive": "Archiver",
-          "market-group-delete": "Supprimer",
           "market-group-edit-managers": "Modifier les gestionnaires",
           "market-group-edit-associated-merchants": "Modifier les commerces associés",
           "market-group-name": "Nom",
@@ -47,7 +45,6 @@ import { defineProps, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 import ICON_BRIEFCASE from "@/lib/icons/briefcase.json";
-import ICON_TRASH from "@/lib/icons/trash.json";
 import ICON_PENCIL from "@/lib/icons/pencil.json";
 import ICON_FOLDER from "@/lib/icons/folder.json";
 
@@ -58,12 +55,11 @@ const { t } = useI18n();
 const props = defineProps({
   marketGroups: { type: Object, default: null },
   urlNameMarketGroupArchive: { type: String, default: "" },
-  urlNameMarketGroupDelete: { type: String, default: "" },
   canEdit: Boolean
 });
 
 const cols = computed(() => {
-  return props.canEdit || props.urlNameMarketGroupDelete || props.urlNameMarketGroupArchive
+  return props.canEdit || props.urlNameMarketGroupArchive
     ? [
         { label: t("market-group-name") },
         {
@@ -88,16 +84,9 @@ const getBtnGroup = (marketGroup) => [
     if: props.canEdit
   },
   {
-    icon: ICON_TRASH,
-    label: t("market-group-delete"),
-    route: { name: props.urlNameMarketGroupDelete, params: { marketGroupId: marketGroup.id } },
-    if: marketGroup.isArchived
-  },
-  {
     icon: ICON_FOLDER,
     label: t("market-group-archive"),
-    route: { name: props.urlNameMarketGroupArchive, params: { marketGroupId: marketGroup.id } },
-    if: !marketGroup.isArchived
+    route: { name: props.urlNameMarketGroupArchive, params: { marketGroupId: marketGroup.id } }
   }
 ];
 

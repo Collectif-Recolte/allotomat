@@ -183,7 +183,6 @@ function getUserLastConnectionTime(item) {
 }
 
 function getUserRole(item) {
-  console.log(item);
   return item?.type === USER_TYPE_PCAADMIN
     ? t("admin-pca")
     : item?.type === USER_TYPE_PROJECTMANAGER

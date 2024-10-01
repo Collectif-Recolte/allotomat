@@ -82,7 +82,7 @@
       </div>
       <h3 class="mb-2 mt-4">{{ t("subscriptions-title") }}</h3>
       <ul class="inline-flex flex-col justify-start items-start gap-y-1 mb-4 max-w-full">
-        <li class="mb-4" v-for="subscription in beneficiary.beneficiarySubscriptions" :key="subscription.subscription.id">
+        <li v-for="subscription in beneficiary.beneficiarySubscriptions" :key="subscription.subscription.id" class="mb-4">
           <b>{{ subscription.subscription.name }}</b>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <div v-html="t('amount-received-each-payment', { amountByPayment: amountByPayment(subscription) })"></div>
