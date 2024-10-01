@@ -432,9 +432,7 @@ async function onSubmit() {
   });
 
   audio.play();
-  setTimeout(() => {
-    emit("onUpdateStep", TRANSACTION_STEPS_COMPLETE, { transactionId: result.data.createTransaction.transaction.id });
-  }, 200);
+  emit("onUpdateStep", TRANSACTION_STEPS_COMPLETE, { transactionId: result.data.createTransaction.transaction.id });
 }
 
 const goToAdminTransaction = () => {
