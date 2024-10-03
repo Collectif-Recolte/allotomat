@@ -14,7 +14,7 @@
 </i18n>
 
 <template>
-  <UiDialogModal v-slot="{ closeModal }" :return-route="{ name: URL_MARKET_ADMIN }" :title="t('title')" :has-footer="false">
+  <UiDialogModal v-slot="{ closeModal }" :return-route="returnRoute()" :title="t('title')" :has-footer="false">
     <MarketForm
       v-if="market"
       :submit-btn="t('edit-market')"
@@ -31,7 +31,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
-import { URL_MARKET_ADMIN } from "@/lib/consts/urls";
+import { URL_MARKET_ADMIN, URL_MARKET_OVERVIEW_EDIT, URL_MARKET_OVERVIEW } from "@/lib/consts/urls";
 
 import MarketForm from "@/views/market/_Form.vue";
 
@@ -75,7 +75,12 @@ async function onSubmit(values) {
   };
 
   await editMarket({ input });
-  router.push({ name: URL_MARKET_ADMIN });
+  router.push(returnRoute());
   addSuccess(t("edit-market-success-notification", { marketName: values.marketName }));
+}
+
+function returnRoute() {
+  if (route.name === URL_MARKET_OVERVIEW_EDIT) return { name: URL_MARKET_OVERVIEW };
+  else return { name: URL_MARKET_ADMIN };
 }
 </script>

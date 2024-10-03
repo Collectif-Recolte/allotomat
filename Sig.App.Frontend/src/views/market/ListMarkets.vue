@@ -26,7 +26,12 @@
             :title="t('market-count', { count: markets.length })"
             :cta-label="t('add-market')"
             :cta-route="addMarketRoute" />
-          <MarketTable can-edit :markets="markets" :url-name-market-archive="URL_MARKET_ARCHIVE" />
+          <MarketTable
+            can-edit
+            :markets="markets"
+            :url-name-market-archive="URL_MARKET_ARCHIVE"
+            :url-name-market-edit="URL_MARKET_EDIT"
+            :url-name-market-manage-managers="URL_MARKET_MANAGE_MANAGERS" />
         </template>
 
         <UiEmptyPage v-else>
@@ -45,7 +50,13 @@ import { useI18n } from "vue-i18n";
 import { onBeforeRouteUpdate } from "vue-router";
 import { useQuery, useResult } from "@vue/apollo-composable";
 
-import { URL_MARKET_ADD, URL_MARKET_ADMIN, URL_MARKET_ARCHIVE } from "@/lib/consts/urls";
+import {
+  URL_MARKET_ADD,
+  URL_MARKET_ADMIN,
+  URL_MARKET_ARCHIVE,
+  URL_MARKET_EDIT,
+  URL_MARKET_MANAGE_MANAGERS
+} from "@/lib/consts/urls";
 import { usePageTitle } from "@/lib/helpers/page-title";
 
 import MarketTable from "@/components/market/market-table";

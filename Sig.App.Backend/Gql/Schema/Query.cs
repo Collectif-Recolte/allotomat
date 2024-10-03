@@ -224,6 +224,13 @@ namespace Sig.App.Backend.Gql.Schema
             }
         }
 
+        [RequirePermission(GlobalPermission.ManageMarkets, GlobalPermission.ManageOrganizations)]
+        [Description("All markets in Tomat")]
+        public static async Task<IEnumerable<MarketGraphType>> AllMarkets(this GqlQuery _, [Inject] AppDbContext db)
+        {
+            return await db.Markets.Where(x => !x.IsArchived).Select(x => new MarketGraphType(x)).ToListAsync();
+        }   
+
         [RequirePermission(GlobalPermission.ManageMarketGroups, GlobalPermission.ManageSpecificMarketGroup)]
         [Description("All market groups manageable by current user")]
         public static async Task<IEnumerable<MarketGroupGraphType>> MarketGroups(this GqlQuery _, IAppUserContext ctx, [Inject] AppDbContext db, [Inject] PermissionService permissionService)

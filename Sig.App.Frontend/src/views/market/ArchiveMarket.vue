@@ -21,7 +21,7 @@
 
 <template>
   <UiDialogDeleteModal
-    :return-route="{ name: URL_MARKET_ADMIN }"
+    :return-route="returnRoute()"
     :title="t('title', { marketName: getMarketName() })"
     :description="t('description', { marketName: getMarketName() })"
     :validation-text="getMarketName()"
@@ -38,7 +38,7 @@ import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
-import { URL_MARKET_ADMIN } from "@/lib/consts/urls";
+import { URL_MARKET_ADMIN, URL_MARKET_OVERVIEW_ARCHIVE, URL_MARKET_OVERVIEW } from "@/lib/consts/urls";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -80,6 +80,11 @@ async function archiveMarket() {
   });
 
   addSuccess(t("archive-market-success-notification", { marketName: market.value.name }));
-  router.push({ name: URL_MARKET_ADMIN });
+  router.push(returnRoute());
+}
+
+function returnRoute() {
+  if (route.name === URL_MARKET_OVERVIEW_ARCHIVE) return { name: URL_MARKET_OVERVIEW };
+  else return { name: URL_MARKET_ADMIN };
 }
 </script>

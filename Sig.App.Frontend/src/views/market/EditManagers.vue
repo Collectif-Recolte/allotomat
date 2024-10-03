@@ -16,7 +16,7 @@
 <template>
   <ManageManagersModal
     ref="manageManagersModal"
-    :return-route="{ name: URL_MARKET_ADMIN }"
+    :return-route="returnRoute()"
     :managers="managers"
     :title="t('title', { marketName: getMarketName() })"
     @removeManager="removeManager"
@@ -31,7 +31,7 @@ import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
-import { URL_MARKET_ADMIN } from "@/lib/consts/urls";
+import { URL_MARKET_ADMIN, URL_MARKET_OVERVIEW_MANAGE_MANAGERS, URL_MARKET_OVERVIEW } from "@/lib/consts/urls";
 
 import ManageManagersModal from "@/components/managers/manage-managers-modal.vue";
 
@@ -48,12 +48,16 @@ const { result, refetch } = useQuery(
         name
         managers {
           id
+          email
+          isConfirmed
+          confirmationLink
+          resetPasswordLink
           profile {
             id
             firstName
             lastName
           }
-          email
+          type
         }
       }
     }
@@ -72,12 +76,16 @@ const { mutate: removeManagerFromMarket } = useMutation(
           id
           managers {
             id
+            email
+            isConfirmed
+            confirmationLink
+            resetPasswordLink
             profile {
               id
               firstName
               lastName
             }
-            email
+            type
           }
         }
       }
@@ -92,6 +100,15 @@ const { mutate: addManagerToMarket } = useMutation(
         managers {
           id
           email
+          isConfirmed
+          confirmationLink
+          resetPasswordLink
+          profile {
+            id
+            firstName
+            lastName
+          }
+          type
         }
       }
     }
@@ -124,5 +141,10 @@ async function addManager(email) {
   addSuccess(t("add-market-manager-success-notification"));
   refetch();
   manageManagersModal.value.hideAddManagerForm();
+}
+
+function returnRoute() {
+  if (route.name === URL_MARKET_OVERVIEW_MANAGE_MANAGERS) return { name: URL_MARKET_OVERVIEW };
+  else return { name: URL_MARKET_ADMIN };
 }
 </script>

@@ -332,7 +332,57 @@ export default [
     component: () => import("@/views/market/ViewMarkets.vue"),
     meta: {
       claim: GLOBAL_MANAGE_CARDS
-    }
+    },
+    children: [
+      {
+        name: urls.URL_MARKET_OVERVIEW_SELECT,
+        path: "select",
+        component: () => import("@/views/market/SelectMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_MARKET_OVERVIEW_ADD,
+        path: "add",
+        component: () => import("@/views/market/AddMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_MARKET_OVERVIEW_EDIT,
+        path: ":marketId/edit",
+        component: () => import("@/views/market/EditMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_MARKET_OVERVIEW_DELETE,
+        path: ":marketId/delete",
+        component: () => import("@/views/market/DeleteMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_MARKET_OVERVIEW_ARCHIVE,
+        path: ":marketId/archive",
+        component: () => import("@/views/market/ArchiveMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_MARKET_OVERVIEW_MANAGE_MANAGERS,
+        path: ":marketId/manage-managers",
+        component: () => import("@/views/market/EditManagers.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      }
+    ]
   },
   {
     name: urls.URL_MARKET_GROUPS_OVERVIEW,
