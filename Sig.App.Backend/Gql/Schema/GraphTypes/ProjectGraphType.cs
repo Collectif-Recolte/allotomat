@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static Sig.App.Backend.Requests.Queries.Cards.SearchCards;
+using static Sig.App.Backend.Requests.Queries.Markets.SearchMarkets;
 
 namespace Sig.App.Backend.Gql.Schema.GraphTypes
 {
@@ -45,6 +46,33 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<IEnumerable<MarketGraphType>> Markets(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadProjectMarkets(Id.LongIdentifierForType<Project>());
+        }
+
+        public IDataLoaderResult<IEnumerable<MarketGroupGraphType>> MarketGroups(IAppUserContext ctx)
+        {
+            return ctx.DataLoader.LoadProjectMarketGroups(Id.LongIdentifierForType<Project>());
+        }
+
+        public async Task<Pagination<MarketGraphType>> MarketsSearch([Inject] IMediator mediator, int page, int limit, Id[] marketGroups,
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+            [Description("If specified, only that match text is returned.")] string? searchText = "",
+#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+            Sort<MarketSort> sort = null
+            )
+        {
+            var results = await mediator.Send(new SearchMarkets.Query
+            {
+                ProjectId = project.Id,
+                Page = new Page(page, limit),
+                SearchText = searchText,
+                Sort = sort,
+                MarketGroups = marketGroups
+            });
+
+            return results.Map(x =>
+            {
+                return new MarketGraphType(x);
+            });
         }
 
         public IDataLoaderResult<IEnumerable<OrganizationGraphType>> Organizations(IAppUserContext ctx)
