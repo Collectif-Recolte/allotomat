@@ -8,6 +8,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.DbModel.Entities.Profiles;
+using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Extensions;
@@ -80,6 +81,18 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 logger.LogInformation($"[Mutation] CreateMarket - Market manager {manager.Email} added to market {market.Name} ({market.Id})");
             }
 
+            if (request.ProjectId.IsSet())
+            {
+                market.Projects = new List<ProjectMarket>
+                {
+                    new ProjectMarket()
+                    {
+                        Market = market,
+                        ProjectId = request.ProjectId.Value.LongIdentifierForType<Project>()
+                    }
+                };
+            }
+
             await db.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation($"[Mutation] CreateMarket - New market created {market.Name} ({market.Id})");
@@ -128,6 +141,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
         {
             public string Name { get; set; }
             public IEnumerable<string> ManagerEmails { get; set; }
+            public Maybe<Id> ProjectId { get; set; }
         }
 
         [MutationPayload]

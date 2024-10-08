@@ -41,14 +41,14 @@ import ICON_TRASH from "@/lib/icons/trash.json";
 import ICON_PENCIL from "@/lib/icons/pencil.json";
 import ICON_FOLDER from "@/lib/icons/folder.json";
 
-import { URL_MARKET_MANAGE_MANAGERS, URL_MARKET_EDIT } from "@/lib/consts/urls";
-
 const { t } = useI18n();
 
 const props = defineProps({
   markets: { type: Object, default: null },
   urlNameMarketArchive: { type: String, default: "" },
   urlNameMarketDelete: { type: String, default: "" },
+  urlNameMarketEdit: { type: String, default: "" },
+  urlNameMarketManageManagers: { type: String, default: "" },
   canEdit: Boolean
 });
 
@@ -68,13 +68,13 @@ const getBtnGroup = (market) => [
   {
     icon: ICON_PENCIL,
     label: t("edit-market"),
-    route: { name: URL_MARKET_EDIT, params: { marketId: market.id } },
+    route: { name: props.urlNameMarketEdit, params: { marketId: market.id } },
     if: props.canEdit
   },
   {
     icon: ICON_BRIEFCASE,
     label: t("market-edit-managers"),
-    route: { name: URL_MARKET_MANAGE_MANAGERS, params: { marketId: market.id } },
+    route: { name: props.urlNameMarketManageManagers, params: { marketId: market.id } },
     if: props.canEdit
   },
   {

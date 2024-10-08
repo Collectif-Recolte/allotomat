@@ -49,12 +49,16 @@ const { result, refetch } = useQuery(
         name
         managers {
           id
+          email
+          isConfirmed
+          confirmationLink
+          resetPasswordLink
           profile {
             id
             firstName
             lastName
           }
-          email
+          type
         }
       }
     }
@@ -73,12 +77,16 @@ const { mutate: removeManagerFromProject } = useMutation(
           id
           managers {
             id
+            email
+            isConfirmed
+            confirmationLink
+            resetPasswordLink
             profile {
               id
               firstName
               lastName
             }
-            email
+            type
           }
         }
       }
@@ -93,6 +101,15 @@ const { mutate: addManagerToProject } = useMutation(
         managers {
           id
           email
+          isConfirmed
+          confirmationLink
+          resetPasswordLink
+          profile {
+            id
+            firstName
+            lastName
+          }
+          type
         }
       }
     }

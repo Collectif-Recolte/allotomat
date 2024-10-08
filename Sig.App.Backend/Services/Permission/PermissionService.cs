@@ -130,7 +130,15 @@ namespace Sig.App.Backend.Services.Permission
         private static readonly MarketPermission[] ProjectManagerMarketPermission = new[]
         {
             MarketPermission.CreateTransaction,
-            MarketPermission.RefundTransaction
+            MarketPermission.RefundTransaction,
+            MarketPermission.ManageMarket,
+            MarketPermission.ArchiveMarket
+        };
+
+        private static readonly MarketPermission[] ProjectManagerMarketPermissionGeneric = new[]
+        {
+            MarketPermission.ManageAllMarkets,
+            MarketPermission.CreateMarket
         };
 
         private static readonly MarketPermission[] OrganizationManagerMarketPermission = new[]
@@ -295,16 +303,21 @@ namespace Sig.App.Backend.Services.Permission
 
             if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()))
             {
-                var marketLongId = Id.New<Market>(marketId).LongIdentifierForType<Market>();
-                var projectMarkets = db.ProjectMarkets.Where(x => x.MarketId == marketLongId).ToList();
-
-                foreach (var projectMarket in projectMarkets)
+                if (marketId != null)
                 {
-                    if (claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectMarket.ProjectId.ToString()))
+                    var marketLongId = Id.New<Market>(marketId).LongIdentifierForType<Market>();
+                    var projectMarkets = db.ProjectMarkets.Where(x => x.MarketId == marketLongId).ToList();
+
+                    foreach (var projectMarket in projectMarkets)
                     {
-                        return Task.FromResult(ProjectManagerMarketPermission);
+                        if (claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectMarket.ProjectId.ToString()))
+                        {
+                            return Task.FromResult(ProjectManagerMarketPermission);
+                        }
                     }
                 }
+
+                return Task.FromResult(ProjectManagerMarketPermissionGeneric);
             }
             
             if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.OrganizationManager.ToString()))
