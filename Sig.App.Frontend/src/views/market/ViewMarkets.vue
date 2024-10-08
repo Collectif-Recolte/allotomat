@@ -7,6 +7,7 @@
       "market-count": "{count} market | {count} markets",
       "search-placeholder": "Search by market name, email address, person name",
       "reset-search": "Reset search",
+      "market-groups": "Market Groups"
     },
     "fr": {
       "add-market": "Ajouter un commerce",
@@ -15,6 +16,7 @@
       "market-count": "{count} commerce | {count} commerces",
       "search-placeholder": "Chercher par nom du commerce, addresse courriel, nom de la personne",
       "reset-search": "Réinitialiser la recherche",
+      "market-groups": "Groupes de commerce"
     }
   }
 </i18n>
@@ -23,29 +25,29 @@
   <RouterView v-slot="{ Component }">
     <AppShell :title="t('title')" :loading="loading">
       <div v-if="markets && markets.length > 0">
-        <UiTableHeader
-          :title="t('market-count', { count: markets.length })"
-          :cta-label="t('add-market')"
-          :cta-route="addMarketRoute">
+        <UiTableHeader :title="t('market-count', { count: markets.length })">
           <template #right>
-            <UiFilter
-              v-model="searchInput"
-              has-search
-              has-filters
-              :has-active-filters="hasActiveFilters"
-              :active-filters-count="activeFiltersCount"
-              :placeholder="t('search-placeholder')"
-              @resetFilters="resetSearch"
-              @search="onSearch">
-              <PfFormInputCheckboxGroup
-                v-if="availableMarketGroups.length > 0"
-                id="market-groups"
-                is-filter
-                :value="marketGroups"
-                :label="t('market-groups')"
-                :options="availableMarketGroups"
-                @input="onMarketGroupsChecked" />
-            </UiFilter>
+            <div class="flex items-center gap-x-4">
+              <UiFilter
+                v-model="searchInput"
+                has-search
+                has-filters
+                :has-active-filters="hasActiveFilters"
+                :active-filters-count="activeFiltersCount"
+                :placeholder="t('search-placeholder')"
+                @resetFilters="resetSearch"
+                @search="onSearch">
+                <PfFormInputCheckboxGroup
+                  v-if="availableMarketGroups.length > 0"
+                  id="market-groups"
+                  is-filter
+                  :value="marketGroups"
+                  :label="t('market-groups')"
+                  :options="availableMarketGroups"
+                  @input="onMarketGroupsChecked" />
+              </UiFilter>
+              <PfButtonLink tag="RouterLink" :to="addMarketRoute" :label="t('add-market')" />
+            </div>
           </template>
         </UiTableHeader>
         <MarketTable
