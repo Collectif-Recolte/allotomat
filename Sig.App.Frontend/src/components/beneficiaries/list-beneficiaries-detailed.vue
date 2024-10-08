@@ -15,7 +15,8 @@
       v-for="beneficiary in props.beneficiariesPagination.items"
       :key="beneficiary.id"
       :beneficiary="beneficiary"
-      :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous" />
+      :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous"
+      :organization="props.organization" />
     <div
       v-if="!administrationSubscriptionsOffPlatform"
       class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
@@ -23,7 +24,8 @@
         tag="routerLink"
         :to="{ name: URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS, query: props.filteredQuery }"
         btn-style="secondary"
-        class="rounded-full">
+        class="rounded-full"
+        :is-disabled="props.isAllGroupSelected">
         <span class="inline-flex items-center">
           {{ t("assign-subscription-btn") }}
           <span class="bg-primary-700 w-6 h-6 flex items-center justify-center rounded-full text-p3 leading-none ml-2 -mr-2">{{
@@ -63,6 +65,14 @@ const props = defineProps({
     default: false
   },
   filteredQuery: {
+    type: Object,
+    required: true
+  },
+  isAllGroupSelected: {
+    type: Boolean,
+    default: false
+  },
+  organization: {
     type: Object,
     required: true
   }

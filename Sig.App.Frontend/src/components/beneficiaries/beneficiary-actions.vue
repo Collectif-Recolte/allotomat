@@ -26,7 +26,11 @@
       "beneficiary-add-missed-payment": "Add missed payment",
       "beneficiary-add-missed-payment-no-card": "You can't add a missed payment if the beneficiary doesn't have a card",
       "beneficiary-add-missed-payment-no-subscription": "You can't add a missed payment if the beneficiary doesn't have a subscription",
-      "beneficiary-add-missed-payment-no-missed-payment": "You can't add a missed payment if the beneficiary doesn't have a missed payment"
+      "beneficiary-add-missed-payment-no-missed-payment": "You can't add a missed payment if the beneficiary doesn't have a missed payment",
+      "beneficiary-create-transaction": "Create transaction",
+      "beneficiary-create-transaction-no-market": "You can't create a transaction if the group doesn't have a market",
+      "beneficiary-create-transaction-no-card": "You can't create a transaction if the beneficiary doesn't have a card",
+      "beneficiary-create-transaction-card-disabled": "You can't create a transaction if the beneficiary's card is disabled"
     },
     "fr": {
       "beneficiary-edit": "Modifier les détails",
@@ -54,11 +58,14 @@
       "beneficiary-add-missed-payment": "Versement d’un paiement manqué",
       "beneficiary-add-missed-payment-no-card": "Vous ne pouvez pas ajouter un paiement manqué si le participant-e n'a pas de carte",
       "beneficiary-add-missed-payment-no-subscription": "Vous ne pouvez pas ajouter un paiement manqué si le participant-e n'a pas d'abonnement",
-      "beneficiary-add-missed-payment-no-missed-payment": "Vous ne pouvez pas ajouter un paiement manqué si le participant-e n'a pas de paiement manqué"
-
+      "beneficiary-add-missed-payment-no-missed-payment": "Vous ne pouvez pas ajouter un paiement manqué si le participant-e n'a pas de paiement manqué",
+      "beneficiary-create-transaction": "Créer une transaction",
+      "beneficiary-create-transaction-no-market": "Vous ne pouvez pas créer une transaction si le groupe n'a pas de commerce",
+      "beneficiary-create-transaction-no-card": "Vous ne pouvez pas créer une transaction si le participant-e n'a pas de carte",
+      "beneficiary-create-transaction-card-disabled": "Vous ne pouvez pas créer une transaction si la carte du participant-e est désactivée"
     }
   }
-  </i18n>
+</i18n>
 
 <template>
   <UiButtonGroup :items="items" />
@@ -84,6 +91,8 @@ import ICON_CLOCK from "@/lib/icons/clock.json";
 import ICON_CLOSE from "@/lib/icons/close.json";
 import ICON_CONFLICT from "@/lib/icons/exclamation-circle.json";
 import ICON_IDENTIFICATION from "@/lib/icons/identification.json";
+import ICON_TRANSACTION from "@/lib/icons/add-square.json";
+import ICON_MISSED_PAYMENT from "@/lib/icons/arrow-ricochet.json";
 
 import {
   URL_BENEFICIARY_EDIT,
@@ -98,13 +107,15 @@ import {
   URL_BENEFICIARY_CARD_ENABLE,
   URL_BENEFICIARY_MANAGE_CONFLICT,
   URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS,
-  URL_BENEFICIARY_ADD_MISSED_PAYMENT
+  URL_BENEFICIARY_ADD_MISSED_PAYMENT,
+  URL_BENEFICIARY_TRANSACTION_ADD
 } from "@/lib/consts/urls";
+import { USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
 
 import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
 
 const { t } = useI18n();
-const { getGlobalPermissions } = storeToRefs(useAuthStore());
+const { getGlobalPermissions, userType } = storeToRefs(useAuthStore());
 
 const items = ref([]);
 
@@ -121,6 +132,10 @@ watch(
 
 const manageCards = computed(() => {
   return getGlobalPermissions.value.includes(GLOBAL_MANAGE_CARDS);
+});
+
+const isOrganizationManager = computed(() => {
+  return userType.value === USER_TYPE_ORGANIZATIONMANAGER;
 });
 
 function updateItems() {
@@ -148,6 +163,19 @@ function updateItems() {
       },
       {
         isExtra: true,
+        icon: ICON_TRANSACTION,
+        label: t("beneficiary-create-transaction"),
+        route: { name: URL_BENEFICIARY_TRANSACTION_ADD, params: { beneficiaryId: props.beneficiary.id } },
+        disabled: !haveCard() || !haveMarketsInOrganization() || isCardDisabled(),
+        reason: !haveCard()
+          ? t("beneficiary-create-transaction-no-card")
+          : !haveMarketsInOrganization()
+          ? t("beneficiary-create-transaction-no-market")
+          : t("beneficiary-create-transaction-card-disabled"),
+        if: isOrganizationManager.value
+      },
+      {
+        isExtra: true,
         icon: ICON_ADD_CASH,
         label: t("beneficiary-add-funds"),
         route: { name: URL_BENEFICIARY_MANUALLY_ADD_FUND, params: { beneficiaryId: props.beneficiary.id } },
@@ -160,7 +188,7 @@ function updateItems() {
       },
       {
         isExtra: true,
-        icon: ICON_ADD_CASH,
+        icon: ICON_MISSED_PAYMENT,
         label: t("beneficiary-add-missed-payment"),
         route: { name: URL_BENEFICIARY_ADD_MISSED_PAYMENT, params: { beneficiaryId: props.beneficiary.id } },
         disabled: !haveCard() || !haveSubscriptions() || !haveMissedPayment(),
@@ -263,7 +291,7 @@ function updateItems() {
       },
       {
         isExtra: true,
-        icon: ICON_ADD_CASH,
+        icon: ICON_MISSED_PAYMENT,
         label: t("beneficiary-add-missed-payment"),
         route: { name: URL_BENEFICIARY_ADD_MISSED_PAYMENT, params: { beneficiaryId: props.beneficiary.id } },
         disabled: !haveCard() || !haveSubscriptions() || !haveMissedPayment(),
@@ -272,6 +300,18 @@ function updateItems() {
           : !haveSubscriptions()
           ? t("beneficiary-add-missed-payment-no-subscription")
           : t("beneficiary-add-missed-payment-no-missed-payment")
+      },
+      {
+        isExtra: true,
+        icon: ICON_TRANSACTION,
+        label: t("beneficiary-create-transaction"),
+        route: { name: URL_BENEFICIARY_TRANSACTION_ADD, params: { beneficiaryId: props.beneficiary.id } },
+        disabled: !haveCard() || !haveMarketsInOrganization() || isCardDisabled(),
+        reason: !haveCard()
+          ? t("beneficiary-create-transaction-no-card")
+          : !haveMarketsInOrganization()
+          ? t("beneficiary-create-transaction-no-market")
+          : t("beneficiary-create-transaction-card-disabled")
       }
     ];
   }
@@ -289,6 +329,10 @@ const props = defineProps({
   haveSubscriptionConflict: {
     type: Boolean,
     default: false
+  },
+  organization: {
+    type: Object,
+    required: true
   }
 });
 
@@ -306,6 +350,10 @@ function haveSubscriptions() {
 
 function haveMissedPayment() {
   return props.beneficiary.beneficiarySubscriptions.some((x) => x.hasMissedPayment);
+}
+
+function haveMarketsInOrganization() {
+  return props.organization.markets.length > 0;
 }
 
 function qrCodeLink() {

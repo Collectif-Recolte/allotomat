@@ -8,7 +8,8 @@
       "beneficiary-without-subscription": "No subscription",
       "beneficiary-no-card": "No card",
       "beneficiary-card-disabled": "Temporarily disabled",
-      "beneficiary-card-last-usage": "Last use"
+      "beneficiary-card-last-usage": "Last use",
+      "beneficiary-organization": "Group"
     },
     "fr": {
       "beneficiary-id1": "ID 1",
@@ -18,7 +19,8 @@
       "beneficiary-without-subscription": "Pas d'abonnement",
       "beneficiary-no-card": "Pas de carte",
       "beneficiary-card-disabled": "Désactivée temporairement",
-      "beneficiary-card-last-usage": "Dernier usage"
+      "beneficiary-card-last-usage": "Dernier usage",
+      "beneficiary-organization": "Groupe"
     }
   }
 </i18n>
@@ -53,6 +55,10 @@
                   size="xs" />
               </div>
             </dd>
+          </div>
+          <div :class="dlGroupClasses" class="w-full">
+            <dt :class="dtClasses">{{ t("beneficiary-organization") }}</dt>
+            <dd :class="ddClasses">{{ beneficiary.organization.name ?? "‒" }}</dd>
           </div>
         </dl>
         <template v-if="haveAnySubscriptions()">
@@ -125,6 +131,7 @@
     <div class="absolute right-3 top-3">
       <BeneficiaryActions
         :beneficiary="beneficiary"
+        :organization="props.organization"
         :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous"
         :have-subscription-conflict="isBeneficiaryPaymentConflict()" />
     </div>
@@ -184,6 +191,10 @@ const props = defineProps({
   beneficiariesAreAnonymous: {
     type: Boolean,
     default: false
+  },
+  organization: {
+    type: Object,
+    default: null
   }
 });
 

@@ -50,6 +50,8 @@ export const URL_ORGANIZATION_DELETE = "organization-delete-url";
 export const URL_ORGANIZATION_MANAGE_MANAGERS = "organization-manage-managers-url";
 export const URL_ORGANIZATION_MANAGER_REMOVE = "organization-manage-managers-remove-url";
 export const URL_ORGANIZATION_EDIT = "organization-edit-url";
+export const URL_ORGANIZATION_MANAGE_MERCHANTS = "organization-manage-merchants-url";
+export const URL_REMOVE_MERCHANTS_FROM_ORGANIZATION = "organization-remove-market-url";
 
 export const URL_SUBSCRIPTION_ADMIN = "subscription-list-url";
 export const URL_SUBSCRIPTION_ADD = "subscription-add-url";
@@ -77,10 +79,12 @@ export const URL_BENEFICIARY_CARD_ENABLE = "beneficiary-card-enable-url";
 export const URL_BENEFICIARY_MANAGE = "beneficiary-manage-url";
 export const URL_BENEFICIARY_MANAGE_CONFLICT = "beneficiary-manage-conflict-url";
 export const URL_BENEFICIARY_ADD_MISSED_PAYMENT = "beneficiary-add-missed-payment-url";
+export const URL_BENEFICIARY_TRANSACTION_ADD = "beneficiary-transaction-add-url";
 
 export const URL_PROJECT_MANAGER_ADMIN = "project-manager-list-url";
 export const URL_PROJECT_MANAGER_ADD = "project-manager-add-url";
 export const URL_PROJECT_SETTINGS = "project-settings-url";
+export const URL_RECONCILIATION_REPORT = "reconciliation-report-url";
 
 export const URL_ORGANIZATION_MANAGER_ADMIN = "organization-manager-list-url";
 export const URL_ORGANIZATION_MANAGER_ADD = "organization-manager-add-url";
