@@ -35,7 +35,7 @@ namespace Sig.App.Backend.Requests.Queries.Markets
             }
             else
             {
-                query = db.ProjectMarkets.Include(x => x.Market).Select(x => x.Market);
+                query = db.Markets;
             }
 
             if (request.SearchText.IsSet() && !string.IsNullOrEmpty(request.SearchText.Value))

@@ -40,24 +40,23 @@
         :processing="isSubmitting"
         @cancel="closeModal">
         <div>
-          <PfFormSection v-if="filteredMarketOptions.length > 0">
-            <Field v-slot="{ field: inputField, errors: fieldErrors }" name="market">
-              <PfFormInputSelect
-                id="marketId"
-                v-bind="inputField"
-                :placeholder="t('choose-market')"
-                :label="t('select-market')"
-                :options="filteredMarketOptions"
-                :errors="fieldErrors" />
-            </Field>
-          </PfFormSection>
-          <template v-else>
-            <div class="text-red-500">
-              <p class="text-sm">{{ t("no-associated-merchant") }}</p>
-            </div>
-          </template>
-
           <div class="flex flex-col gap-y-6">
+            <PfFormSection v-if="filteredMarketOptions.length > 0">
+              <Field v-slot="{ field: inputField, errors: fieldErrors }" name="market">
+                <PfFormInputSelect
+                  id="marketId"
+                  v-bind="inputField"
+                  :placeholder="t('choose-market')"
+                  :label="t('select-market')"
+                  :options="filteredMarketOptions"
+                  :errors="fieldErrors" />
+              </Field>
+            </PfFormSection>
+            <template v-else>
+              <div class="text-red-500">
+                <p class="text-sm">{{ t("no-associated-merchant") }}</p>
+              </div>
+            </template>
             <PfButtonAction btn-style="dash" has-icon-left type="button" :label="t('create-market')" @click="createMarket" />
           </div>
         </div>
@@ -160,7 +159,7 @@ async function onSubmit(values) {
       marketId: values.market
     }
   });
-  router.push({ name: URL_MARKET_ADMIN });
+  router.push(returnRoute());
   addSuccess(t("add-market-success-notification", { ...values.market }));
 }
 

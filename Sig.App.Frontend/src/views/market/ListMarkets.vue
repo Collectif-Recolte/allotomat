@@ -24,18 +24,18 @@
     <AppShell :title="t('title')" :loading="loading">
       <div v-if="marketsPagination?.items">
         <template v-if="marketsPagination?.items.length > 0">
-          <UiTableHeader
-            :title="t('market-count', { count: marketsPagination.items.length })"
-            :cta-label="t('add-market')"
-            :cta-route="addMarketRoute">
+          <UiTableHeader :title="t('market-count', { count: marketsPagination.items.length })">
             <template #right>
-              <UiFilter
-                v-model="searchInput"
-                has-search
-                :placeholder="t('search-placeholder')"
-                @resetFilters="resetSearch"
-                @search="onSearch">
-              </UiFilter>
+              <div class="flex items-center gap-x-4">
+                <UiFilter
+                  v-model="searchInput"
+                  has-search
+                  :placeholder="t('search-placeholder')"
+                  @resetFilters="resetSearch"
+                  @search="onSearch">
+                </UiFilter>
+                <PfButtonLink tag="RouterLink" :to="addMarketRoute" :label="t('add-market')" />
+              </div>
             </template>
           </UiTableHeader>
           <MarketTable
