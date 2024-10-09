@@ -38,6 +38,9 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<MarketGraphType> LoadMarket(long marketId) =>
             LoadOne<GetMarketsByIds.Query, MarketGraphType, long>(marketId);
 
+        public IDataLoaderResult<CashRegisterGraphType> LoadCashRegister(long cashRegisterId) =>
+            LoadOne<GetCashRegistersByIds.Query, CashRegisterGraphType, long>(cashRegisterId);
+
         public IDataLoaderResult<MarketGroupGraphType> LoadMarketGroup(long marketGroupId) =>
             LoadOne<GetMarketGroupsByIds.Query, MarketGroupGraphType, long>(marketGroupId);
 
@@ -127,6 +130,9 @@ namespace Sig.App.Backend.Gql
 
         public IDataLoaderResult<IEnumerable<OrganizationGraphType>> LoadMarketOrganizations(long marketId) =>
             LoadCollection<GetOrganizationByMarketId.Query, OrganizationGraphType, long>(marketId);
+        
+        public IDataLoaderResult<IEnumerable<CashRegisterGraphType>> LoadMarketCashRegisters(long marketId) =>
+            LoadCollection<GetCashRegistersByMarketId.Query, CashRegisterGraphType, long>(marketId);
 
         public IDataLoaderResult<IEnumerable<OrganizationGraphType>> LoadProjectOrganizations(long projectId) =>
             LoadCollection<GetOrganizationByProjectId.Query, OrganizationGraphType, long>(projectId);

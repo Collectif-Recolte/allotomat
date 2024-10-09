@@ -18,6 +18,7 @@ using Sig.App.Backend.Requests.Commands.Mutations.Transactions;
 using Sig.App.Backend.Requests.Commands.Mutations.ProductGroups;
 using Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances;
 using Sig.App.Backend.Requests.Commands.Mutations.MarketGroups;
+using Sig.App.Backend.Requests.Commands.Mutations.CashRegisters;
 
 namespace Sig.App.Backend.Gql.Schema
 {
@@ -800,17 +801,48 @@ namespace Sig.App.Backend.Gql.Schema
             return mediator.Send(input.Value);
         }
 
-        public static Task<AdjustBeneficiarySubscription.Payload> AdjustBeneficiarySubscription(this GqlMutation _, [Inject] IMediator mediator, NonNull<AdjustBeneficiarySubscription.Input> input)
+        [RequirePermission(MarketPermission.CreateCashRegister)]
+        [AnnotateErrorCodes(typeof(CreateCashRegister))]
+        public static Task<CreateCashRegister.Payload> CreateCashRegister(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<CreateCashRegister.Input> input
+            )
         {
             return mediator.Send(input.Value);
         }
 
-        public static Task<AddMissingPayment.Payload> AddMissingPayment(this GqlMutation _, [Inject] IMediator mediator, NonNull<AddMissingPayment.Input> input)
+        [RequirePermission(MarketPermission.ManageCashRegister)]
+        [AnnotateErrorCodes(typeof(EditCashRegister))]
+        public static Task<EditCashRegister.Payload> EditCashRegister(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<EditCashRegister.Input> input
+            )
         {
             return mediator.Send(input.Value);
         }
 
-        public static Task<AddMissingPayments.Payload> AddMissingPayments(this GqlMutation _, [Inject] IMediator mediator, NonNull<AddMissingPayments.Input> input)
+        public static Task<AdjustBeneficiarySubscription.Payload> AdjustBeneficiarySubscription(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<AdjustBeneficiarySubscription.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
+
+        public static Task<AddMissingPayment.Payload> AddMissingPayment(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<AddMissingPayment.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
+
+        public static Task<AddMissingPayments.Payload> AddMissingPayments(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<AddMissingPayments.Input> input)
         {
             return mediator.Send(input.Value);
         }
