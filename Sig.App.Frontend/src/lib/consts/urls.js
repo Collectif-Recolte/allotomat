@@ -106,6 +106,11 @@ export const URL_RECONCILIATION_REPORT = "reconciliation-report-url";
 export const URL_ORGANIZATION_MANAGER_ADMIN = "organization-manager-list-url";
 export const URL_ORGANIZATION_MANAGER_ADD = "organization-manager-add-url";
 
+export const URL_CASH_REGISTER = "cash-register-url";
+export const URL_CASH_REGISTER_ADD = "cash-register-add-url";
+export const URL_CASH_REGISTER_EDIT = "cash-register-edit-url";
+export const URL_CASH_REGISTER_ARCHIVE = "cash-register-archive-url";
+
 export const URL_CARDS = "cards-list-url";
 export const URL_CARDS_ADD = "cards-add-url";
 export const URL_CARDS_LOST = "cards-lost-url";

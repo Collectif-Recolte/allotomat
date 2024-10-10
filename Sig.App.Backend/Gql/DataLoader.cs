@@ -118,6 +118,9 @@ namespace Sig.App.Backend.Gql
 
         public IDataLoaderResult<IEnumerable<MarketGroupGraphType>> LoadProjectMarketGroups(long projectId) =>
             LoadCollection<GetMarketGroupByProjectId.Query, MarketGroupGraphType, long>(projectId);
+        
+        public IDataLoaderResult<IEnumerable<MarketGroupGraphType>> LoadCashRegisterMarketGroups(long cashRegisterId) =>
+            LoadCollection<GetMarketGroupByCashRegisterId.Query, MarketGroupGraphType, long>(cashRegisterId);
 
         public IDataLoaderResult<IEnumerable<MarketGraphType>> LoadGroupMarketMarkets(long marketGroupId) =>
             LoadCollection<GetMarketByGroupMarketId.Query, MarketGraphType, long>(marketGroupId);

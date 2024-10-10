@@ -3,6 +3,7 @@ using GraphQL.DataLoader;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Interfaces;
+using System.Collections.Generic;
 
 namespace Sig.App.Backend.Gql.Schema.GraphTypes
 {
@@ -12,6 +13,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public Id Id => cashRegister.GetIdentifier();
         public NonNull<string> Name => cashRegister.Name;
+        public bool IsArchived => cashRegister.IsArchived;
 
         public CashRegisterGraphType(CashRegister cashRegister)
         {
@@ -21,6 +23,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<MarketGraphType> Market(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadMarket(cashRegister.MarketId);
+        }
+
+        public IDataLoaderResult<IEnumerable<MarketGroupGraphType>> MarketGroups(IAppUserContext ctx)
+        {
+            return ctx.DataLoader.LoadCashRegisterMarketGroups(Id.LongIdentifierForType<CashRegister>());
         }
     }
 }

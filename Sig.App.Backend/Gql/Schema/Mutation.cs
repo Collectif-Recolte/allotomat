@@ -823,6 +823,18 @@ namespace Sig.App.Backend.Gql.Schema
             return mediator.Send(input.Value);
         }
 
+        [RequirePermission(MarketPermission.ManageCashRegister)]
+        [AnnotateErrorCodes(typeof(ArchiveCashRegister))]
+        public static async Task<bool> ArchiveCashRegister(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<ArchiveCashRegister.Input> input
+            )
+        {
+            await mediator.Send(input.Value);
+            return true;
+        }
+
         public static Task<AdjustBeneficiarySubscription.Payload> AdjustBeneficiarySubscription(
             this GqlMutation _,
             [Inject] IMediator mediator,
