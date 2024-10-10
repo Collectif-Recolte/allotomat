@@ -42,6 +42,7 @@ using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Utilities.Sorting;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.Requests.Queries.Markets;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 
 namespace Sig.App.Backend.Gql.Schema
 {
@@ -271,6 +272,11 @@ namespace Sig.App.Backend.Gql.Schema
         public static IDataLoaderResult<MarketGraphType> Market(this GqlQuery _, IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadMarket(id.LongIdentifierForType<Market>());
+        }
+
+        public static IDataLoaderResult<CashRegisterGraphType> CashRegister(this GqlQuery _, IAppUserContext ctx, Id id)
+        {
+            return ctx.DataLoader.LoadCashRegister(id.LongIdentifierForType<CashRegister>());
         }
 
         public static IDataLoaderResult<MarketGroupGraphType> MarketGroup(this GqlQuery _, IAppUserContext ctx, Id id)

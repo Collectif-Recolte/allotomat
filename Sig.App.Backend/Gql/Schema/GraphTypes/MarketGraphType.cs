@@ -59,6 +59,12 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return transactions.Where(x => IsTransactionBetweenDate(x, startDate, endDate));
         }
 
+        [Description("The list of cash-register for this market.")]
+        public IDataLoaderResult<IEnumerable<CashRegisterGraphType>> CashRegisters(IAppUserContext ctx)
+        {
+            return ctx.DataLoader.LoadMarketCashRegisters(Id.LongIdentifierForType<Market>());
+        }
+
         private bool IsTransactionBetweenDate(ITransactionGraphType x, DateTime startDate, DateTime endDate)
         {
             var createdAtInstant = x.CreatedAt().ToInstant();

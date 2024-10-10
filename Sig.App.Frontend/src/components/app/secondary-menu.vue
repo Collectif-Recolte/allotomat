@@ -6,7 +6,8 @@
 		"manage-organization-managers": "User management",
 		"manage-project-managers": "User management",
     "manage-project-export-all-participants": "Export all participants",
-    "reconciliation-report": "Reconciliation report"
+    "reconciliation-report": "Reconciliation report",
+    "cash-register": "Cash registers"
 	},
 	"fr": {
 		"menu-title": "Programme {name}",
@@ -14,7 +15,8 @@
 		"manage-organization-managers": "Gestion des utilisateurs",
 		"manage-project-managers": "Gestion des utilisateurs",
     "manage-project-export-all-participants": "Exporter tous les participants",
-    "reconciliation-report": "Rapport de réconciliation"
+    "reconciliation-report": "Rapport de réconciliation",
+    "cash-register": "Caisses"
 	}
 }
 </i18n>
@@ -34,6 +36,12 @@
         class="text-p4 uppercase font-semibold inline-block px-2 mb-1"
         >{{ t("menu-title", { name: marketGroups[0].name }) }}</span
       >
+      <span
+        v-if="markets && markets.length > 0"
+        id="secondaryMenuTitle"
+        class="text-p4 uppercase font-semibold inline-block px-2 mb-1"
+        >{{ t("menu-title", { name: markets[0].name }) }}</span
+      >
       <SecondaryMenuItem
         v-if="manageProgram"
         :router-link="{ name: $consts.urls.URL_PROJECT_SETTINGS }"
@@ -50,6 +58,11 @@
         v-if="manageProjectManagers || manageSpecificMarketGroup"
         :router-link="{ name: $consts.urls.URL_RECONCILIATION_REPORT }"
         :label="t('reconciliation-report')" />
+      <SecondaryMenuItem
+        v-if="manageSpecificMarket"
+        :router-link="{ name: $consts.urls.URL_CASH_REGISTER }"
+        :label="t('cash-register')"
+        :icon="MARKET" />
       <button
         v-if="manageProjectManagers && manageBeneficiaries"
         class="secondary-menu-item secondary-menu-item--is-inactive"
@@ -80,10 +93,13 @@ import {
   GLOBAL_MANAGE_CATEGORIES,
   GLOBAL_MANAGE_PRODUCT_GROUP,
   GLOBAL_MANAGE_BENEFICIARIES,
-  GLOBAL_MANAGE_SPECIFIC_MARKET_GROUP
+  GLOBAL_MANAGE_SPECIFIC_MARKET_GROUP,
+  GLOBAL_MANAGE_SPECIFIC_MARKET
 } from "@/lib/consts/permissions";
 import { LANG_EN } from "@/lib/consts/langs";
 import { LANGUAGE_FILTER_EN, LANGUAGE_FILTER_FR } from "@/lib/consts/enums";
+
+import MARKET from "@/lib/icons/market.json";
 
 const { t, locale } = useI18n();
 
@@ -94,6 +110,10 @@ const { getGlobalPermissions } = storeToRefs(useAuthStore());
 
 const manageSpecificProject = computed(() => {
   return getGlobalPermissions.value.includes(GLOBAL_MANAGE_SPECIFIC_PROJECT);
+});
+
+const manageSpecificMarket = computed(() => {
+  return getGlobalPermissions.value.includes(GLOBAL_MANAGE_SPECIFIC_MARKET);
 });
 
 const manageSpecificMarketGroup = computed(() => {
@@ -125,8 +145,12 @@ const manageBeneficiaries = computed(() => {
 
 const showSecondaryMenu = computed(() => {
   const showLink =
-    manageProjectManagers.value || manageCards.value || manageOrganizationManagers.value || manageSpecificMarketGroup.value;
-  return (manageSpecificProject.value || manageSpecificMarketGroup.value) && showLink;
+    manageProjectManagers.value ||
+    manageCards.value ||
+    manageOrganizationManagers.value ||
+    manageSpecificMarketGroup.value ||
+    manageSpecificMarket.value;
+  return (manageSpecificProject.value || manageSpecificMarketGroup.value || manageSpecificMarket.value) && showLink;
 });
 
 const { result: resultProjects } = useQuery(
@@ -157,6 +181,20 @@ const { result: resultMarketGroups } = useQuery(
   { fetchPolicy: "cache-first" }
 );
 const marketGroups = useResult(resultMarketGroups);
+
+const { result: resultMarkets } = useQuery(
+  gql`
+    query SecondaryMenuMarkets {
+      markets {
+        id
+        name
+      }
+    }
+  `,
+  {},
+  { fetchPolicy: "cache-first" }
+);
+const markets = useResult(resultMarkets);
 
 async function onExportReport() {
   let result = null;

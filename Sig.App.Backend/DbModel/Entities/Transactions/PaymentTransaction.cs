@@ -1,4 +1,5 @@
-﻿using Sig.App.Backend.DbModel.Entities.Markets;
+﻿using Sig.App.Backend.DbModel.Entities.CashRegisters;
+using Sig.App.Backend.DbModel.Entities.Markets;
 using System.Collections.Generic;
 
 namespace Sig.App.Backend.DbModel.Entities.Transactions
@@ -7,6 +8,9 @@ namespace Sig.App.Backend.DbModel.Entities.Transactions
     {
         public long MarketId { get; set; }
         public Market Market { get; set; }
+
+        public long? CashRegisterId { get; set; }
+        public CashRegister? CashRegister { get; set; }
 
         public List<PaymentTransactionAddingFundTransaction> PaymentTransactionAddingFundTransactions { get; set; }
         public List<AddingFundTransaction> Transactions { get; set; }

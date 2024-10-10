@@ -20,6 +20,7 @@ using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.DbModel.Entities.BackgroundJobs;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 
 namespace Sig.App.Backend.DbModel
 {
@@ -87,6 +88,10 @@ namespace Sig.App.Backend.DbModel
         public DbSet<PaymentTransactionAddingFundTransaction> PaymentTransactionAddingFundTransactions { get; set; }
 
         public DbSet<AddingFundToCardRun> AddingFundToCardRuns { get; set; }
+
+        public DbSet<CashRegister> CashRegisters { get; set; }
+
+        public DbSet<CashRegisterMarketGroup> CashRegisterMarketGroups { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -389,6 +394,26 @@ namespace Sig.App.Backend.DbModel
                     .WithMany()
                     .HasForeignKey(x => x.ProductGroupId)
                     .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            Configure<CashRegister>(_ =>
+            {
+                _.HasOne(x => x.Market)
+                    .WithMany(x => x.CashRegisters)
+                    .HasForeignKey(x => x.MarketId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            Configure<CashRegisterMarketGroup>(_ => {
+                _.HasKey(x => new { x.CashRegisterId, x.MarketGroupId });
+
+                _.HasOne(x => x.MarketGroup)
+                    .WithMany(x => x.CashRegisters)
+                    .HasForeignKey(x => x.MarketGroupId);
+
+                _.HasOne(x => x.CashRegister)
+                    .WithMany(x => x.MarketGroups)
+                    .HasForeignKey(x => x.CashRegisterId);
             });
 
             void Configure<TEntity>(Action<EntityTypeBuilder<TEntity>> action) where TEntity : class => action(builder.Entity<TEntity>());
