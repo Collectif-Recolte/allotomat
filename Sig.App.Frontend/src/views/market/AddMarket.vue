@@ -125,7 +125,7 @@ async function onSubmit(values) {
   };
 
   await createMarket({ input });
-  router.push({ name: URL_MARKET_ADMIN });
+  router.push(returnRoute());
   addSuccess(t("add-market-success-notification", { ...values.marketName }));
 }
 
