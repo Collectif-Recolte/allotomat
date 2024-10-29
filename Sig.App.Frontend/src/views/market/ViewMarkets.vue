@@ -170,7 +170,7 @@ function onMarketGroupsChecked(input) {
 }
 
 const hasActiveFilters = computed(() => {
-  return marketGroups.value.length > 0;
+  return marketGroups.value.length > 0 || searchText.value !== "";
 });
 
 const activeFiltersCount = computed(() => {
