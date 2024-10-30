@@ -22,6 +22,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
         {
             var results = await db.CashRegisters
                 .Where(x => request.Ids.Contains(x.MarketId))
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             return results.ToLookup(x => x.MarketId, x => new CashRegisterGraphType(x));

@@ -9,7 +9,7 @@
 
 <template>
   <div class="flex flex-col relative mb-6">
-    <CashRegisterItem v-for="cashRegister in props.cashRegisters" :key="cashRegister.id" :cash-register="cashRegister" />
+    <CashRegisterItem v-for="cashRegister in cashRegisters" :key="cashRegister.id" :cash-register="cashRegister" />
   </div>
 </template>
 
@@ -18,7 +18,7 @@ import { defineProps } from "vue";
 
 import CashRegisterItem from "@/components/cash-register/cash-register-item";
 
-const props = defineProps({
+defineProps({
   cashRegisters: {
     type: Array,
     required: true,

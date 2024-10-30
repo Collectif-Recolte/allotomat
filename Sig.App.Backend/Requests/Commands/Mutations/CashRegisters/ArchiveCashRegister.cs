@@ -41,7 +41,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.CashRegisters
 
             cashRegister.IsArchived = true;
 
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(cancellationToken);
             logger.LogInformation($"[Mutation] ArchiveCashRegister - Cash register archive ({cashRegisterId}, {cashRegister.Name})");
         }
 

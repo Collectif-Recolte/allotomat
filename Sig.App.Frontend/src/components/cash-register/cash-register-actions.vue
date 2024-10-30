@@ -64,10 +64,6 @@ const props = defineProps({
   cashRegister: {
     type: Object,
     required: true
-  },
-  cashRegisterCanBeDelete: {
-    type: Boolean,
-    default: false
   }
 });
 </script>

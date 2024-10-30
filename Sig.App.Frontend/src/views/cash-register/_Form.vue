@@ -28,9 +28,9 @@
     <PfForm
       has-footer
       :disable-submit="Object.keys(formErrors).length > 0"
-      :submit-label="props.submitBtn"
+      :submit-label="submitBtn"
       :processing="isSubmitting"
-      :warning-message="props.warningMessage"
+      :warning-message="warningMessage"
       @cancel="closeModal">
       <PfFormSection>
         <Field v-slot="{ field, errors: fieldErrors }" name="name">
@@ -45,8 +45,8 @@
         </Field>
       </PfFormSection>
       <PfFormSection :title="t('market-groups')">
-        <div v-if="!props.isNew" class="relative border border-primary-300 rounded-lg px-5 pt-3 pb-6 mb-4 last:mb-0">
-          <div v-for="marketGroup in props.marketGroups" :key="marketGroup.id">
+        <div v-if="!isNew" class="relative border border-primary-300 rounded-lg px-5 pt-3 pb-6 mb-4 last:mb-0">
+          <div v-for="marketGroup in marketGroups" :key="marketGroup.id">
             <div>
               <dt :class="dtClasses">{{ t("project-name") }}</dt>
               <dd :class="ddClasses">{{ marketGroup.project.name }}</dd>

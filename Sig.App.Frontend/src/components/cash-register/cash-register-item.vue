@@ -1,4 +1,3 @@
-É
 <i18n>
   {
     "en": {
@@ -19,12 +18,12 @@
 </i18n>
 
 <template>
-  <div v-if="props.cashRegister" class="relative border border-primary-300 rounded-lg px-5 pt-3 pb-6 mb-4 last:mb-0">
+  <div v-if="cashRegister" class="relative border border-primary-300 rounded-lg px-5 pt-3 pb-6 mb-4 last:mb-0">
     <div class="space-y-6 divide-y divide-grey-300">
       <h3 class="text-h4 text-primary-900 mt-2 mb-2">
-        <span>{{ props.cashRegister.name }}</span>
+        <span>{{ cashRegister.name }}</span>
       </h3>
-      <div v-for="marketGroup in props.cashRegister.marketGroups" :key="marketGroup.id" class="space-y-4">
+      <div v-for="marketGroup in cashRegister.marketGroups" :key="marketGroup.id" class="space-y-4">
         <div class="mt-4">
           <dt :class="dtClasses">{{ t("project-name") }}</dt>
           <dd :class="ddClasses">{{ marketGroup.project.name }}</dd>
@@ -36,13 +35,10 @@
       </div>
     </div>
     <div class="absolute right-3 top-3">
-      <PfTooltip
-        class="group-pfone"
-        :hide-tooltip="props.cashRegister.marketGroups.length !== 0"
-        :label="t('is-disabled-tooltip')">
+      <PfTooltip class="group-pfone" :hide-tooltip="cashRegister.marketGroups.length !== 0" :label="t('is-disabled-tooltip')">
         <PfTag
-          :label="props.cashRegister.marketGroups.length === 0 ? t('is-inactif-tag') : t('is-active-tag')"
-          :bg-color-class="props.cashRegister.marketGroups.length === 0 ? 'bg-red-300' : 'bg-primary-300'" />
+          :label="cashRegister.marketGroups.length === 0 ? t('is-inactif-tag') : t('is-active-tag')"
+          :bg-color-class="cashRegister.marketGroups.length === 0 ? 'bg-red-300' : 'bg-primary-300'" />
       </PfTooltip>
       <CashRegisterActions v-if="!cashRegister.isArchived" class="ml-2" :cash-register="cashRegister" />
     </div>
@@ -60,7 +56,7 @@ const ddClasses = "text-primary-900";
 
 const { t } = useI18n();
 
-const props = defineProps({
+defineProps({
   cashRegister: {
     type: Object,
     required: true

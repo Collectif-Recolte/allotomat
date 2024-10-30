@@ -23,6 +23,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
             var results = await db.CashRegisterMarketGroups
                 .Include(x => x.MarketGroup)
                 .Where(x => request.Ids.Contains(x.CashRegisterId))
+                .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
             return results.ToLookup(x => x.CashRegisterId, x => new MarketGroupGraphType(x.MarketGroup));
