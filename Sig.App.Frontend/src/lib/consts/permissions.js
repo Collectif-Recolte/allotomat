@@ -16,6 +16,7 @@ export const GLOBAL_MANAGE_PRODUCT_GROUP = "ManageProductGroup";
 export const GLOBAL_REFUND_TRANSACTION = "RefundTransaction";
 export const GLOBAL_MANAGE_MARKET_GROUPS = "ManageMarketGroups";
 export const GLOBAL_MANAGE_SPECIFIC_MARKET_GROUP = "ManageSpecificMarketGroup";
+export const GLOBAL_MANAGE_SPECIFIC_MARKET = "ManageSpecificMarket";
 
 export const PROJECT_CREATE_PROJECT = "CreateProject";
 export const PROJECT_MANAGE_PROJECT = "ManageProject";

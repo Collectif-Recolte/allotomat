@@ -1,0 +1,122 @@
+<i18n>
+{
+	"en": {
+    "project-name": "Program",
+    "market-group-name": "Market group",
+		"cash-register-name": "Name",
+		"cash-register-name-placeholder": "Ex. Grand Market Cash Register",
+		"cancel": "Cancel",
+    "market-groups": "Market Groups"
+	},
+	"fr": {
+    "project-name": "Programme",
+    "market-group-name": "Groupe de commerce",
+		"cash-register-name": "Nom",
+		"cash-register-name-placeholder": "Ex. Caisse du Grand Marché",
+		"cancel": "Annuler",
+    "market-groups": "Groupes de commerce"
+	}
+}
+</i18n>
+
+<template>
+  <Form
+    v-slot="{ isSubmitting, errors: formErrors }"
+    :validation-schema="validationSchema"
+    :initial-values="initialValues"
+    @submit="onSubmit">
+    <PfForm
+      has-footer
+      :disable-submit="Object.keys(formErrors).length > 0"
+      :submit-label="submitBtn"
+      :processing="isSubmitting"
+      :warning-message="warningMessage"
+      @cancel="closeModal">
+      <PfFormSection>
+        <Field v-slot="{ field, errors: fieldErrors }" name="name">
+          <PfFormInputText
+            id="name"
+            required
+            v-bind="field"
+            :label="t('cash-register-name')"
+            :placeholder="t('cash-register-name-placeholder')"
+            :errors="fieldErrors"
+            col-span-class="sm:col-span-4" />
+        </Field>
+      </PfFormSection>
+      <PfFormSection :title="t('market-groups')">
+        <div v-if="!isNew" class="relative border border-primary-300 rounded-lg px-5 pt-3 pb-6 mb-4 last:mb-0">
+          <div v-for="marketGroup in marketGroups" :key="marketGroup.id">
+            <div>
+              <dt :class="dtClasses">{{ t("project-name") }}</dt>
+              <dd :class="ddClasses">{{ marketGroup.project.name }}</dd>
+            </div>
+            <div>
+              <dt :class="dtClasses">{{ t("market-group-name") }}</dt>
+              <dd :class="ddClasses">{{ marketGroup.name }}</dd>
+            </div>
+          </div>
+        </div>
+      </PfFormSection>
+      <template #footer>
+        <div class="pt-5">
+          <div class="flex gap-x-6 items-center justify-end">
+            <PfButtonAction btn-style="link" :label="t('cancel')" @click="closeModal" />
+            <PfButtonAction class="px-8" :label="submitBtn" type="submit" />
+          </div>
+        </div>
+      </template>
+    </PfForm>
+  </Form>
+</template>
+
+<script setup>
+import { defineEmits, defineProps, computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { string, object } from "yup";
+
+const { t } = useI18n();
+const emit = defineEmits(["submit", "closeModal", "nextStep"]);
+
+const dtClasses = "text-primary-500 font-semibold tracking-tight mt-px sm:mt-[3px]";
+const ddClasses = "text-primary-900";
+
+const props = defineProps({
+  submitBtn: {
+    type: String,
+    default: ""
+  },
+  name: {
+    type: String,
+    default: ""
+  },
+  marketGroups: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
+  isNew: {
+    type: Boolean,
+    default: false
+  }
+});
+
+const initialValues = {
+  name: props.name
+};
+
+const validationSchema = computed(() =>
+  object({
+    name: string().label(t("cash-register-name")).required()
+  })
+);
+
+function closeModal() {
+  emit("closeModal");
+}
+
+async function onSubmit(event) {
+  emit("submit", event);
+}
+</script>

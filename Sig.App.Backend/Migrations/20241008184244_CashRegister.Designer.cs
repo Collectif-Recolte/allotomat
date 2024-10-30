@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Sig.App.Backend.DbModel;
 
@@ -11,9 +12,11 @@ using Sig.App.Backend.DbModel;
 namespace Sig.App.Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241008184244_CashRegister")]
+    partial class CashRegister
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -885,12 +888,6 @@ namespace Sig.App.Backend.Migrations
                     b.Property<long?>("CardProgramCardId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("CashRegisterId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("CashRegisterName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
 
@@ -1212,9 +1209,6 @@ namespace Sig.App.Backend.Migrations
                 {
                     b.HasBaseType("Sig.App.Backend.DbModel.Entities.Transactions.Transaction");
 
-                    b.Property<long?>("CashRegisterId")
-                        .HasColumnType("bigint");
-
                     b.Property<bool>("InitiatedByOrganization")
                         .HasColumnType("bit");
 
@@ -1224,15 +1218,10 @@ namespace Sig.App.Backend.Migrations
                     b.Property<long>("MarketId")
                         .HasColumnType("bigint");
 
-                    b.HasIndex("CashRegisterId");
-
                     b.HasIndex("MarketId");
 
                     b.ToTable("Transactions", t =>
                         {
-                            t.Property("CashRegisterId")
-                                .HasColumnName("PaymentTransaction_CashRegisterId");
-
                             t.Property("InitiatedByOrganization")
                                 .HasColumnName("PaymentTransaction_InitiatedByOrganization");
 
@@ -1247,9 +1236,6 @@ namespace Sig.App.Backend.Migrations
                 {
                     b.HasBaseType("Sig.App.Backend.DbModel.Entities.Transactions.Transaction");
 
-                    b.Property<long?>("CashRegisterId")
-                        .HasColumnType("bigint");
-
                     b.Property<long>("InitialTransactionId")
                         .HasColumnType("bigint");
 
@@ -1258,8 +1244,6 @@ namespace Sig.App.Backend.Migrations
 
                     b.Property<bool>("InitiatedByProject")
                         .HasColumnType("bit");
-
-                    b.HasIndex("CashRegisterId");
 
                     b.HasIndex("InitialTransactionId");
 
@@ -1823,34 +1807,22 @@ namespace Sig.App.Backend.Migrations
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.PaymentTransaction", b =>
                 {
-                    b.HasOne("Sig.App.Backend.DbModel.Entities.CashRegisters.CashRegister", "CashRegister")
-                        .WithMany()
-                        .HasForeignKey("CashRegisterId");
-
                     b.HasOne("Sig.App.Backend.DbModel.Entities.Markets.Market", "Market")
                         .WithMany()
                         .HasForeignKey("MarketId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CashRegister");
-
                     b.Navigation("Market");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.RefundTransaction", b =>
                 {
-                    b.HasOne("Sig.App.Backend.DbModel.Entities.CashRegisters.CashRegister", "CashRegister")
-                        .WithMany()
-                        .HasForeignKey("CashRegisterId");
-
                     b.HasOne("Sig.App.Backend.DbModel.Entities.Transactions.PaymentTransaction", "InitialTransaction")
                         .WithMany("RefundTransactions")
                         .HasForeignKey("InitialTransactionId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
-
-                    b.Navigation("CashRegister");
 
                     b.Navigation("InitialTransaction");
                 });

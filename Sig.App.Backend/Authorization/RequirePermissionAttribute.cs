@@ -22,6 +22,7 @@ using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 
 namespace Sig.App.Backend.Authorization
 {
@@ -169,6 +170,11 @@ namespace Sig.App.Backend.Authorization
             {
                 var transaction = db.Transactions.OfType<PaymentTransaction>().Include(x => x.Market).Where(x => x.Id == hiti.InitialTransactionId.LongIdentifierForType<PaymentTransaction>()).FirstOrDefault();
                 return transaction.Market.GetIdentifier().IdentifierForType<Market>();
+            }
+            if (input is HaveCashRegisterId hcri)
+            {
+                var cashRegister = db.CashRegisters.Include(x => x.Market).Where(x => x.Id == hcri.CashRegisterId.LongIdentifierForType<CashRegister>()).FirstOrDefault();
+                return cashRegister.Market.GetIdentifier().IdentifierForType<Market>();
             }
             if (input is HaveMarketId hmi)
             {

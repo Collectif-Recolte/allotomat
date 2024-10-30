@@ -8,6 +8,10 @@
         ArchiveMarket,
         ManageAllMarkets,
         CreateTransaction,
-        RefundTransaction
+        RefundTransaction,
+        CreateCashRegister,
+        ManageCashRegister,
+        DeleteCashRegister,
+        ArchiveCashRegister
     }
 }

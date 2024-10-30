@@ -16,6 +16,7 @@ using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Requests.Commands.Mutations.CashRegisters;
 using Sig.App.Backend.Services.Permission.Enums;
 
 namespace Sig.App.Backend.Services.Permission
@@ -124,7 +125,11 @@ namespace Sig.App.Backend.Services.Permission
         {
             MarketPermission.ManageMarket,
             MarketPermission.CreateTransaction,
-            MarketPermission.RefundTransaction
+            MarketPermission.RefundTransaction,
+            MarketPermission.CreateCashRegister,
+            MarketPermission.ManageCashRegister,
+            MarketPermission.DeleteCashRegister,
+            MarketPermission.ArchiveCashRegister
         };
         
         private static readonly MarketPermission[] ProjectManagerMarketPermission = new[]

@@ -16,7 +16,8 @@ import {
   GLOBAL_MANAGE_TRANSACTIONS,
   GLOBAL_MANAGE_PRODUCT_GROUP,
   GLOBAL_REFUND_TRANSACTION,
-  GLOBAL_MANAGE_MARKET_GROUPS
+  GLOBAL_MANAGE_MARKET_GROUPS,
+  GLOBAL_MANAGE_SPECIFIC_MARKET
 } from "@/lib/consts/permissions";
 
 import { useAuthStore } from "@/lib/store/auth";
@@ -893,6 +894,40 @@ export default [
         component: () => import("@/views/transaction/Error.vue"),
         meta: {
           claim: GLOBAL_CREATE_TRANSACTION
+        }
+      }
+    ]
+  },
+  {
+    name: urls.URL_CASH_REGISTER,
+    path: "/cash-register",
+    component: () => import("@/views/cash-register/ListCashRegister.vue"),
+    meta: {
+      claim: GLOBAL_MANAGE_SPECIFIC_MARKET
+    },
+    children: [
+      {
+        name: urls.URL_CASH_REGISTER_ADD,
+        path: "add",
+        component: () => import("@/views/cash-register/AddCashRegister.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SPECIFIC_MARKET
+        }
+      },
+      {
+        name: urls.URL_CASH_REGISTER_EDIT,
+        path: ":cashRegisterId/edit",
+        component: () => import("@/views/cash-register/EditCashRegister.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SPECIFIC_MARKET
+        }
+      },
+      {
+        name: urls.URL_CASH_REGISTER_ARCHIVE,
+        path: ":cashRegisterId/archive",
+        component: () => import("@/views/cash-register/ArchiveCashRegister.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SPECIFIC_MARKET
         }
       }
     ]
