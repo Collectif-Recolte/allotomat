@@ -448,6 +448,14 @@ export default [
             meta: {
               claim: GLOBAL_MANAGE_MARKET_GROUPS
             }
+          },
+          {
+            name: urls.URL_ADD_MERCHANTS_FROM_MARKET_GROUP,
+            path: "add-market",
+            component: () => import("@/views/market/SelectMarket.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_MARKET_GROUPS
+            }
           }
         ]
       }

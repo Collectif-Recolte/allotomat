@@ -1,44 +1,85 @@
 <i18n>
   {
     "en": {
-      "close": "Close",
-      "add-beneficiary": "Add participant",
-      "set-subscription": "Assign subscriptions",
-      "set-card": "Assign card",
-      "set-missed-payment": "Add missed payment", 
-      "next-step-btn-add-beneficiary": "Add participant and assign subscriptions",
-      "next-step-btn-add-subscription": "Add subscription(s) and assign card",
-      "add-beneficiary-success-notification": "Adding {firstname} {lastname} was successful.",
-      "add-subscriptions-success-notification": "Adding subscriptions was successful.",
-      "title": "Add a participant",
-      "set-beneficiary": "Set participant information",
-      "id1-already-exist": "ID1 already exists."
+      "title": "Add Cash Register",
+      "add-cash-register": "Add",
     },
     "fr": {
-      "close": "Fermer",
-      "add-beneficiary": "Ajouter le-la participant-e",
-      "set-subscription": "Assigner les abonnements",
-      "set-card": "Définir la carte",
-      "set-missed-payment": "Ajouter un paiement manqué",    
-      "next-step-btn-add-beneficiary": "Ajouter le-la participant-e et assigner des abonnements",
-      "next-step-btn-add-subscription": "Assigner les abonnements et assigner une carte",
-      "add-beneficiary-success-notification": "L’ajout de {firstname} {lastname} a été un succès.",
-      "add-subscriptions-success-notification": "L’ajout des abonnements a été un succès.",
       "title": "Ajouter une caisse",
-      "set-beneficiary": "Définir les informations du participant-e",
-      "id1-already-exist": "Le numéro d'identification 1 existe déjà."
+      "add-cash-register": "Ajouter",
     }
   }
 </i18n>
 
 <template>
-  <UiDialogModal :title="t('title')" :has-footer="false" :return-route="{ name: URL_CASH_REGISTER }"> </UiDialogModal>
+  <UiDialogModal v-slot="{ closeModal }" :title="t('title')" :has-footer="false" :return-route="{ name: URL_CASH_REGISTER }">
+    <CashRegisterForm :submit-btn="t('add-cash-register')" is-new :market="market" @submit="onSubmit" @closeModal="closeModal" />
+  </UiDialogModal>
 </template>
 
 <script setup>
+import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
+import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
+import { useRouter, useRoute } from "vue-router";
+
+import { useNotificationsStore } from "@/lib/store/notifications";
 
 import { URL_CASH_REGISTER } from "@/lib/consts/urls";
 
+import CashRegisterForm from "@/views/cash-register/_Form";
+
 const { t } = useI18n();
+const router = useRouter();
+const route = useRoute();
+const { addSuccess } = useNotificationsStore();
+
+const { result } = useQuery(
+  gql`
+    query Market($id: ID!) {
+      market(id: $id) {
+        id
+        projects {
+          id
+          name
+          marketGroups {
+            id
+            name
+            isArchived
+          }
+        }
+      }
+    }
+  `,
+  {
+    id: route.query.marketId
+  }
+);
+let market = useResult(result);
+
+const { mutate: addCashRegister } = useMutation(
+  gql`
+    mutation CreateCashRegister($input: CreateCashRegisterInput!) {
+      createCashRegister(input: $input) {
+        cashRegister {
+          id
+          name
+        }
+      }
+    }
+  `
+);
+
+async function onSubmit({ name, selectedMarketGroup }) {
+  console.log({ name, selectedMarketGroup });
+  await addCashRegister({
+    input: {
+      name,
+      marketId: route.query.marketId,
+      marketGroupId: selectedMarketGroup
+    }
+  });
+  router.push({ name: URL_CASH_REGISTER });
+  addSuccess(t("edit-cash-register-success-notification", { name }));
+}
 </script>

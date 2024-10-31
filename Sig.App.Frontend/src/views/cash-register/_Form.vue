@@ -6,7 +6,9 @@
 		"cash-register-name": "Name",
 		"cash-register-name-placeholder": "Ex. Grand Market Cash Register",
 		"cancel": "Cancel",
-    "market-groups": "Market Groups"
+    "market-groups": "Program(s)",
+    "selected-project": "Program",
+    "selected-market-group": "Location"
 	},
 	"fr": {
     "project-name": "Programme",
@@ -14,14 +16,16 @@
 		"cash-register-name": "Nom",
 		"cash-register-name-placeholder": "Ex. Caisse du Grand Marché",
 		"cancel": "Annuler",
-    "market-groups": "Groupes de commerce"
+    "market-groups": "Programme(s)",
+    "selected-project": "Programme",
+    "selected-market-group": "Lieu"
 	}
 }
 </i18n>
 
 <template>
   <Form
-    v-slot="{ isSubmitting, errors: formErrors }"
+    v-slot="{ isSubmitting, errors: formErrors, setFieldValue }"
     :validation-schema="validationSchema"
     :initial-values="initialValues"
     @submit="onSubmit">
@@ -44,8 +48,8 @@
             col-span-class="sm:col-span-4" />
         </Field>
       </PfFormSection>
-      <PfFormSection :title="t('market-groups')">
-        <div v-if="!isNew" class="relative border border-primary-300 rounded-lg px-5 pt-3 pb-6 mb-4 last:mb-0">
+      <PfFormSection v-if="!isNew" :title="t('market-groups')">
+        <div class="relative border border-primary-300 rounded-lg px-5 pt-3 pb-6 mb-4 last:mb-0">
           <div v-for="marketGroup in marketGroups" :key="marketGroup.id">
             <div>
               <dt :class="dtClasses">{{ t("project-name") }}</dt>
@@ -57,6 +61,29 @@
             </div>
           </div>
         </div>
+      </PfFormSection>
+      <PfFormSection v-else :title="t('market-groups')">
+        <Field v-slot="{ field, errors: fieldErrors }" name="selectedProject">
+          <PfFormInputSelect
+            id="selectedProject"
+            required
+            v-bind="field"
+            :label="t('selected-project')"
+            :options="projectOptions"
+            :errors="fieldErrors"
+            col-span-class="sm:col-span-3"
+            @input="(e) => onProjectSelected(e, setFieldValue)" />
+        </Field>
+        <Field v-slot="{ field, errors: fieldErrors }" name="selectedMarketGroup">
+          <PfFormInputSelect
+            id="selectedMarketGroup"
+            required
+            v-bind="field"
+            :label="t('selected-market-group')"
+            :options="marketGroupOptions"
+            :errors="fieldErrors"
+            col-span-class="sm:col-span-3" />
+        </Field>
       </PfFormSection>
       <template #footer>
         <div class="pt-5">
@@ -71,15 +98,17 @@
 </template>
 
 <script setup>
-import { defineEmits, defineProps, computed } from "vue";
+import { ref, defineEmits, defineProps, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { string, object } from "yup";
+import { string, object, lazy } from "yup";
 
 const { t } = useI18n();
 const emit = defineEmits(["submit", "closeModal", "nextStep"]);
 
 const dtClasses = "text-primary-500 font-semibold tracking-tight mt-px sm:mt-[3px]";
 const ddClasses = "text-primary-900";
+
+const selectedProject = ref(null);
 
 const props = defineProps({
   submitBtn: {
@@ -96,6 +125,12 @@ const props = defineProps({
       return [];
     }
   },
+  market: {
+    type: Object,
+    default() {
+      return {};
+    }
+  },
   isNew: {
     type: Boolean,
     default: false
@@ -103,14 +138,51 @@ const props = defineProps({
 });
 
 const initialValues = {
-  name: props.name
+  name: props.name,
+  selectedProject: "",
+  selectedMarketGroup: ""
 };
 
 const validationSchema = computed(() =>
   object({
-    name: string().label(t("cash-register-name")).required()
+    name: string().label(t("cash-register-name")).required(),
+    selectedProject: lazy(() => {
+      if (!props.isNew) return string().notRequired();
+      return string().label(t("selected-project")).required();
+    }),
+    selectedMarketGroup: lazy(() => {
+      if (!props.isNew) return string().notRequired();
+      return string().label(t("selected-market-group")).required();
+    })
   })
 );
+
+const projectOptions = computed(() => {
+  if (!props.market || !props.market.projects) {
+    return [];
+  }
+
+  return props.market.projects.map((project) => {
+    return {
+      value: project.id,
+      label: project.name
+    };
+  });
+});
+
+const marketGroupOptions = computed(() => {
+  if (!props.market || !props.market.projects) {
+    return [];
+  }
+
+  var marketGroups = props.market.projects.find((project) => project.id === selectedProject.value)?.marketGroups || [];
+  return marketGroups.map((marketGroup) => {
+    return {
+      value: marketGroup.id,
+      label: marketGroup.name
+    };
+  });
+});
 
 function closeModal() {
   emit("closeModal");
@@ -119,4 +191,27 @@ function closeModal() {
 async function onSubmit(event) {
   emit("submit", event);
 }
+
+function onProjectSelected(e, setFieldValue) {
+  selectedProject.value = e;
+  if (marketGroupOptions.value.length === 1) {
+    setFieldValue("selectedMarketGroup", marketGroupOptions.value[0].value);
+  }
+}
+
+watch(
+  () => props.market,
+  () => {
+    if (!props.market || !props.market.projects) {
+      return;
+    }
+    if (props.market.projects.length === 1) {
+      initialValues.selectedProject = props.market.projects[0]?.id;
+      if (props.market.projects[0]?.marketGroups.length === 1) {
+        initialValues.selectedMarketGroup = props.market.projects[0]?.marketGroups[0]?.id;
+      }
+    }
+  },
+  { immediate: true }
+);
 </script>

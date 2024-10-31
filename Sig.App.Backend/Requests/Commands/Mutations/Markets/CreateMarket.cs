@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities;
+using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.DbModel.Entities.Profiles;
 using Sig.App.Backend.DbModel.Entities.Projects;
@@ -16,6 +17,7 @@ using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
+using Sig.App.Backend.Requests.Commands.Mutations.CashRegisters;
 using Sig.App.Backend.Services.Mailer;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,13 +33,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
         private readonly AppDbContext db;
         private readonly UserManager<AppUser> userManager;
         private readonly IMailer mailer;
+        private readonly IMediator mediator;
 
-        public CreateMarket(ILogger<CreateMarket> logger, AppDbContext db, UserManager<AppUser> userManager, IMailer mailer)
+        public CreateMarket(ILogger<CreateMarket> logger, AppDbContext db, UserManager<AppUser> userManager, IMailer mailer, IMediator mediator)
         {
             this.logger = logger;
             this.db = db;
             this.userManager = userManager;
             this.mailer = mailer;
+            this.mediator = mediator;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -81,8 +85,25 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 logger.LogInformation($"[Mutation] CreateMarket - Market manager {manager.Email} added to market {market.Name} ({market.Id})");
             }
 
+            await db.SaveChangesAsync(cancellationToken);
+
             if (request.ProjectId.IsSet())
             {
+                var marketGroupId = request.MarketGroupId.Value.LongIdentifierForType<MarketGroup>();
+                var marketGroup = await db.MarketGroups.Include(x => x.Markets).FirstOrDefaultAsync(x => x.Id == marketGroupId, cancellationToken);
+
+                if (marketGroup == null)
+                {
+                    logger.LogWarning("[Mutation] CreateMarket - MarketGroupNotFoundException");
+                    throw new MarketGroupNotFoundException();
+                }
+
+                marketGroup.Markets.Add(new MarketGroupMarket()
+                {
+                    Market = market,
+                    MarketGroup = marketGroup
+                });
+
                 market.Projects = new List<ProjectMarket>
                 {
                     new ProjectMarket()
@@ -91,6 +112,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                         ProjectId = request.ProjectId.Value.LongIdentifierForType<Project>()
                     }
                 };
+
+                var projectId = request.ProjectId.Value.LongIdentifierForType<Project>();
+                var project = await db.Projects.Include(x => x.Markets).FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
+
+                await mediator.Send(new CreateCashRegister.Input() { MarketGroupId = request.MarketGroupId.Value, MarketId = market.GetIdentifier(), Name = "Caisse - " + project.Name });
             }
 
             await db.SaveChangesAsync(cancellationToken);
@@ -142,6 +168,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             public string Name { get; set; }
             public IEnumerable<string> ManagerEmails { get; set; }
             public Maybe<Id> ProjectId { get; set; }
+            public Maybe<Id> MarketGroupId { get; set; }
         }
 
         [MutationPayload]
@@ -153,5 +180,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 
         public class UserAlreadyManagerException : RequestValidationException { }
         public class ExistingUserNotMerchantException : RequestValidationException { }
+        public class MarketGroupNotFoundException : RequestValidationException { }
     }
 }

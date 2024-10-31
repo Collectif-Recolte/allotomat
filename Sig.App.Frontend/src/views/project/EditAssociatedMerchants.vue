@@ -26,6 +26,13 @@
 
       <MarketTable v-else :markets="project.markets" :url-name-market-delete="URL_REMOVE_MERCHANTS_FROM_PROJECT" />
 
+      <PfButtonAction
+        v-if="!selectMarketGroupEnabled"
+        btn-style="dash"
+        has-icon-left
+        type="button"
+        :label="t('create-market')"
+        @click="createMarket" />
       <UiSelectAndAdd
         v-if="filteredMarketOptions.length > 0"
         :show-select="addMerchantDisplayed"

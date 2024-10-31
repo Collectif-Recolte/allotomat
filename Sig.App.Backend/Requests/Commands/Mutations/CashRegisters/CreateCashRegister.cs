@@ -7,6 +7,7 @@ using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -52,7 +53,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.CashRegisters
 
             if (!marketGroup.Markets.Select(x => x.Market).Contains(market))
             {
-                logger.LogWarning("[Mutation] CreateCashRegister - MarkeGrouptNotFoundInMarketException");
+                logger.LogWarning("[Mutation] CreateCashRegister - MarketGroupNotFoundInMarketException");
                 throw new MarketGroupNotFoundInMarketException();
             }
 
@@ -81,10 +82,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.CashRegisters
         }
 
         [MutationInput]
-        public class Input : IRequest<Payload>
+        public class Input : HaveMarketId, IRequest<Payload>
         {
             public string Name { get; set; }
-            public Id MarketId { get; set; }
             public Id MarketGroupId { get; set; }
         }
 
