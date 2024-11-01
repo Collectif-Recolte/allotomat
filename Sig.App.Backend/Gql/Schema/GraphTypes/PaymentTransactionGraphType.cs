@@ -32,6 +32,12 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         {
             return ctx.DataLoader.LoadMarket(transaction.MarketId);
         }
+        
+        public IDataLoaderResult<CashRegisterGraphType> CashRegister(IAppUserContext ctx)
+        {
+            if (transaction.CashRegisterId.HasValue) return ctx.DataLoader.LoadCashRegister(transaction.CashRegisterId.Value);
+            return null;
+        }
 
         public OffsetDateTime CreatedAt()
         {

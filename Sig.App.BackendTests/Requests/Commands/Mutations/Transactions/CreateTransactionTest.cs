@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Cards;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
+using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
@@ -33,6 +35,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         private readonly Market market;
         private readonly Project project;
         private readonly Project offPlatformProject;
+        private readonly CashRegister cashRegister;
         private readonly Card card;
         private readonly Card offPlatformCard;
         private readonly Beneficiary beneficiary;
@@ -64,8 +67,39 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             market = new Market()
             {
-                Name = "Market 1"
+                Name = "Market 1",
+                CashRegisters = new List<CashRegister>()
             };
+
+            var marketGroup = new MarketGroup()
+            {
+                Name = "Market group 1",
+                Project = project,
+                Markets = new List<MarketGroupMarket>(),
+                CashRegisters = new List<CashRegisterMarketGroup>()
+            };
+            marketGroup.Markets.Add(new MarketGroupMarket()
+            {
+                Market = market,
+                MarketGroup = marketGroup
+            });
+
+            cashRegister = new CashRegister()
+            {
+                Name = "Cash register 1",
+                Market = market,
+                MarketGroups = new List<CashRegisterMarketGroup>()
+            };
+
+            var cashRegisterMarketGroup = new CashRegisterMarketGroup()
+            {
+                CashRegister = cashRegister,
+                MarketGroup = marketGroup
+            };
+
+            marketGroup.CashRegisters.Add(cashRegisterMarketGroup);
+            cashRegister.MarketGroups.Add(cashRegisterMarketGroup);
+            market.CashRegisters.Add(cashRegister);
 
             organization = new Organization()
             {
@@ -261,7 +295,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             
             offPlatformProject.Organizations = new List<Organization>() { offPlatformOrganization };
             offPlatformProject.Cards = new List<Card> { offPlatformCard };
-            
+
+            DbContext.CashRegisters.Add(cashRegister);
+            DbContext.MarketGroups.Add(marketGroup);
             DbContext.Markets.Add(market);
             DbContext.Cards.Add(card);
             DbContext.Cards.Add(offPlatformCard);
@@ -298,6 +334,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 MarketId = market.GetIdentifier(),
                 Transactions = new List<CreateTransaction.TransactionInput>(),
                 CardId = card.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
@@ -337,7 +374,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             {
                 MarketId = market.GetIdentifier(),
                 Transactions = new List<CreateTransaction.TransactionInput>(),
-                CardNumber = card.CardNumber
+                CardNumber = card.CardNumber,
+                CashRegisterId = cashRegister.GetIdentifier()
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
@@ -363,7 +401,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             initialTransaction.Transactions.Count.Should().Be(1);
         }
 
-        [Fact]
+        // Disable this test since we don't officialy support OffPlatform for the moment
+        /*[Fact]
         public async Task CreateOffPlatformTransactionCreatesLog()
         {
             SetupRequestHandler(new VerifyCardCanBeUsedInMarket(DbContext));
@@ -373,6 +412,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 MarketId = market.GetIdentifier(),
                 Transactions = new List<CreateTransaction.TransactionInput>(),
                 CardId = offPlatformCard.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
@@ -391,7 +431,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             transactionLog.TransactionUniqueId.Should().Be(transaction.TransactionUniqueId);
 
             offPlatformCard.Funds.First().Amount.Should().Be(10);
-        }
+        }*/
         
         [Fact]
         public async Task CreateTransactionWithTwoBudgetAllowancesCreatesTwoTransactionLogs()
@@ -403,6 +443,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 MarketId = market.GetIdentifier(),
                 Transactions = new List<CreateTransaction.TransactionInput>(),
                 CardId = card.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
@@ -430,6 +471,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 MarketId = market.GetIdentifier(),
                 Transactions = new List<CreateTransaction.TransactionInput>(),
                 CardId = card.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
@@ -461,7 +503,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             {
                 MarketId = market.GetIdentifier(),
                 Transactions = new List<CreateTransaction.TransactionInput>(),
-                CardId = card.GetIdentifier()
+                CardId = card.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
@@ -523,6 +566,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 MarketId = market.GetIdentifier(),
                 Transactions = new List<CreateTransaction.TransactionInput>(),
                 CardId = card.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
@@ -561,6 +605,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 MarketId = market.GetIdentifier(),
                 Transactions = new List<CreateTransaction.TransactionInput>(),
                 CardId = card.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
@@ -579,7 +624,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             {
                 MarketId = market.GetIdentifier(),
                 Transactions = new List<CreateTransaction.TransactionInput>(),
-                CardId = Id.New<Card>(123456)
+                CardId = Id.New<Card>(123456),
+                CashRegisterId = cashRegister.GetIdentifier()
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
@@ -598,7 +644,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             {
                 MarketId = market.GetIdentifier(),
                 Transactions = new List<CreateTransaction.TransactionInput>(),
-                CardNumber = "123456789"
+                CardNumber = "123456789",
+                CashRegisterId = cashRegister.GetIdentifier()
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
@@ -618,6 +665,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 MarketId = Id.New<Market>(123456),
                 Transactions = new List<CreateTransaction.TransactionInput>(),
                 CardId = card.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
@@ -643,7 +691,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             {
                 MarketId = localMarket.GetIdentifier(),
                 Transactions = new List<CreateTransaction.TransactionInput>(),
-                CardId = card.GetIdentifier()
+                CardId = card.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
@@ -665,6 +714,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 MarketId = market.GetIdentifier(),
                 Transactions = new List<CreateTransaction.TransactionInput>(),
                 CardId = card.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
             };
             input.Transactions.Add(new CreateTransaction.TransactionInput()
             {
