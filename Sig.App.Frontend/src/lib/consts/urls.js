@@ -36,6 +36,7 @@ export const URL_PROJECT_MANAGE_MANAGERS = "project-manage-managers-url";
 export const URL_PROJECT_MANAGER_REMOVE = "project-manage-managers-remove-url";
 export const URL_REMOVE_MERCHANTS_FROM_PROJECT = "project-remove-market";
 export const URL_PROJECT_ADMIN_DASHBOARD = "project-admin-dashboard-url";
+export const URL_ADD_MERCHANTS_FROM_PROJECT = "project-add-market";
 
 export const URL_MARKET_ADMIN = "market-list-url";
 export const URL_MARKET_ADD = "market-add-url";

@@ -71,7 +71,7 @@
               </div>
             </template>
             <PfButtonAction
-              v-if="!selectMarketGroupEnabled"
+              v-if="!selectMarketGroupEnabled && canCreateMarket"
               btn-style="dash"
               has-icon-left
               type="button"
@@ -99,7 +99,9 @@ import {
   URL_MARKET_OVERVIEW,
   URL_MARKET_OVERVIEW_ADD,
   URL_ADD_MERCHANTS_FROM_MARKET_GROUP,
-  URL_MARKET_GROUP_MANAGE_MERCHANTS
+  URL_MARKET_GROUP_MANAGE_MERCHANTS,
+  URL_ADD_MERCHANTS_FROM_PROJECT,
+  URL_PROJECT_MANAGE_MERCHANTS
 } from "@/lib/consts/urls";
 
 const { t } = useI18n();
@@ -144,11 +146,19 @@ const { result: resultProject, loading: loadingProject } = useQuery(
   `
 );
 const project = useResult(resultProject, null, (data) => {
+  if (route.params.projectId) {
+    return data.projects.find((project) => project.id === route.params.projectId);
+  }
   return data.projects[0];
 });
 
 const marketGroups = useResult(resultProject, null, (data) => {
-  return data.projects[0].marketGroups.map((marketGroup) => ({
+  var project = data.projects[0];
+  if (route.params.projectId) {
+    project = data.projects.find((project) => project.id === route.params.projectId);
+  }
+
+  return project.marketGroups.map((marketGroup) => ({
     value: marketGroup.id,
     label: marketGroup.name
   }));
@@ -189,6 +199,7 @@ const validationSchema = computed(() =>
 );
 
 const selectMarketGroupEnabled = computed(() => route.name === URL_ADD_MERCHANTS_FROM_MARKET_GROUP);
+const canCreateMarket = computed(() => route.name !== URL_ADD_MERCHANTS_FROM_PROJECT);
 
 function createMarket() {
   router.push({ name: URL_MARKET_OVERVIEW_ADD });
@@ -208,6 +219,7 @@ async function onSubmit(values) {
 
 function returnRoute() {
   if (route.name === URL_ADD_MERCHANTS_FROM_MARKET_GROUP) return { name: URL_MARKET_GROUP_MANAGE_MERCHANTS };
+  if (route.name === URL_ADD_MERCHANTS_FROM_PROJECT) return { name: URL_PROJECT_MANAGE_MERCHANTS };
   if (route.name === URL_MARKET_OVERVIEW_SELECT) return { name: URL_MARKET_OVERVIEW };
   else return { name: URL_MARKET_ADMIN };
 }

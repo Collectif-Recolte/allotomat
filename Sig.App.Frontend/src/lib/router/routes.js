@@ -214,6 +214,14 @@ export default [
             meta: {
               claim: GLOBAL_MANAGE_ALL_PROJECTS
             }
+          },
+          {
+            name: urls.URL_ADD_MERCHANTS_FROM_PROJECT,
+            path: "add-market",
+            component: () => import("@/views/market/SelectMarket.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_ALL_PROJECTS
+            }
           }
         ]
       },

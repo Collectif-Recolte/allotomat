@@ -3,10 +3,12 @@
     "en": {
       "title": "Add Cash Register",
       "add-cash-register": "Add",
+      "add-cash-register-success-notification": "Adding cash register {name} was successful."
     },
     "fr": {
       "title": "Ajouter une caisse",
       "add-cash-register": "Ajouter",
+      "add-cash-register-success-notification": "L'ajout de la caisse {name} a été un succès."
     }
   }
 </i18n>
@@ -71,7 +73,6 @@ const { mutate: addCashRegister } = useMutation(
 );
 
 async function onSubmit({ name, selectedMarketGroup }) {
-  console.log({ name, selectedMarketGroup });
   await addCashRegister({
     input: {
       name,
@@ -80,6 +81,6 @@ async function onSubmit({ name, selectedMarketGroup }) {
     }
   });
   router.push({ name: URL_CASH_REGISTER });
-  addSuccess(t("edit-cash-register-success-notification", { name }));
+  addSuccess(t("add-cash-register-success-notification", { name }));
 }
 </script>

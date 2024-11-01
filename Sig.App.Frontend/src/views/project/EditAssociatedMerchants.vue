@@ -20,40 +20,27 @@
 <template>
   <UiDialogModal :return-route="{ name: URL_PROJECT_ADMIN }" :title="t('title', { projectName: getProjectName() })">
     <template v-if="project">
-      <div v-if="project.markets.length === 0" class="text-red-500">
-        <p class="text-sm">{{ t("no-associated-merchant") }}</p>
+      <div class="flex flex-col gap-y-6">
+        <div v-if="project.markets.length === 0" class="text-red-500">
+          <p class="text-sm">{{ t("no-associated-merchant") }}</p>
+        </div>
+
+        <MarketTable v-else :markets="project.markets" :url-name-market-delete="URL_ADD_MERCHANTS_FROM_PROJECT" />
+
+        <PfButtonAction btn-style="dash" has-icon-left type="button" :label="t('add-merchant')" @click="showAddMerchant" />
+        <RouterView />
       </div>
-
-      <MarketTable v-else :markets="project.markets" :url-name-market-delete="URL_REMOVE_MERCHANTS_FROM_PROJECT" />
-
-      <PfButtonAction
-        v-if="!selectMarketGroupEnabled"
-        btn-style="dash"
-        has-icon-left
-        type="button"
-        :label="t('create-market')"
-        @click="createMarket" />
-      <UiSelectAndAdd
-        v-if="filteredMarketOptions.length > 0"
-        :show-select="addMerchantDisplayed"
-        :select-label="t('selected-market')"
-        :add-label="t('add-merchant')"
-        :options="filteredMarketOptions"
-        @showSelect="showAddMerchant"
-        @submit="saveMerchant" />
-      <RouterView />
     </template>
   </UiDialogModal>
 </template>
 
 <script setup>
 import gql from "graphql-tag";
-import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
-import { ref, computed } from "vue";
+import { useQuery, useResult } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
-import { URL_PROJECT_ADMIN, URL_REMOVE_MERCHANTS_FROM_PROJECT } from "@/lib/consts/urls";
+import { URL_PROJECT_ADMIN, URL_ADD_MERCHANTS_FROM_PROJECT } from "@/lib/consts/urls";
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 
 import MarketTable from "@/components/market/market-table";
@@ -66,10 +53,9 @@ useGraphQLErrorMessages({
 
 const { t } = useI18n();
 const route = useRoute();
+const router = useRouter();
 
-const addMerchantDisplayed = ref(false);
-
-const { result: resultProject, refetch } = useQuery(
+const { result: resultProject } = useQuery(
   gql`
     query Project($id: ID!) {
       project(id: $id) {
@@ -88,61 +74,11 @@ const { result: resultProject, refetch } = useQuery(
 );
 const project = useResult(resultProject);
 
-const { result: resultMarkets } = useQuery(
-  gql`
-    query Markets {
-      markets {
-        id
-        name
-      }
-    }
-  `
-);
-
-const marketOptions = useResult(resultMarkets, null, (data) => {
-  return data.markets.map((x) => ({ label: x.name, value: x.id }));
-});
-
-const { mutate: addMarketToProject } = useMutation(
-  gql`
-    mutation AddMarketToProject($input: AddMarketToProjectInput!) {
-      addMarketToProject(input: $input) {
-        project {
-          id
-          name
-          markets {
-            id
-            name
-          }
-        }
-      }
-    }
-  `
-);
-
-const filteredMarketOptions = computed(() => {
-  if (!marketOptions.value) return [];
-  return marketOptions.value.filter((x) => !project.value.markets.some((y) => y.id === x.value));
-});
-
 function getProjectName() {
   return project.value ? project.value.name : "";
 }
 
 function showAddMerchant() {
-  addMerchantDisplayed.value = true;
-}
-
-async function saveMerchant(market) {
-  await addMarketToProject({
-    input: {
-      projectId: route.params.projectId,
-      marketId: market
-    }
-  });
-
-  refetch();
-
-  addMerchantDisplayed.value = false;
+  router.push({ name: URL_ADD_MERCHANTS_FROM_PROJECT });
 }
 </script>
