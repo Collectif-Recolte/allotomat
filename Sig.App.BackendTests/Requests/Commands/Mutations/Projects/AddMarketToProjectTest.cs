@@ -2,6 +2,7 @@
 using GraphQL.Conventions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
+using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.Extensions;
@@ -17,6 +18,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Projects
         private readonly AddMarketToProject handler;
         private readonly Market market;
         private readonly Project project;
+        private readonly MarketGroup marketGroup;
 
         public AddMarketToProjectTest()
         {
@@ -32,9 +34,16 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Projects
             };
             DbContext.Projects.Add(project);
 
+            marketGroup = new MarketGroup()
+            {
+                Project = project,
+                Name = "MarketGroup 1"
+            };
+            DbContext.MarketGroups.Add(marketGroup);
+
             DbContext.SaveChanges();
 
-            handler = new AddMarketToProject(NullLogger<AddMarketToProject>.Instance, DbContext);
+            handler = new AddMarketToProject(NullLogger<AddMarketToProject>.Instance, DbContext, Mediator);
         }
 
         [Fact]
@@ -43,7 +52,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Projects
             var input = new AddMarketToProject.Input()
             {
                 MarketId = market.GetIdentifier(),
-                ProjectId = project.GetIdentifier()
+                ProjectId = project.GetIdentifier(),
+                MarketGroupId = marketGroup.GetIdentifier()
             };
 
             await handler.Handle(input, CancellationToken.None);
