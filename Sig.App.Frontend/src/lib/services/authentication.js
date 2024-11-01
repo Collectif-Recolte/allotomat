@@ -86,6 +86,7 @@ async function logout(error, returnPath) {
   initialize(null, []);
 
   localStorage.removeItem("currentOrganization");
+  localStorage.removeItem("currentCashRegister");
 
   var path = "";
 
