@@ -28,10 +28,12 @@
                 :available-beneficiary-types="availableBeneficiaryTypes"
                 :available-subscriptions="availableSubscriptions"
                 :available-markets="availableMarkets"
+                :available-cash-register="availableCashRegisters"
                 :selected-organizations="organizations"
                 :selected-beneficiary-types="beneficiaryTypes"
                 :selected-subscriptions="subscriptions"
                 :selected-markets="markets"
+                :selected-cash-registers="cashRegisters"
                 :selected-transaction-types="transactionTypes"
                 :without-subscription-id="WITHOUT_SUBSCRIPTION"
                 :date-from="dateFrom"
@@ -46,6 +48,8 @@
                 @subscriptionsChecked="onSubscriptionsChecked"
                 @marketsUnchecked="onMarketsUnchecked"
                 @marketsChecked="onMarketsChecked"
+                @cashRegistersUnchecked="onCashRegistersUnchecked"
+                @cashRegistersChecked="onCashRegistersChecked"
                 @transactionTypesChecked="onTransactionTypesChecked"
                 @transactionTypesUnchecked="onTransactionTypesUnchecked"
                 @dateFromUpdated="onDateFromUpdated"
@@ -129,6 +133,7 @@ const organizations = ref([]);
 const beneficiaryTypes = ref([]);
 const subscriptions = ref([]);
 const markets = ref([]);
+const cashRegisters = ref([]);
 const transactionTypes = ref([]);
 const searchInput = ref("");
 const searchText = ref("");
@@ -148,6 +153,9 @@ if (route.query.subscriptions) {
 }
 if (route.query.markets) {
   markets.value = route.query.markets.split(",");
+}
+if (route.query.cashRegisters) {
+  cashRegisters.value = route.query.cashRegisters.split(",");
 }
 if (route.query.transactionTypes) {
   transactionTypes.value = route.query.transactionTypes.split(",");
@@ -183,6 +191,14 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
         markets {
           id
           name
+        }
+        marketGroups {
+          id
+          name
+          cashRegisters {
+            id
+            name
+          }
         }
         beneficiaryTypes {
           id
@@ -231,6 +247,14 @@ const { result: resultOrganizations } = useQuery(
             id
             name
           }
+          marketGroups {
+            id
+            name
+            cashRegisters {
+              id
+              name
+            }
+          }
           administrationSubscriptionsOffPlatform
         }
       }
@@ -275,6 +299,7 @@ const {
       $categories: [ID!]
       $subscriptions: [ID!]
       $markets: [ID!]
+      $cashRegisters: [ID!]
       $withoutSubscription: Boolean
       $transactionTypes: [String]
       $searchText: String
@@ -289,6 +314,7 @@ const {
         categories: $categories
         subscriptions: $subscriptions
         markets: $markets
+        cashRegisters: $cashRegisters
         withoutSubscription: $withoutSubscription
         transactionTypes: $transactionTypes
         searchText: $searchText
@@ -363,6 +389,7 @@ const {
       organizations: organizations.value,
       subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
       markets: markets.value,
+      cashRegisters: cashRegisters.value,
       withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
       categories: beneficiaryTypes.value,
       transactionTypes: transactionTypes.value,
@@ -383,6 +410,7 @@ const filteredQuery = computed(() => {
     organizations: organizations.value.length > 0 ? organizations.value.toString() : undefined,
     subscriptions: subscriptions.value.length > 0 ? subscriptions.value.toString() : undefined,
     markets: markets.value.length > 0 ? markets.value.toString() : undefined,
+    cashRegisters: cashRegisters.value.length > 0 ? cashRegisters.value.toString() : undefined,
     beneficiaryTypes: beneficiaryTypes.value.length > 0 ? beneficiaryTypes.value.toString() : undefined,
     transactionTypes: transactionTypes.value.length > 0 ? transactionTypes.value.toString() : undefined,
     text: searchText.value ? searchText.value : undefined,
@@ -413,6 +441,10 @@ let availableSubscriptions = computed(() => {
 
 let availableMarkets = computed(() => {
   return project.value?.markets;
+});
+
+let availableCashRegisters = computed(() => {
+  return project.value?.marketGroups.flatMap((x) => x.cashRegisters);
 });
 
 let administrationSubscriptionsOffPlatform = computed(() => {
@@ -459,6 +491,16 @@ function onMarketsUnchecked(value) {
   markets.value = markets.value.filter((x) => x !== value);
 }
 
+function onCashRegistersChecked(value) {
+  page.value = 1;
+  cashRegisters.value.push(value);
+}
+
+function onCashRegistersUnchecked(value) {
+  page.value = 1;
+  cashRegisters.value = cashRegisters.value.filter((x) => x !== value);
+}
+
 function onTransactionTypesChecked(value) {
   page.value = 1;
   transactionTypes.value.push(value);
@@ -489,6 +531,7 @@ function onResetFilters() {
   organizations.value = [];
   subscriptions.value = [];
   markets.value = [];
+  cashRegisters.value = [];
   beneficiaryTypes.value = [];
   transactionTypes.value = [];
   searchText.value = "";
@@ -520,6 +563,7 @@ async function onExportReport() {
         $categories: [ID!]
         $subscriptions: [ID!]
         $markets: [ID!]
+        $cashRegisters: [ID!]
         $withoutSubscription: Boolean
         $transactionTypes: [String]
         $searchText: String
@@ -534,6 +578,7 @@ async function onExportReport() {
           categories: $categories
           subscriptions: $subscriptions
           markets: $markets
+          cashRegisters: $cashRegisters
           withoutSubscription: $withoutSubscription
           transactionTypes: $transactionTypes
           searchText: $searchText
@@ -549,6 +594,7 @@ async function onExportReport() {
       organizations: organizations.value,
       subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
       markets: markets.value,
+      cashRegisters: cashRegisters.value,
       withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
       categories: beneficiaryTypes.value,
       transactionTypes: transactionTypes.value,
