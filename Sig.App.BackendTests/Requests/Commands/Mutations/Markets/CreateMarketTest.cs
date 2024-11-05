@@ -19,7 +19,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Markets
         public CreateMarketTest()
         {
             mailer = new Mock<IMailer>();
-            handler = new CreateMarket(NullLogger<CreateMarket>.Instance, DbContext, UserManager, mailer.Object);
+            handler = new CreateMarket(NullLogger<CreateMarket>.Instance, DbContext, UserManager, mailer.Object, Mediator);
         }
 
         [Fact]

@@ -24,6 +24,7 @@ namespace Sig.App.Backend.Services.Reports
         public Maybe<bool> WithoutSubscription { get; set; }
         public IEnumerable<Id> Categories { get; set; }
         public IEnumerable<Id> Markets { get; set; }
+        public IEnumerable<Id> CashRegisters { get; set; }
         public IEnumerable<string> TransactionTypes { get; set; }
         public Maybe<string> SearchText { get; set; }
         public string TimeZoneId { get; set; }

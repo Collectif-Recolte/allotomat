@@ -72,6 +72,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .Include(x => x.Organization)
                 .Include(x => x.Transactions)
                 .Include(x => x.PaymentTransactionAddingFundTransactions).ThenInclude(x => x.AddingFundTransaction)
+                .Include(x => x.CashRegister)
                 .FirstOrDefaultAsync(x => x.Id == initialTransactionId, cancellationToken);
 
             if (initialTransaction == null)
@@ -99,7 +100,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 Organization = initialTransaction.Organization,
                 TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(),
                 Amount = request.Transactions.Sum(x => x.Amount),
-                RefundByProductGroups = new List<RefundTransactionProductGroup>()
+                RefundByProductGroups = new List<RefundTransactionProductGroup>(),
+                CashRegister = initialTransaction.CashRegister
             };
 
             var beneficiary = initialTransaction.Beneficiary;
@@ -136,7 +138,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 TransactionInitiatorEmail = currentUser?.Email,
                 TransactionLogProductGroups = new List<TransactionLogProductGroup>(),
                 InitiatedByProject = currentUser?.Type == UserType.ProjectManager,
-                InitiatedByOrganization = currentUser?.Type == UserType.OrganizationManager
+                InitiatedByOrganization = currentUser?.Type == UserType.OrganizationManager,
+                CashRegisterId = initialTransaction.CashRegisterId,
+                CashRegisterName = initialTransaction.CashRegister?.Name
             };
             transactionLogs.Add(baseTransactionLog);
 

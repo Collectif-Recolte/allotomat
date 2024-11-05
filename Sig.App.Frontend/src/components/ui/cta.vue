@@ -2,6 +2,7 @@
   <div class="bg-white rounded-2xl shadow-2xl inline-flex flex-col items-center justify-center text-center p-6 h-remove-margin">
     <img class="w-72 h-auto max-w-full mb-6" :src="props.imgSrc" alt="" aria-hidden />
     <p v-if="description" class="text-p3 mb-4">{{ props.description }}</p>
+    <slot></slot>
     <PfButtonLink
       v-if="primaryBtnRoute"
       class="w-full mb-6"

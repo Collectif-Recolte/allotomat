@@ -42,6 +42,7 @@ using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Utilities.Sorting;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.Requests.Queries.Markets;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 
 namespace Sig.App.Backend.Gql.Schema
 {
@@ -273,6 +274,11 @@ namespace Sig.App.Backend.Gql.Schema
             return ctx.DataLoader.LoadMarket(id.LongIdentifierForType<Market>());
         }
 
+        public static IDataLoaderResult<CashRegisterGraphType> CashRegister(this GqlQuery _, IAppUserContext ctx, Id id)
+        {
+            return ctx.DataLoader.LoadCashRegister(id.LongIdentifierForType<CashRegister>());
+        }
+
         public static IDataLoaderResult<MarketGroupGraphType> MarketGroup(this GqlQuery _, IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadMarketGroup(id.LongIdentifierForType<MarketGroup>());
@@ -359,7 +365,7 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, Id[] markets, string[] transactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
+        public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, Id[] markets, Id[] cashRegisters, string[] transactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
         {
             return await mediator.Send(new GenerateTransactionsReport.Input()
             {
@@ -369,6 +375,7 @@ namespace Sig.App.Backend.Gql.Schema
                 Organizations = organizations,
                 Subscriptions = subscriptions,
                 Markets = markets,
+                CashRegisters = cashRegisters,
                 WithoutSubscription = withoutSubscription,
                 Categories = categories,
                 TransactionTypes = transactionTypes,
@@ -475,7 +482,7 @@ namespace Sig.App.Backend.Gql.Schema
         [RequirePermission(GlobalPermission.ManageTransactions)]
         [Description("All transactions")]
         public static async Task<TransactionLogsPagination<TransactionLogGraphType>> TransactionLogs(this GqlQuery _, [Inject] IMediator mediator,
-            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, Id[] markets, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText, string timeZoneId)
+            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, Id[] markets, bool? withoutSubscription, Id[] categories, string[] transactionTypes, Id[] cashRegisters, string searchText, string timeZoneId)
         {
             var results = await mediator.Send(new SearchTransactionLogs.Query
             {
@@ -486,6 +493,7 @@ namespace Sig.App.Backend.Gql.Schema
                 Organizations = organizations,
                 Subscriptions = subscriptions,
                 Markets = markets,
+                CashRegisters = cashRegisters,
                 WithoutSubscription = withoutSubscription,
                 Categories = categories,
                 TransactionTypes = transactionTypes,

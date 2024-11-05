@@ -24,7 +24,7 @@
 <template>
   <RouterView v-slot="{ Component }">
     <AppShell :title="t('title')" :loading="loading">
-      <div v-if="markets && markets.length > 0">
+      <div v-if="markets">
         <UiTableHeader :title="t('market-count', { count: markets.length })">
           <template #right>
             <div class="flex items-center gap-x-4">
@@ -51,25 +51,25 @@
           </template>
         </UiTableHeader>
         <MarketTable
+          v-if="markets.length > 0"
           can-edit
           :markets="markets"
           :url-name-market-archive="URL_MARKET_OVERVIEW_ARCHIVE"
           :url-name-market-edit="URL_MARKET_OVERVIEW_EDIT"
           :url-name-market-manage-managers="URL_MARKET_OVERVIEW_MANAGE_MANAGERS" />
+        <UiEmptyPage v-else-if="!loading">
+          <UiCta
+            :description="t('empty-list')"
+            :primary-btn-label="t('reset-search')"
+            primary-btn-is-action
+            @onPrimaryBtnClick="resetSearch"></UiCta>
+        </UiEmptyPage>
         <UiPagination
           v-if="marketsPagination && marketsPagination.totalPages > 1"
           v-model:page="page"
           :total-pages="marketsPagination.totalPages">
         </UiPagination>
       </div>
-      <UiEmptyPage v-else-if="!loading">
-        <UiCta
-          :description="t('empty-list')"
-          :primary-btn-label="t('reset-search')"
-          primary-btn-is-action
-          @onPrimaryBtnClick="resetSearch"></UiCta>
-      </UiEmptyPage>
-
       <Component :is="Component" />
     </AppShell>
   </RouterView>
