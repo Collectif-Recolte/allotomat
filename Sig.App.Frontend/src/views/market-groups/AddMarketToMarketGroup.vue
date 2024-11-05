@@ -19,7 +19,7 @@
       "no-associated-merchant": "Tous les commerces disponibles sont associés au groupe de commerce."
     }
   }
-  </i18n>
+</i18n>
 
 <template>
   <UiDialogModal v-slot="{ closeModal }" :return-route="returnRoute()" :title="t('title')" :has-footer="false">

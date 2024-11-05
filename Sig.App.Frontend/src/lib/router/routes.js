@@ -945,6 +945,14 @@ export default [
         meta: {
           claim: GLOBAL_MANAGE_SPECIFIC_MARKET
         }
+      },
+      {
+        name: urls.URL_CASH_REGISTER_ADD_MARKET_GROUP,
+        path: ":cashRegisterId/add-market-group",
+        component: () => import("@/views/cash-register/AddCashRegisterToMarketGroup.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SPECIFIC_MARKET
+        }
       }
     ]
   },
