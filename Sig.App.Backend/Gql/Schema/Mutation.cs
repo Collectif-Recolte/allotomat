@@ -835,6 +835,17 @@ namespace Sig.App.Backend.Gql.Schema
             return true;
         }
 
+        [RequirePermission(MarketPermission.ManageCashRegister)]
+        [AnnotateErrorCodes(typeof(AddCashRegisterToMarketGroup))]
+        public static Task<AddCashRegisterToMarketGroup.Payload> AddCashRegisterToMarketGroup(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<AddCashRegisterToMarketGroup.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
         public static Task<AdjustBeneficiarySubscription.Payload> AdjustBeneficiarySubscription(
             this GqlMutation _,
             [Inject] IMediator mediator,
