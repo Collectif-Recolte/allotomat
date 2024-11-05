@@ -170,24 +170,16 @@ const validationSchema = computed(() =>
 );
 
 const projectOptions = computed(() => {
-  if (!props.market || !props.market.projects) {
-    return [];
-  }
-
-  return props.market.projects.map((project) => {
-    return {
+  return (
+    props.market?.projects?.map((project) => ({
       value: project.id,
       label: project.name
-    };
-  });
+    })) ?? []
+  );
 });
 
 const marketGroupOptions = computed(() => {
-  if (!props.market || !props.market.projects) {
-    return [];
-  }
-
-  var marketGroups = props.market.projects.find((project) => project.id === selectedProject.value)?.marketGroups || [];
+  var marketGroups = props.market?.projects?.find((project) => project.id === selectedProject.value)?.marketGroups ?? [];
   return marketGroups
     .filter((x) => !props.marketGroups.some((y) => x.id === y.id))
     .map((marketGroup) => {
