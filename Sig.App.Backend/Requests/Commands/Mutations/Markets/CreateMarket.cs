@@ -116,7 +116,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 var projectId = request.ProjectId.Value.LongIdentifierForType<Project>();
                 var project = await db.Projects.Include(x => x.Markets).FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
 
-                await mediator.Send(new CreateCashRegister.Input() { MarketGroupId = request.MarketGroupId.Value, MarketId = market.GetIdentifier(), Name = "Caisse - " + project.Name });
+                await mediator.Send(new CreateCashRegister.Input() { MarketGroupId = request.MarketGroupId.Value, MarketId = market.GetIdentifier(), Name = "Caisse - " + marketGroup.Name + " / " + market.Name });
             }
 
             await db.SaveChangesAsync(cancellationToken);

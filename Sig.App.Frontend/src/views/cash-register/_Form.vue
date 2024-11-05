@@ -8,7 +8,8 @@
 		"cancel": "Cancel",
     "market-groups": "Program(s)",
     "selected-project": "Program",
-    "selected-market-group": "Location"
+    "selected-market-group": "Location",
+    "no-associated-market-groups": "All available market groups are associated with the cash register."
 	},
 	"fr": {
     "project-name": "Programme",
@@ -18,7 +19,8 @@
 		"cancel": "Annuler",
     "market-groups": "Programme(s)",
     "selected-project": "Programme",
-    "selected-market-group": "Lieu"
+    "selected-market-group": "Lieu",
+    "no-associated-market-groups": "Tous les groupe de commerces disponibles sont associés à la caisse."
 	}
 }
 </i18n>
@@ -42,13 +44,14 @@
             id="name"
             required
             v-bind="field"
+            :disabled="isAddProject"
             :label="t('cash-register-name')"
             :placeholder="t('cash-register-name-placeholder')"
             :errors="fieldErrors"
             col-span-class="sm:col-span-4" />
         </Field>
       </PfFormSection>
-      <PfFormSection v-if="!isNew" :title="t('market-groups')">
+      <PfFormSection v-if="!isNew && !isAddProject" :title="t('market-groups')">
         <div class="relative border border-primary-300 rounded-lg px-5 pt-3 pb-6 mb-4 last:mb-0">
           <div v-for="marketGroup in marketGroups" :key="marketGroup.id">
             <div>
@@ -74,7 +77,12 @@
             col-span-class="sm:col-span-3"
             @input="(e) => onProjectSelected(e, setFieldValue)" />
         </Field>
-        <Field v-slot="{ field, errors: fieldErrors }" name="selectedMarketGroup">
+        <template v-if="marketGroupOptions.length === 0 && selectedProject !== null">
+          <div class="text-red-500">
+            <p class="text-sm">{{ t("no-associated-market-groups") }}</p>
+          </div>
+        </template>
+        <Field v-else v-slot="{ field, errors: fieldErrors }" name="selectedMarketGroup">
           <PfFormInputSelect
             id="selectedMarketGroup"
             required
@@ -134,6 +142,10 @@ const props = defineProps({
   isNew: {
     type: Boolean,
     default: false
+  },
+  isAddProject: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -158,30 +170,24 @@ const validationSchema = computed(() =>
 );
 
 const projectOptions = computed(() => {
-  if (!props.market || !props.market.projects) {
-    return [];
-  }
-
-  return props.market.projects.map((project) => {
-    return {
+  return (
+    props.market?.projects?.map((project) => ({
       value: project.id,
       label: project.name
-    };
-  });
+    })) ?? []
+  );
 });
 
 const marketGroupOptions = computed(() => {
-  if (!props.market || !props.market.projects) {
-    return [];
-  }
-
-  var marketGroups = props.market.projects.find((project) => project.id === selectedProject.value)?.marketGroups || [];
-  return marketGroups.map((marketGroup) => {
-    return {
-      value: marketGroup.id,
-      label: marketGroup.name
-    };
-  });
+  var marketGroups = props.market?.projects?.find((project) => project.id === selectedProject.value)?.marketGroups ?? [];
+  return marketGroups
+    .filter((x) => !props.marketGroups.some((y) => x.id === y.id))
+    .map((marketGroup) => {
+      return {
+        value: marketGroup.id,
+        label: marketGroup.name
+      };
+    });
 });
 
 function closeModal() {
@@ -207,8 +213,10 @@ watch(
     }
     if (props.market.projects.length === 1) {
       initialValues.selectedProject = props.market.projects[0]?.id;
-      if (props.market.projects[0]?.marketGroups.length === 1) {
-        initialValues.selectedMarketGroup = props.market.projects[0]?.marketGroups[0]?.id;
+      selectedProject.value = props.market.projects[0]?.id;
+
+      if (marketGroupOptions.value.length === 1) {
+        initialValues.selectedMarketGroup = marketGroupOptions.value[0].value;
       }
     }
   },

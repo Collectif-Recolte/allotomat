@@ -460,7 +460,7 @@ export default [
           {
             name: urls.URL_ADD_MERCHANTS_FROM_MARKET_GROUP,
             path: "add-market",
-            component: () => import("@/views/market/SelectMarket.vue"),
+            component: () => import("@/views/market-groups/AddMarketToMarketGroup.vue"),
             meta: {
               claim: GLOBAL_MANAGE_MARKET_GROUPS
             }
@@ -942,6 +942,14 @@ export default [
         name: urls.URL_CASH_REGISTER_ARCHIVE,
         path: ":cashRegisterId/archive",
         component: () => import("@/views/cash-register/ArchiveCashRegister.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SPECIFIC_MARKET
+        }
+      },
+      {
+        name: urls.URL_CASH_REGISTER_ADD_MARKET_GROUP,
+        path: ":cashRegisterId/add-market-group",
+        component: () => import("@/views/cash-register/AddCashRegisterToMarketGroup.vue"),
         meta: {
           claim: GLOBAL_MANAGE_SPECIFIC_MARKET
         }

@@ -51,6 +51,8 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public string ProjectName => transactionLog.ProjectName;
         public bool InitiatedByProject => transactionLog.InitiatedByProject;
         public bool InitiatedByOrganization => transactionLog.InitiatedByOrganization;
+        public long? CashRegisterId => transactionLog.CashRegisterId;
+        public string CashRegisterName => transactionLog.CashRegisterName;
 
         public TransactionLogGraphType(TransactionLog transactionLog)
         {

@@ -9,6 +9,8 @@ using Sig.App.Backend.Requests.Commands.Mutations.MarketGroups;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Sig.App.Backend.DbModel.Entities.Projects;
+using System.Collections.Generic;
 
 namespace Sig.App.BackendTests.Requests.Commands.Mutations.MarketGroups
 {
@@ -17,24 +19,43 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.MarketGroups
         private readonly AddMarketToMarketGroup handler;
         private readonly Market market;
         private readonly MarketGroup MarketGroup;
+        private readonly Project project;
 
         public AddMarketToMarketGroupTest()
         {
+            project = new Project()
+            {
+                Name = "Project 1",
+                Markets = new List<ProjectMarket>()
+            };
+            DbContext.Projects.Add(project);
+
             market = new Market()
             {
-                Name = "Market 1"
+                Name = "Market 1",
+                Projects = new List<ProjectMarket>()
             };
             DbContext.Markets.Add(market);
 
+            var projectMarket = new ProjectMarket()
+            {
+                Project = project,
+                Market = market
+            };
+            market.Projects.Add(projectMarket);
+            project.Markets.Add(projectMarket);
+            DbContext.ProjectMarkets.Add(projectMarket);
+
             MarketGroup = new MarketGroup()
             {
-                Name = "MarketGroup 1"
+                Name = "MarketGroup 1",
+                Project = project
             };
             DbContext.MarketGroups.Add(MarketGroup);
 
             DbContext.SaveChanges();
 
-            handler = new AddMarketToMarketGroup(NullLogger<AddMarketToMarketGroup>.Instance, DbContext);
+            handler = new AddMarketToMarketGroup(NullLogger<AddMarketToMarketGroup>.Instance, DbContext, Mediator);
         }
 
         [Fact]
