@@ -444,7 +444,8 @@ let availableMarkets = computed(() => {
 });
 
 let availableCashRegisters = computed(() => {
-  return project.value?.marketGroups.flatMap((x) => x.cashRegisters);
+  var cashRegister = project.value?.marketGroups.flatMap((x) => x.cashRegisters) ?? [];
+  return cashRegister.filter((x, index) => cashRegister.findIndex((y) => y.id === x.id) === index);
 });
 
 let administrationSubscriptionsOffPlatform = computed(() => {
