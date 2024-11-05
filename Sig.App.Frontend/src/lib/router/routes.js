@@ -214,6 +214,14 @@ export default [
             meta: {
               claim: GLOBAL_MANAGE_ALL_PROJECTS
             }
+          },
+          {
+            name: urls.URL_ADD_MERCHANTS_FROM_PROJECT,
+            path: "add-market",
+            component: () => import("@/views/market/SelectMarket.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_ALL_PROJECTS
+            }
           }
         ]
       },
@@ -445,6 +453,14 @@ export default [
             name: urls.URL_REMOVE_MERCHANTS_FROM_MARKET_GROUP,
             path: ":marketId/remove",
             component: () => import("@/views/market-groups/RemoveMarketFromMarketGroup.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_MARKET_GROUPS
+            }
+          },
+          {
+            name: urls.URL_ADD_MERCHANTS_FROM_MARKET_GROUP,
+            path: "add-market",
+            component: () => import("@/views/market-groups/AddMarketToMarketGroup.vue"),
             meta: {
               claim: GLOBAL_MANAGE_MARKET_GROUPS
             }
@@ -926,6 +942,14 @@ export default [
         name: urls.URL_CASH_REGISTER_ARCHIVE,
         path: ":cashRegisterId/archive",
         component: () => import("@/views/cash-register/ArchiveCashRegister.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SPECIFIC_MARKET
+        }
+      },
+      {
+        name: urls.URL_CASH_REGISTER_ADD_MARKET_GROUP,
+        path: ":cashRegisterId/add-market-group",
+        component: () => import("@/views/cash-register/AddCashRegisterToMarketGroup.vue"),
         meta: {
           claim: GLOBAL_MANAGE_SPECIFIC_MARKET
         }

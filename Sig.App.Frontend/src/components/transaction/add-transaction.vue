@@ -239,9 +239,11 @@ import { formatDate, dateUtc, regularFormat, textualFormat } from "@/lib/helpers
 
 import { useAuthStore } from "@/lib/store/auth";
 import { useNotificationsStore } from "@/lib/store/notifications";
+import { useCashRegisterStore } from "@/lib/store/cash-register";
 
 const { userType } = storeToRefs(useAuthStore());
 const { t } = useI18n();
+const { currentCashRegister } = useCashRegisterStore();
 const { addError } = useNotificationsStore();
 
 const audio = new Audio(require("@/assets/audio/confirmation.mp3"));
@@ -554,7 +556,8 @@ async function onSubmit() {
         .filter((x) => parseFloat(x.amount) > 0)
         .map((x) => ({ amount: parseFloat(x.amount), productGroupId: x.fund.productGroup.id })),
       cardId: props.cardId,
-      marketId: props.marketId
+      marketId: props.marketId,
+      cashRegisterId: currentCashRegister
     }
   });
 

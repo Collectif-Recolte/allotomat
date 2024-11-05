@@ -27,6 +27,8 @@
       :submit-btn="t('add-market')"
       :initial-values="initialValues"
       :validation-schema="validationSchema"
+      :is-in-project="route.name === URL_MARKET_OVERVIEW_ADD"
+      :market-group-options="marketGroups"
       is-new
       @closeModal="closeModal"
       @submit="onSubmit">
@@ -41,7 +43,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQuery, useResult } from "@vue/apollo-composable";
-import { string, object, array } from "yup";
+import { string, object, array, lazy } from "yup";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 import { URL_MARKET_ADMIN, URL_MARKET_OVERVIEW_ADD, URL_MARKET_OVERVIEW } from "@/lib/consts/urls";
@@ -74,6 +76,11 @@ const { result: resultProject } = useQuery(
           id
           name
         }
+        marketGroups {
+          id
+          name
+          isArchived
+        }
       }
     }
   `,
@@ -84,6 +91,12 @@ const { result: resultProject } = useQuery(
 );
 const project = useResult(resultProject, null, (data) => {
   return data.projects[0];
+});
+const marketGroups = useResult(resultProject, null, (data) => {
+  return data.projects[0].marketGroups.map((marketGroup) => ({
+    value: marketGroup.id,
+    label: marketGroup.name
+  }));
 });
 
 const { mutate: createMarket } = useMutation(
@@ -113,7 +126,11 @@ const validationSchema = computed(() =>
         object({
           email: string().label(t("manager-email")).required().email()
         })
-      )
+      ),
+    marketGroup: lazy(() => {
+      if (route.name !== URL_MARKET_OVERVIEW_ADD) return string().notRequired();
+      return string().label(t("selected-market-group")).required();
+    })
   })
 );
 
@@ -121,7 +138,8 @@ async function onSubmit(values) {
   let input = {
     name: values.marketName,
     managerEmails: values.managers.map((x) => x.email),
-    projectId: route.name === URL_MARKET_OVERVIEW_ADD ? { value: project.value.id } : null
+    projectId: route.name === URL_MARKET_OVERVIEW_ADD ? { value: project.value.id } : null,
+    marketGroupId: route.name === URL_MARKET_OVERVIEW_ADD ? { value: values.marketGroup } : null
   };
 
   await createMarket({ input });

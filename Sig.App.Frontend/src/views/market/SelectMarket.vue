@@ -8,7 +8,8 @@
     "choose-market": "Select",
     "select-market": "Market",
     "cancel": "Cancel",
-    "no-associated-merchant": "All available markets are associated with the program."
+    "no-associated-merchant": "All available markets are associated with the program.",
+    "selected-market-group": "Market group"
 	},
 	"fr": {
 		"add-market": "Ajouter",
@@ -18,7 +19,8 @@
     "choose-market": "Sélectionner",
     "select-market": "Commerce",
     "cancel": "Annuler",
-    "no-associated-merchant": "Tous les commerces disponibles sont associés au programme."
+    "no-associated-merchant": "Tous les commerces disponibles sont associés au programme.",
+    "selected-market-group": "Groupe de commerce"
 	}
 }
 </i18n>
@@ -45,10 +47,21 @@
               <Field v-slot="{ field: inputField, errors: fieldErrors }" name="market">
                 <PfFormInputSelect
                   id="marketId"
+                  required
                   v-bind="inputField"
                   :placeholder="t('choose-market')"
                   :label="t('select-market')"
                   :options="filteredMarketOptions"
+                  :errors="fieldErrors" />
+              </Field>
+              <Field v-slot="{ field, errors: fieldErrors }" name="marketGroup">
+                <PfFormInputSelect
+                  id="marketGroup"
+                  required
+                  v-bind="field"
+                  :label="t('selected-market-group')"
+                  :options="marketGroups"
+                  :disabled="selectMarketGroupEnabled"
                   :errors="fieldErrors" />
               </Field>
             </PfFormSection>
@@ -57,7 +70,13 @@
                 <p class="text-sm">{{ t("no-associated-merchant") }}</p>
               </div>
             </template>
-            <PfButtonAction btn-style="dash" has-icon-left type="button" :label="t('create-market')" @click="createMarket" />
+            <PfButtonAction
+              v-if="!selectMarketGroupEnabled && canCreateMarket"
+              btn-style="dash"
+              has-icon-left
+              type="button"
+              :label="t('create-market')"
+              @click="createMarket" />
           </div>
         </div>
       </PfForm>
@@ -74,7 +93,16 @@ import { useMutation, useQuery, useResult } from "@vue/apollo-composable";
 import { string, object } from "yup";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
-import { URL_MARKET_ADMIN, URL_MARKET_OVERVIEW_SELECT, URL_MARKET_OVERVIEW, URL_MARKET_OVERVIEW_ADD } from "@/lib/consts/urls";
+import {
+  URL_MARKET_ADMIN,
+  URL_MARKET_OVERVIEW_SELECT,
+  URL_MARKET_OVERVIEW,
+  URL_MARKET_OVERVIEW_ADD,
+  URL_ADD_MERCHANTS_FROM_MARKET_GROUP,
+  URL_MARKET_GROUP_MANAGE_MERCHANTS,
+  URL_ADD_MERCHANTS_FROM_PROJECT,
+  URL_PROJECT_MANAGE_MERCHANTS
+} from "@/lib/consts/urls";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -108,12 +136,32 @@ const { result: resultProject, loading: loadingProject } = useQuery(
           id
           name
         }
+        marketGroups {
+          id
+          name
+          isArchived
+        }
       }
     }
   `
 );
 const project = useResult(resultProject, null, (data) => {
+  if (route.params.projectId) {
+    return data.projects.find((project) => project.id === route.params.projectId);
+  }
   return data.projects[0];
+});
+
+const marketGroups = useResult(resultProject, null, (data) => {
+  var project = data.projects[0];
+  if (route.params.projectId) {
+    project = data.projects.find((project) => project.id === route.params.projectId);
+  }
+
+  return project.marketGroups.map((marketGroup) => ({
+    value: marketGroup.id,
+    label: marketGroup.name
+  }));
 });
 
 const { mutate: addMarketToProject } = useMutation(
@@ -134,7 +182,8 @@ const { mutate: addMarketToProject } = useMutation(
 );
 
 const initialValues = {
-  market: null
+  market: null,
+  marketGroup: route.params.marketGroupId !== null ? route.params.marketGroupId : null
 };
 
 const filteredMarketOptions = computed(() => {
@@ -144,9 +193,13 @@ const filteredMarketOptions = computed(() => {
 
 const validationSchema = computed(() =>
   object({
-    market: string().label(t("select-market")).required()
+    market: string().label(t("select-market")).required(),
+    marketGroup: string().label(t("selected-market-group")).required()
   })
 );
+
+const selectMarketGroupEnabled = computed(() => route.name === URL_ADD_MERCHANTS_FROM_MARKET_GROUP);
+const canCreateMarket = computed(() => route.name !== URL_ADD_MERCHANTS_FROM_PROJECT);
 
 function createMarket() {
   router.push({ name: URL_MARKET_OVERVIEW_ADD });
@@ -156,7 +209,8 @@ async function onSubmit(values) {
   await addMarketToProject({
     input: {
       projectId: project.value.id,
-      marketId: values.market
+      marketId: values.market,
+      marketGroupId: values.marketGroup
     }
   });
   router.push(returnRoute());
@@ -164,6 +218,8 @@ async function onSubmit(values) {
 }
 
 function returnRoute() {
+  if (route.name === URL_ADD_MERCHANTS_FROM_MARKET_GROUP) return { name: URL_MARKET_GROUP_MANAGE_MERCHANTS };
+  if (route.name === URL_ADD_MERCHANTS_FROM_PROJECT) return { name: URL_PROJECT_MANAGE_MERCHANTS };
   if (route.name === URL_MARKET_OVERVIEW_SELECT) return { name: URL_MARKET_OVERVIEW };
   else return { name: URL_MARKET_ADMIN };
 }

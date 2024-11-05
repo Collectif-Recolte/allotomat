@@ -22,6 +22,7 @@ using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.Services.Permission.Enums;
 using Sig.App.Backend.Gql.Schema.Enums;
 using Sig.App.Backend.DbModel.Entities.Markets;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 
 namespace Sig.App.Backend.Services.Reports
 {
@@ -77,7 +78,8 @@ namespace Sig.App.Backend.Services.Reports
 
             dataWorksheet.Column("Id de la carte/Card id", x => x.CardProgramCardId);
             dataWorksheet.Column("Numéro de la carte/Card number", x => x.CardNumber != null ? x.CardNumber.Replace("-", " ") : "");
-            
+            dataWorksheet.Column("Caisse/Cash register", x => x.CashRegisterName);
+
             return generator.Render();
         }
 
@@ -129,6 +131,12 @@ namespace Sig.App.Backend.Services.Reports
             {
                 var marketsLongIdentifiers = request.Markets.Select(x => x.LongIdentifierForType<Market>());
                 query = query.Where(x => marketsLongIdentifiers.Contains(x.MarketId.GetValueOrDefault()));
+            }
+
+            if (request.CashRegisters?.Any() ?? false)
+            {
+                var cashRegistersLongIdentifiers = request.CashRegisters.Select(x => x.LongIdentifierForType<CashRegister>());
+                query = query.Where(x => cashRegistersLongIdentifiers.Contains(x.CashRegisterId.GetValueOrDefault()));
             }
 
             if (request.TransactionTypes?.Any() ?? false)
@@ -201,6 +209,7 @@ namespace Sig.App.Backend.Services.Reports
             dataWorksheet.Column("Abonnement/Subscription", x => x.SubscriptionName);
             dataWorksheet.Column("Initiateur transaction/Transaction initiator", GetTransactionInitiatorName);
             dataWorksheet.Column("Courriel initiateur transaction/Transaction initiator email", x => x.TransactionInitiatorEmail);
+            dataWorksheet.Column("Caisse/Cash register", x => x.CashRegisterName);
 
             return generator.Render();
         }

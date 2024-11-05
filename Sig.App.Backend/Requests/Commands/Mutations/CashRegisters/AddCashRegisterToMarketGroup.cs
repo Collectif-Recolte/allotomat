@@ -5,25 +5,23 @@ using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
-using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.CashRegisters
 {
-    public class CreateCashRegister : IRequestHandler<CreateCashRegister.Input, CreateCashRegister.Payload>
+    public class AddCashRegisterToMarketGroup : IRequestHandler<AddCashRegisterToMarketGroup.Input, AddCashRegisterToMarketGroup.Payload>
     {
-        private readonly ILogger<CreateCashRegister> logger;
+        private readonly ILogger<AddCashRegisterToMarketGroup> logger;
         private readonly AppDbContext db;
 
-        public CreateCashRegister(ILogger<CreateCashRegister> logger, AppDbContext db)
+        public AddCashRegisterToMarketGroup(ILogger<AddCashRegisterToMarketGroup> logger, AppDbContext db)
         {
             this.logger = logger;
             this.db = db;
@@ -31,49 +29,41 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.CashRegisters
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
-            logger.LogInformation($"[Mutation] CreateCashRegister({request.MarketId}, {request.Name})");
-
-            var marketId = request.MarketId.LongIdentifierForType<Market>();
-            var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
-
-            if (market == null)
-            {
-                logger.LogWarning("[Mutation] CreateCashRegister - MarketNotFoundException");
-                throw new MarketNotFoundException();
-            }
+            logger.LogInformation($"[Mutation] AddCashRegisterToMarketGroup({request.MarketGroupId}, {request.CashRegisterId})");
 
             var marketGroupId = request.MarketGroupId.LongIdentifierForType<MarketGroup>();
             var marketGroup = await db.MarketGroups.Include(x => x.Markets).FirstOrDefaultAsync(x => x.Id == marketGroupId, cancellationToken);
 
             if (marketGroup == null)
             {
-                logger.LogWarning("[Mutation] CreateCashRegister - MarketGroupNotFoundException");
+                logger.LogWarning("[Mutation] AddCashRegisterToMarketGroup - MarketGroupNotFoundException");
                 throw new MarketGroupNotFoundException();
             }
 
-            if (!marketGroup.Markets.Select(x => x.Market).Contains(market))
+            var cashRegisterId = request.CashRegisterId.LongIdentifierForType<CashRegister>();
+            var cashRegister = await db.CashRegisters.Include(x => x.MarketGroups).FirstOrDefaultAsync(x => x.Id == cashRegisterId, cancellationToken);
+
+            if (cashRegister == null)
             {
-                logger.LogWarning("[Mutation] CreateCashRegister - MarketGroupNotFoundInMarketException");
-                throw new MarketGroupNotFoundInMarketException();
+                logger.LogWarning("[Mutation] AddCashRegisterToMarketGroup - CashRegisterNotFoundException");
+                throw new CashRegisterNotFoundException();
             }
 
-            var cashRegister = new CashRegister()
+            if (cashRegister.MarketGroups.Any(x => x.MarketGroupId == marketGroupId))
             {
-                Name = request.Name.Trim(),
-                Market = market,
-                MarketGroups = new List<CashRegisterMarketGroup>()
-            };
+                logger.LogInformation("[Mutation] AddCashRegisterToMarketGroup - CashRegisterAlreadyInMarketGroupException");
+                throw new CashRegisterAlreadyInMarketGroupException();
+            }
+
             cashRegister.MarketGroups.Add(new CashRegisterMarketGroup()
             {
                 CashRegister = cashRegister,
                 MarketGroup = marketGroup
             });
 
-            db.CashRegisters.Add(cashRegister);
-
             await db.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation($"[Mutation] CreateCashRegister - New cash register created {cashRegister.Name} ({cashRegister.Id})");
+            logger.LogInformation($"[Mutation] AddCashRegisterToMarketGroup - Cash register ({cashRegister.Name}) added to MarketGroup ({marketGroup.Name})");
 
             return new Payload
             {
@@ -82,9 +72,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.CashRegisters
         }
 
         [MutationInput]
-        public class Input : HaveMarketId, IRequest<Payload>
+        public class Input : HaveCashRegisterId, IRequest<Payload>
         {
-            public string Name { get; set; }
             public Id MarketGroupId { get; set; }
         }
 
@@ -94,8 +83,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.CashRegisters
             public CashRegisterGraphType CashRegister { get; set; }
         }
 
-        public class MarketNotFoundException : RequestValidationException { }
         public class MarketGroupNotFoundException : RequestValidationException { }
-        public class MarketGroupNotFoundInMarketException : RequestValidationException { }
+        public class CashRegisterNotFoundException : RequestValidationException { }
+        public class CashRegisterAlreadyInMarketGroupException : RequestValidationException { }
     }
 }
