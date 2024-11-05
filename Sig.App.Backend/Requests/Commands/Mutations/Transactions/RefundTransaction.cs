@@ -140,7 +140,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 InitiatedByProject = currentUser?.Type == UserType.ProjectManager,
                 InitiatedByOrganization = currentUser?.Type == UserType.OrganizationManager,
                 CashRegisterId = initialTransaction.CashRegisterId,
-                CashRegisterName = initialTransaction.CashRegister.Name
+                CashRegisterName = initialTransaction.CashRegister?.Name
             };
             transactionLogs.Add(baseTransactionLog);
 

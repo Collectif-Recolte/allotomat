@@ -48,6 +48,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Transactions
             public IEnumerable<Id> Organizations { get; set; }
             public IEnumerable<Id> Subscriptions { get; set; }
             public IEnumerable<Id> Markets { get; set; }
+            public IEnumerable<Id> CashRegisters { get; set; }
             public Maybe<bool> WithoutSubscription { get; set; }
             public IEnumerable<Id> Categories { get; set; }
             public IEnumerable<string> TransactionTypes { get; set; }

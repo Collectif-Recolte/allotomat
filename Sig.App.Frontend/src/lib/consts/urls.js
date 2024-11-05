@@ -112,6 +112,7 @@ export const URL_CASH_REGISTER = "cash-register-url";
 export const URL_CASH_REGISTER_ADD = "cash-register-add-url";
 export const URL_CASH_REGISTER_EDIT = "cash-register-edit-url";
 export const URL_CASH_REGISTER_ARCHIVE = "cash-register-archive-url";
+export const URL_CASH_REGISTER_ADD_MARKET_GROUP = "cash-register-add-market-group-url";
 
 export const URL_CARDS = "cards-list-url";
 export const URL_CARDS_ADD = "cards-add-url";
