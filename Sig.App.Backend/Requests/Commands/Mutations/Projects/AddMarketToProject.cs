@@ -81,7 +81,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 
             await db.SaveChangesAsync(cancellationToken);
 
-            await mediator.Send(new CreateCashRegister.Input() { MarketGroupId = request.MarketGroupId, MarketId = request.MarketId, Name = "Caisse - " + project.Name });
+            await mediator.Send(new CreateCashRegister.Input() { MarketGroupId = request.MarketGroupId, MarketId = request.MarketId, Name = "Caisse - " + marketGroup.Name + " / " + market.Name });
 
             logger.LogInformation($"[Mutation] AddMarketToProject - Market {market.Name} added to project {project.Name}");
 

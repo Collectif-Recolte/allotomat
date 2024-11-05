@@ -38,6 +38,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return ctx.DataLoader.LoadGroupMarketMarkets(Id.LongIdentifierForType<MarketGroup>());
         }
 
+        public IDataLoaderResult<IEnumerable<CashRegisterGraphType>> CashRegisters(IAppUserContext ctx)
+        {
+            return ctx.DataLoader.LoadMarketGroupCashRegisters(Id.LongIdentifierForType<MarketGroup>());
+        }
+
         [Description("The list of market groups managers for this project.")]
         public async Task<IEnumerable<UserGraphType>> Managers([Inject] IMediator mediator)
         {

@@ -3,37 +3,170 @@
     "en": {
       "title": "Create a transaction",
       "start-transaction": "Scan a card",
-      "manually-enter-card-number": "Manually enter card number"
+      "manually-enter-card-number": "Manually enter card number",
+      "select-card-text": "Please select a cash register below to continue.",
+      "select-cash-register": "Save",
+      "cash-register-input": "Cash Register",
+      "cash-register-saved": "Cash register saved successfully!"
     },
     "fr": {
       "title": "Créer une transaction",
       "start-transaction": "Scanner une carte",
-      "manually-enter-card-number": "Saisir le numéro de la carte"
+      "manually-enter-card-number": "Saisir le numéro de la carte",
+      "select-card-text": "Veuillez sélectionner une caisse ci-dessous pour continuer.",
+      "select-cash-register": "Sauvegarder",
+      "cash-register-input": "Caisse",
+      "cash-register-saved": "Caisse sauvegardée avec succès !"
     }
   }
-  </i18n>
+</i18n>
 
 <template>
   <UiEmptyPage class="min-h-app px-8">
     <UiCta
+      v-if="selectedCashRegisterId !== null"
       :img-src="require('@/assets/img/scan-marchand.jpg')"
       :primary-btn-label="t('start-transaction')"
       :secondary-btn-label="t('manually-enter-card-number')"
       primary-btn-is-action
       secondary-btn-is-action
       @onPrimaryBtnClick="emit('onUpdateStep', TRANSACTION_STEPS_SCAN, {})"
-      @onSecondaryBtnClick="emit('onUpdateStep', TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER, {})" />
+      @onSecondaryBtnClick="emit('onUpdateStep', TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER, {})">
+      <div v-if="!loading" class="pt-3 pb-6">
+        <div class="text-left relative border border-primary-300 rounded-lg px-5 pt-3 pb-6 mb-4 last:mb-0">
+          <div class="space-y-6 divide-y divide-grey-300">
+            <h3 class="text-h4 text-primary-900 mt-2 mb-2">
+              <span>{{ selectedCashRegister.name }}</span>
+            </h3>
+            <div v-for="marketGroup in selectedCashRegister.marketGroups" :key="marketGroup.id" class="space-y-4">
+              <div class="mt-4">
+                <dd :class="ddClasses">{{ marketGroup.project.name }}</dd>
+                <dd :class="ddClasses">{{ marketGroup.name }}</dd>
+              </div>
+            </div>
+          </div>
+          <div class="absolute right-3 top-3">
+            <PfButtonAction
+              :disabled="cashRegisters.length === 1"
+              is-icon-only
+              btn-style="outline"
+              :icon="ICON_PENCIL"
+              @click="editCashRegister" />
+          </div>
+        </div>
+      </div>
+    </UiCta>
+    <UiCta v-else :img-src="require('@/assets/img/scan-marchand.jpg')">
+      <div class="text-left relative px-5 pt-3 pb-6 mb-4 last:mb-0">
+        <span class="text-primary-900">{{ t("select-card-text") }}</span>
+        <Form v-slot="{ errors: formErrors }" class="pt-6" :validation-schema="validationSchema" @submit="selectCashRegister">
+          <PfForm has-footer :disable-submit="Object.keys(formErrors).length > 0">
+            <PfFormSection>
+              <Field v-slot="{ field, errors: fieldErrors }" name="selectedCashRegister">
+                <PfFormInputSelect
+                  id="selectedCashRegister"
+                  v-bind="field"
+                  :label="t('cash-register-input')"
+                  :options="cashRegisterOptions"
+                  :errors="fieldErrors" />
+              </Field>
+            </PfFormSection>
+            <template #footer>
+              <div class="pt-5">
+                <div class="flex w-full justify-end">
+                  <PfButtonAction class="px-8" btn-style="secondary" :label="t('select-cash-register')" type="submit" />
+                </div>
+              </div>
+            </template>
+          </PfForm>
+        </Form>
+      </div>
+    </UiCta>
   </UiEmptyPage>
 </template>
 
 <script setup>
-import { defineEmits } from "vue";
+import gql from "graphql-tag";
+import { defineEmits, computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { useQuery, useResult } from "@vue/apollo-composable";
+import { string, object } from "yup";
+
+import { useCashRegisterStore } from "@/lib/store/cash-register";
+import { useNotificationsStore } from "@/lib/store/notifications";
+
 import { usePageTitle } from "@/lib/helpers/page-title";
 import { TRANSACTION_STEPS_SCAN, TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER } from "@/lib/consts/enums";
+
+import ICON_PENCIL from "@/lib/icons/pencil.json";
 
 const { t } = useI18n();
 usePageTitle(t("title"));
 
 const emit = defineEmits(["onUpdateStep"]);
+const { currentCashRegister, changeCashRegister } = useCashRegisterStore();
+const { addSuccess } = useNotificationsStore();
+
+const selectedCashRegisterId = ref(currentCashRegister);
+
+const { result, loading } = useQuery(
+  gql`
+    query Markets {
+      markets {
+        id
+        cashRegisters {
+          id
+          name
+          isArchived
+          marketGroups {
+            id
+            name
+            project {
+              id
+              name
+            }
+          }
+        }
+      }
+    }
+  `
+);
+
+const cashRegisters = useResult(result, [], (data) => {
+  if (data.markets[0].cashRegisters.length === 1) {
+    changeCashRegister(data.markets[0].cashRegisters[0].id);
+  }
+
+  return data.markets[0].cashRegisters.map((cashRegister) => ({
+    id: cashRegister.id,
+    name: cashRegister.name,
+    isArchived: cashRegister.isArchived,
+    marketGroups: cashRegister.marketGroups
+  }));
+});
+
+const cashRegisterOptions = computed(() =>
+  cashRegisters.value.map((cashRegister) => ({ value: cashRegister.id, label: cashRegister.name }))
+);
+
+const selectedCashRegister = computed(() =>
+  cashRegisters.value.find((cashRegister) => cashRegister.id === selectedCashRegisterId.value)
+);
+
+const validationSchema = computed(() =>
+  object({
+    selectedCashRegister: string().label(t("cash-register-input")).required()
+  })
+);
+
+function editCashRegister() {
+  selectedCashRegisterId.value = null;
+  changeCashRegister(null);
+}
+
+function selectCashRegister(event) {
+  selectedCashRegisterId.value = event.selectedCashRegister;
+  changeCashRegister(event.selectedCashRegister);
+  addSuccess(t("cash-register-saved"));
+}
 </script>
