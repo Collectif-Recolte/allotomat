@@ -326,9 +326,9 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         [AnnotateErrorCodes(typeof(VerifyCardCanBeUsedInMarket))]
-        public static async Task<bool> VerifyCardCanBeUsedInMarket(this GqlQuery _, Id cardId, Id marketId, [Inject] IMediator mediator)
+        public static async Task<bool> VerifyCardCanBeUsedInMarket(this GqlQuery _, Id cardId, Id marketId, Id cashRegisterId, [Inject] IMediator mediator)
         {
-            return await mediator.Send(new VerifyCardCanBeUsedInMarket.Input() { CardId = cardId, MarketId = marketId});
+            return await mediator.Send(new VerifyCardCanBeUsedInMarket.Input() { CardId = cardId, MarketId = marketId, CashRegisterId = cashRegisterId });
         }
 
         public static IDataLoaderResult<BeneficiaryTypeGraphType> BeneficiaryType(this GqlQuery _, IAppUserContext ctx, Id id)

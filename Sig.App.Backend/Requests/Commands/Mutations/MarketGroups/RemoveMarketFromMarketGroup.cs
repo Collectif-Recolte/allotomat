@@ -30,7 +30,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.MarketGroups
         {
             logger.LogInformation($"[Mutation] RemoveMarketFromMarketGroup({request.MarketId}, {request.MarketGroupId})");
             var marketGroupId = request.MarketGroupId.LongIdentifierForType<MarketGroup>();
-            var marketGroup = await db.MarketGroups.Include(x => x.Markets).FirstOrDefaultAsync(x => x.Id == marketGroupId, cancellationToken);
+            var marketGroup = await db.MarketGroups.Include(x => x.Markets).Include(x => x.CashRegisters).FirstOrDefaultAsync(x => x.Id == marketGroupId, cancellationToken);
 
             if (marketGroup == null)
             {
@@ -39,7 +39,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.MarketGroups
             }
 
             var marketId = request.MarketId.LongIdentifierForType<Market>();
-            var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
+            var market = await db.Markets.Include(x => x.MarketGroups).Include(x => x.CashRegisters).ThenInclude(x => x.MarketGroups).ThenInclude(x => x.MarketGroup).FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
             if (market == null)
             {
@@ -54,6 +54,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.MarketGroups
             }
 
             marketGroup.Markets.Remove(marketGroup.Markets.First(x => x.MarketId == marketId));
+
+            foreach (var cashRegister in market.CashRegisters)
+            {
+                var cashRegisterMarketGroupToRemove = cashRegister.MarketGroups.Where(x => x.MarketGroup.Id == marketGroupId).ToList();
+                foreach (var cashRegisterMarketGroup in cashRegisterMarketGroupToRemove)
+                {
+                    cashRegister.MarketGroups.Remove(cashRegisterMarketGroup);
+                }
+
+                if (cashRegister.MarketGroups.Count == 0)
+                {
+                    cashRegister.IsArchived = true;
+                }
+            }
 
             await db.SaveChangesAsync(cancellationToken);
 

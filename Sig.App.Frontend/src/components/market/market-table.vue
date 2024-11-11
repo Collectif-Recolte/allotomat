@@ -49,7 +49,8 @@ const props = defineProps({
   urlNameMarketDelete: { type: String, default: "" },
   urlNameMarketEdit: { type: String, default: "" },
   urlNameMarketManageManagers: { type: String, default: "" },
-  canEdit: Boolean
+  canEdit: Boolean,
+  canDelete: Boolean
 });
 
 const cols = computed(() => {
@@ -81,13 +82,13 @@ const getBtnGroup = (market) => [
     icon: ICON_TRASH,
     label: t("market-delete"),
     route: { name: props.urlNameMarketDelete, params: { marketId: market.id } },
-    if: props.urlNameMarketDelete
+    if: (market.isArchived || props.canDelete) && props.urlNameMarketDelete
   },
   {
     icon: ICON_FOLDER,
     label: t("market-archive"),
     route: { name: props.urlNameMarketArchive, params: { marketId: market.id } },
-    if: props.urlNameMarketArchive
+    if: !market.isArchived && props.urlNameMarketArchive
   }
 ];
 

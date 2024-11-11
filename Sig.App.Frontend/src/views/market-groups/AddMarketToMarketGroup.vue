@@ -24,7 +24,7 @@
 <template>
   <UiDialogModal v-slot="{ closeModal }" :return-route="returnRoute()" :title="t('title')" :has-footer="false">
     <Form
-      v-if="!loadingMarkets && !loadingMarketGroup"
+      v-if="!loadingMarketGroup"
       v-slot="{ isSubmitting, errors: formErrors }"
       :validation-schema="validationSchema || baseValidationSchema"
       :initial-values="initialValues"
@@ -79,32 +79,22 @@ const router = useRouter();
 const route = useRoute();
 const { addSuccess } = useNotificationsStore();
 
-const { result, loading: loadingMarkets } = useQuery(
-  gql`
-    query Markets {
-      allMarkets {
-        id
-        name
-      }
-    }
-  `
-);
-const markets = useResult(result, null, (data) => {
-  return data.allMarkets.map((market) => ({
-    value: market.id,
-    label: market.name
-  }));
-});
-
 const { result: resultMarketGroup, loading: loadingMarketGroup } = useQuery(
   gql`
-    query MarketGroup {
+    query MarketGroup($id: ID!) {
       marketGroup(id: $id) {
         id
         name
         markets {
           id
           name
+        }
+        project {
+          id
+          markets {
+            id
+            name
+          }
         }
       }
     }
@@ -115,6 +105,12 @@ const { result: resultMarketGroup, loading: loadingMarketGroup } = useQuery(
 );
 const marketGroup = useResult(resultMarketGroup, null, (data) => {
   return data.marketGroup;
+});
+const markets = useResult(resultMarketGroup, null, (data) => {
+  return data.marketGroup.project.markets.map((market) => ({
+    value: market.id,
+    label: market.name
+  }));
 });
 
 const { mutate: addMarketToMarketGroup } = useMutation(

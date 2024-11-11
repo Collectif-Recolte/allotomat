@@ -20,6 +20,7 @@ using Sig.App.Backend.DbModel.Entities.Transactions;
 using System.Collections.Generic;
 using Sig.App.Backend.Requests.Queries.Organizations;
 using Sig.App.Backend.Gql.Bases;
+using System;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 {
@@ -47,7 +48,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             logger.LogInformation($"[Mutation] DeleteProject({request.ProjectId})");
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects
-                .Include(x => x.Markets).ThenInclude(x => x.Market)
+                .Include(x => x.Markets).ThenInclude(x => x.Market).ThenInclude(x => x.CashRegisters).ThenInclude(x => x.MarketGroups).ThenInclude(x => x.MarketGroup)
+                .Include(x => x.Markets).ThenInclude(x => x.Market).ThenInclude(x => x.MarketGroups).ThenInclude(x => x.MarketGroup)
                 .Include(x => x.ProductGroups).ThenInclude(x => x.Types)
                 .Include(x => x.Subscriptions).ThenInclude(x => x.Beneficiaries)
                 .Include(x => x.Subscriptions).ThenInclude(x => x.BudgetAllowances)
@@ -120,6 +122,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                     paymentTransaction.Market = null;
                     paymentTransaction.Organization = null;
                     paymentTransaction.Transactions = null;
+                    paymentTransaction.CashRegister = null;
                     foreach (var transactionProductGroup in paymentTransaction.TransactionByProductGroups)
                     {
                         paymentTransactionsProductGroup.Add(transactionProductGroup);
@@ -164,6 +167,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                     refundTransaction.Beneficiary = null;
                     refundTransaction.Card = null;
                     refundTransaction.RefundByProductGroups = null;
+                    refundTransaction.CashRegister = null;
                 }
                 else if(type == typeof(OffPlatformAddingFundTransaction) || type == typeof(LoyaltyAddingFundTransaction))
                 {
@@ -217,9 +221,31 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             db.ProjectMarkets.RemoveRange(project.Markets);
             db.Organizations.RemoveRange(project.Organizations);
 
+            foreach (var projectMarket in project.Markets)
+            {
+                db.MarketGroupMarkets.RemoveRange(projectMarket.Market.MarketGroups.Where(x => x.MarketGroup.ProjectId == projectId));
+                db.CashRegisterMarketGroups.RemoveRange(projectMarket.Market.CashRegisters.SelectMany(x => x.MarketGroups.Where(x => x.MarketGroup.ProjectId == projectId)));
+
+                foreach (var cashRegister in projectMarket.Market.CashRegisters)
+                {
+                    cashRegister.MarketGroups = cashRegister.MarketGroups.Where(x => x.MarketGroup.ProjectId != projectId).ToList();
+                    if (cashRegister.MarketGroups.Count == 0)
+                    {
+                        cashRegister.IsArchived = true;
+                    }
+                }
+            }
+
             db.Projects.Remove(project);
 
-            await db.SaveChangesAsync();
+            try
+            {
+                await db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                var i = 0;
+            }
 
             logger.LogInformation($"[Mutation] DeleteProject - Project deleted ({projectId}, {project.Name})");
         }

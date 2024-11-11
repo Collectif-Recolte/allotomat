@@ -37,6 +37,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             logger.LogInformation($"[Mutation] ArchiveMarket({request.MarketId})");
             var marketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets
+                .Include(x => x.CashRegisters)
                 .Include(x => x.Projects)
                 .FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
@@ -60,6 +61,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             }
 
             db.ProjectMarkets.RemoveRange(market.Projects);
+
+            foreach (var cashRegister in market.CashRegisters)
+            {
+                cashRegister.IsArchived = true;
+            }
 
             market.IsArchived = true;
 
