@@ -96,7 +96,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var cardCanBeUsedInMarket = await mediator.Send(new VerifyCardCanBeUsedInMarket.Input
             {
                 MarketId = request.MarketId,
-                CardId = card.GetIdentifier()
+                CardId = card.GetIdentifier(),
+                CashRegisterId = request.CashRegisterId
             }, cancellationToken);
 
             if (!cardCanBeUsedInMarket)
