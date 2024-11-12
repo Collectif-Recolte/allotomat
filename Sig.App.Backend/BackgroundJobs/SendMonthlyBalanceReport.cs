@@ -51,17 +51,19 @@ namespace Sig.App.Backend.BackgroundJobs
                 .AddMonths(-1);
 
             var transactions = await db.Transactions
+                .Include(x => x.Organization)
                 .Include(x => x.Card)
                 .Where(x => x.CreatedAtUtc.Month == lastMonth.Month && x.CreatedAtUtc.Year == lastMonth.Year).ToListAsync();
 
             var refundTransactions = await db.Transactions
                 .OfType<RefundTransaction>()
+                .Include(x => x.Organization)
                 .Include(x => x.Card)
                 .Include(x => x.InitialTransaction)
                 .Where(x => x.CreatedAtUtc.Month == lastMonth.Month && x.CreatedAtUtc.Year == lastMonth.Year).ToListAsync();
 
-            var transactionGroupByProject = transactions.Where(x => x.Card != null).GroupBy(x => x.Card.ProjectId).ToList();
-            var refundTransactionGroupByProject = refundTransactions.Where(x => x.Card != null).GroupBy(x => x.Card.ProjectId).ToList();
+            var transactionGroupByProject = transactions.Where(x => x.Organization != null || x.Card != null).GroupBy(x => x.Organization != null ? x.Organization.ProjectId : x.Card.ProjectId).ToList();
+            var refundTransactionGroupByProject = refundTransactions.Where(x => x.Organization != null || x.Card != null).GroupBy(x => x.Organization != null ? x.Organization.ProjectId : x.Card.ProjectId).ToList();
 
             foreach (var groupByProject in transactionGroupByProject)
             {
@@ -81,6 +83,9 @@ namespace Sig.App.Backend.BackgroundJobs
                     foreach (var groupByMarket in paymentTransactionGroupByMarket)
                     {
                         var market = await db.Markets.Where(x => x.Id == groupByMarket.Key).FirstAsync();
+
+                        var totalAmount = groupByMarket.Sum(x => x.Amount);
+                        var transactionsOrderByDate = groupByMarket.OrderBy(x => x.CreatedAtUtc);
 
                         marketBalanceReports.Add(new MarketBalanceReport()
                         {
