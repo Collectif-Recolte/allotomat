@@ -34,7 +34,7 @@
         </div>
       </div>
     </div>
-    <div class="absolute right-3 top-3">
+    <div class="absolute right-3 top-3 flex">
       <PfTooltip class="group-pfone" :hide-tooltip="cashRegister.marketGroups.length !== 0" :label="t('is-disabled-tooltip')">
         <PfTag
           :label="cashRegister.marketGroups.length === 0 ? t('is-inactif-tag') : t('is-active-tag')"

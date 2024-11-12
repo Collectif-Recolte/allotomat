@@ -25,7 +25,7 @@
           <p class="text-sm">{{ t("no-associated-merchant") }}</p>
         </div>
 
-        <MarketTable v-else :markets="project.markets" :url-name-market-delete="URL_ADD_MERCHANTS_FROM_PROJECT" />
+        <MarketTable v-else :markets="project.markets" :url-name-market-delete="URL_REMOVE_MERCHANTS_FROM_PROJECT" can-delete />
 
         <PfButtonAction btn-style="dash" has-icon-left type="button" :label="t('add-merchant')" @click="showAddMerchant" />
         <RouterView />
@@ -40,7 +40,7 @@ import { useQuery, useResult } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 
-import { URL_PROJECT_ADMIN, URL_ADD_MERCHANTS_FROM_PROJECT } from "@/lib/consts/urls";
+import { URL_PROJECT_ADMIN, URL_ADD_MERCHANTS_FROM_PROJECT, URL_REMOVE_MERCHANTS_FROM_PROJECT } from "@/lib/consts/urls";
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 
 import MarketTable from "@/components/market/market-table";

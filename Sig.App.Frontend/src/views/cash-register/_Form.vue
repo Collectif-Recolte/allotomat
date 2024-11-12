@@ -65,6 +65,11 @@
           </div>
         </div>
       </PfFormSection>
+      <template v-else-if="projectOptions.length === 0 || marketGroupOptions.length === 0">
+        <div class="text-red-500">
+          <p class="text-sm">{{ t("no-associated-market-groups") }}</p>
+        </div>
+      </template>
       <PfFormSection v-else :title="t('market-groups')">
         <Field v-slot="{ field, errors: fieldErrors }" name="selectedProject">
           <PfFormInputSelect
@@ -77,12 +82,7 @@
             col-span-class="sm:col-span-3"
             @input="(e) => onProjectSelected(e, setFieldValue)" />
         </Field>
-        <template v-if="marketGroupOptions.length === 0 && selectedProject !== null">
-          <div class="text-red-500">
-            <p class="text-sm">{{ t("no-associated-market-groups") }}</p>
-          </div>
-        </template>
-        <Field v-else v-slot="{ field, errors: fieldErrors }" name="selectedMarketGroup">
+        <Field v-slot="{ field, errors: fieldErrors }" name="selectedMarketGroup">
           <PfFormInputSelect
             id="selectedMarketGroup"
             required
@@ -171,10 +171,12 @@ const validationSchema = computed(() =>
 
 const projectOptions = computed(() => {
   return (
-    props.market?.projects?.map((project) => ({
-      value: project.id,
-      label: project.name
-    })) ?? []
+    props.market?.projects
+      ?.filter((x) => !props.marketGroups.some((y) => x.id === y.project.id))
+      .map((project) => ({
+        value: project.id,
+        label: project.name
+      })) ?? []
   );
 });
 
@@ -211,9 +213,9 @@ watch(
     if (!props.market || !props.market.projects) {
       return;
     }
-    if (props.market.projects.length === 1) {
-      initialValues.selectedProject = props.market.projects[0]?.id;
-      selectedProject.value = props.market.projects[0]?.id;
+    if (projectOptions.value.length === 1) {
+      initialValues.selectedProject = projectOptions.value[0]?.value;
+      selectedProject.value = projectOptions.value[0]?.value;
 
       if (marketGroupOptions.value.length === 1) {
         initialValues.selectedMarketGroup = marketGroupOptions.value[0].value;
