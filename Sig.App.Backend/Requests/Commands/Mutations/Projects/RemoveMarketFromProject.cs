@@ -39,7 +39,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             }
 
             var marketId = request.MarketId.LongIdentifierForType<Market>();
-            var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
+            var market = await db.Markets.Include(x => x.MarketGroups).Include(x => x.CashRegisters).ThenInclude(x => x.MarketGroups).ThenInclude(x => x.MarketGroup).FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
             if (market == null)
             {
@@ -54,6 +54,26 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             }
 
             project.Markets.Remove(project.Markets.First(x => x.MarketId == marketId));
+
+            foreach (var cashRegister in market.CashRegisters)
+            {
+                var cashRegisterMarketGroupToRemove = cashRegister.MarketGroups.Where(x => x.MarketGroup.ProjectId == projectId).ToList();
+                foreach (var cashRegisterMarketGroup in cashRegisterMarketGroupToRemove)
+                {
+                    cashRegister.MarketGroups.Remove(cashRegisterMarketGroup);
+                }
+
+                if (cashRegister.MarketGroups.Count == 0)
+                {
+                    cashRegister.IsArchived = true;
+                }
+            }
+
+            var marketGroupToRemove = market.MarketGroups.Where(x => x.MarketGroup.ProjectId == projectId).ToList();
+            foreach (var marketGroup in marketGroupToRemove)
+            {
+                market.MarketGroups.Remove(marketGroup);
+            }
 
             await db.SaveChangesAsync(cancellationToken);
 

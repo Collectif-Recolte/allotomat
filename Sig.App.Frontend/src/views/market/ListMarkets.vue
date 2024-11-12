@@ -42,6 +42,7 @@
             can-edit
             :markets="marketsPagination.items"
             :url-name-market-archive="URL_MARKET_ARCHIVE"
+            :url-name-market-delete="URL_MARKET_DELETE"
             :url-name-market-edit="URL_MARKET_EDIT"
             :url-name-market-manage-managers="URL_MARKET_MANAGE_MANAGERS" />
           <UiPagination
@@ -72,6 +73,7 @@ import {
   URL_MARKET_ADD,
   URL_MARKET_ADMIN,
   URL_MARKET_ARCHIVE,
+  URL_MARKET_DELETE,
   URL_MARKET_EDIT,
   URL_MARKET_MANAGE_MANAGERS
 } from "@/lib/consts/urls";
@@ -98,6 +100,7 @@ const { result, loading, refetch } = useQuery(
         items {
           id
           name
+          isArchived
         }
       }
     }

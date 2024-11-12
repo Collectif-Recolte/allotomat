@@ -19,6 +19,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public Id Id => market.GetIdentifier();
         public NonNull<string> Name => market.Name;
+        public bool IsArchived => market.IsArchived;
 
         public MarketGraphType(Market market)
         {

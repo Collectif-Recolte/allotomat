@@ -44,7 +44,7 @@
       :label="t('manage-markets')"
       :icon="OFFICE_BUILDING" />
     <MenuItem
-      v-if="manageBeneficiaries && isProjectManager"
+      v-if="manageBeneficiaries && (isProjectManager || isOrganizationManager)"
       :router-link="{ name: $consts.urls.URL_PROJECT_ADMIN_DASHBOARD }"
       :label="t('dashboard')"
       :icon="DASHBOARD" />
@@ -59,7 +59,7 @@
       :label="t('manage-subscriptions')"
       :icon="IDENTIFICATION" />
     <MenuItem
-      v-if="manageBeneficiaries && isProjectManager"
+      v-if="manageBeneficiaries && (isProjectManager || isOrganizationManager)"
       :router-link="{ name: $consts.urls.URL_BENEFICIARY_MANAGE }"
       :label="t('manage-beneficiaries')"
       :icon="USER_GROUP" />
@@ -124,7 +124,7 @@ import {
   GLOBAL_MANAGE_MARKET_GROUPS
 } from "@/lib/consts/permissions";
 
-import { USER_TYPE_PROJECTMANAGER, USER_TYPE_MARKETGROUPMANAGER } from "@/lib/consts/enums";
+import { USER_TYPE_PROJECTMANAGER, USER_TYPE_MARKETGROUPMANAGER, USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
 
 import BRIEFCASE from "@/lib/icons/briefcase.json";
 import CREDIT_CARD from "@/lib/icons/credit-card.json";
@@ -167,6 +167,10 @@ const manageCards = computed(() => {
 
 const isProjectManager = computed(() => {
   return userType.value === USER_TYPE_PROJECTMANAGER;
+});
+
+const isOrganizationManager = computed(() => {
+  return userType.value === USER_TYPE_ORGANIZATIONMANAGER;
 });
 
 const isMarketGroupManager = computed(() => {

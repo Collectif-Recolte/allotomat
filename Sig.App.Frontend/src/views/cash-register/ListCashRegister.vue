@@ -41,9 +41,9 @@
 import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult } from "@vue/apollo-composable";
-import { useRouter } from "vue-router";
+import { onBeforeRouteUpdate, useRouter } from "vue-router";
 
-import { URL_CASH_REGISTER_ADD } from "@/lib/consts/urls";
+import { URL_CASH_REGISTER_ADD, URL_CASH_REGISTER } from "@/lib/consts/urls";
 
 import Title from "@/components/app/title";
 import ListCashRegister from "@/components/cash-register/list-cash-register";
@@ -52,7 +52,11 @@ import Loading from "@/components/app/loading";
 const { t } = useI18n();
 const router = useRouter();
 
-const { result: resultMarkets, loading: marketsLoading } = useQuery(
+const {
+  result: resultMarkets,
+  loading: marketsLoading,
+  refetch: refetchCashRegisters
+} = useQuery(
   gql`
     query Markets {
       markets {
@@ -92,4 +96,10 @@ async function onAddCashRegisterClick() {
     query: { marketId: markets.value[0].id }
   });
 }
+
+onBeforeRouteUpdate((to) => {
+  if (to.name === URL_CASH_REGISTER) {
+    refetchCashRegisters();
+  }
+});
 </script>

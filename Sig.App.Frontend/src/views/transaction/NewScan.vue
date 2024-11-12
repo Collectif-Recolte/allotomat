@@ -5,6 +5,7 @@
       "start-transaction": "Scan a card",
       "manually-enter-card-number": "Manually enter card number",
       "select-card-text": "Please select a cash register below to continue.",
+      "no-available-cash-register": "The market has no more cash register.",
       "select-cash-register": "Save",
       "cash-register-input": "Cash Register",
       "cash-register-saved": "Cash register saved successfully!"
@@ -14,6 +15,7 @@
       "start-transaction": "Scanner une carte",
       "manually-enter-card-number": "Saisir le numéro de la carte",
       "select-card-text": "Veuillez sélectionner une caisse ci-dessous pour continuer.",
+      "no-available-cash-register": "Le commerce ne possède plus de caisse.",
       "select-cash-register": "Sauvegarder",
       "cash-register-input": "Caisse",
       "cash-register-saved": "Caisse sauvegardée avec succès !"
@@ -58,28 +60,33 @@
     </UiCta>
     <UiCta v-else :img-src="require('@/assets/img/scan-marchand.jpg')">
       <div class="text-left relative px-5 pt-3 pb-6 mb-4 last:mb-0">
-        <span class="text-primary-900">{{ t("select-card-text") }}</span>
-        <Form v-slot="{ errors: formErrors }" class="pt-6" :validation-schema="validationSchema" @submit="selectCashRegister">
-          <PfForm has-footer :disable-submit="Object.keys(formErrors).length > 0">
-            <PfFormSection>
-              <Field v-slot="{ field, errors: fieldErrors }" name="selectedCashRegister">
-                <PfFormInputSelect
-                  id="selectedCashRegister"
-                  v-bind="field"
-                  :label="t('cash-register-input')"
-                  :options="cashRegisterOptions"
-                  :errors="fieldErrors" />
-              </Field>
-            </PfFormSection>
-            <template #footer>
-              <div class="pt-5">
-                <div class="flex w-full justify-end">
-                  <PfButtonAction class="px-8" btn-style="secondary" :label="t('select-cash-register')" type="submit" />
+        <div v-if="cashRegisterOptions.length === 0" class="text-red-500">
+          <p class="text-sm">{{ t("no-available-cash-register") }}</p>
+        </div>
+        <div v-else>
+          <span class="text-primary-900">{{ t("select-card-text") }}</span>
+          <Form v-slot="{ errors: formErrors }" class="pt-6" :validation-schema="validationSchema" @submit="selectCashRegister">
+            <PfForm has-footer :disable-submit="Object.keys(formErrors).length > 0">
+              <PfFormSection>
+                <Field v-slot="{ field, errors: fieldErrors }" name="selectedCashRegister">
+                  <PfFormInputSelect
+                    id="selectedCashRegister"
+                    v-bind="field"
+                    :label="t('cash-register-input')"
+                    :options="cashRegisterOptions"
+                    :errors="fieldErrors" />
+                </Field>
+              </PfFormSection>
+              <template #footer>
+                <div class="pt-5">
+                  <div class="flex w-full justify-end">
+                    <PfButtonAction class="px-8" btn-style="secondary" :label="t('select-cash-register')" type="submit" />
+                  </div>
                 </div>
-              </div>
-            </template>
-          </PfForm>
-        </Form>
+              </template>
+            </PfForm>
+          </Form>
+        </div>
       </div>
     </UiCta>
   </UiEmptyPage>
@@ -134,7 +141,7 @@ const { result, loading } = useQuery(
 
 const cashRegisters = useResult(result, [], (data) => {
   if (data.markets[0].cashRegisters.length === 1) {
-    changeCashRegister(data.markets[0].cashRegisters[0].id);
+    if (!data.markets[0].cashRegisters[0].isArchived) changeCashRegister(data.markets[0].cashRegisters[0].id);
   }
 
   return data.markets[0].cashRegisters.map((cashRegister) => ({
@@ -146,7 +153,7 @@ const cashRegisters = useResult(result, [], (data) => {
 });
 
 const cashRegisterOptions = computed(() =>
-  cashRegisters.value.map((cashRegister) => ({ value: cashRegister.id, label: cashRegister.name }))
+  cashRegisters.value.filter((x) => !x.isArchived).map((cashRegister) => ({ value: cashRegister.id, label: cashRegister.name }))
 );
 
 const selectedCashRegister = computed(() =>
