@@ -17,6 +17,7 @@ using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.BackgroundJobs;
 using Sig.App.Backend.DbModel.Entities.Transactions;
+using System;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 {
@@ -115,7 +116,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 throw new SubscriptionDontHaveMissedPaymentException();
             }
 
-            subscriptionBeneficiary.BudgetAllowance.AvailableFund -= amount;
+            var maxNumberOfPayments = subscription.MaxNumberOfPayments.HasValue ? subscription.MaxNumberOfPayments.Value : subscriptionTotalPayment;
+            var isBudgetAllowanceAlreadyAllocated = maxNumberOfPayments - transactions.Count <= Math.Min(maxNumberOfPayments - transactions.Count(), subscriptionPaymentRemaining);
+            if (!isBudgetAllowanceAlreadyAllocated)
+            {
+                subscriptionBeneficiary.BudgetAllowance.AvailableFund -= amount;
+            }
 
             var addingFundToCardJob = new AddingFundToCard(db, clock, addingFundLogger);
             await addingFundToCardJob.AddFundToSpecificBeneficiary(beneficiary.GetIdentifier(), beneficiary.BeneficiaryType, subscription.GetIdentifier(), new AddingFundToCard.InitiatedBy()
