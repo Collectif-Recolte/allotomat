@@ -252,7 +252,7 @@ namespace Sig.App.Backend.BackgroundJobs
             if (beneficiary.Card != null)
             {
                 var card = beneficiary.Card;
-                if (subscription.IsSubscriptionPaymentBasedCardUsage)
+                if (subscription.IsSubscriptionPaymentBasedCardUsage && initiatedBy == null)
                 {
                     var subscriptionAddedFundCount = beneficiary.Card.Transactions.OfType<SubscriptionAddingFundTransaction>().Count(x => x.SubscriptionType.SubscriptionId == subscription.Id);
 

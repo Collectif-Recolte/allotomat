@@ -5,6 +5,7 @@ using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -47,6 +48,30 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         {
             var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
             return transactions.Count();
+        }
+
+        public async Task<int> PaymentRemaining(IAppUserContext ctx, [Inject] IClock clock)
+        {
+            var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
+            var subscriptionTotalPayment = subscription.GetTotalPayment();
+            var subscriptionPaymentRemaining = subscription.GetPaymentRemaining(clock);
+            var maxNumberOfPayments = subscription.MaxNumberOfPayments.HasValue ? subscription.MaxNumberOfPayments.Value : subscriptionTotalPayment;
+
+            return Math.Min(maxNumberOfPayments - transactions.Count(), subscriptionPaymentRemaining);
+        }
+
+        public int MaxNumberOfPayments()
+        {
+            return subscription.MaxNumberOfPayments.HasValue ? subscription.MaxNumberOfPayments.Value : subscription.GetTotalPayment();
+        }
+
+        public async Task<int> MissedPaymentCount(IAppUserContext ctx, [Inject] IClock clock)
+        {
+            var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
+            var subscriptionTotalPayment = subscription.GetTotalPayment();
+            var subscriptionPaymentRemaining = subscription.GetPaymentRemaining(clock);
+
+            return (subscriptionTotalPayment - subscriptionPaymentRemaining) - transactions.Count();
         }
 
         public async Task<bool> HasMissedPayment(IAppUserContext ctx, [Inject] IClock clock) {

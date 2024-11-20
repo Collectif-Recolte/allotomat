@@ -110,6 +110,9 @@ const { result: resultBeneficiary } = useQuery(
           beneficiarySubscriptions {
             hasMissedPayment
             paymentReceived
+            paymentRemaining
+            missedPaymentCount
+            maxNumberOfPayments
             subscription {
               id
               name
@@ -160,7 +163,8 @@ const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
         label: label,
         value: x.subscription.id,
         types: x.subscription.types,
-        budgetAllowance: x.subscription.budgetAllowancesTotal
+        budgetAllowance: x.subscription.budgetAllowancesTotal,
+        isBudgetAllowanceAlreadyAllocated: x.maxNumberOfPayments - x.paymentReceived <= x.paymentRemaining
       };
     })
     .reduce(function (a, b) {
@@ -211,6 +215,11 @@ function onSubscriptionSelected(e) {
 const budgetAllowanceAvailableAfterAllocation = computed(() => {
   if (selectedSubscription.value === null) return 0;
   var selectedSubscriptionData = subscriptionOptions.value.find((x) => x.value === selectedSubscription.value);
+
+  if (selectedSubscriptionData.isBudgetAllowanceAlreadyAllocated) {
+    return selectedSubscriptionData.budgetAllowance;
+  }
+
   return selectedSubscriptionData.budgetAllowance - amountThatWillBeAllocated.value;
 });
 
