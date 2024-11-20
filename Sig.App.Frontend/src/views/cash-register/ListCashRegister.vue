@@ -86,7 +86,7 @@ const cashRegisters = useResult(resultMarkets, [], (data) => {
     name: cashRegister.name,
     isArchived: cashRegister.isArchived,
     marketGroups: cashRegister.marketGroups,
-    cashRegisterCanBeDelete: data.markets[0].cashRegisters.length > 1
+    cashRegisterCanBeDelete: data.markets[0].cashRegisters.filter((x) => !x.isArchived).length > 1
   }));
 });
 

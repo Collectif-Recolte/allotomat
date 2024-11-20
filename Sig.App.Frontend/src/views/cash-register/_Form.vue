@@ -65,7 +65,7 @@
           </div>
         </div>
       </PfFormSection>
-      <template v-else-if="projectOptions.length === 0 || marketGroupOptions.length === 0">
+      <template v-else-if="projectOptions.length === 0 || (marketGroupOptions.length === 0 && !isNew && !isAddProject)">
         <div class="text-red-500">
           <p class="text-sm">{{ t("no-associated-market-groups") }}</p>
         </div>

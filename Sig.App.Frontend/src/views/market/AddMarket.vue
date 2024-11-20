@@ -7,7 +7,8 @@
 		"user-already-manager": "One of the managers is already the manager of a market.",
 		"user-not-market-manager": "One of the managers is not a market manager.",
     "manager-email": "Email",
-    "market-name": "Market name"
+    "market-name": "Market name",
+    "selected-market-group": "Location"
 	},
 	"fr": {
 		"add-market": "Ajouter",
@@ -16,7 +17,8 @@
 		"user-already-manager": "Un des gestionnaires est déjà gestionnaire d'un commerce.",
 		"user-not-market-manager": "Un des gestionnaires n'est pas du type gestionnaire de commerce.",
     "manager-email": "Courriel",
-    "market-name": "Nom du marché"
+    "market-name": "Nom du marché",
+    "selected-market-group": "Lieu"
 	}
 }
 </i18n>
