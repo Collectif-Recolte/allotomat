@@ -78,8 +78,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
             var subscriptionTotalPayment = subscription.GetTotalPayment();
             var subscriptionPaymentRemaining = subscription.GetPaymentRemaining(clock);
+            var maxNumberOfPayments = subscription.MaxNumberOfPayments.HasValue ? subscription.MaxNumberOfPayments.Value : subscriptionTotalPayment;
 
-            return transactions.Count() < subscriptionTotalPayment - subscriptionPaymentRemaining;
+            return transactions.Count() < maxNumberOfPayments - subscriptionPaymentRemaining;
         }
     }
 }
