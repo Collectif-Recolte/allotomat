@@ -1,22 +1,26 @@
 <i18n>
 {
 	"en": {
-		"menu-title": "{name} program",
+		"menu-title-program": "{name} program",
     "program-settings": "Program settings",
 		"manage-organization-managers": "User management",
 		"manage-project-managers": "User management",
     "manage-project-export-all-participants": "Export all participants",
     "reconciliation-report": "Reconciliation report",
-    "cash-register": "Cash registers"
+    "cash-register": "Cash registers",
+    "menu-title-market": "{name} market",
+    "menu-title-market-group": "{name} market group"
 	},
 	"fr": {
-		"menu-title": "Programme {name}",
+		"menu-title-program": "Programme {name}",
     "program-settings": "Paramètres du programme",
 		"manage-organization-managers": "Gestion des utilisateurs",
 		"manage-project-managers": "Gestion des utilisateurs",
     "manage-project-export-all-participants": "Exporter tous les participants",
     "reconciliation-report": "Rapport de réconciliation",
-    "cash-register": "Caisses"
+    "cash-register": "Caisses",
+    "menu-title-market": "Marché {name}",
+    "menu-title-market-group": "Groupe de commerce {name}"
 	}
 }
 </i18n>
@@ -25,22 +29,22 @@
   <div v-if="showSecondaryMenu" class="shrink-0 flex flex-col items-start border-t border-primary-300 dark:border-grey-900 py-4">
     <nav class="px-2 space-y-0.5 w-full" aria-labelledby="secondaryMenuTitle">
       <span
-        v-if="projects && projects.length > 0"
+        v-if="userType === USER_TYPE_PROJECTMANAGER && projects && projects.length > 0"
         id="secondaryMenuTitle"
         class="text-p4 uppercase font-semibold inline-block px-2 mb-1"
-        >{{ t("menu-title", { name: projects[0].name }) }}</span
+        >{{ t("menu-title-program", { name: projects[0].name }) }}</span
       >
       <span
-        v-if="marketGroups && marketGroups.length > 0"
+        v-if="userType === USER_TYPE_MARKETGROUPMANAGER && marketGroups && marketGroups.length > 0"
         id="secondaryMenuTitle"
         class="text-p4 uppercase font-semibold inline-block px-2 mb-1"
-        >{{ t("menu-title", { name: marketGroups[0].name }) }}</span
+        >{{ t("menu-title-market-group", { name: marketGroups[0].name }) }}</span
       >
       <span
-        v-if="markets && markets.length > 0"
+        v-if="userType === USER_TYPE_MERCHANT && markets && markets.length > 0"
         id="secondaryMenuTitle"
         class="text-p4 uppercase font-semibold inline-block px-2 mb-1"
-        >{{ t("menu-title", { name: markets[0].name }) }}</span
+        >{{ t("menu-title-market", { name: markets[0].name }) }}</span
       >
       <SecondaryMenuItem
         v-if="manageProgram"
@@ -97,7 +101,13 @@ import {
   GLOBAL_MANAGE_SPECIFIC_MARKET
 } from "@/lib/consts/permissions";
 import { LANG_EN } from "@/lib/consts/langs";
-import { LANGUAGE_FILTER_EN, LANGUAGE_FILTER_FR } from "@/lib/consts/enums";
+import {
+  LANGUAGE_FILTER_EN,
+  LANGUAGE_FILTER_FR,
+  USER_TYPE_MARKETGROUPMANAGER,
+  USER_TYPE_PROJECTMANAGER,
+  USER_TYPE_MERCHANT
+} from "@/lib/consts/enums";
 
 import MARKET from "@/lib/icons/market.json";
 
@@ -106,7 +116,7 @@ const { t, locale } = useI18n();
 const { resolveClient } = useApolloClient();
 const client = resolveClient();
 
-const { getGlobalPermissions } = storeToRefs(useAuthStore());
+const { getGlobalPermissions, userType } = storeToRefs(useAuthStore());
 
 const manageSpecificProject = computed(() => {
   return getGlobalPermissions.value.includes(GLOBAL_MANAGE_SPECIFIC_PROJECT);
