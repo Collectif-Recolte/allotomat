@@ -20,7 +20,7 @@
     "market-groups": "Programme(s)",
     "selected-project": "Programme",
     "selected-market-group": "Lieu",
-    "no-associated-market-groups": "Tous les groupe de commerces disponibles sont associés à la caisse."
+    "no-associated-market-groups": "Tous les groupes de commerces disponibles sont associés à la caisse."
 	}
 }
 </i18n>
