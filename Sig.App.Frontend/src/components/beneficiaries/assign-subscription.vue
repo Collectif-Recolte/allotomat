@@ -199,8 +199,6 @@ const getBudgetAllowanceNeeded = (option) => {
   const totalPaymentCount = option.totalPayment;
   const budgetAllowanceNeeded = amountByPayment * remainingPaymentCount;
 
-  console.log(option);
-
   return t("budget-allowance-needed", { amountByPayment, remainingPaymentCount, totalPaymentCount, budgetAllowanceNeeded });
 };
 
