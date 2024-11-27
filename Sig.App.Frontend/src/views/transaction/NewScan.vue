@@ -24,9 +24,10 @@
 </i18n>
 
 <template>
-  <UiEmptyPage class="min-h-app px-8">
+  <div class="flex justify-center h-full w-full py-8 lg:py-16">
     <UiCta
       v-if="selectedCashRegisterId !== null"
+      class="w-full max-w-sm"
       :img-src="require('@/assets/img/scan-marchand.jpg')"
       :primary-btn-label="t('start-transaction')"
       :secondary-btn-label="t('manually-enter-card-number')"
@@ -34,38 +35,34 @@
       secondary-btn-is-action
       @onPrimaryBtnClick="emit('onUpdateStep', TRANSACTION_STEPS_SCAN, {})"
       @onSecondaryBtnClick="emit('onUpdateStep', TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER, {})">
-      <div v-if="!loading" class="pt-3 pb-6">
-        <div class="text-left relative border border-primary-300 rounded-lg px-5 pt-3 pb-6 mb-4 last:mb-0">
-          <div class="space-y-6 divide-y divide-grey-300">
-            <h3 class="text-h4 text-primary-900 mt-2 mb-2">
-              <span>{{ selectedCashRegister.name }}</span>
-            </h3>
-            <div v-for="marketGroup in selectedCashRegister.marketGroups" :key="marketGroup.id" class="space-y-4">
-              <div class="mt-4">
-                <dd :class="ddClasses">{{ marketGroup.project.name }}</dd>
-                <dd :class="ddClasses">{{ marketGroup.name }}</dd>
-              </div>
-            </div>
-          </div>
-          <div class="absolute right-3 top-3">
-            <PfButtonAction
-              :disabled="cashRegisters.length === 1"
-              is-icon-only
-              btn-style="outline"
-              :icon="ICON_PENCIL"
-              @click="editCashRegister" />
-          </div>
+      <div v-if="!loading" class="mb-6 text-left relative border border-primary-300 rounded-lg p-4 w-full">
+        <div class="flex items-center justify-between gap-x-4 mb-2">
+          <h3 class="text-h4 font-semibold text-primary-900 mt-2 mb-2">
+            <span>{{ selectedCashRegister.name }}</span>
+          </h3>
+          <PfButtonAction
+            :disabled="cashRegisters.length === 1"
+            is-icon-only
+            btn-style="outline"
+            :icon="ICON_PENCIL"
+            @click="editCashRegister" />
         </div>
+        <ul class="mb-0">
+          <li v-for="marketGroup in selectedCashRegister.marketGroups" :key="marketGroup.id" class="text-p2">
+            <div>{{ marketGroup.project.name }}</div>
+            <div>{{ marketGroup.name }}</div>
+          </li>
+        </ul>
       </div>
     </UiCta>
-    <UiCta v-else :img-src="require('@/assets/img/scan-marchand.jpg')">
-      <div class="text-left relative px-5 pt-3 pb-6 mb-4 last:mb-0">
+    <UiCta v-else class="w-full max-w-sm h-full" :img-src="require('@/assets/img/scan-marchand.jpg')">
+      <div class="text-left">
         <div v-if="cashRegisterOptions.length === 0" class="text-red-500">
           <p class="text-sm">{{ t("no-available-cash-register") }}</p>
         </div>
         <div v-else>
-          <span class="text-primary-900">{{ t("select-card-text") }}</span>
-          <Form v-slot="{ errors: formErrors }" class="pt-6" :validation-schema="validationSchema" @submit="selectCashRegister">
+          <p class="text-primary-900 text-h4">{{ t("select-card-text") }}</p>
+          <Form v-slot="{ errors: formErrors }" :validation-schema="validationSchema" @submit="selectCashRegister">
             <PfForm has-footer :disable-submit="Object.keys(formErrors).length > 0">
               <PfFormSection>
                 <Field v-slot="{ field, errors: fieldErrors }" name="selectedCashRegister">
@@ -89,7 +86,7 @@
         </div>
       </div>
     </UiCta>
-  </UiEmptyPage>
+  </div>
 </template>
 
 <script setup>

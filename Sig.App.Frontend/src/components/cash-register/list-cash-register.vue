@@ -8,9 +8,11 @@
 </i18n>
 
 <template>
-  <div class="flex flex-col relative mb-6">
-    <CashRegisterItem v-for="cashRegister in cashRegisters" :key="cashRegister.id" :cash-register="cashRegister" />
-  </div>
+  <ul class="mb-6">
+    <li v-for="cashRegister in cashRegisters" :key="cashRegister.id" class="mb-4 last:mb-0">
+      <CashRegisterItem :cash-register="cashRegister" />
+    </li>
+  </ul>
 </template>
 
 <script setup>

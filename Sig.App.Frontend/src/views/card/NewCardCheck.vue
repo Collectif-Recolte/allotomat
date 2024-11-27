@@ -14,15 +14,16 @@
   </i18n>
 
 <template>
-  <UiEmptyPage>
+  <div class="flex justify-center h-full w-full py-8 lg:py-16">
     <UiCta
+      class="w-full max-w-md"
       :img-src="require('@/assets/img/scan-marchand.jpg')"
       :primary-btn-label="t('restart-scan')"
       :primary-btn-icon="ICON_SCAN"
       primary-btn-is-action
       :description="t('camera-access')"
       @onPrimaryBtnClick="emit('onUpdateStep', CHECK_CARD_STEPS_SCAN)" />
-  </UiEmptyPage>
+  </div>
 </template>
 
 <script setup>

@@ -5,7 +5,7 @@
     <slot></slot>
     <PfButtonLink
       v-if="primaryBtnRoute"
-      class="w-full mb-6"
+      class="w-full mb-4"
       btn-style="secondary"
       tag="routerLink"
       :to="primaryBtnRoute"
@@ -15,7 +15,7 @@
       size="lg" />
     <PfButtonAction
       v-else-if="primaryBtnIsAction"
-      class="w-full mb-6"
+      class="w-full mb-4"
       btn-style="secondary"
       :label="primaryBtnLabel"
       :icon="primaryBtnIcon"
@@ -31,7 +31,7 @@
         :label="secondaryBtnLabel" />
       <PfButtonAction
         v-else-if="secondaryBtnIsAction"
-        class="w-full mb-6"
+        class="w-full mb-4"
         btn-style="secondary"
         :label="secondaryBtnLabel"
         :icon="secondaryBtnIcon"
@@ -55,6 +55,7 @@ const props = defineProps({
   primaryBtnIsAction: Boolean,
 
   secondaryBtnLabel: { type: String, default: "" },
+  secondaryBtnIcon: { type: Object, default: null },
   secondaryBtnRoute: { type: Object, default: null },
   secondaryBtnIsAction: Boolean
 });
