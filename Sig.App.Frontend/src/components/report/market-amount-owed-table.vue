@@ -2,11 +2,13 @@
   {
     "en": {
       "market-name": "Name",
-      "market-amount-owed": "Amount owed"
+      "market-amount-owed": "Amount owed",
+      "cash-register-name": "Cash register"
     },
     "fr": {
       "market-name": "Nom",
-      "market-amount-owed": "Montant dû"
+      "market-amount-owed": "Montant dû",
+      "cash-register-name": "Caisse"
     }
   }
   </i18n>
@@ -17,6 +19,11 @@
       <td>
         <div class="inline-flex items-center">
           {{ getMarketName(slotProps.item) }}
+        </div>
+      </td>
+      <td>
+        <div class="inline-flex items-center">
+          {{ getCashRegisterName(slotProps.item) }}
         </div>
       </td>
       <td>
@@ -42,6 +49,7 @@ const props = defineProps({
 
 const cols = computed(() => [
   { label: t("market-name") },
+  { label: t("cash-register-name") },
   {
     label: t("market-amount-owed"),
     isRight: true
@@ -50,6 +58,10 @@ const cols = computed(() => [
 
 function getMarketName(item) {
   return `${item.market.name}`;
+}
+
+function getCashRegisterName(item) {
+  return `${item.cashRegister.name}`;
 }
 
 function getAmountOwed(item) {
