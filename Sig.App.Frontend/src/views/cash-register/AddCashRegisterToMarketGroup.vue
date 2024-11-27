@@ -86,6 +86,12 @@ const { mutate: addCashRegisterToMarketGroup } = useMutation(
         cashRegister {
           id
           name
+          market {
+            projects {
+              id
+              name
+            }
+          }
         }
       }
     }
@@ -93,7 +99,7 @@ const { mutate: addCashRegisterToMarketGroup } = useMutation(
 );
 
 async function onSubmit({ selectedMarketGroup, selectedProject }) {
-  await addCashRegisterToMarketGroup({
+  var result = await addCashRegisterToMarketGroup({
     input: {
       cashRegisterId: cashRegister.value.id,
       marketGroupId: selectedMarketGroup
@@ -101,11 +107,11 @@ async function onSubmit({ selectedMarketGroup, selectedProject }) {
   });
   router.push({ name: URL_CASH_REGISTER });
   addSuccess(
-    t(
-      "add-cash-register-success-notification",
-      { cashRegisterName: cashRegister.value.name },
-      { projectName: cashRegister.value.market.projects.find((x) => x.id === selectedProject).name }
-    )
+    t("add-cash-register-success-notification", {
+      cashRegisterName: cashRegister.value.name,
+      projectName: result.data.addCashRegisterToMarketGroup.cashRegister.market.projects.find((x) => x.id === selectedProject)
+        .name
+    })
   );
 }
 </script>
