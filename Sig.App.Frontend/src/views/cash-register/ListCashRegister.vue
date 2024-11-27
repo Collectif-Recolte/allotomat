@@ -81,13 +81,15 @@ const {
 );
 const markets = useResult(resultMarkets);
 const cashRegisters = useResult(resultMarkets, [], (data) => {
-  return data.markets[0].cashRegisters.map((cashRegister) => ({
-    id: cashRegister.id,
-    name: cashRegister.name,
-    isArchived: cashRegister.isArchived,
-    marketGroups: cashRegister.marketGroups,
-    cashRegisterCanBeDelete: data.markets[0].cashRegisters.filter((x) => !x.isArchived).length > 1
-  }));
+  return data.markets[0].cashRegisters
+    .map((cashRegister) => ({
+      id: cashRegister.id,
+      name: cashRegister.name,
+      isArchived: cashRegister.isArchived,
+      marketGroups: cashRegister.marketGroups,
+      cashRegisterCanBeDelete: data.markets[0].cashRegisters.filter((x) => !x.isArchived).length > 1
+    }))
+    .sort((a, b) => a.isArchived - b.isArchived);
 });
 
 async function onAddCashRegisterClick() {
