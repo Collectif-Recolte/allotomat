@@ -15,14 +15,11 @@
     :title="t('title-new-transaction')"
     :has-title="hasTitle"
     :has-footer="false"
-    :return-route="{ name: userType === USER_TYPE_ORGANIZATIONMANAGER ? URL_BENEFICIARY_ADMIN : URL_TRANSACTION_ADMIN }">
+    :return-route="{ name: route.params.beneficiaryId !== undefined ? URL_BENEFICIARY_ADMIN : URL_TRANSACTION_ADMIN }">
     <template v-if="activeStep === TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER">
-      <SelectMarket
-        v-if="userType === USER_TYPE_ORGANIZATIONMANAGER && beneficiary"
-        @onUpdateStep="updateStep"
-        @onCloseModal="closeModal" />
+      <SelectMarket v-if="beneficiary" @onUpdateStep="updateStep" @onCloseModal="closeModal" />
       <ManuallyEnterCardNumber
-        v-else-if="userType === USER_TYPE_PROJECTMANAGER"
+        v-else-if="userType === USER_TYPE_PROJECTMANAGER && route.params.beneficiaryId === undefined"
         @onUpdateStep="updateStep"
         @onCloseModal="closeModal" />
     </template>
@@ -72,7 +69,7 @@ const { userType } = storeToRefs(useAuthStore());
 onMounted(loadBeneficiary);
 
 async function loadBeneficiary() {
-  if (userType.value === USER_TYPE_ORGANIZATIONMANAGER) {
+  if (route.params.beneficiaryId !== undefined) {
     const { onResult } = useQuery(
       gql`
         query Beneficiary($id: ID!) {
