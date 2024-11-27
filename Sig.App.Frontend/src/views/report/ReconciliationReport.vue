@@ -115,6 +115,13 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
               name
             }
             amount
+            amountByCashRegister {
+              cashRegister {
+                id
+                name
+              }
+              amount
+            }
           }
         }
       }
@@ -145,6 +152,13 @@ const { result: resultMarketGroups, loading: loadingMarketGroups } = useQuery(
               name
             }
             amount
+            amountByCashRegister {
+              cashRegister {
+                id
+                name
+              }
+              amount
+            }
           }
         }
       }
@@ -161,7 +175,29 @@ const marketGroup = useResult(resultMarketGroups, null, (data) => {
 });
 
 const marketsAmountOwed = computed(() => {
-  return project.value ? project.value.marketsAmountOwed : marketGroup.value ? marketGroup.value.marketsAmountOwed : null;
+  var marketsAmountOwed = project.value
+    ? project.value.marketsAmountOwed
+    : marketGroup.value
+    ? marketGroup.value.marketsAmountOwed
+    : null;
+  let items = [];
+  let totalCount = 0;
+
+  if (marketsAmountOwed) {
+    totalCount = marketsAmountOwed.totalCount;
+    marketsAmountOwed.items.forEach((item) => {
+      item.amountByCashRegister.forEach((cashRegisterItem) => {
+        let marketData = {
+          market: item.market,
+          cashRegister: cashRegisterItem.cashRegister,
+          amount: cashRegisterItem.amount
+        };
+        items.push(marketData);
+      });
+    });
+  }
+
+  return { items, totalCount };
 });
 
 function onDateFromUpdated(value) {
