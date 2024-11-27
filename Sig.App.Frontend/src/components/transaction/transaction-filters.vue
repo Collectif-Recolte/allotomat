@@ -46,7 +46,7 @@
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppe remboursée après avoir retiré un participant d'un abonnement",
     "transaction-log-type-refund-payment": "Remboursement d'un paiement",
     "market": "Commerces",
-    "cash-register": "Caisse"
+    "cash-register": "Caisses"
 	}
 }
 </i18n>
