@@ -18,7 +18,7 @@
   <Form v-slot="{ isSubmitting }" @submit="onSubmit">
     <PfForm :processing="isSubmitting" :disable-submit="subscriptionChecked.length === 0" @cancel="closeModal">
       <AssignSubscription
-        v-if="subscriptionsOrderByDate.length > 0"
+        v-if="organization !== undefined && subscriptionsOrderByDate.length > 0"
         id="subscriptionConflict"
         :value="subscriptionChecked"
         :options="subscriptionsOrderByDate"
