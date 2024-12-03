@@ -299,6 +299,7 @@ namespace Sig.App.Backend
             DeactivateOffPlatformBeneficiary.RegisterJob(configuration);
             RefreshCardBalance.RegisterJob(configuration);
             DeleteUser.RegisterJob(configuration);
+            DeleteBeneficiary.RegisterJob(configuration);
         }
 
         private void ConfigureDbContext(DbContextOptionsBuilder options)

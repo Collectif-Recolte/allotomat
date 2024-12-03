@@ -115,15 +115,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
             db.Beneficiaries.RemoveRange(organization.Beneficiaries);
             db.Organizations.Remove(organization);
 
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "[Mutation] DeleteOrganization - DbUpdateConcurrencyException");
-                throw;
-            }
+            await db.SaveChangesAsync();
             logger.LogInformation($"[Mutation] DeleteOrganization - Organization deleted ({organizationId}, {organization.Name})");
         }
 
