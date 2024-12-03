@@ -97,7 +97,11 @@
         <div class="pt-5">
           <div class="flex gap-x-6 items-center justify-end">
             <PfButtonAction btn-style="link" :label="t('cancel')" @click="closeModal" />
-            <PfButtonAction class="px-8" :label="submitBtn" type="submit" :disabled="projectOptions.length === 0" />
+            <PfButtonAction
+              class="px-8"
+              :label="submitBtn"
+              type="submit"
+              :disabled="isAddProject && projectOptions.length === 0" />
           </div>
         </div>
       </template>
