@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.Services.Permission;
 using Sig.App.Backend.Services.Permission.Enums;
+using Sig.App.Backend.DbModel.Enums;
 
 namespace Sig.App.Backend.Controllers
 {
@@ -61,6 +62,7 @@ namespace Sig.App.Backend.Controllers
             }
 
             user.LastAccessTimeUtc = DateTime.UtcNow;
+            user.State = UserState.Active;
             await userManager.UpdateAsync(user);
 
             var principal = await claimsPrincipalFactory.CreateAsync(user);

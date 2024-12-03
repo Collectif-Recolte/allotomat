@@ -106,7 +106,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             var paymentTransactionsProductGroup = new List<PaymentTransactionProductGroup>();
             var paymentTransactionAddingFundTransactions = new List<PaymentTransactionAddingFundTransaction>();
 
-            foreach (var transaction in project.Cards.SelectMany(x => x.Transactions))
+            var transactions = project.Cards.SelectMany(x => x.Transactions).ToList();
+            foreach (var transaction in transactions)
             {
                 var type = transaction.GetType();
                 if (type == typeof(PaymentTransaction))
@@ -202,7 +203,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 }
             }
 
-            var transactions = project.Cards.SelectMany(x => x.Transactions).ToList();
             var transactionLogs = db.TransactionLogs.Include(x => x.TransactionLogProductGroups).Where(x => x.ProjectId == projectId);
             db.TransactionLogProductGroups.RemoveRange(transactionLogs.SelectMany(x => x.TransactionLogProductGroups));
             db.TransactionLogs.RemoveRange(transactionLogs);
