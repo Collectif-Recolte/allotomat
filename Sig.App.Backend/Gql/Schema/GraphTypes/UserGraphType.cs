@@ -23,6 +23,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public NonNull<string> Email => user.Email;
         public UserType Type => user.Type;
         public bool IsConfirmed => user.EmailConfirmed;
+        public UserStatus Status => user.Status;
 
         public UserGraphType(AppUser user)
         {

@@ -54,6 +54,37 @@ namespace Sig.App.Backend.Gql.Schema
             return mediator.Send(input.Value);
         }
 
+        [ApplyPolicy(AuthorizationPolicies.ManageUser)]
+        [AnnotateErrorCodes(typeof(DeleteUser))]
+        public static async Task<bool> DeleteUser(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<DeleteUser.Input> input)
+        {
+            await mediator.Send(input.Value);
+            return true;
+        }
+
+        [ApplyPolicy(AuthorizationPolicies.ManageUser)]
+        [AnnotateErrorCodes(typeof(DisableUser))]
+        public static Task<DisableUser.Payload> DisableUser(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<DisableUser.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [ApplyPolicy(AuthorizationPolicies.ManageUser)]
+        [AnnotateErrorCodes(typeof(ReactivateUser))]
+        public static Task<ReactivateUser.Payload> ReactivateUser(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<ReactivateUser.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
+
         [AnnotateErrorCodes(typeof(ResendConfirmationEmail))]
         public static async Task<bool> ResendConfirmationEmail(
             this GqlMutation _,
