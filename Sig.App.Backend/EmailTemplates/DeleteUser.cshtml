@@ -1,0 +1,20 @@
+﻿@using Sig.App.Backend.Helpers
+
+@model Sig.App.Backend.EmailTemplates.Models.DeleteUserEmail
+@{ Layout = "_EmailLayout.cshtml"; }
+
+<p>Bonjour @Model.FirstName</p>
+<p>
+    Conformément à notre politique, votre compte a été supprimé le @Model.DeletionDate.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("fr-CA")). Toutes les données associées ont été définitivement effacées de notre système.
+</p>
+<p>
+    Si vous pensez qu’il s’agit d’une erreur ou si vous avez des questions, veuillez contacter notre équipe de support.
+</p>
+<br />
+<p>Hello @Model.FirstName</p>
+<p>
+    As per our policy, your account has been deleted on @Model.DeletionDate.ToString("MMMM dd, yyyy", new System.Globalization.CultureInfo("en-CA")). All associated data has been permanently removed from our system.
+</p>
+<p>
+    If you believe this is a mistake or have any questions, please contact our support team.
+</p>

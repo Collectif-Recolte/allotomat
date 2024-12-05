@@ -29,7 +29,6 @@ namespace Sig.App.Backend.BackgroundJobs
 
         public static void RegisterJob(IConfiguration config)
         {
-            var cronFirstDayOfMonth = Cron.Monthly();
             RecurringJob.AddOrUpdate<DeactivateOffPlatformBeneficiary>("DeactivateOffPlatformBeneficiary",
                 x => x.Run(),
                 Cron.Daily(),

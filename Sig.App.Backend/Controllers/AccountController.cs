@@ -71,6 +71,7 @@ namespace Sig.App.Backend.Controllers
             }
 
             user.LastAccessTimeUtc = DateTime.UtcNow;
+            user.State = UserState.Active;
             await userManager.UpdateAsync(user);
 
             var principal = await claimsPrincipalFactory.CreateAsync(user);

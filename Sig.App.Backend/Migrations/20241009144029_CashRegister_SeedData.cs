@@ -20,7 +20,7 @@ namespace Sig.App.Backend.Migrations
 
             migrationBuilder.Sql("UPDATE tl SET tl.CashRegisterId = cr.Id, tl.CashRegisterName = cr.Name FROM TransactionLogs tl JOIN CashRegisters cr ON tl.MarketId = cr.MarketId");
 
-            migrationBuilder.Sql("UPDATE t SET t.CashRegisterId = cr.Id FROM Transactions t JOIN CashRegisters cr ON t.MarketId = cr.MarketId");
+            migrationBuilder.Sql("UPDATE t SET t.PaymentTransaction_CashRegisterId = cr.Id FROM Transactions t JOIN CashRegisters cr ON t.MarketId = cr.MarketId");
         }
 
         /// <inheritdoc />
