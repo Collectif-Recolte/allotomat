@@ -14,7 +14,12 @@
 </i18n>
 
 <template>
-  <UiDialogModal v-slot="{ closeModal }" :title="t('title')" :has-footer="false" :return-route="{ name: URL_CASH_REGISTER }">
+  <UiDialogModal
+    v-if="!loading"
+    v-slot="{ closeModal }"
+    :title="t('title')"
+    :has-footer="false"
+    :return-route="{ name: URL_CASH_REGISTER }">
     <CashRegisterForm :submit-btn="t('add-cash-register')" is-new :market="market" @submit="onSubmit" @closeModal="closeModal" />
   </UiDialogModal>
 </template>
@@ -36,7 +41,7 @@ const router = useRouter();
 const route = useRoute();
 const { addSuccess } = useNotificationsStore();
 
-const { result } = useQuery(
+const { result, loading } = useQuery(
   gql`
     query Market($id: ID!) {
       market(id: $id) {

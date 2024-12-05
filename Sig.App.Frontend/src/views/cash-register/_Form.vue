@@ -33,9 +33,11 @@
     @submit="onSubmit">
     <PfForm
       has-footer
+      can-cancel
       :disable-submit="Object.keys(formErrors).length > 0"
       :submit-label="submitBtn"
       :processing="isSubmitting"
+      :cancel-label="t('cancel')"
       :warning-message="warningMessage"
       @cancel="closeModal">
       <PfFormSection>
@@ -93,11 +95,15 @@
             col-span-class="sm:col-span-3" />
         </Field>
       </PfFormSection>
-      <template #footer>
+      <template #footer v-if="!isNew">
         <div class="pt-5">
           <div class="flex gap-x-6 items-center justify-end">
             <PfButtonAction btn-style="link" :label="t('cancel')" @click="closeModal" />
-            <PfButtonAction class="px-8" :label="submitBtn" type="submit" :disabled="projectOptions.length === 0" />
+            <PfButtonAction
+              class="px-8"
+              :label="submitBtn"
+              type="submit"
+              :disabled="isAddProject && projectOptions.length === 0" />
           </div>
         </div>
       </template>
@@ -151,8 +157,8 @@ const props = defineProps({
 
 const initialValues = {
   name: props.name,
-  selectedProject: "",
-  selectedMarketGroup: ""
+  selectedProject: null,
+  selectedMarketGroup: null
 };
 
 const validationSchema = computed(() =>
