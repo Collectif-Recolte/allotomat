@@ -32,5 +32,6 @@ namespace Sig.App.Backend.DbModel.Entities
 
         public DateTime? LastAccessTimeUtc { get; set; }
 
+        public UserStatus Status { get; set; } = UserStatus.Actived;
     }
 }

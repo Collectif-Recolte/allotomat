@@ -18,6 +18,9 @@ export const URL_PROFILE_EDIT = "edit-profile-url";
 export const URL_ADMIN_USERS = "admin-users-url";
 export const URL_ADMIN_USER_PROFILE = "admin-user-profile-url";
 export const URL_ADMIN_ADD_USER = "admin-add-user-url";
+export const URL_ADMIN_DELETE_USER = "admin-delete-user-url";
+export const URL_ADMIN_DISABLE_USER = "admin-disable-user-url";
+export const URL_ADMIN_REACTIVATE_USER = "admin-reactivate-user-url";
 
 export const URL_DOC_FORM = "form-example-url";
 export const URL_DOC_CALENDAR = "calendar-url";
