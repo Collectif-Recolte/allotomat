@@ -61,6 +61,15 @@ namespace Sig.App.Backend.Controllers
                     statusCode: 400);
             }
 
+            if (user.Status != UserStatus.Actived)
+            {
+                logger.LogWarning($"Login rejected for {request.Username} (user not actived)");
+                return Problem(
+                    type: "app:account:login:disabled",
+                    title: "Email not actived",
+                    statusCode: 400);
+            }
+
             user.LastAccessTimeUtc = DateTime.UtcNow;
             user.State = UserState.Active;
             await userManager.UpdateAsync(user);

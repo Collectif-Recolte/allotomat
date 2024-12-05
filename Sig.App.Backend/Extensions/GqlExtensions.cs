@@ -15,6 +15,16 @@ namespace Sig.App.Backend.Extensions
             return longId;
         }
 
+        public static string StringIdentifierForType<T>(this Id id)
+        {
+            var rawId = id.IdentifierForType<T>();
+
+            if (string.IsNullOrWhiteSpace(rawId))
+                throw new ArgumentException($"Expected valid string but got {rawId}");
+
+            return rawId;
+        }
+
         public static object GetInputValue(this IResolutionContext ctx)
         {
             var input = ctx.GetArgument("input");
