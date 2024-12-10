@@ -23,14 +23,18 @@ using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
+using Microsoft.AspNetCore.Identity;
+using Sig.App.Backend.DbModel.Entities;
 
 namespace Sig.App.Backend.Authorization
 {
     public class RequirePermissionAttribute : ExecutionFilterAttributeBase, IMetaDataAttribute
     {
-        private PermissionService permissionService;
-        private AppDbContext db;
         private readonly object[] permissions;
+
+        private PermissionService permissionService;
+        private UserManager<AppUser> userManager;
+        private AppDbContext db;
         private bool hasPermission;
 
         public RequirePermissionAttribute(params object[] permissions)
@@ -41,16 +45,22 @@ namespace Sig.App.Backend.Authorization
         public override async Task<object> Execute(IResolutionContext context, FieldResolutionDelegate next)
         {
             permissionService = context.DependencyInjector.Resolve<PermissionService>();
+            userManager = context.DependencyInjector.Resolve<UserManager<AppUser>>();
             db = context.DependencyInjector.Resolve<AppDbContext>();
             var input = context.GetInputValue();
             var appUserContext = ((IAppUserContext)context.UserContext);
 
-            foreach (var permission in permissions)
+            var currentUser = await userManager.FindByIdAsync(appUserContext.CurrentUser.GetUserId());
+
+            if (currentUser.Status == DbModel.Enums.UserStatus.Actived)
             {
-                if (await HasPermission(appUserContext.CurrentUser, permission, input))
+                foreach (var permission in permissions)
                 {
-                    hasPermission = true;
-                    break;
+                    if (await HasPermission(appUserContext.CurrentUser, permission, input))
+                    {
+                        hasPermission = true;
+                        break;
+                    }
                 }
             }
 
