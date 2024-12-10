@@ -32,13 +32,21 @@ import QRCodeScanner from "@/components/transaction/qr-code-scanner.vue";
 
 import { URL_TRANSACTION, URL_TRANSACTION_ERROR } from "@/lib/consts/urls";
 import { TRANSACTION_STEPS_START, TRANSACTION_STEPS_ADD } from "@/lib/consts/enums";
-import { CARD_CANT_BE_USED_IN_MARKET, CARD_NOT_FOUND, CARD_DEACTIVATED } from "@/lib/consts/qr-code-error";
+import {
+  CARD_CANT_BE_USED_IN_MARKET,
+  CARD_NOT_FOUND,
+  CARD_DEACTIVATED,
+  CARD_CANT_BE_USED_WITH_CASH_REGISTER
+} from "@/lib/consts/qr-code-error";
+
+import { useCashRegisterStore } from "@/lib/store/cash-register";
 
 const audio = new Audio(require("@/assets/audio/scan.mp3"));
 const { t } = useI18n();
 const router = useRouter();
 const { resolveClient } = useApolloClient();
 const client = resolveClient();
+const { currentCashRegister } = useCashRegisterStore();
 
 usePageTitle(t("title"));
 
@@ -61,13 +69,14 @@ async function checkQRCode(result) {
   try {
     canBeUsedInMarket = await client.query({
       query: gql`
-        query VerifyCardCanBeUsedInMarket($cardId: ID!, $marketId: ID!) {
-          verifyCardCanBeUsedInMarket(cardId: $cardId, marketId: $marketId)
+        query VerifyCardCanBeUsedInMarket($cardId: ID!, $marketId: ID!, $cashRegisterId: ID!) {
+          verifyCardCanBeUsedInMarket(cardId: $cardId, marketId: $marketId, cashRegisterId: $cashRegisterId)
         }
       `,
       variables: {
         cardId: result,
-        marketId: myMarket.value.id
+        marketId: myMarket.value.id,
+        cashRegisterId: currentCashRegister
       }
     });
 
@@ -77,7 +86,12 @@ async function checkQRCode(result) {
     }
   } catch (exception) {
     emit("onUpdateStep", TRANSACTION_STEPS_START, {});
-    if (exception.message.indexOf(CARD_CANT_BE_USED_IN_MARKET) !== -1) {
+    if (exception.message.indexOf(CARD_CANT_BE_USED_WITH_CASH_REGISTER) !== -1) {
+      router.push({
+        name: URL_TRANSACTION_ERROR,
+        query: { error: CARD_CANT_BE_USED_WITH_CASH_REGISTER, returnRoute: URL_TRANSACTION }
+      });
+    } else if (exception.message.indexOf(CARD_CANT_BE_USED_IN_MARKET) !== -1) {
       router.push({ name: URL_TRANSACTION_ERROR, query: { error: CARD_CANT_BE_USED_IN_MARKET, returnRoute: URL_TRANSACTION } });
     } else if (exception.message.indexOf(CARD_NOT_FOUND) !== -1) {
       router.push({ name: URL_TRANSACTION_ERROR, query: { error: CARD_NOT_FOUND, returnRoute: URL_TRANSACTION } });

@@ -3,12 +3,14 @@
 	"en": {
 		"cancel": "Cancel",
 		"market-name": "Name",
-		"market-name-placeholder": "Ex. Central market"
+		"market-name-placeholder": "Ex. Central market",
+    "selected-market-group": "Location"
 	},
 	"fr": {
 		"cancel": "Annuler",
 		"market-name": "Nom",
 		"market-name-placeholder": "Ex. Marché centrale",
+    "selected-market-group": "Lieu"
 	}
 }
 </i18n>
@@ -34,6 +36,14 @@
             v-bind="field"
             :label="t('market-name')"
             :placeholder="t('market-name-placeholder')"
+            :errors="fieldErrors" />
+        </Field>
+        <Field v-if="isInProject" v-slot="{ field, errors: fieldErrors }" name="marketGroup">
+          <PfFormInputSelect
+            id="marketGroup"
+            v-bind="field"
+            :label="t('selected-market-group')"
+            :options="marketGroupOptions"
             :errors="fieldErrors" />
         </Field>
       </PfFormSection>
@@ -62,7 +72,7 @@ const props = defineProps({
   initialValues: {
     type: Object,
     default(rawProps) {
-      return { marketName: rawProps.marketName };
+      return { marketName: rawProps.marketName, marketGroup: "" };
     }
   },
   validationSchema: {
@@ -72,6 +82,16 @@ const props = defineProps({
   isNew: {
     type: Boolean,
     default: false
+  },
+  isInProject: {
+    type: Boolean,
+    default: false
+  },
+  marketGroupOptions: {
+    type: Array,
+    default() {
+      return [];
+    }
   }
 });
 

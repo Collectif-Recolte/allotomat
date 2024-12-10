@@ -28,6 +28,7 @@ using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Gql.Bases;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 {
@@ -83,8 +84,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 throw new CardIsDisabledException();
             }
 
-            var martketId = request.MarketId.LongIdentifierForType<Market>();
-            var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == martketId, cancellationToken);
+            var marketId = request.MarketId.LongIdentifierForType<Market>();
+            var market = await db.Markets.FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
             if (market == null)
             {
@@ -95,7 +96,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var cardCanBeUsedInMarket = await mediator.Send(new VerifyCardCanBeUsedInMarket.Input
             {
                 MarketId = request.MarketId,
-                CardId = card.GetIdentifier()
+                CardId = card.GetIdentifier(),
+                CashRegisterId = request.CashRegisterId
             }, cancellationToken);
 
             if (!cardCanBeUsedInMarket)
@@ -103,7 +105,28 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 logger.LogWarning("[Mutation] CreateTransaction - CardCantBeUsedInMarketException");
                 throw new CardCantBeUsedInMarketException();
             }
-            
+
+            var cashRegisterId = request.CashRegisterId.LongIdentifierForType<CashRegister>();
+            var cashRegister = await db.CashRegisters.Include(x => x.MarketGroups).ThenInclude(x => x.MarketGroup).FirstOrDefaultAsync(x => x.Id == cashRegisterId, cancellationToken);
+
+            if (cashRegister == null)
+            {
+                logger.LogWarning("[Mutation] CreateTransaction - CashRegisterNotFoundException");
+                throw new CashRegisterNotFoundException();
+            }
+
+            if (cashRegister.MarketId != marketId)
+            {
+                logger.LogWarning("[Mutation] CreateTransaction - CashRegisterNotInMarketException");
+                throw new CashRegisterNotInMarketException();
+            }
+
+            if (!cashRegister.MarketGroups.Any(x => x.MarketGroup.ProjectId == card.ProjectId))
+            {
+                logger.LogWarning("[Mutation] CreateTransaction - CashRegisterCantBeUsedInProject");
+                throw new CashRegisterCantBeUsedInProject();
+            }
+
             today = clock
                 .GetCurrentInstant()
                 .InUtc()
@@ -134,7 +157,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 Market = market,
                 CreatedAtUtc = today,
                 InitiatedByProject = currentUser?.Type == UserType.ProjectManager,
-                InitiatedByOrganization = currentUser?.Type == UserType.OrganizationManager
+                InitiatedByOrganization = currentUser?.Type == UserType.OrganizationManager,
+                CashRegister = cashRegister
             };
 
             foreach (var transactionInput in request.Transactions)
@@ -373,7 +397,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     TransactionInitiatorEmail = currentUser?.Email,
                     TransactionLogProductGroups = new List<TransactionLogProductGroup>(),
                     InitiatedByProject = currentUser?.Type == UserType.ProjectManager,
-                    InitiatedByOrganization = currentUser?.Type == UserType.OrganizationManager
+                    InitiatedByOrganization = currentUser?.Type == UserType.OrganizationManager,
+                    CashRegisterId = paymentTransaction.CashRegister.Id,
+                    CashRegisterName = paymentTransaction.CashRegister.Name
                 };
                 transactionLogs.Add(transactionLog);
             }
@@ -402,6 +428,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             public Id? CardId { get; set; }
             public string CardNumber { get; set; }
             public List<TransactionInput> Transactions { get; set; }
+            public Id CashRegisterId { get; set; }
         }
 
         [InputType]
@@ -429,5 +456,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         public class CardCantBeUsedInMarketException : RequestValidationException { }
         public class CardDontHaveFundType : RequestValidationException { }
         public class NotEnoughtFundException : RequestValidationException { }
+        public class CashRegisterNotFoundException : RequestValidationException { }
+        public class CashRegisterNotInMarketException : RequestValidationException { }
+        public class CashRegisterCantBeUsedInProject : RequestValidationException { }
     }
 }

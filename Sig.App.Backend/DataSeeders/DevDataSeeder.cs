@@ -23,6 +23,8 @@ using Sig.App.Backend.Helpers;
 using NodaTime;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
+using Sig.App.Backend.DbModel.Entities.MarketGroups;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 
 namespace Sig.App.Backend.DataSeeders;
 
@@ -52,7 +54,9 @@ public class DevDataSeeder : IDataSeeder
         
         await SeedDevUsers();
         await SeedDevProjects();
+        await SeedDevMarketGroups();
         await SeedDevMarkets();
+        await SeedDevCashRegister();
         await SeedDevOrganizations();
         await SeedDevProductGroups();
         await SeedDevSubscriptions();
@@ -112,6 +116,26 @@ public class DevDataSeeder : IDataSeeder
         await db.SaveChangesAsync();
     }
 
+    private async Task SeedDevMarketGroups()
+    {
+        if (db.MarketGroups.Any(x => x.Name == "SeedDev - Groupe de commerce 1"))
+        {
+            return;
+        }
+
+        var project = db.Projects.First(x => x.Name == "SeedDev - Programme 1");
+
+        var marketGroup = new MarketGroup()
+        {
+            Name = "SeedDev - Groupe de commerce 1",
+            Project = project
+        };
+
+        await db.MarketGroups.AddAsync(marketGroup);
+
+        await db.SaveChangesAsync();
+    }
+
     private async Task SeedDevMarkets()
     {
         if (db.Markets.Any(x => x.Name == "SeedDev - Commerce 1"))
@@ -120,18 +144,23 @@ public class DevDataSeeder : IDataSeeder
         }
 
         var project = db.Projects.First(x => x.Name == "SeedDev - Programme 1");
-        
+        var marketGroup = db.MarketGroups.First(x => x.Name == "SeedDev - Groupe de commerce 1");
+
         var market = new Market()
         {
             Name = "SeedDev - Commerce 1",
-            Projects = new List<ProjectMarket>()
+            Projects = new List<ProjectMarket>(),
+            MarketGroups = new List<MarketGroupMarket>()
         };
         string[] managerEmails = { "outils+merchant1@sigmund.ca", "outils+merchant2@sigmund.ca" };
         var marketResult = await db.Markets.AddAsync(market);
         market = marketResult.Entity;
         
-        var projectMarket = new ProjectMarket() {Project = project, Market = market};
+        var projectMarket = new ProjectMarket() { Project = project, Market = market };
         db.ProjectMarkets.Add(projectMarket);
+
+        var marketGroupMarket = new MarketGroupMarket() { Market = market, MarketGroup = marketGroup };
+        db.MarketGroupMarkets.Add(marketGroupMarket);
 
         await db.SaveChangesAsync();
 
@@ -147,6 +176,29 @@ public class DevDataSeeder : IDataSeeder
                 await userManager.AddClaimAsync(manager, new Claim(AppClaimTypes.MarketManagerOf, market.Id.ToString()));
             }
         }
+
+        await db.SaveChangesAsync();
+    }
+
+    private async Task SeedDevCashRegister()
+    {
+        if (db.CashRegisters.Any(x => x.Name == "SeedDev - Caisse 1"))
+        {
+            return;
+        }
+
+        var market = db.Markets.First(x => x.Name == "SeedDev - Commerce 1");
+        var marketGroup = db.MarketGroups.First(x => x.Name == "SeedDev - Groupe de commerce 1");
+
+        var cashRegister = new CashRegister()
+        {
+            Market = market,
+            Name = "SeedDev - Caisse 1",
+            MarketGroups = new List<CashRegisterMarketGroup>()
+        };
+
+        var cashRegisterMarketGroup = new CashRegisterMarketGroup() { CashRegister = cashRegister, MarketGroup = marketGroup };
+        db.CashRegisterMarketGroups.Add(cashRegisterMarketGroup);
 
         await db.SaveChangesAsync();
     }
@@ -467,6 +519,7 @@ public class DevDataSeeder : IDataSeeder
         var project = db.Projects.FirstOrDefault(x => x.Name == "SeedDev - Programme 1");
         var market = db.Markets.FirstOrDefault(x => x.Name == "SeedDev - Commerce 1");
         var productGroup = db.ProductGroups.FirstOrDefault(x => x.Name == "SeedDev - Groupe1");
+        var cashRegister = db.CashRegisters.FirstOrDefault(x => x.Name == "SeedDev - Caisse 1");
 
         if (beneficiary == null || project == null || market == null)
         {
@@ -487,7 +540,7 @@ public class DevDataSeeder : IDataSeeder
             return;
         }
 
-        var transaction1 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 25.75m, CreatedAtUtc = DateTime.UtcNow.AddMonths(-1), Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>(), PaymentTransactionAddingFundTransactions = new List<PaymentTransactionAddingFundTransaction>() };
+        var transaction1 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 25.75m, CreatedAtUtc = DateTime.UtcNow.AddMonths(-1), Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>(), PaymentTransactionAddingFundTransactions = new List<PaymentTransactionAddingFundTransaction>(), CashRegister = cashRegister };
         transaction1.TransactionByProductGroups = new List<PaymentTransactionProductGroup>() { new PaymentTransactionProductGroup() { Amount = 25.75m, ProductGroup = productGroup, PaymentTransaction = transaction1 } };
         addingFundsTransaction.AvailableFund -= transaction1.Amount;
         var fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroup.Id);
@@ -538,10 +591,12 @@ public class DevDataSeeder : IDataSeeder
             OrganizationName = beneficiary.Organization.Name,
             MarketId = market.Id,
             MarketName = market.Name,
-            TransactionLogProductGroups = transactionLogProductGroups
+            TransactionLogProductGroups = transactionLogProductGroups,
+            CashRegisterId = cashRegister.Id,
+            CashRegisterName = cashRegister.Name
         });
         
-        var transaction2 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 32.33m, CreatedAtUtc = DateTime.UtcNow.AddMonths(-1), Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>(), PaymentTransactionAddingFundTransactions = new List<PaymentTransactionAddingFundTransaction>() };
+        var transaction2 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 32.33m, CreatedAtUtc = DateTime.UtcNow.AddMonths(-1), Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>(), PaymentTransactionAddingFundTransactions = new List<PaymentTransactionAddingFundTransaction>(), CashRegister = cashRegister };
         transaction2.TransactionByProductGroups = new List<PaymentTransactionProductGroup>() { new PaymentTransactionProductGroup() { Amount = 32.33m, ProductGroup = productGroup, PaymentTransaction = transaction1 } };
         addingFundsTransaction.AvailableFund -= transaction2.Amount;
         fund = card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroup.Id);
@@ -592,7 +647,9 @@ public class DevDataSeeder : IDataSeeder
             OrganizationName = beneficiary.Organization.Name,
             MarketId = market.Id,
             MarketName = market.Name,
-            TransactionLogProductGroups = transactionLogProductGroups
+            TransactionLogProductGroups = transactionLogProductGroups,
+            CashRegisterId = cashRegister.Id,
+            CashRegisterName = cashRegister.Name
         });
 
         await db.SaveChangesAsync();

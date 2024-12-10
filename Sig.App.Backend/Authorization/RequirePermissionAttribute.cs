@@ -21,6 +21,8 @@ using Sig.App.Backend.DbModel.Entities.Cards;
 using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.Gql.Bases;
+using Sig.App.Backend.DbModel.Entities.MarketGroups;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 
 namespace Sig.App.Backend.Authorization
 {
@@ -76,6 +78,8 @@ namespace Sig.App.Backend.Authorization
                 return await HasBeneficiaryTypePermissions(claimsPrincipal, btp, input);
             if (permission is CardPermission cp)
                 return await HasCardPermissions(claimsPrincipal, cp, input);
+            if (permission is MarketGroupPermission mgp)
+                return await HasMarketGroupPermissions(claimsPrincipal, mgp, input);
             return false;
         }
 
@@ -127,6 +131,12 @@ namespace Sig.App.Backend.Authorization
             return cardPermissions.Contains(permission);
         }
 
+        private async Task<bool> HasMarketGroupPermissions(ClaimsPrincipal claimsPrincipal, MarketGroupPermission permission, object input)
+        {
+            var marketGroupPermissions = await permissionService.GetMarketGroupPermissions(claimsPrincipal, GetMarketGroupIdFromInput(input));
+            return marketGroupPermissions.Contains(permission);
+        }
+
         private string GetProjectIdFromInput(object input)
         {
             if (input is HaveProjectId hpi)
@@ -160,6 +170,11 @@ namespace Sig.App.Backend.Authorization
             {
                 var transaction = db.Transactions.OfType<PaymentTransaction>().Include(x => x.Market).Where(x => x.Id == hiti.InitialTransactionId.LongIdentifierForType<PaymentTransaction>()).FirstOrDefault();
                 return transaction.Market.GetIdentifier().IdentifierForType<Market>();
+            }
+            if (input is HaveCashRegisterId hcri)
+            {
+                var cashRegister = db.CashRegisters.Include(x => x.Market).Where(x => x.Id == hcri.CashRegisterId.LongIdentifierForType<CashRegister>()).FirstOrDefault();
+                return cashRegister.Market.GetIdentifier().IdentifierForType<Market>();
             }
             if (input is HaveMarketId hmi)
             {
@@ -344,6 +359,20 @@ namespace Sig.App.Backend.Authorization
             if (input is Id id)
             {
                 return id.IdentifierForType<Card>();
+            }
+
+            return null;
+        }
+
+        private string GetMarketGroupIdFromInput(object input)
+        {
+            if (input is HaveMarketGroupId hmgi)
+            {
+                return hmgi.MarketGroupId.IdentifierForType<MarketGroup>();
+            }
+            if (input is HaveMarketGroupIdAndMarketId hmgiami)
+            {
+                return hmgiami.MarketGroupId.IdentifierForType<MarketGroup>();
             }
 
             return null;

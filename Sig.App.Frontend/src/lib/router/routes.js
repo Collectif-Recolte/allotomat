@@ -15,7 +15,9 @@ import {
   GLOBAL_CREATE_TRANSACTION,
   GLOBAL_MANAGE_TRANSACTIONS,
   GLOBAL_MANAGE_PRODUCT_GROUP,
-  GLOBAL_REFUND_TRANSACTION
+  GLOBAL_REFUND_TRANSACTION,
+  GLOBAL_MANAGE_MARKET_GROUPS,
+  GLOBAL_MANAGE_SPECIFIC_MARKET
 } from "@/lib/consts/permissions";
 
 import { useAuthStore } from "@/lib/store/auth";
@@ -94,6 +96,16 @@ export default [
     name: urls.URL_ACCOUNT_ORGANIZATION_MANAGER_CONFIRM,
     path: "/registration/organization-manager",
     component: () => import("@/views/account/ConfirmOrganizationManager.vue"),
+    meta: {
+      fullscreen,
+      anonymous,
+      notConnected
+    }
+  },
+  {
+    name: urls.URL_ACCOUNT_MARKET_GROUP_MANAGER_CONFIRM,
+    path: "/registration/market-group-manager",
+    component: () => import("@/views/account/ConfirmMarketGroupManager.vue"),
     meta: {
       fullscreen,
       anonymous,
@@ -199,6 +211,14 @@ export default [
             name: urls.URL_REMOVE_MERCHANTS_FROM_PROJECT,
             path: ":marketId/remove",
             component: () => import("@/views/project/RemoveMarketFromProject.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_ALL_PROJECTS
+            }
+          },
+          {
+            name: urls.URL_ADD_MERCHANTS_FROM_PROJECT,
+            path: "add-market",
+            component: () => import("@/views/market/SelectMarket.vue"),
             meta: {
               claim: GLOBAL_MANAGE_ALL_PROJECTS
             }
@@ -321,7 +341,133 @@ export default [
     component: () => import("@/views/market/ViewMarkets.vue"),
     meta: {
       claim: GLOBAL_MANAGE_CARDS
-    }
+    },
+    children: [
+      {
+        name: urls.URL_MARKET_OVERVIEW_SELECT,
+        path: "select",
+        component: () => import("@/views/market/SelectMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_MARKET_OVERVIEW_ADD,
+        path: "add",
+        component: () => import("@/views/market/AddMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_MARKET_OVERVIEW_EDIT,
+        path: ":marketId/edit",
+        component: () => import("@/views/market/EditMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_MARKET_OVERVIEW_DELETE,
+        path: ":marketId/delete",
+        component: () => import("@/views/market/DeleteMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_MARKET_OVERVIEW_ARCHIVE,
+        path: ":marketId/archive",
+        component: () => import("@/views/market/ArchiveMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      },
+      {
+        name: urls.URL_MARKET_OVERVIEW_MANAGE_MANAGERS,
+        path: ":marketId/manage-managers",
+        component: () => import("@/views/market/EditManagers.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_CARDS
+        }
+      }
+    ]
+  },
+  {
+    name: urls.URL_MARKET_GROUPS_OVERVIEW,
+    path: "/market-groups-overview",
+    component: () => import("@/views/market-groups/ListMarketGroups.vue"),
+    meta: {
+      claim: GLOBAL_MANAGE_MARKET_GROUPS
+    },
+    children: [
+      {
+        name: urls.URL_MARKET_GROUP_ADD,
+        path: "add",
+        component: () => import("@/views/market-groups/AddMarketGroup.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_MARKET_GROUPS
+        }
+      },
+      {
+        name: urls.URL_MARKET_GROUP_EDIT,
+        path: ":marketGroupId/edit",
+        component: () => import("@/views/market-groups/EditMarketGroup.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_MARKET_GROUPS
+        }
+      },
+      {
+        name: urls.URL_MARKET_GROUP_DELETE,
+        path: ":marketGroupId/delete",
+        component: () => import("@/views/market-groups/DeleteMarketGroup.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_MARKET_GROUPS
+        }
+      },
+      {
+        name: urls.URL_MARKET_GROUP_ARCHIVE,
+        path: ":marketGroupId/archive",
+        component: () => import("@/views/market-groups/ArchiveMarketGroup.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_MARKET_GROUPS
+        }
+      },
+      {
+        name: urls.URL_MARKET_GROUP_MANAGE_MANAGERS,
+        path: ":marketGroupId/manage-managers",
+        component: () => import("@/views/market-groups/EditManagers.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_MARKET_GROUPS
+        }
+      },
+      {
+        name: urls.URL_MARKET_GROUP_MANAGE_MERCHANTS,
+        path: ":marketGroupId/manage-merchants",
+        component: () => import("@/views/market-groups/EditAssociatedMerchants.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_MARKET_GROUPS
+        },
+        children: [
+          {
+            name: urls.URL_REMOVE_MERCHANTS_FROM_MARKET_GROUP,
+            path: ":marketId/remove",
+            component: () => import("@/views/market-groups/RemoveMarketFromMarketGroup.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_MARKET_GROUPS
+            }
+          },
+          {
+            name: urls.URL_ADD_MERCHANTS_FROM_MARKET_GROUP,
+            path: "add-market",
+            component: () => import("@/views/market-groups/AddMarketToMarketGroup.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_MARKET_GROUPS
+            }
+          }
+        ]
+      }
+    ]
   },
   {
     name: urls.URL_ORGANIZATION_ADMIN,
@@ -764,6 +910,48 @@ export default [
         component: () => import("@/views/transaction/Error.vue"),
         meta: {
           claim: GLOBAL_CREATE_TRANSACTION
+        }
+      }
+    ]
+  },
+  {
+    name: urls.URL_CASH_REGISTER,
+    path: "/cash-register",
+    component: () => import("@/views/cash-register/ListCashRegister.vue"),
+    meta: {
+      claim: GLOBAL_MANAGE_SPECIFIC_MARKET
+    },
+    children: [
+      {
+        name: urls.URL_CASH_REGISTER_ADD,
+        path: "add",
+        component: () => import("@/views/cash-register/AddCashRegister.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SPECIFIC_MARKET
+        }
+      },
+      {
+        name: urls.URL_CASH_REGISTER_EDIT,
+        path: ":cashRegisterId/edit",
+        component: () => import("@/views/cash-register/EditCashRegister.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SPECIFIC_MARKET
+        }
+      },
+      {
+        name: urls.URL_CASH_REGISTER_ARCHIVE,
+        path: ":cashRegisterId/archive",
+        component: () => import("@/views/cash-register/ArchiveCashRegister.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SPECIFIC_MARKET
+        }
+      },
+      {
+        name: urls.URL_CASH_REGISTER_ADD_MARKET_GROUP,
+        path: ":cashRegisterId/add-market-group",
+        component: () => import("@/views/cash-register/AddCashRegisterToMarketGroup.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SPECIFIC_MARKET
         }
       }
     ]

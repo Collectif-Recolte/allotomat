@@ -37,11 +37,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
             logger.LogInformation($"[Mutation] CompleteUserRegistration({request.UserId}, {request.FirstName}, {request.LastName}, {request.EmailAddress})");
             var userType = request.TokenType == TokenType.AdminInvitation ? UserType.PCAAdmin :
                 request.TokenType == TokenType.ProjectManagerInvitation ? UserType.ProjectManager :
-                request.TokenType == TokenType.MerchantInvitation ? UserType.Merchant : UserType.OrganizationManager;
+                request.TokenType == TokenType.MerchantInvitation ? UserType.Merchant :
+                request.TokenType == TokenType.MarketGroupManagerInvitation ? UserType.MarketGroupManager : UserType.OrganizationManager;
 
             var tokenPurpose = request.TokenType == TokenType.AdminInvitation ? TokenPurposes.AdminInvite :
                 request.TokenType == TokenType.ProjectManagerInvitation ? TokenPurposes.ProjectManagerInvite :
-                request.TokenType == TokenType.MerchantInvitation ? TokenPurposes.MerchantInvite : TokenPurposes.OrganizationManagerInvite;
+                request.TokenType == TokenType.MerchantInvitation ? TokenPurposes.MerchantInvite :
+                request.TokenType == TokenType.MarketGroupManagerInvitation ? TokenPurposes.MarketGroupManagerInvite : TokenPurposes.OrganizationManagerInvite;
 
             var user = await userManager.FindByEmailAsync(request.EmailAddress);
             if (user == null)

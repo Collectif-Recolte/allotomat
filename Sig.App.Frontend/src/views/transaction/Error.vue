@@ -6,6 +6,7 @@
 		"card-not-found": "QR code does not equate to a known user.",
 		"create-new-transaction-btn": "Create a new transaction",
 		"not-enought-fund": "The participant does not have enough funds",
+    "card-cant-be-use-in-cash-register": "The participant cannot make a purchase with this cash register",
 		"title": "Error during payment 🚫"
 	},
 	"fr": {
@@ -14,6 +15,7 @@
 		"card-not-found": "Le code QR n'équivaut pas à un utilisateur connu.",
 		"create-new-transaction-btn": "Créer une nouvelle transaction",
 		"not-enought-fund": "Le-la participant-e ne possède pas assez de fond",
+    "card-cant-be-use-in-cash-register": "Le-la participant-e ne peut pas faire d'achat avec cette caisse",
 		"title": "Erreur lors du paiement 🚫"
 	}
 }
@@ -34,7 +36,13 @@ import { computed } from "vue";
 import { useRoute } from "vue-router";
 
 import { URL_TRANSACTION } from "@/lib/consts/urls";
-import { CARD_CANT_BE_USED_IN_MARKET, CARD_NOT_FOUND, CARD_DEACTIVATED, NOT_ENOUGHT_FUND } from "@/lib/consts/qr-code-error";
+import {
+  CARD_CANT_BE_USED_IN_MARKET,
+  CARD_NOT_FOUND,
+  CARD_DEACTIVATED,
+  NOT_ENOUGHT_FUND,
+  CARD_CANT_BE_USED_WITH_CASH_REGISTER
+} from "@/lib/consts/qr-code-error";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -49,6 +57,8 @@ const error = computed(() => {
       return t("card-deactivated");
     case NOT_ENOUGHT_FUND:
       return t("not-enought-fund");
+    case CARD_CANT_BE_USED_WITH_CASH_REGISTER:
+      return t("card-cant-be-use-in-cash-register");
     default:
       return "";
   }

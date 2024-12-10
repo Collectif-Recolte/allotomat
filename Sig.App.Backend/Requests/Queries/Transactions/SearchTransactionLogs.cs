@@ -26,6 +26,7 @@ using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.Gql.Bases;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 
 namespace Sig.App.Backend.Requests.Queries.Transactions
 {
@@ -96,6 +97,12 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
                 query = query.Where(x => marketsLongIdentifiers.Contains(x.MarketId.GetValueOrDefault()));
             }
 
+            if (request.CashRegisters?.Any() ?? false)
+            {
+                var cashRegistersLongIdentifiers = request.CashRegisters.Select(x => x.LongIdentifierForType<CashRegister>());
+                query = query.Where(x => cashRegistersLongIdentifiers.Contains(x.CashRegisterId.GetValueOrDefault()));
+            }
+
             if (request.TransactionTypes?.Any() ?? false)
             {
                 var transactionLogDiscriminators =
@@ -135,6 +142,7 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             public IEnumerable<Id> Organizations { get; set; }
             public IEnumerable<Id> Subscriptions { get; set; }
             public IEnumerable<Id> Markets { get; set; }
+            public IEnumerable<Id> CashRegisters { get; set; }
             public Maybe<bool> WithoutSubscription { get; set; }
             public IEnumerable<Id> Categories { get; set; }
             public IEnumerable<string> TransactionTypes { get; set; }

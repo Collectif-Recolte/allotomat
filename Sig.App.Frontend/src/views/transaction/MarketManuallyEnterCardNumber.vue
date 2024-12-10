@@ -60,17 +60,28 @@ import { computed, defineEmits } from "vue";
 import { useI18n } from "vue-i18n";
 import { string, object } from "yup";
 import { useQuery, useResult, useApolloClient } from "@vue/apollo-composable";
+import { useRouter } from "vue-router";
 
+import { URL_TRANSACTION, URL_TRANSACTION_ERROR } from "@/lib/consts/urls";
 import { TRANSACTION_STEPS_ADD, TRANSACTION_STEPS_START } from "@/lib/consts/enums";
+import {
+  CARD_CANT_BE_USED_IN_MARKET,
+  CARD_NOT_FOUND,
+  CARD_DEACTIVATED,
+  CARD_CANT_BE_USED_WITH_CASH_REGISTER
+} from "@/lib/consts/qr-code-error";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
+import { useCashRegisterStore } from "@/lib/store/cash-register";
 
 const { t } = useI18n();
 const { resolveClient } = useApolloClient();
 
+const router = useRouter();
 const client = resolveClient();
 
 const { addError } = useNotificationsStore();
+const { currentCashRegister } = useCashRegisterStore();
 
 const emit = defineEmits(["onUpdateStep"]);
 
@@ -136,11 +147,43 @@ async function nextStep(values) {
   if (card === null || market.value.projects.find((project) => project.id === card.project.id) === undefined) {
     addError(t("card-number-invalid"));
   } else {
-    emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
-      marketId: values.marketId,
-      cardNumber: values.cardNumber,
-      cardId: card.id
-    });
+    let canBeUsedInMarket = null;
+    try {
+      canBeUsedInMarket = await client.query({
+        query: gql`
+          query VerifyCardCanBeUsedInMarket($cardId: ID!, $marketId: ID!, $cashRegisterId: ID!) {
+            verifyCardCanBeUsedInMarket(cardId: $cardId, marketId: $marketId, cashRegisterId: $cashRegisterId)
+          }
+        `,
+        variables: {
+          cardId: card.id,
+          marketId: market.value.id,
+          cashRegisterId: currentCashRegister
+        }
+      });
+
+      if (canBeUsedInMarket.data.verifyCardCanBeUsedInMarket) {
+        emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
+          marketId: values.marketId,
+          cardNumber: values.cardNumber,
+          cardId: card.id
+        });
+      }
+    } catch (exception) {
+      emit("onUpdateStep", TRANSACTION_STEPS_START, {});
+      if (exception.message.indexOf(CARD_CANT_BE_USED_WITH_CASH_REGISTER) !== -1) {
+        router.push({
+          name: URL_TRANSACTION_ERROR,
+          query: { error: CARD_CANT_BE_USED_WITH_CASH_REGISTER, returnRoute: URL_TRANSACTION }
+        });
+      } else if (exception.message.indexOf(CARD_CANT_BE_USED_IN_MARKET) !== -1) {
+        router.push({ name: URL_TRANSACTION_ERROR, query: { error: CARD_CANT_BE_USED_IN_MARKET, returnRoute: URL_TRANSACTION } });
+      } else if (exception.message.indexOf(CARD_NOT_FOUND) !== -1) {
+        router.push({ name: URL_TRANSACTION_ERROR, query: { error: CARD_NOT_FOUND, returnRoute: URL_TRANSACTION } });
+      } else if (exception.message.indexOf(CARD_DEACTIVATED) !== -1) {
+        router.push({ name: URL_TRANSACTION_ERROR, query: { error: CARD_DEACTIVATED, returnRoute: URL_TRANSACTION } });
+      }
+    }
   }
 }
 

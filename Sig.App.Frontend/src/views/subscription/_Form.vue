@@ -671,7 +671,8 @@ const getSubscriptionPaymentDates = computed(() => {
   if (startDateValue.value && endDateValue.value) {
     const startMonth =
       (monthlyPaymentMomentValue.value === FIRST_DAY_OF_THE_MONTH && startDateValue.value.getDate() === 1) ||
-      (monthlyPaymentMomentValue.value === FIRST_AND_FIFTEENTH_DAY_OF_THE_MONTH && startDateValue.value.getDate() <= 15)
+      (monthlyPaymentMomentValue.value === FIRST_AND_FIFTEENTH_DAY_OF_THE_MONTH && startDateValue.value.getDate() <= 15) ||
+      (monthlyPaymentMomentValue.value === FIFTEENTH_DAY_OF_THE_MONTH && startDateValue.value.getDate() <= 15)
         ? startDateValue.value.getMonth()
         : startDateValue.value.getMonth() + 1;
     let currentDate = new Date(

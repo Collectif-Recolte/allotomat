@@ -700,7 +700,10 @@ const amountThatWillBeAllocated = computed(() => {
       .filter((y) => y.beneficiaryType.id === x.beneficiaryType.id)
       .reduce((accumulator, type) => accumulator + type.amount, 0);
 
-    var paymentRemaining = selectedSubscriptionData.paymentRemaining;
+    var paymentRemaining = selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage
+      ? Math.min(selectedSubscriptionData.paymentRemaining, selectedSubscriptionData.maxNumberOfPayments)
+      : selectedSubscriptionData.paymentRemaining;
+
     if (replicatePaymentOnAttribution.value && x.card) {
       paymentRemaining++;
     }

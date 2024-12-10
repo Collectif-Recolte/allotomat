@@ -40,6 +40,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             logger.LogInformation($"[Mutation] DeleteMarket({request.MarketId})");
             var marketId = request.MarketId.LongIdentifierForType<Market>();
             var market = await db.Markets
+                .Include(x => x.CashRegisters).ThenInclude(x => x.MarketGroups)
+                .Include(x => x.MarketGroups)
                 .Include(x => x.Projects)
                 .FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
@@ -69,6 +71,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             {
                 db.Transactions.RemoveRange(transactions);
             }
+
+            db.CashRegisters.RemoveRange(market.CashRegisters);
+            db.MarketGroupMarkets.RemoveRange(market.MarketGroups);
+            db.CashRegisterMarketGroups.RemoveRange(market.CashRegisters.SelectMany(x => x.MarketGroups));
 
             db.ProjectMarkets.RemoveRange(market.Projects);
             

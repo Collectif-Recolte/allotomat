@@ -46,7 +46,7 @@ namespace Sig.App.Backend.Helpers
 
             if (needExtraDay) cardPaymentRemaining++;
 
-            return Math.Max(0, cardPaymentRemaining);
+            return Math.Max(0, subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(cardPaymentRemaining, subscription.MaxNumberOfPayments.Value) : cardPaymentRemaining);
         }
 
         public static int GetTotalPayment(this Subscription subscription)
@@ -83,7 +83,7 @@ namespace Sig.App.Backend.Helpers
                 if (startDate.Day == 15) cardPaymentRemaining++;
             }
 
-            return cardPaymentRemaining;
+            return subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(subscription.MaxNumberOfPayments.Value, cardPaymentRemaining) : cardPaymentRemaining;
         }
 
         public static DateTime GetNextPaymentDateTime(IClock clock, SubscriptionMonthlyPaymentMoment moment)

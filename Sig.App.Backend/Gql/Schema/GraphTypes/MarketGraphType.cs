@@ -19,6 +19,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public Id Id => market.GetIdentifier();
         public NonNull<string> Name => market.Name;
+        public bool IsArchived => market.IsArchived;
 
         public MarketGraphType(Market market)
         {
@@ -57,6 +58,12 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             var transactions = await ctx.DataLoader.LoadMarketTransactions(Id.LongIdentifierForType<Market>()).GetResultAsync();
 
             return transactions.Where(x => IsTransactionBetweenDate(x, startDate, endDate));
+        }
+
+        [Description("The list of cash-register for this market.")]
+        public IDataLoaderResult<IEnumerable<CashRegisterGraphType>> CashRegisters(IAppUserContext ctx)
+        {
+            return ctx.DataLoader.LoadMarketCashRegisters(Id.LongIdentifierForType<Market>());
         }
 
         private bool IsTransactionBetweenDate(ITransactionGraphType x, DateTime startDate, DateTime endDate)

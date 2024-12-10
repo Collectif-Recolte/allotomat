@@ -17,6 +17,8 @@ using Sig.App.Backend.Requests.Commands.Mutations.Cards;
 using Sig.App.Backend.Requests.Commands.Mutations.Transactions;
 using Sig.App.Backend.Requests.Commands.Mutations.ProductGroups;
 using Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances;
+using Sig.App.Backend.Requests.Commands.Mutations.MarketGroups;
+using Sig.App.Backend.Requests.Commands.Mutations.CashRegisters;
 
 namespace Sig.App.Backend.Gql.Schema
 {
@@ -707,17 +709,163 @@ namespace Sig.App.Backend.Gql.Schema
             return mediator.Send(input.Value);
         }
 
-        public static Task<AdjustBeneficiarySubscription.Payload> AdjustBeneficiarySubscription(this GqlMutation _, [Inject] IMediator mediator, NonNull<AdjustBeneficiarySubscription.Input> input)
+        [RequirePermission(MarketGroupPermission.ManageMarketGroup)]
+        [AnnotateErrorCodes(typeof(AddManagerToMarketGroup))]
+        public static Task<AddManagerToMarketGroup.Payload> AddManagerToMarketGroup(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<AddManagerToMarketGroup.Input> input
+            )
         {
             return mediator.Send(input.Value);
         }
 
-        public static Task<AddMissingPayment.Payload> AddMissingPayment(this GqlMutation _, [Inject] IMediator mediator, NonNull<AddMissingPayment.Input> input)
+        [RequirePermission(MarketGroupPermission.ManageMarketGroup)]
+        [AnnotateErrorCodes(typeof(RemoveManagerFromMarketGroup))]
+        public static Task<RemoveManagerFromMarketGroup.Payload> RemoveManagerFromMarketGroup(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<RemoveManagerFromMarketGroup.Input> input
+            )
         {
             return mediator.Send(input.Value);
         }
 
-        public static Task<AddMissingPayments.Payload> AddMissingPayments(this GqlMutation _, [Inject] IMediator mediator, NonNull<AddMissingPayments.Input> input)
+        [RequirePermission(MarketGroupPermission.ArchiveMarketGroup)]
+        [AnnotateErrorCodes(typeof(ArchiveMarketGroup))]
+        public static async Task<bool> ArchiveMarketGroup(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<ArchiveMarketGroup.Input> input
+            )
+        {
+            await mediator.Send(input.Value);
+
+            return true;
+        }
+
+        [RequirePermission(ProjectPermission.ManageProject)]
+        [AnnotateErrorCodes(typeof(CreateMarketGroup))]
+        public static Task<CreateMarketGroup.Payload> CreateMarketGroup(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<CreateMarketGroup.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(MarketGroupPermission.DeleteMarketGroup)]
+        [AnnotateErrorCodes(typeof(DeleteMarketGroup))]
+        public static async Task<bool> DeleteMarketGroup(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<DeleteMarketGroup.Input> input
+            )
+        {
+            await mediator.Send(input.Value);
+
+            return true;
+        }
+
+        [RequirePermission(MarketGroupPermission.ManageMarketGroup)]
+        [AnnotateErrorCodes(typeof(EditMarketGroup))]
+        public static Task<EditMarketGroup.Payload> EditMarketGroup(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<EditMarketGroup.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(MarketGroupPermission.ManageMarketGroup)]
+        [AnnotateErrorCodes(typeof(AddMarketToMarketGroup))]
+        public static Task<AddMarketToMarketGroup.Payload> AddMarketToMarketGroup(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<AddMarketToMarketGroup.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(MarketGroupPermission.ManageMarketGroup)]
+        [AnnotateErrorCodes(typeof(RemoveMarketFromMarketGroup))]
+        public static Task<RemoveMarketFromMarketGroup.Payload> RemoveMarketFromMarketGroup(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<RemoveMarketFromMarketGroup.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(MarketPermission.CreateCashRegister)]
+        [AnnotateErrorCodes(typeof(CreateCashRegister))]
+        public static Task<CreateCashRegister.Payload> CreateCashRegister(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<CreateCashRegister.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(MarketPermission.ManageCashRegister)]
+        [AnnotateErrorCodes(typeof(EditCashRegister))]
+        public static Task<EditCashRegister.Payload> EditCashRegister(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<EditCashRegister.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(MarketPermission.ManageCashRegister)]
+        [AnnotateErrorCodes(typeof(ArchiveCashRegister))]
+        public static async Task<bool> ArchiveCashRegister(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<ArchiveCashRegister.Input> input
+            )
+        {
+            await mediator.Send(input.Value);
+            return true;
+        }
+
+        [RequirePermission(MarketPermission.ManageCashRegister)]
+        [AnnotateErrorCodes(typeof(AddCashRegisterToMarketGroup))]
+        public static Task<AddCashRegisterToMarketGroup.Payload> AddCashRegisterToMarketGroup(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<AddCashRegisterToMarketGroup.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        public static Task<AdjustBeneficiarySubscription.Payload> AdjustBeneficiarySubscription(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<AdjustBeneficiarySubscription.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
+
+        public static Task<AddMissingPayment.Payload> AddMissingPayment(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<AddMissingPayment.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
+
+        public static Task<AddMissingPayments.Payload> AddMissingPayments(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<AddMissingPayments.Input> input)
         {
             return mediator.Send(input.Value);
         }

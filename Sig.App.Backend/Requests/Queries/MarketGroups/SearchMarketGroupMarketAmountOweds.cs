@@ -12,11 +12,11 @@ using Sig.App.Backend.DbModel.Enums;
 
 namespace Sig.App.Backend.Requests.Queries.Markets
 {
-    public class SearchMarketAmountOweds : IRequestHandler<SearchMarketAmountOweds.Query, MarketAmountOwedPagination<MarketAmountOwedGraphType>>
+    public class SearchProjectMarketAmountOweds : IRequestHandler<SearchProjectMarketAmountOweds.Query, MarketAmountOwedPagination<MarketAmountOwedGraphType>>
     {
         private readonly AppDbContext db;
 
-        public SearchMarketAmountOweds(AppDbContext db)
+        public SearchProjectMarketAmountOweds(AppDbContext db)
         {
             this.db = db;
         }
@@ -28,7 +28,21 @@ namespace Sig.App.Backend.Requests.Queries.Markets
 
             var markets = db.Markets.Where(x => transactions.Select(x => x.Key).Contains(x.Id)).ToList();
 
-            return await MarketAmountOwedPagination.For(transactions.Select(x => new MarketAmountOwedGraphType { Market = new MarketGraphType(markets.First(y => y.Id == x.Key)), Amount = x.Sum(t => t.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog ? t.TotalAmount : -t.TotalAmount) }), request.Page);
+            return await MarketAmountOwedPagination.For(transactions.Select(x => {
+                var transactionByCashRegister = x.Select(x => x).Where(x => x.CashRegisterId.HasValue).GroupBy(x => x.CashRegisterId.Value);
+                var amountByCashRegister = transactionByCashRegister.Select(x =>
+                {
+                    var cashRegister = db.CashRegisters.FirstOrDefault(y => y.Id == x.Key);
+
+                    return new CashRegisterAmountOwedGraphType()
+                    {
+                        CashRegister = new CashRegisterGraphType(cashRegister),
+                        Amount = x.Sum(t => t.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog ? t.TotalAmount : -t.TotalAmount)
+                    };
+                });
+
+                return new MarketAmountOwedGraphType { Market = new MarketGraphType(markets.First(y => y.Id == x.Key)), Amount = x.Sum(t => t.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog ? t.TotalAmount : -t.TotalAmount), AmountByCashRegister = amountByCashRegister };
+            }), request.Page);
         }
 
         public class Query : IRequest<MarketAmountOwedPagination<MarketAmountOwedGraphType>>
