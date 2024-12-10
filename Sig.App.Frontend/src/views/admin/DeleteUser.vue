@@ -47,6 +47,7 @@ const { result } = useQuery(
     query User($id: ID!) {
       user(id: $id) {
         id
+        email
         profile {
           id
           firstName
@@ -70,7 +71,11 @@ const { mutate: deleteUserMutation } = useMutation(
 );
 
 function getUserName() {
-  return user.value ? `${user.value.profile.firstName} ${user.value.profile.lastName}` : "";
+  return user.value
+    ? user.value.profile.firstName !== null
+      ? `${user.value.profile.firstName} ${user.value.profile.lastName}`
+      : user.value.email
+    : "";
 }
 
 async function deleteUser() {
