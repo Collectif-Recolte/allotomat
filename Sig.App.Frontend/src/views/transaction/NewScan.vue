@@ -138,7 +138,10 @@ const { result, loading } = useQuery(
 
 const cashRegisters = useResult(result, [], (data) => {
   if (data.markets[0].cashRegisters.length === 1) {
-    if (!data.markets[0].cashRegisters[0].isArchived) changeCashRegister(data.markets[0].cashRegisters[0].id);
+    if (!data.markets[0].cashRegisters[0].isArchived) {
+      changeCashRegister(data.markets[0].cashRegisters[0].id);
+      selectedCashRegisterId.value = data.markets[0].cashRegisters[0].id;
+    }
   }
 
   return data.markets[0].cashRegisters.map((cashRegister) => ({
