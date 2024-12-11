@@ -90,21 +90,32 @@ const validationSchema = computed(() =>
   })
 );
 
-const { result: resultAllMarkets } = useQuery(
+const { result: resultProjects } = useQuery(
   gql`
-    query Markets {
-      allMarkets {
+    query Projects {
+      projects {
         id
-        name
+        markets {
+          id
+          name
+        }
       }
     }
   `
 );
-const allMarkets = useResult(resultAllMarkets, null, (data) => {
-  return data.allMarkets.map((market) => ({
-    value: market.id,
-    label: market.name
-  }));
+const projectMarkets = useResult(resultProjects, null, (data) => {
+  if (data.projects[0].markets.length === 1) {
+    emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
+      marketId: data.projects[0].markets[0].id
+    });
+    return [];
+  }
+  return data.projects[0].markets.map((x) => {
+    return {
+      label: x.name,
+      value: x.id
+    };
+  });
 });
 
 const { result: resultOrganizations } = useQuery(
@@ -139,7 +150,7 @@ const markets = computed(() => {
   if (userType.value === USER_TYPE_ORGANIZATIONMANAGER) {
     return organizationMarkets.value;
   }
-  return allMarkets.value;
+  return projectMarkets.value;
 });
 
 async function nextStep(values) {
