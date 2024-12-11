@@ -17,7 +17,7 @@
     :has-footer="false"
     :return-route="{ name: route.params.beneficiaryId !== undefined ? URL_BENEFICIARY_ADMIN : URL_TRANSACTION_ADMIN }">
     <template v-if="activeStep === TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER">
-      <SelectMarket v-if="beneficiary" @onUpdateStep="updateStep" @onCloseModal="closeModal" />
+      <SelectMarket v-if="beneficiary" :market-id="marketId" @onUpdateStep="updateStep" @onCloseModal="closeModal" />
       <ManuallyEnterCardNumber
         v-else-if="userType === USER_TYPE_PROJECTMANAGER && route.params.beneficiaryId === undefined"
         @onUpdateStep="updateStep"
@@ -45,6 +45,7 @@ import { storeToRefs } from "pinia";
 import gql from "graphql-tag";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
+import { useMarketStore } from "@/lib/store/market";
 import { useAuthStore } from "@/lib/store/auth";
 
 import {
@@ -65,8 +66,16 @@ const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const { userType } = storeToRefs(useAuthStore());
+const { currentMarket, changeCurrentMarket } = useMarketStore();
 
 onMounted(loadBeneficiary);
+onMounted(loadMarket);
+
+function loadMarket() {
+  if (userType.value === USER_TYPE_PROJECTMANAGER) {
+    marketId.value = currentMarket;
+  }
+}
 
 async function loadBeneficiary() {
   if (route.params.beneficiaryId !== undefined) {
@@ -124,8 +133,14 @@ const updateStep = (currentStep, values) => {
       activeStep.value = TRANSACTION_STEPS_COMPLETE;
       break;
     case TRANSACTION_FINISH:
+      if (userType.value === USER_TYPE_PROJECTMANAGER) {
+        changeCurrentMarket(marketId.value);
+      }
       router.push({
-        name: userType.value === USER_TYPE_ORGANIZATIONMANAGER ? URL_BENEFICIARY_ADMIN : URL_TRANSACTION_ADMIN
+        name:
+          userType.value === USER_TYPE_ORGANIZATIONMANAGER || userType.value === USER_TYPE_PROJECTMANAGER
+            ? URL_BENEFICIARY_ADMIN
+            : URL_TRANSACTION_ADMIN
       });
       break;
   }
