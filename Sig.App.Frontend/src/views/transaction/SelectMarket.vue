@@ -22,7 +22,7 @@
   </i18n>
 
 <template>
-  <div v-if="markets != null && markets.length > 0">
+  <div>
     <p class="text-p1">
       {{ userType === USER_TYPE_ORGANIZATIONMANAGER ? t("transaction-in-organization-name") : t("transaction-in-project-name") }}
     </p>
@@ -30,6 +30,7 @@
       v-slot="{ errors: formErrors }"
       :validation-schema="validationSchema"
       :initial-values="initialValues"
+      :initial-touched="initialTouched"
       keep-values
       @submit="nextStep">
       <PfForm
@@ -80,9 +81,13 @@ const props = defineProps({
   }
 });
 
-const initialValues = {
-  marketId: props.marketId
-};
+const initialValues = computed(() => {
+  return { marketId: props.marketId };
+});
+
+const initialTouched = computed(() => {
+  return { marketId: props.marketId !== "" };
+});
 
 const validationSchema = computed(() =>
   object({
