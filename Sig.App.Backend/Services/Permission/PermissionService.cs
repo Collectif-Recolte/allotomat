@@ -16,7 +16,6 @@ using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Requests.Commands.Mutations.CashRegisters;
 using Sig.App.Backend.Services.Permission.Enums;
 
 namespace Sig.App.Backend.Services.Permission
@@ -48,7 +47,8 @@ namespace Sig.App.Backend.Services.Permission
             GlobalPermission.ManageProductGroup,
             GlobalPermission.CreateTransaction,
             GlobalPermission.RefundTransaction,
-            GlobalPermission.ManageMarketGroups
+            GlobalPermission.ManageMarketGroups,
+            GlobalPermission.ManageMarkets
         };
 
         private static GlobalPermission[] ProjectManagerSubscriptionsOffPlatformGlobalPermissions = new[]
@@ -63,7 +63,8 @@ namespace Sig.App.Backend.Services.Permission
             GlobalPermission.ManageBudgetAllowance,
             GlobalPermission.ManageProductGroup,
             GlobalPermission.CreateTransaction,
-            GlobalPermission.RefundTransaction
+            GlobalPermission.RefundTransaction,
+            GlobalPermission.ManageMarkets
         };
 
         private static GlobalPermission[] OrganizationManagerGlobalPermissions = new[]
@@ -87,7 +88,9 @@ namespace Sig.App.Backend.Services.Permission
             GlobalPermission.ManageBeneficiaries,
             GlobalPermission.ManageTransactions,
             GlobalPermission.RefundTransaction,
-            GlobalPermission.ManageSpecificMarketGroup
+            GlobalPermission.ManageSpecificMarketGroup,
+            GlobalPermission.ManageMarketGroupManagers,
+            GlobalPermission.ManageMarkets
         };
 
         private static readonly ProjectPermission[] AdminProjectPermission = new[]
@@ -96,15 +99,6 @@ namespace Sig.App.Backend.Services.Permission
             ProjectPermission.ManageProject,
             ProjectPermission.DeleteProject,
             ProjectPermission.ManageAllProjects
-        };
-
-        private static readonly MarketPermission[] AdminMarketPermissions = new[]
-        {
-            MarketPermission.CreateMarket,
-            MarketPermission.ManageMarket,
-            MarketPermission.DeleteMarket,
-            MarketPermission.ArchiveMarket,
-            MarketPermission.ManageAllMarkets
         };
 
         private static readonly ProjectPermission[] ProjectManagerProjectPermission = new[]
@@ -119,6 +113,15 @@ namespace Sig.App.Backend.Services.Permission
         {
             BeneficiaryTypePermission.EditBeneficiaryType,
             BeneficiaryTypePermission.DeleteBeneficiaryType
+        };
+
+        private static readonly MarketPermission[] AdminMarketPermissions = new[]
+        {
+            MarketPermission.CreateMarket,
+            MarketPermission.ManageMarket,
+            MarketPermission.DeleteMarket,
+            MarketPermission.ArchiveMarket,
+            MarketPermission.ManageAllMarkets
         };
 
         private static readonly MarketPermission[] MarketManagerMarketPermission = new[]
@@ -150,6 +153,12 @@ namespace Sig.App.Backend.Services.Permission
         {
             MarketPermission.CreateTransaction,
             MarketPermission.RefundTransaction
+        };
+
+        private static readonly MarketPermission[] MarketGroupManagerMarketPermission = new[]
+        {
+            MarketPermission.ManageMarket,
+            MarketPermission.ArchiveMarket
         };
 
         private static readonly OrganizationPermission[] ProjectManagerOrganizationPermission = new[]
@@ -209,6 +218,13 @@ namespace Sig.App.Backend.Services.Permission
             MarketGroupPermission.DeleteMarketGroup,
             MarketGroupPermission.ArchiveMarketGroup
         };
+
+        private static readonly MarketGroupPermission[] MarketGroupManagerMarketGroupPermission = new[]
+        {
+            MarketGroupPermission.ManageMarketGroup
+        };
+
+
 
         public Task<GlobalPermission[]> GetGlobalPermissions(ClaimsPrincipal claimsPrincipal)
         {
@@ -340,6 +356,20 @@ namespace Sig.App.Backend.Services.Permission
                 }
             }
 
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.MarketGroupManager.ToString()))
+            {
+                var marketLongId = Id.New<Market>(marketId).LongIdentifierForType<Market>();
+                var marketGroupMarkets = db.MarketGroupMarkets.Where(x => x.MarketId == marketLongId).ToList();
+
+                foreach (var marketGroupMarket in marketGroupMarkets)
+                {
+                    if (claimsPrincipal.HasClaim(AppClaimTypes.MarketGroupManagerOf, marketGroupMarket.MarketGroupId.ToString()))
+                    {
+                        return Task.FromResult(MarketGroupManagerMarketPermission);
+                    }
+                }
+            }
+
             return Task.FromResult(Array.Empty<MarketPermission>());
         }
 
@@ -441,6 +471,11 @@ namespace Sig.App.Backend.Services.Permission
             if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectId))
             {
                 return Task.FromResult(ProjectManagerMarketGroupPermission);
+            }
+
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.MarketGroupManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.MarketGroupManagerOf, marketGroupLongId.ToString()))
+            {
+                return Task.FromResult(MarketGroupManagerMarketGroupPermission);
             }
 
             return Task.FromResult(Array.Empty<MarketGroupPermission>());

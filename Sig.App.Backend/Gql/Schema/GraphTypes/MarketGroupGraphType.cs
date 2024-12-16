@@ -8,10 +8,12 @@ using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Requests.Queries.MarketGroups;
 using Sig.App.Backend.Requests.Queries.Markets;
 using Sig.App.Backend.Utilities;
+using Sig.App.Backend.Utilities.Sorting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Sig.App.Backend.Requests.Queries.Markets.SearchMarkets;
 
 namespace Sig.App.Backend.Gql.Schema.GraphTypes
 {
@@ -65,6 +67,27 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             });
 
             return results;
+        }
+
+        public async Task<Pagination<MarketGraphType>> MarketsSearch([Inject] IMediator mediator, int page, int limit,
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+            [Description("If specified, only that match text is returned.")] string? searchText = "",
+#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+            Sort<MarketSort> sort = null
+            )
+        {
+            var results = await mediator.Send(new SearchMarkets.Query
+            {
+                MarketGroupId = marketGroup.Id,
+                Page = new Page(page, limit),
+                SearchText = searchText,
+                Sort = sort
+            });
+
+            return results.Map(x =>
+            {
+                return new MarketGraphType(x);
+            });
         }
     }
 }
