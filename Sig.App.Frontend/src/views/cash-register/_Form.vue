@@ -95,7 +95,7 @@
             col-span-class="sm:col-span-3" />
         </Field>
       </PfFormSection>
-      <template #footer v-if="!isNew">
+      <template v-if="!isNew" #footer>
         <div class="pt-5">
           <div class="flex gap-x-6 items-center justify-end">
             <PfButtonAction btn-style="link" :label="t('cancel')" @click="closeModal" />
@@ -189,7 +189,7 @@ const projectOptions = computed(() => {
 const marketGroupOptions = computed(() => {
   var marketGroups = props.market?.projects?.find((project) => project.id === selectedProject.value)?.marketGroups ?? [];
   return marketGroups
-    .filter((x) => !props.marketGroups.some((y) => x.id === y.id))
+    .filter((x) => !props.marketGroups.some((y) => x.id === y.id) && x.markets.find((y) => y.id === props.market.id))
     .map((marketGroup) => {
       return {
         value: marketGroup.id,
