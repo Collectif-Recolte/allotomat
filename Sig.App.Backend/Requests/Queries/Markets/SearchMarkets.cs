@@ -33,6 +33,10 @@ namespace Sig.App.Backend.Requests.Queries.Markets
             {
                 query = db.ProjectMarkets.Include(x => x.Market).Where(x => request.ProjectId.Value == x.ProjectId).Select(x => x.Market);
             }
+            else if (request.MarketGroupId.HasValue)
+            {
+                query = db.MarketGroupMarkets.Include(x => x.Market).Where(x => request.MarketGroupId.Value == x.MarketGroupId).Select(x => x.Market);
+            }
             else
             {
                 query = db.Markets;
@@ -62,6 +66,7 @@ namespace Sig.App.Backend.Requests.Queries.Markets
         {
             public Page? Page { get; set; }
             public long? ProjectId { get; set; }
+            public long? MarketGroupId { get; set; }
             public Maybe<string> SearchText { get; set; }
             public Sort<MarketSort> Sort { get; set; }
             public IEnumerable<Id> MarketGroups { get; set; }

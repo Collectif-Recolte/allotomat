@@ -15,6 +15,7 @@
 
 <template>
   <ManageManagersModal
+    v-if="marketGroup"
     ref="manageManagersModal"
     :return-route="{ name: URL_MARKET_GROUPS_OVERVIEW }"
     :managers="managers"
@@ -40,6 +41,35 @@ const route = useRoute();
 const { addSuccess } = useNotificationsStore();
 const manageManagersModal = ref(null);
 
+const marketGroupId = computed(() => {
+  if (route.params.marketGroupId !== undefined) {
+    return route.params.marketGroupId;
+  } else {
+    if (marketGroups.value) {
+      return marketGroups.value[0].id;
+    } else {
+      return "";
+    }
+  }
+});
+
+const marketGroupVariables = computed(() => {
+  return {
+    id: marketGroupId.value
+  };
+});
+
+const { result: resultMarketGroups } = useQuery(
+  gql`
+    query MarketGroups {
+      marketGroups {
+        id
+      }
+    }
+  `
+);
+const marketGroups = useResult(resultMarketGroups);
+
 const { result, refetch } = useQuery(
   gql`
     query MarketGroup($id: ID!) {
@@ -48,6 +78,7 @@ const { result, refetch } = useQuery(
         name
         managers {
           id
+          isConfirmed
           profile {
             id
             firstName
@@ -58,9 +89,10 @@ const { result, refetch } = useQuery(
       }
     }
   `,
-  {
-    id: route.params.marketGroupId
-  }
+  marketGroupVariables,
+  () => ({
+    enabled: marketGroupId.value !== undefined && marketGroupId.value !== ""
+  })
 );
 const marketGroup = useResult(result);
 
@@ -72,6 +104,7 @@ const { mutate: removeManagerFromMarketGroup } = useMutation(
           id
           managers {
             id
+            isConfirmed
             profile {
               id
               firstName

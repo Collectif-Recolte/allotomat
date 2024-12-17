@@ -95,7 +95,7 @@
             col-span-class="sm:col-span-3" />
         </Field>
       </PfFormSection>
-      <template #footer v-if="!isNew">
+      <template v-if="!isNew" #footer>
         <div class="pt-5">
           <div class="flex gap-x-6 items-center justify-end">
             <PfButtonAction btn-style="link" :label="t('cancel')" @click="closeModal" />

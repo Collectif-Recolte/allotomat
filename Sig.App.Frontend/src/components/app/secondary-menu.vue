@@ -5,6 +5,7 @@
     "program-settings": "Program settings",
 		"manage-organization-managers": "User management",
 		"manage-project-managers": "User management",
+    "manage-marketgroup-managers": "User management",
     "manage-project-export-all-participants": "Export all participants",
     "reconciliation-report": "Reconciliation report",
     "cash-register": "Cash registers",
@@ -16,6 +17,7 @@
     "program-settings": "Paramètres du programme",
 		"manage-organization-managers": "Gestion des utilisateurs",
 		"manage-project-managers": "Gestion des utilisateurs",
+    "manage-marketgroup-managers": "Gestion des utilisateurs",
     "manage-project-export-all-participants": "Exporter tous les participants",
     "reconciliation-report": "Rapport de réconciliation",
     "cash-register": "Caisses",
@@ -59,6 +61,10 @@
         :router-link="{ name: $consts.urls.URL_PROJECT_MANAGER_ADMIN }"
         :label="t('manage-project-managers')" />
       <SecondaryMenuItem
+        v-if="manageMarketGroupManagers"
+        :router-link="{ name: $consts.urls.URL_MARKETGROUP_MANAGER_ADMIN }"
+        :label="t('manage-marketgroup-managers')" />
+      <SecondaryMenuItem
         v-if="manageProjectManagers || manageSpecificMarketGroup"
         :router-link="{ name: $consts.urls.URL_RECONCILIATION_REPORT }"
         :label="t('reconciliation-report')" />
@@ -98,7 +104,8 @@ import {
   GLOBAL_MANAGE_PRODUCT_GROUP,
   GLOBAL_MANAGE_BENEFICIARIES,
   GLOBAL_MANAGE_SPECIFIC_MARKET_GROUP,
-  GLOBAL_MANAGE_SPECIFIC_MARKET
+  GLOBAL_MANAGE_SPECIFIC_MARKET,
+  GLOBAL_MANAGE_MARKETGROUP_MANAGERS
 } from "@/lib/consts/permissions";
 import { LANG_EN } from "@/lib/consts/langs";
 import {
@@ -132,6 +139,10 @@ const manageSpecificMarketGroup = computed(() => {
 
 const manageProjectManagers = computed(() => {
   return getGlobalPermissions.value.includes(GLOBAL_MANAGE_PROJECT_MANAGERS);
+});
+
+const manageMarketGroupManagers = computed(() => {
+  return getGlobalPermissions.value.includes(GLOBAL_MANAGE_MARKETGROUP_MANAGERS);
 });
 
 const manageCards = computed(() => {
