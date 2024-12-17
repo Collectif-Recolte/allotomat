@@ -189,7 +189,7 @@ const projectOptions = computed(() => {
 const marketGroupOptions = computed(() => {
   var marketGroups = props.market?.projects?.find((project) => project.id === selectedProject.value)?.marketGroups ?? [];
   return marketGroups
-    .filter((x) => !props.marketGroups.some((y) => x.id === y.id))
+    .filter((x) => !props.marketGroups.some((y) => x.id === y.id) && x.markets.find((y) => y.id === props.market.id))
     .map((marketGroup) => {
       return {
         value: marketGroup.id,

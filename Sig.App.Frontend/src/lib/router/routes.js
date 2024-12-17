@@ -17,7 +17,8 @@ import {
   GLOBAL_MANAGE_PRODUCT_GROUP,
   GLOBAL_REFUND_TRANSACTION,
   GLOBAL_MANAGE_MARKET_GROUPS,
-  GLOBAL_MANAGE_SPECIFIC_MARKET
+  GLOBAL_MANAGE_SPECIFIC_MARKET,
+  GLOBAL_MANAGE_MARKETGROUP_MANAGERS
 } from "@/lib/consts/permissions";
 
 import { useAuthStore } from "@/lib/store/auth";
@@ -364,7 +365,7 @@ export default [
     path: "/markets-overview",
     component: () => import("@/views/market/ViewMarkets.vue"),
     meta: {
-      claim: GLOBAL_MANAGE_CARDS
+      claim: GLOBAL_MANAGE_ALL_MARKETS
     },
     children: [
       {
@@ -372,7 +373,7 @@ export default [
         path: "select",
         component: () => import("@/views/market/SelectMarket.vue"),
         meta: {
-          claim: GLOBAL_MANAGE_CARDS
+          claim: GLOBAL_MANAGE_ALL_MARKETS
         }
       },
       {
@@ -380,7 +381,7 @@ export default [
         path: "add",
         component: () => import("@/views/market/AddMarket.vue"),
         meta: {
-          claim: GLOBAL_MANAGE_CARDS
+          claim: GLOBAL_MANAGE_ALL_MARKETS
         }
       },
       {
@@ -388,7 +389,7 @@ export default [
         path: ":marketId/edit",
         component: () => import("@/views/market/EditMarket.vue"),
         meta: {
-          claim: GLOBAL_MANAGE_CARDS
+          claim: GLOBAL_MANAGE_ALL_MARKETS
         }
       },
       {
@@ -396,7 +397,7 @@ export default [
         path: ":marketId/delete",
         component: () => import("@/views/market/DeleteMarket.vue"),
         meta: {
-          claim: GLOBAL_MANAGE_CARDS
+          claim: GLOBAL_MANAGE_ALL_MARKETS
         }
       },
       {
@@ -404,7 +405,7 @@ export default [
         path: ":marketId/archive",
         component: () => import("@/views/market/ArchiveMarket.vue"),
         meta: {
-          claim: GLOBAL_MANAGE_CARDS
+          claim: GLOBAL_MANAGE_ALL_MARKETS
         }
       },
       {
@@ -412,7 +413,7 @@ export default [
         path: ":marketId/manage-managers",
         component: () => import("@/views/market/EditManagers.vue"),
         meta: {
-          claim: GLOBAL_MANAGE_CARDS
+          claim: GLOBAL_MANAGE_ALL_MARKETS
         }
       }
     ]
@@ -492,6 +493,14 @@ export default [
         ]
       }
     ]
+  },
+  {
+    name: urls.URL_MARKETGROUP_MANAGER_ADMIN,
+    path: "/marketgroup-managers",
+    component: () => import("@/views/market-groups/EditManagers.vue"),
+    meta: {
+      claim: GLOBAL_MANAGE_MARKETGROUP_MANAGERS
+    }
   },
   {
     name: urls.URL_ORGANIZATION_ADMIN,

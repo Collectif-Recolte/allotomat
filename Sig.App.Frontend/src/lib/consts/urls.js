@@ -66,6 +66,8 @@ export const URL_MARKET_GROUP_MANAGE_MERCHANTS = "market-group-manage-merchants-
 export const URL_REMOVE_MERCHANTS_FROM_MARKET_GROUP = "market-group-remove-market-url";
 export const URL_ADD_MERCHANTS_FROM_MARKET_GROUP = "market-group-add-market-url";
 
+export const URL_MARKETGROUP_MANAGER_ADMIN = "marketgroup-manager-list-url";
+
 export const URL_ORGANIZATION_ADMIN = "organization-list-url";
 export const URL_ORGANIZATION_ADD = "organization-add-url";
 export const URL_ORGANIZATION_DELETE = "organization-delete-url";

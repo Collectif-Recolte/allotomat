@@ -23,7 +23,7 @@
 
 <template>
   <RouterView v-slot="{ Component }">
-    <AppShell :title="t('title')" :loading="loading">
+    <AppShell :title="t('title')" :loading="loading || loadingMarketGroups">
       <div v-if="markets">
         <UiTableHeader :title="t('market-count', { count: markets.length })">
           <template #right>
@@ -31,7 +31,7 @@
               <UiFilter
                 v-model="searchInput"
                 has-search
-                has-filters
+                :has-filters="userType === USER_TYPE_PROJECTMANAGER"
                 :has-active-filters="hasActiveFilters"
                 :active-filters-count="activeFiltersCount"
                 :placeholder="t('search-placeholder')"
@@ -46,7 +46,11 @@
                   :options="availableMarketGroups"
                   @input="onMarketGroupsChecked" />
               </UiFilter>
-              <PfButtonLink tag="RouterLink" :to="addMarketRoute" :label="t('add-market')" />
+              <PfButtonLink
+                v-if="userType === USER_TYPE_PROJECTMANAGER"
+                tag="RouterLink"
+                :to="addMarketRoute"
+                :label="t('add-market')" />
             </div>
           </template>
         </UiTableHeader>
@@ -81,7 +85,9 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult } from "@vue/apollo-composable";
 import { onBeforeRouteUpdate } from "vue-router";
+import { storeToRefs } from "pinia";
 
+import { useAuthStore } from "@/lib/store/auth";
 import { usePageTitle } from "@/lib/helpers/page-title";
 import {
   URL_MARKET_OVERVIEW,
@@ -91,9 +97,12 @@ import {
   URL_MARKET_OVERVIEW_MANAGE_MANAGERS
 } from "@/lib/consts/urls";
 
+import { USER_TYPE_PROJECTMANAGER, USER_TYPE_MARKETGROUPMANAGER } from "@/lib/consts/enums";
+
 import MarketTable from "@/components/market/market-table";
 
 const { t } = useI18n();
+const { userType } = storeToRefs(useAuthStore());
 
 usePageTitle(t("title"));
 
@@ -101,6 +110,35 @@ const page = ref(1);
 const searchInput = ref("");
 const searchText = ref("");
 const marketGroups = ref([]);
+
+const {
+  result: resultMarketGroups,
+  loading: loadingMarketGroups,
+  refetch: refetchMarketGroups
+} = useQuery(
+  gql`
+    query MarketGroups($page: Int!, $searchText: String) {
+      marketGroups {
+        id
+        marketsSearch(page: $page, limit: 30, searchText: $searchText) {
+          pageNumber
+          pageSize
+          totalCount
+          totalPages
+          items {
+            id
+            name
+            isArchived
+          }
+        }
+      }
+    }
+  `,
+  marketsVariables,
+  () => ({
+    enabled: userType.value === USER_TYPE_MARKETGROUPMANAGER
+  })
+);
 
 const {
   result: resultProjects,
@@ -119,6 +157,7 @@ const {
           items {
             id
             name
+            isArchived
           }
         }
         marketGroups {
@@ -128,7 +167,10 @@ const {
       }
     }
   `,
-  marketsVariables
+  marketsVariables,
+  () => ({
+    enabled: userType.value === USER_TYPE_PROJECTMANAGER
+  })
 );
 
 function marketsVariables() {
@@ -139,6 +181,7 @@ function marketsVariables() {
   };
 }
 
+const marketGroup = useResult(resultMarketGroups, null, (data) => data.marketGroups[0]);
 const project = useResult(resultProjects, null, (data) => data.projects[0]);
 const availableMarketGroups = useResult(resultProjects, [], (data) =>
   data.projects[0]?.marketGroups.map((x) => ({ label: x.name, value: x.id }))
@@ -146,8 +189,20 @@ const availableMarketGroups = useResult(resultProjects, [], (data) =>
 
 const addMarketRoute = { name: URL_MARKET_OVERVIEW_SELECT };
 
-const markets = computed(() => project.value?.marketsSearch.items);
-const marketsPagination = computed(() => project.value?.marketsSearch);
+const markets = computed(() => {
+  if (userType.value === USER_TYPE_MARKETGROUPMANAGER) {
+    return marketGroup.value?.marketsSearch.items;
+  } else {
+    return project.value?.marketsSearch.items;
+  }
+});
+const marketsPagination = computed(() => {
+  if (userType.value === USER_TYPE_MARKETGROUPMANAGER) {
+    return marketGroup.value?.marketsSearch;
+  } else {
+    return project.value?.marketsSearch;
+  }
+});
 
 function onSearch() {
   page.value = 1;
@@ -180,6 +235,7 @@ const activeFiltersCount = computed(() => {
 onBeforeRouteUpdate((to) => {
   if (to.name === URL_MARKET_OVERVIEW) {
     refetch();
+    refetchMarketGroups();
   }
 });
 </script>

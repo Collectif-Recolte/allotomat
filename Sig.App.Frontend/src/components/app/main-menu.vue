@@ -39,7 +39,7 @@
       :label="t('manage-programs')"
       :icon="RECEIPT_TAX" />
     <MenuItem
-      v-if="manageAllMarkets"
+      v-if="manageAllMarkets && !isMarketGroupManager && !isProjectManager"
       :router-link="{ name: $consts.urls.URL_MARKET_ADMIN }"
       :label="t('manage-markets')"
       :icon="OFFICE_BUILDING" />
@@ -85,7 +85,7 @@
       :icon="HAND_CARD" />
     <!-- TODO: Change global permission -->
     <MenuItem
-      v-if="manageOrganizations"
+      v-if="manageOrganizations || isMarketGroupManager"
       :router-link="{ name: $consts.urls.URL_MARKET_OVERVIEW }"
       :label="t('manage-markets')"
       :icon="OFFICE_BUILDING" />
