@@ -226,7 +226,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 },
                 MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
                 EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(1),
-                StartDate = new DateTime(today.Year, today.Month - 1, 1),
+                StartDate = new DateTime(today.Year, today.Month, 1),
                 FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(2),
                 IsFundsAccumulable = true
             };
