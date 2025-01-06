@@ -730,7 +730,6 @@ async function onSubmit({
   subscriptionName,
   startDate,
   endDate,
-  monthlyPaymentMoment,
   maxNumberOfPayments,
   fundsExpirationDate,
   productGroupSubscriptionTypes
@@ -739,7 +738,7 @@ async function onSubmit({
     subscriptionName,
     startDate,
     endDate,
-    monthlyPaymentMoment,
+    monthlyPaymentMoment: monthlyPaymentMomentValue.value,
     isSubscriptionPaymentBasedCardUsage: subscriptionPaymentBasedCardUsageValue.value,
     maxNumberOfPayments: subscriptionPaymentBasedCardUsageValue.value ? parseInt(maxNumberOfPayments) : null,
     isFundsAccumulable: isFundsAccumulableValue.value,
