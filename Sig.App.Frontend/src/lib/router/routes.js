@@ -181,6 +181,30 @@ export default [
         meta: {
           claim: GLOBAL_MANAGE_ALL_USERS
         }
+      },
+      {
+        name: urls.URL_ADMIN_DELETE_USER,
+        path: "/users/delete/:id",
+        component: () => import("@/views/admin/DeleteUser.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_ALL_USERS
+        }
+      },
+      {
+        name: urls.URL_ADMIN_DISABLE_USER,
+        path: "/users/disable/:id",
+        component: () => import("@/views/admin/DisableUser.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_ALL_USERS
+        }
+      },
+      {
+        name: urls.URL_ADMIN_REACTIVATE_USER,
+        path: "/users/reactivate/:id",
+        component: () => import("@/views/admin/ReactivateUser.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_ALL_USERS
+        }
       }
     ]
   },

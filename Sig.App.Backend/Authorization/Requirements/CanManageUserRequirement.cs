@@ -8,6 +8,7 @@ using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Services.Permission;
 using Sig.App.Backend.Services.Permission.Enums;
 using Sig.App.Backend.Gql.Bases;
+using Microsoft.AspNetCore.Identity;
 
 namespace Sig.App.Backend.Authorization.Requirements
 {

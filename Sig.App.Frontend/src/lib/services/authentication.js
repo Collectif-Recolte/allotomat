@@ -1,5 +1,5 @@
 /* eslint-disable @intlify/vue-i18n/no-missing-keys */
-import { AccountLoginBadCredentials, AccountLoginUnconfirmed } from "@/lib/consts/problems";
+import { AccountLoginBadCredentials, AccountLoginUnconfirmed, AccountLoginDisabled } from "@/lib/consts/problems";
 import { URL_ROOT } from "@/lib/consts/urls";
 import {
   CLAIM_UTYPE_PROJECTMANAGER_OF,
@@ -41,6 +41,9 @@ async function login(username, password) {
         break;
       case AccountLoginUnconfirmed:
         addError(i18n.global.t("authentication-login-unconfirmed"));
+        break;
+      case AccountLoginDisabled:
+        addError(i18n.global.t("authentication-login-disabled"));
         break;
       default:
         addError(i18n.global.t("authentication-login-error"));
@@ -87,6 +90,7 @@ async function logout(error, returnPath) {
 
   localStorage.removeItem("currentOrganization");
   localStorage.removeItem("currentCashRegister");
+  localStorage.removeItem("currentMarket");
 
   var path = "";
 

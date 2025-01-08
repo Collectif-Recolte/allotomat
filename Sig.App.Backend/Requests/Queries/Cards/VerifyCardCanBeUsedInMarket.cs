@@ -32,16 +32,19 @@ namespace Sig.App.Backend.Requests.Queries.Cards
 
             if (card.Status != DbModel.Enums.CardStatus.Assigned && card.Status != DbModel.Enums.CardStatus.GiftCard) throw new CardDeactivatedException();
 
-            var cashRegisterId = request.CashRegisterId.LongIdentifierForType<CashRegister>();
-            var cashRegister = await db.CashRegisters.Include(x => x.MarketGroups).ThenInclude(x => x.MarketGroup).Where(x => x.Id == cashRegisterId).FirstOrDefaultAsync();
+            if (request.CashRegisterId.HasValue)
+            {
+                var cashRegisterId = request.CashRegisterId.Value.LongIdentifierForType<CashRegister>();
+                var cashRegister = await db.CashRegisters.Include(x => x.MarketGroups).ThenInclude(x => x.MarketGroup).Where(x => x.Id == cashRegisterId).FirstOrDefaultAsync();
+
+                if (!cashRegister.MarketGroups.Select(x => x.MarketGroup).Any(x => x.ProjectId == card.ProjectId))
+                {
+                    throw new CardCantBeUsedWithCashRegisterException();
+                }
+            }
 
             var projects = await db.ProjectMarkets.Where(x => x.MarketId == request.MarketId.LongIdentifierForType<Market>()).ToListAsync();
             var projectMarket = projects.Find(x => x.ProjectId == card.ProjectId);
-
-            if (!cashRegister.MarketGroups.Select(x => x.MarketGroup).Any(x => x.ProjectId == card.ProjectId))
-            {
-                throw new CardCantBeUsedWithCashRegisterException();
-            }
 
             if (projectMarket != null)
             {
@@ -53,7 +56,7 @@ namespace Sig.App.Backend.Requests.Queries.Cards
 
         public class Input : HaveMarketIdAndCardId, IRequest<bool>
         {
-            public Id CashRegisterId { get; set; }
+            public Id? CashRegisterId { get; set; }
         }
 
         public class CardNotFoundException : RequestValidationException { }

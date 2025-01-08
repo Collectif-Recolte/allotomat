@@ -31,6 +31,10 @@ namespace Sig.App.Backend.DbModel.Entities
         public UserProfile Profile { get; set; }
 
         public DateTime? LastAccessTimeUtc { get; set; }
+        public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
+        public UserState State { get; set; } = UserState.Active;
+
+        public UserStatus Status { get; set; } = UserStatus.Actived;
     }
 }

@@ -106,25 +106,29 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 throw new CardCantBeUsedInMarketException();
             }
 
-            var cashRegisterId = request.CashRegisterId.LongIdentifierForType<CashRegister>();
-            var cashRegister = await db.CashRegisters.Include(x => x.MarketGroups).ThenInclude(x => x.MarketGroup).FirstOrDefaultAsync(x => x.Id == cashRegisterId, cancellationToken);
-
-            if (cashRegister == null)
+            CashRegister cashRegister = null;
+            if (request.CashRegisterId.HasValue)
             {
-                logger.LogWarning("[Mutation] CreateTransaction - CashRegisterNotFoundException");
-                throw new CashRegisterNotFoundException();
-            }
+                var cashRegisterId = request.CashRegisterId.Value.LongIdentifierForType<CashRegister>();
+                cashRegister = await db.CashRegisters.Include(x => x.MarketGroups).ThenInclude(x => x.MarketGroup).FirstOrDefaultAsync(x => x.Id == cashRegisterId, cancellationToken);
 
-            if (cashRegister.MarketId != marketId)
-            {
-                logger.LogWarning("[Mutation] CreateTransaction - CashRegisterNotInMarketException");
-                throw new CashRegisterNotInMarketException();
-            }
+                if (cashRegister == null)
+                {
+                    logger.LogWarning("[Mutation] CreateTransaction - CashRegisterNotFoundException");
+                    throw new CashRegisterNotFoundException();
+                }
 
-            if (!cashRegister.MarketGroups.Any(x => x.MarketGroup.ProjectId == card.ProjectId))
-            {
-                logger.LogWarning("[Mutation] CreateTransaction - CashRegisterCantBeUsedInProject");
-                throw new CashRegisterCantBeUsedInProject();
+                if (cashRegister.MarketId != marketId)
+                {
+                    logger.LogWarning("[Mutation] CreateTransaction - CashRegisterNotInMarketException");
+                    throw new CashRegisterNotInMarketException();
+                }
+
+                if (!cashRegister.MarketGroups.Any(x => x.MarketGroup.ProjectId == card.ProjectId))
+                {
+                    logger.LogWarning("[Mutation] CreateTransaction - CashRegisterCantBeUsedInProject");
+                    throw new CashRegisterCantBeUsedInProject();
+                }
             }
 
             today = clock
@@ -158,7 +162,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 CreatedAtUtc = today,
                 InitiatedByProject = currentUser?.Type == UserType.ProjectManager,
                 InitiatedByOrganization = currentUser?.Type == UserType.OrganizationManager,
-                CashRegister = cashRegister
+                CashRegister = cashRegister != null ? cashRegister : null
             };
 
             foreach (var transactionInput in request.Transactions)
@@ -398,8 +402,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     TransactionLogProductGroups = new List<TransactionLogProductGroup>(),
                     InitiatedByProject = currentUser?.Type == UserType.ProjectManager,
                     InitiatedByOrganization = currentUser?.Type == UserType.OrganizationManager,
-                    CashRegisterId = paymentTransaction.CashRegister.Id,
-                    CashRegisterName = paymentTransaction.CashRegister.Name
+                    CashRegisterId = paymentTransaction.CashRegister != null ? paymentTransaction.CashRegister.Id : null,
+                    CashRegisterName = paymentTransaction.CashRegister != null ? paymentTransaction.CashRegister.Name : ""
                 };
                 transactionLogs.Add(transactionLog);
             }
@@ -428,7 +432,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             public Id? CardId { get; set; }
             public string CardNumber { get; set; }
             public List<TransactionInput> Transactions { get; set; }
-            public Id CashRegisterId { get; set; }
+            public Id? CashRegisterId { get; set; }
         }
 
         [InputType]

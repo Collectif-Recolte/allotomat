@@ -8,8 +8,10 @@
       "choose-market": "Select",
       "next-step": "Next",
       "cancel": "Cancel",
+      "qr-code-invalid": "QR code does not equate to a known card.",
       "card-number-invalid": "Card number does not match any card linked to the program.",
-      "transaction-in-program-name": "Purchase on behalf of program"
+      "transaction-in-program-name": "Purchase on behalf of program",
+      "scan-card-btn": "Scan a card",
     },
     "fr": {
       "select-market": "Marchand",
@@ -19,8 +21,10 @@
       "choose-market": "Sélectionner",
       "next-step": "Suivant",
       "cancel": "Annuler",
+      "qr-code-invalid": "Le code QR n'équivaut pas à une carte connue.",
       "card-number-invalid": "Le numéro de carte ne correspond à aucune carte reliée au programme.",
-      "transaction-in-program-name": "Achat au nom du programme"
+      "transaction-in-program-name": "Achat au nom du programme",
+      "scan-card-btn": "Scanner une carte",
     }
   }
   </i18n>
@@ -29,7 +33,7 @@
   <p class="text-p1">
     {{ t("transaction-in-program-name") }}
   </p>
-  <Form v-slot="{ errors: formErrors }" :validation-schema="validationSchema" keep-values @submit="nextStep">
+  <Form v-slot="{ errors: formErrors, setFieldValue }" :validation-schema="validationSchema" keep-values @submit="nextStep">
     <PfForm
       has-footer
       :disable-submit="Object.keys(formErrors).length > 0"
@@ -51,21 +55,33 @@
         <div>
           <Field v-slot="{ field: inputField, errors: fieldErrors }" name="cardNumber">
             <PfFormInputText
+              v-if="enterCardNumber"
               id="cardNumber"
               v-bind="inputField"
               :description="t('card-number-description')"
               :label="t('card-number')"
               :errors="fieldErrors" />
+            <QRCodeScanner
+              v-else
+              @cancel="enterCardNumber = true"
+              @triggerError="checkQRCode('', setFieldValue)"
+              @checkQRCode="(cardId) => checkQRCode(cardId, setFieldValue)" />
           </Field>
         </div>
       </PfFormSection>
+      <PfButtonAction
+        v-if="enterCardNumber"
+        class="w-full"
+        btn-style="secondary"
+        :label="t('scan-card-btn')"
+        @click="enterCardNumber = !enterCardNumber" />
     </PfForm>
   </Form>
 </template>
 
 <script setup>
 import gql from "graphql-tag";
-import { computed, defineEmits } from "vue";
+import { computed, defineEmits, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { string, object } from "yup";
 import { useQuery, useResult, useApolloClient } from "@vue/apollo-composable";
@@ -73,6 +89,10 @@ import { useQuery, useResult, useApolloClient } from "@vue/apollo-composable";
 import { TRANSACTION_STEPS_ADD } from "@/lib/consts/enums";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
+
+import QRCodeScanner from "@/components/transaction/qr-code-scanner.vue";
+
+const enterCardNumber = ref(true);
 
 const { t } = useI18n();
 const { resolveClient } = useApolloClient();
@@ -131,6 +151,34 @@ const markets = useResult(resultProjects, null, (data) => {
 const project = useResult(resultProjects, null, (data) => {
   return data.projects[0];
 });
+
+async function checkQRCode(cardId, callback) {
+  let card = null;
+  if (cardId !== "") {
+    const result = await client.query({
+      query: gql`
+        query Card($id: ID!) {
+          card(id: $id) {
+            id
+            cardNumber
+          }
+        }
+      `,
+      variables: {
+        id: cardId
+      }
+    });
+    card = result.data.card;
+  }
+
+  if (!card) {
+    addError(t("qr-code-invalid"));
+  } else {
+    callback("cardNumber", card.cardNumber.replaceAll("-", " "));
+  }
+
+  enterCardNumber.value = true;
+}
 
 async function nextStep(values) {
   const result = await client.query({

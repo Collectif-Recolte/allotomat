@@ -46,9 +46,11 @@ import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult } from "@vue/apollo-composable";
 import { usePageTitle } from "@/lib/helpers/page-title";
+import { onBeforeRouteUpdate } from "vue-router";
 
 import UserFilters from "@/components/admin/user-filters";
 import UserTable from "@/components/admin/user-table";
+import { URL_ADMIN_USERS } from "@/lib/consts/urls";
 
 const { t } = useI18n();
 
@@ -59,7 +61,11 @@ const searchInput = ref("");
 const searchText = ref("");
 const selectedUserTypes = ref([]);
 
-const { result, loading } = useQuery(
+const {
+  result,
+  loading,
+  refetch: refetchUsers
+} = useQuery(
   gql`
     query GetUsers($page: Int!, $searchText: String, $userTypes: [UserType!]) {
       users(page: $page, limit: 30, searchText: $searchText, userTypes: $userTypes) {
@@ -70,6 +76,7 @@ const { result, loading } = useQuery(
           confirmationLink
           resetPasswordLink
           lastConnectionTime
+          status
           profile {
             id
             firstName
@@ -118,4 +125,10 @@ function onUserTypesUnchecked(value) {
 }
 
 const users = useResult(result);
+
+onBeforeRouteUpdate((to) => {
+  if (to.name === URL_ADMIN_USERS) {
+    refetchUsers();
+  }
+});
 </script>
