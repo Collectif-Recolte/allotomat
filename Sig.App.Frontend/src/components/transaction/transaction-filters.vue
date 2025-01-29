@@ -54,7 +54,7 @@
 <template>
   <UiFilter
     :model-value="modelValue"
-    has-search
+    :has-search="props.hasSearch"
     has-filters
     items-can-wrap
     :has-active-filters="hasActiveFilters"
@@ -62,7 +62,7 @@
     @resetFilters="onResetFilters"
     @search="onSearch"
     @update:modelValue="(e) => emit('update:modelValue', e)">
-    <template #prependElements>
+    <template v-if="!props.hideDate" #prependElements>
       <div class="text-right mb-2 w-full xs:flex xs:gap-x-4 xs:justify-end sm:mb-0 xl:w-auto">
         <div class="flex items-center justify-end gap-x-4 mb-2 xs:mb-0">
           <span class="text-sm text-primary-700">{{ t("date-selector-from") }}</span>
@@ -132,7 +132,7 @@
       :options="availableCashRegister"
       @input="onCashRegistersChecked" />
     <PfFormInputCheckboxGroup
-      v-if="availableTransactionTypes.length > 0"
+      v-if="availableTransactionTypes.length > 0 && !props.hideTransactionType"
       id="transactionTypes"
       class="mt-3"
       is-filter
@@ -265,6 +265,18 @@ const props = defineProps({
     default: undefined
   },
   administrationSubscriptionsOffPlatform: {
+    type: Boolean,
+    default: false
+  },
+  hideDate: {
+    type: Boolean,
+    default: false
+  },
+  hasSearch: {
+    type: Boolean,
+    default: true
+  },
+  hideTransactionType: {
     type: Boolean,
     default: false
   }

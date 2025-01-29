@@ -54,7 +54,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 MarketGroups = new List<MarketGroup>()
             };
             project.MarketGroups.Add(new MarketGroup() {
-                Name = "Groupe de commerce par défaut",
+                Name = "Groupe de commerce par défaut / Default market group",
                 Project = project
             });
 

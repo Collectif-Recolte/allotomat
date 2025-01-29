@@ -16,6 +16,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public decimal Amount => transaction.Amount;
         public bool InitiatedByProject => transaction.InitiatedByProject;
         public bool InitiatedByOrganization => transaction.InitiatedByOrganization;
+        public long? CashRegisterId => transaction.CashRegisterId;
 
         public PaymentTransactionGraphType(PaymentTransaction transaction)
         {

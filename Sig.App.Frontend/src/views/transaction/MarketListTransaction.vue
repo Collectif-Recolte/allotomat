@@ -52,7 +52,16 @@
             </div>
           </template>
           <template #subpagesCta>
-            <div class="text-right">
+            <div v-if="markets && markets.length > 0" class="text-right">
+              <TransactionFilters
+                :available-cash-register="availableCashRegisters"
+                :selected-cash-registers="cashRegisters"
+                :has-search="false"
+                hide-date
+                hide-transaction-type
+                @cashRegistersUnchecked="onCashRegistersUnchecked"
+                @cashRegistersChecked="onCashRegistersChecked"
+                @resetFilters="onResetFilters" />
               <PfButtonAction class="mt-2" :label="t('export-btn')" :icon="ICON_DOWNLOAD" has-icon-left @click="onExportReport" />
             </div>
           </template>
@@ -86,17 +95,21 @@ import { useI18n } from "vue-i18n";
 import { useQuery, useResult, useApolloClient } from "@vue/apollo-composable";
 import gql from "graphql-tag";
 
+import TransactionFilters from "@/components/transaction/transaction-filters";
 import MarketTransactionTable from "@/components/transaction/market-transaction-table";
 import Title from "@/components/app/title";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { usePageTitle } from "@/lib/helpers/page-title";
+import { useCashRegisterStore } from "@/lib/store/cash-register";
 
 import { LANG_EN } from "@/lib/consts/langs";
 import { LANGUAGE_FILTER_EN, LANGUAGE_FILTER_FR } from "@/lib/consts/enums";
 
 const dateFrom = ref(new Date(Date.now()));
 const dateTo = ref(new Date(Date.now()));
+const { currentCashRegister } = useCashRegisterStore();
+const cashRegisters = ref([currentCashRegister]);
 
 const { t, locale } = useI18n();
 const { resolveClient } = useApolloClient();
@@ -113,11 +126,11 @@ const dateToEndOfDay = computed(
 
 const { result, loading } = useQuery(
   gql`
-    query Markets($startDate: DateTime!, $endDate: DateTime!) {
+    query Markets($startDate: DateTime!, $endDate: DateTime!, $cashRegisters: [ID!]) {
       markets {
         id
         name
-        transactions(startDate: $startDate, endDate: $endDate) {
+        transactions(startDate: $startDate, endDate: $endDate, cashRegisters: $cashRegisters) {
           id
           amount
           card {
@@ -126,15 +139,24 @@ const { result, loading } = useQuery(
           }
           createdAt
         }
+        cashRegisters {
+          id
+          name
+        }
       }
     }
   `,
   () => ({
     startDate: dateFromStartOfDay.value,
-    endDate: dateToEndOfDay.value
+    endDate: dateToEndOfDay.value,
+    cashRegisters: cashRegisters.value
   })
 );
 const markets = useResult(result);
+
+let availableCashRegisters = computed(() => {
+  return markets.value[0].cashRegisters;
+});
 
 function getTotalTransactionAmount(transactions) {
   var amount = 0;
@@ -148,6 +170,18 @@ function getTotalTransactionAmount(transactions) {
   }
 
   return getMoneyFormat(parseFloat(amount));
+}
+
+function onCashRegistersChecked(value) {
+  cashRegisters.value.push(value);
+}
+
+function onCashRegistersUnchecked(value) {
+  cashRegisters.value = cashRegisters.value.filter((x) => x !== value);
+}
+
+function onResetFilters() {
+  cashRegisters.value = [];
 }
 
 async function onExportReport() {
