@@ -110,7 +110,7 @@ import { LANGUAGE_FILTER_EN, LANGUAGE_FILTER_FR } from "@/lib/consts/enums";
 const dateFrom = ref(new Date(Date.now()));
 const dateTo = ref(new Date(Date.now()));
 const { currentCashRegister } = useCashRegisterStore();
-const cashRegisters = ref([currentCashRegister]);
+const cashRegisters = ref(currentCashRegister !== null ? [currentCashRegister] : []);
 
 const { t, locale } = useI18n();
 const { resolveClient } = useApolloClient();
