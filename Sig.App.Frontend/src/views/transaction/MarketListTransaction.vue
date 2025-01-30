@@ -52,17 +52,18 @@
             </div>
           </template>
           <template #subpagesCta>
-            <div v-if="markets && markets.length > 0" class="text-right">
+            <div v-if="markets && markets.length > 0" class="flex flex-wrap justify-end items-center gap-2">
               <TransactionFilters
                 :available-cash-register="availableCashRegisters"
                 :selected-cash-registers="cashRegisters"
                 :has-search="false"
+                :items-can-wrap="false"
                 hide-date
                 hide-transaction-type
                 @cashRegistersUnchecked="onCashRegistersUnchecked"
                 @cashRegistersChecked="onCashRegistersChecked"
                 @resetFilters="onResetFilters" />
-              <PfButtonAction class="mt-2" :label="t('export-btn')" :icon="ICON_DOWNLOAD" has-icon-left @click="onExportReport" />
+              <PfButtonAction :label="t('export-btn')" :icon="ICON_DOWNLOAD" has-icon-left @click="onExportReport" />
             </div>
           </template>
         </Title>

@@ -14,8 +14,8 @@
 </i18n>
 
 <template>
-  <div class="flex items-start sm:items-center sm:space-x-4 justify-end">
-    <PfTooltip v-slot="{ tooltipId }" class="mb-3 sm:mb-0" :label="t('reset-filters')" position="top">
+  <div class="flex justify-end" :class="itemsCanWrap ? 'items-start sm:items-center sm:gap-x-4' : 'items-center gap-x-4'">
+    <PfTooltip v-slot="{ tooltipId }" :class="itemsCanWrap ? 'mb-3 sm:mb-0' : 'mb-0'" :label="t('reset-filters')" position="top">
       <PfButtonAction
         v-if="props.hasActiveFilters"
         class="min-w-0 my-3 sm:my-0"
