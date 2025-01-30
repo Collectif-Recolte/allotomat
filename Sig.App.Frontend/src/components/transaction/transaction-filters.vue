@@ -56,7 +56,7 @@
     :model-value="modelValue"
     :has-search="props.hasSearch"
     has-filters
-    items-can-wrap
+    :items-can-wrap="itemsCanWrap"
     :has-active-filters="hasActiveFilters"
     :active-filters-count="activeFiltersCount"
     @resetFilters="onResetFilters"
@@ -279,6 +279,10 @@ const props = defineProps({
   hideTransactionType: {
     type: Boolean,
     default: false
+  },
+  itemsCanWrap: {
+    type: Boolean,
+    default: true
   }
 });
 
