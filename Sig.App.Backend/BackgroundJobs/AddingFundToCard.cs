@@ -235,7 +235,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 .Where(x => x.Id == subscriptionIdLong).FirstAsync();
 
             var beneficiary = await db.Beneficiaries
-                .Include(x => x.Card).ThenInclude(x => x.Transactions).ThenInclude(x => (x as SubscriptionAddingFundTransaction).SubscriptionType)
+                .Include(x => x.Card).ThenInclude(x => x.Transactions)
                 .Include(x => x.Card).ThenInclude(x => x.Funds)
                 .Include(x => x.Organization).ThenInclude(x => x.Project)
                 .Where(x => x.Id== beneficiaryIdLong)
@@ -254,7 +254,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 var card = beneficiary.Card;
                 if (subscription.IsSubscriptionPaymentBasedCardUsage && initiatedBy == null)
                 {
-                    var subscriptionAddedFundCount = beneficiary.Card.Transactions.OfType<SubscriptionAddingFundTransaction>().Count(x => x.SubscriptionType.SubscriptionId == subscription.Id);
+                    var subscriptionAddedFundCount = beneficiary.Card.Transactions.OfType<SubscriptionAddingFundTransaction>().Count(x => subscriptionTypes.Any(y => y.Id == x.SubscriptionTypeId));
 
                     // The beneficiary already received all the funds
                     if (subscription.MaxNumberOfPayments.Value == subscriptionAddedFundCount * subscriptionTypes.Count()) return;
