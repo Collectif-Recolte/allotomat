@@ -254,26 +254,19 @@ namespace Sig.App.Backend.BackgroundJobs
                 var card = beneficiary.Card;
                 if (subscription.IsSubscriptionPaymentBasedCardUsage && initiatedBy == null)
                 {
-                    try
+                    var subscriptionAddedFundCount = beneficiary.Card.Transactions.OfType<SubscriptionAddingFundTransaction>().Count(x => subscriptionTypes.Any(y => y.Id == x.SubscriptionTypeId));
+
+                    // The beneficiary already received all the funds
+                    if (subscription.MaxNumberOfPayments.Value == subscriptionAddedFundCount * subscriptionTypes.Count()) return;
+
+                    var previousPaymentDateTime = SubscriptionHelper.GetPreviousPaymentDateTime(clock, subscription.MonthlyPaymentMoment);
+                    if (subscriptionAddedFundCount != 0 && !beneficiary.Card.Transactions.Where(x => x is PaymentTransaction).Any(x => x.CreatedAtUtc >= previousPaymentDateTime))
                     {
-                        var subscriptionAddedFundCount = beneficiary.Card.Transactions.OfType<SubscriptionAddingFundTransaction>().Count(x => subscriptionTypes.Any(y => y.Id == x.SubscriptionTypeId));
-
-                        // The beneficiary already received all the funds
-                        if (subscription.MaxNumberOfPayments.Value == subscriptionAddedFundCount * subscriptionTypes.Count()) return;
-
-                        var previousPaymentDateTime = SubscriptionHelper.GetPreviousPaymentDateTime(clock, subscription.MonthlyPaymentMoment);
-                        if (subscriptionAddedFundCount != 0 && !beneficiary.Card.Transactions.Where(x => x is PaymentTransaction).Any(x => x.CreatedAtUtc >= previousPaymentDateTime))
+                        if (subscription.MaxNumberOfPayments - subscriptionAddedFundCount >= subscription.GetPaymentRemaining(clock))
                         {
-                            if (subscription.MaxNumberOfPayments - subscriptionAddedFundCount >= subscription.GetPaymentRemaining(clock))
-                            {
-                                RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
-                            }
-                            return;
+                            RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
                         }
-                    }
-                    catch (Exception exception)
-                    {
-                        var test = 1;
+                        return;
                     }
                 }
 
