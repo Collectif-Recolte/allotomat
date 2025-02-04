@@ -76,7 +76,6 @@
         <Field v-slot="{ field, errors: fieldErrors }" name="selectedProject">
           <PfFormInputSelect
             id="selectedProject"
-            required
             v-bind="field"
             :label="t('selected-project')"
             :options="projectOptions"
@@ -95,18 +94,6 @@
             col-span-class="sm:col-span-3" />
         </Field>
       </PfFormSection>
-      <template v-if="!isNew" #footer>
-        <div class="pt-5">
-          <div class="flex gap-x-6 items-center justify-end">
-            <PfButtonAction btn-style="link" :label="t('cancel')" @click="closeModal" />
-            <PfButtonAction
-              class="px-8"
-              :label="submitBtn"
-              type="submit"
-              :disabled="isAddProject && projectOptions.length === 0" />
-          </div>
-        </div>
-      </template>
     </PfForm>
   </Form>
 </template>
@@ -114,7 +101,7 @@
 <script setup>
 import { ref, defineEmits, defineProps, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { string, object, lazy } from "yup";
+import { string, object, lazy, mixed } from "yup";
 
 const { t } = useI18n();
 const emit = defineEmits(["submit", "closeModal", "nextStep"]);
@@ -165,11 +152,22 @@ const validationSchema = computed(() =>
   object({
     name: string().label(t("cash-register-name")).required(),
     selectedProject: lazy(() => {
-      if (!props.isNew) return string().notRequired();
+      if (!props.isNew)
+        return mixed().test({
+          test: function () {
+            return true;
+          }
+        });
       return string().label(t("selected-project")).required();
     }),
     selectedMarketGroup: lazy(() => {
-      if (!props.isNew) return string().notRequired();
+      console.log(props.isNew);
+      if (!props.isNew)
+        return mixed().test({
+          test: function () {
+            return true;
+          }
+        });
       return string().label(t("selected-market-group")).required();
     })
   })
