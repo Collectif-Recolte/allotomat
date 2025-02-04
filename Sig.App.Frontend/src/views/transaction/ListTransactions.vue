@@ -553,6 +553,28 @@ async function onExportReport() {
   updateUrl();
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+  var dateFromLocal = new Date(dateFrom.value);
+  dateFromLocal.setHours(0, 0, 0, 0);
+
+  var dateToLocal = new Date(dateTo.value);
+  dateToLocal.setHours(23, 59, 59, 999);
+
+  const variables = {
+    projectId: projectId.value,
+    startDate: dateFromLocal,
+    endDate: dateToLocal,
+    timeZoneId: timeZone,
+    organizations: organizations.value,
+    subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
+    markets: markets.value,
+    cashRegisters: cashRegisters.value,
+    withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
+    categories: beneficiaryTypes.value,
+    transactionTypes: transactionTypes.value,
+    searchText: searchText.value,
+    language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR
+  };
+
   let result = await client.query({
     query: gql`
       query GenerateTransactionsReports(
@@ -587,21 +609,7 @@ async function onExportReport() {
         )
       }
     `,
-    variables: {
-      projectId: projectId.value,
-      startDate: dateFrom.value,
-      endDate: dateTo.value,
-      timeZoneId: timeZone,
-      organizations: organizations.value,
-      subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
-      markets: markets.value,
-      cashRegisters: cashRegisters.value,
-      withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
-      categories: beneficiaryTypes.value,
-      transactionTypes: transactionTypes.value,
-      searchText: searchText.value,
-      language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR
-    }
+    variables
   });
 
   window.open(result.data.generateTransactionsReport, "_blank");

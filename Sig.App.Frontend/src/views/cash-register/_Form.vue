@@ -161,7 +161,6 @@ const validationSchema = computed(() =>
       return string().label(t("selected-project")).required();
     }),
     selectedMarketGroup: lazy(() => {
-      console.log(props.isNew);
       if (!props.isNew)
         return mixed().test({
           test: function () {
