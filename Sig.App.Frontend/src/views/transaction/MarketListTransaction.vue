@@ -188,6 +188,20 @@ function onResetFilters() {
 async function onExportReport() {
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+  var dateFromLocal = new Date(dateFrom.value);
+  dateFromLocal.setHours(0, 0, 0, 0);
+
+  var dateToLocal = new Date(dateTo.value);
+  dateToLocal.setHours(23, 59, 59, 999);
+
+  const variables = {
+    marketId: markets.value[0].id,
+    startDate: dateFromLocal,
+    endDate: dateToLocal,
+    timeZoneId: timeZone,
+    language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR
+  };
+
   let result = await client.query({
     query: gql`
       query GenerateTransactionsReportsForMarket(
@@ -206,13 +220,7 @@ async function onExportReport() {
         )
       }
     `,
-    variables: {
-      marketId: markets.value[0].id,
-      startDate: dateFrom.value,
-      endDate: dateTo.value,
-      timeZoneId: timeZone,
-      language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR
-    }
+    variables
   });
 
   window.open(result.data.generateTransactionsReportForMarket, "_blank");

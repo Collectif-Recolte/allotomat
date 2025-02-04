@@ -46,8 +46,8 @@ namespace Sig.App.Backend.Services.Reports
         public async Task<Stream> GenerateTransactionReportForMarket(IReportForMarketInput request)
         {
             var longMarketId = request.MarketId.LongIdentifierForType<Market>();
-            var startDate = new DateTime(request.StartDate.Year, request.StartDate.Month, request.StartDate.Day, 0, 0, 0).ToUniversalTime();
-            var endDate = new DateTime(request.EndDate.Year, request.EndDate.Month, request.EndDate.Day, 23, 59, 59).ToUniversalTime();
+            var startDate = request.StartDate.ToUniversalTime();
+            var endDate = request.EndDate.ToUniversalTime();
 
             IQueryable<TransactionLog> query = db.TransactionLogs.Include(x => x.TransactionLogProductGroups).Where(x =>
                 x.CreatedAtUtc > startDate && x.CreatedAtUtc < endDate && x.MarketId == longMarketId);
