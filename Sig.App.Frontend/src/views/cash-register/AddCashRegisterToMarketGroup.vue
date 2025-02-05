@@ -59,6 +59,9 @@ const { result } = useQuery(
               id
               name
               isArchived
+              markets {
+                id
+              }
             }
           }
         }

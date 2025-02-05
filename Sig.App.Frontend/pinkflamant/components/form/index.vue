@@ -94,7 +94,7 @@ export default {
       const isTouched = useIsFormTouched();
       const isValid = useIsFormValid();
 
-      return (!isDirty.value && !isTouched.value) || !isValid.value;
+      return (!isDirty.value && !isTouched.value && !isValid.value) || !isValid.value;
     }
   }
 };
