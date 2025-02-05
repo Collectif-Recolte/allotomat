@@ -259,10 +259,6 @@ namespace Sig.App.Backend.Gql.Schema
             {
                 return await ctx.DataLoader.LoadMarketGroupOwnedByUser(ctx.CurrentUserId).GetResultAsync();
             }
-            else if (globalPermissions.Contains(GlobalPermission.ManageSpecificMarketGroup))
-            {
-                return await ctx.DataLoader.LoadMarketGroupOwnedByUser(ctx.CurrentUserId).GetResultAsync();
-            }
             else
             {
                 return new MarketGroupGraphType[0];
