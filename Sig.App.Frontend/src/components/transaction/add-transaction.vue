@@ -82,7 +82,7 @@
       </div>
       <h3 class="mb-2 mt-4">{{ t("subscriptions-title") }}</h3>
       <ul class="inline-flex flex-col justify-start items-start gap-y-1 mb-4 max-w-full">
-        <li class="mb-4" v-for="subscription in beneficiary.beneficiarySubscriptions" :key="subscription.subscription.id">
+        <li v-for="subscription in beneficiary.beneficiarySubscriptions" :key="subscription.subscription.id" class="mb-4">
           <b>{{ subscription.subscription.name }}</b>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <div v-html="t('amount-received-each-payment', { amountByPayment: amountByPayment(subscription) })"></div>
@@ -239,9 +239,11 @@ import { formatDate, dateUtc, regularFormat, textualFormat } from "@/lib/helpers
 
 import { useAuthStore } from "@/lib/store/auth";
 import { useNotificationsStore } from "@/lib/store/notifications";
+import { useCashRegisterStore } from "@/lib/store/cash-register";
 
 const { userType } = storeToRefs(useAuthStore());
 const { t } = useI18n();
+const { currentCashRegister } = useCashRegisterStore();
 const { addError } = useNotificationsStore();
 
 const audio = new Audio(require("@/assets/audio/confirmation.mp3"));
@@ -554,7 +556,8 @@ async function onSubmit() {
         .filter((x) => parseFloat(x.amount) > 0)
         .map((x) => ({ amount: parseFloat(x.amount), productGroupId: x.fund.productGroup.id })),
       cardId: props.cardId,
-      marketId: props.marketId
+      marketId: props.marketId,
+      cashRegisterId: currentCashRegister
     }
   });
 

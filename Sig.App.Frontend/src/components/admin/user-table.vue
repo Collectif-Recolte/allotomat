@@ -5,6 +5,7 @@
       "edit-profile": "Edit user profile",
       "last-login-date": "Last login",
       "merchant": "Merchant",
+      "merchant-group-manager": "Market group manager",
       "options": "Options",
       "organization-manager": "Group manager",
       "project-manager": "Program manager",
@@ -19,12 +20,16 @@
       "confirmation-link-copied": "Confirmation link copied to clipboard.",
       "copy-reset-password-email": "Copy reset password link",
       "confirmation-reset-password-link-copied": "Reset password link copied to clipboard.",
+      "delete-user": "Delete user",
+      "reactivate-user": "Reactivate user",
+      "disable-user": "Disable user"
     },
     "fr": {
       "admin-pca": "Administrateur",
       "edit-profile": "Modifier le profil de l'utilisateur",
       "last-login-date": "Dernière connexion",
       "merchant": "Marchand",
+      "merchant-group-manager": "Gestionnaire de groupe de commerce",
       "options": "Actions possibles",
       "organization-manager": "Gestionnaire de groupe",
       "project-manager": "Gestionnaire de programme",
@@ -38,13 +43,16 @@
       "copy-confirmation-email": "Copier le lien de confirmation",
       "confirmation-link-copied": "Lien de confirmation copié dans le presse-papiers.",
       "copy-reset-password-email": "Copier le lien de réinitialisation du mot de passe",
-      "confirmation-reset-password-link-copied": "Lien de réinitialisation du mot de passe copié dans le presse-papiers."
+      "confirmation-reset-password-link-copied": "Lien de réinitialisation du mot de passe copié dans le presse-papiers.",
+      "delete-user": "Supprimer l'utilisateur",
+      "reactivate-user": "Réactiver l'utilisateur",
+      "disable-user": "Désactiver l'utilisateur"
     }
   }
   </i18n>
 
 <template>
-  <UiTable :items="props.users" :cols="cols">
+  <UiTable v-if="me" :items="props.users" :cols="cols">
     <template #default="slotProps">
       <td>
         <p v-if="getUserName(slotProps.item)" class="mb-0">{{ getUserName(slotProps.item) }}</p>
@@ -73,17 +81,30 @@ import gql from "graphql-tag";
 import { defineProps, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useMutation } from "@vue/apollo-composable";
+import { useQuery, useResult } from "@vue/apollo-composable";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 
 import { copyTextToClipboard } from "@/lib/helpers/clipboard";
 
-import { USER_TYPE_PCAADMIN, USER_TYPE_PROJECTMANAGER, USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
-import { URL_ADMIN_USER_PROFILE } from "@/lib/consts/urls";
+import {
+  USER_TYPE_PCAADMIN,
+  USER_TYPE_PROJECTMANAGER,
+  USER_TYPE_ORGANIZATIONMANAGER,
+  USER_TYPE_MARKETGROUPMANAGER
+} from "@/lib/consts/enums";
+import {
+  URL_ADMIN_USER_PROFILE,
+  URL_ADMIN_DELETE_USER,
+  URL_ADMIN_DISABLE_USER,
+  URL_ADMIN_REACTIVATE_USER
+} from "@/lib/consts/urls";
 
 import PENCIL_ICON from "@/lib/icons/pencil.json";
 import MAIL_ICON from "@/lib/icons/mail.json";
 import COPY_ICON from "@/lib/icons/copy.json";
+import ICON_TRASH from "@/lib/icons/trash.json";
+import ICON_FOLDER from "@/lib/icons/folder.json";
 
 const { addSuccess } = useNotificationsStore();
 const { t } = useI18n();
@@ -127,9 +148,39 @@ function getBtnGroup(user) {
       icon: PENCIL_ICON,
       label: t("edit-profile"),
       route: { name: URL_ADMIN_USER_PROFILE, params: { id: user.id } }
+    },
+    {
+      if: user.status === "ACTIVED" && me.value.email !== user.email,
+      icon: ICON_FOLDER,
+      label: t("disable-user"),
+      route: { name: URL_ADMIN_DISABLE_USER, params: { id: user.id } }
+    },
+    {
+      if: user.status === "DISABLED" && me.value.email !== user.email,
+      icon: ICON_FOLDER,
+      label: t("reactivate-user"),
+      route: { name: URL_ADMIN_REACTIVATE_USER, params: { id: user.id } }
+    },
+    {
+      if: user.status === "DISABLED" && me.value.email !== user.email,
+      icon: ICON_TRASH,
+      label: t("delete-user"),
+      route: { name: URL_ADMIN_DELETE_USER, params: { id: user.id } }
     }
   ];
 }
+
+const { result: resultMe } = useQuery(
+  gql`
+    query GetMe {
+      me {
+        id
+        email
+      }
+    }
+  `
+);
+const me = useResult(resultMe);
 
 const { mutate: resendConfirmationEmailMutation } = useMutation(
   gql`
@@ -182,6 +233,8 @@ function getUserRole(item) {
     ? t("project-manager")
     : item?.type === USER_TYPE_ORGANIZATIONMANAGER
     ? t("organization-manager")
+    : item?.type === USER_TYPE_MARKETGROUPMANAGER
+    ? t("merchant-group-manager")
     : t("merchant");
 }
 </script>

@@ -298,6 +298,8 @@ namespace Sig.App.Backend
             ExpireFundsFromCard.RegisterJob(configuration);
             DeactivateOffPlatformBeneficiary.RegisterJob(configuration);
             RefreshCardBalance.RegisterJob(configuration);
+            DeleteUser.RegisterJob(configuration);
+            DeleteBeneficiary.RegisterJob(configuration);
         }
 
         private void ConfigureDbContext(DbContextOptionsBuilder options)

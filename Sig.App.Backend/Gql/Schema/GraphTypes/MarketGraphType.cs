@@ -2,6 +2,7 @@
 using GraphQL.DataLoader;
 using MediatR;
 using NodaTime.Extensions;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Interfaces;
@@ -19,6 +20,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public Id Id => market.GetIdentifier();
         public NonNull<string> Name => market.Name;
+        public bool IsArchived => market.IsArchived;
 
         public MarketGraphType(Market market)
         {
@@ -46,8 +48,8 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return marketManagers.Select(x => new UserGraphType(x));
         }
 
-        [Description("The list of transactions for this market by date.")]
-        public async Task<IEnumerable<ITransactionGraphType>> Transactions(DateTime startDate, DateTime endDate, IAppUserContext ctx)
+        [Description("The list of transactions for this market by date and cash-register.")]
+        public async Task<IEnumerable<ITransactionGraphType>> Transactions(DateTime startDate, DateTime endDate, Id[] cashRegisters, IAppUserContext ctx)
         {
             if (startDate > endDate)
             {
@@ -56,7 +58,13 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
             var transactions = await ctx.DataLoader.LoadMarketTransactions(Id.LongIdentifierForType<Market>()).GetResultAsync();
 
-            return transactions.Where(x => IsTransactionBetweenDate(x, startDate, endDate));
+            return transactions.Where(x => IsTransactionBetweenDate(x, startDate, endDate) && IsTransactionInCashRegister(x, cashRegisters));
+        }
+
+        [Description("The list of cash-register for this market.")]
+        public IDataLoaderResult<IEnumerable<CashRegisterGraphType>> CashRegisters(IAppUserContext ctx)
+        {
+            return ctx.DataLoader.LoadMarketCashRegisters(Id.LongIdentifierForType<Market>());
         }
 
         private bool IsTransactionBetweenDate(ITransactionGraphType x, DateTime startDate, DateTime endDate)
@@ -64,6 +72,30 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             var createdAtInstant = x.CreatedAt().ToInstant();
 
             return startDate.ToInstant() <= createdAtInstant && createdAtInstant < endDate.ToInstant();
+        }
+
+        private bool IsTransactionInCashRegister(ITransactionGraphType x, Id[] cashRegisters)
+        {
+            if (cashRegisters.Length > 0)
+            {
+                var cashRegisterIds = cashRegisters.Select(x => x.LongIdentifierForType<CashRegister>());
+                if (x is RefundTransactionGraphType rtgt)
+                {
+                    if (cashRegisterIds.Where(x => x == rtgt.CashRegisterId).Any())
+                    {
+                        return true;
+                    }
+                }
+                if (x is PaymentTransactionGraphType ptgt)
+                {
+                    if (cashRegisterIds.Where(x => x == ptgt.CashRegisterId).Any())
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return true;
         }
     }
 }

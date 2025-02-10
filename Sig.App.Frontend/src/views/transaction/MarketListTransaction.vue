@@ -52,8 +52,18 @@
             </div>
           </template>
           <template #subpagesCta>
-            <div class="text-right">
-              <PfButtonAction class="mt-2" :label="t('export-btn')" :icon="ICON_DOWNLOAD" has-icon-left @click="onExportReport" />
+            <div v-if="markets && markets.length > 0" class="flex flex-wrap justify-end items-center gap-2">
+              <TransactionFilters
+                :available-cash-register="availableCashRegisters"
+                :selected-cash-registers="cashRegisters"
+                :has-search="false"
+                :items-can-wrap="false"
+                hide-date
+                hide-transaction-type
+                @cashRegistersUnchecked="onCashRegistersUnchecked"
+                @cashRegistersChecked="onCashRegistersChecked"
+                @resetFilters="onResetFilters" />
+              <PfButtonAction :label="t('export-btn')" :icon="ICON_DOWNLOAD" has-icon-left @click="onExportReport" />
             </div>
           </template>
         </Title>
@@ -86,17 +96,21 @@ import { useI18n } from "vue-i18n";
 import { useQuery, useResult, useApolloClient } from "@vue/apollo-composable";
 import gql from "graphql-tag";
 
+import TransactionFilters from "@/components/transaction/transaction-filters";
 import MarketTransactionTable from "@/components/transaction/market-transaction-table";
 import Title from "@/components/app/title";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { usePageTitle } from "@/lib/helpers/page-title";
+import { useCashRegisterStore } from "@/lib/store/cash-register";
 
 import { LANG_EN } from "@/lib/consts/langs";
 import { LANGUAGE_FILTER_EN, LANGUAGE_FILTER_FR } from "@/lib/consts/enums";
 
 const dateFrom = ref(new Date(Date.now()));
 const dateTo = ref(new Date(Date.now()));
+const { currentCashRegister } = useCashRegisterStore();
+const cashRegisters = ref(currentCashRegister !== null ? [currentCashRegister] : []);
 
 const { t, locale } = useI18n();
 const { resolveClient } = useApolloClient();
@@ -113,11 +127,11 @@ const dateToEndOfDay = computed(
 
 const { result, loading } = useQuery(
   gql`
-    query Markets($startDate: DateTime!, $endDate: DateTime!) {
+    query Markets($startDate: DateTime!, $endDate: DateTime!, $cashRegisters: [ID!]) {
       markets {
         id
         name
-        transactions(startDate: $startDate, endDate: $endDate) {
+        transactions(startDate: $startDate, endDate: $endDate, cashRegisters: $cashRegisters) {
           id
           amount
           card {
@@ -126,15 +140,24 @@ const { result, loading } = useQuery(
           }
           createdAt
         }
+        cashRegisters {
+          id
+          name
+        }
       }
     }
   `,
   () => ({
     startDate: dateFromStartOfDay.value,
-    endDate: dateToEndOfDay.value
+    endDate: dateToEndOfDay.value,
+    cashRegisters: cashRegisters.value
   })
 );
 const markets = useResult(result);
+
+let availableCashRegisters = computed(() => {
+  return markets.value[0].cashRegisters;
+});
 
 function getTotalTransactionAmount(transactions) {
   var amount = 0;
@@ -150,8 +173,34 @@ function getTotalTransactionAmount(transactions) {
   return getMoneyFormat(parseFloat(amount));
 }
 
+function onCashRegistersChecked(value) {
+  cashRegisters.value.push(value);
+}
+
+function onCashRegistersUnchecked(value) {
+  cashRegisters.value = cashRegisters.value.filter((x) => x !== value);
+}
+
+function onResetFilters() {
+  cashRegisters.value = [];
+}
+
 async function onExportReport() {
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  var dateFromLocal = new Date(dateFrom.value);
+  dateFromLocal.setHours(0, 0, 0, 0);
+
+  var dateToLocal = new Date(dateTo.value);
+  dateToLocal.setHours(23, 59, 59, 999);
+
+  const variables = {
+    marketId: markets.value[0].id,
+    startDate: dateFromLocal,
+    endDate: dateToLocal,
+    timeZoneId: timeZone,
+    language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR
+  };
 
   let result = await client.query({
     query: gql`
@@ -171,13 +220,7 @@ async function onExportReport() {
         )
       }
     `,
-    variables: {
-      marketId: markets.value[0].id,
-      startDate: dateFrom.value,
-      endDate: dateTo.value,
-      timeZoneId: timeZone,
-      language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR
-    }
+    variables
   });
 
   window.open(result.data.generateTransactionsReportForMarket, "_blank");

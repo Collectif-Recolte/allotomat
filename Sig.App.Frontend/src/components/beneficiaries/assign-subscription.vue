@@ -1,7 +1,7 @@
 <i18n>
 {
   "en": {
-    "payment-dates": "→ Payment dates : <b>{paymentDates}</b>",
+    "payment-dates": "→ Payment dates: <b>Payments on the {paymentMoment} of the month between {startDate} and {endDate}</b>",
     "availables-amounts": "→ Available amounts : <b>{amounts}</b>",
     "payment-moment-first-day-of-the-month": "1st",
     "payment-moment-fifteenth-day-of-the-month": "15",

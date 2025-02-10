@@ -8,7 +8,7 @@
 		"title": "Remove - {marketName}"
 	},
 	"fr": {
-		"delete-market-success-notification": "Le commerce {projectName} a été retiré avec succès.",
+		"delete-market-success-notification": "Le commerce {marketName} a été retiré avec succès.",
 		"delete-text-error": "Le texte doit correspondre au nom du commerce",
 		"delete-text-label": "Taper le nom du commerce pour confirmer",
 		"description": "Avertissement ! Le retrait du commerce <strong>{marketName}</strong> ne peut pas être annulé. Si vous continuez, le commerce sera retiré du programme de façon définitive.",

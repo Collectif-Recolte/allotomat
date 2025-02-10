@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { useIsFormDirty, useIsFormValid } from "vee-validate";
+import { useIsFormDirty, useIsFormValid, useIsFormTouched } from "vee-validate";
 
 export default {
   props: {
@@ -91,9 +91,10 @@ export default {
     },
     isDisabled() {
       const isDirty = useIsFormDirty();
+      const isTouched = useIsFormTouched();
       const isValid = useIsFormValid();
 
-      return !isDirty.value || !isValid.value;
+      return (!isDirty.value && !isTouched.value && !isValid.value) || !isValid.value;
     }
   }
 };

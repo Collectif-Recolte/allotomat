@@ -1,0 +1,26 @@
+﻿@using Sig.App.Backend.Helpers
+
+@model Sig.App.Backend.EmailTemplates.Models.DeactivateUserReminderEmail
+@{ Layout = "_EmailLayout.cshtml"; }
+
+<p>Bonjour @Model.FirstName</p>
+<p>
+    Ceci est un rappel que votre compte est prévu pour être supprimé le @Model.DeletionDate.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("fr-CA")).
+</p>
+<p>
+    Si vous souhaitez éviter la suppression, veuillez vous connecter ou nous contacter avant le @Model.DeletionDate.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("fr-CA")).
+</p>
+<p>
+    <a clicktracking="off" href="@Model.BaseUrl/login">Me connecter</a>.
+</p>
+<br />
+<p>Hello @Model.FirstName</p>
+<p>
+    This is a reminder that your account is scheduled for deletion on @Model.DeletionDate.ToString("MMMM dd, yyyy", new System.Globalization.CultureInfo("en-CA")).
+</p>
+<p>
+    If you would like to prevent the deletion, please log in or contact us by @Model.DeletionDate.ToString("MMMM dd, yyyy", new System.Globalization.CultureInfo("en-CA")).
+</p>
+<p>
+    <a clicktracking="off" href="@Model.BaseUrl/login">Log in</a>.
+</p>

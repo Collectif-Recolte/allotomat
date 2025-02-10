@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.Services.Permission;
 using Sig.App.Backend.Services.Permission.Enums;
+using Sig.App.Backend.DbModel.Enums;
 
 namespace Sig.App.Backend.Controllers
 {
@@ -60,7 +61,17 @@ namespace Sig.App.Backend.Controllers
                     statusCode: 400);
             }
 
+            if (user.Status != UserStatus.Actived)
+            {
+                logger.LogWarning($"Login rejected for {request.Username} (user not actived)");
+                return Problem(
+                    type: "app:account:login:disabled",
+                    title: "Email not actived",
+                    statusCode: 400);
+            }
+
             user.LastAccessTimeUtc = DateTime.UtcNow;
+            user.State = UserState.Active;
             await userManager.UpdateAsync(user);
 
             var principal = await claimsPrincipalFactory.CreateAsync(user);

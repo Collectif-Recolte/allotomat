@@ -96,7 +96,9 @@ async function decryptQRCode(result) {
 
     if (decryptResult === "" || decryptResult === null) {
       emit("triggerError");
-      router.push({ name: props.errorUrlConst, query: { error: CARD_NOT_FOUND } });
+      if (props.errorUrlConst) {
+        router.push({ name: props.errorUrlConst, query: { error: CARD_NOT_FOUND } });
+      }
     } else {
       emit("checkQRCode", decryptResult);
     }

@@ -1,5 +1,6 @@
 ﻿using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Cards;
+using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
@@ -20,6 +21,7 @@ namespace Sig.App.Backend.DbModel.Entities.Projects
         public IList<Card> Cards { get; set; }
         public IList<BeneficiaryType> BeneficiaryTypes { get; set; }
         public IList<ProductGroup> ProductGroups { get; set; }
+        public IList<MarketGroup> MarketGroups { get; set; }
 
         public bool AllowOrganizationsAssignCards { get; set; } = false;
         public bool BeneficiariesAreAnonymous { get; set; } = false;

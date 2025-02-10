@@ -5,6 +5,12 @@
       :class="isActive ? 'secondary-menu-item--is-active' : 'secondary-menu-item--is-inactive'"
       :href="href"
       @click="navigate">
+      <PfIcon
+        v-if="props.icon"
+        class="secondary-menu-item__icon"
+        :class="{ 'secondary-menu-item__icon--is-active': isActive }"
+        :icon="props.icon"
+        aria-hidden="true" />
       {{ props.label }}
     </a>
   </RouterLink>
@@ -21,6 +27,10 @@ const props = defineProps({
   label: {
     type: String,
     required: true
+  },
+  icon: {
+    type: Object,
+    default: null
   }
 });
 </script>
@@ -53,6 +63,15 @@ const props = defineProps({
 
   &--is-active {
     @apply bg-white dark:bg-grey-900 dark:text-primary-300 cursor-default;
+  }
+
+  &__icon {
+    @apply mr-3
+    shrink-0;
+
+    &--is-active {
+      @apply text-yellow-500;
+    }
   }
 }
 </style>

@@ -23,6 +23,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public NonNull<string> Email => user.Email;
         public UserType Type => user.Type;
         public bool IsConfirmed => user.EmailConfirmed;
+        public UserStatus Status => user.Status;
 
         public UserGraphType(AppUser user)
         {
@@ -72,6 +73,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
                 case UserType.Merchant:
                     token = await userManager.GenerateUserTokenAsync(user, TokenProviders.EmailInvites, TokenPurposes.MerchantInvite);
                     return $"{config["Mailer:BaseUrl"]}/{UrlHelper.RegistrationMarketManager(user.Email, token)}";
+                case UserType.MarketGroupManager:
+                    token = await userManager.GenerateUserTokenAsync(user, TokenProviders.EmailInvites, TokenPurposes.MarketGroupManagerInvite);
+                    return $"{config["Mailer:BaseUrl"]}/{UrlHelper.RegistrationMarketGroupManager(user.Email, token)}";
             }
 
             return null;

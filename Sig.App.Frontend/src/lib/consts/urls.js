@@ -11,12 +11,16 @@ export const URL_ACCOUNT_ADMIN_CONFIRM = "confirm-admin-url";
 export const URL_ACCOUNT_PROJECT_MANAGER_CONFIRM = "confirm-project-manager-url";
 export const URL_ACCOUNT_MERCHANT_CONFIRM = "confirm-merchant-url";
 export const URL_ACCOUNT_ORGANIZATION_MANAGER_CONFIRM = "confirm-organization-manager-url";
+export const URL_ACCOUNT_MARKET_GROUP_MANAGER_CONFIRM = "confirm-market-group-manager-url";
 
 export const URL_PROFILE_EDIT = "edit-profile-url";
 
 export const URL_ADMIN_USERS = "admin-users-url";
 export const URL_ADMIN_USER_PROFILE = "admin-user-profile-url";
 export const URL_ADMIN_ADD_USER = "admin-add-user-url";
+export const URL_ADMIN_DELETE_USER = "admin-delete-user-url";
+export const URL_ADMIN_DISABLE_USER = "admin-disable-user-url";
+export const URL_ADMIN_REACTIVATE_USER = "admin-reactivate-user-url";
 
 export const URL_DOC_FORM = "form-example-url";
 export const URL_DOC_CALENDAR = "calendar-url";
@@ -35,6 +39,7 @@ export const URL_PROJECT_MANAGE_MANAGERS = "project-manage-managers-url";
 export const URL_PROJECT_MANAGER_REMOVE = "project-manage-managers-remove-url";
 export const URL_REMOVE_MERCHANTS_FROM_PROJECT = "project-remove-market";
 export const URL_PROJECT_ADMIN_DASHBOARD = "project-admin-dashboard-url";
+export const URL_ADD_MERCHANTS_FROM_PROJECT = "project-add-market";
 
 export const URL_MARKET_ADMIN = "market-list-url";
 export const URL_MARKET_ADD = "market-add-url";
@@ -42,7 +47,26 @@ export const URL_MARKET_DELETE = "market-delete-url";
 export const URL_MARKET_MANAGE_MANAGERS = "market-manage-managers-url";
 export const URL_MARKET_EDIT = "market-edit-url";
 export const URL_MARKET_ARCHIVE = "market-archive-url";
+
 export const URL_MARKET_OVERVIEW = "market-overview-url";
+export const URL_MARKET_OVERVIEW_SELECT = "market-overview-select-url";
+export const URL_MARKET_OVERVIEW_ADD = "market-overview-add-url";
+export const URL_MARKET_OVERVIEW_DELETE = "market-overview-delete-url";
+export const URL_MARKET_OVERVIEW_MANAGE_MANAGERS = "market-overview-manage-managers-url";
+export const URL_MARKET_OVERVIEW_EDIT = "market-overview-edit-url";
+export const URL_MARKET_OVERVIEW_ARCHIVE = "market-overview-archive-url";
+
+export const URL_MARKET_GROUPS_OVERVIEW = "market-groups-overview-url";
+export const URL_MARKET_GROUP_ADD = "market-group-add-url";
+export const URL_MARKET_GROUP_EDIT = "market-group-edit-url";
+export const URL_MARKET_GROUP_DELETE = "market-group-delete-url";
+export const URL_MARKET_GROUP_ARCHIVE = "market-group-archive-url";
+export const URL_MARKET_GROUP_MANAGE_MANAGERS = "market-group-manage-managers-url";
+export const URL_MARKET_GROUP_MANAGE_MERCHANTS = "market-group-manage-merchants-url";
+export const URL_REMOVE_MERCHANTS_FROM_MARKET_GROUP = "market-group-remove-market-url";
+export const URL_ADD_MERCHANTS_FROM_MARKET_GROUP = "market-group-add-market-url";
+
+export const URL_MARKETGROUP_MANAGER_ADMIN = "marketgroup-manager-list-url";
 
 export const URL_ORGANIZATION_ADMIN = "organization-list-url";
 export const URL_ORGANIZATION_ADD = "organization-add-url";
@@ -88,6 +112,12 @@ export const URL_RECONCILIATION_REPORT = "reconciliation-report-url";
 
 export const URL_ORGANIZATION_MANAGER_ADMIN = "organization-manager-list-url";
 export const URL_ORGANIZATION_MANAGER_ADD = "organization-manager-add-url";
+
+export const URL_CASH_REGISTER = "cash-register-url";
+export const URL_CASH_REGISTER_ADD = "cash-register-add-url";
+export const URL_CASH_REGISTER_EDIT = "cash-register-edit-url";
+export const URL_CASH_REGISTER_ARCHIVE = "cash-register-archive-url";
+export const URL_CASH_REGISTER_ADD_MARKET_GROUP = "cash-register-add-market-group-url";
 
 export const URL_CARDS = "cards-list-url";
 export const URL_CARDS_ADD = "cards-add-url";

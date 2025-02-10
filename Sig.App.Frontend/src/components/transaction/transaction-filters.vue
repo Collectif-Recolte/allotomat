@@ -21,7 +21,8 @@
     "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Budget allowances refund from participant having no cards",
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Budget allowance refund from participant removed from subscription",
     "transaction-log-type-refund-payment": "Payment refund",
-    "market": "Markets"
+    "market": "Markets",
+    "cash-register": "Cash Registers"
 	},
 	"fr": {
     "date-selector-from": "Intervalle du",
@@ -44,7 +45,8 @@
     "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Enveloppe remboursée en raison d'un participant sans carte",
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppe remboursée après avoir retiré un participant d'un abonnement",
     "transaction-log-type-refund-payment": "Remboursement d'un paiement",
-    "market": "Commerces"
+    "market": "Commerces",
+    "cash-register": "Caisses"
 	}
 }
 </i18n>
@@ -52,15 +54,15 @@
 <template>
   <UiFilter
     :model-value="modelValue"
-    has-search
+    :has-search="props.hasSearch"
     has-filters
-    items-can-wrap
+    :items-can-wrap="itemsCanWrap"
     :has-active-filters="hasActiveFilters"
     :active-filters-count="activeFiltersCount"
     @resetFilters="onResetFilters"
     @search="onSearch"
     @update:modelValue="(e) => emit('update:modelValue', e)">
-    <template #prependElements>
+    <template v-if="!props.hideDate" #prependElements>
       <div class="text-right mb-2 w-full xs:flex xs:gap-x-4 xs:justify-end sm:mb-0 xl:w-auto">
         <div class="flex items-center justify-end gap-x-4 mb-2 xs:mb-0">
           <span class="text-sm text-primary-700">{{ t("date-selector-from") }}</span>
@@ -121,7 +123,16 @@
       :options="availableMarkets"
       @input="onMarketsChecked" />
     <PfFormInputCheckboxGroup
-      v-if="availableTransactionTypes.length > 0"
+      v-if="availableCashRegister.length > 0"
+      id="cashRegisters"
+      class="mt-3"
+      is-filter
+      :value="selectedCashRegisters"
+      :label="t('cash-register')"
+      :options="availableCashRegister"
+      @input="onCashRegistersChecked" />
+    <PfFormInputCheckboxGroup
+      v-if="availableTransactionTypes.length > 0 && !props.hideTransactionType"
       id="transactionTypes"
       class="mt-3"
       is-filter
@@ -153,7 +164,9 @@ const emit = defineEmits([
   "dateFromUpdated",
   "dateToUpdated",
   "marketsChecked",
-  "marketsUnchecked"
+  "marketsUnchecked",
+  "cashRegistersChecked",
+  "cashRegistersUnchecked"
 ]);
 
 const props = defineProps({
@@ -199,7 +212,19 @@ const props = defineProps({
       return [];
     }
   },
+  availableCashRegister: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
   selectedMarkets: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
+  selectedCashRegisters: {
     type: Array,
     default() {
       return [];
@@ -242,6 +267,22 @@ const props = defineProps({
   administrationSubscriptionsOffPlatform: {
     type: Boolean,
     default: false
+  },
+  hideDate: {
+    type: Boolean,
+    default: false
+  },
+  hasSearch: {
+    type: Boolean,
+    default: true
+  },
+  hideTransactionType: {
+    type: Boolean,
+    default: false
+  },
+  itemsCanWrap: {
+    type: Boolean,
+    default: true
   }
 });
 
@@ -251,6 +292,8 @@ const hasActiveFilters = computed(() => {
     props.selectedBeneficiaryTypes?.length > 0 ||
     props.selectedSubscriptions?.length > 0 ||
     props.selectedTransactionTypes?.length > 0 ||
+    props.selectedCashRegisters?.length > 0 ||
+    props.selectedMarkets?.length > 0 ||
     !!props.searchFilter
   );
 });
@@ -260,7 +303,17 @@ const activeFiltersCount = computed(() => {
   const selectedBeneficiariesCount = props.selectedBeneficiaryTypes?.length ?? 0;
   const selectedSubscritionsCount = props.selectedSubscriptions?.length ?? 0;
   const selectedTransactionTypesCount = props.selectedTransactionTypes?.length ?? 0;
-  return selectedOrganizationsCount + selectedBeneficiariesCount + selectedSubscritionsCount + selectedTransactionTypesCount;
+  const selectedCashRegistersCount = props.selectedCashRegisters?.length ?? 0;
+  const selectedMarketsCount = props.selectedMarkets?.length ?? 0;
+
+  return (
+    selectedOrganizationsCount +
+    selectedBeneficiariesCount +
+    selectedSubscritionsCount +
+    selectedTransactionTypesCount +
+    selectedCashRegistersCount +
+    selectedMarketsCount
+  );
 });
 
 const availableOrganizations = computed(() => {
@@ -292,6 +345,11 @@ const availableSubscriptions = computed(() => {
 const availableMarkets = computed(() => {
   if (!props.availableMarkets || props.availableMarkets?.length <= 0) return [];
   return props.availableMarkets.map((x) => ({ value: x.id, label: x.name }));
+});
+
+const availableCashRegister = computed(() => {
+  if (!props.availableCashRegister || props.availableCashRegister?.length <= 0) return [];
+  return props.availableCashRegister.map((x) => ({ value: x.id, label: x.name }));
 });
 
 const availableTransactionTypes = computed(() => {
@@ -340,6 +398,14 @@ function onMarketsChecked(input) {
     emit("marketsChecked", input.value);
   } else {
     emit("marketsUnchecked", input.value);
+  }
+}
+
+function onCashRegistersChecked(input) {
+  if (input.isChecked) {
+    emit("cashRegistersChecked", input.value);
+  } else {
+    emit("cashRegistersUnchecked", input.value);
   }
 }
 

@@ -18,7 +18,9 @@ using System.Collections.Generic;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
+using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.DbModel.Entities.BackgroundJobs;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 
 namespace Sig.App.Backend.DbModel
 {
@@ -42,6 +44,10 @@ namespace Sig.App.Backend.DbModel
         public DbSet<Project> Projects { get; set; }
 
         public DbSet<Market> Markets { get; set; }
+
+        public DbSet<MarketGroup> MarketGroups { get; set; }
+
+        public DbSet<MarketGroupMarket> MarketGroupMarkets { get; set; }
 
         public DbSet<ProjectMarket> ProjectMarkets { get; set; }
 
@@ -83,6 +89,10 @@ namespace Sig.App.Backend.DbModel
 
         public DbSet<AddingFundToCardRun> AddingFundToCardRuns { get; set; }
 
+        public DbSet<CashRegister> CashRegisters { get; set; }
+
+        public DbSet<CashRegisterMarketGroup> CashRegisterMarketGroups { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -108,6 +118,18 @@ namespace Sig.App.Backend.DbModel
                     .HasForeignKey(x => x.MarketId);
             });
 
+            Configure<MarketGroupMarket>(_ => {
+                _.HasKey(x => new { x.MarketId, x.MarketGroupId });
+
+                _.HasOne(x => x.MarketGroup)
+                    .WithMany(x => x.Markets)
+                    .HasForeignKey(x => x.MarketGroupId);
+
+                _.HasOne(x => x.Market)
+                    .WithMany(x => x.MarketGroups)
+                    .HasForeignKey(x => x.MarketId);
+            });
+
             Configure<OrganizationMarket>(_ => {
                 _.HasKey(x => new { x.MarketId, x.OrganizationId});
 
@@ -118,6 +140,12 @@ namespace Sig.App.Backend.DbModel
                 _.HasOne(x => x.Market)
                     .WithMany(x => x.Organizations)
                     .HasForeignKey(x => x.MarketId);
+            });
+
+            Configure<MarketGroup>(_ => {
+                _.HasOne(x => x.Project)
+                    .WithMany(x => x.MarketGroups)
+                    .HasForeignKey(x => x.ProjectId);
             });
 
             Configure<Organization>(_ =>
@@ -366,6 +394,26 @@ namespace Sig.App.Backend.DbModel
                     .WithMany()
                     .HasForeignKey(x => x.ProductGroupId)
                     .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            Configure<CashRegister>(_ =>
+            {
+                _.HasOne(x => x.Market)
+                    .WithMany(x => x.CashRegisters)
+                    .HasForeignKey(x => x.MarketId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            Configure<CashRegisterMarketGroup>(_ => {
+                _.HasKey(x => new { x.CashRegisterId, x.MarketGroupId });
+
+                _.HasOne(x => x.MarketGroup)
+                    .WithMany(x => x.CashRegisters)
+                    .HasForeignKey(x => x.MarketGroupId);
+
+                _.HasOne(x => x.CashRegister)
+                    .WithMany(x => x.MarketGroups)
+                    .HasForeignKey(x => x.CashRegisterId);
             });
 
             void Configure<TEntity>(Action<EntityTypeBuilder<TEntity>> action) where TEntity : class => action(builder.Entity<TEntity>());

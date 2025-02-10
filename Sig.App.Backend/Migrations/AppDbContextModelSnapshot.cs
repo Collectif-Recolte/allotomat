@@ -217,6 +217,9 @@ namespace Sig.App.Backend.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -252,6 +255,12 @@ namespace Sig.App.Backend.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("State")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -503,6 +512,84 @@ namespace Sig.App.Backend.Migrations
                     b.HasIndex("ProductGroupId");
 
                     b.ToTable("Funds");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.CashRegisters.CashRegister", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("MarketId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MarketId");
+
+                    b.ToTable("CashRegisters");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.CashRegisters.CashRegisterMarketGroup", b =>
+                {
+                    b.Property<long>("CashRegisterId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("MarketGroupId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("CashRegisterId", "MarketGroupId");
+
+                    b.HasIndex("MarketGroupId");
+
+                    b.ToTable("CashRegisterMarketGroups");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroup", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("ProjectId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("MarketGroups");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroupMarket", b =>
+                {
+                    b.Property<long>("MarketId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("MarketGroupId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("MarketId", "MarketGroupId");
+
+                    b.HasIndex("MarketGroupId");
+
+                    b.ToTable("MarketGroupMarkets");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Markets.Market", b =>
@@ -806,6 +893,12 @@ namespace Sig.App.Backend.Migrations
 
                     b.Property<long?>("CardProgramCardId")
                         .HasColumnType("bigint");
+
+                    b.Property<long?>("CashRegisterId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("CashRegisterName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("datetime2");
@@ -1128,6 +1221,9 @@ namespace Sig.App.Backend.Migrations
                 {
                     b.HasBaseType("Sig.App.Backend.DbModel.Entities.Transactions.Transaction");
 
+                    b.Property<long?>("CashRegisterId")
+                        .HasColumnType("bigint");
+
                     b.Property<bool>("InitiatedByOrganization")
                         .HasColumnType("bit");
 
@@ -1137,10 +1233,15 @@ namespace Sig.App.Backend.Migrations
                     b.Property<long>("MarketId")
                         .HasColumnType("bigint");
 
+                    b.HasIndex("CashRegisterId");
+
                     b.HasIndex("MarketId");
 
                     b.ToTable("Transactions", t =>
                         {
+                            t.Property("CashRegisterId")
+                                .HasColumnName("PaymentTransaction_CashRegisterId");
+
                             t.Property("InitiatedByOrganization")
                                 .HasColumnName("PaymentTransaction_InitiatedByOrganization");
 
@@ -1155,6 +1256,9 @@ namespace Sig.App.Backend.Migrations
                 {
                     b.HasBaseType("Sig.App.Backend.DbModel.Entities.Transactions.Transaction");
 
+                    b.Property<long?>("CashRegisterId")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("InitialTransactionId")
                         .HasColumnType("bigint");
 
@@ -1163,6 +1267,8 @@ namespace Sig.App.Backend.Migrations
 
                     b.Property<bool>("InitiatedByProject")
                         .HasColumnType("bit");
+
+                    b.HasIndex("CashRegisterId");
 
                     b.HasIndex("InitialTransactionId");
 
@@ -1389,6 +1495,66 @@ namespace Sig.App.Backend.Migrations
                     b.Navigation("Card");
 
                     b.Navigation("ProductGroup");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.CashRegisters.CashRegister", b =>
+                {
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.Markets.Market", "Market")
+                        .WithMany("CashRegisters")
+                        .HasForeignKey("MarketId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Market");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.CashRegisters.CashRegisterMarketGroup", b =>
+                {
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.CashRegisters.CashRegister", "CashRegister")
+                        .WithMany("MarketGroups")
+                        .HasForeignKey("CashRegisterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroup", "MarketGroup")
+                        .WithMany("CashRegisters")
+                        .HasForeignKey("MarketGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CashRegister");
+
+                    b.Navigation("MarketGroup");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroup", b =>
+                {
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.Projects.Project", "Project")
+                        .WithMany("MarketGroups")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroupMarket", b =>
+                {
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroup", "MarketGroup")
+                        .WithMany("Markets")
+                        .HasForeignKey("MarketGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.Markets.Market", "Market")
+                        .WithMany("MarketGroups")
+                        .HasForeignKey("MarketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Market");
+
+                    b.Navigation("MarketGroup");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Organizations.Organization", b =>
@@ -1666,22 +1832,34 @@ namespace Sig.App.Backend.Migrations
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.PaymentTransaction", b =>
                 {
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.CashRegisters.CashRegister", "CashRegister")
+                        .WithMany()
+                        .HasForeignKey("CashRegisterId");
+
                     b.HasOne("Sig.App.Backend.DbModel.Entities.Markets.Market", "Market")
                         .WithMany()
                         .HasForeignKey("MarketId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("CashRegister");
+
                     b.Navigation("Market");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.RefundTransaction", b =>
                 {
+                    b.HasOne("Sig.App.Backend.DbModel.Entities.CashRegisters.CashRegister", "CashRegister")
+                        .WithMany()
+                        .HasForeignKey("CashRegisterId");
+
                     b.HasOne("Sig.App.Backend.DbModel.Entities.Transactions.PaymentTransaction", "InitialTransaction")
                         .WithMany("RefundTransactions")
                         .HasForeignKey("InitialTransactionId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("CashRegister");
 
                     b.Navigation("InitialTransaction");
                 });
@@ -1737,8 +1915,24 @@ namespace Sig.App.Backend.Migrations
                     b.Navigation("Transactions");
                 });
 
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.CashRegisters.CashRegister", b =>
+                {
+                    b.Navigation("MarketGroups");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.MarketGroups.MarketGroup", b =>
+                {
+                    b.Navigation("CashRegisters");
+
+                    b.Navigation("Markets");
+                });
+
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Markets.Market", b =>
                 {
+                    b.Navigation("CashRegisters");
+
+                    b.Navigation("MarketGroups");
+
                     b.Navigation("Organizations");
 
                     b.Navigation("Projects");
@@ -1765,6 +1959,8 @@ namespace Sig.App.Backend.Migrations
                     b.Navigation("BeneficiaryTypes");
 
                     b.Navigation("Cards");
+
+                    b.Navigation("MarketGroups");
 
                     b.Navigation("Markets");
 

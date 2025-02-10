@@ -20,6 +20,7 @@ using System.Security.Claims;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.DbModel.Entities.Profiles;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
+using Sig.App.Backend.DbModel.Entities.MarketGroups;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
 {
@@ -49,8 +50,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 Url = request.Url,
                 AllowOrganizationsAssignCards = request.AllowOrganizationsAssignCards,
                 BeneficiariesAreAnonymous = request.BeneficiariesAreAnonymous,
-                AdministrationSubscriptionsOffPlatform = request.AdministrationSubscriptionsOffPlatform
+                AdministrationSubscriptionsOffPlatform = request.AdministrationSubscriptionsOffPlatform,
+                MarketGroups = new List<MarketGroup>()
             };
+            project.MarketGroups.Add(new MarketGroup() {
+                Name = "Groupe de commerce par défaut / Default market group",
+                Project = project
+            });
+
             var managers = new List<AppUser>();
 
             db.Projects.Add(project);

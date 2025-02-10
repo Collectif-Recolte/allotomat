@@ -16,6 +16,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public decimal Amount => transaction.Amount;
         public bool InitiatedByProject => transaction.InitiatedByProject;
         public bool InitiatedByOrganization => transaction.InitiatedByOrganization;
+        public long? CashRegisterId => transaction.CashRegisterId;
 
         public PaymentTransactionGraphType(PaymentTransaction transaction)
         {
@@ -31,6 +32,12 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<MarketGraphType> Market(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadMarket(transaction.MarketId);
+        }
+        
+        public IDataLoaderResult<CashRegisterGraphType> CashRegister(IAppUserContext ctx)
+        {
+            if (transaction.CashRegisterId.HasValue) return ctx.DataLoader.LoadCashRegister(transaction.CashRegisterId.Value);
+            return null;
         }
 
         public OffsetDateTime CreatedAt()

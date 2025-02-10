@@ -1,0 +1,26 @@
+﻿@using Sig.App.Backend.Helpers
+
+@model Sig.App.Backend.EmailTemplates.Models.DeactivateUserEmail
+@{ Layout = "_EmailLayout.cshtml"; }
+
+<p>Bonjour @Model.FirstName</p>
+<p>
+    Nous avons remarqué que votre compte est inactif depuis un certain temps. Conformément à notre politique, votre compte est prévu pour être supprimé le @Model.DeletionDate.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("fr-CA")).
+</p>
+<p>
+    Si vous souhaitez garder votre compte actif, veuillez vous connecter ou nous contacter avant cette date.
+</p>
+<p>
+    <a clicktracking="off" href="@Model.BaseUrl/login">Me connecter</a>.
+</p>
+<br />
+<p>Hello @Model.FirstName</p>
+<p>
+    We noticed that your account has been inactive for some time. As per our policy, your account is scheduled for deletion on @Model.DeletionDate.ToString("MMMM dd, yyyy", new System.Globalization.CultureInfo("en-CA")).
+</p>
+<p>
+    If you would like to keep your account active, please log in or contact us before this date.
+</p>
+<p>
+    <a clicktracking="off" href="@Model.BaseUrl/login">Log in</a>.
+</p>

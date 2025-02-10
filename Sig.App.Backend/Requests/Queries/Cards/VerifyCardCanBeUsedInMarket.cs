@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Cards;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
@@ -31,9 +32,21 @@ namespace Sig.App.Backend.Requests.Queries.Cards
 
             if (card.Status != DbModel.Enums.CardStatus.Assigned && card.Status != DbModel.Enums.CardStatus.GiftCard) throw new CardDeactivatedException();
 
-            var projects = await db.ProjectMarkets.Where(x => x.MarketId == request.MarketId.LongIdentifierForType<Market>()).ToListAsync();
+            if (request.CashRegisterId.HasValue)
+            {
+                var cashRegisterId = request.CashRegisterId.Value.LongIdentifierForType<CashRegister>();
+                var cashRegister = await db.CashRegisters.Include(x => x.MarketGroups).ThenInclude(x => x.MarketGroup).Where(x => x.Id == cashRegisterId).FirstOrDefaultAsync();
 
-            if (projects.Find(x => x.ProjectId == card.ProjectId) != null)
+                if (!cashRegister.MarketGroups.Select(x => x.MarketGroup).Any(x => x.ProjectId == card.ProjectId))
+                {
+                    throw new CardCantBeUsedWithCashRegisterException();
+                }
+            }
+
+            var projects = await db.ProjectMarkets.Where(x => x.MarketId == request.MarketId.LongIdentifierForType<Market>()).ToListAsync();
+            var projectMarket = projects.Find(x => x.ProjectId == card.ProjectId);
+
+            if (projectMarket != null)
             {
                 return true;
             }
@@ -41,10 +54,14 @@ namespace Sig.App.Backend.Requests.Queries.Cards
             throw new CardCantBeUsedInMarketException();
         }
 
-        public class Input : HaveMarketIdAndCardId, IRequest<bool> { }
+        public class Input : HaveMarketIdAndCardId, IRequest<bool>
+        {
+            public Id? CashRegisterId { get; set; }
+        }
 
         public class CardNotFoundException : RequestValidationException { }
         public class CardDeactivatedException : RequestValidationException { }
         public class CardCantBeUsedInMarketException : RequestValidationException { }
+        public class CardCantBeUsedWithCashRegisterException : RequestValidationException { }
     }
 }

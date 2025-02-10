@@ -40,6 +40,9 @@ using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Requests.Queries.Beneficiaries;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Utilities.Sorting;
+using Sig.App.Backend.DbModel.Entities.MarketGroups;
+using Sig.App.Backend.Requests.Queries.Markets;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 
 namespace Sig.App.Backend.Gql.Schema
 {
@@ -138,6 +141,8 @@ namespace Sig.App.Backend.Gql.Schema
                         return (TokenProviders.EmailInvites, TokenPurposes.MerchantInvite);
                     case TokenType.OrganizationManagerInvitation:
                         return (TokenProviders.EmailInvites, TokenPurposes.OrganizationManagerInvite);
+                    case TokenType.MarketGroupManagerInvitation:
+                        return (TokenProviders.EmailInvites, TokenPurposes.MarketGroupManagerInvite);
                     default: throw new ArgumentOutOfRangeException(nameof(type));
                 }
             }
@@ -221,9 +226,58 @@ namespace Sig.App.Backend.Gql.Schema
             }
         }
 
+        [RequirePermission(GlobalPermission.ManageMarkets)]
+        [Description("All markets with pagination")]
+        public static async Task<Pagination<MarketGraphType>> AllMarketsSearch(this GqlQuery _, [Inject] IMediator mediator, int page, int limit, string searchText, Id[] marketGroups)
+        {
+            var results = await mediator.Send(new SearchMarkets.Query
+            {
+                Page = new Page(page, limit),
+                SearchText = searchText,
+                MarketGroups = marketGroups
+            });
+
+            return results.Map(x =>
+            {
+                return new MarketGraphType(x);
+            });
+        }
+
+        [RequirePermission(GlobalPermission.ManageMarkets, GlobalPermission.ManageOrganizations)]
+        [Description("All markets in Tomat")]
+        public static async Task<IEnumerable<MarketGraphType>> AllMarkets(this GqlQuery _, [Inject] AppDbContext db)
+        {
+            return await db.Markets.Where(x => !x.IsArchived).Select(x => new MarketGraphType(x)).ToListAsync();
+        }   
+
+        [RequirePermission(GlobalPermission.ManageMarketGroups, GlobalPermission.ManageSpecificMarketGroup)]
+        [Description("All market groups manageable by current user")]
+        public static async Task<IEnumerable<MarketGroupGraphType>> MarketGroups(this GqlQuery _, IAppUserContext ctx, [Inject] AppDbContext db, [Inject] PermissionService permissionService)
+        {
+            var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
+            if (globalPermissions.Contains(GlobalPermission.ManageMarketGroups) || globalPermissions.Contains(GlobalPermission.ManageSpecificMarketGroup))
+            {
+                return await ctx.DataLoader.LoadMarketGroupOwnedByUser(ctx.CurrentUserId).GetResultAsync();
+            }
+            else
+            {
+                return new MarketGroupGraphType[0];
+            }
+        }
+
         public static IDataLoaderResult<MarketGraphType> Market(this GqlQuery _, IAppUserContext ctx, Id id)
         {
             return ctx.DataLoader.LoadMarket(id.LongIdentifierForType<Market>());
+        }
+
+        public static IDataLoaderResult<CashRegisterGraphType> CashRegister(this GqlQuery _, IAppUserContext ctx, Id id)
+        {
+            return ctx.DataLoader.LoadCashRegister(id.LongIdentifierForType<CashRegister>());
+        }
+
+        public static IDataLoaderResult<MarketGroupGraphType> MarketGroup(this GqlQuery _, IAppUserContext ctx, Id id)
+        {
+            return ctx.DataLoader.LoadMarketGroup(id.LongIdentifierForType<MarketGroup>());
         }
 
         [RequirePermission(BeneficiaryPermission.ManageBeneficiary)]
@@ -268,9 +322,9 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         [AnnotateErrorCodes(typeof(VerifyCardCanBeUsedInMarket))]
-        public static async Task<bool> VerifyCardCanBeUsedInMarket(this GqlQuery _, Id cardId, Id marketId, [Inject] IMediator mediator)
+        public static async Task<bool> VerifyCardCanBeUsedInMarket(this GqlQuery _, Id cardId, Id marketId, Id cashRegisterId, [Inject] IMediator mediator)
         {
-            return await mediator.Send(new VerifyCardCanBeUsedInMarket.Input() { CardId = cardId, MarketId = marketId});
+            return await mediator.Send(new VerifyCardCanBeUsedInMarket.Input() { CardId = cardId, MarketId = marketId, CashRegisterId = cashRegisterId });
         }
 
         public static IDataLoaderResult<BeneficiaryTypeGraphType> BeneficiaryType(this GqlQuery _, IAppUserContext ctx, Id id)
@@ -307,7 +361,7 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, Id[] markets, string[] transactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
+        public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, Id[] markets, Id[] cashRegisters, string[] transactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
         {
             return await mediator.Send(new GenerateTransactionsReport.Input()
             {
@@ -317,6 +371,7 @@ namespace Sig.App.Backend.Gql.Schema
                 Organizations = organizations,
                 Subscriptions = subscriptions,
                 Markets = markets,
+                CashRegisters = cashRegisters,
                 WithoutSubscription = withoutSubscription,
                 Categories = categories,
                 TransactionTypes = transactionTypes,
@@ -423,7 +478,7 @@ namespace Sig.App.Backend.Gql.Schema
         [RequirePermission(GlobalPermission.ManageTransactions)]
         [Description("All transactions")]
         public static async Task<TransactionLogsPagination<TransactionLogGraphType>> TransactionLogs(this GqlQuery _, [Inject] IMediator mediator,
-            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, Id[] markets, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string searchText, string timeZoneId)
+            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, Id[] markets, bool? withoutSubscription, Id[] categories, string[] transactionTypes, Id[] cashRegisters, string searchText, string timeZoneId)
         {
             var results = await mediator.Send(new SearchTransactionLogs.Query
             {
@@ -434,6 +489,7 @@ namespace Sig.App.Backend.Gql.Schema
                 Organizations = organizations,
                 Subscriptions = subscriptions,
                 Markets = markets,
+                CashRegisters = cashRegisters,
                 WithoutSubscription = withoutSubscription,
                 Categories = categories,
                 TransactionTypes = transactionTypes,

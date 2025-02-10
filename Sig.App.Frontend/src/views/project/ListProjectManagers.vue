@@ -61,11 +61,15 @@ const { result, loading, refetch } = useQuery(
         managers {
           id
           email
+          isConfirmed
+          confirmationLink
+          resetPasswordLink
           profile {
             id
             firstName
             lastName
           }
+          type
         }
       }
     }

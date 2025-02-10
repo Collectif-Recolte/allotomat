@@ -19,6 +19,9 @@
         ManageOrganizationManagers,
         ManageBudgetAllowance,
         ManageProductGroup,
-        RefundTransaction
+        RefundTransaction,
+        ManageMarketGroups,
+        ManageSpecificMarketGroup,
+        ManageMarketGroupManagers
     }
 }
