@@ -65,21 +65,16 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return subscription.MaxNumberOfPayments.HasValue ? subscription.MaxNumberOfPayments.Value : subscription.GetTotalPayment();
         }
 
-        public async Task<int> MissedPaymentCount(IAppUserContext ctx, [Inject] IClock clock)
-        {
-            var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
-            var subscriptionTotalPayment = subscription.GetTotalPayment();
-            var subscriptionPaymentRemaining = subscription.GetPaymentRemaining(clock);
-
-            return (subscriptionTotalPayment - subscriptionPaymentRemaining) - transactions.Count();
-        }
-
         public async Task<bool> HasMissedPayment(IAppUserContext ctx, [Inject] IClock clock) {
             var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
             var subscriptionTotalPayment = subscription.GetTotalPayment();
-            var subscriptionPaymentRemaining = subscription.GetPaymentRemaining(clock);
 
-            return transactions.Count() < subscriptionTotalPayment - subscriptionPaymentRemaining;
+            if (subscription.MaxNumberOfPayments.HasValue)
+            {
+                return subscription.GetFirstPaymentDateTime(clock) < clock.GetCurrentInstant().ToDateTimeUtc() && transactions.Count() < subscriptionTotalPayment;
+            }
+
+            return transactions.Count() < subscriptionTotalPayment;
         }
     }
 }
