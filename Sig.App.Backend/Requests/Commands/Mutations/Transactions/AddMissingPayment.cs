@@ -110,7 +110,15 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var subscriptionTotalPayment = subscription.GetTotalPayment();
             var subscriptionPaymentRemaining = subscription.GetPaymentRemaining(clock);
 
-            if (transactions.Count() >= subscriptionTotalPayment - subscriptionPaymentRemaining || (subscription.MaxNumberOfPayments.HasValue && transactions.Count() == subscription.MaxNumberOfPayments))
+            if (subscription.MaxNumberOfPayments.HasValue)
+            {
+                if (transactions.Count() == subscription.MaxNumberOfPayments)
+                {
+                    logger.LogWarning("[Mutation] AddMissingPayment - SubscriptionDontHaveMissedPaymentException");
+                    throw new SubscriptionDontHaveMissedPaymentException();
+                }
+            }
+            else if (transactions.Count() >= subscriptionTotalPayment - subscriptionPaymentRemaining)
             {
                 logger.LogWarning("[Mutation] AddMissingPayment - SubscriptionDontHaveMissedPaymentException");
                 throw new SubscriptionDontHaveMissedPaymentException();

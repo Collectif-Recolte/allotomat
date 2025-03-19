@@ -111,7 +111,6 @@ const { result: resultBeneficiary } = useQuery(
             hasMissedPayment
             paymentReceived
             paymentRemaining
-            missedPaymentCount
             maxNumberOfPayments
             subscription {
               id

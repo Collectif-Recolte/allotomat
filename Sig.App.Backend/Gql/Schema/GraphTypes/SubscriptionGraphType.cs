@@ -29,6 +29,10 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public bool HasMissedPayment([Inject] IClock clock)
         {
+            if (subscription.MaxNumberOfPayments.HasValue)
+            {
+                return subscription.GetFirstPaymentDateTime(clock) < clock.GetCurrentInstant().ToDateTimeUtc();
+            }
             return subscription.GetPaymentRemaining(clock) < subscription.GetTotalPayment();
         }
 
