@@ -86,6 +86,47 @@ namespace Sig.App.Backend.Helpers
             return subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(subscription.MaxNumberOfPayments.Value, cardPaymentRemaining) : cardPaymentRemaining;
         }
 
+        public static DateTime GetFirstPaymentDateTime(this Subscription subscription, IClock clock)
+        {
+            var startDate = subscription.StartDate;
+
+            if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth)
+            {
+                if (startDate.Day == 1)
+                {
+                    return startDate;
+                }
+                else
+                {
+                    return new DateTime(startDate.Year, startDate.Month, 1).AddMonths(1);
+                }
+            }
+            else if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth)
+            {
+                if (startDate.Day <= 15) {
+                    return new DateTime(startDate.Year, startDate.Month, 15);
+                }
+                else
+                {
+                    return new DateTime(startDate.Year, startDate.Month, 15).AddMonths(1);
+                }
+            }
+            else
+            {
+                if (startDate.Day == 1)
+                {
+                    return startDate;
+                }
+                else if (startDate.Day <= 15)
+                {
+                    return new DateTime(startDate.Year, startDate.Month, 15);
+                }
+                else {
+                    return new DateTime(startDate.Year, startDate.Month, 1).AddMonths(1);
+                }
+            }
+        }
+
         public static DateTime GetNextPaymentDateTime(IClock clock, SubscriptionMonthlyPaymentMoment moment)
         {
             var today = clock
