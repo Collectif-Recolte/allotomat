@@ -217,7 +217,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
             {
                 if (x.Card != null)
                 {
-                    var transactions = db.Transactions.Where(y => y.BeneficiaryId == x.Id).AsNoTracking().ToList();
+                    var transactions = x.Card.Transactions;
                     return transactions.Where(x => x.GetType() == typeof(PaymentTransaction)).Sum(x => x.Amount).ToString("C", request.Language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA"));
                 }
                 else
