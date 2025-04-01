@@ -50,6 +50,8 @@ using Sig.App.Backend.Services.Beneficiaries;
 using Sig.App.Backend.Services.HtmlToPdf;
 using Sig.App.Backend.Services.Reports;
 using Sig.App.Backend.Services.Cards;
+using Microsoft.AspNetCore.Http.Timeouts;
+using Microsoft.AspNetCore.Http;
 
 namespace Sig.App.Backend
 {
@@ -217,6 +219,18 @@ namespace Sig.App.Backend
                 client.DefaultRequestHeaders.Add("Authorization", configuration["Api2Pdf:ApiKey"]);
             });
             services.AddScoped<IHtmlToPdfConverter, Api2PdfConverter>();
+
+            services.AddRequestTimeouts(options => {
+                options.DefaultPolicy = new RequestTimeoutPolicy
+                {
+                    Timeout = TimeSpan.FromMilliseconds(60000),
+                    TimeoutStatusCode = 408,
+                    WriteTimeoutResponse = async (HttpContext context) => {
+                        context.Response.ContentType = "text/plain";
+                        await context.Response.WriteAsync("Response Output");
+                    }
+                };
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
