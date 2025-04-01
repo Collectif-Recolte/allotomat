@@ -56,7 +56,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
                 .Include(x => x.BeneficiaryType)
                 .Include(x => x.Card).ThenInclude(x => x.Transactions)
                 .Include(x => x.Card).ThenInclude(x => x.Funds).ThenInclude(x => x.ProductGroup)
-                .Include(x => x.Subscriptions).ThenInclude(x => x.Subscription);
+                .Include(x => x.Subscriptions).ThenInclude(x => x.Subscription).AsNoTracking();
 
             if (request.Subscriptions != null)
             {
@@ -155,7 +155,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
             if (request.Id.IsIdentifierForType<Organization>())
             {
                 var organizationId = request.Id.LongIdentifierForType<Organization>();
-                var organization = await db.Organizations.FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
+                var organization = await db.Organizations.AsNoTracking().FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
                 if (organization == null) throw new OrganizationNotFoundException();
                 query = query.Where(x => x.OrganizationId == organizationId);
                 fileName = organization.Name.Replace(" ", "");
@@ -163,7 +163,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
             else if (request.Id.IsIdentifierForType<Project>())
             {
                 var projectId = request.Id.LongIdentifierForType<Project>();
-                var project = await db.Projects.FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
+                var project = await db.Projects.AsNoTracking().FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
                 if (project == null) throw new ProjectNotFoundException();
                 query = query.Where(x => x.Organization.ProjectId == projectId);
                 fileName = project.Name.Replace(" ", "");
@@ -217,7 +217,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
             {
                 if (x.Card != null)
                 {
-                    var transactions = db.Transactions.Where(y => y.BeneficiaryId == x.Id).ToList();
+                    var transactions = db.Transactions.Where(y => y.BeneficiaryId == x.Id).AsNoTracking().ToList();
                     return transactions.Where(x => x.GetType() == typeof(PaymentTransaction)).Sum(x => x.Amount).ToString("C", request.Language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA"));
                 }
                 else
