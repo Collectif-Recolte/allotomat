@@ -261,10 +261,6 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
 
         private string GetActiveSubscriptions(IList<SubscriptionBeneficiary> subscriptions)
         {
-            var today = clock
-                .GetCurrentInstant()
-                .ToDateTimeUtc();
-
             return string.Join(";", subscriptions.Select(x => x.Subscription.Name).ToArray());
         }
 
