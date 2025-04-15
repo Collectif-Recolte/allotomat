@@ -340,6 +340,7 @@ const validationSchema = computed(() =>
 
       return string().label(t("select-subscription-label")).required();
     }),
+    expirationDate: string().label(t("select-expiration-date-label")).required(),
     productGroup: string().label(t("select-product-group-label")).required(),
     amount: lazy((value) => {
       if (value === "") {
