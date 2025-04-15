@@ -176,6 +176,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                 if (initialTransaction.PaymentTransactionAddingFundTransactions.Any())
                 {
+                    var subscriptionAddingFundTransaction = initialTransaction.PaymentTransactionAddingFundTransactions.FirstOrDefault(x => x.AddingFundTransaction.GetType() == typeof(SubscriptionAddingFundTransaction))?.AddingFundTransaction as SubscriptionAddingFundTransaction;
+                    if (subscriptionAddingFundTransaction != null)
+                    {
+                        var subscriptionType = await db.SubscriptionTypes.Include(x => x.Subscription).FirstOrDefaultAsync(x => x.Id == subscriptionAddingFundTransaction.SubscriptionTypeId);
+                        baseTransactionLog.SubscriptionId = subscriptionType.SubscriptionId;
+                        baseTransactionLog.SubscriptionName = subscriptionType.Subscription.Name;
+                    }
+
                     var paymentTransactionAddingFundTransactions = initialTransaction.PaymentTransactionAddingFundTransactions.Where(x => x.AddingFundTransaction.ProductGroupId == productGroupId).ToList();
                     var amountToRefund = refund.Amount;
                     
