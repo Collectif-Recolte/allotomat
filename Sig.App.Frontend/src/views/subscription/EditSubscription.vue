@@ -51,7 +51,7 @@ import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
 import { URL_SUBSCRIPTION_ADMIN } from "@/lib/consts/urls";
 import { NUMBER_OF_DAYS } from "@/lib/consts/funds-expiration-trigger";
 
-import { formatDate, serverFormat } from "@/lib/helpers/date";
+import { formatDate, serverFormat, formattedDate } from "@/lib/helpers/date";
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
@@ -215,20 +215,5 @@ async function onSubmit({
   });
   router.push({ name: URL_SUBSCRIPTION_ADMIN });
   addSuccess(t("edit-subscription-success-notification", { subscriptionName }));
-}
-
-function formattedDate(date) {
-  try {
-    if (date === null || date === undefined) {
-      return null;
-    }
-
-    let formattedDate = date.substring(0, 10).split("-");
-    return new Date(formattedDate[0], formattedDate[1] - 1, formattedDate[2]);
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log("Error while formatting date", e);
-    return null;
-  }
 }
 </script>
