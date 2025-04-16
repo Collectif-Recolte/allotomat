@@ -258,7 +258,11 @@ namespace Sig.App.Backend.Services.Reports
         private string GetAmountText(TransactionLog transactionLog, Language language)
         {
             var amount = transactionLog.TotalAmount.ToString("C", language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA"));
-            if (transactionLog.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog || transactionLog.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog)
+            if (transactionLog.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog ||
+                transactionLog.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog ||
+                transactionLog.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromUnassignedCardTransactionLog ||
+                transactionLog.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog ||
+                transactionLog.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog)
             {
                 return $"-{amount}";
             }

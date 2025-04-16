@@ -107,6 +107,9 @@ const { result: resultBeneficiary } = useQuery(
           beneficiaryType {
             id
           }
+          organization {
+            id
+          }
           beneficiarySubscriptions {
             hasMissedPayment
             paymentReceived
@@ -115,7 +118,6 @@ const { result: resultBeneficiary } = useQuery(
             subscription {
               id
               name
-              budgetAllowancesTotal
               fundsExpirationDate
               isFundsAccumulable
               maxNumberOfPayments
@@ -123,6 +125,13 @@ const { result: resultBeneficiary } = useQuery(
                 id
                 amount
                 beneficiaryType {
+                  id
+                }
+              }
+              budgetAllowances {
+                id
+                availableFund
+                organization {
                   id
                 }
               }
@@ -140,6 +149,7 @@ const { result: resultBeneficiary } = useQuery(
 const beneficiary = useResult(resultBeneficiary, null, (data) => data.beneficiary);
 
 const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
+  var localBeneficiary = data.beneficiary;
   return data.beneficiary.beneficiarySubscriptions
     .filter(
       (x) =>
@@ -162,7 +172,8 @@ const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
         label: label,
         value: x.subscription.id,
         types: x.subscription.types,
-        budgetAllowance: x.subscription.budgetAllowancesTotal,
+        budgetAllowance: x.subscription.budgetAllowances.find((x) => x.organization.id === localBeneficiary.organization.id)
+          .availableFund,
         isBudgetAllowanceAlreadyAllocated: x.maxNumberOfPayments - x.paymentReceived <= x.paymentRemaining
       };
     })
