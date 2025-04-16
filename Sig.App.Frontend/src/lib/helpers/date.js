@@ -41,6 +41,21 @@ function getFormat(tokens, lang) {
   }
 }
 
+function formattedDate(date) {
+  try {
+    if (date === null || date === undefined) {
+      return null;
+    }
+
+    let formattedDate = date.substring(0, 10).split("-");
+    return new Date(formattedDate[0], formattedDate[1] - 1, formattedDate[2]);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log("Error while formatting date", e);
+    return null;
+  }
+}
+
 function formatDate(date, formatId) {
   if (date === null) {
     return "";
@@ -62,6 +77,7 @@ function dateUtc(date) {
 export {
   formatDate,
   dateUtc,
+  formattedDate,
   regularFormat,
   regularWithTimeFormat,
   textualFormat,

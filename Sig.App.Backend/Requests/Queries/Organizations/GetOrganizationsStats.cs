@@ -30,9 +30,10 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
+            var projectId = request.ProjectId.LongIdentifierForType<Project>();
             var project = await db.Projects
                 .Include(x => x.Organizations).ThenInclude(x => x.BudgetAllowances).ThenInclude(x => x.Subscription)
-                .Where(x => x.Id == request.ProjectId.LongIdentifierForType<Project>())
+                .Where(x => x.Id == projectId)
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
             List<ManuallyAddingFundTransaction> manuallyAddingTransactions;
@@ -129,8 +130,8 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
 
         public decimal GetTotalAllocatedOnCardsAmounts(List<ManuallyAddingFundTransaction> manuallyAddingTransactions, List<SubscriptionAddingFundTransaction> subscriptionTransactions)
         {
-            var manuallyAddingAmount = manuallyAddingTransactions.Sum(x => x.Amount);
-            var subscriptionAmount = subscriptionTransactions.Sum(x => x.Amount);
+            var manuallyAddingAmount = manuallyAddingTransactions.Where(x => x.CardId != null).Sum(x => x.Amount);
+            var subscriptionAmount = subscriptionTransactions.Where(x => x.CardId != null).Sum(x => x.Amount);
 
             return manuallyAddingAmount + subscriptionAmount;
         }
