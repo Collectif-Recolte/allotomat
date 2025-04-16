@@ -118,7 +118,6 @@ const { result: resultBeneficiary } = useQuery(
             subscription {
               id
               name
-              budgetAllowancesTotal
               fundsExpirationDate
               isFundsAccumulable
               maxNumberOfPayments
