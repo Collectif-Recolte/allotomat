@@ -176,7 +176,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                 if (initialTransaction.PaymentTransactionAddingFundTransactions.Any())
                 {
-                    var subscriptionAddingFundTransaction = initialTransaction.PaymentTransactionAddingFundTransactions.FirstOrDefault(x => x.AddingFundTransaction.GetType() == typeof(SubscriptionAddingFundTransaction))?.AddingFundTransaction as SubscriptionAddingFundTransaction;
+                    var subscriptionAddingFundTransaction = initialTransaction.PaymentTransactionAddingFundTransactions.Select(x => x.AddingFundTransaction).OfType<SubscriptionAddingFundTransaction>().FirstOrDefault();
                     if (subscriptionAddingFundTransaction != null)
                     {
                         var subscriptionType = await db.SubscriptionTypes.Include(x => x.Subscription).FirstOrDefaultAsync(x => x.Id == subscriptionAddingFundTransaction.SubscriptionTypeId);
