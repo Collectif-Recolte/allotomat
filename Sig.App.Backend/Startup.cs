@@ -219,6 +219,9 @@ namespace Sig.App.Backend
                 client.DefaultRequestHeaders.Add("Authorization", configuration["Api2Pdf:ApiKey"]);
             });
             services.AddScoped<IHtmlToPdfConverter, Api2PdfConverter>();
+
+            services.AddSingleton<EmailBlacklistCache>();
+            services.AddScoped<IEmailBlacklistService, EmailBlacklistService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -354,9 +357,15 @@ namespace Sig.App.Backend
         {
             services.AddScoped<FluentMailer>();
 
-            services.AddScoped<IMailer>(x => new RetryingMailer(
+            services.AddScoped(x => new RetryingMailer(
                 x.GetService<FluentMailer>(),
                 x.GetService<ILogger<RetryingMailer>>())
+            );
+
+            services.AddScoped<IMailer>(x => new BlacklistCheckingMailer(
+                x.GetService<RetryingMailer>(),
+                x.GetService<IEmailBlacklistService>(),
+                x.GetService<ILogger<BlacklistCheckingMailer>>())
             );
         }
     }
