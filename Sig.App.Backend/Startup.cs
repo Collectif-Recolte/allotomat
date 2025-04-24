@@ -357,7 +357,10 @@ namespace Sig.App.Backend
         {
             services.AddScoped<FluentMailer>();
 
-            services.AddScoped<RetryingMailer>();
+            services.AddScoped(x => new RetryingMailer(
+                 x.GetService<FluentMailer>(),
+                 x.GetService<ILogger<RetryingMailer>>())
+             );
 
             services.AddScoped<IMailer>(x => new BlacklistCheckingMailer(
                 x.GetService<RetryingMailer>(),
