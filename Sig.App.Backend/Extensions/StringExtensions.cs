@@ -18,6 +18,13 @@ namespace Sig.App.Backend.Extensions
             return Encoding.Default.GetString(bytes);
         }
 
+        public static string NormalizeEmailAddress(this string emailAddress)
+        {
+            if (string.IsNullOrWhiteSpace(emailAddress)) return null;
+
+            return emailAddress.Trim().ToUpperInvariant();
+        }
+
         public static string Slugify(this string text, int maxLength = 9999)
         {
             if (string.IsNullOrWhiteSpace(text))
