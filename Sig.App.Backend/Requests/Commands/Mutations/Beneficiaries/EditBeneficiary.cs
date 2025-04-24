@@ -69,8 +69,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             request.Id2.IfSet(v => beneficiary.ID2 = v.Trim());
             request.IsUnsubscribeToReceipt.IfSet(v => beneficiary.IsUnsubscribeToReceipt = v);
 
-            if (beneficiary != null)
-
             await request.BeneficiaryTypeId.IfSet(async v => await UpdateBeneficiaryType(beneficiary, v, cancellationToken));
 
             await db.SaveChangesAsync(cancellationToken);
