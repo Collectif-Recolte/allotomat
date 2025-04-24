@@ -20,7 +20,8 @@
     "beneficiary-notes": "Notes",
     "unique-id-other-system": "Other System Unique Identifier",
     "unique-id-id1": "Unique Identifier 1",
-    "unique-id-id2": "Unique Identifier 2"
+    "unique-id-id2": "Unique Identifier 2",
+    "unsubscribe-to-transaction-receipt": "Do not receive transaction receipts"
 	},
 	"fr": {
 		"beneficiary-firstname": "Prénom",
@@ -42,7 +43,8 @@
     "beneficiary-notes": "Notes",
     "unique-id-other-system": "Identifiant unique d'autre système",
     "unique-id-id1": "Identifiant unique 1",
-    "unique-id-id2": "Identifiant unique 2"
+    "unique-id-id2": "Identifiant unique 2",
+    "unsubscribe-to-transaction-receipt": "Ne pas recevoir les reçus des transactions"
 	}
 }
 </i18n>
@@ -108,6 +110,14 @@
             :label="t('communication-means-email')"
             :placeholder="t('communication-means-email-placeholder')"
             :errors="fieldErrors"
+            col-span-class="sm:col-span-4" />
+        </Field>
+        <Field v-slot="{ field }" name="isUnsubscribeToReceipt">
+          <PfFormInputCheckbox
+            id="isUnsubscribeToReceipt"
+            v-bind="field"
+            :checked="field.value"
+            :label="t('unsubscribe-to-transaction-receipt')"
             col-span-class="sm:col-span-4" />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="phone">
@@ -231,6 +241,10 @@ const props = defineProps({
     type: String,
     default: ""
   },
+  isUnsubscribeToReceipt: {
+    type: Boolean,
+    default: false
+  },
   organizationId: {
     type: String,
     required: true
@@ -255,7 +269,8 @@ const initialValues = {
   postalCode: props.postalCode,
   id1: props.id1,
   id2: props.id2,
-  beneficiaryTypeId: props.beneficiaryTypeId
+  beneficiaryTypeId: props.beneficiaryTypeId,
+  isUnsubscribeToReceipt: props.isUnsubscribeToReceipt
 };
 
 const { result } = useQuery(

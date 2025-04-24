@@ -132,6 +132,7 @@ export const URL_CARDS_UNLOCK = "cards-unlock-url";
 
 export const URL_CARD_CHECK = "card-check-url";
 export const URL_CARD_ERROR = "card-error-url";
+export const URL_UNSUBSCRIBE_TRANSACTION_RECEIPT = "unsubscribe-transaction-receipt-url";
 
 export const URL_TRANSACTION = "transaction-url";
 export const URL_TRANSACTION_ERROR = "transaction-error-url";

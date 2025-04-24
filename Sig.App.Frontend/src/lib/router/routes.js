@@ -1026,6 +1026,14 @@ export default [
     ]
   },
   {
+    name: urls.URL_UNSUBSCRIBE_TRANSACTION_RECEIPT,
+    path: "/unsubscribe-transaction-receipt",
+    component: () => import("@/views/beneficiary/UnsubscribeReceipt.vue"),
+    meta: {
+      anonymous
+    }
+  },
+  {
     name: urls.URL_PROJECT_SETTINGS,
     path: "/programs-settings",
     component: () => import("@/views/project-settings/_index.vue"),
