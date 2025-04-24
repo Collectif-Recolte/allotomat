@@ -25,6 +25,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public string PostalCode => beneficiary.PostalCode;
         public SubscriptionMonthlyPaymentMoment? MonthlyPaymentMoment => beneficiary.MonthlyPaymentMoment;
         public bool IsActive => beneficiary.IsActive;
+        public bool IsUnsubscribeToReceipt => beneficiary.IsUnsubscribeToReceipt;
 
         public OffPlatformBeneficiaryGraphType(OffPlatformBeneficiary beneficiary)
         {

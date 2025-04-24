@@ -234,7 +234,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             logger.LogInformation($"[Mutation] RefundTransaction - Transaction refund between {cardName} with ({market.Name}) for an amount of {request.Transactions.Sum(x => x.Amount)} for product group(s) {request.Transactions.Select(x => x.ProductGroupId)}");
 
-            if (beneficiary != null && !string.IsNullOrEmpty(beneficiary.Email))
+            if (beneficiary != null && !string.IsNullOrEmpty(beneficiary.Email) && !beneficiary.IsUnsubscribeToReceipt)
             {
                 try
                 {
@@ -246,7 +246,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                             Name = x.ProductGroup.Name == ProductGroupType.LOYALTY
                                 ? "Carte-cadeau/Gift-card"
                                 : x.ProductGroup.Name
-                        })));
+                        }), beneficiary.GetIdentifier().ToString()));
                 }
                 catch (Exception e)
                 {

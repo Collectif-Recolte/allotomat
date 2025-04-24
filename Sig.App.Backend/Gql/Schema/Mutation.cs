@@ -900,5 +900,14 @@ namespace Sig.App.Backend.Gql.Schema
         {
             return mediator.Send(input.Value);
         }
+
+        public static async Task<bool> UnsubscribeBeneficiaryFromTransactionReceipt(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<UnsubscribeBeneficiaryFromTransactionReceipt.Input> input)
+        {
+            await mediator.Send(input.Value);
+            return true;
+        }
     }
 }

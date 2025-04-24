@@ -5,6 +5,7 @@ namespace Sig.App.Backend.EmailTemplates.Models
 {
     public class TransactionBeneficiaryReceiptEmail : EmailModel
     {
+        public string BeneficiaryId { get; set; }
         public string MarketName { get; set; }
         public string ProjectName { get; set; }
         public string ProjectUrl { get; set; }
@@ -14,7 +15,7 @@ namespace Sig.App.Backend.EmailTemplates.Models
 
         public override string Subject => $"Reçu de transaction chez {MarketName} / Transaction receipt at {MarketName}";
 
-        public TransactionBeneficiaryReceiptEmail(string to, string marketName, string projectName, string projectUrl, decimal amount, decimal totalFund, IEnumerable<ProductGroupAvailableFund> productGroupAvailableFunds) : base(to)
+        public TransactionBeneficiaryReceiptEmail(string to, string marketName, string projectName, string projectUrl, decimal amount, decimal totalFund, IEnumerable<ProductGroupAvailableFund> productGroupAvailableFunds, string beneficiaryId) : base(to)
         {
             MarketName = marketName;
             ProjectName = projectName;
@@ -22,6 +23,7 @@ namespace Sig.App.Backend.EmailTemplates.Models
             Amount = amount;
             TotalFund = totalFund;
             ProductGroupAvailableFunds = productGroupAvailableFunds;
+            BeneficiaryId = beneficiaryId;
         }
     }
 
