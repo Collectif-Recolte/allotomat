@@ -7,6 +7,9 @@ export const USER_TYPE_MARKETGROUPMANAGER = "MARKET_GROUP_MANAGER";
 
 export const WITHOUT_SUBSCRIPTION = "withoutSubscription";
 
+export const WITH_GIFT_CARD = "withGiftCard";
+export const WITHOUT_GIFT_CARD = "withoutGiftCard";
+
 export const CARD_STATUS_ASSIGNED = "ASSIGNED";
 export const CARD_STATUS_UNASSIGNED = "UNASSIGNED";
 export const CARD_STATUS_LOST = "LOST";

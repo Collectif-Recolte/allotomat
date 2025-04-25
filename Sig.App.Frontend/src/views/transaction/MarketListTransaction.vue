@@ -60,6 +60,7 @@
                 :items-can-wrap="false"
                 hide-date
                 hide-transaction-type
+                hide-gift-card-transaction-type
                 @cashRegistersUnchecked="onCashRegistersUnchecked"
                 @cashRegistersChecked="onCashRegistersChecked"
                 @resetFilters="onResetFilters" />
