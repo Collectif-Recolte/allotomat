@@ -110,6 +110,27 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
                 query = query.Where(x => transactionLogDiscriminators.Contains(x.Discriminator));
             }
 
+            if (request.GiftCardTransactionTypes?.Any() ?? false)
+            {
+                var withGiftCard = request.GiftCardTransactionTypes.Where(x => x == "withGiftCard").Any();
+                var withoutGiftCard = request.GiftCardTransactionTypes.Where(x => x == "withoutGiftCard").Any();
+
+                if (withoutGiftCard && withGiftCard)
+                {
+                    // Nothing to do in the case it's with and without
+                }
+                else if (withGiftCard)
+                {
+                    // When the transaction is made without an organizationId, the transaction is for a gift-card
+                    query = query.Where(x => x.OrganizationId == null);
+                }
+                else if (withoutGiftCard)
+                {
+                    // When the transaction is made with an organizationId, the transaction is not for a gift-card
+                    query = query.Where(x => x.OrganizationId != null);
+                }
+            }
+
             if (request.SearchText.IsSet() && !string.IsNullOrEmpty(request.SearchText.Value))
             {
                 var searchText = request.SearchText.Value.Split(' ').AsEnumerable();
@@ -146,6 +167,7 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             public Maybe<bool> WithoutSubscription { get; set; }
             public IEnumerable<Id> Categories { get; set; }
             public IEnumerable<string> TransactionTypes { get; set; }
+            public IEnumerable<string> GiftCardTransactionTypes { get; set; }
             public Maybe<string> SearchText { get; set; }
             public string TimeZoneId { get; set; }
         }

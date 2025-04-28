@@ -22,7 +22,10 @@
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Budget allowance refund from participant removed from subscription",
     "transaction-log-type-refund-payment": "Payment refund",
     "market": "Markets",
-    "cash-register": "Cash Registers"
+    "cash-register": "Cash Registers",
+    "gift-card-transaction-types": "Gift Card Transaction Types",
+    "with-gift-card": "With Gift Card",
+    "without-gift-card": "Without Gift Card"
 	},
 	"fr": {
     "date-selector-from": "Intervalle du",
@@ -46,7 +49,10 @@
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppe remboursée après avoir retiré un participant d'un abonnement",
     "transaction-log-type-refund-payment": "Remboursement d'un paiement",
     "market": "Commerces",
-    "cash-register": "Caisses"
+    "cash-register": "Caisses",
+    "gift-card-transaction-types": "Carte-cadeaux",
+    "with-gift-card": "Avec carte-cadeau",
+    "without-gift-card": "Sans carte-cadeau"
 	}
 }
 </i18n>
@@ -140,6 +146,15 @@
       :label="t('transaction-log-types')"
       :options="availableTransactionTypes"
       @input="onTransactionTypesChecked" />
+    <PfFormInputCheckboxGroup
+      v-if="availableGiftCardTransactionTypes.length > 0 && !props.hideGiftCardTransactionType"
+      id="giftCardTransactionTypes"
+      class="mt-3"
+      is-filter
+      :value="selectedGiftCardTransactionTypes"
+      :label="t('gift-card-transaction-types')"
+      :options="availableGiftCardTransactionTypes"
+      @input="onGiftCardTransactionTypesChecked" />
   </UiFilter>
 </template>
 
@@ -166,7 +181,9 @@ const emit = defineEmits([
   "marketsChecked",
   "marketsUnchecked",
   "cashRegistersChecked",
-  "cashRegistersUnchecked"
+  "cashRegistersUnchecked",
+  "giftCardTransactionTypesChecked",
+  "giftCardTransactionTypesUnchecked"
 ]);
 
 const props = defineProps({
@@ -236,7 +253,17 @@ const props = defineProps({
       return [];
     }
   },
+  selectedGiftCardTransactionTypes: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
   withoutSubscriptionId: {
+    type: String,
+    default: ""
+  },
+  withCashRegisterId: {
     type: String,
     default: ""
   },
@@ -279,6 +306,18 @@ const props = defineProps({
   hideTransactionType: {
     type: Boolean,
     default: false
+  },
+  hideGiftCardTransactionType: {
+    type: Boolean,
+    default: false
+  },
+  withGiftCardId: {
+    type: String,
+    default: ""
+  },
+  withoutGiftCardId: {
+    type: String,
+    default: ""
   },
   itemsCanWrap: {
     type: Boolean,
@@ -377,6 +416,13 @@ const availableTransactionTypes = computed(() => {
   ];
 });
 
+const availableGiftCardTransactionTypes = computed(() => {
+  return [
+    { value: props.withGiftCardId, label: t("with-gift-card") },
+    { value: props.withoutGiftCardId, label: t("without-gift-card") }
+  ];
+});
+
 function onOrganizationsChecked(input) {
   if (input.isChecked) {
     emit("organizationsChecked", input.value);
@@ -422,6 +468,14 @@ function onTransactionTypesChecked(input) {
     emit("transactionTypesChecked", input.value);
   } else {
     emit("transactionTypesUnchecked", input.value);
+  }
+}
+
+function onGiftCardTransactionTypesChecked(input) {
+  if (input.isChecked) {
+    emit("giftCardTransactionTypesChecked", input.value);
+  } else {
+    emit("giftCardTransactionTypesUnchecked", input.value);
   }
 }
 

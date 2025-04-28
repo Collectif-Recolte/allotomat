@@ -23,6 +23,7 @@ using Sig.App.Backend.Services.Permission.Enums;
 using Sig.App.Backend.Gql.Schema.Enums;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
+using Sig.App.Backend.DbModel.Entities.Cards;
 
 namespace Sig.App.Backend.Services.Reports
 {
@@ -144,6 +145,27 @@ namespace Sig.App.Backend.Services.Reports
                 var transactionLogDiscriminators =
                     request.TransactionTypes.Select(x => Enum.Parse(typeof(TransactionLogDiscriminator), x));
                 query = query.Where(x => transactionLogDiscriminators.Contains(x.Discriminator));
+            }
+
+            if (request.GiftCardTransactionTypes?.Any() ?? false)
+            {
+                var withGiftCard = request.GiftCardTransactionTypes.Where(x => x == "withGiftCard").Any();
+                var withoutGiftCard = request.GiftCardTransactionTypes.Where(x => x == "withoutGiftCard").Any();
+
+                if (withoutGiftCard && withGiftCard)
+                {
+                    // Nothing to do in the case it's with and without
+                }
+                else if (withGiftCard)
+                {
+                    // When the transaction is made without an organizationId, the transaction is for a gift-card
+                    query = query.Where(x => x.OrganizationId == null);
+                }
+                else if (withoutGiftCard)
+                {
+                    // When the transaction is made with an organizationId, the transaction is not for a gift-card
+                    query = query.Where(x => x.OrganizationId != null);
+                }
             }
 
             if (request.SearchText.IsSet() && !string.IsNullOrEmpty(request.SearchText.Value))
