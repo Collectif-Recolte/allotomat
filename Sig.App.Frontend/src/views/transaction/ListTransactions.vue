@@ -2,13 +2,13 @@
   {
     "en": {
       "title": "Transaction history",
-      "transaction-count": "No transaction | {count} transaction / Amount due to markets {amount} | {count} transactions / Amount due to markets {amount}",   
+      "transaction-count": "No transaction | {count} transaction | {count} transactions",
       "export-btn": "Export report",
       "create-transaction": "New transaction"
     },
     "fr": {
       "title": "Historique des transactions",
-      "transaction-count": "Aucune transaction | {count} transaction / Montant dû aux marché(s) : {amount} | {count} transactions / Montant dû aux marchés : {amount}",
+      "transaction-count": "Aucune transaction | {count} transaction | {count} transactions",
       "export-btn": "Exporter un rapport",
       "create-transaction": "Nouvelle transaction"
     }
@@ -60,8 +60,11 @@
                 @resetFilters="onResetFilters"
                 @update:modelValue="onSearchTextUpdated"
                 @giftCardTransactionTypesChecked="onGiftCardTransactionTypesChecked"
-                @giftCardTransactionTypesUnchecked="onGiftCardTransactionTypesUnchecked" />
-              <PfButtonAction class="mt-2" :label="t('export-btn')" :icon="ICON_DOWNLOAD" has-icon-left @click="onExportReport" />
+                @giftCardTransactionTypesUnchecked="onGiftCardTransactionTypesUnchecked">
+                <template #prependElements>
+                  <PfButtonAction :label="t('export-btn')" :icon="ICON_DOWNLOAD" has-icon-left @click="onExportReport" />
+                </template>
+              </TransactionFilters>
             </div>
           </template>
         </Title>
@@ -70,8 +73,7 @@
         <UiTableHeader
           :title="
             t('transaction-count', {
-              count: transactionLogs.totalCount,
-              amount: getMoneyFormat(transactionLogs.amountDueToMarkets)
+              count: transactionLogs.totalCount
             })
           " />
         <div class="flex flex-col relative mb-6">
@@ -108,7 +110,7 @@ import { useRouter, useRoute, onBeforeRouteUpdate } from "vue-router";
 import { storeToRefs } from "pinia";
 
 import Title from "@/components/app/title";
-import TransactionFilters from "@/components/transaction/transaction-filters";
+import TransactionFilters from "@/components/transaction/program-transaction-filters";
 import ProgramTransactionTable from "@/components/transaction/program-transaction-table";
 
 import { URL_TRANSACTION_ADD } from "@/lib/consts/urls";
@@ -128,7 +130,6 @@ import ICON_DOWNLOAD from "@/lib/icons/download.json";
 import { useAuthStore } from "@/lib/store/auth";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
-import { getMoneyFormat } from "@/lib/helpers/money";
 
 const route = useRoute();
 const router = useRouter();
