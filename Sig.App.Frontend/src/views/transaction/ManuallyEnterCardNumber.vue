@@ -141,12 +141,14 @@ const { result: resultProjects } = useQuery(
   `
 );
 const markets = useResult(resultProjects, null, (data) => {
-  return data.projects[0].markets.map((x) => {
-    return {
-      label: x.name,
-      value: x.id
-    };
-  });
+  return data.projects[0].markets
+    .map((x) => {
+      return {
+        label: x.name,
+        value: x.id
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
 });
 const project = useResult(resultProjects, null, (data) => {
   return data.projects[0];

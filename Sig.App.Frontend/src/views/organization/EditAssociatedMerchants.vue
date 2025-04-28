@@ -95,7 +95,7 @@ const { result: resultMarkets } = useQuery(
 );
 
 const marketOptions = useResult(resultMarkets, null, (data) => {
-  return data.markets.map((x) => ({ label: x.name, value: x.id }));
+  return data.markets.map((x) => ({ label: x.name, value: x.id })).sort((a, b) => a.label.localeCompare(b.label));
 });
 
 const { mutate: addMarketToOrganization } = useMutation(

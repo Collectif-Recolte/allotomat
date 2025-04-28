@@ -420,7 +420,7 @@ const availableSubscriptions = computed(() => {
 
 const availableMarkets = computed(() => {
   if (!props.availableMarkets || props.availableMarkets?.length <= 0) return [];
-  return props.availableMarkets.map((x) => ({ value: x.id, label: x.name }));
+  return props.availableMarkets.map((x) => ({ value: x.id, label: x.name })).sort((a, b) => a.label.localeCompare(b.label));
 });
 
 const availableCashRegister = computed(() => {

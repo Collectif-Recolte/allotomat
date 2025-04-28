@@ -115,12 +115,14 @@ const projectMarkets = useResult(resultProjects, null, (data) => {
     });
     return [];
   }
-  return data.projects[0].markets.map((x) => {
-    return {
-      label: x.name,
-      value: x.id
-    };
-  });
+  return data.projects[0].markets
+    .map((x) => {
+      return {
+        label: x.name,
+        value: x.id
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
 });
 
 const { result: resultOrganizations } = useQuery(
@@ -143,12 +145,14 @@ const organizationMarkets = useResult(resultOrganizations, null, (data) => {
     });
     return [];
   }
-  return data.organizations[0].markets.map((x) => {
-    return {
-      label: x.name,
-      value: x.id
-    };
-  });
+  return data.organizations[0].markets
+    .map((x) => {
+      return {
+        label: x.name,
+        value: x.id
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
 });
 
 const markets = computed(() => {
