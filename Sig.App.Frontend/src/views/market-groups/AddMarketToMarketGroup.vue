@@ -107,10 +107,12 @@ const marketGroup = useResult(resultMarketGroup, null, (data) => {
   return data.marketGroup;
 });
 const markets = useResult(resultMarketGroup, null, (data) => {
-  return data.marketGroup.project.markets.map((market) => ({
-    value: market.id,
-    label: market.name
-  }));
+  return data.marketGroup.project.markets
+    .map((market) => ({
+      value: market.id,
+      label: market.name
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 });
 
 const { mutate: addMarketToMarketGroup } = useMutation(
