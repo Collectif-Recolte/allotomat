@@ -298,6 +298,16 @@ const { currentOrganization, changeOrganization } = useOrganizationStore();
 usePageTitle(t("title"));
 
 const subpages = computed(() => {
+  if (selectedOrganization.value === ALL_GROUP) {
+    return [
+      {
+        route: { name: URL_BENEFICIARY_ADMIN },
+        label: t("manage-participants"),
+        isActive: true
+      }
+    ];
+  }
+
   return [
     {
       route: { name: URL_BENEFICIARY_ADMIN },

@@ -133,7 +133,8 @@
         :beneficiary="beneficiary"
         :organization="props.organization"
         :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous"
-        :have-subscription-conflict="isBeneficiaryPaymentConflict()" />
+        :have-subscription-conflict="isBeneficiaryPaymentConflict()"
+        :is-all-group-selected="props.isAllGroupSelected" />
     </div>
   </div>
 </template>
@@ -195,6 +196,10 @@ const props = defineProps({
   organization: {
     type: Object,
     default: null
+  },
+  isAllGroupSelected: {
+    type: Boolean,
+    default: false
   }
 });
 

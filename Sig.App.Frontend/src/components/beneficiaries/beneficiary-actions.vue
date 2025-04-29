@@ -18,19 +18,24 @@
       "beneficiary-delete-disabled-anonymous": "You can't delete an anonymous beneficiary",
       "beneficiary-add-funds-disabled-anonymous": "You can't add funds if the beneficiary is anonymous",
       "beneficiary-add-funds-disabled-no-subscription": "You can't add funds if the beneficiary doesn't have a subscription",
+      "beneficiary-add-funds-disabled-all-group": "You can't add funds if all groups are selected",
       "beneficiary-disable-card": "Deactivate card",
       "beneficiary-enable-card": "Re-enable card",
       "beneficiary-payment-conflict": "Fix conflicts",
       "beneficiary-payment-conflict-disabled": "The beneficiary doesn't have a payment conflict",
+      "beneficiary-payment-conflict-all-group-selected": "You can't fix a conflict if all groups are selected",
       "beneficiary-assign-subscription": "Assign subscription",
+      "beneficiary-assign-subscription-disabled": "You can't assign a subscription if all groups are selected",
       "beneficiary-add-missed-payment": "Add missed payment",
       "beneficiary-add-missed-payment-no-card": "You can't add a missed payment if the beneficiary doesn't have a card",
       "beneficiary-add-missed-payment-no-subscription": "You can't add a missed payment if the beneficiary doesn't have a subscription",
       "beneficiary-add-missed-payment-no-missed-payment": "You can't add a missed payment if the beneficiary doesn't have a missed payment",
+      "beneficiary-add-missed-payment-all-group-selected": "You can't add a missed payment if all groups are selected",
       "beneficiary-create-transaction": "Create transaction",
       "beneficiary-create-transaction-no-market": "You can't create a transaction if the group doesn't have a market",
       "beneficiary-create-transaction-no-card": "You can't create a transaction if the beneficiary doesn't have a card",
-      "beneficiary-create-transaction-card-disabled": "You can't create a transaction if the beneficiary's card is disabled"
+      "beneficiary-create-transaction-card-disabled": "You can't create a transaction if the beneficiary's card is disabled",
+      "beneficiary-create-transaction-all-group": "You can't create a transaction if all groups are selected"
     },
     "fr": {
       "beneficiary-edit": "Modifier les détails",
@@ -50,19 +55,24 @@
       "beneficiary-delete-disabled-anonymous": "Vous ne pouvez pas supprimer un participant-e anonyme",
       "beneficiary-add-funds-disabled-anonymous": "Vous ne pouvez pas ajouter des fonds si le participant-e est anonyme",
       "beneficiary-add-funds-disabled-no-subscription": "Vous ne pouvez pas ajouter des fonds si le participant-e n'a pas d'abonnement",
+      "beneficiary-add-funds-disabled-all-group": "Vous ne pouvez pas ajouter des fonds si tous les groupes sont sélectionnés",
       "beneficiary-disable-card": "Désactiver la carte",
       "beneficiary-enable-card": "Réactiver la carte",
       "beneficiary-payment-conflict": "Corriger les conflits",
       "beneficiary-payment-conflict-disabled": "Le participant-e n'a pas de conflit de paiement",
+      "beneficiary-payment-conflict-all-group-selected": "Vous ne pouvez pas corriger un conflit si tous les groupes sont sélectionnés",
       "beneficiary-assign-subscription": "Attribuer un abonnement",
+      "beneficiary-assign-subscription-disabled": "Vous ne pouvez pas attribuer un abonnement si tous les groupes sont sélectionnés",
       "beneficiary-add-missed-payment": "Versement d’un paiement manqué",
       "beneficiary-add-missed-payment-no-card": "Vous ne pouvez pas ajouter un paiement manqué si le participant-e n'a pas de carte",
       "beneficiary-add-missed-payment-no-subscription": "Vous ne pouvez pas ajouter un paiement manqué si le participant-e n'a pas d'abonnement",
       "beneficiary-add-missed-payment-no-missed-payment": "Vous ne pouvez pas ajouter un paiement manqué si le participant-e n'a pas de paiement manqué",
+      "beneficiary-add-missed-payment-all-group-selected": "Vous ne pouvez pas ajouter un paiement manqué si tous les groupes sont sélectionnés",
       "beneficiary-create-transaction": "Créer une transaction",
       "beneficiary-create-transaction-no-market": "Vous ne pouvez pas créer une transaction si le groupe n'a pas de commerce",
       "beneficiary-create-transaction-no-card": "Vous ne pouvez pas créer une transaction si le participant-e n'a pas de carte",
-      "beneficiary-create-transaction-card-disabled": "Vous ne pouvez pas créer une transaction si la carte du participant-e est désactivée"
+      "beneficiary-create-transaction-card-disabled": "Vous ne pouvez pas créer une transaction si la carte du participant-e est désactivée",
+      "beneficiary-create-transaction-all-group": "Vous ne pouvez pas créer une transaction si tous les groupes sont sélectionnés"
     }
   }
 </i18n>
@@ -148,7 +158,9 @@ function updateItems() {
         isExtra: true,
         icon: ICON_IDENTIFICATION,
         label: t("beneficiary-assign-subscription"),
-        route: { name: URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS, query: { text: props.beneficiary.id1 } }
+        route: { name: URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS, query: { text: props.beneficiary.id1 } },
+        disabled: props.isAllGroupSelected,
+        reason: t("beneficiary-assign-subscription-disabled")
       },
       {
         isExtra: true,
@@ -161,19 +173,25 @@ function updateItems() {
         icon: ICON_TRANSACTION,
         label: t("beneficiary-create-transaction"),
         route: { name: URL_BENEFICIARY_TRANSACTION_ADD, params: { beneficiaryId: props.beneficiary.id } },
-        disabled: !haveCard() || isCardDisabled(),
-        reason: !haveCard() ? t("beneficiary-create-transaction-no-card") : t("beneficiary-create-transaction-card-disabled")
+        disabled: !haveCard() || isCardDisabled() || props.isAllGroupSelected,
+        reason: !haveCard()
+          ? t("beneficiary-create-transaction-no-card")
+          : isCardDisabled()
+          ? t("beneficiary-create-transaction-card-disabled")
+          : t("beneficiary-create-transaction-all-group")
       },
       {
         isExtra: true,
         icon: ICON_ADD_CASH,
         label: t("beneficiary-add-funds"),
         route: { name: URL_BENEFICIARY_MANUALLY_ADD_FUND, params: { beneficiaryId: props.beneficiary.id } },
-        disabled: !haveCard() || props.beneficiariesAreAnonymous || !haveSubscriptions(),
+        disabled: !haveCard() || props.beneficiariesAreAnonymous || !haveSubscriptions() || props.isAllGroupSelected,
         reason: !haveCard()
           ? t("beneficiary-add-funds-disabled")
           : !haveSubscriptions()
           ? t("beneficiary-add-funds-disabled-no-subscription")
+          : props.isAllGroupSelected
+          ? t("beneficiary-add-funds-disabled-all-group")
           : t("beneficiary-add-funds-disabled-anonymous")
       },
       {
@@ -181,12 +199,14 @@ function updateItems() {
         icon: ICON_MISSED_PAYMENT,
         label: t("beneficiary-add-missed-payment"),
         route: { name: URL_BENEFICIARY_ADD_MISSED_PAYMENT, params: { beneficiaryId: props.beneficiary.id } },
-        disabled: !haveCard() || !haveSubscriptions() || !haveMissedPayment(),
+        disabled: !haveCard() || !haveSubscriptions() || !haveMissedPayment() || props.isAllGroupSelected,
         reason: !haveCard()
           ? t("beneficiary-add-missed-payment-no-card")
           : !haveSubscriptions()
           ? t("beneficiary-add-missed-payment-no-subscription")
-          : t("beneficiary-add-missed-payment-no-missed-payment")
+          : !haveMissedPayment()
+          ? t("beneficiary-add-missed-payment-no-missed-payment")
+          : t("beneficiary-add-missed-payment-all-group-selected")
       },
       {
         isExtra: true,
@@ -236,9 +256,11 @@ function updateItems() {
         isExtra: true,
         icon: ICON_CONFLICT,
         label: t("beneficiary-payment-conflict"),
-        disabled: !props.haveSubscriptionConflict,
+        disabled: !props.haveSubscriptionConflict || props.isAllGroupSelected,
         route: { name: URL_BENEFICIARY_MANAGE_CONFLICT, params: { beneficiaryId: props.beneficiary.id } },
-        reason: t("beneficiary-payment-conflict-disabled")
+        reason: !props.haveSubscriptionConflict
+          ? t("beneficiary-payment-conflict-disabled")
+          : t("beneficiary-payment-conflict-all-group-selected")
       },
       {
         isExtra: true,
@@ -323,6 +345,10 @@ const props = defineProps({
   organization: {
     type: Object,
     required: true
+  },
+  isAllGroupSelected: {
+    type: Boolean,
+    default: false
   }
 });
 
