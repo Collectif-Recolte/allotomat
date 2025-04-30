@@ -23,7 +23,6 @@ using Sig.App.Backend.Services.Permission.Enums;
 using Sig.App.Backend.Gql.Schema.Enums;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
-using Sig.App.Backend.DbModel.Entities.Cards;
 
 namespace Sig.App.Backend.Services.Reports
 {
@@ -209,6 +208,7 @@ namespace Sig.App.Backend.Services.Reports
             dataWorksheet.Column("Participant-e hors plateforme/Participant off platform", x => x.BeneficiaryIsOffPlatform ? "Oui/Yes" : "Non/No");
             dataWorksheet.Column("Type", GetOperationTypeText);
             dataWorksheet.Column("Marché/Market", x => x.MarketName);
+            dataWorksheet.Column("ID Marché/ID Market", x => x.MarketId);
             dataWorksheet.Column("Montant total/Total amount", x => GetAmountText(x, request.Language));
 
             foreach (var productGroup in productGroupDictionary)
@@ -228,7 +228,9 @@ namespace Sig.App.Backend.Services.Reports
                 "Transfert de fond depuis le numéro de carte/Transferred fund from card number",
                 x => x.FundTransferredFromCardNumber != null ? x.FundTransferredFromCardNumber.Replace('-', ' ') : "");
             dataWorksheet.Column("Groupe/Group", x => x.OrganizationName);
+            dataWorksheet.Column("ID Groupe/ID Group", x => x.OrganizationId);
             dataWorksheet.Column("Abonnement/Subscription", x => x.SubscriptionName);
+            dataWorksheet.Column("ID Abonnement/ID Subscription", x => x.SubscriptionId);
             dataWorksheet.Column("Initiateur transaction/Transaction initiator", GetTransactionInitiatorName);
             dataWorksheet.Column("Courriel initiateur transaction/Transaction initiator email", x => x.TransactionInitiatorEmail);
             dataWorksheet.Column("Caisse/Cash register", x => x.CashRegisterName);
