@@ -195,8 +195,8 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
             }
             
             dataWorksheet.Column("Catégorie/Category", x => x.BeneficiaryType.GetKeys().First());
-            dataWorksheet.Column("Solde total/Total balance", x => x.Card != null ? x.Card.TotalFund().ToString("C", request.Language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA")) : "");
-            dataWorksheet.Column("Solde abonnement/Subscription balance", x => x.Card != null ? x.Card.TotalSubscriptionFund().ToString("C", request.Language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA")) : "");
+            dataWorksheet.Column("Solde total/Total balance", x => x.Card != null ? x.Card.TotalFund() : "", "0.00 $");
+            dataWorksheet.Column("Solde abonnement/Subscription balance", x => x.Card != null ? x.Card.TotalSubscriptionFund() : "", "0.00 $");
 
             foreach (var productGroup in productGroups)
             {
@@ -205,26 +205,26 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
                     dataWorksheet.Column("Montant/Amount - " + productGroup.Name, x => {
                         if (x.Card != null)
                         {
-                            return x.Card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroup.Id)?.Amount.ToString("C", request.Language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA"));
+                            return x.Card.Funds.FirstOrDefault(x => x.ProductGroupId == productGroup.Id)?.Amount;
                         }
                         return null;
-                    });
+                    }, "0.00 $");
                 }
             }
 
-            dataWorksheet.Column("Solde carte-cadeau/Gift card balance", x => x.Card != null ? x.Card.LoyaltyFund().ToString("C", request.Language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA")) : "");
+            dataWorksheet.Column("Solde carte-cadeau/Gift card balance", x => x.Card != null ? x.Card.LoyaltyFund() : null, "0.00 $");
             dataWorksheet.Column("Dépenses/Expenses", x =>
             {
                 if (x.Card != null)
                 {
                     var transactions = x.Card.Transactions;
-                    return transactions.Where(x => x.GetType() == typeof(PaymentTransaction)).Sum(x => x.Amount).ToString("C", request.Language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA"));
+                    return transactions.Where(x => x.GetType() == typeof(PaymentTransaction)).Sum(x => x.Amount);
                 }
                 else
                 {
                     return "";
                 }
-            });
+            }, "0.00 $");
             dataWorksheet.Column("ID carte/Card ID", x => x.Card != null ? x.Card.ProgramCardId : "");
             dataWorksheet.Column("Numéro carte/Card Number", x => x.Card != null ? x.Card.CardNumber.Replace('-', ' ') : "");
             dataWorksheet.Column("Abonnements/Subscriptions", x => GetActiveSubscriptions(x.Subscriptions));
