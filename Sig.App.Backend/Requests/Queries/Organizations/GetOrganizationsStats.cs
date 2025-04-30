@@ -31,11 +31,11 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
             var projectId = request.ProjectId.LongIdentifierForType<Project>();
-            var project = await db.Projects
-                .Include(x => x.Organizations).ThenInclude(x => x.BudgetAllowances).ThenInclude(x => x.Subscription)
-                .Where(x => x.Id == projectId)
+            var organizations = await db.Organizations
+                .Include(x => x.BudgetAllowances).ThenInclude(x => x.Subscription)
+                .Where(x => x.ProjectId == projectId)
                 .AsNoTracking()
-                .FirstOrDefaultAsync();
+                .ToListAsync();
             List<ManuallyAddingFundTransaction> manuallyAddingTransactions;
             List<SubscriptionAddingFundTransaction> subscriptionTransactions;
             List<ExpireFundTransaction> expiredTransactions;
@@ -62,7 +62,7 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
                     .AsNoTracking()
                     .ToListAsync();
 
-                foreach (var organization in project.Organizations)
+                foreach (var organization in organizations)
                 {
                     organization.BudgetAllowances = organization.BudgetAllowances.Where(x => request.Subscriptions.Contains(x.SubscriptionId)).ToList();
                 }
@@ -97,7 +97,7 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
                 .GetCurrentInstant()
                 .ToDateTimeUtc();
 
-            foreach (var organization in project.Organizations)
+            foreach (var organization in organizations)
             {
                 var organizationManuallyAddingTransactions = manuallyAddingTransactions.Where(x => x.OrganizationId == organization.Id).ToList();
                 var organizationSubscriptionTransactions = subscriptionTransactions.Where(x => x.OrganizationId == organization.Id).ToList();

@@ -113,6 +113,9 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<IEnumerable<ProjectGraphType>> LoadProjectOwnedByUser(string userId) =>
             LoadCollection<GetProjectOwnedByUserId.Query, ProjectGraphType, string>(userId);
 
+        public IDataLoaderResult<IEnumerable<BaseProjectGraphType>> LoadBaseProjectOwnedByUser(string userId) =>
+            LoadCollection<GetBaseProjectOwnedByUserId.Query, BaseProjectGraphType, string>(userId);
+
         public IDataLoaderResult<IEnumerable<MarketGraphType>> LoadProjectMarkets(long projectId) =>
             LoadCollection<GetMarketByProjectId.Query, MarketGraphType, long>(projectId);
 
