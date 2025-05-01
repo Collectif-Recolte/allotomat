@@ -1,0 +1,33 @@
+﻿@using Sig.App.Backend.Helpers
+@using System.Globalization
+
+@model Sig.App.Backend.EmailTemplates.Models.SubscriptionExpirationEmail
+@{ Layout = "_EmailLayout.cshtml"; }
+
+<p>L’abonnement @Model.SubscriptionName est arrivé à échéance en date du @DateTime.Now.ToShortDateString().</p>
+<p>Voici un résumé des données associées à cet abonnement :</p>
+<ul>
+    <li>Montant total chargé sur les cartes : @Model.TotalAmountLoadedOnCards.ToString("C", CultureInfo.CreateSpecificCulture("fr-CA"))</li>
+    <li>Montant utilisé pour des achats (paiements moins remboursements) : @Model.AmountUsedForPurchases.ToString("C", CultureInfo.CreateSpecificCulture("fr-CA"))</li>
+    <li>Montant expiré (non utilisé) : @Model.ExpiredAmount.ToString("C", CultureInfo.CreateSpecificCulture("fr-CA"))</li>
+</ul>
+<p>Nous vous invitons à :</p>
+<ul>
+    <li>Vérifier que tous les montants et cartes associés sont bien conformes.</li>
+    <li>Finaliser vos rapports ou conciliations internes.</li>
+</ul>
+<p>N’hésitez pas à nous contacter si vous avez besoin d’assistance ou de précisions supplémentaires.</p>
+<br />
+<p>The subscription @Model.SubscriptionName expired on @DateTime.Now.ToShortDateString().</p>
+<p>Here is a summary of the data associated with this subscription:</p>
+<ul>
+    <li>Total amount loaded on cards: @Model.TotalAmountLoadedOnCards.ToString("C", CultureInfo.CreateSpecificCulture("en-CA"))</li>
+    <li>Amount used for purchases (payments less refunds): @Model.AmountUsedForPurchases.ToString("C", CultureInfo.CreateSpecificCulture("en-CA"))</li>
+    <li>Expired Amount (Unused): @Model.ExpiredAmount.ToString("C", CultureInfo.CreateSpecificCulture("en-CA"))</li>
+</ul>
+<p>We invite you to:</p>
+<ul>
+    <li>Check that all associated amounts and cards are correct.</li>
+    <li>Finalize your internal reports or reconciliations.</li>
+</ul>
+<p>Please do not hesitate to contact us if you require any assistance or further clarification.</p>

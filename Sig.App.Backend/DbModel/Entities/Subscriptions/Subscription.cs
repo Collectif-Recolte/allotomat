@@ -31,6 +31,8 @@ namespace Sig.App.Backend.DbModel.Entities.Subscriptions
         public IList<SubscriptionBeneficiary> Beneficiaries { get; set; }
         public IList<BudgetAllowance> BudgetAllowances { get; set; }
 
+        public bool IsExpired { get; set; }
+
         public DateTime GetExpirationDate(IClock clock)
         {
             if (IsFundsAccumulable && FundsExpirationDate.HasValue)
