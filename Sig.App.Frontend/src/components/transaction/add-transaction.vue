@@ -259,6 +259,10 @@ const props = defineProps({
   marketId: {
     type: String,
     required: true
+  },
+  cashRegisterId: {
+    type: String,
+    required: true
   }
 });
 
@@ -557,7 +561,7 @@ async function onSubmit() {
         .map((x) => ({ amount: parseFloat(x.amount), productGroupId: x.fund.productGroup.id })),
       cardId: props.cardId,
       marketId: props.marketId,
-      cashRegisterId: currentCashRegister
+      cashRegisterId: currentCashRegister || props.cashRegisterId
     }
   });
 
