@@ -263,6 +263,28 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         [RequirePermission(MarketPermission.ManageMarket)]
+        [AnnotateErrorCodes(typeof(DisabledMarket))]
+        public static Task<DisabledMarket.Payload> DisabledMarket(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<DisabledMarket.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(MarketPermission.ManageMarket)]
+        [AnnotateErrorCodes(typeof(EnabledMarket))]
+        public static Task<EnabledMarket.Payload> EnabledMarket(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<EnabledMarket.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(MarketPermission.ManageMarket)]
         [AnnotateErrorCodes(typeof(AddManagerToMarket))]
         public static Task<AddManagerToMarket.Payload> AddManagerToMarket(
             this GqlMutation _,

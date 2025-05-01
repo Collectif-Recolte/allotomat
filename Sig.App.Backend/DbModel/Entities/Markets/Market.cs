@@ -16,6 +16,7 @@ namespace Sig.App.Backend.DbModel.Entities.Markets
         public IList<MarketGroupMarket> MarketGroups { get; set; }
         public IList<CashRegister> CashRegisters { get; set; }
 
+        public bool IsDisabled { get; set; }
         public bool IsArchived { get; set; }
     }
 }

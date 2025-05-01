@@ -129,6 +129,7 @@ const {
             id
             name
             isArchived
+            isDisabled
           }
         }
       }
