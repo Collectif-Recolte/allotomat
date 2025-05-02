@@ -3,6 +3,8 @@
     public enum SubscriptionPermission
     {
         EditSubscription,
-        DeleteSubscription
+        DeleteSubscription,
+        ArchiveSubscription,
+        UnarchiveSubscription
     }
 }

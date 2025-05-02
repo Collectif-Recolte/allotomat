@@ -687,6 +687,22 @@ export default [
         }
       },
       {
+        name: urls.URL_SUBSCRIPTION_ARCHIVE,
+        path: ":subscriptionId/archive",
+        component: () => import("@/views/subscription/ArchiveSubscription.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SUBSCRIPTIONS
+        }
+      },
+      {
+        name: urls.URL_SUBSCRIPTION_UNARCHIVE,
+        path: ":subscriptionId/unarchive",
+        component: () => import("@/views/subscription/UnarchiveSubscription.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SUBSCRIPTIONS
+        }
+      },
+      {
         name: urls.URL_SUBSCRIPTION_MANAGE_BUDGET_ALLOWANCE,
         path: ":subscriptionId/budgets",
         component: () => import("@/views/budget-allowance/EditBudgetAllowance.vue"),

@@ -73,6 +73,7 @@ const { result, loading, refetch } = useQuery(
           endDate
           fundsExpirationDate
           isFundsAccumulable
+          isArchived
           budgetAllowances {
             id
             originalFund
@@ -99,6 +100,8 @@ const subscriptionsOrderByDate = computed(() => {
   let subscriptions = [...projects.value[0].subscriptions];
 
   return subscriptions.sort((a, b) => {
+    if (a.isArchived && !b.isArchived) return 1;
+    if (!a.isArchived && b.isArchived) return -1;
     const dateA = a.isFundsAccumulable ? new Date(a.fundsExpirationDate) : new Date(a.endDate);
     const dateB = b.isFundsAccumulable ? new Date(b.fundsExpirationDate) : new Date(b.endDate);
     return dateB - dateA;

@@ -83,9 +83,9 @@
       <h3 class="mb-2 mt-4">{{ t("subscriptions-title") }}</h3>
       <ul class="inline-flex flex-col justify-start items-start gap-y-1 mb-4 max-w-full">
         <li v-for="subscription in beneficiary.beneficiarySubscriptions" :key="subscription.subscription.id" class="mb-4">
-          <b>{{ subscription.subscription.name }}</b>
+          <b>{{ subscriptionName(subscription.subscription) }}</b>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <div v-html="t('amount-received-each-payment', { amountByPayment: amountByPayment(subscription) })"></div>
+          <div v-html="t('amount-received-each-payment', { amountByPayment: amountByPayment(subscription.subscription) })"></div>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <div v-html="t('remaining-payment-on-card', { remainingPayment: subscription.subscription.paymentRemaining })"></div>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
@@ -240,6 +240,7 @@ import { formatDate, dateUtc, regularFormat, textualFormat } from "@/lib/helpers
 import { useAuthStore } from "@/lib/store/auth";
 import { useNotificationsStore } from "@/lib/store/notifications";
 import { useCashRegisterStore } from "@/lib/store/cash-register";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 const { userType } = storeToRefs(useAuthStore());
 const { t } = useI18n();
@@ -287,6 +288,7 @@ const { result } = useQuery(
               subscription {
                 id
                 name
+                isArchived
                 paymentRemaining
                 monthlyPaymentMoment
                 endDate
@@ -549,7 +551,7 @@ function prevStep() {
 }
 
 function amountByPayment(subscription) {
-  return getMoneyFormat(subscription.subscription.types.map((x) => x.amount).reduce((total, arg) => total + arg, 0));
+  return getMoneyFormat(subscription.types.map((x) => x.amount).reduce((total, arg) => total + arg, 0));
 }
 
 async function onSubmit() {

@@ -56,7 +56,7 @@ import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/lib/store/auth";
 
 import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
-
+import { subscriptionName } from "@/lib/helpers/subscription";
 import AssignSubscription from "@/components/beneficiaries/assign-subscription";
 
 const { t } = useI18n();
@@ -116,6 +116,7 @@ const { result } = useQuery(
           id
           subscriptions {
             id
+            isArchived
             name
             monthlyPaymentMoment
             startDate
@@ -185,7 +186,7 @@ const subscriptionsOrderByDate = computed(() => {
   return subscriptions.map((subscription) => {
     return {
       id: subscription.id,
-      name: subscription.name,
+      name: subscriptionName(subscription),
       monthlyPaymentMoment: subscription.monthlyPaymentMoment,
       startDate: subscription.startDate,
       endDate: subscription.endDate,

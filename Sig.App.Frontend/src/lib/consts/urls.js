@@ -85,6 +85,8 @@ export const URL_SUBSCRIPTION_ADMIN = "subscription-list-url";
 export const URL_SUBSCRIPTION_ADD = "subscription-add-url";
 export const URL_SUBSCRIPTION_EDIT = "subscription-edit-url";
 export const URL_SUBSCRIPTION_DELETE = "subscription-delete-url";
+export const URL_SUBSCRIPTION_ARCHIVE = "subscription-archive-url";
+export const URL_SUBSCRIPTION_UNARCHIVE = "subscription-unarchive-url";
 export const URL_SUBSCRIPTION_MANAGE_BUDGET_ALLOWANCE = "subscription-manage-budget-allowance-url";
 export const URL_SUBSCRIPTION_DELETE_BUDGET_ALLOWANCE = "subscription-delete-budget-allowance-url";
 

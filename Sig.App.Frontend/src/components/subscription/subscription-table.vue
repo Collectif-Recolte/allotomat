@@ -4,6 +4,8 @@
           "date-separator": " to ",
           "options": "Options",
           "subscription-delete": "Delete",
+          "subscription-archived": "Archived",
+          "subscription-unarchived": "Unarchived",
           "subscription-edit": "Edit configuration",
           "subscription-edit-budget-allowance": "Manage budgets allowances",
           "subscription-name": "Subscription period name",
@@ -15,6 +17,8 @@
           "date-separator": " au ",
           "options": "Options",
           "subscription-delete": "Supprimer",
+          "subscription-archived": "Archiver",
+          "subscription-unarchived": "Désarchiver",
           "subscription-edit": "Modifier la configuration",
           "subscription-edit-budget-allowance": "Configurer les enveloppes",
           "subscription-name": "Nom de la période",
@@ -41,7 +45,25 @@
         {{ getBudgetAllowanceTotal(slotProps.item) }}
       </td>
       <td>
-        <UiButtonGroup :items="getBtnGroup(slotProps.item.id)" tooltip-position="left" />
+        <div class="inline-flex items-center gap-x-2">
+          <template v-if="props.canEdit">
+            <PfButtonLink
+              v-if="!slotProps.item.isArchived"
+              tag="routerLink"
+              btn-style="outline"
+              size="sm"
+              :label="t('subscription-archived')"
+              :to="{ name: URL_SUBSCRIPTION_ARCHIVE, params: { subscriptionId: slotProps.item.id } }" />
+            <PfButtonLink
+              v-else
+              tag="routerLink"
+              btn-style="outline"
+              size="sm"
+              :label="t('subscription-unarchived')"
+              :to="{ name: URL_SUBSCRIPTION_UNARCHIVE, params: { subscriptionId: slotProps.item.id } }" />
+          </template>
+          <UiButtonGroup :items="getBtnGroup(slotProps.item)" tooltip-position="left" />
+        </div>
       </td>
     </template>
   </UiTable>
@@ -52,11 +74,19 @@ import { defineProps, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { formatDate, dateUtc, textualFormat } from "@/lib/helpers/date";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 import ICON_TRASH from "@/lib/icons/trash.json";
 import ICON_PENCIL from "@/lib/icons/pencil.json";
 import ICON_ADD_ENVELOPPE from "@/lib/icons/add-enveloppe.json";
-import { URL_SUBSCRIPTION_EDIT, URL_SUBSCRIPTION_MANAGE_BUDGET_ALLOWANCE, URL_SUBSCRIPTION_DELETE } from "@/lib/consts/urls";
+
+import {
+  URL_SUBSCRIPTION_EDIT,
+  URL_SUBSCRIPTION_MANAGE_BUDGET_ALLOWANCE,
+  URL_SUBSCRIPTION_DELETE,
+  URL_SUBSCRIPTION_ARCHIVE,
+  URL_SUBSCRIPTION_UNARCHIVE
+} from "@/lib/consts/urls";
 import { getMoneyFormat } from "@/lib/helpers/money";
 
 const { t } = useI18n();
@@ -82,27 +112,28 @@ const cols = computed(() => {
   return cols;
 });
 
-const getBtnGroup = (subscriptionId) => [
+const getBtnGroup = (subscription) => [
   {
     icon: ICON_ADD_ENVELOPPE,
     label: t("subscription-edit-budget-allowance"),
-    route: { name: URL_SUBSCRIPTION_MANAGE_BUDGET_ALLOWANCE, params: { subscriptionId: subscriptionId } }
+    route: { name: URL_SUBSCRIPTION_MANAGE_BUDGET_ALLOWANCE, params: { subscriptionId: subscription.id } },
+    if: !subscription.isArchived
   },
   {
     icon: ICON_PENCIL,
     label: t("subscription-edit"),
-    route: { name: URL_SUBSCRIPTION_EDIT, params: { subscriptionId: subscriptionId } },
-    if: props.canEdit
+    route: { name: URL_SUBSCRIPTION_EDIT, params: { subscriptionId: subscription.id } },
+    if: props.canEdit && !subscription.isArchived
   },
   {
     icon: ICON_TRASH,
     label: t("subscription-delete"),
-    route: { name: URL_SUBSCRIPTION_DELETE, params: { subscriptionId: subscriptionId } }
+    route: { name: URL_SUBSCRIPTION_DELETE, params: { subscriptionId: subscription.id } }
   }
 ];
 
 function getSubscriptionName(item) {
-  return `${item.name}`;
+  return subscriptionName(item);
 }
 
 function getSubscriptionType(item) {

@@ -43,6 +43,8 @@ import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 
+import { subscriptionName } from "@/lib/helpers/subscription";
+
 import { useOrganizationStore } from "@/lib/store/organization";
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
 
@@ -64,6 +66,7 @@ const { result: resultBeneficiary, refetch } = useQuery(
         beneficiarySubscriptions {
           subscription {
             id
+            isArchived
             name
           }
         }
@@ -91,6 +94,7 @@ const { result: resultOrganization } = useQuery(
           subscriptions {
             id
             name
+            isArchived
             types {
               id
               beneficiaryType {
@@ -113,7 +117,7 @@ const { result: resultOrganization } = useQuery(
 const subscriptionOptions = useResult(resultOrganization, null, (data) => {
   return data.organization.project.subscriptions
     .map((x) => {
-      return { label: `${x.name}`, value: `${x.id}`, types: x.types };
+      return { label: `${subscriptionName(x)}`, value: `${x.id}`, types: x.types };
     })
     .reduce(function (a, b) {
       return a.concat(b);
@@ -129,6 +133,7 @@ const { mutate: addBeneficiaryToSubscription } = useMutation(
           beneficiarySubscriptions {
             subscription {
               id
+              isArchived
               name
             }
           }
@@ -154,7 +159,7 @@ const subscriptionItems = computed(() => {
   for (let item of items) {
     formattedItems.push({
       id: item.subscription.id,
-      name: item.subscription.name
+      name: subscriptionName(item.subscription)
     });
   }
 

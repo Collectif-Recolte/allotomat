@@ -81,6 +81,7 @@ const { mutate: createSubscriptionInProject } = useMutation(
       createSubscriptionInProject(input: $input) {
         subscription {
           id
+          isArchived
           name
           isFundsAccumulable
           monthlyPaymentMoment

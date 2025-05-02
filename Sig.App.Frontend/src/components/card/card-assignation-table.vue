@@ -38,7 +38,7 @@
           <PfTag
             v-for="item in getBeneficiarySubscriptions(slotProps.item)"
             :key="item.subscription.id"
-            :label="item.subscription.name"
+            :label="subscriptionName(item.subscription)"
             is-dark-theme
             bg-color-class="bg-primary-700" />
         </div>
@@ -59,6 +59,7 @@
 <script setup>
 import { defineProps, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 const { t } = useI18n();
 

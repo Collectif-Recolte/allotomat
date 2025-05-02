@@ -208,7 +208,9 @@ namespace Sig.App.Backend.Services.Permission
         private static readonly SubscriptionPermission[] ProjectManagerSubscriptionPermission = new []
         {
             SubscriptionPermission.EditSubscription,
-            SubscriptionPermission.DeleteSubscription
+            SubscriptionPermission.DeleteSubscription,
+            SubscriptionPermission.ArchiveSubscription,
+            SubscriptionPermission.UnarchiveSubscription
         };
 
         private static readonly MarketGroupPermission[] ProjectManagerMarketGroupPermission = new[]
