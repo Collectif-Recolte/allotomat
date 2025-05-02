@@ -32,16 +32,16 @@
 <template>
   <UiTable v-if="props.subscriptions" :items="props.subscriptions" :cols="cols">
     <template #default="slotProps">
-      <td>
+      <td :class="{ 'text-primary-300': slotProps.item.isArchived }">
         {{ getSubscriptionName(slotProps.item) }}
       </td>
-      <td v-if="showSubscriptionPeriod">
+      <td v-if="showSubscriptionPeriod" :class="{ 'text-primary-300': slotProps.item.isArchived }">
         {{ getSubscriptionPeriod(slotProps.item) }}
       </td>
       <td v-if="showSubscriptionType">
         {{ getSubscriptionType(slotProps.item) }}
       </td>
-      <td v-if="showBudgetAllowanceTotal">
+      <td v-if="showBudgetAllowanceTotal" :class="{ 'text-primary-300': slotProps.item.isArchived }">
         {{ getBudgetAllowanceTotal(slotProps.item) }}
       </td>
       <td>
