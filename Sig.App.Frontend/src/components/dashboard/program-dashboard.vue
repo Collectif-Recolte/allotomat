@@ -90,25 +90,11 @@ const organizationsStats = ref([]);
 const project = ref(null);
 const availableSubscriptions = ref([]);
 
-const { result: resultProjects, loading } = useQuery(
+const { result: resultProjectOrganizationsStats, loading: loadingProjectOrganizationsStats } = useQuery(
   gql`
     query Projects($subscriptions: [ID!]) {
       projects {
         id
-        subscriptions {
-          id
-          isArchived
-          name
-          startDate
-          endDate
-          fundsExpirationDate
-          isFundsAccumulable
-        }
-        projectStats {
-          beneficiaryCount
-          unspentLoyaltyFund
-          totalActiveSubscriptionsEnvelopes
-        }
         organizationsStats(subscriptions: $subscriptions) {
           balanceOnCards
           cardSpendingAmounts
@@ -127,11 +113,38 @@ const { result: resultProjects, loading } = useQuery(
   projectsStatsVariables
 );
 
+const { result: resultProjects, loading: loadingProjects } = useQuery(
+  gql`
+    query Projects {
+      projects {
+        id
+        subscriptions {
+          id
+          name
+          startDate
+          endDate
+          fundsExpirationDate
+          isFundsAccumulable
+        }
+        projectStats {
+          beneficiaryCount
+          unspentLoyaltyFund
+          totalActiveSubscriptionsEnvelopes
+        }
+      }
+    }
+  `
+);
+
+watch(resultProjectOrganizationsStats, (value) => {
+  if (value === undefined) return;
+  organizationsStats.value = value.projects[0].organizationsStats;
+});
+
 watch(resultProjects, (value) => {
   if (value === undefined) return;
 
   project.value = value.projects[0];
-  organizationsStats.value = value.projects[0].organizationsStats;
 
   var subscriptions = [...value.projects[0].subscriptions];
   availableSubscriptions.value = subscriptions
@@ -147,6 +160,10 @@ watch(resultProjects, (value) => {
         label: subscriptionName(subscription)
       };
     });
+});
+
+const loading = computed(() => {
+  return loadingProjects.value || loadingProjectOrganizationsStats.value;
 });
 
 const hasActiveFilters = computed(() => {

@@ -2,7 +2,6 @@
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.Helpers;
 using System;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -66,13 +65,13 @@ namespace Sig.App.Backend.Services.Reports
 
             dataWorksheet.Column("Participant-e hors plateforme/Participant off platform", x => x.BeneficiaryIsOffPlatform ? "Oui/Yes" : "Non/No");
             dataWorksheet.Column("Type", GetOperationTypeText);
-            dataWorksheet.Column("Montant total/Total amount", x => GetAmountText(x, request.Language));
+            dataWorksheet.Column("Montant total/Total amount", x => GetAmount(x), "0.00 $");
 
             foreach (var productGroup in productGroupDictionary)
             {
                 if (productGroup.Value != ProductGroupType.LOYALTY)
                 {
-                    dataWorksheet.Column("Montant/Amount - " + productGroup.Value, x => GetAmountByProductGroup(productGroup.Key, x, request.Language));
+                    dataWorksheet.Column("Montant/Amount - " + productGroup.Value, x => GetAmountByProductGroup(productGroup.Key, x, request.Language), "0.00 $");
                 }
             }
 
@@ -209,13 +208,13 @@ namespace Sig.App.Backend.Services.Reports
             dataWorksheet.Column("Type", GetOperationTypeText);
             dataWorksheet.Column("Marché/Market", x => x.MarketName);
             dataWorksheet.Column("ID Marché/ID Market", x => x.MarketId);
-            dataWorksheet.Column("Montant total/Total amount", x => GetAmountText(x, request.Language));
+            dataWorksheet.Column("Montant total/Total amount", x => GetAmount(x), "0.00 $");
 
             foreach (var productGroup in productGroupDictionary)
             {
                 if (productGroup.Value != ProductGroupType.LOYALTY)
                 {
-                    dataWorksheet.Column("Montant/Amount - " + productGroup.Value, x => GetAmountByProductGroup(productGroup.Key, x, request.Language));
+                    dataWorksheet.Column("Montant/Amount - " + productGroup.Value, x => GetAmountByProductGroup(productGroup.Key, x, request.Language), "0.00 $");
                 }
             }
 
@@ -279,30 +278,29 @@ namespace Sig.App.Backend.Services.Reports
             }
         }
 
-        private string GetAmountText(TransactionLog transactionLog, Language language)
+        private decimal GetAmount(TransactionLog transactionLog)
         {
-            var amount = transactionLog.TotalAmount.ToString("C", language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA"));
             if (transactionLog.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog ||
                 transactionLog.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog ||
                 transactionLog.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromUnassignedCardTransactionLog ||
                 transactionLog.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog ||
                 transactionLog.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog)
             {
-                return $"-{amount}";
+                return -transactionLog.TotalAmount;
             }
 
-            return amount;
+            return transactionLog.TotalAmount;
         }
 
-        private string GetAmountByProductGroup(long productGroupId, TransactionLog transactionLog, Language language)
+        private decimal? GetAmountByProductGroup(long productGroupId, TransactionLog transactionLog, Language language)
         {
             var transactionByProduct = transactionLog.TransactionLogProductGroups.FirstOrDefault(x => x.ProductGroupId == productGroupId);
             if (transactionByProduct != null)
             {
-                return transactionByProduct.Amount.ToString("C", language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA"));
+                return transactionByProduct.Amount;
             }
             
-            return "";
+            return null;
         }
     }
 }

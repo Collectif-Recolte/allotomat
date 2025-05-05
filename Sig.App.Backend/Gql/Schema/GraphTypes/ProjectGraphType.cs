@@ -112,9 +112,19 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         }
 
         [RequirePermission(GlobalPermission.ManageSpecificProject)]
-        public IDataLoaderResult<ProjectStatsGraphType> ProjectStats(IAppUserContext ctx)
+        public async Task<ProjectStatsGraphType> ProjectStats([Inject] IMediator mediator)
         {
-            return ctx.DataLoader.LoadProjectStats(Id.LongIdentifierForType<Project>());
+            var result = await mediator.Send(new GetProjectsStats.Input()
+            {
+                ProjectId = Id
+            });
+
+            return new ProjectStatsGraphType()
+            {
+                BeneficiaryCount = result.BeneficiaryCount,
+                TotalActiveSubscriptionsEnvelopes = result.TotalActiveSubscriptionsEnvelopes,
+                UnspentLoyaltyFund = result.UnspentLoyaltyFund
+            };
         }
 
         public async Task<IEnumerable<OrganizationStatsGraphType>> OrganizationsStats([Inject] IMediator mediator,
