@@ -47,6 +47,8 @@ export const URL_MARKET_DELETE = "market-delete-url";
 export const URL_MARKET_MANAGE_MANAGERS = "market-manage-managers-url";
 export const URL_MARKET_EDIT = "market-edit-url";
 export const URL_MARKET_ARCHIVE = "market-archive-url";
+export const URL_MARKET_DISABLED = "market-disabled-url";
+export const URL_MARKET_ENABLED = "market-enabled-url";
 
 export const URL_MARKET_OVERVIEW = "market-overview-url";
 export const URL_MARKET_OVERVIEW_SELECT = "market-overview-select-url";
@@ -55,6 +57,8 @@ export const URL_MARKET_OVERVIEW_DELETE = "market-overview-delete-url";
 export const URL_MARKET_OVERVIEW_MANAGE_MANAGERS = "market-overview-manage-managers-url";
 export const URL_MARKET_OVERVIEW_EDIT = "market-overview-edit-url";
 export const URL_MARKET_OVERVIEW_ARCHIVE = "market-overview-archive-url";
+export const URL_MARKET_OVERVIEW_ENABLED = "market-overview-enabled-url";
+export const URL_MARKET_OVERVIEW_DISABLED = "market-overview-disabled-url";
 
 export const URL_MARKET_GROUPS_OVERVIEW = "market-groups-overview-url";
 export const URL_MARKET_GROUP_ADD = "market-group-add-url";

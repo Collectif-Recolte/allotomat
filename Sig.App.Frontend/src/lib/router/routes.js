@@ -331,6 +331,22 @@ export default [
         meta: {
           claim: GLOBAL_MANAGE_ALL_MARKETS
         }
+      },
+      {
+        name: urls.URL_MARKET_ENABLED,
+        path: ":marketId/enabled",
+        component: () => import("@/views/market/EnabledMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_ALL_MARKETS
+        }
+      },
+      {
+        name: urls.URL_MARKET_DISABLED,
+        path: ":marketId/disabled",
+        component: () => import("@/views/market/DisabledMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_ALL_MARKETS
+        }
       }
     ]
   },
@@ -412,6 +428,22 @@ export default [
         name: urls.URL_MARKET_OVERVIEW_MANAGE_MANAGERS,
         path: ":marketId/manage-managers",
         component: () => import("@/views/market/EditManagers.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_ALL_MARKETS
+        }
+      },
+      {
+        name: urls.URL_MARKET_OVERVIEW_ENABLED,
+        path: ":marketId/ ",
+        component: () => import("@/views/market/EnabledMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_ALL_MARKETS
+        }
+      },
+      {
+        name: urls.URL_MARKET_OVERVIEW_DISABLED,
+        path: ":marketId/disabled",
+        component: () => import("@/views/market/DisabledMarket.vue"),
         meta: {
           claim: GLOBAL_MANAGE_ALL_MARKETS
         }

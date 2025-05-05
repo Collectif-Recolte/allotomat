@@ -26,11 +26,13 @@
 <template>
   <div class="flex justify-center h-full w-full py-8 lg:py-16">
     <UiCta
-      v-if="selectedCashRegisterId !== null"
+      v-if="selectedCashRegisterId !== null && market !== null"
       class="w-full max-w-sm"
       :img-src="require('@/assets/img/scan-marchand.jpg')"
       :primary-btn-label="t('start-transaction')"
       :secondary-btn-label="t('manually-enter-card-number')"
+      :primary-btn-disabled="market.isDisabled"
+      :secondary-btn-disabled="market.isDisabled"
       primary-btn-is-action
       secondary-btn-is-action
       @onPrimaryBtnClick="emit('onUpdateStep', TRANSACTION_STEPS_SCAN, {})"
@@ -118,6 +120,7 @@ const { result, loading } = useQuery(
     query Markets {
       markets {
         id
+        isDisabled
         cashRegisters {
           id
           name
@@ -151,6 +154,8 @@ const cashRegisters = useResult(result, [], (data) => {
     marketGroups: cashRegister.marketGroups
   }));
 });
+
+const market = useResult(result, null, (data) => data.markets[0]);
 
 const cashRegisterOptions = computed(() =>
   cashRegisters.value.filter((x) => !x.isArchived).map((cashRegister) => ({ value: cashRegister.id, label: cashRegister.name }))

@@ -11,6 +11,7 @@
       :to="primaryBtnRoute"
       :label="primaryBtnLabel"
       :icon="primaryBtnIcon"
+      :is-disabled="primaryBtnDisabled"
       has-icon-left
       size="lg" />
     <PfButtonAction
@@ -19,6 +20,7 @@
       btn-style="secondary"
       :label="primaryBtnLabel"
       :icon="primaryBtnIcon"
+      :is-disabled="primaryBtnDisabled"
       has-icon-left
       size="lg"
       @click="() => emit('onPrimaryBtnClick')" />
@@ -28,13 +30,15 @@
         btn-style="link"
         tag="routerLink"
         :to="secondaryBtnRoute"
-        :label="secondaryBtnLabel" />
+        :label="secondaryBtnLabel"
+        :is-disabled="secondaryBtnDisabled" />
       <PfButtonAction
         v-else-if="secondaryBtnIsAction"
         class="w-full mb-4"
         btn-style="secondary"
         :label="secondaryBtnLabel"
         :icon="secondaryBtnIcon"
+        :is-disabled="secondaryBtnDisabled"
         has-icon-left
         size="lg"
         @click="() => emit('onSecondaryBtnClick')" />
@@ -53,11 +57,13 @@ const props = defineProps({
   primaryBtnIcon: { type: Object, default: null },
   primaryBtnRoute: { type: Object, default: null },
   primaryBtnIsAction: Boolean,
+  primaryBtnDisabled: { type: Boolean, default: false },
 
   secondaryBtnLabel: { type: String, default: "" },
   secondaryBtnIcon: { type: Object, default: null },
   secondaryBtnRoute: { type: Object, default: null },
-  secondaryBtnIsAction: Boolean
+  secondaryBtnIsAction: Boolean,
+  secondaryBtnDisabled: { type: Boolean, default: false }
 });
 
 const emit = defineEmits(["onPrimaryBtnClick", "onSecondaryBtnClick"]);
