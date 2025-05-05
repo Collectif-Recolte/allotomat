@@ -34,7 +34,6 @@ namespace Sig.App.Backend.BackgroundJobs
 
         public static void RegisterJob(IConfiguration config)
         {
-            var cronFirstDayOfMonth = Cron.Monthly();
             RecurringJob.AddOrUpdate<ExpireSubscription>("ExpireSubscription",
                 x => x.Run(),
                 Cron.Daily(),
@@ -52,7 +51,7 @@ namespace Sig.App.Backend.BackgroundJobs
 
             foreach (var subscription in subscriptions)
             {
-                if (!subscription.IsExpired && subscription.GetExpirationDate(clock) <= today)
+                if (subscription.ExpirationNotificationSentDate == null && subscription.GetLastExpirationDate(clock) <= today)
                 {
                     var projectManagers = await mediator.Send(new GetProjectProjectManagers.Query
                     {
@@ -61,7 +60,7 @@ namespace Sig.App.Backend.BackgroundJobs
 
                     var transactions = db.TransactionLogs.Where(x => x.SubscriptionId == subscription.Id);
 
-                    subscription.IsExpired = true;
+                    subscription.ExpirationNotificationSentDate = DateTime.Now;
                     await mailer.Send(new SubscriptionExpirationEmail(string.Join(";", projectManagers.Select(x => x.Email)))
                     {
                         SubscriptionName = subscription.Name,

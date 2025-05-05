@@ -4,7 +4,7 @@
 @model Sig.App.Backend.EmailTemplates.Models.SubscriptionExpirationEmail
 @{ Layout = "_EmailLayout.cshtml"; }
 
-<p>L’abonnement @Model.SubscriptionName est arrivé à échéance en date du @DateTime.Now.ToShortDateString().</p>
+<p>L’abonnement @Model.SubscriptionName est arrivé à échéance en date du @Model.Date.ToShortDateString().</p>
 <p>Voici un résumé des données associées à cet abonnement :</p>
 <ul>
     <li>Montant total chargé sur les cartes : @Model.TotalAmountLoadedOnCards.ToString("C", CultureInfo.CreateSpecificCulture("fr-CA"))</li>
@@ -18,7 +18,7 @@
 </ul>
 <p>N’hésitez pas à nous contacter si vous avez besoin d’assistance ou de précisions supplémentaires.</p>
 <br />
-<p>The subscription @Model.SubscriptionName expired on @DateTime.Now.ToShortDateString().</p>
+<p>The subscription @Model.SubscriptionName expired on @Model.Date.ToShortDateString().</p>
 <p>Here is a summary of the data associated with this subscription:</p>
 <ul>
     <li>Total amount loaded on cards: @Model.TotalAmountLoadedOnCards.ToString("C", CultureInfo.CreateSpecificCulture("en-CA"))</li>
