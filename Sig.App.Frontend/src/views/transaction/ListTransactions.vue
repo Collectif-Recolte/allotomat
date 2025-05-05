@@ -222,6 +222,7 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
         }
         subscriptions {
           id
+          isArchived
           name
           startDate
           endDate
@@ -253,6 +254,7 @@ const { result: resultOrganizations } = useQuery(
           }
           subscriptions {
             id
+            isArchived
             name
             startDate
             endDate

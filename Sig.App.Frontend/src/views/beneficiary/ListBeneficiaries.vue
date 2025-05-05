@@ -462,6 +462,7 @@ const {
           }
           subscriptions {
             id
+            isArchived
             name
             startDate
             endDate
@@ -605,6 +606,7 @@ const {
                 hasMissedPayment
                 subscription {
                   id
+                  isArchived
                   name
                   endDate
                   types {
@@ -636,6 +638,7 @@ const {
                 }
                 subscription {
                   id
+                  isArchived
                   name
                 }
               }
@@ -744,6 +747,7 @@ const {
                 hasMissedPayment
                 subscription {
                   id
+                  isArchived
                   name
                   endDate
                   types {
@@ -775,6 +779,7 @@ const {
                 }
                 subscription {
                   id
+                  isArchived
                   name
                 }
               }

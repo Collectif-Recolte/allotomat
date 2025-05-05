@@ -305,6 +305,7 @@ namespace Sig.App.Backend
             RefreshCardBalance.RegisterJob(configuration);
             DeleteUser.RegisterJob(configuration);
             DeleteBeneficiary.RegisterJob(configuration);
+            ExpireSubscription.RegisterJob(configuration);
         }
 
         private void ConfigureDbContext(DbContextOptionsBuilder options)

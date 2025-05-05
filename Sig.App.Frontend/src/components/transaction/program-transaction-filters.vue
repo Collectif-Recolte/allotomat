@@ -170,6 +170,7 @@
 <script setup>
 import { defineProps, defineEmits, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 const { t } = useI18n();
 
@@ -408,7 +409,7 @@ const availableSubscriptions = computed(() => {
   }
   let subscriptions = [];
   if (props.availableSubscriptions && props.availableSubscriptions?.length > 0) {
-    subscriptions = props.availableSubscriptions.map((x) => ({ value: x.id, label: x.name }));
+    subscriptions = props.availableSubscriptions.map((x) => ({ value: x.id, label: subscriptionName(x) }));
   }
 
   if (props.withoutSubscriptionId !== "") {

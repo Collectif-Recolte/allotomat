@@ -36,7 +36,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
             {
                 var beneficiaryCount = await db.Beneficiaries.Where(x => id == x.Organization.ProjectId).AsNoTracking().CountAsync();
                 var unspentLoyaltyFund = await db.Funds.Where(x => id == x.Card.ProjectId && x.ProductGroup.Name == ProductGroupType.LOYALTY).AsNoTracking().SumAsync(x => x.Amount);
-                var subscriptions = await db.Subscriptions.Include(x => x.BudgetAllowances).Where(x => id == x.ProjectId).AsNoTracking().ToListAsync();
+                var subscriptions = await db.Subscriptions.Include(x => x.BudgetAllowances).Where(x => id == x.ProjectId && !x.IsArchived).AsNoTracking().ToListAsync();
                 var totalActiveSubscriptionsEnvelopes = subscriptions.Where(x => (x.FundsExpirationDate >= today || !x.IsFundsAccumulable)).Sum(x => x.BudgetAllowances.Sum(y => y.OriginalFund));
                 results.Add(id, new ProjectStatsGraphType()
                 {
