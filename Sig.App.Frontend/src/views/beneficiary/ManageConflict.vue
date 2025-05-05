@@ -126,7 +126,6 @@ const { result: resultBeneficiary } = useQuery(
             subscription {
               id
               isArchived
-              isArchived
               name
               endDate
               maxNumberOfPayments
