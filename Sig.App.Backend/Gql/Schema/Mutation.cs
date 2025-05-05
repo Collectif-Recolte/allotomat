@@ -442,6 +442,28 @@ namespace Sig.App.Backend.Gql.Schema
             return true;
         }
 
+        [RequirePermission(SubscriptionPermission.ArchiveSubscription)]
+        [AnnotateErrorCodes(typeof(ArchiveSubscription))]
+        public static async Task<ArchiveSubscription.Payload> ArchiveSubscription(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<ArchiveSubscription.Input> input
+            )
+        {
+            return await mediator.Send(input.Value);
+        }
+
+        [RequirePermission(SubscriptionPermission.UnarchiveSubscription)]
+        [AnnotateErrorCodes(typeof(UnarchiveSubscription))]
+        public static async Task<UnarchiveSubscription.Payload> UnarchiveSubscription(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<UnarchiveSubscription.Input> input
+            )
+        {
+            return await mediator.Send(input.Value);
+        }
+
         [RequirePermission(OrganizationPermission.ManageOrganization)]
         [AnnotateErrorCodes(typeof(CreateBeneficiaryInOrganization))]
         public static Task<CreateBeneficiaryInOrganization.Payload> CreateBeneficiaryInOrganization(

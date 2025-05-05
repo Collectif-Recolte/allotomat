@@ -22,7 +22,7 @@
     <SubscriptionForm
       v-if="!loading"
       :project-id="subscription.project.id"
-      :subscription-name="subscription.name"
+      :subscription-name="subscriptionName(subscription)"
       :monthly-payment-moment="subscription.monthlyPaymentMoment"
       :start-date="formattedDate(subscription.startDate)"
       :end-date="formattedDate(subscription.endDate)"
@@ -50,6 +50,7 @@ import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
 
 import { URL_SUBSCRIPTION_ADMIN } from "@/lib/consts/urls";
 import { NUMBER_OF_DAYS } from "@/lib/consts/funds-expiration-trigger";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 import { formatDate, serverFormat, formattedDate } from "@/lib/helpers/date";
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
@@ -116,6 +117,7 @@ const { mutate: editSubscription } = useMutation(
       editSubscription(input: $input) {
         subscription {
           id
+          isArchived
           name
           startDate
           endDate

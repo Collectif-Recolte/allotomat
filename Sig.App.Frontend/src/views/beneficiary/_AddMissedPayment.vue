@@ -74,6 +74,7 @@ import { ref, computed, defineEmits } from "vue";
 import gql from "graphql-tag";
 import { useRouter } from "vue-router";
 import { useMutation } from "@vue/apollo-composable";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 
@@ -128,7 +129,7 @@ const subscriptionsWithMissedPayment = computed(() => {
     .map((x) => {
       return {
         id: x.subscription.id,
-        name: x.subscription.name,
+        name: subscriptionName(x.subscription),
         budgetAllowance: x.subscription.budgetAllowances.filter(
           (y) => y.organization.id === props.beneficiary.organization.id
         )[0],

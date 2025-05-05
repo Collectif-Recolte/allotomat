@@ -44,7 +44,7 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
                 manuallyAddingTransactions = await db.Transactions.OfType<ManuallyAddingFundTransaction>()
                     .Include(x => x.Transactions)
                     .Include(x => x.ExpireFundTransaction)
-                    .Where(x => request.Subscriptions.Contains(x.SubscriptionId))
+                    .Where(x => request.Subscriptions.Contains(x.SubscriptionId) && !x.Subscription.IsArchived)
                     .AsNoTracking()
                     .ToListAsync();
 
@@ -52,19 +52,20 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
                     .Include(x => x.Transactions)
                     .Include(x => x.ExpireFundTransaction)
                     .Include(x => x.SubscriptionType)
+                    .Where(x => !x.SubscriptionType.Subscription.IsArchived)
                     .AsNoTracking()
                     .ToListAsync();
                 subscriptionTransactions = subscriptionTransactions.Where(x => request.Subscriptions.Contains(x.SubscriptionType.SubscriptionId)).ToList();
 
                 expiredTransactions = await db.Transactions.OfType<ExpireFundTransaction>()
                     .Include(x => x.ExpiredSubscription)
-                    .Where(x => request.Subscriptions.Contains(x.ExpiredSubscriptionId))
+                    .Where(x => request.Subscriptions.Contains(x.ExpiredSubscriptionId) && !x.ExpiredSubscription.IsArchived)
                     .AsNoTracking()
                     .ToListAsync();
 
                 foreach (var organization in project.Organizations)
                 {
-                    organization.BudgetAllowances = organization.BudgetAllowances.Where(x => request.Subscriptions.Contains(x.SubscriptionId)).ToList();
+                    organization.BudgetAllowances = organization.BudgetAllowances.Where(x => request.Subscriptions.Contains(x.SubscriptionId) && !x.Subscription.IsArchived).ToList();
                 }
             }
             else
@@ -72,6 +73,7 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
                 manuallyAddingTransactions = await db.Transactions.OfType<ManuallyAddingFundTransaction>()
                     .Include(x => x.Transactions)
                     .Include(x => x.ExpireFundTransaction)
+                    .Where(x => !x.Subscription.IsArchived)
                     .AsNoTracking()
                     .ToListAsync();
 
@@ -79,11 +81,13 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
                     .Include(x => x.Transactions)
                     .Include(x => x.ExpireFundTransaction)
                     .Include(x => x.SubscriptionType)
+                    .Where(x => !x.SubscriptionType.Subscription.IsArchived)
                     .AsNoTracking()
                     .ToListAsync();
 
                 expiredTransactions = await db.Transactions.OfType<ExpireFundTransaction>()
                     .Include(x => x.ExpiredSubscription)
+                    .Where(x => !x.ExpiredSubscription.IsArchived)
                     .AsNoTracking()
                     .ToListAsync();
             }
@@ -103,13 +107,13 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
                 var organizationSubscriptionTransactions = subscriptionTransactions.Where(x => x.OrganizationId == organization.Id).ToList();
                 var organizationExpiredTransactions = expiredTransactions.Where(x => x.OrganizationId == organization.Id).ToList();
 
-                var totalActiveSubscriptionsEnvelopes = organization.BudgetAllowances.Where(x => x.Subscription.FundsExpirationDate >= today || !x.Subscription.IsFundsAccumulable).Sum(x => x.OriginalFund);
+                var totalActiveSubscriptionsEnvelopes = organization.BudgetAllowances.Where(x => x.Subscription.FundsExpirationDate >= today || !x.Subscription.IsFundsAccumulable && !x.Subscription.IsArchived).Sum(x => x.OriginalFund);
 
                 payload.Items.Add(new PayloadItem()
                 {
                     Organization = organization,
                     TotalActiveSubscriptionsEnvelopes = totalActiveSubscriptionsEnvelopes,
-                    RemainingPerEnvelope = organization.BudgetAllowances.Where(x => x.Subscription.FundsExpirationDate >= today || !x.Subscription.IsFundsAccumulable).Sum(x => x.AvailableFund),
+                    RemainingPerEnvelope = organization.BudgetAllowances.Where(x => x.Subscription.FundsExpirationDate >= today || !x.Subscription.IsFundsAccumulable && !x.Subscription.IsArchived).Sum(x => x.AvailableFund),
                     BalanceOnCards = GetBalanceOnCards(organizationManuallyAddingTransactions, organizationSubscriptionTransactions),
                     CardSpendingAmounts = GetCardSpendingAmounts(organizationManuallyAddingTransactions, organizationSubscriptionTransactions),
                     TotalAllocatedOnCards = GetTotalAllocatedOnCardsAmounts(organizationManuallyAddingTransactions, organizationSubscriptionTransactions),

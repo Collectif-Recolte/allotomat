@@ -77,6 +77,7 @@ import { ref, computed, watch } from "vue";
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 import Loading from "@/components/app/loading";
 import OrganizationStatsTable from "@/components/dashboard/organization-stats-table.vue";
@@ -96,6 +97,7 @@ const { result: resultProjects, loading } = useQuery(
         id
         subscriptions {
           id
+          isArchived
           name
           startDate
           endDate
@@ -133,6 +135,7 @@ watch(resultProjects, (value) => {
 
   var subscriptions = [...value.projects[0].subscriptions];
   availableSubscriptions.value = subscriptions
+    .filter((subscription) => !subscription.isArchived)
     .sort((a, b) => {
       const dateA = a.isFundsAccumulable ? new Date(a.fundsExpirationDate) : new Date(a.endDate);
       const dateB = b.isFundsAccumulable ? new Date(b.fundsExpirationDate) : new Date(b.endDate);
@@ -141,7 +144,7 @@ watch(resultProjects, (value) => {
     .map((subscription) => {
       return {
         value: subscription.id,
-        label: subscription.name
+        label: subscriptionName(subscription)
       };
     });
 });
