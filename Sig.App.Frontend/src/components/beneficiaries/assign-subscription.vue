@@ -44,7 +44,7 @@
     <div v-for="(option, index) in props.options" :key="index">
       <PfFormInputCheckbox
         :value="isChecked(option.id)"
-        :label="option.name"
+        :label="subscriptionName(option)"
         :checked="isChecked(option.id)"
         :disabled="option.dontHaveBudgetAllowance || option.dontHaveBeneficiaryType || !option.isBudgetAllowanceIsEnough"
         @input="(e) => updateCheckbox(option.id, e)">
@@ -104,6 +104,7 @@
 import { computed, defineProps, defineEmits } from "vue";
 import { useI18n } from "vue-i18n";
 
+import { subscriptionName } from "@/lib/helpers/subscription";
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { formatDate, textualFormat } from "@/lib/helpers/date";
 

@@ -128,6 +128,7 @@
 import { defineProps, defineEmits, computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 
+import { subscriptionName } from "@/lib/helpers/subscription";
 import { BY_FUND_AVAILABLE_ON_CARD, ID1, LAST_NAME, SORT_ORDER } from "@/lib/consts/beneficiary-sort-order";
 
 const { t } = useI18n();
@@ -330,7 +331,7 @@ const availableSubscriptions = computed(() => {
   }
   let subscriptions = [];
   if (props.availableSubscriptions && props.availableSubscriptions?.length > 0) {
-    subscriptions = props.availableSubscriptions.map((x) => ({ value: x.id, label: x.name }));
+    subscriptions = props.availableSubscriptions.map((x) => ({ value: x.id, label: subscriptionName(x) }));
   }
 
   if (props.withoutSubscriptionId !== "") {

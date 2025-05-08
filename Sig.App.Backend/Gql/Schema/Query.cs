@@ -167,6 +167,25 @@ namespace Sig.App.Backend.Gql.Schema
             }
         }
 
+        [RequirePermission(GlobalPermission.ManageProjects, GlobalPermission.ManageSpecificProject)]
+        [Description("All base projects manageable by current user")]
+        public static async Task<IEnumerable<BaseProjectGraphType>> AllProjects(this GqlQuery _, IAppUserContext ctx, [Inject] AppDbContext db, [Inject] PermissionService permissionService)
+        {
+            var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
+            if (globalPermissions.Contains(GlobalPermission.ManageProjects))
+            {
+                return await db.Projects.Select(x => new BaseProjectGraphType(x)).ToListAsync();
+            }
+            else if (globalPermissions.Contains(GlobalPermission.ManageSpecificProject))
+            {
+                return await ctx.DataLoader.LoadBaseProjectOwnedByUser(ctx.CurrentUserId).GetResultAsync();
+            }
+            else
+            {
+                return new BaseProjectGraphType[0];
+            }
+        }
+
         [RequirePermission(ProjectPermission.ManageProject)]
         public static IDataLoaderResult<ProjectGraphType> Project(this GqlQuery _, IAppUserContext ctx, Id id)
         {

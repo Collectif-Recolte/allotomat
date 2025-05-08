@@ -119,6 +119,7 @@ import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 
 import { formatDate, dateUtc, textualFormat, serverFormat, formattedDate } from "@/lib/helpers/date";
 import { getMoneyFormat } from "@/lib/helpers/money";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 import { useOrganizationStore } from "@/lib/store/organization";
 import { useNotificationsStore } from "@/lib/store/notifications";
@@ -199,6 +200,7 @@ const { result: resultOrganization, loading } = useQuery(
           availableFund
           subscription {
             id
+            isArchived
             name
             fundsExpirationDate
             monthlyPaymentMoment
@@ -257,7 +259,7 @@ const subscriptionOptions = useResult(resultOrganization, null, (data) => {
           break;
       }
       label = t("subscription-label", {
-        name: x.subscription.name,
+        name: subscriptionName(x.subscription),
         monthlyPaymentMoment
       });
 

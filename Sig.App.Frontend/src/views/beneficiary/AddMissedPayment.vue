@@ -78,6 +78,7 @@ import { object, string, lazy } from "yup";
 
 import { formatDate, dateUtc, textualFormat } from "@/lib/helpers/date";
 import { getMoneyFormat } from "@/lib/helpers/money";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 
@@ -118,6 +119,7 @@ const { result: resultBeneficiary } = useQuery(
             subscription {
               id
               name
+              isArchived
               fundsExpirationDate
               isFundsAccumulable
               maxNumberOfPayments
@@ -161,11 +163,11 @@ const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
 
       if (x.subscription.fundsExpirationDate !== null) {
         label = t("subscription-label", {
-          name: x.subscription.name,
+          name: subscriptionName(x.subscription),
           date: formatDate(dateUtc(x.subscription.fundsExpirationDate), textualFormat)
         });
       } else {
-        label = x.subscription.name;
+        label = subscriptionName(x.subscription);
       }
 
       return {

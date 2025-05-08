@@ -331,6 +331,22 @@ export default [
         meta: {
           claim: GLOBAL_MANAGE_ALL_MARKETS
         }
+      },
+      {
+        name: urls.URL_MARKET_ENABLED,
+        path: ":marketId/enabled",
+        component: () => import("@/views/market/EnabledMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_ALL_MARKETS
+        }
+      },
+      {
+        name: urls.URL_MARKET_DISABLED,
+        path: ":marketId/disabled",
+        component: () => import("@/views/market/DisabledMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_ALL_MARKETS
+        }
       }
     ]
   },
@@ -412,6 +428,22 @@ export default [
         name: urls.URL_MARKET_OVERVIEW_MANAGE_MANAGERS,
         path: ":marketId/manage-managers",
         component: () => import("@/views/market/EditManagers.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_ALL_MARKETS
+        }
+      },
+      {
+        name: urls.URL_MARKET_OVERVIEW_ENABLED,
+        path: ":marketId/ ",
+        component: () => import("@/views/market/EnabledMarket.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_ALL_MARKETS
+        }
+      },
+      {
+        name: urls.URL_MARKET_OVERVIEW_DISABLED,
+        path: ":marketId/disabled",
+        component: () => import("@/views/market/DisabledMarket.vue"),
         meta: {
           claim: GLOBAL_MANAGE_ALL_MARKETS
         }
@@ -650,6 +682,22 @@ export default [
         name: urls.URL_SUBSCRIPTION_DELETE,
         path: ":subscriptionId/delete",
         component: () => import("@/views/subscription/DeleteSubscription.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SUBSCRIPTIONS
+        }
+      },
+      {
+        name: urls.URL_SUBSCRIPTION_ARCHIVE,
+        path: ":subscriptionId/archive",
+        component: () => import("@/views/subscription/ArchiveSubscription.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SUBSCRIPTIONS
+        }
+      },
+      {
+        name: urls.URL_SUBSCRIPTION_UNARCHIVE,
+        path: ":subscriptionId/unarchive",
+        component: () => import("@/views/subscription/UnarchiveSubscription.vue"),
         meta: {
           claim: GLOBAL_MANAGE_SUBSCRIPTIONS
         }

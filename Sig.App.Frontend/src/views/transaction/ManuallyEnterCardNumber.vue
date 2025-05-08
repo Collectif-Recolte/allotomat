@@ -12,6 +12,8 @@
       "card-number-invalid": "Card number does not match any card linked to the program.",
       "transaction-in-program-name": "Purchase on behalf of program",
       "scan-card-btn": "Scan a card",
+      "select-cash-register": "Cash Register",
+      "choose-cash-register": "Select"
     },
     "fr": {
       "select-market": "Marchand",
@@ -25,6 +27,8 @@
       "card-number-invalid": "Le numéro de carte ne correspond à aucune carte reliée au programme.",
       "transaction-in-program-name": "Achat au nom du programme",
       "scan-card-btn": "Scanner une carte",
+      "select-cash-register": "Caisse",
+      "choose-cash-register": "Sélectionner"
     }
   }
   </i18n>
@@ -50,6 +54,17 @@
             :placeholder="t('choose-market')"
             :label="t('select-market')"
             :options="markets"
+            :errors="fieldErrors"
+            @input="onMarketSelected" />
+        </Field>
+        <Field v-slot="{ field: inputField, errors: fieldErrors }" name="cashRegisterId">
+          <PfFormInputSelect
+            id="cashRegisterId"
+            v-bind="inputField"
+            :disabled="!selectedMarket"
+            :placeholder="t('choose-cash-register')"
+            :label="t('select-cash-register')"
+            :options="cashRegisters"
             :errors="fieldErrors" />
         </Field>
         <div>
@@ -93,6 +108,7 @@ import { useNotificationsStore } from "@/lib/store/notifications";
 import QRCodeScanner from "@/components/transaction/qr-code-scanner.vue";
 
 const enterCardNumber = ref(true);
+const selectedMarket = ref("");
 
 const { t } = useI18n();
 const { resolveClient } = useApolloClient();
@@ -106,6 +122,7 @@ const emit = defineEmits(["onUpdateStep", "onCloseModal"]);
 const validationSchema = computed(() =>
   object({
     marketId: string().label(t("select-market")).required(),
+    cashRegisterId: string().label(t("select-cash-register")).required(),
     cardNumber: string()
       .label(t("card-number"))
       .test({
@@ -135,21 +152,38 @@ const { result: resultProjects } = useQuery(
         markets {
           id
           name
+          cashRegisters {
+            id
+            name
+          }
         }
       }
     }
   `
 );
 const markets = useResult(resultProjects, null, (data) => {
-  return data.projects[0].markets.map((x) => {
-    return {
-      label: x.name,
-      value: x.id
-    };
-  });
+  return data.projects[0].markets
+    .map((x) => {
+      return {
+        label: x.name,
+        value: x.id
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
 });
 const project = useResult(resultProjects, null, (data) => {
   return data.projects[0];
+});
+const cashRegisters = useResult(resultProjects, null, (data) => {
+  return data.projects[0].markets
+    .find((x) => x.id === selectedMarket.value)
+    .cashRegisters.map((x) => {
+      return {
+        label: x.name,
+        value: x.id
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
 });
 
 async function checkQRCode(cardId, callback) {
@@ -204,10 +238,15 @@ async function nextStep(values) {
   } else {
     emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
       marketId: values.marketId,
+      cashRegisterId: values.cashRegisterId,
       cardNumber: values.cardNumber,
       cardId: card.id
     });
   }
+}
+
+function onMarketSelected(e) {
+  selectedMarket.value = e;
 }
 
 function closeModal() {

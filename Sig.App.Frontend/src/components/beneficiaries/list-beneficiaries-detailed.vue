@@ -16,6 +16,7 @@
       :key="beneficiary.id"
       :beneficiary="beneficiary"
       :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous"
+      :is-all-group-selected="props.isAllGroupSelected"
       :organization="props.organization" />
     <div
       v-if="!administrationSubscriptionsOffPlatform"

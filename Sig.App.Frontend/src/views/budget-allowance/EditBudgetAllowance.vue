@@ -58,6 +58,7 @@ import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
 
+import { subscriptionName } from "@/lib/helpers/subscription";
 import { formatDate, dateUtc, textualFormat } from "@/lib/helpers/date";
 import { useNotificationsStore } from "@/lib/store/notifications";
 import { URL_SUBSCRIPTION_DELETE_BUDGET_ALLOWANCE, URL_SUBSCRIPTION_ADMIN } from "@/lib/consts/urls";
@@ -160,7 +161,7 @@ function getSubscriptionName() {
     return "";
   }
 
-  return `${subscription.value.name} (${formatDate(dateUtc(subscription.value.startDate), textualFormat)}${t(
+  return `${subscriptionName(subscription.value)} (${formatDate(dateUtc(subscription.value.startDate), textualFormat)}${t(
     "date-separator"
   )}${formatDate(dateUtc(subscription.value.endDate), textualFormat)})`;
 }
@@ -184,7 +185,7 @@ async function saveBudgetAllowance(input) {
     });
     addSuccess(
       t("add-budget-allowance-success-notification", {
-        subscriptionName: subscription.value.name,
+        subscriptionName: subscriptionName(subscription.value),
         amount: getMoneyFormat(input.originalFund)
       })
     );

@@ -7,7 +7,9 @@
       "next-step": "Next",
       "cancel": "Cancel",
       "transaction-in-project-name": "Purchase on behalf of project",
-      "transaction-in-organization-name": "Purchase on behalf of organization"
+      "transaction-in-organization-name": "Purchase on behalf of organization",
+      "select-cash-register": "Cash Register",
+      "choose-cash-register": "Select"
     },
     "fr": {
       "sub-title": "Achat au nom du programme",
@@ -16,7 +18,9 @@
       "next-step": "Suivant",
       "cancel": "Annuler",
       "transaction-in-project-name": "Achat au nom d'un programme",
-      "transaction-in-organization-name": "Achat au nom d'une organisation"
+      "transaction-in-organization-name": "Achat au nom d'une organisation",
+      "select-cash-register": "Caisse",
+      "choose-cash-register": "Sélectionner"
     }
   }
   </i18n>
@@ -49,6 +53,17 @@
               :placeholder="t('choose-market')"
               :label="t('select-market')"
               :options="markets"
+              :errors="fieldErrors"
+              @input="onMarketSelected" />
+          </Field>
+          <Field v-slot="{ field: inputField, errors: fieldErrors }" name="cashRegisterId">
+            <PfFormInputSelect
+              id="cashRegisterId"
+              v-bind="inputField"
+              :disabled="!selectedMarket"
+              :placeholder="t('choose-cash-register')"
+              :label="t('select-cash-register')"
+              :options="cashRegisters"
               :errors="fieldErrors" />
           </Field>
         </PfFormSection>
@@ -59,7 +74,7 @@
 
 <script setup>
 import gql from "graphql-tag";
-import { computed, defineProps, defineEmits } from "vue";
+import { computed, defineProps, defineEmits, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { string, object } from "yup";
 import { useQuery, useResult } from "@vue/apollo-composable";
@@ -74,24 +89,31 @@ const { userType } = storeToRefs(useAuthStore());
 
 const emit = defineEmits(["onUpdateStep", "onCloseModal"]);
 
+const selectedMarket = ref("");
+
 const props = defineProps({
   marketId: {
+    type: String,
+    default: ""
+  },
+  cashRegisterId: {
     type: String,
     default: ""
   }
 });
 
 const initialValues = computed(() => {
-  return { marketId: props.marketId };
+  return { marketId: props.marketId, cashRegisterId: props.cashRegisterId };
 });
 
 const initialTouched = computed(() => {
-  return { marketId: props.marketId !== "" };
+  return { marketId: props.marketId !== "", cashRegisterId: props.cashRegisterId !== "" };
 });
 
 const validationSchema = computed(() =>
   object({
-    marketId: string().label(t("select-market")).required()
+    marketId: string().label(t("select-market")).required(),
+    cashRegisterId: string().label(t("select-cash-register")).required()
   })
 );
 
@@ -103,24 +125,42 @@ const { result: resultProjects } = useQuery(
         markets {
           id
           name
+          cashRegisters {
+            id
+            name
+          }
         }
       }
     }
   `
 );
 const projectMarkets = useResult(resultProjects, null, (data) => {
-  if (data.projects[0].markets.length === 1) {
+  if (data.projects[0].markets.length === 1 && data.projects[0].markets[0].cashRegisters.length === 1) {
     emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
-      marketId: data.projects[0].markets[0].id
+      marketId: data.projects[0].markets[0].id,
+      cashRegisterId: data.projects[0].markets[0].cashRegisters[0].id
     });
     return [];
   }
-  return data.projects[0].markets.map((x) => {
-    return {
-      label: x.name,
-      value: x.id
-    };
-  });
+  return data.projects[0].markets
+    .map((x) => {
+      return {
+        label: x.name,
+        value: x.id
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
+});
+const projectCashRegisters = useResult(resultProjects, null, (data) => {
+  return data.projects[0].markets
+    .find((x) => x.id === selectedMarket.value)
+    .cashRegisters.map((x) => {
+      return {
+        label: x.name,
+        value: x.id
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
 });
 
 const { result: resultOrganizations } = useQuery(
@@ -131,24 +171,42 @@ const { result: resultOrganizations } = useQuery(
         markets {
           id
           name
+          cashRegisters {
+            id
+            name
+          }
         }
       }
     }
   `
 );
 const organizationMarkets = useResult(resultOrganizations, null, (data) => {
-  if (data.organizations[0].markets.length === 1) {
+  if (data.organizations[0].markets.length === 1 && data.organizations[0].markets[0].cashRegisters.length === 1) {
     emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
-      marketId: data.organizations[0].markets[0].id
+      marketId: data.organizations[0].markets[0].id,
+      cashRegisterId: data.organizations[0].markets[0].cashRegisters[0].id
     });
     return [];
   }
-  return data.organizations[0].markets.map((x) => {
-    return {
-      label: x.name,
-      value: x.id
-    };
-  });
+  return data.organizations[0].markets
+    .map((x) => {
+      return {
+        label: x.name,
+        value: x.id
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
+});
+const organizationCashRegisters = useResult(resultOrganizations, null, (data) => {
+  return data.organizations[0].markets
+    .find((x) => x.id === selectedMarket.value)
+    .cashRegisters.map((x) => {
+      return {
+        label: x.name,
+        value: x.id
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
 });
 
 const markets = computed(() => {
@@ -158,9 +216,21 @@ const markets = computed(() => {
   return projectMarkets.value;
 });
 
+const cashRegisters = computed(() => {
+  if (userType.value === USER_TYPE_ORGANIZATIONMANAGER) {
+    return organizationCashRegisters.value;
+  }
+  return projectCashRegisters.value;
+});
+
+function onMarketSelected(e) {
+  selectedMarket.value = e;
+}
+
 async function nextStep(values) {
   emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
-    marketId: values.marketId
+    marketId: values.marketId,
+    cashRegisterId: values.cashRegisterId
   });
 }
 

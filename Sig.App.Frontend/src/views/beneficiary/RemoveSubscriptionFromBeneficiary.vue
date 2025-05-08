@@ -42,6 +42,7 @@ import { storeToRefs } from "pinia";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 import { useAuthStore } from "@/lib/store/auth";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
 import { USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
@@ -108,7 +109,7 @@ function getBeneficiaryName() {
 }
 
 function getSubscriptionName() {
-  return subscription.value ? subscription.value.name : "";
+  return subscription.value ? subscriptionName(subscription.value) : "";
 }
 
 async function removeBeneficiaryFromSubscription() {
@@ -119,7 +120,9 @@ async function removeBeneficiaryFromSubscription() {
     }
   });
 
-  addSuccess(t("remove-beneficiary-from-subscription-success-notification", { subscriptionName: subscription.value.name }));
+  addSuccess(
+    t("remove-beneficiary-from-subscription-success-notification", { subscriptionName: subscriptionName(subscription.value) })
+  );
   router.push({
     name: URL_BENEFICIARY_ADMIN
   });

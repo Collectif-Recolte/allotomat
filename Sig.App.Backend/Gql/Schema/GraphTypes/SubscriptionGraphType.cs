@@ -25,6 +25,8 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public FundsExpirationTrigger TriggerFundExpiration => subscription.TriggerFundExpiration;
         public int? NumberDaysUntilFundsExpire => subscription.NumberDaysUntilFundsExpire;
 
+        public bool IsArchived => subscription.IsArchived;
+        public bool IsExpired => subscription.ExpirationNotificationSentDate != null;
         public int TotalPayment => subscription.GetTotalPayment();
 
         public bool HasMissedPayment([Inject] IClock clock)

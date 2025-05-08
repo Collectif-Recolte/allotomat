@@ -637,6 +637,9 @@ namespace Sig.App.Backend.Migrations
                     b.Property<bool>("IsArchived")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsDisabled")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -794,8 +797,14 @@ namespace Sig.App.Backend.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("ExpirationNotificationSentDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("FundsExpirationDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsFundsAccumulable")
                         .HasColumnType("bit");

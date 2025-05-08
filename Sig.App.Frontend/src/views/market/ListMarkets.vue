@@ -101,6 +101,7 @@ const { result, loading, refetch } = useQuery(
           id
           name
           isArchived
+          isDisabled
         }
       }
     }

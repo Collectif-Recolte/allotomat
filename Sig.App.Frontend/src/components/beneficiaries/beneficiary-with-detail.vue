@@ -66,7 +66,7 @@
             <li v-for="item in getBeneficiarySubscriptions()" :key="item.subscription.id" class="max-w-full">
               <PfTag
                 class="max-w-full"
-                :label="item.subscription.name"
+                :label="subscriptionName(item.subscription)"
                 is-dark-theme
                 :bg-color-class="isSubscriptionPaymentConflict(item) ? 'bg-red-500' : 'bg-primary-700'"
                 can-dismiss
@@ -133,7 +133,8 @@
         :beneficiary="beneficiary"
         :organization="props.organization"
         :beneficiaries-are-anonymous="props.beneficiariesAreAnonymous"
-        :have-subscription-conflict="isBeneficiaryPaymentConflict()" />
+        :have-subscription-conflict="isBeneficiaryPaymentConflict()"
+        :is-all-group-selected="props.isAllGroupSelected" />
     </div>
   </div>
 </template>
@@ -148,7 +149,7 @@ import ICON_CREDIT_CARD from "@/lib/icons/credit-card.json";
 import ICON_INFO from "@/lib/icons/info.json";
 
 import { URL_BENEFICIARY_REMOVE_SUBSCRIPTION } from "@/lib/consts/urls";
-
+import { subscriptionName } from "@/lib/helpers/subscription";
 import { formatDate, dateUtc, regularFormat } from "@/lib/helpers/date";
 
 const { t } = useI18n();
@@ -195,6 +196,10 @@ const props = defineProps({
   organization: {
     type: Object,
     default: null
+  },
+  isAllGroupSelected: {
+    type: Boolean,
+    default: false
   }
 });
 

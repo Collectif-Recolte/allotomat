@@ -132,6 +132,7 @@ const { result: resultBeneficiaries, refetch } = useQuery(
                 subscription {
                   id
                   name
+                  isArchived
                 }
               }
             }

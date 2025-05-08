@@ -26,6 +26,7 @@
     <AddTransaction
       v-else-if="activeStep === TRANSACTION_STEPS_ADD"
       :market-id="marketId"
+      :cash-register-id="cashRegisterId"
       :card-id="cardId"
       @onUpdateStep="updateStep"
       @onCloseModal="closeModal" />
@@ -108,6 +109,7 @@ const cardId = ref("");
 const cardNumber = ref("");
 const transactionId = ref("");
 const marketId = ref("");
+const cashRegisterId = ref("");
 const beneficiary = ref(null);
 
 const hasTitle = computed(() => {
@@ -120,6 +122,7 @@ const updateStep = (currentStep, values) => {
   switch (currentStep) {
     case TRANSACTION_STEPS_ADD:
       marketId.value = values.marketId;
+      cashRegisterId.value = values.cashRegisterId;
       if (values.cardNumber !== undefined) {
         cardNumber.value = values.cardNumber.replaceAll("-", " ");
       }

@@ -66,7 +66,7 @@ import { useRoute, useRouter } from "vue-router";
 import { ref, computed } from "vue";
 
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
-
+import { subscriptionName } from "@/lib/helpers/subscription";
 import { useNotificationsStore } from "@/lib/store/notifications";
 
 import { dateUtc } from "@/lib/helpers/date";
@@ -125,6 +125,7 @@ const { result: resultBeneficiary } = useQuery(
             paymentReceived
             subscription {
               id
+              isArchived
               name
               endDate
               maxNumberOfPayments
@@ -229,7 +230,7 @@ const beneficiarySubscriptionsWithConflict = computed(() => {
       }
 
       subscriptions.push({
-        label: beneficiarySubscription.subscription.name,
+        label: subscriptionName(beneficiarySubscription.subscription),
         value: beneficiarySubscription.subscription.id,
         previousPaymentAmount,
         newPaymentAmount,
