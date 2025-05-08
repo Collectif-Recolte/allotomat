@@ -22,12 +22,12 @@
         <slot name="prependElements" />
         <div class="flex flex-row gap-x-4">
           <PfTooltip
+            v-if="props.hasActiveFilters"
             v-slot="{ tooltipId }"
             :class="itemsCanWrap ? 'mb-3 sm:mb-0' : 'mb-0'"
             :label="t('reset-filters')"
             position="top">
             <PfButtonAction
-              v-if="props.hasActiveFilters"
               class="min-w-0 my-3 sm:my-0"
               btn-style="link"
               size="sm"

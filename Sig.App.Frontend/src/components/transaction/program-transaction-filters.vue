@@ -94,75 +94,77 @@
       </div>
     </template>
     <template #appendElements>
-      <UiFilterSelect :label="t('organizations')" :active-filters-count="organizationActiveFiltersCount">
-        <PfFormInputCheckboxGroup
-          v-if="availableOrganizations.length > 0"
-          id="organizations"
-          is-filter
-          :value="selectedOrganizations"
-          :options="availableOrganizations"
-          @input="onOrganizationsChecked" />
-      </UiFilterSelect>
-      <UiFilterSelect :label="t('beneficiary-type')" :active-filters-count="beneficiaryTypeActiveFiltersCount">
-        <PfFormInputCheckboxGroup
-          v-if="availableBeneficiaryTypes.length > 0"
-          id="beneficiary-types"
-          class="mt-3"
-          is-filter
-          :value="selectedBeneficiaryTypes"
-          :options="availableBeneficiaryTypes"
-          @input="onBeneficiaryTypesChecked" />
-      </UiFilterSelect>
-      <UiFilterSelect :label="t('subscription')" :active-filters-count="subscriptionActiveFiltersCount">
-        <PfFormInputCheckboxGroup
-          v-if="availableSubscriptions.length > 0"
-          id="subscriptions"
-          class="mt-3"
-          is-filter
-          :value="selectedSubscriptions"
-          :options="availableSubscriptions"
-          @input="onSubscriptionsChecked" />
-      </UiFilterSelect>
-      <UiFilterSelect :label="t('market')" :active-filters-count="marketActiveFiltersCount">
-        <PfFormInputCheckboxGroup
-          v-if="availableMarkets.length > 0"
-          id="markets"
-          class="mt-3"
-          is-filter
-          :value="selectedMarkets"
-          :options="availableMarkets"
-          @input="onMarketsChecked" />
-      </UiFilterSelect>
-      <UiFilterSelect :label="t('cash-register')" :active-filters-count="cashRegisterActiveFiltersCount">
-        <PfFormInputCheckboxGroup
-          v-if="availableCashRegister.length > 0"
-          id="cashRegisters"
-          class="mt-3"
-          is-filter
-          :value="selectedCashRegisters"
-          :options="availableCashRegister"
-          @input="onCashRegistersChecked" />
-      </UiFilterSelect>
-      <UiFilterSelect :label="t('transaction-log-types')" :active-filters-count="transactionTypeActiveFiltersCount">
-        <PfFormInputCheckboxGroup
-          v-if="availableTransactionTypes.length > 0 && !props.hideTransactionType"
-          id="transactionTypes"
-          class="mt-3"
-          is-filter
-          :value="selectedTransactionTypes"
-          :options="availableTransactionTypes"
-          @input="onTransactionTypesChecked" />
-      </UiFilterSelect>
-      <UiFilterSelect :label="t('gift-card-transaction-types')" :active-filters-count="giftCardTransactionTypeActiveFiltersCount">
-        <PfFormInputCheckboxGroup
-          v-if="availableGiftCardTransactionTypes.length > 0 && !props.hideGiftCardTransactionType"
-          id="giftCardTransactionTypes"
-          class="mt-3"
-          is-filter
-          :value="selectedGiftCardTransactionTypes"
-          :options="availableGiftCardTransactionTypes"
-          @input="onGiftCardTransactionTypesChecked" />
-      </UiFilterSelect>
+      <div class="flex flex-row flex-wrap gap-2 justify-end">
+        <UiFilterSelect :label="t('organizations')" :active-filters-count="organizationActiveFiltersCount">
+          <PfFormInputCheckboxGroup
+            v-if="availableOrganizations.length > 0"
+            id="organizations"
+            is-filter
+            :value="selectedOrganizations"
+            :options="availableOrganizations"
+            @input="onOrganizationsChecked" />
+        </UiFilterSelect>
+        <UiFilterSelect :label="t('beneficiary-type')" :active-filters-count="beneficiaryTypeActiveFiltersCount">
+          <PfFormInputCheckboxGroup
+            v-if="availableBeneficiaryTypes.length > 0"
+            id="beneficiary-types"
+            class="mt-3"
+            is-filter
+            :value="selectedBeneficiaryTypes"
+            :options="availableBeneficiaryTypes"
+            @input="onBeneficiaryTypesChecked" />
+        </UiFilterSelect>
+        <UiFilterSelect :label="t('subscription')" :active-filters-count="subscriptionActiveFiltersCount">
+          <PfFormInputCheckboxGroup
+            v-if="availableSubscriptions.length > 0"
+            id="subscriptions"
+            class="mt-3"
+            is-filter
+            :value="selectedSubscriptions"
+            :options="availableSubscriptions"
+            @input="onSubscriptionsChecked" />
+        </UiFilterSelect>
+        <UiFilterSelect :label="t('market')" :active-filters-count="marketActiveFiltersCount">
+          <PfFormInputCheckboxGroup
+            v-if="availableMarkets.length > 0"
+            id="markets"
+            class="mt-3"
+            is-filter
+            :value="selectedMarkets"
+            :options="availableMarkets"
+            @input="onMarketsChecked" />
+        </UiFilterSelect>
+        <UiFilterSelect :label="t('cash-register')" :active-filters-count="cashRegisterActiveFiltersCount">
+          <PfFormInputCheckboxGroup
+            v-if="availableCashRegister.length > 0"
+            id="cashRegisters"
+            class="mt-3"
+            is-filter
+            :value="selectedCashRegisters"
+            :options="availableCashRegister"
+            @input="onCashRegistersChecked" />
+        </UiFilterSelect>
+        <UiFilterSelect :label="t('transaction-log-types')" :active-filters-count="transactionTypeActiveFiltersCount">
+          <PfFormInputCheckboxGroup
+            v-if="availableTransactionTypes.length > 0 && !props.hideTransactionType"
+            id="transactionTypes"
+            class="mt-3"
+            is-filter
+            :value="selectedTransactionTypes"
+            :options="availableTransactionTypes"
+            @input="onTransactionTypesChecked" />
+        </UiFilterSelect>
+        <UiFilterSelect :label="t('gift-card-transaction-types')" :active-filters-count="giftCardTransactionTypeActiveFiltersCount">
+          <PfFormInputCheckboxGroup
+            v-if="availableGiftCardTransactionTypes.length > 0 && !props.hideGiftCardTransactionType"
+            id="giftCardTransactionTypes"
+            class="mt-3"
+            is-filter
+            :value="selectedGiftCardTransactionTypes"
+            :options="availableGiftCardTransactionTypes"
+            @input="onGiftCardTransactionTypesChecked" />
+        </UiFilterSelect>
+      </div>
     </template>
   </UiFilter>
 </template>
