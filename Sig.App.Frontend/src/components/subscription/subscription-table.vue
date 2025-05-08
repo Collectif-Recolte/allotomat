@@ -4,8 +4,9 @@
           "date-separator": " to ",
           "options": "Options",
           "subscription-delete": "Delete",
-          "subscription-archived": "Archived",
-          "subscription-unarchived": "Unarchived",
+          "subscription-archive": "Archived",
+          "subscription-archived": "(Archived)",
+          "subscription-unarchive": "Unarchived",
           "subscription-edit": "Edit configuration",
           "subscription-edit-budget-allowance": "Manage budgets allowances",
           "subscription-name": "Subscription period name",
@@ -17,8 +18,9 @@
           "date-separator": " au ",
           "options": "Options",
           "subscription-delete": "Supprimer",
-          "subscription-archived": "Archiver",
-          "subscription-unarchived": "Désarchiver",
+          "subscription-archive": "Archiver",
+          "subscription-archived": "Archivé",
+          "subscription-unarchive": "Désarchiver",
           "subscription-edit": "Modifier la configuration",
           "subscription-edit-budget-allowance": "Configurer les enveloppes",
           "subscription-name": "Nom de la période",
@@ -32,16 +34,21 @@
 <template>
   <UiTable v-if="props.subscriptions" :items="props.subscriptions" :cols="cols">
     <template #default="slotProps">
-      <td :class="{ 'text-primary-300': slotProps.item.isArchived }">
+      <td :class="{ 'text-primary-500': slotProps.item.isArchived }">
+        <span
+          v-if="slotProps.item.isArchived"
+          class="bg-grey-50 border border-grey-100 rounded-md px-1.5 py-0.5 text-xs font-semibold mr-1">
+          {{ t("subscription-archived") }}
+        </span>
         {{ getSubscriptionName(slotProps.item) }}
       </td>
-      <td v-if="showSubscriptionPeriod" :class="{ 'text-primary-300': slotProps.item.isArchived }">
+      <td v-if="showSubscriptionPeriod" :class="{ 'text-primary-500': slotProps.item.isArchived }">
         {{ getSubscriptionPeriod(slotProps.item) }}
       </td>
       <td v-if="showSubscriptionType">
         {{ getSubscriptionType(slotProps.item) }}
       </td>
-      <td v-if="showBudgetAllowanceTotal" :class="{ 'text-primary-300': slotProps.item.isArchived }">
+      <td v-if="showBudgetAllowanceTotal" class="text-right" :class="{ 'text-primary-500': slotProps.item.isArchived }">
         {{ getBudgetAllowanceTotal(slotProps.item) }}
       </td>
       <td>
@@ -52,14 +59,14 @@
               tag="routerLink"
               btn-style="outline"
               size="sm"
-              :label="t('subscription-archived')"
+              :label="t('subscription-archive')"
               :to="{ name: URL_SUBSCRIPTION_ARCHIVE, params: { subscriptionId: slotProps.item.id } }" />
             <PfButtonLink
               v-else
               tag="routerLink"
               btn-style="outline"
               size="sm"
-              :label="t('subscription-unarchived')"
+              :label="t('subscription-unarchive')"
               :to="{ name: URL_SUBSCRIPTION_UNARCHIVE, params: { subscriptionId: slotProps.item.id } }" />
           </template>
           <UiButtonGroup :items="getBtnGroup(slotProps.item)" tooltip-position="left" />
@@ -104,7 +111,7 @@ const cols = computed(() => {
   cols.push({ label: t("subscription-name") });
   if (props.showSubscriptionPeriod) cols.push({ label: t("subscription-period") });
   if (props.showSubscriptionType) cols.push({ label: t("subscription-type") });
-  if (props.showBudgetAllowanceTotal) cols.push({ label: t("subscription-budget-allowance-total") });
+  if (props.showBudgetAllowanceTotal) cols.push({ label: t("subscription-budget-allowance-total"), isRight: true });
   cols.push({
     label: t("options"),
     hasHiddenLabel: true
