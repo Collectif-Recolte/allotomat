@@ -24,7 +24,7 @@
 </i18n>
 
 <template>
-  <UiTable v-if="props.markets" :items="props.markets" :cols="cols">
+  <UiTable v-if="props.markets" :items="markets" :cols="cols">
     <template #default="slotProps">
       <td class="py-3">
         {{ getMarketName(slotProps.item) }}
@@ -73,7 +73,8 @@ const props = defineProps({
   urlNameMarketEdit: { type: String, default: "" },
   urlNameMarketManageManagers: { type: String, default: "" },
   canEdit: Boolean,
-  canDelete: Boolean
+  canDelete: Boolean,
+  orderByMarketName: { type: Boolean, default: false }
 });
 
 const cols = computed(() => {
@@ -86,6 +87,15 @@ const cols = computed(() => {
         }
       ]
     : [{ label: t("market-name") }];
+});
+
+const markets = computed(() => {
+  if (props.orderByMarketName) {
+    return [...props.markets].sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+  }
+  return props.markets;
 });
 
 const getBtnGroup = (market) => [
