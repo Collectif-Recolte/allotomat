@@ -27,7 +27,11 @@
           <p class="text-sm">{{ t("no-associated-merchant") }}</p>
         </div>
 
-        <MarketTable v-else :markets="marketGroup.markets" :url-name-market-delete="URL_REMOVE_MERCHANTS_FROM_MARKET_GROUP" />
+        <MarketTable
+          v-else
+          :markets="marketGroup.markets"
+          :url-name-market-delete="URL_REMOVE_MERCHANTS_FROM_MARKET_GROUP"
+          order-by-market-name />
 
         <PfButtonAction btn-style="dash" has-icon-left type="button" :label="t('add-merchant')" @click="showAddMerchant" />
       </div>
