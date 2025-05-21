@@ -30,6 +30,7 @@
         <MarketTable
           v-else
           :markets="marketGroup.markets"
+          can-delete
           :url-name-market-delete="URL_REMOVE_MERCHANTS_FROM_MARKET_GROUP"
           order-by-market-name />
 

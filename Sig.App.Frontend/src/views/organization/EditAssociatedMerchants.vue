@@ -26,7 +26,7 @@
         <p class="text-sm">{{ t("no-associated-merchant") }}</p>
       </div>
 
-      <MarketTable v-else :markets="organization.markets" :url-name-market-delete="URL_REMOVE_MERCHANTS_FROM_ORGANIZATION" order-by-market-name />
+      <MarketTable v-else :markets="organization.markets" can-delete :url-name-market-delete="URL_REMOVE_MERCHANTS_FROM_ORGANIZATION" order-by-market-name />
 
       <UiSelectAndAdd
         v-if="filteredMarketOptions.length > 0"
