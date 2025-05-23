@@ -121,13 +121,13 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
                 }
                 else if (withGiftCard)
                 {
-                    // When the transaction is made without an organizationId, the transaction is for a gift-card
-                    query = query.Where(x => x.OrganizationId == null);
+                    // When the transaction is made without an subscriptionId, the transaction is for a gift-card
+                    query = query.Where(x => x.SubscriptionId == null);
                 }
                 else if (withoutGiftCard)
                 {
-                    // When the transaction is made with an organizationId, the transaction is not for a gift-card
-                    query = query.Where(x => x.OrganizationId != null);
+                    // When the transaction is made with an subscriptionId, the transaction is not for a gift-card
+                    query = query.Where(x => x.SubscriptionId != null);
                 }
             }
 
