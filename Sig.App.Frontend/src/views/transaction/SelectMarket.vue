@@ -1,7 +1,6 @@
 <i18n>
   {
     "en": {
-      "sub-title": "Purchase on behalf of program",
       "select-market": "Merchant",
       "choose-market": "Select",
       "next-step": "Next",
@@ -12,7 +11,6 @@
       "choose-cash-register": "Select"
     },
     "fr": {
-      "sub-title": "Achat au nom du programme",
       "select-market": "Marchand",
       "choose-market": "Sélectionner",
       "next-step": "Suivant",
@@ -128,6 +126,7 @@ const { result: resultProjects } = useQuery(
           cashRegisters {
             id
             name
+            isArchived
           }
         }
       }
@@ -174,6 +173,7 @@ const { result: resultOrganizations } = useQuery(
           cashRegisters {
             id
             name
+            isArchived
           }
         }
       }
@@ -181,10 +181,10 @@ const { result: resultOrganizations } = useQuery(
   `
 );
 const organizationMarkets = useResult(resultOrganizations, null, (data) => {
-  if (data.organizations[0].markets.length === 1 && data.organizations[0].markets[0].cashRegisters.length === 1) {
+  if (data.organizations[0].markets.length === 1 && data.organizations[0].markets[0].cashRegisters.filter((x) => !x.isArchived).length === 1) {
     emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
       marketId: data.organizations[0].markets[0].id,
-      cashRegisterId: data.organizations[0].markets[0].cashRegisters[0].id
+      cashRegisterId: data.organizations[0].markets[0].cashRegisters.filter((x) => !x.isArchived)[0].id
     });
     return [];
   }
@@ -200,7 +200,8 @@ const organizationMarkets = useResult(resultOrganizations, null, (data) => {
 const organizationCashRegisters = useResult(resultOrganizations, null, (data) => {
   return data.organizations[0].markets
     .find((x) => x.id === selectedMarket.value)
-    .cashRegisters.map((x) => {
+    .cashRegisters.filter((x) => !x.isArchived)
+    .map((x) => {
       return {
         label: x.name,
         value: x.id

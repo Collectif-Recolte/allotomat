@@ -155,6 +155,7 @@ const { result: resultProjects } = useQuery(
           cashRegisters {
             id
             name
+            isArchived
           }
         }
       }
@@ -177,7 +178,8 @@ const project = useResult(resultProjects, null, (data) => {
 const cashRegisters = useResult(resultProjects, null, (data) => {
   return data.projects[0].markets
     .find((x) => x.id === selectedMarket.value)
-    .cashRegisters.map((x) => {
+    .cashRegisters.filter((x) => !x.isArchived)
+    .map((x) => {
       return {
         label: x.name,
         value: x.id
