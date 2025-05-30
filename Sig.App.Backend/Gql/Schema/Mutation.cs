@@ -263,6 +263,28 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         [RequirePermission(MarketPermission.ManageMarket)]
+        [AnnotateErrorCodes(typeof(DisabledMarket))]
+        public static Task<DisabledMarket.Payload> DisabledMarket(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<DisabledMarket.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(MarketPermission.ManageMarket)]
+        [AnnotateErrorCodes(typeof(EnabledMarket))]
+        public static Task<EnabledMarket.Payload> EnabledMarket(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<EnabledMarket.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(MarketPermission.ManageMarket)]
         [AnnotateErrorCodes(typeof(AddManagerToMarket))]
         public static Task<AddManagerToMarket.Payload> AddManagerToMarket(
             this GqlMutation _,
@@ -418,6 +440,28 @@ namespace Sig.App.Backend.Gql.Schema
             await mediator.Send(input.Value);
 
             return true;
+        }
+
+        [RequirePermission(SubscriptionPermission.ArchiveSubscription)]
+        [AnnotateErrorCodes(typeof(ArchiveSubscription))]
+        public static async Task<ArchiveSubscription.Payload> ArchiveSubscription(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<ArchiveSubscription.Input> input
+            )
+        {
+            return await mediator.Send(input.Value);
+        }
+
+        [RequirePermission(SubscriptionPermission.UnarchiveSubscription)]
+        [AnnotateErrorCodes(typeof(UnarchiveSubscription))]
+        public static async Task<UnarchiveSubscription.Payload> UnarchiveSubscription(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<UnarchiveSubscription.Input> input
+            )
+        {
+            return await mediator.Send(input.Value);
         }
 
         [RequirePermission(OrganizationPermission.ManageOrganization)]
@@ -899,6 +943,15 @@ namespace Sig.App.Backend.Gql.Schema
             NonNull<AddMissingPayments.Input> input)
         {
             return mediator.Send(input.Value);
+        }
+
+        public static async Task<bool> UnsubscribeBeneficiaryFromTransactionReceipt(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<UnsubscribeBeneficiaryFromTransactionReceipt.Input> input)
+        {
+            await mediator.Send(input.Value);
+            return true;
         }
     }
 }

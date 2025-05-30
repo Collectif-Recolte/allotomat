@@ -67,6 +67,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             request.PostalCode.IfSet(v => beneficiary.PostalCode = v.Trim());
             request.Id1.IfSet(v => beneficiary.ID1 = v.Trim());
             request.Id2.IfSet(v => beneficiary.ID2 = v.Trim());
+            request.IsUnsubscribeToReceipt.IfSet(v => beneficiary.IsUnsubscribeToReceipt = v);
 
             await request.BeneficiaryTypeId.IfSet(async v => await UpdateBeneficiaryType(beneficiary, v, cancellationToken));
 
@@ -103,6 +104,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             public Maybe<NonNull<string>> Id1 { get; set; }
             public Maybe<NonNull<string>> Id2 { get; set; }
             public Maybe<Id> BeneficiaryTypeId { get; set; }
+            public Maybe<bool> IsUnsubscribeToReceipt { get; set; }
         }
 
         [MutationPayload]

@@ -340,7 +340,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var cardName = beneficiary != null ? $"{card.Beneficiary.Firstname} {card.Beneficiary.Lastname}" : card.Id.ToString();
             logger.LogInformation($"[Mutation] CreateTransaction - Transaction between {cardName} with ({market.Name}) or an amount of a total {request.Transactions.Sum(x => x.Amount)} for product group(s) {request.Transactions.Select(x => x.ProductGroupId)}");
 
-            if (beneficiary != null && !string.IsNullOrEmpty(beneficiary.Email))
+            if (beneficiary != null && !string.IsNullOrEmpty(beneficiary.Email) && !beneficiary.IsUnsubscribeToReceipt)
             {
                 try
                 {
@@ -352,7 +352,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                             Name = x.ProductGroup.Name == ProductGroupType.LOYALTY
                                 ? "Carte-cadeau/Gift-card"
                                 : x.ProductGroup.Name
-                        })));
+                        }), card.Beneficiary.GetIdentifier().ToString()));
                 }
                 catch (Exception e)
                 {

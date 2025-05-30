@@ -39,7 +39,7 @@ import { defineProps, defineEmits } from "vue";
 
 const props = defineProps({
   label: { type: String, default: "" },
-  stat: { type: Number, default: 0 },
+  stat: { type: [Number, String], default: 0 },
   primaryBtnLabel: { type: String, default: "" },
   primaryBtnRoute: { type: Object, default: null },
   primaryBtnIsAction: Boolean,

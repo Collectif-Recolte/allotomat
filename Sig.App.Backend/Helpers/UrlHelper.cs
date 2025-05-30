@@ -41,5 +41,10 @@
         {
             return $"reset-password?email={System.Net.WebUtility.UrlEncode(to)}&token={System.Net.WebUtility.UrlEncode(token)}";
         }
+
+        public static string UnsubscribeFromTransactionReceipt(string beneficiaryId)
+        {
+            return $"unsubscribe-transaction-receipt?beneficiaryId={beneficiaryId}";
+        }
     }
 }

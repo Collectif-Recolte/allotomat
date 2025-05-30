@@ -56,6 +56,7 @@ import { SPECIFIC_DATE, NUMBER_OF_DAYS } from "@/lib/consts/funds-expiration-tri
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { formatDate, textualFormat } from "@/lib/helpers/date";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 import SubscriptionStatsTable from "@/components/dashboard/subscription-stats-table.vue";
 
@@ -83,6 +84,7 @@ const { result: resultOrganizations } = useQuery(
             triggerFundExpiration
             isFundsAccumulable
             numberDaysUntilFundsExpire
+            isArchived
           }
         }
       }
@@ -96,7 +98,7 @@ const organization = useResult(resultOrganizations, null, (data) => {
 const subscriptionStats = useResult(resultOrganizations, null, (data) => {
   return data.organizations[0].budgetAllowances.map((budgetAllowance) => {
     return {
-      name: budgetAllowance.subscription.name,
+      name: subscriptionName(budgetAllowance.subscription),
       startDate: budgetAllowance.subscription.startDate,
       endDate: budgetAllowance.subscription.endDate,
       expiration: !budgetAllowance.subscription.isFundsAccumulable

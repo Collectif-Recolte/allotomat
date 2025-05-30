@@ -36,6 +36,7 @@
       :organization-id="beneficiary.organization.id"
       :beneficiary-type-id="beneficiary.beneficiaryType.id"
       :warning-message="t('warning-message')"
+      :is-unsubscribe-to-receipt="beneficiary.isUnsubscribeToReceipt"
       @submit="onSubmit"
       @closeModal="closeModal" />
   </UiDialogModal>
@@ -89,6 +90,7 @@ const { result } = useQuery(
         organization {
           id
         }
+        isUnsubscribeToReceipt
       }
     }
   `,
@@ -113,6 +115,7 @@ const { mutate: editBeneficiary } = useMutation(
           postalCode
           id1
           id2
+          isUnsubscribeToReceipt
           ... on BeneficiaryGraphType {
             beneficiaryType {
               id
@@ -124,7 +127,19 @@ const { mutate: editBeneficiary } = useMutation(
   `
 );
 
-async function onSubmit({ firstname, lastname, email, phone, address, notes, postalCode, id1, id2, beneficiaryTypeId }) {
+async function onSubmit({
+  firstname,
+  lastname,
+  email,
+  phone,
+  address,
+  notes,
+  postalCode,
+  id1,
+  id2,
+  beneficiaryTypeId,
+  isUnsubscribeToReceipt
+}) {
   await editBeneficiary({
     input: {
       beneficiaryId: route.params.beneficiaryId,
@@ -137,7 +152,8 @@ async function onSubmit({ firstname, lastname, email, phone, address, notes, pos
       postalCode: { value: postalCode ?? "" },
       id1: { value: id1 ?? "" },
       id2: { value: id2 ?? "" },
-      beneficiaryTypeId: { value: beneficiaryTypeId }
+      beneficiaryTypeId: { value: beneficiaryTypeId },
+      isUnsubscribeToReceipt: { value: isUnsubscribeToReceipt }
     }
   });
   router.push({ name: URL_BENEFICIARY_ADMIN });

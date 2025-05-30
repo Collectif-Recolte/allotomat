@@ -77,6 +77,7 @@ import { ref, computed, watch } from "vue";
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 import Loading from "@/components/app/loading";
 import OrganizationStatsTable from "@/components/dashboard/organization-stats-table.vue";
@@ -89,24 +90,11 @@ const organizationsStats = ref([]);
 const project = ref(null);
 const availableSubscriptions = ref([]);
 
-const { result: resultProjects, loading } = useQuery(
+const { result: resultProjectOrganizationsStats, loading: loadingProjectOrganizationsStats } = useQuery(
   gql`
     query Projects($subscriptions: [ID!]) {
       projects {
         id
-        subscriptions {
-          id
-          name
-          startDate
-          endDate
-          fundsExpirationDate
-          isFundsAccumulable
-        }
-        projectStats {
-          beneficiaryCount
-          unspentLoyaltyFund
-          totalActiveSubscriptionsEnvelopes
-        }
         organizationsStats(subscriptions: $subscriptions) {
           balanceOnCards
           cardSpendingAmounts
@@ -125,14 +113,42 @@ const { result: resultProjects, loading } = useQuery(
   projectsStatsVariables
 );
 
+const { result: resultProjects, loading: loadingProjects } = useQuery(
+  gql`
+    query Projects {
+      projects {
+        id
+        subscriptions {
+          id
+          name
+          startDate
+          endDate
+          fundsExpirationDate
+          isFundsAccumulable
+        }
+        projectStats {
+          beneficiaryCount
+          unspentLoyaltyFund
+          totalActiveSubscriptionsEnvelopes
+        }
+      }
+    }
+  `
+);
+
+watch(resultProjectOrganizationsStats, (value) => {
+  if (value === undefined) return;
+  organizationsStats.value = value.projects[0].organizationsStats;
+});
+
 watch(resultProjects, (value) => {
   if (value === undefined) return;
 
   project.value = value.projects[0];
-  organizationsStats.value = value.projects[0].organizationsStats;
 
   var subscriptions = [...value.projects[0].subscriptions];
   availableSubscriptions.value = subscriptions
+    .filter((subscription) => !subscription.isArchived)
     .sort((a, b) => {
       const dateA = a.isFundsAccumulable ? new Date(a.fundsExpirationDate) : new Date(a.endDate);
       const dateB = b.isFundsAccumulable ? new Date(b.fundsExpirationDate) : new Date(b.endDate);
@@ -141,9 +157,13 @@ watch(resultProjects, (value) => {
     .map((subscription) => {
       return {
         value: subscription.id,
-        label: subscription.name
+        label: subscriptionName(subscription)
       };
     });
+});
+
+const loading = computed(() => {
+  return loadingProjects.value || loadingProjectOrganizationsStats.value;
 });
 
 const hasActiveFilters = computed(() => {

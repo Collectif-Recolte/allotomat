@@ -16,6 +16,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         string Id1 { get; }
         string Id2 { get; }
         string PostalCode { get; }
+        bool IsUnsubscribeToReceipt { get; }
 
         IDataLoaderResult<OrganizationGraphType> Organization(IAppUserContext ctx);
         IDataLoaderResult<CardGraphType> Card(IAppUserContext ctx);

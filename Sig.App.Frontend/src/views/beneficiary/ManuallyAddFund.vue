@@ -7,12 +7,16 @@
 		"add-amount": "Add amount",
 		"amount-label": "Amount",
 		"amount-placeholder": "Ex. {amount}",
-		"subscription-label": "{name} - expires on {date}",
+		"subscription-label": "{name} - {monthlyPaymentMoment}",
 		"manually-add-fund-success-notification": "{name} has received {amount} on their card. The funds will expire on {expirationDate}.",
     "select-product-group-label": "Product group",
     "available-fund-cant-be-less-than-zero-error-notification": "The card balance cannot be negative.",
     "card-current-balance": "Current balance: {amount}",
-    "select-subscription-description": "Subscriptions that have expired or subscriptions that are not assigned to the participant are not displayed and selectable for manual fund addition."
+    "select-subscription-description": "Subscriptions that have expired or subscriptions that are not assigned to the participant are not displayed and selectable for manual fund addition.",
+    "select-expiration-date-label": "Expiration date",
+    "first-day-of-the-month": "payment on the 1st day of the month",
+    "first-and-fifteenth-day-of-the-month": "payment on the 1st and 15th day of the month",
+    "fifteenth-day-of-the-month": "payment on the 15th day of the month"
 	},
 	"fr": {
 		"title": "Ajouter manuellement des fonds",
@@ -21,12 +25,16 @@
 		"add-amount": "Ajouter le montant",
 		"amount-label": "Montant",
 		"amount-placeholder": "Ex. {amount}",
-		"subscription-label": "{name} - expire le {date}",
+		"subscription-label": "{name} - {monthlyPaymentMoment}",
 		"manually-add-fund-success-notification": "{name} a reçu {amount} sur sa carte. Les fonds vont expirer le {expirationDate}.",
     "select-product-group-label": "Groupe de produits",
     "available-fund-cant-be-less-than-zero-error-notification": "Le solde de la carte ne peut pas être négatif.",
     "card-current-balance": "Solde actuel: {amount}",
-    "select-subscription-description": "Les abonnements qui ont expiré ou les abonnements qui ne sont pas assignés au participant ne sont pas affichés et sélectionnables pour l'ajout manuel de fonds."
+    "select-subscription-description": "Les abonnements qui ont expiré ou les abonnements qui ne sont pas assignés au participant ne sont pas affichés et sélectionnables pour l'ajout manuel de fonds.",
+    "select-expiration-date-label": "Date d'expiration",
+    "first-day-of-the-month": "versement le 1er jour du mois",
+    "first-and-fifteenth-day-of-the-month": "versement le 1er et 15ème jour du mois",
+    "fifteenth-day-of-the-month": "versement le 15ème jour du mois"
 	}
 }
 </i18n>
@@ -60,6 +68,15 @@
               :description="t('select-subscription-description')"
               :errors="fieldErrors"
               @input="onSubscriptionSelected" />
+          </Field>
+          <Field v-slot="{ field, errors: fieldErrors }" name="expirationDate">
+            <PfFormInputSelect
+              id="expirationDate"
+              v-bind="field"
+              :disabled="expirationDateOptions.length === 0"
+              :label="t('select-expiration-date-label')"
+              :options="expirationDateOptions"
+              :errors="fieldErrors" />
           </Field>
           <Field v-slot="{ field, errors: fieldErrors }" name="productGroup">
             <PfFormInputSelect
@@ -100,12 +117,18 @@ import { useRoute, useRouter } from "vue-router";
 import { object, string, number, lazy, mixed } from "yup";
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 
-import { formatDate, dateUtc, textualFormat } from "@/lib/helpers/date";
+import { formatDate, dateUtc, textualFormat, serverFormat, formattedDate } from "@/lib/helpers/date";
 import { getMoneyFormat } from "@/lib/helpers/money";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 import { useOrganizationStore } from "@/lib/store/organization";
 import { useNotificationsStore } from "@/lib/store/notifications";
 
+import {
+  FIRST_DAY_OF_THE_MONTH,
+  FIRST_AND_FIFTEENTH_DAY_OF_THE_MONTH,
+  FIFTEENTH_DAY_OF_THE_MONTH
+} from "@/lib/consts/monthly-payment-moment";
 import { URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
 import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
 
@@ -177,8 +200,10 @@ const { result: resultOrganization, loading } = useQuery(
           availableFund
           subscription {
             id
+            isArchived
             name
             fundsExpirationDate
+            monthlyPaymentMoment
             isFundsAccumulable
             types {
               id
@@ -221,14 +246,22 @@ const subscriptionOptions = useResult(resultOrganization, null, (data) => {
     .map((x) => {
       let label = "";
 
-      if (x.subscription.fundsExpirationDate !== null) {
-        label = t("subscription-label", {
-          name: x.subscription.name,
-          date: formatDate(dateUtc(x.subscription.fundsExpirationDate), textualFormat)
-        });
-      } else {
-        label = x.subscription.name;
+      let monthlyPaymentMoment = "";
+      switch (x.subscription.monthlyPaymentMoment) {
+        case FIRST_DAY_OF_THE_MONTH:
+          monthlyPaymentMoment = t("first-day-of-the-month");
+          break;
+        case FIRST_AND_FIFTEENTH_DAY_OF_THE_MONTH:
+          monthlyPaymentMoment = t("first-and-fifteenth-day-of-the-month");
+          break;
+        case FIFTEENTH_DAY_OF_THE_MONTH:
+          monthlyPaymentMoment = t("fifteenth-day-of-the-month");
+          break;
       }
+      label = t("subscription-label", {
+        name: subscriptionName(x.subscription),
+        monthlyPaymentMoment
+      });
 
       return {
         label: label,
@@ -268,16 +301,18 @@ const { mutate: createManuallyAddingFundTransaction } = useMutation(
   `
 );
 
-async function onSubmit({ amount, subscription, productGroup }) {
+async function onSubmit({ amount, expirationDate, subscription, productGroup }) {
   var result = await createManuallyAddingFundTransaction({
     input: {
       amount: parseFloat(amount),
+      expirationDate: formatDate(expirationDate, serverFormat),
       subscriptionId: subscription,
       beneficiaryId: route.params.beneficiaryId,
       productGroupId: productGroup
     }
   });
   router.push({ name: URL_BENEFICIARY_ADMIN });
+
   addSuccess(
     t("manually-add-fund-success-notification", {
       name: `${result.data.createManuallyAddingFundTransaction.transaction.card.beneficiary.firstname} ${result.data.createManuallyAddingFundTransaction.transaction.card.beneficiary.lastname}`,
@@ -307,6 +342,7 @@ const validationSchema = computed(() =>
 
       return string().label(t("select-subscription-label")).required();
     }),
+    expirationDate: string().label(t("select-expiration-date-label")).required(),
     productGroup: string().label(t("select-product-group-label")).required(),
     amount: lazy((value) => {
       if (value === "") {
@@ -317,6 +353,69 @@ const validationSchema = computed(() =>
     })
   })
 );
+
+const getNextPaymentDates = (currentDate, paymentMoment) => {
+  const results = [];
+  const addDate = (date) => {
+    results.push({
+      label: formatDate(date, textualFormat),
+      value: new Date(date.getTime())
+    });
+  };
+
+  const nextDate = new Date(currentDate.getTime());
+
+  switch (paymentMoment) {
+    case FIRST_DAY_OF_THE_MONTH:
+      nextDate.setMonth(nextDate.getMonth() + 1, 1);
+      addDate(nextDate);
+      nextDate.setMonth(nextDate.getMonth() + 1);
+      addDate(nextDate);
+      break;
+    case FIRST_AND_FIFTEENTH_DAY_OF_THE_MONTH:
+      if (currentDate.getDate() >= 15) {
+        nextDate.setMonth(nextDate.getMonth() + 1, 1);
+        addDate(nextDate);
+        nextDate.setDate(15);
+        addDate(nextDate);
+      } else {
+        nextDate.setDate(15);
+        addDate(nextDate);
+        nextDate.setMonth(nextDate.getMonth() + 1, 1);
+        addDate(nextDate);
+      }
+      break;
+    default:
+      if (currentDate.getDate() >= 15) {
+        nextDate.setMonth(nextDate.getMonth() + 1);
+      }
+      nextDate.setDate(15);
+      addDate(nextDate);
+      nextDate.setMonth(nextDate.getMonth() + 1);
+      addDate(nextDate);
+  }
+
+  return results;
+};
+
+const expirationDateOptions = computed(() => {
+  if (selectedSubscription.value == "") return [];
+
+  var subscription = subscriptions.value.find((x) => x.id === selectedSubscription.value);
+
+  if (subscription.isFundsAccumulable) {
+    return [
+      {
+        label: formatDate(dateUtc(subscription.fundsExpirationDate), textualFormat),
+        value: formattedDate(subscription.fundsExpirationDate)
+      }
+    ];
+  }
+
+  let currentDate = new Date();
+
+  return getNextPaymentDates(currentDate, subscription.monthlyPaymentMoment);
+});
 
 const productGroupOptions = computed(() => {
   if (project.value === undefined) {

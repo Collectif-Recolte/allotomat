@@ -331,6 +331,7 @@ import { useNotificationsStore } from "@/lib/store/notifications";
 import { useOrganizationStore } from "@/lib/store/organization";
 import { useAuthStore } from "@/lib/store/auth";
 import { usePageTitle } from "@/lib/helpers/page-title";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 import { getShortMoneyFormat } from "@/lib/helpers/money";
 
@@ -449,6 +450,7 @@ const {
           subscriptions {
             id
             name
+            isArchived
             startDate
             endDate
             fundsExpirationDate
@@ -517,6 +519,7 @@ const subscriptions = useResult(resultOrganizations, null, (data) => {
   return subscriptions
     .filter(
       (x) =>
+        !x.isArchived &&
         x.budgetAllowances.find((y) => y.organization.id === selectedOrganization.value) &&
         new Date(x.getLastDateToAssignBeneficiary) >= new Date()
     )
@@ -526,7 +529,7 @@ const subscriptions = useResult(resultOrganizations, null, (data) => {
       return dateB - dateA;
     })
     .map((x) => ({
-      label: x.name,
+      label: subscriptionName(x),
       value: x.id,
       budgetAllowance: x.budgetAllowances.find((y) => y.organization.id === selectedOrganization.value)?.availableFund,
       totalPayment: x.totalPayment,
@@ -594,6 +597,7 @@ const {
                 subscription {
                   id
                   name
+                  isArchived
                 }
               }
             }

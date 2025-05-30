@@ -93,6 +93,8 @@ namespace Sig.App.Backend.DbModel
 
         public DbSet<CashRegisterMarketGroup> CashRegisterMarketGroups { get; set; }
 
+        public DbSet<BlacklistedEmail> BlacklistedEmails { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -415,6 +417,8 @@ namespace Sig.App.Backend.DbModel
                     .WithMany(x => x.MarketGroups)
                     .HasForeignKey(x => x.CashRegisterId);
             });
+
+            Configure<BlacklistedEmail>(_ => { _.HasKey(x => x.Email); });
 
             void Configure<TEntity>(Action<EntityTypeBuilder<TEntity>> action) where TEntity : class => action(builder.Entity<TEntity>());
         }

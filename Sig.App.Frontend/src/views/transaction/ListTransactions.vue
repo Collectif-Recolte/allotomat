@@ -2,13 +2,13 @@
   {
     "en": {
       "title": "Transaction history",
-      "transaction-count": "No transaction | {count} transaction / Amount due to markets {amount} | {count} transactions / Amount due to markets {amount}",   
+      "transaction-count": "No transaction | {count} transaction | {count} transactions",
       "export-btn": "Export report",
       "create-transaction": "New transaction"
     },
     "fr": {
       "title": "Historique des transactions",
-      "transaction-count": "Aucune transaction | {count} transaction / Montant dû aux marché(s) : {amount} | {count} transactions / Montant dû aux marchés : {amount}",
+      "transaction-count": "Aucune transaction | {count} transaction | {count} transactions",
       "export-btn": "Exporter un rapport",
       "create-transaction": "Nouvelle transaction"
     }
@@ -35,7 +35,10 @@
                 :selected-markets="markets"
                 :selected-cash-registers="cashRegisters"
                 :selected-transaction-types="transactionTypes"
+                :selected-gift-card-transaction-types="giftCardTransactionTypes"
                 :without-subscription-id="WITHOUT_SUBSCRIPTION"
+                :with-gift-card-id="WITH_GIFT_CARD"
+                :without-gift-card-id="WITHOUT_GIFT_CARD"
                 :date-from="dateFrom"
                 :date-to="dateTo"
                 :search-filter="searchText"
@@ -55,8 +58,13 @@
                 @dateFromUpdated="onDateFromUpdated"
                 @dateToUpdated="onDateToUpdated"
                 @resetFilters="onResetFilters"
-                @update:modelValue="onSearchTextUpdated" />
-              <PfButtonAction class="mt-2" :label="t('export-btn')" :icon="ICON_DOWNLOAD" has-icon-left @click="onExportReport" />
+                @update:modelValue="onSearchTextUpdated"
+                @giftCardTransactionTypesChecked="onGiftCardTransactionTypesChecked"
+                @giftCardTransactionTypesUnchecked="onGiftCardTransactionTypesUnchecked">
+                <template #prependElements>
+                  <PfButtonAction :label="t('export-btn')" :icon="ICON_DOWNLOAD" has-icon-left @click="onExportReport" />
+                </template>
+              </TransactionFilters>
             </div>
           </template>
         </Title>
@@ -65,8 +73,7 @@
         <UiTableHeader
           :title="
             t('transaction-count', {
-              count: transactionLogs.totalCount,
-              amount: getMoneyFormat(transactionLogs.amountDueToMarkets)
+              count: transactionLogs.totalCount
             })
           " />
         <div class="flex flex-col relative mb-6">
@@ -103,11 +110,17 @@ import { useRouter, useRoute, onBeforeRouteUpdate } from "vue-router";
 import { storeToRefs } from "pinia";
 
 import Title from "@/components/app/title";
-import TransactionFilters from "@/components/transaction/transaction-filters";
+import TransactionFilters from "@/components/transaction/program-transaction-filters";
 import ProgramTransactionTable from "@/components/transaction/program-transaction-table";
 
 import { URL_TRANSACTION_ADD } from "@/lib/consts/urls";
-import { WITHOUT_SUBSCRIPTION, LANGUAGE_FILTER_EN, LANGUAGE_FILTER_FR } from "@/lib/consts/enums";
+import {
+  WITHOUT_SUBSCRIPTION,
+  WITH_GIFT_CARD,
+  WITHOUT_GIFT_CARD,
+  LANGUAGE_FILTER_EN,
+  LANGUAGE_FILTER_FR
+} from "@/lib/consts/enums";
 import { LANG_EN } from "@/lib/consts/langs";
 import { GLOBAL_CREATE_TRANSACTION } from "@/lib/consts/permissions";
 import { URL_TRANSACTION_ADMIN } from "@/lib/consts/urls";
@@ -117,7 +130,6 @@ import ICON_DOWNLOAD from "@/lib/icons/download.json";
 import { useAuthStore } from "@/lib/store/auth";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
-import { getMoneyFormat } from "@/lib/helpers/money";
 
 const route = useRoute();
 const router = useRouter();
@@ -135,6 +147,7 @@ const subscriptions = ref([]);
 const markets = ref([]);
 const cashRegisters = ref([]);
 const transactionTypes = ref([]);
+const giftCardTransactionTypes = ref([]);
 const searchInput = ref("");
 const searchText = ref("");
 const page = ref(1);
@@ -159,6 +172,9 @@ if (route.query.cashRegisters) {
 }
 if (route.query.transactionTypes) {
   transactionTypes.value = route.query.transactionTypes.split(",");
+}
+if (route.query.giftCardTransactionTypes) {
+  giftCardTransactionTypes.value = route.query.giftCardTransactionTypes.split(",");
 }
 if (route.query.text) {
   searchText.value = route.query.text;
@@ -206,6 +222,7 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
         }
         subscriptions {
           id
+          isArchived
           name
           startDate
           endDate
@@ -237,6 +254,7 @@ const { result: resultOrganizations } = useQuery(
           }
           subscriptions {
             id
+            isArchived
             name
             startDate
             endDate
@@ -302,6 +320,7 @@ const {
       $cashRegisters: [ID!]
       $withoutSubscription: Boolean
       $transactionTypes: [String]
+      $giftCardTransactionTypes: [String]
       $searchText: String
     ) {
       transactionLogs(
@@ -317,6 +336,7 @@ const {
         cashRegisters: $cashRegisters
         withoutSubscription: $withoutSubscription
         transactionTypes: $transactionTypes
+        giftCardTransactionTypes: $giftCardTransactionTypes
         searchText: $searchText
       ) {
         totalCount
@@ -393,6 +413,7 @@ const {
       withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
       categories: beneficiaryTypes.value,
       transactionTypes: transactionTypes.value,
+      giftCardTransactionTypes: giftCardTransactionTypes.value,
       searchText: searchText.value
     };
   },
@@ -413,6 +434,7 @@ const filteredQuery = computed(() => {
     cashRegisters: cashRegisters.value.length > 0 ? cashRegisters.value.toString() : undefined,
     beneficiaryTypes: beneficiaryTypes.value.length > 0 ? beneficiaryTypes.value.toString() : undefined,
     transactionTypes: transactionTypes.value.length > 0 ? transactionTypes.value.toString() : undefined,
+    giftCardTransactionTypes: giftCardTransactionTypes.value.length > 0 ? giftCardTransactionTypes.value.toString() : undefined,
     text: searchText.value ? searchText.value : undefined,
     dateFrom: dateFrom.value ? dateFrom.value.toISOString() : undefined,
     dateTo: dateTo.value ? dateTo.value.toISOString() : undefined
@@ -512,6 +534,15 @@ function onTransactionTypesUnchecked(value) {
   transactionTypes.value = transactionTypes.value.filter((x) => x !== value);
 }
 
+function onGiftCardTransactionTypesChecked(value) {
+  page.value = 1;
+  giftCardTransactionTypes.value.push(value);
+}
+
+function onGiftCardTransactionTypesUnchecked(value) {
+  page.value = 1;
+  giftCardTransactionTypes.value = giftCardTransactionTypes.value.filter((x) => x !== value);
+}
 function onDateFromUpdated(value) {
   page.value = 1;
   dateFrom.value = value;
@@ -535,6 +566,7 @@ function onResetFilters() {
   cashRegisters.value = [];
   beneficiaryTypes.value = [];
   transactionTypes.value = [];
+  giftCardTransactionTypes.value = [];
   searchText.value = "";
   searchInput.value = "";
   dateFrom.value = previousMonth;
@@ -571,6 +603,7 @@ async function onExportReport() {
     withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
     categories: beneficiaryTypes.value,
     transactionTypes: transactionTypes.value,
+    giftCardTransactionTypes: giftCardTransactionTypes.value,
     searchText: searchText.value,
     language: locale.value === LANG_EN ? LANGUAGE_FILTER_EN : LANGUAGE_FILTER_FR
   };
@@ -589,6 +622,7 @@ async function onExportReport() {
         $cashRegisters: [ID!]
         $withoutSubscription: Boolean
         $transactionTypes: [String]
+        $giftCardTransactionTypes: [String]
         $searchText: String
         $language: Language!
       ) {
@@ -604,6 +638,7 @@ async function onExportReport() {
           cashRegisters: $cashRegisters
           withoutSubscription: $withoutSubscription
           transactionTypes: $transactionTypes
+          giftCardTransactionTypes: $giftCardTransactionTypes
           searchText: $searchText
           language: $language
         )

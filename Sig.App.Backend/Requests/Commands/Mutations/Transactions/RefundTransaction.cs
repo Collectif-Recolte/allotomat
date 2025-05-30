@@ -176,6 +176,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                 if (initialTransaction.PaymentTransactionAddingFundTransactions.Any())
                 {
+                    var subscriptionAddingFundTransaction = initialTransaction.PaymentTransactionAddingFundTransactions.Select(x => x.AddingFundTransaction).OfType<SubscriptionAddingFundTransaction>().FirstOrDefault();
+                    if (subscriptionAddingFundTransaction != null)
+                    {
+                        var subscriptionType = await db.SubscriptionTypes.Include(x => x.Subscription).FirstOrDefaultAsync(x => x.Id == subscriptionAddingFundTransaction.SubscriptionTypeId);
+                        baseTransactionLog.SubscriptionId = subscriptionType.SubscriptionId;
+                        baseTransactionLog.SubscriptionName = subscriptionType.Subscription.Name;
+                    }
+
                     var paymentTransactionAddingFundTransactions = initialTransaction.PaymentTransactionAddingFundTransactions.Where(x => x.AddingFundTransaction.ProductGroupId == productGroupId).ToList();
                     var amountToRefund = refund.Amount;
                     
@@ -226,7 +234,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             logger.LogInformation($"[Mutation] RefundTransaction - Transaction refund between {cardName} with ({market.Name}) for an amount of {request.Transactions.Sum(x => x.Amount)} for product group(s) {request.Transactions.Select(x => x.ProductGroupId)}");
 
-            if (beneficiary != null && !string.IsNullOrEmpty(beneficiary.Email))
+            if (beneficiary != null && !string.IsNullOrEmpty(beneficiary.Email) && !beneficiary.IsUnsubscribeToReceipt)
             {
                 try
                 {
@@ -238,7 +246,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                             Name = x.ProductGroup.Name == ProductGroupType.LOYALTY
                                 ? "Carte-cadeau/Gift-card"
                                 : x.ProductGroup.Name
-                        })));
+                        }), beneficiary.GetIdentifier().ToString()));
                 }
                 catch (Exception e)
                 {

@@ -2,7 +2,6 @@
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.Helpers;
 using System;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -66,13 +65,13 @@ namespace Sig.App.Backend.Services.Reports
 
             dataWorksheet.Column("Participant-e hors plateforme/Participant off platform", x => x.BeneficiaryIsOffPlatform ? "Oui/Yes" : "Non/No");
             dataWorksheet.Column("Type", GetOperationTypeText);
-            dataWorksheet.Column("Montant total/Total amount", x => GetAmountText(x, request.Language));
+            dataWorksheet.Column("Montant total/Total amount", x => GetAmount(x), "0.00 $");
 
             foreach (var productGroup in productGroupDictionary)
             {
                 if (productGroup.Value != ProductGroupType.LOYALTY)
                 {
-                    dataWorksheet.Column("Montant/Amount - " + productGroup.Value, x => GetAmountByProductGroup(productGroup.Key, x, request.Language));
+                    dataWorksheet.Column("Montant/Amount - " + productGroup.Value, x => GetAmountByProductGroup(productGroup.Key, x, request.Language), "0.00 $");
                 }
             }
 
@@ -146,6 +145,27 @@ namespace Sig.App.Backend.Services.Reports
                 query = query.Where(x => transactionLogDiscriminators.Contains(x.Discriminator));
             }
 
+            if (request.GiftCardTransactionTypes?.Any() ?? false)
+            {
+                var withGiftCard = request.GiftCardTransactionTypes.Where(x => x == "withGiftCard").Any();
+                var withoutGiftCard = request.GiftCardTransactionTypes.Where(x => x == "withoutGiftCard").Any();
+
+                if (withoutGiftCard && withGiftCard)
+                {
+                    // Nothing to do in the case it's with and without
+                }
+                else if (withGiftCard)
+                {
+                    // When the transaction is made without an organizationId, the transaction is for a gift-card
+                    query = query.Where(x => x.OrganizationId == null);
+                }
+                else if (withoutGiftCard)
+                {
+                    // When the transaction is made with an organizationId, the transaction is not for a gift-card
+                    query = query.Where(x => x.OrganizationId != null);
+                }
+            }
+
             if (request.SearchText.IsSet() && !string.IsNullOrEmpty(request.SearchText.Value))
             {
                 var searchText = request.SearchText.Value.Split(' ').AsEnumerable();
@@ -187,13 +207,14 @@ namespace Sig.App.Backend.Services.Reports
             dataWorksheet.Column("Participant-e hors plateforme/Participant off platform", x => x.BeneficiaryIsOffPlatform ? "Oui/Yes" : "Non/No");
             dataWorksheet.Column("Type", GetOperationTypeText);
             dataWorksheet.Column("Marché/Market", x => x.MarketName);
-            dataWorksheet.Column("Montant total/Total amount", x => GetAmountText(x, request.Language));
+            dataWorksheet.Column("ID Marché/ID Market", x => x.MarketId);
+            dataWorksheet.Column("Montant total/Total amount", x => GetAmount(x), "0.00 $");
 
             foreach (var productGroup in productGroupDictionary)
             {
                 if (productGroup.Value != ProductGroupType.LOYALTY)
                 {
-                    dataWorksheet.Column("Montant/Amount - " + productGroup.Value, x => GetAmountByProductGroup(productGroup.Key, x, request.Language));
+                    dataWorksheet.Column("Montant/Amount - " + productGroup.Value, x => GetAmountByProductGroup(productGroup.Key, x, request.Language), "0.00 $");
                 }
             }
 
@@ -206,7 +227,9 @@ namespace Sig.App.Backend.Services.Reports
                 "Transfert de fond depuis le numéro de carte/Transferred fund from card number",
                 x => x.FundTransferredFromCardNumber != null ? x.FundTransferredFromCardNumber.Replace('-', ' ') : "");
             dataWorksheet.Column("Groupe/Group", x => x.OrganizationName);
+            dataWorksheet.Column("ID Groupe/ID Group", x => x.OrganizationId);
             dataWorksheet.Column("Abonnement/Subscription", x => x.SubscriptionName);
+            dataWorksheet.Column("ID Abonnement/ID Subscription", x => x.SubscriptionId);
             dataWorksheet.Column("Initiateur transaction/Transaction initiator", GetTransactionInitiatorName);
             dataWorksheet.Column("Courriel initiateur transaction/Transaction initiator email", x => x.TransactionInitiatorEmail);
             dataWorksheet.Column("Caisse/Cash register", x => x.CashRegisterName);
@@ -255,26 +278,29 @@ namespace Sig.App.Backend.Services.Reports
             }
         }
 
-        private string GetAmountText(TransactionLog transactionLog, Language language)
+        private decimal GetAmount(TransactionLog transactionLog)
         {
-            var amount = transactionLog.TotalAmount.ToString("C", language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA"));
-            if (transactionLog.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog || transactionLog.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog)
+            if (transactionLog.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog ||
+                transactionLog.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog ||
+                transactionLog.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromUnassignedCardTransactionLog ||
+                transactionLog.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog ||
+                transactionLog.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog)
             {
-                return $"-{amount}";
+                return -transactionLog.TotalAmount;
             }
 
-            return amount;
+            return transactionLog.TotalAmount;
         }
 
-        private string GetAmountByProductGroup(long productGroupId, TransactionLog transactionLog, Language language)
+        private decimal? GetAmountByProductGroup(long productGroupId, TransactionLog transactionLog, Language language)
         {
             var transactionByProduct = transactionLog.TransactionLogProductGroups.FirstOrDefault(x => x.ProductGroupId == productGroupId);
             if (transactionByProduct != null)
             {
-                return transactionByProduct.Amount.ToString("C", language == Language.French ? CultureInfo.CreateSpecificCulture("fr-CA") : CultureInfo.CreateSpecificCulture("en-CA"));
+                return transactionByProduct.Amount;
             }
             
-            return "";
+            return null;
         }
     }
 }

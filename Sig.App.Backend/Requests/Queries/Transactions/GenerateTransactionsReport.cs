@@ -52,6 +52,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Transactions
             public Maybe<bool> WithoutSubscription { get; set; }
             public IEnumerable<Id> Categories { get; set; }
             public IEnumerable<string> TransactionTypes { get; set; }
+            public IEnumerable<string> GiftCardTransactionTypes { get; set; }
             public Maybe<string> SearchText { get; set; }
             public string TimeZoneId { get; set; }
             public Language Language { get; set; }

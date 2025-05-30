@@ -78,6 +78,7 @@ import { object, string, lazy } from "yup";
 
 import { formatDate, dateUtc, textualFormat } from "@/lib/helpers/date";
 import { getMoneyFormat } from "@/lib/helpers/money";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 
@@ -107,6 +108,9 @@ const { result: resultBeneficiary } = useQuery(
           beneficiaryType {
             id
           }
+          organization {
+            id
+          }
           beneficiarySubscriptions {
             hasMissedPayment
             paymentReceived
@@ -115,7 +119,7 @@ const { result: resultBeneficiary } = useQuery(
             subscription {
               id
               name
-              budgetAllowancesTotal
+              isArchived
               fundsExpirationDate
               isFundsAccumulable
               maxNumberOfPayments
@@ -123,6 +127,13 @@ const { result: resultBeneficiary } = useQuery(
                 id
                 amount
                 beneficiaryType {
+                  id
+                }
+              }
+              budgetAllowances {
+                id
+                availableFund
+                organization {
                   id
                 }
               }
@@ -140,6 +151,7 @@ const { result: resultBeneficiary } = useQuery(
 const beneficiary = useResult(resultBeneficiary, null, (data) => data.beneficiary);
 
 const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
+  var localBeneficiary = data.beneficiary;
   return data.beneficiary.beneficiarySubscriptions
     .filter(
       (x) =>
@@ -151,18 +163,19 @@ const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
 
       if (x.subscription.fundsExpirationDate !== null) {
         label = t("subscription-label", {
-          name: x.subscription.name,
+          name: subscriptionName(x.subscription),
           date: formatDate(dateUtc(x.subscription.fundsExpirationDate), textualFormat)
         });
       } else {
-        label = x.subscription.name;
+        label = subscriptionName(x.subscription);
       }
 
       return {
         label: label,
         value: x.subscription.id,
         types: x.subscription.types,
-        budgetAllowance: x.subscription.budgetAllowancesTotal,
+        budgetAllowance: x.subscription.budgetAllowances.find((x) => x.organization.id === localBeneficiary.organization.id)
+          .availableFund,
         isBudgetAllowanceAlreadyAllocated: x.maxNumberOfPayments - x.paymentReceived <= x.paymentRemaining
       };
     })

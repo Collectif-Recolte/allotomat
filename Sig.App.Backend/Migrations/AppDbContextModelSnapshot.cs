@@ -344,6 +344,9 @@ namespace Sig.App.Backend.Migrations
                     b.Property<string>("ID2")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsUnsubscribeToReceipt")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Lastname")
                         .HasColumnType("nvarchar(max)");
 
@@ -427,6 +430,37 @@ namespace Sig.App.Backend.Migrations
                     b.HasIndex("ProductGroupId");
 
                     b.ToTable("PaymentFunds");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.BlacklistedEmail", b =>
+                {
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AddedCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EmailSentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EmailSource")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmailSubject")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("FirstAddedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LastAddedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Email");
+
+                    b.ToTable("BlacklistedEmails");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.BudgetAllowances.BudgetAllowance", b =>
@@ -603,6 +637,9 @@ namespace Sig.App.Backend.Migrations
                     b.Property<bool>("IsArchived")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsDisabled")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -760,8 +797,14 @@ namespace Sig.App.Backend.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("ExpirationNotificationSentDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("FundsExpirationDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsFundsAccumulable")
                         .HasColumnType("bit");

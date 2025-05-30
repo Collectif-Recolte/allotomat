@@ -22,7 +22,10 @@
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Budget allowance refund from participant removed from subscription",
     "transaction-log-type-refund-payment": "Payment refund",
     "market": "Markets",
-    "cash-register": "Cash Registers"
+    "cash-register": "Cash Registers",
+    "gift-card-transaction-types": "Gift Card Transaction Types",
+    "with-gift-card": "With Gift Card",
+    "without-gift-card": "Without Gift Card"
 	},
 	"fr": {
     "date-selector-from": "Intervalle du",
@@ -46,7 +49,10 @@
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppe remboursée après avoir retiré un participant d'un abonnement",
     "transaction-log-type-refund-payment": "Remboursement d'un paiement",
     "market": "Commerces",
-    "cash-register": "Caisses"
+    "cash-register": "Caisses",
+    "gift-card-transaction-types": "Carte-cadeaux",
+    "with-gift-card": "Avec carte-cadeau",
+    "without-gift-card": "Sans carte-cadeau"
 	}
 }
 </i18n>
@@ -140,12 +146,22 @@
       :label="t('transaction-log-types')"
       :options="availableTransactionTypes"
       @input="onTransactionTypesChecked" />
+    <PfFormInputCheckboxGroup
+      v-if="availableGiftCardTransactionTypes.length > 0 && !props.hideGiftCardTransactionType"
+      id="giftCardTransactionTypes"
+      class="mt-3"
+      is-filter
+      :value="selectedGiftCardTransactionTypes"
+      :label="t('gift-card-transaction-types')"
+      :options="availableGiftCardTransactionTypes"
+      @input="onGiftCardTransactionTypesChecked" />
   </UiFilter>
 </template>
 
 <script setup>
 import { defineProps, defineEmits, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 const { t } = useI18n();
 
@@ -166,7 +182,9 @@ const emit = defineEmits([
   "marketsChecked",
   "marketsUnchecked",
   "cashRegistersChecked",
-  "cashRegistersUnchecked"
+  "cashRegistersUnchecked",
+  "giftCardTransactionTypesChecked",
+  "giftCardTransactionTypesUnchecked"
 ]);
 
 const props = defineProps({
@@ -236,7 +254,17 @@ const props = defineProps({
       return [];
     }
   },
+  selectedGiftCardTransactionTypes: {
+    type: Array,
+    default() {
+      return [];
+    }
+  },
   withoutSubscriptionId: {
+    type: String,
+    default: ""
+  },
+  withCashRegisterId: {
     type: String,
     default: ""
   },
@@ -279,6 +307,18 @@ const props = defineProps({
   hideTransactionType: {
     type: Boolean,
     default: false
+  },
+  hideGiftCardTransactionType: {
+    type: Boolean,
+    default: false
+  },
+  withGiftCardId: {
+    type: String,
+    default: ""
+  },
+  withoutGiftCardId: {
+    type: String,
+    default: ""
   },
   itemsCanWrap: {
     type: Boolean,
@@ -332,7 +372,7 @@ const availableSubscriptions = computed(() => {
   }
   let subscriptions = [];
   if (props.availableSubscriptions && props.availableSubscriptions?.length > 0) {
-    subscriptions = props.availableSubscriptions.map((x) => ({ value: x.id, label: x.name }));
+    subscriptions = props.availableSubscriptions.map((x) => ({ value: x.id, label: subscriptionName(x) }));
   }
 
   if (props.withoutSubscriptionId !== "") {
@@ -344,7 +384,7 @@ const availableSubscriptions = computed(() => {
 
 const availableMarkets = computed(() => {
   if (!props.availableMarkets || props.availableMarkets?.length <= 0) return [];
-  return props.availableMarkets.map((x) => ({ value: x.id, label: x.name }));
+  return props.availableMarkets.map((x) => ({ value: x.id, label: x.name })).sort((a, b) => a.label.localeCompare(b.label));
 });
 
 const availableCashRegister = computed(() => {
@@ -374,6 +414,13 @@ const availableTransactionTypes = computed(() => {
       label: t("transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription")
     },
     { value: "RefundPaymentTransactionLog", label: t("transaction-log-type-refund-payment") }
+  ];
+});
+
+const availableGiftCardTransactionTypes = computed(() => {
+  return [
+    { value: props.withGiftCardId, label: t("with-gift-card") },
+    { value: props.withoutGiftCardId, label: t("without-gift-card") }
   ];
 });
 
@@ -422,6 +469,14 @@ function onTransactionTypesChecked(input) {
     emit("transactionTypesChecked", input.value);
   } else {
     emit("transactionTypesUnchecked", input.value);
+  }
+}
+
+function onGiftCardTransactionTypesChecked(input) {
+  if (input.isChecked) {
+    emit("giftCardTransactionTypesChecked", input.value);
+  } else {
+    emit("giftCardTransactionTypesUnchecked", input.value);
   }
 }
 
