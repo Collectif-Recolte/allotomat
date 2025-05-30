@@ -183,7 +183,14 @@ const subscriptionsOrderByDate = computed(() => {
     return dateB - dateA;
   });
 
-  return subscriptions.map((subscription) => {
+  return subscriptions
+      .filter(
+        (x) =>
+          !x.isArchived &&
+          x.budgetAllowances.find((y) => y.organization.id === beneficiary.value.organization.id) &&
+          new Date(x.fundsExpirationDate) >= new Date()
+      )
+      .map((subscription) => {
     return {
       id: subscription.id,
       name: subscriptionName(subscription),
