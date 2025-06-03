@@ -4,7 +4,7 @@
 		"unarchive-subscription-success-notification": "The subscription {subscriptionName} has been successfully unarchived.",
 		"unarchive-text-error": "The text must match the name of the subscription",
 		"unarchive-subscription-success-notification-text-label": "Type the name of the subscription to confirm",
-		"description": "Warning ! If you continue, the subscription will be unarchived and it will be possible to assign it to a participant. However, the funds of the cards will remain unchanged.",
+		"description": "Warning ! If you continue, the subscription will be unarchived and it will be possible to assign it to a participant. However, the funds of the cards will remain unchanged. (This action can be reversed later.)",
     "title": "Unarchive - {subscriptionName}",
     "unarchive-btn": "Unarchive"
 	},
@@ -12,7 +12,7 @@
 		"unarchive-subscription-success-notification": "L'abonnement {subscriptionName} a été désarchivé avec succès.",
 		"unarchive-text-error": "Le texte doit correspondre au nom de l'abonnement",
 		"unarchive-subscription-success-notification-text-label": "Taper le nom de l'abonnement pour confirmer",
-		"description": "Avertissement ! Si vous continuez, l'abonnement sera désarchivé et il pourra être assigné à un participant. Par contre, les fonds des cartes vont rester inchangés.",
+		"description": "Avertissement ! Si vous continuez, l'abonnement sera désarchivé et il pourra être assigné à un participant. Par contre, les fonds des cartes vont rester inchangés. (Cette action peut être annulée plus tard.)",
 		"title": "Désarchiver - {subscriptionName}",
     "unarchive-btn": "Désarchiver"
 	}
