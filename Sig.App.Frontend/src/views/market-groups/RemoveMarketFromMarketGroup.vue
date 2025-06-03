@@ -5,14 +5,16 @@
 		"delete-text-error": "The text must match the name of the market",
 		"delete-text-label": "Type the name of the market to confirm",
 		"description": "Warning ! The withdrawal of the market <strong>{marketName}</strong> cannot be undone. If you continue, the market will be removed from the market group permanently.",
-		"title": "Remove - {marketName}"
+		"title": "Remove - {marketName}",
+		"delete-button-label": "Remove from group"
 	},
 	"fr": {
 		"delete-market-success-notification": "Le commerce {marketName} a été retiré avec succès.",
 		"delete-text-error": "Le texte doit correspondre au nom du commerce",
 		"delete-text-label": "Taper le nom du commerce pour confirmer",
 		"description": "Avertissement ! Le retrait du commerce <strong>{marketName}</strong> ne peut pas être annulé. Si vous continuez, le commerce sera retiré du groupe de commerce de façon définitive.",
-		"title": "Retirer - {marketName}"
+		"title": "Retirer - {marketName}",
+		"delete-button-label": "Enlever du groupe"
 	}
 }
 </i18n>
@@ -25,6 +27,7 @@
     :validation-text="getMarketName()"
     :delete-text-label="t('delete-text-label')"
     :delete-text-error="t('delete-text-error')"
+    :delete-button-label="t('delete-button-label')"
     @onDelete="removeMarket" />
 </template>
 
