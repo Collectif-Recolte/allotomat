@@ -73,6 +73,17 @@ namespace Sig.App.Backend.Helpers
                 );
             }
 
+            public DataWorksheet<T> Column(string heading, Func<T, object> getValue, string numberFormat)
+            {
+                return Column(
+                    x => x.Value = heading,
+                    (item, cell) => {
+                        cell.Style.NumberFormat.Format = numberFormat;
+                        cell.Value = TransformValue(getValue(item));
+                     }
+                );
+            }
+
             public DataWorksheet<T> AddFooterRow(Action<IXLRow> renderRow)
             {
                 footerRenderers.Add(renderRow);

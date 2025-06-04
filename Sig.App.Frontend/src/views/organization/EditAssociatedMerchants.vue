@@ -26,7 +26,7 @@
         <p class="text-sm">{{ t("no-associated-merchant") }}</p>
       </div>
 
-      <MarketTable v-else :markets="organization.markets" :url-name-market-delete="URL_REMOVE_MERCHANTS_FROM_ORGANIZATION" />
+      <MarketTable v-else :markets="organization.markets" can-delete :url-name-market-delete="URL_REMOVE_MERCHANTS_FROM_ORGANIZATION" order-by-market-name />
 
       <UiSelectAndAdd
         v-if="filteredMarketOptions.length > 0"
@@ -95,7 +95,7 @@ const { result: resultMarkets } = useQuery(
 );
 
 const marketOptions = useResult(resultMarkets, null, (data) => {
-  return data.markets.map((x) => ({ label: x.name, value: x.id }));
+  return data.markets.map((x) => ({ label: x.name, value: x.id })).sort((a, b) => a.label.localeCompare(b.label));
 });
 
 const { mutate: addMarketToOrganization } = useMutation(

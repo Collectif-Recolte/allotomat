@@ -26,6 +26,7 @@ namespace Sig.App.Backend.Services.Reports
         public IEnumerable<Id> Markets { get; set; }
         public IEnumerable<Id> CashRegisters { get; set; }
         public IEnumerable<string> TransactionTypes { get; set; }
+        public IEnumerable<string> GiftCardTransactionTypes { get; set; }
         public Maybe<string> SearchText { get; set; }
         public string TimeZoneId { get; set; }
         public Language Language { get; set; }

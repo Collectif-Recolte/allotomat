@@ -167,6 +167,25 @@ namespace Sig.App.Backend.Gql.Schema
             }
         }
 
+        [RequirePermission(GlobalPermission.ManageProjects, GlobalPermission.ManageSpecificProject)]
+        [Description("All base projects manageable by current user")]
+        public static async Task<IEnumerable<BaseProjectGraphType>> AllProjects(this GqlQuery _, IAppUserContext ctx, [Inject] AppDbContext db, [Inject] PermissionService permissionService)
+        {
+            var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
+            if (globalPermissions.Contains(GlobalPermission.ManageProjects))
+            {
+                return await db.Projects.Select(x => new BaseProjectGraphType(x)).ToListAsync();
+            }
+            else if (globalPermissions.Contains(GlobalPermission.ManageSpecificProject))
+            {
+                return await ctx.DataLoader.LoadBaseProjectOwnedByUser(ctx.CurrentUserId).GetResultAsync();
+            }
+            else
+            {
+                return new BaseProjectGraphType[0];
+            }
+        }
+
         [RequirePermission(ProjectPermission.ManageProject)]
         public static IDataLoaderResult<ProjectGraphType> Project(this GqlQuery _, IAppUserContext ctx, Id id)
         {
@@ -361,7 +380,7 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, Id[] markets, Id[] cashRegisters, string[] transactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
+        public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, Id[] markets, Id[] cashRegisters, string[] transactionTypes, string[] giftCardTransactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
         {
             return await mediator.Send(new GenerateTransactionsReport.Input()
             {
@@ -375,6 +394,7 @@ namespace Sig.App.Backend.Gql.Schema
                 WithoutSubscription = withoutSubscription,
                 Categories = categories,
                 TransactionTypes = transactionTypes,
+                GiftCardTransactionTypes = giftCardTransactionTypes,
                 SearchText = searchText,
                 TimeZoneId = timeZoneId,
                 Language = language
@@ -478,7 +498,7 @@ namespace Sig.App.Backend.Gql.Schema
         [RequirePermission(GlobalPermission.ManageTransactions)]
         [Description("All transactions")]
         public static async Task<TransactionLogsPagination<TransactionLogGraphType>> TransactionLogs(this GqlQuery _, [Inject] IMediator mediator,
-            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, Id[] markets, bool? withoutSubscription, Id[] categories, string[] transactionTypes, Id[] cashRegisters, string searchText, string timeZoneId)
+            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, Id[] markets, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string[] giftCardTransactionTypes, Id[] cashRegisters, string searchText, string timeZoneId)
         {
             var results = await mediator.Send(new SearchTransactionLogs.Query
             {
@@ -493,6 +513,7 @@ namespace Sig.App.Backend.Gql.Schema
                 WithoutSubscription = withoutSubscription,
                 Categories = categories,
                 TransactionTypes = transactionTypes,
+                GiftCardTransactionTypes = giftCardTransactionTypes,
                 SearchText = searchText,
                 TimeZoneId = timeZoneId,
             });

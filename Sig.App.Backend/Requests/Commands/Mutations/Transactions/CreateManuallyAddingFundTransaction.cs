@@ -199,7 +199,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     Amount = request.Amount,
                     AvailableFund = request.Amount,
                     CreatedAtUtc = today,
-                    ExpirationDate = subscription.GetExpirationDate(clock),
+                    ExpirationDate = request.ExpirationDate.AtMidnight().InUtc().ToDateTimeUtc(),
                     Subscription = subscription,
                     ProductGroup = productGroup,
                     AffectedNegativeFundTransactions = affectedNegativeFundTransactions
@@ -218,7 +218,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     Amount = request.Amount,
                     AvailableFund = request.Amount,
                     CreatedAtUtc = today,
-                    ExpirationDate = SubscriptionHelper.GetNextPaymentDateTime(clock, (beneficiary as OffPlatformBeneficiary).MonthlyPaymentMoment.HasValue ? (beneficiary as OffPlatformBeneficiary).MonthlyPaymentMoment.Value : SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth),
+                    ExpirationDate = request.ExpirationDate.AtMidnight().InUtc().ToDateTimeUtc(),
                     ProductGroup = productGroup
                 };
                 beneficiary.Card.Transactions.Add(transaction);
@@ -289,6 +289,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             public Id SubscriptionId { get; set; }
             public decimal Amount { get; set; }
             public Id ProductGroupId { get; set; }
+            public LocalDate ExpirationDate { get; set; }
         }
 
         [MutationPayload]

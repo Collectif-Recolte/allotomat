@@ -21,6 +21,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public string Id1 => beneficiary.ID1;
         public string Id2 => beneficiary.ID2;
         public string PostalCode => beneficiary.PostalCode;
+        public bool IsUnsubscribeToReceipt => beneficiary.IsUnsubscribeToReceipt;
 
         public BeneficiaryGraphType(Beneficiary beneficiary)
         {

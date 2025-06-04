@@ -129,6 +129,7 @@ const {
             id
             name
             isArchived
+            isDisabled
           }
         }
       }
@@ -158,6 +159,7 @@ const {
             id
             name
             isArchived
+            isDisabled
           }
         }
         marketGroups {

@@ -40,6 +40,7 @@
           </UiTableHeader>
           <MarketTable
             can-edit
+            can-delete
             :markets="marketsPagination.items"
             :url-name-market-archive="URL_MARKET_ARCHIVE"
             :url-name-market-delete="URL_MARKET_DELETE"
@@ -101,6 +102,7 @@ const { result, loading, refetch } = useQuery(
           id
           name
           isArchived
+          isDisabled
         }
       }
     }

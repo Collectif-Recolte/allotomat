@@ -127,6 +127,49 @@ namespace Sig.App.Backend.Helpers
             }
         }
 
+        public static DateTime GetLastExpirationDateTime(this Subscription subscription, IClock clock)
+        {
+            var endDate = subscription.EndDate;
+
+            if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth)
+            {
+                if (endDate.Day == 1)
+                {
+                    return endDate;
+                }
+                else
+                {
+                    return new DateTime(endDate.Year, endDate.Month, 1).AddMonths(1);
+                }
+            }
+            else if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth)
+            {
+                if (endDate.Day <= 15)
+                {
+                    return new DateTime(endDate.Year, endDate.Month, 15);
+                }
+                else
+                {
+                    return new DateTime(endDate.Year, endDate.Month, 15).AddMonths(1);
+                }
+            }
+            else
+            {
+                if (endDate.Day == 1)
+                {
+                    return endDate;
+                }
+                else if (endDate.Day <= 15)
+                {
+                    return new DateTime(endDate.Year, endDate.Month, 15);
+                }
+                else
+                {
+                    return new DateTime(endDate.Year, endDate.Month, 1).AddMonths(1);
+                }
+            }
+        }
+
         public static DateTime GetNextPaymentDateTime(IClock clock, SubscriptionMonthlyPaymentMoment moment)
         {
             var today = clock

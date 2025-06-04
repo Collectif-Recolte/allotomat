@@ -47,6 +47,8 @@ export const URL_MARKET_DELETE = "market-delete-url";
 export const URL_MARKET_MANAGE_MANAGERS = "market-manage-managers-url";
 export const URL_MARKET_EDIT = "market-edit-url";
 export const URL_MARKET_ARCHIVE = "market-archive-url";
+export const URL_MARKET_DISABLED = "market-disabled-url";
+export const URL_MARKET_ENABLED = "market-enabled-url";
 
 export const URL_MARKET_OVERVIEW = "market-overview-url";
 export const URL_MARKET_OVERVIEW_SELECT = "market-overview-select-url";
@@ -55,6 +57,8 @@ export const URL_MARKET_OVERVIEW_DELETE = "market-overview-delete-url";
 export const URL_MARKET_OVERVIEW_MANAGE_MANAGERS = "market-overview-manage-managers-url";
 export const URL_MARKET_OVERVIEW_EDIT = "market-overview-edit-url";
 export const URL_MARKET_OVERVIEW_ARCHIVE = "market-overview-archive-url";
+export const URL_MARKET_OVERVIEW_ENABLED = "market-overview-enabled-url";
+export const URL_MARKET_OVERVIEW_DISABLED = "market-overview-disabled-url";
 
 export const URL_MARKET_GROUPS_OVERVIEW = "market-groups-overview-url";
 export const URL_MARKET_GROUP_ADD = "market-group-add-url";
@@ -81,6 +85,8 @@ export const URL_SUBSCRIPTION_ADMIN = "subscription-list-url";
 export const URL_SUBSCRIPTION_ADD = "subscription-add-url";
 export const URL_SUBSCRIPTION_EDIT = "subscription-edit-url";
 export const URL_SUBSCRIPTION_DELETE = "subscription-delete-url";
+export const URL_SUBSCRIPTION_ARCHIVE = "subscription-archive-url";
+export const URL_SUBSCRIPTION_UNARCHIVE = "subscription-unarchive-url";
 export const URL_SUBSCRIPTION_MANAGE_BUDGET_ALLOWANCE = "subscription-manage-budget-allowance-url";
 export const URL_SUBSCRIPTION_DELETE_BUDGET_ALLOWANCE = "subscription-delete-budget-allowance-url";
 
@@ -132,6 +138,7 @@ export const URL_CARDS_UNLOCK = "cards-unlock-url";
 
 export const URL_CARD_CHECK = "card-check-url";
 export const URL_CARD_ERROR = "card-error-url";
+export const URL_UNSUBSCRIBE_TRANSACTION_RECEIPT = "unsubscribe-transaction-receipt-url";
 
 export const URL_TRANSACTION = "transaction-url";
 export const URL_TRANSACTION_ERROR = "transaction-error-url";

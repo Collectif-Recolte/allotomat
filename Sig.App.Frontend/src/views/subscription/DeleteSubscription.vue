@@ -35,6 +35,7 @@ import gql from "graphql-tag";
 import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { useRoute, useRouter } from "vue-router";
+import { subscriptionName } from "@/lib/helpers/subscription";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 import { URL_SUBSCRIPTION_ADMIN } from "@/lib/consts/urls";
@@ -75,7 +76,7 @@ const { mutate: deleteSubscriptionMutation } = useMutation(
 );
 
 function getSubscriptionName() {
-  return subscription.value ? subscription.value.name : "";
+  return subscription.value ? subscriptionName(subscription.value) : "";
 }
 
 async function deleteSubscription() {
@@ -85,7 +86,7 @@ async function deleteSubscription() {
     }
   });
 
-  addSuccess(t("delete-subscription-success-notification", { subscriptionName: subscription.value.name }));
+  addSuccess(t("delete-subscription-success-notification", { subscriptionName: subscriptionName(subscription.value) }));
   router.push({ name: URL_SUBSCRIPTION_ADMIN });
 }
 </script>

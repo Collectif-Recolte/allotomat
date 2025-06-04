@@ -31,6 +31,21 @@ namespace Sig.App.Backend.DbModel.Entities.Subscriptions
         public IList<SubscriptionBeneficiary> Beneficiaries { get; set; }
         public IList<BudgetAllowance> BudgetAllowances { get; set; }
 
+        public bool IsArchived { get; set; }
+        public DateTime? ExpirationNotificationSentDate { get; set; }
+
+        public DateTime? GetLastExpirationDate(IClock clock)
+        {
+            if (IsFundsAccumulable && FundsExpirationDate.HasValue)
+            {
+                return FundsExpirationDate.Value;
+            }
+            else
+            {
+                return this.GetLastExpirationDateTime(clock);
+            }
+        }
+
         public DateTime GetExpirationDate(IClock clock)
         {
             if (IsFundsAccumulable && FundsExpirationDate.HasValue)

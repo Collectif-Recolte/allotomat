@@ -18,7 +18,8 @@
       "payment-conflicts-alert": "{count} payment conflicts",
       "manage-participants": "Manage",
       "assign-subscriptions": "Assignments",
-      "all-group": "All groups"
+      "all-group": "All groups",
+      "selected-all-group-description": "Some actions are not available if all groups are selected"
     },
     "fr": {
       "add-beneficiary": "Ajouter un participant",
@@ -38,7 +39,8 @@
       "payment-conflicts-alert":"{count} conflit de versement | {count} conflits de versements",
       "manage-participants": "Gestion",
       "assign-subscriptions": "Attribution",
-      "all-group": "Tous les Groupes"
+      "all-group": "Tous les Groupes",
+      "selected-all-group-description": "Certaines actions ne sont pas disponibles si tous les groupes sont sélectionnés"
     }
   }
 </i18n>
@@ -56,14 +58,17 @@
         <template v-if="organizations && manageOrganizations" #right>
           <div class="flex items-center gap-x-4">
             <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-organization") }}</span>
-            <PfFormInputSelect
-              id="selectedOrganization"
-              has-hidden-label
-              :label="t('selected-organization')"
-              :value="selectedOrganization"
-              :options="organizations"
-              col-span-class="sm:col-span-3"
-              @input="onOrganizationSelected" />
+            <div class="flex flex-col gap-y-2">
+              <PfFormInputSelect
+                id="selectedOrganization"
+                has-hidden-label
+                :label="t('selected-organization')"
+                :value="selectedOrganization"
+                :options="organizations"
+                col-span-class="sm:col-span-3"
+                @input="onOrganizationSelected" />
+              <p v-if="isAllGroupSelected" class="text-sm text-red-500">{{ t("selected-all-group-description") }}</p>
+            </div>
           </div>
         </template>
         <template v-if="organizations" #subpagesCta>
@@ -298,6 +303,16 @@ const { currentOrganization, changeOrganization } = useOrganizationStore();
 usePageTitle(t("title"));
 
 const subpages = computed(() => {
+  if (selectedOrganization.value === ALL_GROUP) {
+    return [
+      {
+        route: { name: URL_BENEFICIARY_ADMIN },
+        label: t("manage-participants"),
+        isActive: true
+      }
+    ];
+  }
+
   return [
     {
       route: { name: URL_BENEFICIARY_ADMIN },
@@ -447,6 +462,7 @@ const {
           }
           subscriptions {
             id
+            isArchived
             name
             startDate
             endDate
@@ -590,6 +606,7 @@ const {
                 hasMissedPayment
                 subscription {
                   id
+                  isArchived
                   name
                   endDate
                   types {
@@ -621,6 +638,7 @@ const {
                 }
                 subscription {
                   id
+                  isArchived
                   name
                 }
               }
@@ -729,6 +747,7 @@ const {
                 hasMissedPayment
                 subscription {
                   id
+                  isArchived
                   name
                   endDate
                   types {
@@ -760,6 +779,7 @@ const {
                 }
                 subscription {
                   id
+                  isArchived
                   name
                 }
               }

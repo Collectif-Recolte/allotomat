@@ -25,7 +25,7 @@
           <p class="text-sm">{{ t("no-associated-merchant") }}</p>
         </div>
 
-        <MarketTable v-else :markets="project.markets" :url-name-market-delete="URL_REMOVE_MERCHANTS_FROM_PROJECT" can-delete />
+        <MarketTable v-else :markets="project.markets" :url-name-market-delete="URL_REMOVE_MERCHANTS_FROM_PROJECT" can-delete order-by-market-name />
 
         <PfButtonAction btn-style="dash" has-icon-left type="button" :label="t('add-merchant')" @click="showAddMerchant" />
         <RouterView />

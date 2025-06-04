@@ -1,4 +1,5 @@
-﻿using Sig.App.Backend.DbModel.Entities.Cards;
+﻿using GraphQL.Conventions;
+using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using System;
@@ -36,5 +37,7 @@ namespace Sig.App.Backend.DbModel.Entities.Beneficiaries
         public long SortOrder { get; set; }
 
         public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+
+        public bool IsUnsubscribeToReceipt { get; set; } = false;
     }
 }
