@@ -124,7 +124,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 paymentRemaining = Math.Min(subscription.MaxNumberOfPayments.Value, paymentRemaining);
             }
 
-            decimal totalAmount = 0;
             var beneficiariesWhoGetSubscriptions = 0;
 
             logger.LogInformation($"[Mutation] AssignBeneficiariesToSubscription - Beneficiary count that fit the search ({beneficiaries.Length})");
@@ -141,6 +140,24 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         BudgetAllowanceId = budgetAllowance.Id,
                         BeneficiaryType = beneficiary.BeneficiaryType
                     });
+
+                    if (request.ReplicatePaymentOnAttribution && beneficiary.Card != null)
+                    {
+                        var beneficiarypaymentRemaining = (request.ReplicatePaymentOnAttribution && beneficiary.Card != null ? Math.Min(subscription.MaxNumberOfPayments.HasValue ? subscription.MaxNumberOfPayments.Value : subscription.GetTotalPayment(), paymentRemaining + 1) : paymentRemaining);
+                        var amount = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId).Sum(x => x.Amount) * beneficiarypaymentRemaining;
+                        
+                        if (budgetAllowance.AvailableFund >= amount)
+                        {
+                            budgetAllowance.AvailableFund -= amount;
+                            await addingFundToCardJob.AddFundToSpecificBeneficiary(beneficiary.GetIdentifier(), beneficiary.BeneficiaryType, subscription.GetIdentifier(), new AddingFundToCard.InitiatedBy()
+                            {
+                                TransactionInitiatorId = currentUserId,
+                                TransactionInitiatorEmail = currentUser?.Email,
+                                TransactionInitiatorFirstname = currentUser?.Profile.FirstName,
+                                TransactionInitiatorLastname = currentUser?.Profile.LastName
+                            });
+                        }
+                    }
 
                     logger.LogInformation(
                         $"[Mutation] AssignBeneficiariesToSubscription - Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} added to subscription {subscription.Name}");
@@ -165,7 +182,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         });
 
                         budgetAllowance.AvailableFund -= amount;
-                        totalAmount += amount;
                         beneficiariesWhoGetSubscriptions++;
 
                         if (request.ReplicatePaymentOnAttribution && beneficiary.Card != null)

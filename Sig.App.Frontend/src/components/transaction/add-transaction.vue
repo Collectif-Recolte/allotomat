@@ -88,15 +88,9 @@
           class="mb-4">
           <b>{{ subscriptionName(beneficiarySubscription.subscription) }}</b>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <div
-            v-html="
-              t('amount-received-each-payment', { amountByPayment: amountByPayment(beneficiarySubscription.subscription) })
-            "></div>
+          <div v-html="t('amount-received-each-payment', { amountByPayment: amountByPayment(beneficiarySubscription.subscription) })"></div>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <div
-            v-html="
-              t('remaining-payment-on-card', { remainingPayment: beneficiarySubscription.subscription.paymentRemaining })
-            "></div>
+          <div v-html="t('remaining-payment-on-card', { remainingPayment: beneficiarySubscription.subscription.paymentRemaining })"></div>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <div v-html="getPaymentDates(beneficiarySubscription.subscription)"></div>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
