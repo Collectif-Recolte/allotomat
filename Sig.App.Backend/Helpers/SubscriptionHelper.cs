@@ -36,7 +36,7 @@ namespace Sig.App.Backend.Helpers
                 {
                     monthsApart++;
                 }
-                if (today.Day >= 15 && endDate.Day < 15)
+                if (startDate.Day >= 15 && endDate.Day < 15)
                 {
                     monthsApart--;
                 }
