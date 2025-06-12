@@ -110,6 +110,7 @@ export const URL_BENEFICIARY_MANAGE = "beneficiary-manage-url";
 export const URL_BENEFICIARY_MANAGE_CONFLICT = "beneficiary-manage-conflict-url";
 export const URL_BENEFICIARY_ADD_MISSED_PAYMENT = "beneficiary-add-missed-payment-url";
 export const URL_BENEFICIARY_TRANSACTION_ADD = "beneficiary-transaction-add-url";
+export const URL_BENEFICIARY_ADMIN_AVAILABLE_AMOUNT_FOR_ALLOCATION = "beneficiary-admin-available-amount-for-allocation-url";
 
 export const URL_PROJECT_MANAGER_ADMIN = "project-manager-list-url";
 export const URL_PROJECT_MANAGER_ADD = "project-manager-add-url";

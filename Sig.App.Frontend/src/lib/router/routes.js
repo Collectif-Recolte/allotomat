@@ -748,6 +748,14 @@ export default [
         },
         children: [
           {
+            name: urls.URL_BENEFICIARY_ADMIN_AVAILABLE_AMOUNT_FOR_ALLOCATION,
+            path: "available-amount-for-allocation",
+            component: () => import("@/views/beneficiary/AvailableAmountForAllocation.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_BENEFICIARIES
+            }
+          },
+          {
             name: urls.URL_BENEFICIARY_CARD_ASSIGN,
             path: ":beneficiaryId/assign",
             component: () => import("@/views/card/AssignCard.vue"),
