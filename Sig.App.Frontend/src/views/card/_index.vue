@@ -28,7 +28,8 @@
     "sort-order": "Sort order",
     "sort-order-by-id": "Sort by ID",
     "sort-order-by-balance": "Sort by balance",
-    "unlock-card": "Mark card as found"
+    "unlock-card": "Mark card as found",
+    "export-cards-list": "Export"
 	},
 	"fr": {
 		"generate-cards": "Générer de nouvelles cartes",
@@ -58,7 +59,8 @@
     "sort-order": "Ordre de tri",
     "sort-order-by-id": "Trier par ID",
     "sort-order-by-balance": "Trier par solde",
-    "unlock-card": "Marquer la carte comme retrouvée"
+    "unlock-card": "Marquer la carte comme retrouvée",
+    "export-cards-list": "Exporter"
 	}
 }
 </i18n>
@@ -75,6 +77,12 @@
                 <p class="my-1">{{ t("available-card", { count: project.cardStats.cardsUnassigned }) }}</p>
               </div>
               <div class="flex flex-wrap gap-x-4 gap-y-3">
+                <PfButtonAction
+                  btn-style="outline"
+                  :label="t('export-cards-list')"
+                  :icon="ICON_DOWNLOAD"
+                  has-icon-left
+                  @click="onExportReport" />
                 <PfButtonLink
                   v-if="project"
                   btn-style="outline"
@@ -181,7 +189,7 @@ import gql from "graphql-tag";
 import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { onBeforeRouteUpdate } from "vue-router";
-import { useQuery } from "@vue/apollo-composable";
+import { useQuery, useApolloClient } from "@vue/apollo-composable";
 import { storeToRefs } from "pinia";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
@@ -220,6 +228,8 @@ import ICON_CARD_LINK from "@/lib/icons/card-link.json";
 
 const { getGlobalPermissions } = storeToRefs(useAuthStore());
 const { t } = useI18n();
+const { resolveClient } = useApolloClient();
+const client = resolveClient();
 
 const page = ref(1);
 const searchInput = ref("");
@@ -339,6 +349,20 @@ watch(resultProjects, (value) => {
   cardsPagination.value = value.projects[0]?.cards;
   cards.value = value.projects[0]?.cards.items;
 });
+
+async function onExportReport() {
+  const result = await client.query({
+    query: gql`
+      query ExportCardsList($projectId: ID!) {
+        exportCardsList(projectId: $projectId)
+      }
+    `,
+    variables: {
+      projectId: project.value.id
+    }
+  });
+  window.open(result.data.exportCardsList, "_blank");
+}
 
 const showCreateGiftCardBtn = computed(() => {
   return project.value ? { name: URL_GIFT_CARD_ADD, query: { projectId: project.value.id } } : null;
