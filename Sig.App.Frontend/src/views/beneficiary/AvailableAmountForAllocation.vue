@@ -36,13 +36,13 @@ const { result } = useQuery(
     query Organization($id: ID!) {
       organization(id: $id) {
         id
-        name
         budgetAllowances {
           id
           availableFund
           originalFund
           organization {
             id
+            name
           }
         }
       }
@@ -56,11 +56,6 @@ const organization = useResult(result);
 
 const budgetAllowances = computed(() => {
   if (!organization.value) return [];
-  return organization.value.budgetAllowances.map((budgetAllowance) => {
-    return {
-      ...budgetAllowance,
-      organization: organization.value
-    };
-  });
+  return organization.value.budgetAllowances;
 });
 </script>
