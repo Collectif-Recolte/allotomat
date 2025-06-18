@@ -93,7 +93,6 @@
             id="amount"
             v-bind="field"
             :label="t('amount-label')"
-            :placeholder="t('amount-placeholder', { amount: getMoneyFormat(18.43) })"
             :errors="fieldErrors"
             input-type="number"
             min="0">

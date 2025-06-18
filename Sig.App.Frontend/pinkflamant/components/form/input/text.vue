@@ -9,7 +9,8 @@
     :errors="errors"
     :disabled="disabled"
     :has-hidden-label="hasHiddenLabel"
-    :required="required">
+    :required="required"
+    :is-large="isLarge">
     <div class="flex rounded-md shadow-sm relative">
       <span
         v-if="addOn || $slots.addOn"
@@ -120,7 +121,8 @@ export default {
     max: {
       type: Number,
       default: null
-    }
+    },
+    isLarge: Boolean
   },
   emits: ["input", "keypress"],
   computed: {
