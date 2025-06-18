@@ -447,6 +447,14 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
+        public static async Task<string> ExportCardsList(this GqlQuery _, [Inject] IMediator mediator, Id projectId)
+        {
+            return await mediator.Send(new ExportCardsList.Input()
+            {
+                ProjectId = projectId
+            });
+        }
+
         public static async Task<string> ExportOffPlatformBeneficiariesList(this GqlQuery _, Id id, string timeZoneId, [Inject] IMediator mediator)
         {
             return await mediator.Send(new ExportOffPlatformBeneficiariesList.Input()

@@ -1,0 +1,16 @@
+﻿@using Sig.App.Backend.Helpers
+@using System.Globalization
+@using Sig.App.Backend.Constants
+
+@model Sig.App.Backend.EmailTemplates.Models.MonthlyCardBalanceReportEmail
+@{ Layout = "_EmailLayout.cshtml"; }
+
+<p>
+    Bonjour,
+    Voici le rapport mensuel des cartes pour le programme @Model.Project.Name
+</p>
+<br />
+<p>
+    Hello,
+    Here is the monthly cards report for the @Model.Project.Name program
+</p>
