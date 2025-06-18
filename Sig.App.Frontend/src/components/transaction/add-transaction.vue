@@ -88,9 +88,15 @@
           class="mb-4">
           <b>{{ subscriptionName(beneficiarySubscription.subscription) }}</b>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <div v-html="t('amount-received-each-payment', { amountByPayment: amountByPayment(beneficiarySubscription.subscription) })"></div>
+          <div
+            v-html="
+              t('amount-received-each-payment', { amountByPayment: amountByPayment(beneficiarySubscription.subscription) })
+            "></div>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <div v-html="t('remaining-payment-on-card', { remainingPayment: beneficiarySubscription.subscription.paymentRemaining })"></div>
+          <div
+            v-html="
+              t('remaining-payment-on-card', { remainingPayment: beneficiarySubscription.subscription.paymentRemaining })
+            "></div>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <div v-html="getPaymentDates(beneficiarySubscription.subscription)"></div>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
@@ -148,8 +154,8 @@
                     v-bind="inputField"
                     :label="fundLabel(funds[idx].fund, 'amount-label')"
                     :after-label="fundAfterLabel(funds[idx].fund, 'amount-after-label')"
-                    :placeholder="t('amount-placeholder', { amount: 18.43 })"
                     :errors="fieldErrors"
+                    is-large
                     input-mode="decimal">
                     <template #trailingIcon>
                       <UiDollarSign :errors="fieldErrors" />
@@ -190,11 +196,11 @@
                     getColorBgClass(item.fund.productGroup.color),
                     getIsGiftCard(item.fund.productGroup.name) ? 'bg-diagonal-pattern' : ''
                   ]">
-                  <span class="w-1/2 font-bold">
+                  <span class="w-1/2 font-bold text-lg">
                     {{ fundLabel(item.fund, "confirmation-amount-label") }}
                   </span>
                   <span class="w-1/2 text-right">
-                    <span class="ml-2">{{ getMoneyFormat(-Math.abs(item.amount)) }}</span>
+                    <span class="ml-2 text-lg">{{ getMoneyFormat(-Math.abs(item.amount)) }}</span>
                   </span>
                 </div>
               </li>
