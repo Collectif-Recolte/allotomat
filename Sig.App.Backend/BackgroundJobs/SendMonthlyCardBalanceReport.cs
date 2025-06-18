@@ -6,16 +6,15 @@ using Microsoft.Extensions.Logging;
 using NodaTime;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel;
-using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Helpers;
+using Sig.App.Backend.Requests.Queries.Cards;
 using Sig.App.Backend.Requests.Queries.Projects;
 using Sig.App.Backend.Services.Mailer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static Sig.App.Backend.EmailTemplates.Models.MonthlyCardBalanceReportEmail;
 
 namespace Sig.App.Backend.BackgroundJobs
 {
@@ -50,12 +49,14 @@ namespace Sig.App.Backend.BackgroundJobs
                 .ToListAsync();
 
             var cardGroupByProject = cards.GroupBy(x => x.ProjectId).ToList();
-            
+            var projectIds = cardGroupByProject.Select(g => g.Key).ToList();
+            var projects = await db.Projects.Where(p => projectIds.Contains(p.Id)).ToDictionaryAsync(p => p.Id);
+
             foreach (var groupByProject in cardGroupByProject)
             {
                 var cardBalanceReports = new List<CardBalanceReport>();
 
-                foreach (var card in groupByProject.ToList())
+                foreach (var card in groupByProject)
                 {
                     cardBalanceReports.Add(new CardBalanceReport()
                     {
@@ -64,7 +65,7 @@ namespace Sig.App.Backend.BackgroundJobs
                     });
                 }
 
-                var project = await db.Projects.Where(x => x.Id == groupByProject.Key).FirstAsync();
+                var project = projects[groupByProject.Key];
                 var projectManagers = await mediator.Send(new GetProjectProjectManagers.Query
                 {
                     ProjectId = project.Id
@@ -78,7 +79,7 @@ namespace Sig.App.Backend.BackgroundJobs
                     generator.AddDataWorksheet("Rapport des cartes mensuel", cardBalanceReports)
                         .Column("Numéro", x => x.Card.CardNumber)
                         .Column("ID de carte de programme", x => x.Card.ProgramCardId)
-                        .Column("Status", x => GetCardStatus(x.Card.Status))
+                        .Column("Status", x => CardHelper.GetCardStatus(x.Card.Status))
                         .Column("Fonds carte cadeau", x => MoneyHelper.GetMoneyFormat(x.Card.LoyaltyFund(), MoneyHelper.EN))
                         .Column("Fonds d'abonnement", x => MoneyHelper.GetMoneyFormat(x.Card.TotalSubscriptionFund(), MoneyHelper.EN))
                         .Column("Total", x => MoneyHelper.GetMoneyFormat(x.Total, MoneyHelper.EN));
@@ -89,38 +90,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 }
                 else
                 {
-                    logger.LogInformation($"Can't send monthly balance report for {project.Name}. Reason: No project manager.");
-                }
-            }
-        }
-
-        private string GetCardStatus(CardStatus status)
-        {
-            switch (status)
-            {
-                case CardStatus.Unassigned:
-                {
-                    return "Non attribué/Unassigned";
-                }
-                case CardStatus.Assigned:
-                {
-                    return "Attribué/Assigned";
-                }
-                case CardStatus.Deactivated:
-                {
-                    return "Désactivé/Deactivated";
-                }
-                case CardStatus.GiftCard:
-                {
-                    return "Carte cadeau/Gift-Card";
-                }
-                case CardStatus.Lost:
-                {
-                    return "Perdue/Lost";
-                }
-                default:
-                {
-                    return "";
+                    logger.LogInformation($"Can't send monthly card report for {project.Name}. Reason: No project manager.");
                 }
             }
         }

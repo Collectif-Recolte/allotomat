@@ -1,6 +1,5 @@
-﻿using Sig.App.Backend.DbModel.Entities.Cards;
-using Sig.App.Backend.DbModel.Entities.Markets;
-using Sig.App.Backend.DbModel.Entities.Projects;
+﻿using Sig.App.Backend.DbModel.Entities.Projects;
+using Sig.App.Backend.Requests.Queries.Cards;
 using Sig.App.Backend.Services.Mailer;
 using System.Collections.Generic;
 
@@ -17,12 +16,6 @@ namespace Sig.App.Backend.EmailTemplates.Models
         {
             Reports = reports;
             Project = project;
-        }
-
-        public class CardBalanceReport
-        {
-            public Card Card { get; set; }
-            public decimal Total { get; set; }
         }
     }
 }

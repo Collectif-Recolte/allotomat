@@ -4,16 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Projects;
-using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Plugins.MediatR;
+using Sig.App.Backend.Requests.Queries.Cards;
 using Sig.App.Backend.Services.Files;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using static Sig.App.Backend.EmailTemplates.Models.MonthlyCardBalanceReportEmail;
 
 namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
 {
@@ -58,7 +57,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
             generator.AddDataWorksheet("Rapport des cartes mensuel", cardBalanceReports)
                 .Column("Numéro", x => x.Card.CardNumber)
                 .Column("ID de carte de programme", x => x.Card.ProgramCardId)
-                .Column("Status", x => GetCardStatus(x.Card.Status))
+                .Column("Status", x => CardHelper.GetCardStatus(x.Card.Status))
                 .Column("Fonds carte cadeau", x => MoneyHelper.GetMoneyFormat(x.Card.LoyaltyFund(), MoneyHelper.EN))
                 .Column("Fonds d'abonnement", x => MoneyHelper.GetMoneyFormat(x.Card.TotalSubscriptionFund(), MoneyHelper.EN))
                 .Column("Total", x => MoneyHelper.GetMoneyFormat(x.Total, MoneyHelper.EN));
@@ -74,37 +73,6 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
             });
 
             return result.FileUrl;
-        }
-
-        private string GetCardStatus(CardStatus status)
-        {
-            switch (status)
-            {
-                case CardStatus.Unassigned:
-                {
-                    return "Non attribué/Unassigned";
-                }
-                case CardStatus.Assigned:
-                {
-                    return "Attribué/Assigned";
-                }
-                case CardStatus.Deactivated:
-                {
-                    return "Désactivé/Deactivated";
-                }
-                case CardStatus.GiftCard:
-                {
-                    return "Carte cadeau/Gift-Card";
-                }
-                case CardStatus.Lost:
-                {
-                    return "Perdue/Lost";
-                }
-                default:
-                {
-                    return "";
-                }
-            }
         }
 
         public class Input : IRequest<string>
