@@ -2,8 +2,8 @@
 {
     public enum ReconciliationReportDate
     {
-        OneMonth,
-        OneWeek,
-        OneDay
+        OneMonth = 0,
+        OneWeek = 1,
+        OneDay = 2
     }
 }

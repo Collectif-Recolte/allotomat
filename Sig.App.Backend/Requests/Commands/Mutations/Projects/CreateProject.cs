@@ -201,7 +201,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             public bool AllowOrganizationsAssignCards { get; set; }
             public bool BeneficiariesAreAnonymous { get; set; }
             public bool AdministrationSubscriptionsOffPlatform { get; set; }
-            public ReconciliationReportDate ReconciliationReportDate { get; set; } = ReconciliationReportDate.OneWeek;
+            public ReconciliationReportDate ReconciliationReportDate { get; set; } = ReconciliationReportDate.OneMonth;
         }
 
         [MutationPayload]
