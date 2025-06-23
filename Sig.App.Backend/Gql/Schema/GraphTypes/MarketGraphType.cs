@@ -63,9 +63,15 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         }
 
         [Description("The list of cash-register for this market.")]
-        public IDataLoaderResult<IEnumerable<CashRegisterGraphType>> CashRegisters(IAppUserContext ctx)
+        public async Task<IEnumerable<CashRegisterGraphType>> CashRegisters(IAppUserContext ctx, bool includeArchived = true)
         {
-            return ctx.DataLoader.LoadMarketCashRegisters(Id.LongIdentifierForType<Market>());
+            var cashRegisters = await ctx.DataLoader.LoadMarketCashRegisters(Id.LongIdentifierForType<Market>()).GetResultAsync();
+
+            if (includeArchived)
+            {
+                return cashRegisters;
+            }
+            return cashRegisters.Where(x => !x.IsArchived);
         }
 
         private bool IsTransactionBetweenDate(ITransactionGraphType x, DateTime startDate, DateTime endDate)
