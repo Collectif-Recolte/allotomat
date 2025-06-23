@@ -105,6 +105,7 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
     query Projects($page: Int!, $dateFrom: DateTime!, $dateTo: DateTime!) {
       projects {
         id
+        reconciliationReportDate
         name
         marketsAmountOwed(page: $page, limit: 30, startDate: $dateFrom, endDate: $dateTo) {
           totalCount
@@ -134,6 +135,10 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
 );
 
 const project = useResult(resultProjects, null, (data) => {
+  if (!route.query.dateFrom && !route.query.dateTo) {
+    setDateFrom(data.projects[0].reconciliationReportDate);
+  }
+
   return data.projects[0];
 });
 
@@ -143,6 +148,10 @@ const { result: resultMarketGroups, loading: loadingMarketGroups } = useQuery(
       marketGroups {
         id
         name
+        project {
+          id
+          reconciliationReportDate
+        }
         marketsAmountOwed(page: $page, limit: 30, startDate: $dateFrom, endDate: $dateTo) {
           totalCount
           totalPages
@@ -171,8 +180,33 @@ const { result: resultMarketGroups, loading: loadingMarketGroups } = useQuery(
 );
 
 const marketGroup = useResult(resultMarketGroups, null, (data) => {
+  if (!route.query.dateFrom && !route.query.dateTo) {
+    setDateFrom(data.marketGroups[0].project.reconciliationReportDate);
+  }
+
   return data.marketGroups[0];
 });
+
+function setDateFrom(reconciliationReportDate) {
+  switch (reconciliationReportDate) {
+    case "ONE_MONTH": {
+      let previousMonth = new Date();
+      previousMonth.setMonth(previousMonth.getMonth() - 1);
+      dateFrom.value = previousMonth;
+      break;
+    }
+    case "ONE_WEEK": {
+      let previousWeek = new Date();
+      previousWeek.setDate(previousWeek.getDate() - 7);
+      dateFrom.value = previousWeek;
+      break;
+    }
+    case "ONE_DAY": {
+      dateFrom.value = new Date();
+      break;
+    }
+  }
+}
 
 const marketsAmountOwed = computed(() => {
   var marketsAmountOwed = project.value

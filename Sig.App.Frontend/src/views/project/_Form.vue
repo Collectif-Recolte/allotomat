@@ -8,7 +8,11 @@
     "project-url-description": "Ex. https://carteproximite.org/",
     "project-allow-organizations-assign-cards": "Allow groups to assign cards",
     "project-beneficiaries-are-anonymous": "Anonymous beneficiaries",
-    "project-administration-subscriptions-off-platform": "The administration of participants is done off-platform"
+    "project-administration-subscriptions-off-platform": "The administration of participants is done off-platform",
+    "reconciliation-report-date": "Reconciliation report date",
+    "one-month": "Last month",
+    "one-week": "Last week",
+    "one-day": "Last day"
 	},
 	"fr": {
 		"cancel": "Annuler",
@@ -18,7 +22,11 @@
     "project-url-description": "Ex. https://carteproximite.org/",
     "project-allow-organizations-assign-cards": "Permettre aux groupes d’assigner des cartes",
     "project-beneficiaries-are-anonymous": "Participant-e-s anonymes",
-    "project-administration-subscriptions-off-platform": "L'administration des participant-e-s se fait hors plateforme"
+    "project-administration-subscriptions-off-platform": "L'administration des participant-e-s se fait hors plateforme",
+    "reconciliation-report-date": "Date de réconciliation",
+    "one-month": "Le dernier mois",
+    "one-week": "La dernière semaine",
+    "one-day": "La dernière journée"
   }
 }
 </i18n>
@@ -83,6 +91,15 @@
             :checked="field.value"
             col-span-class="sm:col-span-4" />
         </Field>
+        <Field v-slot="{ field }" name="reconciliationReportDate">
+          <PfFormInputSelect
+            id="reconciliationReportDate"
+            v-bind="field"
+            :errors="errors"
+            :label="t('reconciliation-report-date')"
+            :options="reconciliationReportDateOptions"
+            col-span-class="sm:col-span-4" />
+        </Field>
       </PfFormSection>
       <slot></slot>
     </PfForm>
@@ -126,6 +143,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  reconciliationReportDate: {
+    type: String,
+    default: ""
+  },
   initialValues: {
     type: Object,
     default: null
@@ -149,8 +170,24 @@ const baseInitialValues = {
   url: props.url,
   allowOrganizationsAssignCards: props.allowOrganizationsAssignCards,
   beneficiariesAreAnonymous: props.beneficiariesAreAnonymous,
-  administrationSubscriptionsOffPlatform: props.administrationSubscriptionsOffPlatform
+  administrationSubscriptionsOffPlatform: props.administrationSubscriptionsOffPlatform,
+  reconciliationReportDate: props.reconciliationReportDate
 };
+
+const reconciliationReportDateOptions = [
+  {
+    label: t("one-month"),
+    value: "ONE_MONTH"
+  },
+  {
+    label: t("one-week"),
+    value: "ONE_WEEK"
+  },
+  {
+    label: t("one-day"),
+    value: "ONE_DAY"
+  }
+];
 
 const baseValidationSchema = computed(() =>
   object({
