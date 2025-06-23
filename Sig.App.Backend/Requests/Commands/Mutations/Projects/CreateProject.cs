@@ -51,6 +51,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 AllowOrganizationsAssignCards = request.AllowOrganizationsAssignCards,
                 BeneficiariesAreAnonymous = request.BeneficiariesAreAnonymous,
                 AdministrationSubscriptionsOffPlatform = request.AdministrationSubscriptionsOffPlatform,
+                ReconciliationReportDate = request.ReconciliationReportDate,
                 MarketGroups = new List<MarketGroup>()
             };
             project.MarketGroups.Add(new MarketGroup() {
@@ -200,6 +201,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             public bool AllowOrganizationsAssignCards { get; set; }
             public bool BeneficiariesAreAnonymous { get; set; }
             public bool AdministrationSubscriptionsOffPlatform { get; set; }
+            public ReconciliationReportDate ReconciliationReportDate { get; set; } = ReconciliationReportDate.OneWeek;
         }
 
         [MutationPayload]

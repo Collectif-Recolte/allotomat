@@ -106,7 +106,8 @@ async function onSubmit({
   allowOrganizationsAssignCards,
   managers,
   beneficiariesAreAnonymous,
-  administrationSubscriptionsOffPlatform
+  administrationSubscriptionsOffPlatform,
+  reconciliationReportDate
 }) {
   let input = {
     name,
@@ -115,7 +116,8 @@ async function onSubmit({
     allowOrganizationsAssignCards: allowOrganizationsAssignCards !== undefined ? allowOrganizationsAssignCards : false,
     beneficiariesAreAnonymous: beneficiariesAreAnonymous !== undefined ? beneficiariesAreAnonymous : false,
     administrationSubscriptionsOffPlatform:
-      administrationSubscriptionsOffPlatform !== undefined ? administrationSubscriptionsOffPlatform : false
+      administrationSubscriptionsOffPlatform !== undefined ? administrationSubscriptionsOffPlatform : false,
+    reconciliationReportDate: reconciliationReportDate !== undefined ? reconciliationReportDate : null
   };
 
   await createProject({ input });
