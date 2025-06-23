@@ -121,10 +121,9 @@ const { result, loading } = useQuery(
       markets {
         id
         isDisabled
-        cashRegisters {
+        cashRegisters(includeArchived: false) {
           id
           name
-          isArchived
           marketGroups {
             id
             name
@@ -140,8 +139,8 @@ const { result, loading } = useQuery(
 );
 
 const cashRegisters = useResult(result, [], (data) => {
-  if (data.markets[0].cashRegisters.filter((x) => !x.isArchived).length === 1) {
-    const cashRegister = data.markets[0].cashRegisters.filter((x) => !x.isArchived)[0];
+  if (data.markets[0].cashRegisters.length === 1) {
+    const cashRegister = data.markets[0].cashRegisters[0];
     changeCashRegister(cashRegister.id);
     selectedCashRegisterId.value = cashRegister.id;
   }
@@ -149,7 +148,6 @@ const cashRegisters = useResult(result, [], (data) => {
   return data.markets[0].cashRegisters.map((cashRegister) => ({
     id: cashRegister.id,
     name: cashRegister.name,
-    isArchived: cashRegister.isArchived,
     marketGroups: cashRegister.marketGroups
   }));
 });
@@ -157,7 +155,7 @@ const cashRegisters = useResult(result, [], (data) => {
 const market = useResult(result, null, (data) => data.markets[0]);
 
 const cashRegisterOptions = computed(() =>
-  cashRegisters.value.filter((x) => !x.isArchived).map((cashRegister) => ({ value: cashRegister.id, label: cashRegister.name }))
+  cashRegisters.value.map((cashRegister) => ({ value: cashRegister.id, label: cashRegister.name }))
 );
 
 const selectedCashRegister = computed(() =>
