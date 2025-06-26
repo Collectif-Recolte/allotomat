@@ -113,7 +113,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             if (subscription.MaxNumberOfPayments.HasValue)
             {
-                if (transactions.Count() == subscription.MaxNumberOfPayments - subscriptionPaymentRemaining)
+                if (transactions.Count() >= subscription.MaxNumberOfPayments - subscriptionPaymentRemaining)
                 {
                     logger.LogWarning("[Mutation] AddMissingPayment - SubscriptionDontHaveMissedPaymentException");
                     throw new SubscriptionDontHaveMissedPaymentException();
