@@ -19,10 +19,10 @@
       <td class="py-3">
         {{ slotProps.item.organization.name }}
       </td>
-      <td class="py-3">
+      <td class="py-3 text-right">
         {{ getMoneyFormat(slotProps.item.originalFund) }}
       </td>
-      <td class="py-3">
+      <td class="py-3 text-right">
         {{ getMoneyFormat(slotProps.item.availableFund) }}
       </td>
     </template>
@@ -44,8 +44,8 @@ const props = defineProps({
 const cols = computed(() => {
   return [
     { label: t("organization-name") },
-    { label: t("budget-allowance-original-fund") },
-    { label: t("budget-allowance-available-fund") }
+    { label: t("budget-allowance-original-fund"), isRight: true },
+    { label: t("budget-allowance-available-fund"), isRight: true }
   ];
 });
 </script>
