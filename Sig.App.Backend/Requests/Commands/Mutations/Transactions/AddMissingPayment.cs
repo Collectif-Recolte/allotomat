@@ -104,6 +104,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             }
 
             var transactions = await db.Transactions.OfType<SubscriptionAddingFundTransaction>()
+                .Where(x => x.Status != DbModel.Enums.FundTransactionStatus.Unassigned)
                 .Include(x => x.SubscriptionType)
                 .Where(x => x.BeneficiaryId == beneficiary.Id && x.SubscriptionType.SubscriptionId == subscription.Id).ToListAsync();
 
@@ -112,7 +113,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             if (subscription.MaxNumberOfPayments.HasValue)
             {
-                if (transactions.Count() == subscription.MaxNumberOfPayments)
+                if (transactions.Count() >= subscription.MaxNumberOfPayments - subscriptionPaymentRemaining)
                 {
                     logger.LogWarning("[Mutation] AddMissingPayment - SubscriptionDontHaveMissedPaymentException");
                     throw new SubscriptionDontHaveMissedPaymentException();
