@@ -14,7 +14,7 @@
     :for="props.inputId"
     class="font-semibold transition-colors duration-200 ease-in-out"
     :class="[
-      isFilter ? 'text-xs relative top-px lg:top-[2px]' : 'text-sm',
+      isLarge ? 'text-lg' : isFilter ? 'text-xs relative top-px lg:top-[2px]' : 'text-sm',
       {
         'text-red-600 dark:text-white': props.hasErrorState,
         'text-grey-500 dark:text-grey-200': props.disabled,
@@ -29,7 +29,7 @@
       <span class="font-normal text-red-500 pl-1">{{ t("mandatory-label") }}</span>
     </slot>
     <slot name="afterLabel">
-      <span class="font-normal">{{ props.afterLabel }}</span>
+      <span class="font-normal" :class="[isLarge ? 'text-lg' : 'text-sm']">{{ props.afterLabel }}</span>
     </slot>
   </label>
 </template>
@@ -56,6 +56,7 @@ const props = defineProps({
   hasErrorState: Boolean,
   disabled: Boolean,
   isFilter: Boolean,
+  isLarge: Boolean,
   required: Boolean
 });
 </script>

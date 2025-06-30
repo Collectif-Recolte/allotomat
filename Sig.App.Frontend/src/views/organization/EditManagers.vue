@@ -49,6 +49,9 @@ const { result, refetch } = useQuery(
         name
         managers {
           id
+          isConfirmed
+          confirmationLink
+          resetPasswordLink
           profile {
             id
             firstName

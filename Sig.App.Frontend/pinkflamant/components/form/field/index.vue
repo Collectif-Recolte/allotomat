@@ -10,7 +10,8 @@
       :after-label="afterLabel"
       :has-error-state="hasErrorState"
       :disabled="disabled"
-      :required="required" />
+      :required="required"
+      :is-large="isLarge" />
 
     <div :class="{ 'relative flex items-start': isRadioOrCheck }">
       <!-- Input -->
@@ -101,7 +102,8 @@ export const commonFieldProps = {
   required: Boolean,
   disabled: Boolean,
   isFilter: Boolean,
-  hasHiddenLabel: Boolean
+  hasHiddenLabel: Boolean,
+  isLarge: Boolean
 };
 
 export default {
