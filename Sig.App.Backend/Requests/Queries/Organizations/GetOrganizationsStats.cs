@@ -126,8 +126,8 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
 
         public decimal GetBalanceOnCards(List<ManuallyAddingFundTransaction> manuallyAddingTransactions, List<SubscriptionAddingFundTransaction> subscriptionTransactions)
         {
-            var manuallyAddingBalance = manuallyAddingTransactions.Sum(x => x.AvailableFund);
-            var subscriptionBalance = subscriptionTransactions.Sum(x => x.AvailableFund);
+            var manuallyAddingBalance = manuallyAddingTransactions.Where(x => x.CardId != null).Sum(x => x.AvailableFund);
+            var subscriptionBalance = subscriptionTransactions.Where(x => x.CardId != null).Sum(x => x.AvailableFund);
 
             return manuallyAddingBalance + subscriptionBalance;
         }
@@ -136,7 +136,7 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
         {
             var manuallyAddingAmount = manuallyAddingTransactions.Where(x => x.CardId != null).Sum(x => x.Amount);
             var subscriptionAmount = subscriptionTransactions.Where(x => x.CardId != null).Sum(x => x.Amount);
-
+            
             return manuallyAddingAmount + subscriptionAmount;
         }
 
