@@ -1,12 +1,12 @@
 <i18n>
   {
       "en": {
-          "organization-name": "Group name",
+          "subscription-name": "Subscription",
 					"budget-allowance-original-fund": "Original fund",
 					"budget-allowance-available-fund": "Available fund",
       },
       "fr": {
-          "organization-name": "Nom du groupe",
+          "subscription-name": "Abonnement",
 					"budget-allowance-original-fund": "Fonds original",
 					"budget-allowance-available-fund": "Fonds disponible"
       }
@@ -17,7 +17,7 @@
   <UiTable v-if="props.budgetAllowances" :items="props.budgetAllowances" :cols="cols">
     <template #default="slotProps">
       <td class="py-3">
-        {{ slotProps.item.organization.name }}
+        {{ slotProps.item.subscription.name }}
       </td>
       <td class="py-3 text-right">
         {{ getMoneyFormat(slotProps.item.originalFund) }}
@@ -43,7 +43,7 @@ const props = defineProps({
 
 const cols = computed(() => {
   return [
-    { label: t("organization-name") },
+    { label: t("subscription-name") },
     { label: t("budget-allowance-original-fund"), isRight: true },
     { label: t("budget-allowance-available-fund"), isRight: true }
   ];

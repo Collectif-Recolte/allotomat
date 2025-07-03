@@ -40,9 +40,14 @@ const { result } = useQuery(
           id
           availableFund
           originalFund
-          organization {
+          subscription {
             id
             name
+            isArchived
+            isExpired
+            isFundsAccumulable
+            fundsExpirationDate
+            endDate
           }
         }
       }
@@ -56,6 +61,16 @@ const organization = useResult(result);
 
 const budgetAllowances = computed(() => {
   if (!organization.value) return [];
-  return organization.value.budgetAllowances;
+  return organization.value.budgetAllowances
+    .filter((budgetAllowance) => !budgetAllowance.subscription.isArchived && !budgetAllowance.subscription.isExpired)
+    .sort((a, b) => {
+      const dateA = a.subscription.isFundsAccumulable
+        ? new Date(a.subscription.fundsExpirationDate)
+        : new Date(a.subscription.endDate);
+      const dateB = b.subscription.isFundsAccumulable
+        ? new Date(b.subscription.fundsExpirationDate)
+        : new Date(b.subscription.endDate);
+      return dateB - dateA;
+    });
 });
 </script>
