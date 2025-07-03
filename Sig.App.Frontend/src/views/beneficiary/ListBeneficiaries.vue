@@ -19,7 +19,8 @@
       "manage-participants": "Manage",
       "assign-subscriptions": "Assignments",
       "all-group": "All groups",
-      "selected-all-group-description": "Some actions are not available if all groups are selected"
+      "selected-all-group-description": "Some actions are not available if all groups are selected",
+      "available-amount-for-allocation-details": "Show details"
     },
     "fr": {
       "add-beneficiary": "Ajouter un participant",
