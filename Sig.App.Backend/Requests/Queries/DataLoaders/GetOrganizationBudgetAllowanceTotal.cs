@@ -25,7 +25,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
         {
             var results = await db.BudgetAllowances
                 .Include(x => x.Subscription)
-                .Where(x => request.Ids.Contains(x.OrganizationId))
+                .Where(x => request.Ids.Contains(x.OrganizationId) && !x.Subscription.IsArchived)
                 .ToListAsync();
 
             var now = clock.GetCurrentInstant().ToDateTimeUtc();

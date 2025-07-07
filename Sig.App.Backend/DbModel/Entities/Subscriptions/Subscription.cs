@@ -48,6 +48,11 @@ namespace Sig.App.Backend.DbModel.Entities.Subscriptions
 
         public DateTime GetExpirationDate(IClock clock)
         {
+            if (FundsExpirationDate.HasValue && FundsExpirationDate.Value < clock.GetCurrentInstant().ToDateTimeUtc())
+            {
+                return FundsExpirationDate.Value;
+            }
+
             if (IsFundsAccumulable && FundsExpirationDate.HasValue)
             {
                 return FundsExpirationDate.Value;
