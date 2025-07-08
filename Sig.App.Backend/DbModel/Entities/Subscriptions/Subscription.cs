@@ -36,7 +36,7 @@ namespace Sig.App.Backend.DbModel.Entities.Subscriptions
 
         public DateTime? GetLastExpirationDate(IClock clock)
         {
-            if (IsFundsAccumulable && FundsExpirationDate.HasValue)
+            if (IsExpiringAndAccumulableFunds)
             {
                 return FundsExpirationDate.Value;
             }
@@ -48,12 +48,7 @@ namespace Sig.App.Backend.DbModel.Entities.Subscriptions
 
         public DateTime GetExpirationDate(IClock clock)
         {
-            if (FundsExpirationDate.HasValue && FundsExpirationDate.Value < clock.GetCurrentInstant().ToDateTimeUtc())
-            {
-                return FundsExpirationDate.Value;
-            }
-
-            if (IsFundsAccumulable && FundsExpirationDate.HasValue)
+            if (IsExpired(clock) || IsExpiringAndAccumulableFunds)
             {
                 return FundsExpirationDate.Value;
             }
@@ -65,7 +60,7 @@ namespace Sig.App.Backend.DbModel.Entities.Subscriptions
         
         public DateTime GetLastDateToAssignBeneficiary()
         {
-            if (IsFundsAccumulable && FundsExpirationDate.HasValue)
+            if (IsExpiringAndAccumulableFunds)
             {
                 return FundsExpirationDate.Value;
             }
@@ -89,5 +84,9 @@ namespace Sig.App.Backend.DbModel.Entities.Subscriptions
                     throw new Exception("Unsupported SubscriptionMonthlyPaymentMoment");
             }
         }
+
+        public bool IsExpired(IClock clock) => FundsExpirationDate.HasValue && FundsExpirationDate.Value < clock.GetCurrentInstant().ToDateTimeUtc();
+
+        public bool IsExpiringAndAccumulableFunds => IsFundsAccumulable && FundsExpirationDate.HasValue;
     }
 }
