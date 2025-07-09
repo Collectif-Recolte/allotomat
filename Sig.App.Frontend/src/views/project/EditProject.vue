@@ -23,6 +23,7 @@
       :allow-organizations-assign-cards="project.allowOrganizationsAssignCards"
       :beneficiaries-are-anonymous="project.beneficiariesAreAnonymous"
       :administration-subscriptions-off-platform="project.administrationSubscriptionsOffPlatform"
+      :reconciliation-report-date="project.reconciliationReportDate"
       @closeModal="closeModal"
       @submit="onSubmit" />
   </UiDialogModal>
@@ -54,6 +55,7 @@ const { result } = useQuery(
         allowOrganizationsAssignCards
         beneficiariesAreAnonymous
         administrationSubscriptionsOffPlatform
+        reconciliationReportDate
       }
     }
   `,
@@ -74,19 +76,21 @@ const { mutate: editProject } = useMutation(
           allowOrganizationsAssignCards
           beneficiariesAreAnonymous
           administrationSubscriptionsOffPlatform
+          reconciliationReportDate
         }
       }
     }
   `
 );
 
-async function onSubmit({ name, url, allowOrganizationsAssignCards, beneficiariesAreAnonymous }) {
+async function onSubmit({ name, url, allowOrganizationsAssignCards, beneficiariesAreAnonymous, reconciliationReportDate }) {
   let input = {
     projectId: route.params.projectId,
     name: { value: name },
     url: { value: url },
     allowOrganizationsAssignCards: { value: allowOrganizationsAssignCards },
-    beneficiariesAreAnonymous: { value: beneficiariesAreAnonymous }
+    beneficiariesAreAnonymous: { value: beneficiariesAreAnonymous },
+    reconciliationReportDate: { value: reconciliationReportDate }
   };
 
   await editProject({

@@ -19,7 +19,8 @@
       "manage-participants": "Manage",
       "assign-subscriptions": "Assignments",
       "all-group": "All groups",
-      "selected-all-group-description": "Some actions are not available if all groups are selected"
+      "selected-all-group-description": "Some actions are not available if all groups are selected",
+      "available-amount-for-allocation-details": "Show details"
     },
     "fr": {
       "add-beneficiary": "Ajouter un participant",
@@ -40,7 +41,8 @@
       "manage-participants": "Gestion",
       "assign-subscriptions": "Attribution",
       "all-group": "Tous les Groupes",
-      "selected-all-group-description": "Certaines actions ne sont pas disponibles si tous les groupes sont sélectionnés"
+      "selected-all-group-description": "Certaines actions ne sont pas disponibles si tous les groupes sont sélectionnés",
+      "available-amount-for-allocation-details": "Voir détails"
     }
   }
 </i18n>
@@ -50,9 +52,14 @@
     <RouterView v-slot="{ Component }">
       <Title :title="t('title')" :subpages="subpages">
         <template v-if="organizations && !administrationSubscriptionsOffPlatform && !isAllGroupSelected" #center>
-          <div class="xs:text-right flex items-center gap-x-4 text-primary-700">
-            <span class="text-sm">{{ t("available-amount-for-allocation") }}</span>
-            <span class="text-4xl font-bold">{{ getShortMoneyFormat(budgetAllowancesTotal) }}</span>
+          <div class="flex flex-col gap-y-2 text-right">
+            <div class="xs:text-right flex items-center gap-x-4 text-primary-700">
+              <span class="text-sm">{{ t("available-amount-for-allocation") }}</span>
+              <span class="text-4xl font-bold">{{ getShortMoneyFormat(budgetAllowancesTotal) }}</span>
+            </div>
+            <RouterLink :to="{ name: URL_BENEFICIARY_ADMIN_AVAILABLE_AMOUNT_FOR_ALLOCATION }">
+              {{ t("available-amount-for-allocation-details") }}
+            </RouterLink>
           </div>
         </template>
         <template v-if="organizations && manageOrganizations" #right>
@@ -259,7 +266,8 @@ import {
   URL_BENEFICIARY_OFF_PLATFORM_IMPORT_LIST,
   URL_ORGANIZATION_ADD,
   URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS,
-  URL_BENEFICIARY_ADD
+  URL_BENEFICIARY_ADD,
+  URL_BENEFICIARY_ADMIN_AVAILABLE_AMOUNT_FOR_ALLOCATION
 } from "@/lib/consts/urls";
 import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
 import {

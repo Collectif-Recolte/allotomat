@@ -123,10 +123,9 @@ const { result: resultProjects } = useQuery(
         markets {
           id
           name
-          cashRegisters {
+          cashRegisters(includeArchived: false) {
             id
             name
-            isArchived
           }
         }
       }
@@ -134,13 +133,10 @@ const { result: resultProjects } = useQuery(
   `
 );
 const projectMarkets = useResult(resultProjects, null, (data) => {
-  if (
-    data.projects[0].markets.length === 1 &&
-    data.projects[0].markets[0].cashRegisters.filter((x) => !x.isArchived).length === 1
-  ) {
+  if (data.projects[0].markets.length === 1 && data.projects[0].markets[0].cashRegisters.length === 1) {
     emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
       marketId: data.projects[0].markets[0].id,
-      cashRegisterId: data.projects[0].markets[0].cashRegisters.filter((x) => !x.isArchived)[0].id
+      cashRegisterId: data.projects[0].markets[0].cashRegisters[0].id
     });
     return [];
   }
@@ -173,10 +169,9 @@ const { result: resultOrganizations } = useQuery(
         markets {
           id
           name
-          cashRegisters {
+          cashRegisters(includeArchived: false) {
             id
             name
-            isArchived
           }
         }
       }
@@ -184,13 +179,10 @@ const { result: resultOrganizations } = useQuery(
   `
 );
 const organizationMarkets = useResult(resultOrganizations, null, (data) => {
-  if (
-    data.organizations[0].markets.length === 1 &&
-    data.organizations[0].markets[0].cashRegisters.filter((x) => !x.isArchived).length === 1
-  ) {
+  if (data.organizations[0].markets.length === 1 && data.organizations[0].markets[0].cashRegisters.length === 1) {
     emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
       marketId: data.organizations[0].markets[0].id,
-      cashRegisterId: data.organizations[0].markets[0].cashRegisters.filter((x) => !x.isArchived)[0].id
+      cashRegisterId: data.organizations[0].markets[0].cashRegisters[0].id
     });
     return [];
   }
@@ -206,8 +198,7 @@ const organizationMarkets = useResult(resultOrganizations, null, (data) => {
 const organizationCashRegisters = useResult(resultOrganizations, null, (data) => {
   return data.organizations[0].markets
     .find((x) => x.id === selectedMarket.value)
-    .cashRegisters.filter((x) => !x.isArchived)
-    .map((x) => {
+    .cashRegisters.map((x) => {
       return {
         label: x.name,
         value: x.id

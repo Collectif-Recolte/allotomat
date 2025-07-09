@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Projects;
+using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
@@ -44,6 +45,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             request.CardImageFileId.IfSet(v => project.CardImageFileId = v);
             request.AllowOrganizationsAssignCards.IfSet(v => project.AllowOrganizationsAssignCards = v);
             request.BeneficiariesAreAnonymous.IfSet(v => project.BeneficiariesAreAnonymous = v);
+            request.ReconciliationReportDate.IfSet(v => project.ReconciliationReportDate = v);
 
             await db.SaveChangesAsync(cancellationToken);
 
@@ -63,6 +65,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
             public Maybe<NonNull<string>> CardImageFileId { get; set; }
             public Maybe<bool> AllowOrganizationsAssignCards { get; set; }
             public Maybe<bool> BeneficiariesAreAnonymous { get; set; }
+            public Maybe<ReconciliationReportDate> ReconciliationReportDate { get; set; }
         }
 
         [MutationPayload]

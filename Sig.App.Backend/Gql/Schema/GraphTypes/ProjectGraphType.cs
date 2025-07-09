@@ -37,6 +37,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public bool AllowOrganizationsAssignCards => project.AllowOrganizationsAssignCards;
         public bool BeneficiariesAreAnonymous => project.BeneficiariesAreAnonymous;
         public bool AdministrationSubscriptionsOffPlatform => project.AdministrationSubscriptionsOffPlatform;
+        public ReconciliationReportDate ReconciliationReportDate => project.ReconciliationReportDate;
 
         public ProjectGraphType(Project project)
         {

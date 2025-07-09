@@ -4,13 +4,13 @@
 		"close-sidebar": "Close sidebar",
 		"logo": "Tomat logo",
     "support": "Help and support",
-    "support-link": "https://www.notion.so/allotomat/Tomat-Support-Center-fbf571e40909463db20b3a0160a65b3a"
+    "support-link": "https://info.allotomat.com/user-guide/"
 	},
 	"fr": {
 		"close-sidebar": "Fermer le panneau",
 		"logo": "Logo de Tomat",
     "support": "Aide et support",
-    "support-link": "https://allotomat.notion.site/"
+    "support-link": "https://info.allotomat.com/guide-dutilisation/"
 	}
 }
 </i18n>

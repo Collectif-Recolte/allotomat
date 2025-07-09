@@ -44,10 +44,10 @@
         </div>
 
         <span class="w-1/2 text-right">
-          <span class="ml-2">{{ getMoneyFormat(item.amount) }}</span>
+          <span class="ml-2 text-lg">{{ getMoneyFormat(item.amount) }}</span>
         </span>
         <span class="w-1/2 text-right">
-          <span class="ml-2">{{ getMoneyFormat(getAvailableFundByProductGroupId(item.productGroup.id)) }}</span>
+          <span class="ml-2 text-lg">{{ getMoneyFormat(getAvailableFundByProductGroupId(item.productGroup.id)) }}</span>
         </span>
       </div>
     </li>

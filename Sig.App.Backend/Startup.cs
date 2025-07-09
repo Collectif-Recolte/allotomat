@@ -306,6 +306,7 @@ namespace Sig.App.Backend
             DeleteUser.RegisterJob(configuration);
             DeleteBeneficiary.RegisterJob(configuration);
             ExpireSubscription.RegisterJob(configuration);
+            SendMonthlyCardBalanceReport.RegisterJob(configuration);
         }
 
         private void ConfigureDbContext(DbContextOptionsBuilder options)
