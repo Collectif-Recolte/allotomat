@@ -380,6 +380,15 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
+        public static async Task<ForecastAddingFundTransactionForSubscriptionByBeneficiary.AddingFundTransactionForSubscriptionByBeneficiaryPayload> ForecastAddingFundTransactionForSubscriptionByBeneficiary(this GqlQuery _, Id subscriptionId, Id[] beneficiaryIds, [Inject] IMediator mediator)
+        {
+            return await mediator.Send(new ForecastAddingFundTransactionForSubscriptionByBeneficiary.Input()
+            {
+                SubscriptionId = subscriptionId,
+                Beneficiaries = beneficiaryIds
+            });
+        }
+
         public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, Id[] markets, Id[] cashRegisters, string[] transactionTypes, string[] giftCardTransactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
         {
             return await mediator.Send(new GenerateTransactionsReport.Input()

@@ -1,14 +1,17 @@
-﻿using FluentAssertions;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
+using FluentAssertions;
 using GraphQL.Conventions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
+using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
+using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Requests.Commands.Mutations.Subscriptions;
@@ -17,9 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Sig.App.Backend.DbModel.Entities.Cards;
 using Xunit;
-using Sig.App.Backend.DbModel.Entities.Transactions;
 
 namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 {
@@ -192,6 +193,51 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             localBeneficiary.Subscriptions.Should().HaveCount(0);
             localSubscription.Beneficiaries.Should().HaveCount(0);
             localBudgetAllowance.AvailableFund.Should().Be(25);
+            transactionLogCreated.Should().Be(true);
+        }
+
+        [Fact]
+        public async Task RemoveBeneficiaryFromSubscriptionWithTwoMaximumPaymentAndOneTransaction()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 2;
+            subscription.EndDate = new DateTime(today.Year, today.Month, 2).AddMonths(4);
+            beneficiary.Card = new Card()
+            {
+                Transactions = new List<Transaction>() {
+                    new SubscriptionAddingFundTransaction()
+                    {
+                        Amount = 25,
+                        SubscriptionType = new SubscriptionType()
+                        {
+                            Subscription = subscription,
+                            ProductGroup = subscription.Types.First(x => x.BeneficiaryType == beneficiary.BeneficiaryType).ProductGroup,
+                            BeneficiaryType = beneficiary.BeneficiaryType
+                        }
+                    }
+                }
+            };
+
+            DbContext.SaveChanges();
+
+            var input = new RemoveBeneficiaryFromSubscription.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBeneficiary = await DbContext.Beneficiaries.FirstAsync();
+            var localSubscription = await DbContext.Subscriptions.FirstAsync();
+            var localBudgetAllowance = await DbContext.BudgetAllowances.FirstAsync();
+            var transactionLogCreated = await DbContext.TransactionLogs.AnyAsync(x => x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog);
+
+            localBeneficiary.Subscriptions.Should().HaveCount(0);
+            localSubscription.Beneficiaries.Should().HaveCount(0);
+            localBudgetAllowance.AvailableFund.Should().Be(50);
             transactionLogCreated.Should().Be(true);
         }
 
