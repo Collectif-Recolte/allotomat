@@ -51,20 +51,23 @@ import { ref, computed } from "vue";
 import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult } from "@vue/apollo-composable";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 
 import Title from "@/components/app/title";
 import ReportFilters from "@/components/report/report-filters";
 import MarketAmountOwedTable from "@/components/report/market-amount-owed-table";
 
+import { formatDate, serverFormat } from "@/lib/helpers/date";
 import { useAuthStore } from "@/lib/store/auth";
 import { usePageTitle } from "@/lib/helpers/page-title";
 
+import { URL_RECONCILIATION_REPORT } from "@/lib/consts/urls";
 import { USER_TYPE_PROJECTMANAGER, USER_TYPE_MARKETGROUPMANAGER } from "@/lib/consts/enums";
 
 const { userType } = storeToRefs(useAuthStore());
 const route = useRoute();
+const router = useRouter();
 
 let previousMonth = new Date();
 previousMonth.setMonth(previousMonth.getMonth() - 1);
@@ -234,14 +237,26 @@ const marketsAmountOwed = computed(() => {
   return { items, totalCount };
 });
 
+function updateUrl() {
+  router.push({
+    name: URL_RECONCILIATION_REPORT,
+    query: {
+      dateFrom: formatDate(new Date(dateFrom.value), serverFormat),
+      dateTo: formatDate(new Date(dateTo.value), serverFormat)
+    }
+  });
+}
+
 function onDateFromUpdated(value) {
   page.value = 1;
   dateFrom.value = value;
+  updateUrl();
 }
 
 function onDateToUpdated(value) {
   page.value = 1;
   dateTo.value = value;
+  updateUrl();
 }
 </script>
 
