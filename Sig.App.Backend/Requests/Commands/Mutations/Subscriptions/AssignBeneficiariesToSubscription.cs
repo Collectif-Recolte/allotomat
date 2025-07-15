@@ -145,7 +145,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
                     if (request.ReplicatePaymentOnAttribution && beneficiary.Card != null)
                     {
-                        var beneficiaryPaymentRemaining = (request.ReplicatePaymentOnAttribution && beneficiary.Card != null ? Math.Min(subscription.MaxNumberOfPayments.HasValue ? subscription.MaxNumberOfPayments.Value : subscription.GetTotalPayment(), paymentRemaining + 1) : paymentRemaining);
+                        var maxPayments = subscription.MaxNumberOfPayments ?? subscription.GetTotalPayment();
+                        var shouldReplicate = request.ReplicatePaymentOnAttribution && beneficiary.Card != null;
+
+                        var beneficiaryPaymentRemaining = shouldReplicate
+                            ? Math.Min(maxPayments, paymentRemaining + 1)
+                            : paymentRemaining;
+
                         var amount = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId).Sum(x => x.Amount) * beneficiaryPaymentRemaining;
                         
                         if (budgetAllowance.AvailableFund >= amount)
@@ -169,16 +175,29 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             {
                 foreach (var beneficiary in beneficiaries)
                 {
+                    var beneficiaryTransactionCountForThisSubscription = 0;
                     if (subscription.IsSubscriptionPaymentBasedCardUsage)
                     {
-                        var beneficiaryTransactionForThisSubscription = await db.Transactions
+                        beneficiaryTransactionCountForThisSubscription = await db.Transactions
                             .Include(x => (x as SubscriptionAddingFundTransaction).SubscriptionType)
-                            .Where(x => x.BeneficiaryId == beneficiary.Id)
-                            .ToListAsync(cancellationToken);
-                        paymentRemaining = Math.Max(0, paymentRemaining - beneficiaryTransactionForThisSubscription.OfType<SubscriptionAddingFundTransaction>().Where(x => x.SubscriptionType.SubscriptionId == subscription.Id).Count());
+                            .OfType<SubscriptionAddingFundTransaction>()
+                            .Where(x => x.BeneficiaryId == beneficiary.Id && x.SubscriptionType.SubscriptionId == subscription.Id)
+                            .CountAsync(cancellationToken);
+
+                        paymentRemaining = Math.Max(0, paymentRemaining - beneficiaryTransactionCountForThisSubscription);
                     }
 
-                    var amount = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId).Sum(x => x.Amount) * (request.ReplicatePaymentOnAttribution && beneficiary.Card != null ? Math.Min(subscription.GetTotalPayment(), paymentRemaining + 1) : paymentRemaining);
+                    var amountPerPayment = subscription.Types
+                        .Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId)
+                        .Sum(x => x.Amount);
+
+                    var replicatePaymentOnAttribution = request.ReplicatePaymentOnAttribution && beneficiary.Card != null && subscription.GetTotalPayment() - beneficiaryTransactionCountForThisSubscription > 0;
+
+                    var numberOfPayments = replicatePaymentOnAttribution
+                        ? Math.Min(subscription.GetTotalPayment() - beneficiaryTransactionCountForThisSubscription, paymentRemaining + 1)
+                        : paymentRemaining;
+
+                    var amount = amountPerPayment * numberOfPayments;
 
                     if (budgetAllowance.AvailableFund >= amount)
                     {
@@ -193,7 +212,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         budgetAllowance.AvailableFund -= amount;
                         beneficiariesWhoGetSubscriptions++;
 
-                        if (request.ReplicatePaymentOnAttribution && beneficiary.Card != null)
+                        if (replicatePaymentOnAttribution)
                         {
                             await addingFundToCardJob.AddFundToSpecificBeneficiary(beneficiary.GetIdentifier(), beneficiary.BeneficiaryType, subscription.GetIdentifier(), new AddingFundToCard.InitiatedBy()
                             {

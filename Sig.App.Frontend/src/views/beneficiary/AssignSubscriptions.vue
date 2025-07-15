@@ -706,18 +706,14 @@ const { result: resultForecastAddingFundTransactionForSubscriptionByBeneficiary 
       }
     }
   `,
-  ForecastAddingFundTransactionForSubscriptionByBeneficiaryVariables,
+  () => ({
+    subscriptionId: selectedSubscription.value,
+    beneficiaryIds: selectedBeneficiaries.value.map((x) => x.id)
+  }),
   () => ({
     enabled: selectedSubscription.value !== null && selectedBeneficiaries.value.length > 0
   })
 );
-
-function ForecastAddingFundTransactionForSubscriptionByBeneficiaryVariables() {
-  return {
-    subscriptionId: selectedSubscription.value,
-    beneficiaryIds: selectedBeneficiaries.value.map((x) => x.id)
-  };
-}
 
 const amountThatWillBeAllocated = computed(() => {
   if (selectedSubscription.value === null) return 0;

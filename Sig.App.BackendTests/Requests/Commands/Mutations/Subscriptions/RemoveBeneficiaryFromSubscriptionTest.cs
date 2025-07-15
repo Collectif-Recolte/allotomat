@@ -170,7 +170,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                             Subscription = subscription,
                             ProductGroup = subscription.Types.First(x => x.BeneficiaryType == beneficiary.BeneficiaryType).ProductGroup,
                             BeneficiaryType = beneficiary.BeneficiaryType
-                        }
+                        },
+                        Beneficiary = beneficiary
                     }
                 }
             };
@@ -215,7 +216,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                             Subscription = subscription,
                             ProductGroup = subscription.Types.First(x => x.BeneficiaryType == beneficiary.BeneficiaryType).ProductGroup,
                             BeneficiaryType = beneficiary.BeneficiaryType
-                        }
+                        },
+                        Beneficiary = beneficiary
                     }
                 }
             };
