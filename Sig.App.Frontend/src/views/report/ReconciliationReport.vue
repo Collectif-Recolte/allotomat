@@ -238,7 +238,7 @@ const marketsAmountOwed = computed(() => {
 });
 
 function updateUrl() {
-  router.push({
+  router.replace({
     name: URL_RECONCILIATION_REPORT,
     query: {
       dateFrom: formatDate(new Date(dateFrom.value), serverFormat),
