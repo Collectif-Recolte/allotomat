@@ -1,26 +1,28 @@
 ﻿using GraphQL.Conventions;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NodaTime;
+using Sig.App.Backend.BackgroundJobs;
 using Sig.App.Backend.DbModel;
+using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
+using Sig.App.Backend.DbModel.Entities.Transactions;
+using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Sig.App.Backend.Gql.Bases;
-using System.Collections.Generic;
-using Sig.App.Backend.BackgroundJobs;
-using Microsoft.AspNetCore.Http;
-using Sig.App.Backend.DbModel.Entities;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 {
@@ -143,8 +145,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
                     if (request.ReplicatePaymentOnAttribution && beneficiary.Card != null)
                     {
-                        var beneficiarypaymentRemaining = (request.ReplicatePaymentOnAttribution && beneficiary.Card != null ? Math.Min(subscription.MaxNumberOfPayments.HasValue ? subscription.MaxNumberOfPayments.Value : subscription.GetTotalPayment(), paymentRemaining + 1) : paymentRemaining);
-                        var amount = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId).Sum(x => x.Amount) * beneficiarypaymentRemaining;
+                        var maxPayments = subscription.MaxNumberOfPayments ?? subscription.GetTotalPayment();
+                        var shouldReplicate = request.ReplicatePaymentOnAttribution && beneficiary.Card != null;
+
+                        var beneficiaryPaymentRemaining = shouldReplicate
+                            ? Math.Min(maxPayments, paymentRemaining + 1)
+                            : paymentRemaining;
+
+                        var amount = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId).Sum(x => x.Amount) * beneficiaryPaymentRemaining;
                         
                         if (budgetAllowance.AvailableFund >= amount)
                         {
@@ -167,9 +175,29 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             {
                 foreach (var beneficiary in beneficiaries)
                 {
-                    var amount =
-                        subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId)
-                            .Sum(x => x.Amount) * (request.ReplicatePaymentOnAttribution && beneficiary.Card != null ? Math.Min(subscription.MaxNumberOfPayments.HasValue ? subscription.MaxNumberOfPayments.Value : subscription.GetTotalPayment(), paymentRemaining + 1) : paymentRemaining);
+                    var beneficiaryTransactionCountForThisSubscription = 0;
+                    if (subscription.IsSubscriptionPaymentBasedCardUsage)
+                    {
+                        beneficiaryTransactionCountForThisSubscription = await db.Transactions
+                            .Include(x => (x as SubscriptionAddingFundTransaction).SubscriptionType)
+                            .OfType<SubscriptionAddingFundTransaction>()
+                            .Where(x => x.BeneficiaryId == beneficiary.Id && x.SubscriptionType.SubscriptionId == subscription.Id)
+                            .CountAsync(cancellationToken);
+
+                        paymentRemaining = Math.Max(0, paymentRemaining - beneficiaryTransactionCountForThisSubscription);
+                    }
+
+                    var amountPerPayment = subscription.Types
+                        .Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId)
+                        .Sum(x => x.Amount);
+
+                    var replicatePaymentOnAttribution = request.ReplicatePaymentOnAttribution && beneficiary.Card != null && subscription.GetTotalPayment() - beneficiaryTransactionCountForThisSubscription > 0;
+
+                    var numberOfPayments = replicatePaymentOnAttribution
+                        ? Math.Min(subscription.GetTotalPayment() - beneficiaryTransactionCountForThisSubscription, paymentRemaining + 1)
+                        : paymentRemaining;
+
+                    var amount = amountPerPayment * numberOfPayments;
 
                     if (budgetAllowance.AvailableFund >= amount)
                     {
@@ -184,7 +212,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         budgetAllowance.AvailableFund -= amount;
                         beneficiariesWhoGetSubscriptions++;
 
-                        if (request.ReplicatePaymentOnAttribution && beneficiary.Card != null)
+                        if (replicatePaymentOnAttribution)
                         {
                             await addingFundToCardJob.AddFundToSpecificBeneficiary(beneficiary.GetIdentifier(), beneficiary.BeneficiaryType, subscription.GetIdentifier(), new AddingFundToCard.InitiatedBy()
                             {

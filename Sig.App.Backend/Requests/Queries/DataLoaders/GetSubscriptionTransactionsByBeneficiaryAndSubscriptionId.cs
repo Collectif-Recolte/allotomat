@@ -26,7 +26,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
         {
             var transactions = await db.Transactions.OfType<SubscriptionAddingFundTransaction>()
                 .Include(x => x.SubscriptionType)
-                .Where(x => x.BeneficiaryId == request.Group && x.Status != DbModel.Enums.FundTransactionStatus.Unassigned && request.Ids.Contains(x.SubscriptionType.SubscriptionId)).ToListAsync();
+                .Where(x => x.BeneficiaryId == request.Group && request.Ids.Contains(x.SubscriptionType.SubscriptionId)).ToListAsync();
 
             return transactions.ToLookup(x => x.SubscriptionType.SubscriptionId, x => new TransactionGraphType(x));
         }

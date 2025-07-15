@@ -692,10 +692,37 @@ const amountThatWillBeAllocatedModalMoneyFormat = computed(() => {
   return amount !== 0 ? getMoneyFormat(amount) : "0$";
 });
 
+const { result: resultForecastAddingFundTransactionForSubscriptionByBeneficiary } = useQuery(
+  gql`
+    query ForecastAddingFundTransactionForSubscriptionByBeneficiary($subscriptionId: ID!, $beneficiaryIds: [ID!]) {
+      forecastAddingFundTransactionForSubscriptionByBeneficiary(
+        subscriptionId: $subscriptionId
+        beneficiaryIds: $beneficiaryIds
+      ) {
+        beneficiaries {
+          beneficiaryId
+          count
+        }
+      }
+    }
+  `,
+  () => ({
+    subscriptionId: selectedSubscription.value,
+    beneficiaryIds: selectedBeneficiaries.value.map((x) => x.id)
+  }),
+  () => ({
+    enabled: selectedSubscription.value !== null && selectedBeneficiaries.value.length > 0
+  })
+);
+
 const amountThatWillBeAllocated = computed(() => {
   if (selectedSubscription.value === null) return 0;
+  if (resultForecastAddingFundTransactionForSubscriptionByBeneficiary.value === undefined) return 0;
 
   var selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
+  var subscriptionPaymentRemaining = selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage
+    ? Math.min(selectedSubscriptionData.paymentRemaining, selectedSubscriptionData.maxNumberOfPayments)
+    : selectedSubscriptionData.paymentRemaining;
 
   var amount = 0;
 
@@ -704,12 +731,24 @@ const amountThatWillBeAllocated = computed(() => {
       .filter((y) => y.beneficiaryType.id === x.beneficiaryType.id)
       .reduce((accumulator, type) => accumulator + type.amount, 0);
 
-    var paymentRemaining = selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage
-      ? Math.min(selectedSubscriptionData.paymentRemaining, selectedSubscriptionData.maxNumberOfPayments)
-      : selectedSubscriptionData.paymentRemaining;
+    var paymentRemaining = subscriptionPaymentRemaining;
+    var beneficiaryTransactionCount =
+      resultForecastAddingFundTransactionForSubscriptionByBeneficiary.value.forecastAddingFundTransactionForSubscriptionByBeneficiary.beneficiaries.find(
+        (y) => y.beneficiaryId === x.id
+      )?.count ?? 0;
 
-    if (replicatePaymentOnAttribution.value && x.card) {
-      paymentRemaining++;
+    if (selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage) {
+      paymentRemaining = Math.min(paymentRemaining, selectedSubscriptionData.maxNumberOfPayments - beneficiaryTransactionCount);
+    }
+
+    if (replicatePaymentOnAttribution.value && x.card && paymentRemaining > 0) {
+      if (selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage) {
+        if (selectedSubscriptionData.maxNumberOfPayments - beneficiaryTransactionCount > subscriptionPaymentRemaining) {
+          paymentRemaining++;
+        }
+      } else {
+        paymentRemaining++;
+      }
     }
 
     if (selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage) {
