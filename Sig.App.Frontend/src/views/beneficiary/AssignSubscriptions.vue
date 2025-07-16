@@ -737,8 +737,6 @@ const amountThatWillBeAllocated = computed(() => {
         (y) => y.beneficiaryId === x.id
       )?.count ?? 0;
 
-    console.log(beneficiaryTransactionCount);
-
     if (selectedSubscriptionData.isSubscriptionPaymentBasedCardUsage) {
       paymentRemaining = Math.min(paymentRemaining, selectedSubscriptionData.maxNumberOfPayments - beneficiaryTransactionCount);
     }
