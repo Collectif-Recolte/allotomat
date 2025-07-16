@@ -802,7 +802,18 @@ const selectedSubscriptionName = computed(() => {
 
 const selectedSubscriptionHasMissedPayment = computed(() => {
   if (selectedSubscription.value === null) return "-";
-  return subscriptions.value.find((x) => x.value === selectedSubscription.value).hasMissedPayment;
+
+  var beneficiaryTransactionCount =
+    resultForecastAddingFundTransactionForSubscriptionByBeneficiary.value.forecastAddingFundTransactionForSubscriptionByBeneficiary.beneficiaries.find(
+      (y) => y.beneficiaryId === selectedBeneficiaries.value[0].id
+    )?.count ?? 0;
+
+  return (
+    subscriptions.value.find((x) => x.value === selectedSubscription.value).hasMissedPayment &&
+    subscriptions.value.find((x) => x.value === selectedSubscription.value).totalPayment -
+      subscriptions.value.find((x) => x.value === selectedSubscription.value).paymentRemaining >
+      beneficiaryTransactionCount
+  );
 });
 
 const usageAmountDetail = computed(() => {
