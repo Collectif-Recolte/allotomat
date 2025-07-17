@@ -54,8 +54,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             var beneficiaryId = request.BeneficiaryId.LongIdentifierForType<Beneficiary>();
             var beneficiary = await db.Beneficiaries
                 .Include(x => x.Organization).ThenInclude(x => x.Project)
-                .Include(x => x.Card).ThenInclude(x => x.Transactions).ThenInclude(x => (x as SubscriptionAddingFundTransaction).SubscriptionType)
+                .Include(x => x.Card)
                 .FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
+            var beneficiaryTransactions = await db.Transactions
+                .Include(x => (x as SubscriptionAddingFundTransaction).SubscriptionType)
+                .Where(x => x.BeneficiaryId == beneficiaryId)
+                .ToListAsync(cancellationToken);
 
             if (beneficiary == null)
             {
@@ -83,12 +87,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             if (subscription.IsSubscriptionPaymentBasedCardUsage)
             {
                 var subscriptionAddingFundTransactionCount = 0;
-                if (beneficiary.Card != null)
+                if (beneficiaryTransactions.Count > 0)
                 {
-                    subscriptionAddingFundTransactionCount = beneficiary.Card.Transactions.OfType<SubscriptionAddingFundTransaction>().Where(x => x.SubscriptionType.SubscriptionId == subscription.Id).Count();
+                    subscriptionAddingFundTransactionCount = beneficiaryTransactions.OfType<SubscriptionAddingFundTransaction>().Where(x => x.SubscriptionType.SubscriptionId == subscription.Id).Count();
                 }
 
-                paymentsRemaining = Math.Min(paymentsRemaining, subscription.MaxNumberOfPayments.Value - subscriptionAddingFundTransactionCount);
+                paymentsRemaining = Math.Max(0, Math.Min(paymentsRemaining, subscription.MaxNumberOfPayments.Value - subscriptionAddingFundTransactionCount));
                 totalRefund = paymentsRemaining * subscriptionTypes.Sum(x => x.Amount);
             }
 

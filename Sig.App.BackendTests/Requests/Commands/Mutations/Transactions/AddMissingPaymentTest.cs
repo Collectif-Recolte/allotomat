@@ -169,6 +169,58 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             localBudgetAllowance.AvailableFund.Should().Be(75);
         }
 
+        // This payment is already "calculated" in the Budget of this beneficiary
+        [Fact]
+        public async Task AddOneMissingPaymentForSubscriptionWithMaxPaymentFromBeneficiaryBudget()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.MaxNumberOfPayments = 1;
+            subscription.StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(-4);
+            subscription.EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(6);
+            subscription.FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(7);
+
+            DbContext.SaveChanges();
+
+            var input = new AddMissingPayment.Input()
+            {
+                SubscriptionId = subscription.GetIdentifier(),
+                BeneficiaryId = beneficiary.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBudgetAllowance = DbContext.BudgetAllowances.First();
+
+            localBudgetAllowance.AvailableFund.Should().Be(100);
+        }
+
+        // This payment is not "calculated" in the budget of this beneficiary
+        [Fact]
+        public async Task AddOneMissingPaymentForSubscriptionWithMaxPaymentFromBudgetAllowance()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.MaxNumberOfPayments = 1;
+            subscription.StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(-4);
+            subscription.EndDate = new DateTime(today.Year, today.Month, 1);
+            subscription.FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(1);
+
+            DbContext.SaveChanges();
+
+            var input = new AddMissingPayment.Input()
+            {
+                SubscriptionId = subscription.GetIdentifier(),
+                BeneficiaryId = beneficiary.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBudgetAllowance = DbContext.BudgetAllowances.First();
+
+            localBudgetAllowance.AvailableFund.Should().Be(75);
+        }
+
         [Fact]
         public async Task ThrowsIfBeneficiaryNotFound()
         {
