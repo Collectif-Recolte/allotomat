@@ -140,13 +140,16 @@ const { result: resultProjects } = useQuery(
   `
 );
 const projectMarkets = useResult(resultProjects, null, (data) => {
-  if (
-    data.projects[0].markets.filter((x) => !x.isDisabled).length === 1 &&
-    data.projects[0].markets.filter((x) => !x.isDisabled)[0].cashRegisters.length === 1
-  ) {
+  const enabledMarkets = data.projects[0].markets.filter((x) => !x.isDisabled);
+
+  if (!enabledMarkets.find((x) => x.id === selectedMarket.value)) {
+    selectedMarket.value = "";
+  }
+
+  if (enabledMarkets.length === 1 && enabledMarkets[0].cashRegisters.length === 1) {
     emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
-      marketId: data.projects[0].markets[0].id,
-      cashRegisterId: data.projects[0].markets[0].cashRegisters[0].id
+      marketId: enabledMarkets[0].id,
+      cashRegisterId: enabledMarkets[0].cashRegisters[0].id
     });
     return [];
   }
@@ -191,13 +194,11 @@ const { result: resultOrganizations } = useQuery(
   `
 );
 const organizationMarkets = useResult(resultOrganizations, null, (data) => {
-  if (
-    data.organizations[0].markets.filter((x) => !x.isDisabled).length === 1 &&
-    data.organizations[0].markets.filter((x) => !x.isDisabled)[0].cashRegisters.length === 1
-  ) {
+  const enabledMarkets = data.organizations[0].markets.filter((x) => !x.isDisabled);
+  if (enabledMarkets.length === 1 && enabledMarkets[0].cashRegisters.length === 1) {
     emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
-      marketId: data.organizations[0].markets[0].id,
-      cashRegisterId: data.organizations[0].markets[0].cashRegisters[0].id
+      marketId: enabledMarkets[0].id,
+      cashRegisterId: enabledMarkets[0].cashRegisters[0].id
     });
     return [];
   }

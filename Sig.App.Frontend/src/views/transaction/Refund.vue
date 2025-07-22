@@ -13,7 +13,7 @@
     "password": "Password",
     "no-amount-to-refund": "No amount to refund.",
     "wrong-password-error-notification": "The password is invalid.",
-    "expired-funds":"Some of the funds used in this transaction have expired and can no longer be reimbursed.",
+    "expired-funds":"Some of the funds used in this transaction have expired and can no longer be refunded.",
     "market-disabled": "The market is disabled. Refund is not possible."
 	},
 	"fr": {
