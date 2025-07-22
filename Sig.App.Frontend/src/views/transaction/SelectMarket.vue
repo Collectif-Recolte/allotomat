@@ -8,7 +8,8 @@
       "transaction-in-project-name": "Purchase on behalf of project",
       "transaction-in-organization-name": "Purchase on behalf of organization",
       "select-cash-register": "Cash Register",
-      "choose-cash-register": "Select"
+      "choose-cash-register": "Select",
+      "market-disabled-label": "{market} is disabled"
     },
     "fr": {
       "select-market": "Marchand",
@@ -18,7 +19,8 @@
       "transaction-in-project-name": "Achat au nom d'un programme",
       "transaction-in-organization-name": "Achat au nom d'une organisation",
       "select-cash-register": "Caisse",
-      "choose-cash-register": "Sélectionner"
+      "choose-cash-register": "Sélectionner",
+      "market-disabled-label": "{market} est désactivé"
     }
   }
   </i18n>
@@ -123,6 +125,7 @@ const { result: resultProjects } = useQuery(
         markets {
           id
           name
+          isDisabled
           cashRegisters(includeArchived: false) {
             id
             name
@@ -133,7 +136,10 @@ const { result: resultProjects } = useQuery(
   `
 );
 const projectMarkets = useResult(resultProjects, null, (data) => {
-  if (data.projects[0].markets.length === 1 && data.projects[0].markets[0].cashRegisters.length === 1) {
+  if (
+    data.projects[0].markets.filter((x) => !x.isDisabled).length === 1 &&
+    data.projects[0].markets.filter((x) => !x.isDisabled)[0].cashRegisters.length === 1
+  ) {
     emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
       marketId: data.projects[0].markets[0].id,
       cashRegisterId: data.projects[0].markets[0].cashRegisters[0].id
@@ -143,8 +149,9 @@ const projectMarkets = useResult(resultProjects, null, (data) => {
   return data.projects[0].markets
     .map((x) => {
       return {
-        label: x.name,
-        value: x.id
+        label: x.isDisabled ? t("market-disabled-label", { market: x.name }) : x.name,
+        value: x.id,
+        isDisabled: x.isDisabled
       };
     })
     .sort((a, b) => a.label.localeCompare(b.label));

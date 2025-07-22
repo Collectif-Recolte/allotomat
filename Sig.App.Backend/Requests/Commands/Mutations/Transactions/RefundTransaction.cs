@@ -81,6 +81,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 throw new InitialTransactionNotFoundException();
             }
 
+            if (initialTransaction.Market.IsDisabled)
+            {
+                throw new MarketDisabledException();
+            }
+
             var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
             currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
 
@@ -289,5 +294,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         public class InitialTransactionNotFoundException : RequestValidationException { }
         public class ProductGroupNotFoundException : RequestValidationException { }
         public class TooMuchRefundException : RequestValidationException { }
+        public class MarketDisabledException : RequestValidationException { }
     }
 }

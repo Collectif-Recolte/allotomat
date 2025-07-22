@@ -13,7 +13,8 @@
     "password": "Password",
     "no-amount-to-refund": "No amount to refund.",
     "wrong-password-error-notification": "The password is invalid.",
-    "expired-funds":"Some of the funds used in this transaction have expired and can no longer be reimbursed."
+    "expired-funds":"Some of the funds used in this transaction have expired and can no longer be reimbursed.",
+    "market-disabled": "The market is disabled. Refund is not possible."
 	},
 	"fr": {
 		"title": "Remboursement",
@@ -28,7 +29,8 @@
     "password": "Mot de passe",
     "no-amount-to-refund": "Aucun montant à rembourser.",
     "wrong-password-error-notification": "Le mot de passe est invalide.",
-    "expired-funds":"Certains des fonds utilisés dans cette transaction ont expiré et ne peuvent plus être remboursés."
+    "expired-funds":"Certains des fonds utilisés dans cette transaction ont expiré et ne peuvent plus être remboursés.",
+    "market-disabled": "Impossible d’effectuer un remboursement pour un marchand désactivé."
 	}
 }
 </i18n>
@@ -166,6 +168,9 @@ useGraphQLErrorMessages({
   // Ce code est lancé quand le mot de passe est invalid
   WRONG_PASSWORD: () => {
     return t("wrong-password-error-notification");
+  },
+  MARKET_DISABLED: () => {
+    return t("market-disabled");
   }
 });
 

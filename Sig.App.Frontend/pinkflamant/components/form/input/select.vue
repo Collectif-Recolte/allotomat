@@ -30,7 +30,9 @@
       <option v-if="placeholder" value="" disabled selected hidden>
         {{ placeholder }}
       </option>
-      <option v-for="option in options" :key="option" :value="option.value">{{ option.label }}</option>
+      <option v-for="option in options" :key="option" :value="option.value" :disabled="isDisabled(option)">
+        {{ option.label }}
+      </option>
     </select>
   </FormField>
 </template>
@@ -63,6 +65,11 @@ export default {
       }
     }
   },
-  emits: ["input"]
+  emits: ["input"],
+  computed: {
+    isDisabled() {
+      return (option) => option.isDisabled || false;
+    }
+  }
 };
 </script>
