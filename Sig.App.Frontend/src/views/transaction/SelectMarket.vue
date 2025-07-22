@@ -176,6 +176,7 @@ const { result: resultOrganizations } = useQuery(
         markets {
           id
           name
+          isDisabled
           cashRegisters(includeArchived: false) {
             id
             name
@@ -186,7 +187,10 @@ const { result: resultOrganizations } = useQuery(
   `
 );
 const organizationMarkets = useResult(resultOrganizations, null, (data) => {
-  if (data.organizations[0].markets.length === 1 && data.organizations[0].markets[0].cashRegisters.length === 1) {
+  if (
+    data.organizations[0].markets.filter((x) => !x.isDisabled).length === 1 &&
+    data.organizations[0].markets.filter((x) => !x.isDisabled)[0].cashRegisters.length === 1
+  ) {
     emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
       marketId: data.organizations[0].markets[0].id,
       cashRegisterId: data.organizations[0].markets[0].cashRegisters[0].id
@@ -196,8 +200,9 @@ const organizationMarkets = useResult(resultOrganizations, null, (data) => {
   return data.organizations[0].markets
     .map((x) => {
       return {
-        label: x.name,
-        value: x.id
+        label: x.isDisabled ? t("market-disabled-label", { market: x.name }) : x.name,
+        value: x.id,
+        isDisabled: x.isDisabled
       };
     })
     .sort((a, b) => a.label.localeCompare(b.label));
