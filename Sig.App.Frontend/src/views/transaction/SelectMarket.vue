@@ -23,7 +23,7 @@
       "market-disabled-label": "{market} est désactivé"
     }
   }
-  </i18n>
+</i18n>
 
 <template>
   <div>
@@ -74,7 +74,7 @@
 
 <script setup>
 import gql from "graphql-tag";
-import { computed, defineProps, defineEmits, ref } from "vue";
+import { computed, defineProps, defineEmits, ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { string, object } from "yup";
 import { useQuery, useResult } from "@vue/apollo-composable";
@@ -100,6 +100,10 @@ const props = defineProps({
     type: String,
     default: ""
   }
+});
+
+onMounted(() => {
+  selectedMarket.value = props.marketId;
 });
 
 const initialValues = computed(() => {
