@@ -13,7 +13,8 @@
       "transaction-in-program-name": "Purchase on behalf of program",
       "scan-card-btn": "Scan a card",
       "select-cash-register": "Cash Register",
-      "choose-cash-register": "Select"
+      "choose-cash-register": "Select",
+      "market-disabled-label": "{market} is disabled"
     },
     "fr": {
       "select-market": "Marchand",
@@ -28,7 +29,8 @@
       "transaction-in-program-name": "Achat au nom du programme",
       "scan-card-btn": "Scanner une carte",
       "select-cash-register": "Caisse",
-      "choose-cash-register": "Sélectionner"
+      "choose-cash-register": "Sélectionner",
+      "market-disabled-label": "{market} est désactivé"
     }
   }
   </i18n>
@@ -152,6 +154,7 @@ const { result: resultProjects } = useQuery(
         markets {
           id
           name
+          isDisabled
           cashRegisters {
             id
             name
@@ -166,8 +169,9 @@ const markets = useResult(resultProjects, null, (data) => {
   return data.projects[0].markets
     .map((x) => {
       return {
-        label: x.name,
-        value: x.id
+        label: x.isDisabled ? t("market-disabled-label", { market: x.name }) : x.name,
+        value: x.id,
+        isDisabled: x.isDisabled
       };
     })
     .sort((a, b) => a.label.localeCompare(b.label));

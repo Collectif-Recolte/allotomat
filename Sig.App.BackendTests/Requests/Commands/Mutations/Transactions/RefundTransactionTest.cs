@@ -640,5 +640,32 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.TooMuchRefundException>();
         }
+
+        [Fact]
+        public async Task ThrowsIfMarketDisabled()
+        {
+            market.IsDisabled = true;
+            DbContext.SaveChanges();
+
+            var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
+            {
+                InitialTransactionId = initialPaymentTransaction1.GetIdentifier(),
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
+                Password = "Abcd1234!!"
+            };
+            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
+            {
+                Amount = 10,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
+            {
+                Amount = 10,
+                ProductGroupId = loyaltyProductgroup.GetIdentifier()
+            });
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.MarketDisabledException>();
+        }
     }
 }
