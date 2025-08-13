@@ -30,7 +30,9 @@
       <option v-if="placeholder" value="" disabled selected hidden>
         {{ placeholder }}
       </option>
-      <option v-for="option in options" :key="option" :value="option.value">{{ option.label }}</option>
+      <option v-for="option in options" :key="option" :value="option.value" :disabled="!!option.isDisabled">
+        {{ option.label }}
+      </option>
     </select>
   </FormField>
 </template>
