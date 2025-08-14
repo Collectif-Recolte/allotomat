@@ -36,5 +36,7 @@ namespace Sig.App.Backend.DbModel.Entities
         public UserState State { get; set; } = UserState.Active;
 
         public UserStatus Status { get; set; } = UserStatus.Actived;
+
+        public UserEmailOptIn EmailOptIn { get; set; } = new UserEmailOptIn() {};
     }
 }

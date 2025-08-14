@@ -55,8 +55,11 @@ namespace Sig.App.Backend.BackgroundJobs
                 {
                     var projectManagers = await mediator.Send(new GetProjectProjectManagers.Query
                     {
-                        ProjectId = subscription.ProjectId
+                        ProjectId = subscription.ProjectId,
+                        IncludeEmailOptIn = true
                     });
+
+                    projectManagers = projectManagers.Where(x => x.EmailOptIn.SubscriptionExpirationEmail).ToList();
 
                     var transactions = db.TransactionLogs.Where(x => x.SubscriptionId == subscription.Id);
 

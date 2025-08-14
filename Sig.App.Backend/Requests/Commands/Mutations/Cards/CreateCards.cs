@@ -104,8 +104,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             var projectManagers = await mediator.Send(new GetProjectProjectManagers.Query
             {
-                ProjectId = project.Id
+                ProjectId = project.Id,
+                IncludeEmailOptIn = true
             });
+
+            projectManagers = projectManagers.Where(x => x.EmailOptIn.CreatedCardPdfEmail).ToList();
 
             if (projectManagers != null && projectManagers.Count > 0)
             {
