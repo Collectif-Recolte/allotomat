@@ -38,7 +38,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
                 {
                     FirstName = request.FirstName.Trim(),
                     LastName = request.LastName.Trim()
-                }
+                },
+                EmailOptIn = new UserEmailOptIn()
             };
 
             var result = await userManager.CreateAsync(user);

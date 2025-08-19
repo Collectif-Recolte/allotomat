@@ -17,10 +17,10 @@ namespace Sig.App.Backend.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CreatedCardPdfEmail = table.Column<bool>(type: "bit", nullable: false),
-                    MonthlyBalanceReportEmail = table.Column<bool>(type: "bit", nullable: false),
-                    MonthlyCardBalanceReportEmail = table.Column<bool>(type: "bit", nullable: false),
-                    SubscriptionExpirationEmail = table.Column<bool>(type: "bit", nullable: false)
+                    CreatedCardPdfEmail = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    MonthlyBalanceReportEmail = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    MonthlyCardBalanceReportEmail = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    SubscriptionExpirationEmail = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
                 },
                 constraints: table =>
                 {
@@ -38,6 +38,8 @@ namespace Sig.App.Backend.Migrations
                 table: "UserEmailOptIns",
                 column: "UserId",
                 unique: true);
+
+            migrationBuilder.Sql("INSERT INTO UserEmailOptIns (UserId) SELECT u.Id AS UserId FROM AspNetUsers u");
         }
 
         /// <inheritdoc />
