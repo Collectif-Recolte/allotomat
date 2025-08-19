@@ -72,7 +72,8 @@ namespace Sig.App.Backend.BackgroundJobs
                 var project = await db.Projects.Where(x => x.Id == groupByProject.Key).FirstAsync();
                 var projectManagers = await mediator.Send(new GetProjectProjectManagers.Query
                 {
-                    ProjectId = project.Id
+                    ProjectId = project.Id,
+                    IncludeEmailOptIn = true
                 });
 
                 var refundGroupByProject = refundTransactionGroupByProject.FirstOrDefault(x => x.Key == groupByProject.Key);
@@ -117,6 +118,8 @@ namespace Sig.App.Backend.BackgroundJobs
                         }
                     }
                 }
+
+                projectManagers = projectManagers.Where(x => x.EmailOptIn.MonthlyBalanceReportEmail).ToList();
 
                 if (projectManagers.Any())
                 {

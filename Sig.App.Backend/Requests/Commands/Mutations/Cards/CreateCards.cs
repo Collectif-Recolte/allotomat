@@ -104,19 +104,25 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             var projectManagers = await mediator.Send(new GetProjectProjectManagers.Query
             {
-                ProjectId = project.Id
+                ProjectId = project.Id,
+                IncludeEmailOptIn = true
             });
 
-            if (projectManagers != null && projectManagers.Count > 0)
+            if (projectManagers != null)
             {
-                var email = new CreatedCardPdfEmail(string.Join(";", projectManagers.Select(x => x.Email)));
+                projectManagers = projectManagers.Where(x => x.EmailOptIn.CreatedCardPdfEmail).ToList();
 
-                xlsxStream.Position = 0;
-                email.Attachments = new List<EmailAttachmentModel>() {
-                    new EmailAttachmentModel(xlsxFileName, ContentTypes.Xlsx, xlsxStream)
-                };
+                if (projectManagers.Count > 0)
+                {
+                    var email = new CreatedCardPdfEmail(string.Join(";", projectManagers.Select(x => x.Email)));
 
-                await mailer.Send(email);
+                    xlsxStream.Position = 0;
+                    email.Attachments = new List<EmailAttachmentModel>() {
+                        new EmailAttachmentModel(xlsxFileName, ContentTypes.Xlsx, xlsxStream)
+                    };
+
+                    await mailer.Send(email);
+                }
             }
             
             return new Payload()

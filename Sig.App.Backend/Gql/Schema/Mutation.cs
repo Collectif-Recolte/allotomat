@@ -953,5 +953,15 @@ namespace Sig.App.Backend.Gql.Schema
             await mediator.Send(input.Value);
             return true;
         }
+
+        [ApplyPolicy(AuthorizationPolicies.LoggedIn)]
+        [AnnotateErrorCodes(typeof(ChangeEmailOptIn))]
+        public static Task<ChangeEmailOptIn.Payload> ChangeEmailOptIn(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<ChangeEmailOptIn.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
     }
 }

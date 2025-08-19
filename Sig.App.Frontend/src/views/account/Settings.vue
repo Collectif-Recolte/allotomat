@@ -91,6 +91,8 @@
           </PfFormSection>
         </PfForm>
       </Form>
+
+      <EmailOptInForm v-if="isProjectManager" class="mt-12" :user="user" />
     </div>
   </AppShell>
 </template>
@@ -103,7 +105,11 @@ import { useRouter } from "vue-router";
 import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
 import { object, string, ref as yupRef } from "yup";
 
+import EmailOptInForm from "@/components/settings/email-opt-in-form";
+
 import { URL_ROOT } from "@/lib/consts/urls";
+import { USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
+
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 import { useNotificationsStore } from "@/lib/store/notifications";
 import { usePageTitle } from "@/lib/helpers/page-title";
@@ -137,6 +143,9 @@ const validationSchemaPassword = computed(() =>
     passwordConfirmation: string().label(t("password-confirmation")).required().samePassword(yupRef("password"))
   })
 );
+const isProjectManager = computed(() => {
+  return user.value.type === USER_TYPE_PROJECTMANAGER;
+});
 
 const { mutate: changeEmail } = useMutation(
   gql`
@@ -164,6 +173,13 @@ function getUserEmail() {
         me {
           id
           email
+          type
+          emailOptIn {
+            createdCardPdfEmail
+            monthlyBalanceReportEmail
+            monthlyCardBalanceReportEmail
+            subscriptionExpirationEmail
+          }
         }
       }
     `
