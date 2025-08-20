@@ -8,7 +8,8 @@
       "transaction-in-project-name": "Purchase on behalf of project",
       "transaction-in-organization-name": "Purchase on behalf of organization",
       "select-cash-register": "Cash Register",
-      "choose-cash-register": "Select"
+      "choose-cash-register": "Select",
+      "market-disabled-label": "{market} is disabled"
     },
     "fr": {
       "select-market": "Marchand",
@@ -18,10 +19,11 @@
       "transaction-in-project-name": "Achat au nom d'un programme",
       "transaction-in-organization-name": "Achat au nom d'une organisation",
       "select-cash-register": "Caisse",
-      "choose-cash-register": "Sélectionner"
+      "choose-cash-register": "Sélectionner",
+      "market-disabled-label": "{market} est désactivé"
     }
   }
-  </i18n>
+</i18n>
 
 <template>
   <div>
@@ -72,7 +74,7 @@
 
 <script setup>
 import gql from "graphql-tag";
-import { computed, defineProps, defineEmits, ref } from "vue";
+import { computed, defineProps, defineEmits, ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { string, object } from "yup";
 import { useQuery, useResult } from "@vue/apollo-composable";
@@ -100,6 +102,10 @@ const props = defineProps({
   }
 });
 
+onMounted(() => {
+  selectedMarket.value = props.marketId;
+});
+
 const initialValues = computed(() => {
   return { marketId: props.marketId, cashRegisterId: props.cashRegisterId };
 });
@@ -123,6 +129,7 @@ const { result: resultProjects } = useQuery(
         markets {
           id
           name
+          isDisabled
           cashRegisters(includeArchived: false) {
             id
             name
@@ -133,18 +140,25 @@ const { result: resultProjects } = useQuery(
   `
 );
 const projectMarkets = useResult(resultProjects, null, (data) => {
-  if (data.projects[0].markets.length === 1 && data.projects[0].markets[0].cashRegisters.length === 1) {
+  const enabledMarkets = data.projects[0].markets.filter((x) => !x.isDisabled);
+
+  if (!enabledMarkets.find((x) => x.id === selectedMarket.value)) {
+    selectedMarket.value = "";
+  }
+
+  if (enabledMarkets.length === 1 && enabledMarkets[0].cashRegisters.length === 1) {
     emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
-      marketId: data.projects[0].markets[0].id,
-      cashRegisterId: data.projects[0].markets[0].cashRegisters[0].id
+      marketId: enabledMarkets[0].id,
+      cashRegisterId: enabledMarkets[0].cashRegisters[0].id
     });
     return [];
   }
   return data.projects[0].markets
     .map((x) => {
       return {
-        label: x.name,
-        value: x.id
+        label: x.isDisabled ? t("market-disabled-label", { market: x.name }) : x.name,
+        value: x.id,
+        isDisabled: x.isDisabled
       };
     })
     .sort((a, b) => a.label.localeCompare(b.label));
@@ -169,6 +183,7 @@ const { result: resultOrganizations } = useQuery(
         markets {
           id
           name
+          isDisabled
           cashRegisters(includeArchived: false) {
             id
             name
@@ -179,18 +194,20 @@ const { result: resultOrganizations } = useQuery(
   `
 );
 const organizationMarkets = useResult(resultOrganizations, null, (data) => {
-  if (data.organizations[0].markets.length === 1 && data.organizations[0].markets[0].cashRegisters.length === 1) {
+  const enabledMarkets = data.organizations[0].markets.filter((x) => !x.isDisabled);
+  if (enabledMarkets.length === 1 && enabledMarkets[0].cashRegisters.length === 1) {
     emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
-      marketId: data.organizations[0].markets[0].id,
-      cashRegisterId: data.organizations[0].markets[0].cashRegisters[0].id
+      marketId: enabledMarkets[0].id,
+      cashRegisterId: enabledMarkets[0].cashRegisters[0].id
     });
     return [];
   }
   return data.organizations[0].markets
     .map((x) => {
       return {
-        label: x.name,
-        value: x.id
+        label: x.isDisabled ? t("market-disabled-label", { market: x.name }) : x.name,
+        value: x.id,
+        isDisabled: x.isDisabled
       };
     })
     .sort((a, b) => a.label.localeCompare(b.label));
