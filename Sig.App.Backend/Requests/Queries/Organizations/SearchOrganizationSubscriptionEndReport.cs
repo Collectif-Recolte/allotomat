@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Sig.App.Backend.Requests.Queries.Organizations
 {
-    public class SearchOrganizationSubscriptionEndReport : IRequestHandler<SearchOrganizationSubscriptionEndReport.Query, SubscriptionEndReportPagination<SubscriptionEndReportGraphType>>
+    public class SearchOrganizationSubscriptionEndReport : IRequestHandler<SearchOrganizationSubscriptionEndReport.Query, Pagination<SubscriptionEndReportGraphType>>
     {
         private readonly AppDbContext db;
 
@@ -23,7 +23,7 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
             this.db = db;
         }
 
-        public async Task<SubscriptionEndReportPagination<SubscriptionEndReportGraphType>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Pagination<SubscriptionEndReportGraphType>> Handle(Query request, CancellationToken cancellationToken)
         {
             IQueryable<TransactionLog> query = db.TransactionLogs.Where(x => x.OrganizationId == request.OrganizationId && x.CreatedAtUtc >= request.StartDate && x.CreatedAtUtc <= request.EndDate);
 
@@ -61,7 +61,7 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
             }), request.Page);
         }
 
-        public class Query : IRequest<SubscriptionEndReportPagination<SubscriptionEndReportGraphType>>
+        public class Query : IRequest<Pagination<SubscriptionEndReportGraphType>>
         {
             public Page Page { get; set; }
             public long OrganizationId { get; set; }
