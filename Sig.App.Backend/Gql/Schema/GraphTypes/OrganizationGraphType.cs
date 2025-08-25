@@ -6,11 +6,14 @@ using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Requests.Queries.Beneficiaries;
+using Sig.App.Backend.Requests.Queries.Markets;
 using Sig.App.Backend.Requests.Queries.Organizations;
 using Sig.App.Backend.Utilities;
 using Sig.App.Backend.Utilities.Sorting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -109,6 +112,21 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<decimal> BudgetAllowancesTotal(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadOrganizationBudgetAllowanceTotal(Id.LongIdentifierForType<Organization>());
+        }
+
+        public async Task<SubscriptionEndReportPagination<SubscriptionEndReportGraphType>> SubscriptionEndReport([Inject] IMediator mediator, int page, int limit, DateTime startDate, DateTime endDate,
+            [Description("If specified, only transactions with one of those subscription are returned.")] Id[] withSpecificSubscriptions = null)
+        {
+            var results = await mediator.Send(new SearchOrganizationSubscriptionEndReport.Query
+            {
+                OrganizationId = organization.Id,
+                Page = new Page(page, limit),
+                StartDate = startDate,
+                EndDate = endDate,
+                Subscriptions = withSpecificSubscriptions?.Select(y => y.LongIdentifierForType<Subscription>())
+            });
+
+            return results;
         }
     }
 }
