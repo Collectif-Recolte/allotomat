@@ -9,7 +9,7 @@ namespace Sig.App.Backend.Gql.Bases
 {
     public static class SubscriptionEndReportPagination
     {
-        public static async Task<SubscriptionEndReportPagination<SubscriptionEndReportGraphType>> For(IEnumerable<SubscriptionEndReportGraphType> query, Page page)
+        public static SubscriptionEndReportPagination<SubscriptionEndReportGraphType> For(IEnumerable<SubscriptionEndReportGraphType> query, Page page)
         {
             var totalCount = query.Count();
             var itemPage = page.PageSize > 0

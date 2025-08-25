@@ -282,9 +282,11 @@ const subscriptionEndReport = computed(() => {
     : null;
   let items = [];
   let totalCount = 0;
+  let totalPages = 0;
 
   if (subscriptionEndReport) {
     totalCount = subscriptionEndReport.totalCount;
+    totalPages = subscriptionEndReport.totalPages;
     subscriptionEndReport.items.forEach((item) => {
       item.subscriptionEndTransactions.forEach((subscriptionEndTransaction) => {
         let subscriptionEndTransactionData = {
@@ -303,7 +305,7 @@ const subscriptionEndReport = computed(() => {
     });
   }
 
-  return { items, totalCount };
+  return { items, totalCount, totalPages };
 });
 
 function updateUrl() {

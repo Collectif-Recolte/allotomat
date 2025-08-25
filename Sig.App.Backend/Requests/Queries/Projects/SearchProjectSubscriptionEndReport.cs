@@ -37,10 +37,11 @@ namespace Sig.App.Backend.Requests.Queries.Projects
                 query = query.Where(x => request.Organizations.Contains(x.OrganizationId.Value));
             }
 
-            var transactionLogs = query.AsNoTracking().ToList().GroupBy(x => x.OrganizationId);
-            var organizations = db.Organizations.Where(x => transactionLogs.Select(x => x.Key).Contains(x.Id)).AsNoTracking().ToList();
+            var transactionLogs = await query.AsNoTracking().ToListAsync();
+            var transactionLogsGroupBy = transactionLogs.GroupBy(x => x.OrganizationId);
+            var organizations = await db.Organizations.Where(x => transactionLogsGroupBy.Select(x => x.Key).Contains(x.Id)).AsNoTracking().ToListAsync();
             
-            return await SubscriptionEndReportPagination.For(transactionLogs.Select(x =>
+            return SubscriptionEndReportPagination.For(transactionLogsGroupBy.Select(x =>
             {
                 var transactionBySubscription = x.Select(x => x).Where(x => x.SubscriptionId.HasValue).GroupBy(x => x.SubscriptionId.Value);
                 var reportBySubscription = transactionBySubscription.Select(y =>
@@ -62,7 +63,7 @@ namespace Sig.App.Backend.Requests.Queries.Projects
                 });
 
                 return new SubscriptionEndReportGraphType { Organization = new OrganizationGraphType(organizations.First(y => y.Id == x.Key)), SubscriptionEndTransactions = reportBySubscription };
-            }), request.Page);
+            }).OrderBy(x => x.Organization.Id), request.Page);
         }
 
         public class Query : IRequest<SubscriptionEndReportPagination<SubscriptionEndReportGraphType>>
