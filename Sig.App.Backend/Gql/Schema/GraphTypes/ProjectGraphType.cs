@@ -3,6 +3,7 @@ using GraphQL.DataLoader;
 using MediatR;
 using Sig.App.Backend.Authorization;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
+using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
@@ -227,6 +228,23 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
                 Page = new Page(page, limit),
                 StartDate = startDate,
                 EndDate = endDate
+            });
+
+            return results;
+        }
+
+        public async Task<Pagination<SubscriptionEndReportGraphType>> SubscriptionEndReport([Inject] IMediator mediator, int page, int limit, DateTime startDate, DateTime endDate,
+            [Description("If specified, only transactions with one of those subscription are returned.")] Id[] withSpecificSubscriptions = null,
+            [Description("If specified, only transactions with one of those organization are returned.")] Id[] withSpecificOrganizations = null)
+        {
+            var results = await mediator.Send(new SearchProjectSubscriptionEndReport.Query
+            {
+                ProjectId = project.Id,
+                Page = new Page(page, limit),
+                StartDate = startDate,
+                EndDate = endDate,
+                Subscriptions = withSpecificSubscriptions?.Select(y => y.LongIdentifierForType<Subscription>()),
+                Organizations = withSpecificOrganizations?.Select(y => y.LongIdentifierForType<Organization>())
             });
 
             return results;
