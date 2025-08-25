@@ -30,47 +30,47 @@
     <template #default="slotProps">
       <td>
         <div class="inline-flex items-center">
-          {{ getOrganizationName(slotProps.item) }}
+          {{ slotProps.item.organization.name }}
         </div>
       </td>
       <td>
         <div class="inline-flex items-center">
-          {{ getSubscriptionName(slotProps.item) }}
+          {{ slotProps.item.subscription.name }}
         </div>
       </td>
       <td>
         <div class="inline-flex items-center">
-          {{ getTotalPurchases(slotProps.item) }}
+          {{ slotProps.item.totalPurchases }}
         </div>
       </td>
       <td>
         <div class="inline-flex items-center">
-          {{ getCardsWithFunds(slotProps.item) }}
+          {{ slotProps.item.cardsWithFunds }}
         </div>
       </td>
       <td>
         <div class="inline-flex items-center">
-          {{ getCardsUsedForPurchases(slotProps.item) }}
+          {{ slotProps.item.cardsUsedForPurchases }}
         </div>
       </td>
       <td>
         <div class="inline-flex items-center">
-          {{ getMerchantsWithPurchases(slotProps.item) }}
+          {{ slotProps.item.merchantsWithPurchases }}
         </div>
       </td>
       <td>
         <div class="inline-flex items-center">
-          {{ getTotalFundsLoaded(slotProps.item) }}
+          {{ getMoneyFormat(slotProps.item.totalFundsLoaded) }}
         </div>
       </td>
       <td>
         <div class="inline-flex items-center">
-          {{ getTotalPurchaseValue(slotProps.item) }}
+          {{ getMoneyFormat(slotProps.item.totalPurchaseValue) }}
         </div>
       </td>
       <td>
         <div class="inline-flex items-center">
-          {{ getTotalExpiredAmount(slotProps.item) }}
+          {{ getMoneyFormat(slotProps.item.totalExpiredAmount) }}
         </div>
       </td>
     </template>
@@ -125,40 +125,4 @@ const cols = computed(() => [
     isRight: true
   }
 ]);
-
-function getOrganizationName(item) {
-  return `${item.organization.name}`;
-}
-
-function getSubscriptionName(item) {
-  return `${item.subscription.name}`;
-}
-
-function getTotalPurchases(item) {
-  return item.totalPurchases;
-}
-
-function getCardsWithFunds(item) {
-  return item.cardsWithFunds;
-}
-
-function getCardsUsedForPurchases(item) {
-  return item.cardsUsedForPurchases;
-}
-
-function getMerchantsWithPurchases(item) {
-  return item.merchantsWithPurchases;
-}
-
-function getTotalFundsLoaded(item) {
-  return getMoneyFormat(item.totalFundsLoaded);
-}
-
-function getTotalPurchaseValue(item) {
-  return getMoneyFormat(item.totalPurchaseValue);
-}
-
-function getTotalExpiredAmount(item) {
-  return getMoneyFormat(item.totalExpiredAmount);
-}
 </script>
