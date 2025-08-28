@@ -2,7 +2,7 @@
   {
     "en": {
       "submit": "Submit",
-      "email-created-card-pdf": "Email created card pdf",
+      "created-card-pdf-email": "Email created card pdf",
       "monthly-balance-report-email": "Monthly balance report email",
       "monthly-card-balance-report-email": "Monthly card balance report email",
       "subscription-expiration-email": "Subscription expiration email",
