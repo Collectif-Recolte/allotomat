@@ -38,37 +38,37 @@
           {{ slotProps.item.subscription.name }}
         </div>
       </td>
-      <td>
+      <td class="text-right">
         <div class="inline-flex items-center">
           {{ slotProps.item.totalPurchases }}
         </div>
       </td>
-      <td>
+      <td class="text-right">
         <div class="inline-flex items-center">
           {{ slotProps.item.cardsWithFunds }}
         </div>
       </td>
-      <td>
+      <td class="text-right">
         <div class="inline-flex items-center">
           {{ slotProps.item.cardsUsedForPurchases }}
         </div>
       </td>
-      <td>
+      <td class="text-right">
         <div class="inline-flex items-center">
           {{ slotProps.item.merchantsWithPurchases }}
         </div>
       </td>
-      <td>
+      <td class="text-right">
         <div class="inline-flex items-center">
           {{ getMoneyFormat(slotProps.item.totalFundsLoaded) }}
         </div>
       </td>
-      <td>
+      <td class="text-right">
         <div class="inline-flex items-center">
           {{ getMoneyFormat(slotProps.item.totalPurchaseValue) }}
         </div>
       </td>
-      <td>
+      <td class="text-right">
         <div class="inline-flex items-center">
           {{ getMoneyFormat(slotProps.item.totalExpiredAmount) }}
         </div>
@@ -104,22 +104,18 @@ const cols = computed(() => [
     label: t("cards-used-for-purchases"),
     isRight: true
   },
-
   {
     label: t("merchants-with-purchases"),
     isRight: true
   },
-
   {
     label: t("total-funds-loaded"),
     isRight: true
   },
-
   {
     label: t("total-purchase-value"),
     isRight: true
   },
-
   {
     label: t("total-expired-amount"),
     isRight: true
