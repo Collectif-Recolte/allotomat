@@ -348,6 +348,8 @@ const {
           id
           beneficiaryFirstname
           beneficiaryLastname
+          beneficiaryID1
+          beneficiaryID2
           createdAt
           discriminator
           marketName

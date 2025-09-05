@@ -35,6 +35,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return ctx.DataLoader.LoadProfileByUserId(user.Id);
         }
 
+        public IDataLoaderResult<UserEmailOptInGraphType> EmailOptIn(IAppUserContext ctx)
+        {
+            return ctx.DataLoader.LoadEmailOptInByUserId(user.Id);
+        }
+
         [ApplyPolicy(AuthorizationPolicies.IsPCAAdmin)]
         public OffsetDateTime? LastConnectionTime()
         {

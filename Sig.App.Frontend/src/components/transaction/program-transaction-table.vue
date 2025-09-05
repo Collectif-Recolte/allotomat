@@ -25,7 +25,9 @@
       "operation-transaction-refund-payment-desc": "By: {x}",
       "operation-transaction-subscription-adding-fund-title": "Adding fund",
       "operation-transaction-subscription-adding-fund-desc": "Subscription",
-      "operation-transaction-transfer-fund-title": "Transfer fund"
+      "operation-transaction-transfer-fund-title": "Transfer fund",
+      "beneficiary-id1": "ID 1 :",
+      "beneficiary-id2": "ID 2 :",
     },
     "fr": {
       "transaction-date-hour": "Date et heure",
@@ -52,7 +54,9 @@
       "operation-transaction-refund-payment-desc": "Par: {x}",
       "operation-transaction-subscription-adding-fund-title": "Ajout de fonds",
       "operation-transaction-subscription-adding-fund-desc": "D'un abonnement",
-      "operation-transaction-transfer-fund-title": "Transfert de fonds"
+      "operation-transaction-transfer-fund-title": "Transfert de fonds",
+      "beneficiary-id1": "ID 1 :",
+      "beneficiary-id2": "ID 2 :",
     }
   }
   </i18n>
@@ -64,7 +68,9 @@
         {{ getTransactionDate(slotProps.item) }}
       </td>
       <td v-if="!props.beneficiariesAreAnonymous">
-        {{ getBeneficiaryName(slotProps.item) }}
+        <b>{{ getBeneficiaryName(slotProps.item) }}</b>
+        <p class="mb-0">{{ t("beneficiary-id1") }} {{ getBeneficiaryId1(slotProps.item) }}</p>
+        <p class="mb-0">{{ t("beneficiary-id2") }} {{ getBeneficiaryId2(slotProps.item) }}</p>
       </td>
       <td>
         <b>{{ getOperationName(slotProps.item) }}</b>
@@ -167,6 +173,14 @@ function getBeneficiaryName(transaction) {
     return `${transaction.beneficiaryFirstname} ${transaction.beneficiaryLastname}`;
   }
   return `-`;
+}
+
+function getBeneficiaryId1(transaction) {
+  return transaction.beneficiaryID1 !== null ? transaction.beneficiaryID1 : "-";
+}
+
+function getBeneficiaryId2(transaction) {
+  return transaction.beneficiaryID2 !== null ? transaction.beneficiaryID2 : "-";
 }
 
 function getOperationName(transaction) {

@@ -109,7 +109,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                 user = new AppUser(email)
                 {
                     Type = UserType.Merchant,
-                    Profile = new UserProfile()
+                    Profile = new UserProfile(),
+                    EmailOptIn = new UserEmailOptIn()
                 };
 
                 var result = await userManager.CreateAsync(user);

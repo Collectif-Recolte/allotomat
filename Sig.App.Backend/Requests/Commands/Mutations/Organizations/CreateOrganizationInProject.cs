@@ -122,7 +122,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
                 user = new AppUser(email)
                 {
                     Type = UserType.OrganizationManager,
-                    Profile = new UserProfile()
+                    Profile = new UserProfile(),
+                    EmailOptIn = new UserEmailOptIn()
                 };
 
                 var result = await userManager.CreateAsync(user);

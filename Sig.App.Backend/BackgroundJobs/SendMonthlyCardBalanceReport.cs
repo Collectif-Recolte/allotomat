@@ -68,8 +68,11 @@ namespace Sig.App.Backend.BackgroundJobs
                 var project = projects[groupByProject.Key];
                 var projectManagers = await mediator.Send(new GetProjectProjectManagers.Query
                 {
-                    ProjectId = project.Id
+                    ProjectId = project.Id,
+                    IncludeEmailOptIn = true
                 });
+
+                projectManagers = projectManagers.Where(x => x.EmailOptIn.MonthlyCardBalanceReportEmail).ToList();
 
                 if (projectManagers.Any())
                 {
