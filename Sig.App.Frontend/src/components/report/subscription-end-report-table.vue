@@ -3,30 +3,32 @@
     "en": {
       "organization-name": "Group",
       "subscription-name": "Subscription",
-      "total-purchases": "Total purchases",
-      "cards-with-funds": "Cards with funds",
+      "total-purchases": "Number of purchases",
+      "cards-with-funds": "Cards that received funds",
       "cards-used-for-purchases": "Cards used for purchases",
       "merchants-with-purchases": "Merchants with purchases",
       "total-funds-loaded": "Total funds loaded",
       "total-purchase-value": "Total purchase value",
-      "total-expired-amount": "Total expired amount"
+      "total-expired-amount": "Total expired amount",
+      "subscription-totals": "Total"
     },
     "fr": {
       "organization-name": "Groupe",
       "subscription-name": "Abonnement",
-      "total-purchases": "Total des achats",
-      "cards-with-funds": "Cartes avec fonds",
+      "total-purchases": "Nombre d’achats",
+      "cards-with-funds": "Cartes qui ont reçu des fonds",
       "cards-used-for-purchases": "Cartes utilisées pour les achats",
       "merchants-with-purchases": "Marchands avec achats",
       "total-funds-loaded": "Total des fonds chargés",
       "total-purchase-value": "Valeur totale des achats",
-      "total-expired-amount": "Montant total expiré"
+      "total-expired-amount": "Montant total expiré",
+      "subscription-totals": "Total"
     }
   }
   </i18n>
 
 <template>
-  <UiTable :items="props.organizations" :cols="cols">
+  <UiTable :items="props.organizations" :cols="cols" :footers="footers">
     <template #default="slotProps">
       <td>
         <div class="inline-flex items-center">
@@ -121,4 +123,48 @@ const cols = computed(() => [
     isRight: true
   }
 ]);
+
+const footers = computed(() => {
+  const footers = [];
+
+  footers.push({ value: t("subscription-totals") });
+  footers.push({ value: "" }); // Empty cell subscription-name
+  footers.push({ value: getSubscriptionPurchasesTotal(), isRight: true });
+  footers.push({ value: getSubscriptionCardsWithFundsTotal(), isRight: true });
+  footers.push({ value: getSubscriptionCardsUsedForPurchasesTotal(), isRight: true });
+  footers.push({ value: getSubscriptionMerchantsWithPurchasesTotal(), isRight: true });
+  footers.push({ value: getSubscriptionTotalFundsLoadedTotal(), isRight: true });
+  footers.push({ value: getSubscriptionTotalPurchaseValueTotal(), isRight: true });
+  footers.push({ value: getSubscriptionTotalExpiredAmountTotal(), isRight: true });
+
+  return footers;
+});
+
+function getSubscriptionPurchasesTotal() {
+  return props.organizations.reduce((total, organization) => total + organization.totalPurchases, 0);
+}
+
+function getSubscriptionCardsWithFundsTotal() {
+  return props.organizations.reduce((total, organization) => total + organization.cardsWithFunds, 0);
+}
+
+function getSubscriptionCardsUsedForPurchasesTotal() {
+  return props.organizations.reduce((total, organization) => total + organization.cardsUsedForPurchases, 0);
+}
+
+function getSubscriptionMerchantsWithPurchasesTotal() {
+  return props.organizations.reduce((total, organization) => total + organization.merchantsWithPurchases, 0);
+}
+
+function getSubscriptionTotalFundsLoadedTotal() {
+  return getMoneyFormat(props.organizations.reduce((total, organization) => total + organization.totalFundsLoaded, 0));
+}
+
+function getSubscriptionTotalPurchaseValueTotal() {
+  return getMoneyFormat(props.organizations.reduce((total, organization) => total + organization.totalPurchaseValue, 0));
+}
+
+function getSubscriptionTotalExpiredAmountTotal() {
+  return getMoneyFormat(props.organizations.reduce((total, organization) => total + organization.totalExpiredAmount, 0));
+}
 </script>

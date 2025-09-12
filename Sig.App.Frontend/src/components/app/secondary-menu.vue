@@ -8,7 +8,7 @@
     "manage-marketgroup-managers": "User management",
     "manage-project-export-all-participants": "Export all participants",
     "reconciliation-report": "Reconciliation report",
-    "subscription-end-report": "Subscription end report",
+    "subscription-end-report": "Subscription report",
     "cash-register": "Cash registers",
     "menu-title-market": "{name} market",
     "menu-title-market-group": "{name} market group"
@@ -21,7 +21,7 @@
     "manage-marketgroup-managers": "Gestion des utilisateurs",
     "manage-project-export-all-participants": "Exporter tous les participants",
     "reconciliation-report": "Rapport de réconciliation",
-    "subscription-end-report": "Rapport de fin d'abonnement",
+    "subscription-end-report": "Rapport d'abonnement",
     "cash-register": "Caisses",
     "menu-title-market": "Marché {name}",
     "menu-title-market-group": "Groupe de commerce {name}"

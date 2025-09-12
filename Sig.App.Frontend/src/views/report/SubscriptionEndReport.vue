@@ -1,11 +1,11 @@
 <i18n>
   {
     "en": {
-      "title": "Subscription end report",
+      "title": "Subscription report",
       "no-results": "No transactions for the selected period"
     },
     "fr": {
-      "title": "Rapport de fin d'abonnement",
+      "title": "Rapport d'abonnement",
       "no-results": "Aucune transaction pour la période sélectionnée"
     }
   }
@@ -86,6 +86,8 @@ const searchInput = ref("");
 const page = ref(1);
 const organizations = ref([]);
 const subscriptions = ref([]);
+const availableSubscriptions = ref([]);
+const availableOrganizations = ref([]);
 
 if (route.query.dateFrom) {
   dateFrom.value = new Date(route.query.dateFrom);
@@ -179,19 +181,9 @@ const project = useResult(resultProjects, null, (data) => {
     setDateFrom(data.projects[0].reconciliationReportDate);
   }
 
+  availableOrganizations.value = data.projects[0].organizations;
+  availableSubscriptions.value = data.projects[0].subscriptions;
   return data.projects[0];
-});
-
-const availableOrganizations = computed(() => {
-  return project.value?.organizations ?? [];
-});
-
-const availableSubscriptions = computed(() => {
-  if (userType.value === USER_TYPE_PROJECTMANAGER) {
-    return project.value?.subscriptions ?? [];
-  } else {
-    return organization.value?.budgetAllowances?.map((x) => x.subscription) ?? [];
-  }
 });
 
 const { result: resultOrganizations, loading: loadingOrganizations } = useQuery(
@@ -250,6 +242,7 @@ const organization = useResult(resultOrganizations, null, (data) => {
     setDateFrom(data.organizations[0].subscriptionEndReportDate);
   }
 
+  availableSubscriptions.value = data.organizations[0].budgetAllowances.map((x) => x.subscription);
   return data.organizations[0];
 });
 
