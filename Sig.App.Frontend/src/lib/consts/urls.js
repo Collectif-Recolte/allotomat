@@ -12,6 +12,7 @@ export const URL_ACCOUNT_PROJECT_MANAGER_CONFIRM = "confirm-project-manager-url"
 export const URL_ACCOUNT_MERCHANT_CONFIRM = "confirm-merchant-url";
 export const URL_ACCOUNT_ORGANIZATION_MANAGER_CONFIRM = "confirm-organization-manager-url";
 export const URL_ACCOUNT_MARKET_GROUP_MANAGER_CONFIRM = "confirm-market-group-manager-url";
+export const URL_ACCOUNT_UNSUBSCRIBE_EMAIL = "unsubscribe-email-url";
 
 export const URL_PROFILE_EDIT = "edit-profile-url";
 
