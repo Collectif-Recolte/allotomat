@@ -38,7 +38,10 @@
       </template>
       <div v-if="subscriptionEndReport">
         <div class="flex flex-col relative mb-6">
-          <SubscriptionEndReportTable v-if="subscriptionEndReport.totalCount > 0" :organizations="subscriptionEndReport.items" />
+          <SubscriptionEndReportTable
+            v-if="subscriptionEndReport.totalCount > 0"
+            :organizations="subscriptionEndReport.items"
+            :total="subscriptionEndReportTotal" />
           <UiEmptyPage v-else>
             <UiCta :img-src="require('@/assets/img/swan.jpg')" :description="t('no-results')"> </UiCta>
           </UiEmptyPage>
@@ -137,6 +140,20 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
           id
           name
         }
+        subscriptionEndReportTotal(
+          startDate: $dateFrom
+          endDate: $dateTo
+          withSpecificOrganizations: $organizations
+          withSpecificSubscriptions: $subscriptions
+        ) {
+          totalPurchases
+          cardsWithFunds
+          cardsUsedForPurchases
+          merchantsWithPurchases
+          totalFundsLoaded
+          totalPurchaseValue
+          totalExpiredAmount
+        }
         subscriptionEndReport(
           page: $page
           limit: 30
@@ -198,6 +215,15 @@ const { result: resultOrganizations, loading: loadingOrganizations } = useQuery(
             id
             name
           }
+        }
+        subscriptionEndReportTotal(startDate: $dateFrom, endDate: $dateTo, withSpecificSubscriptions: $subscriptions) {
+          totalPurchases
+          cardsWithFunds
+          cardsUsedForPurchases
+          merchantsWithPurchases
+          totalFundsLoaded
+          totalPurchaseValue
+          totalExpiredAmount
         }
         subscriptionEndReport(
           page: $page
@@ -266,6 +292,14 @@ function setDateFrom(reconciliationReportDate) {
     }
   }
 }
+
+const subscriptionEndReportTotal = computed(() => {
+  return project.value
+    ? project.value.subscriptionEndReportTotal
+    : organization.value
+    ? organization.value.subscriptionEndReportTotal
+    : null;
+});
 
 const subscriptionEndReport = computed(() => {
   var subscriptionEndReport = project.value

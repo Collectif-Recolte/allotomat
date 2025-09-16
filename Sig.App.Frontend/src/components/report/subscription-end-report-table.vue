@@ -88,7 +88,8 @@ import { getMoneyFormat } from "@/lib/helpers/money";
 const { t } = useI18n();
 
 const props = defineProps({
-  organizations: { type: Array, required: true }
+  organizations: { type: Array, required: true },
+  total: { type: Object, required: true }
 });
 
 const cols = computed(() => [
@@ -129,42 +130,14 @@ const footers = computed(() => {
 
   footers.push({ value: t("subscription-totals") });
   footers.push({ value: "" }); // Empty cell subscription-name
-  footers.push({ value: getSubscriptionPurchasesTotal(), isRight: true });
-  footers.push({ value: getSubscriptionCardsWithFundsTotal(), isRight: true });
-  footers.push({ value: getSubscriptionCardsUsedForPurchasesTotal(), isRight: true });
-  footers.push({ value: getSubscriptionMerchantsWithPurchasesTotal(), isRight: true });
-  footers.push({ value: getSubscriptionTotalFundsLoadedTotal(), isRight: true });
-  footers.push({ value: getSubscriptionTotalPurchaseValueTotal(), isRight: true });
-  footers.push({ value: getSubscriptionTotalExpiredAmountTotal(), isRight: true });
+  footers.push({ value: props.total.totalPurchases, isRight: true });
+  footers.push({ value: props.total.cardsWithFunds, isRight: true });
+  footers.push({ value: props.total.cardsUsedForPurchases, isRight: true });
+  footers.push({ value: props.total.merchantsWithPurchases, isRight: true });
+  footers.push({ value: getMoneyFormat(props.total.totalFundsLoaded), isRight: true });
+  footers.push({ value: getMoneyFormat(props.total.totalPurchaseValue), isRight: true });
+  footers.push({ value: getMoneyFormat(props.total.totalExpiredAmount), isRight: true });
 
   return footers;
 });
-
-function getSubscriptionPurchasesTotal() {
-  return props.organizations.reduce((total, organization) => total + organization.totalPurchases, 0);
-}
-
-function getSubscriptionCardsWithFundsTotal() {
-  return props.organizations.reduce((total, organization) => total + organization.cardsWithFunds, 0);
-}
-
-function getSubscriptionCardsUsedForPurchasesTotal() {
-  return props.organizations.reduce((total, organization) => total + organization.cardsUsedForPurchases, 0);
-}
-
-function getSubscriptionMerchantsWithPurchasesTotal() {
-  return props.organizations.reduce((total, organization) => total + organization.merchantsWithPurchases, 0);
-}
-
-function getSubscriptionTotalFundsLoadedTotal() {
-  return getMoneyFormat(props.organizations.reduce((total, organization) => total + organization.totalFundsLoaded, 0));
-}
-
-function getSubscriptionTotalPurchaseValueTotal() {
-  return getMoneyFormat(props.organizations.reduce((total, organization) => total + organization.totalPurchaseValue, 0));
-}
-
-function getSubscriptionTotalExpiredAmountTotal() {
-  return getMoneyFormat(props.organizations.reduce((total, organization) => total + organization.totalExpiredAmount, 0));
-}
 </script>
