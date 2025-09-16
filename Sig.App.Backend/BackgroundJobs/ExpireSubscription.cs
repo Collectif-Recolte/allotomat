@@ -7,6 +7,7 @@ using NodaTime;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
+using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Requests.Queries.Projects;
 using Sig.App.Backend.Services.Mailer;
 using System;
@@ -56,10 +57,9 @@ namespace Sig.App.Backend.BackgroundJobs
                     var projectManagers = await mediator.Send(new GetProjectProjectManagers.Query
                     {
                         ProjectId = subscription.ProjectId,
-                        IncludeEmailOptIn = true
                     });
 
-                    projectManagers = projectManagers.Where(x => x.EmailOptIn.SubscriptionExpirationEmail).ToList();
+                    projectManagers = projectManagers.Where(x => x.GetIfEmailOptIn(EmailOptIn.SubscriptionExpirationEmail)).ToList();
 
                     var transactions = db.TransactionLogs.Where(x => x.SubscriptionId == subscription.Id);
 

@@ -227,6 +227,9 @@ namespace Sig.App.Backend.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("EmailOptIn")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("LastAccessTimeUtc")
                         .HasColumnType("datetime2");
 
@@ -709,38 +712,6 @@ namespace Sig.App.Backend.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("ProductGroups");
-                });
-
-            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Profiles.UserEmailOptIn", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<bool>("CreatedCardPdfEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("MonthlyBalanceReportEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("MonthlyCardBalanceReportEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("SubscriptionExpirationEmail")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("UserEmailOptIns");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Profiles.UserProfile", b =>
@@ -1676,17 +1647,6 @@ namespace Sig.App.Backend.Migrations
                     b.Navigation("Project");
                 });
 
-            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Profiles.UserEmailOptIn", b =>
-                {
-                    b.HasOne("Sig.App.Backend.DbModel.Entities.AppUser", "User")
-                        .WithOne("EmailOptIn")
-                        .HasForeignKey("Sig.App.Backend.DbModel.Entities.Profiles.UserEmailOptIn", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Profiles.UserProfile", b =>
                 {
                     b.HasOne("Sig.App.Backend.DbModel.Entities.AppUser", "User")
@@ -1977,8 +1937,6 @@ namespace Sig.App.Backend.Migrations
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.AppUser", b =>
                 {
-                    b.Navigation("EmailOptIn");
-
                     b.Navigation("Profile");
                 });
 

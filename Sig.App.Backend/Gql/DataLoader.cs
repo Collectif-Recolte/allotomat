@@ -32,9 +32,6 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<IProfileGraphType> LoadProfileByUserId(string userId) =>
             LoadOne<GetUserProfilesByUserIds.Query, IProfileGraphType, string>(userId);
 
-        public IDataLoaderResult<UserEmailOptInGraphType> LoadEmailOptInByUserId(string userId) =>
-            LoadOne<GetEmailOptInByUserIds.Query, UserEmailOptInGraphType, string>(userId);
-
         public IDataLoaderResult<OrganizationGraphType> LoadOrganization(long organizationId) =>
             LoadOne<GetOrganizationsByIds.Query, OrganizationGraphType, long>(organizationId);
 

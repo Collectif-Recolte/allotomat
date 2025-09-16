@@ -108,8 +108,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.MarketGroups
                 user = new AppUser(email)
                 {
                     Type = UserType.MarketGroupManager,
-                    Profile = new UserProfile(),
-                    EmailOptIn = new UserEmailOptIn()
+                    Profile = new UserProfile()
                 };
 
                 var result = await userManager.CreateAsync(user);

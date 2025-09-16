@@ -24,6 +24,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public UserType Type => user.Type;
         public bool IsConfirmed => user.EmailConfirmed;
         public UserStatus Status => user.Status;
+        public string EmailOptIn => user.EmailOptIn;
 
         public UserGraphType(AppUser user)
         {
@@ -33,11 +34,6 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<IProfileGraphType> Profile(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadProfileByUserId(user.Id);
-        }
-
-        public IDataLoaderResult<UserEmailOptInGraphType> EmailOptIn(IAppUserContext ctx)
-        {
-            return ctx.DataLoader.LoadEmailOptInByUserId(user.Id);
         }
 
         [ApplyPolicy(AuthorizationPolicies.IsPCAAdmin)]

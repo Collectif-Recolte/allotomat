@@ -7,6 +7,7 @@ using NodaTime;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Transactions;
+using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Requests.Queries.Projects;
@@ -72,8 +73,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 var project = await db.Projects.Where(x => x.Id == groupByProject.Key).FirstAsync();
                 var projectManagers = await mediator.Send(new GetProjectProjectManagers.Query
                 {
-                    ProjectId = project.Id,
-                    IncludeEmailOptIn = true
+                    ProjectId = project.Id
                 });
 
                 var refundGroupByProject = refundTransactionGroupByProject.FirstOrDefault(x => x.Key == groupByProject.Key);
@@ -119,7 +119,14 @@ namespace Sig.App.Backend.BackgroundJobs
                     }
                 }
 
-                projectManagers = projectManagers.Where(x => x.EmailOptIn.MonthlyBalanceReportEmail).ToList();
+                var emailOptIn = EmailOptInHelper.GetEmailOptInMonthlyBalanceReport(clock.GetCurrentInstant().ToDateTimeUtc());
+
+                if (emailOptIn == null)
+                {
+                    throw new Exception();
+                }
+
+                projectManagers = projectManagers.Where(x => x.GetIfEmailOptIn(emailOptIn.Value)).ToList();
 
                 if (projectManagers.Any())
                 {

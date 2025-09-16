@@ -95,8 +95,6 @@ namespace Sig.App.Backend.DbModel
 
         public DbSet<BlacklistedEmail> BlacklistedEmails { get; set; }
 
-        public DbSet<UserEmailOptIn> UserEmailOptIns { get; set; }
-
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -106,10 +104,6 @@ namespace Sig.App.Backend.DbModel
                 _.HasOne(x => x.Profile)
                     .WithOne(x => x.User)
                     .HasForeignKey<UserProfile>(x => x.UserId);
-
-                _.HasOne(x => x.EmailOptIn)
-                    .WithOne(x => x.User)
-                    .HasForeignKey<UserEmailOptIn>(x => x.UserId);
 
                 _.Property(x => x.Id).ValueGeneratedOnAdd();
             });

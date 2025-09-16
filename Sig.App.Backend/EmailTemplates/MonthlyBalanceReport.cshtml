@@ -15,7 +15,7 @@
     <p>Montant total des transactions du dernier mois : @report.Total.ToString("C", CultureInfo.CreateSpecificCulture("fr-CA"))</p>
 }
 <p>
-    Si vous ne souhaitez plus recevoir de courriels, vous pouvez vous désabonner en cliquant ici : <a clicktracking="off" href="@Model.BaseUrl/@UrlHelper.UnsubscribeFromEmail(Sig.App.Backend.DbModel.Enums.EmailOptIn.MonthlyBalanceReportEmail)">Se désabonner</a>
+    Si vous ne souhaitez plus recevoir de courriels, vous pouvez vous désabonner en cliquant ici : <a clicktracking="off" href="@Model.BaseUrl/@UrlHelper.UnsubscribeFromEmail(Sig.App.Backend.DbModel.Enums.EmailOptIn.MonthlyBalanceReportEmailJanuary)">Se désabonner</a>
 </p>
 <br />
 <p>
@@ -28,5 +28,5 @@
     <p>Total amount of transactions in the last month : @report.Total.ToString("C", CultureInfo.CreateSpecificCulture("en-CA"))</p>
 }
 <p>
-    If you no longer wish to receive emails, you can unsubscribe by clicking here : <a clicktracking="off" href="@Model.BaseUrl/@UrlHelper.UnsubscribeFromEmail(Sig.App.Backend.DbModel.Enums.EmailOptIn.MonthlyBalanceReportEmail)">Unsubscribe</a>
+    If you no longer wish to receive emails, you can unsubscribe by clicking here : <a clicktracking="off" href="@Model.BaseUrl/@UrlHelper.UnsubscribeFromEmail(Sig.App.Backend.DbModel.Enums.EmailOptIn.MonthlyBalanceReportEmailJanuary)">Unsubscribe</a>
 </p>
