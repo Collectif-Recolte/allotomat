@@ -12,70 +12,44 @@ namespace Sig.App.Backend.Helpers
             return user.EmailOptIn.Split(';').Any(x => x == emailOptIn.ToString());
         }
 
-        public static EmailOptIn? GetEmailOptInMonthlyBalanceReport(DateTime month)
+        public static EmailOptIn GetEmailOptInMonthlyBalanceReport(DateTime month)
         {
-            switch (month.Month)
+            return month.Month switch
             {
-                case 1:
-                    return EmailOptIn.MonthlyBalanceReportEmailJanuary;
-                case 2:
-                    return EmailOptIn.MonthlyBalanceReportEmailFebruary;
-                case 3:
-                    return EmailOptIn.MonthlyBalanceReportEmailMarch;
-                case 4:
-                    return EmailOptIn.MonthlyBalanceReportEmailApril;
-                case 5:
-                    return EmailOptIn.MonthlyBalanceReportEmailMay;
-                case 6:
-                    return EmailOptIn.MonthlyBalanceReportEmailJune;
-                case 7:
-                    return EmailOptIn.MonthlyBalanceReportEmailJuly;
-                case 8:
-                    return EmailOptIn.MonthlyBalanceReportEmailAugust;
-                case 9:
-                    return EmailOptIn.MonthlyBalanceReportEmailSeptember;
-                case 10:
-                    return EmailOptIn.MonthlyBalanceReportEmailOctober;
-                case 11:
-                    return EmailOptIn.MonthlyBalanceReportEmailNovember;
-                case 12:
-                    return EmailOptIn.MonthlyBalanceReportEmailDecember;
-                default:
-                    return null;
-            }
+                1 => EmailOptIn.MonthlyBalanceReportEmailJanuary,
+                2 => EmailOptIn.MonthlyBalanceReportEmailFebruary,
+                3 => EmailOptIn.MonthlyBalanceReportEmailMarch,
+                4 => EmailOptIn.MonthlyBalanceReportEmailApril,
+                5 => EmailOptIn.MonthlyBalanceReportEmailMay,
+                6 => EmailOptIn.MonthlyBalanceReportEmailJune,
+                7 => EmailOptIn.MonthlyBalanceReportEmailJuly,
+                8 => EmailOptIn.MonthlyBalanceReportEmailAugust,
+                9 => EmailOptIn.MonthlyBalanceReportEmailSeptember,
+                10 => EmailOptIn.MonthlyBalanceReportEmailOctober,
+                11 => EmailOptIn.MonthlyBalanceReportEmailNovember,
+                12 => EmailOptIn.MonthlyBalanceReportEmailDecember,
+                _ => throw new InvalidOperationException("Bad month value")
+            };
         }
 
-        public static EmailOptIn? GetEmailOptInMonthlyCardBalanceReport(DateTime month)
+        public static EmailOptIn GetEmailOptInMonthlyCardBalanceReport(DateTime month)
         {
-            switch (month.Month)
+            return month.Month switch
             {
-                case 1:
-                    return EmailOptIn.MonthlyCardBalanceReportEmailJanuary;
-                case 2:
-                    return EmailOptIn.MonthlyCardBalanceReportEmailFebruary;
-                case 3:
-                    return EmailOptIn.MonthlyCardBalanceReportEmailMarch;
-                case 4:
-                    return EmailOptIn.MonthlyCardBalanceReportEmailApril;
-                case 5:
-                    return EmailOptIn.MonthlyCardBalanceReportEmailMay;
-                case 6:
-                    return EmailOptIn.MonthlyCardBalanceReportEmailJune;
-                case 7:
-                    return EmailOptIn.MonthlyCardBalanceReportEmailJuly;
-                case 8:
-                    return EmailOptIn.MonthlyCardBalanceReportEmailAugust;
-                case 9:
-                    return EmailOptIn.MonthlyCardBalanceReportEmailSeptember;
-                case 10:
-                    return EmailOptIn.MonthlyCardBalanceReportEmailOctober;
-                case 11:
-                    return EmailOptIn.MonthlyCardBalanceReportEmailNovember;
-                case 12:
-                    return EmailOptIn.MonthlyCardBalanceReportEmailDecember;
-                default:
-                    return null;
-            }
+                1 => EmailOptIn.MonthlyCardBalanceReportEmailJanuary,
+                2 => EmailOptIn.MonthlyCardBalanceReportEmailFebruary,
+                3 => EmailOptIn.MonthlyCardBalanceReportEmailMarch,
+                4 => EmailOptIn.MonthlyCardBalanceReportEmailApril,
+                5 => EmailOptIn.MonthlyCardBalanceReportEmailMay,
+                6 => EmailOptIn.MonthlyCardBalanceReportEmailJune,
+                7 => EmailOptIn.MonthlyCardBalanceReportEmailJuly,
+                8 => EmailOptIn.MonthlyCardBalanceReportEmailAugust,
+                9 => EmailOptIn.MonthlyCardBalanceReportEmailSeptember,
+                10 => EmailOptIn.MonthlyCardBalanceReportEmailOctober,
+                11 => EmailOptIn.MonthlyCardBalanceReportEmailNovember,
+                12 => EmailOptIn.MonthlyCardBalanceReportEmailDecember,
+                _ => throw new InvalidOperationException("Bad month value")
+            };
         }
     }
 }
