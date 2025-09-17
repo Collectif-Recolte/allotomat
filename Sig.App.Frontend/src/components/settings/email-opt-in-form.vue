@@ -2,7 +2,7 @@
   {
     "en": {
       "submit": "Submit",
-      "created-card-pdf-email": "Copy of generated card data (.csv file)",
+      "created-card-csv-email": "Copy of generated card data (.csv file)",
       "monthly-balance-report-email": "Monthly reconciliation report (amounts owing to merchants)",
       "monthly-card-balance-report-email": "Monthly card status report",
       "subscription-expiration-email": "Subscription expiration email",
@@ -22,7 +22,7 @@
     },
     "fr": {
       "submit": "Mettre à jour",
-      "created-card-pdf-email": "Copie des données de cartes générées (fichier .csv)",
+      "created-card-csv-email": "Copie des données de cartes générées (fichier .csv)",
       "monthly-balance-report-email": "Rapport de réconciliation mensuel (montants dûs aux commerces)",
       "monthly-card-balance-report-email": "Rapport de solde mensuel des cartes",
       "subscription-expiration-email": "Rappel d’expiration d’abonnement",
@@ -208,7 +208,7 @@
             id="createdCardPdfEmail"
             v-bind="field"
             :checked="field.value"
-            :label="t('created-card-pdf-email')" />
+            :label="t('created-card-csv-email')" />
         </Field>
 
         <Field v-slot="{ field }" name="subscriptionExpirationEmail">

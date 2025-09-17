@@ -31,9 +31,6 @@
         </template>
       </PfNote>
     </template>
-    <div v-else-if="isUnsubscribed" class="flex items-center">
-      <p class="mb-0">{{ t("unsubscribed", { emailType: getEmailTypeText() }) }}</p>
-    </div>
     <div v-else class="flex items-center">
       <PfSpinner class="mr-3" is-small aria-hidden="true" />
       <p class="mb-0">{{ t("unsubscribing", { emailType: getEmailTypeText() }) }}</p>
@@ -59,7 +56,6 @@ const { t } = useI18n();
 const { addSuccess } = useNotificationsStore();
 
 const showError = ref(false);
-const isUnsubscribed = ref(false);
 
 const route = useRoute();
 const router = useRouter();
@@ -83,7 +79,6 @@ async function unsubscribeBeneficiary() {
     await unsubscribeFromEmailMutation({ input: { emailType: getEmailType() } });
     addSuccess(t("unsubscribed", { emailType: getEmailTypeText() }));
     router.push({ name: URL_ROOT });
-    isUnsubscribed.value = true;
   } catch (err) {
     showError.value = true;
     LoggerService.logError(`Error unsubscribing from email. ${err}`);
@@ -94,10 +89,10 @@ function getEmailType() {
   switch (emailType) {
     case "CreatedCardPdfEmail":
       return "CREATED_CARD_PDF_EMAIL";
-    case "MonthlyBalanceReportEmail":
-      return "MONTHLY_BALANCE_REPORT_EMAIL";
-    case "MonthlyCardBalanceReportEmail":
-      return "MONTHLY_CARD_BALANCE_REPORT_EMAIL";
+    case "MonthlyBalanceReportEmailJanuary":
+      return "MONTHLY_BALANCE_REPORT_EMAIL_JANUARY";
+    case "MonthlyCardBalanceReportEmailJanuary":
+      return "MONTHLY_CARD_BALANCE_REPORT_EMAIL_JANUARY";
     case "SubscriptionExpirationEmail":
       return "SUBSCRIPTION_EXPIRATION_EMAIL";
   }
@@ -107,9 +102,9 @@ function getEmailTypeText() {
   switch (emailType) {
     case "CreatedCardPdfEmail":
       return t("created-card-pdf-email");
-    case "MonthlyBalanceReportEmail":
+    case "MonthlyBalanceReportEmailJanuary":
       return t("monthly-balance-report-email");
-    case "MonthlyCardBalanceReportEmail":
+    case "MonthlyCardBalanceReportEmailJanuary":
       return t("monthly-card-balance-report-email");
     case "SubscriptionExpirationEmail":
       return t("subscription-expiration-email");
