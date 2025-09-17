@@ -5,7 +5,7 @@
 		"unsubscribed": "You have been unsubscribed from {emailType} emails.",
 		"error": "There was a problem unsubscribing from {emailType} emails.",
 		"title": "Unsubscribe",
-    "created-card-pdf-email": "created card pdf",
+    "created-card-csv-email": "created card csv",
     "monthly-balance-report-email": "monthly balance report",
     "monthly-card-balance-report-email": "monthly card balance report",
     "subscription-expiration-email": "subscription expiration"
@@ -15,7 +15,7 @@
 		"unsubscribed": "Vous avez été désabonné des courriels de {emailType}.",
 		"error": "Il y a eu un problème lors du désabonnement des courriels de {emailType}.",
 		"title": "Désabonnement",
-    "created-card-pdf-email": "fichier d'impression des cartes",
+    "created-card-csv-email": "fichier d'impression des cartes",
     "monthly-balance-report-email": "rapport mensuel de transaction",
     "monthly-card-balance-report-email": "rapport mensuel des cartes",
     "subscription-expiration-email": "fin d'abonnement"
@@ -101,7 +101,7 @@ function getEmailType() {
 function getEmailTypeText() {
   switch (emailType) {
     case "CreatedCardPdfEmail":
-      return t("created-card-pdf-email");
+      return t("created-card-csv-email");
     case "MonthlyBalanceReportEmailJanuary":
       return t("monthly-balance-report-email");
     case "MonthlyCardBalanceReportEmailJanuary":

@@ -6,8 +6,10 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
+using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -42,7 +44,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
                 throw new UserNotProjectManager();
             }
 
-            user.EmailOptIn = request.EmailOptIn;
+            EmailOptInHelper.SetEmailOptIn(user, request.EmailOptIns);
             
             await db.SaveChangesAsync();
 
@@ -57,7 +59,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
         [MutationInput]
         public class Input : IRequest<Payload>
         {
-            public string EmailOptIn { get; set; }
+            public EmailOptIn[] EmailOptIns { get; set; }
         }
 
         [MutationPayload]

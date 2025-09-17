@@ -1,4 +1,5 @@
-﻿using Sig.App.Backend.DbModel.Entities;
+﻿using FluentEmail.Core;
+using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Enums;
 using System;
 using System.Linq;
@@ -10,6 +11,37 @@ namespace Sig.App.Backend.Helpers
         public static bool GetIfEmailOptIn(this AppUser user, EmailOptIn emailOptIn)
         {
             return user.EmailOptIn.Split(';').Any(x => x == emailOptIn.ToString());
+        }
+
+        public static void AddEmailOptIn(AppUser user, EmailOptIn emailOptIn)
+        {
+            if (user.EmailOptIn.IndexOf(emailOptIn.ToString()) == -1)
+            {
+                var emailsOptIns = user.EmailOptIn.Split(';');
+                emailsOptIns.AddRange(new string[] { emailOptIn.ToString() });
+                user.EmailOptIn = string.Join(';', emailsOptIns);
+            }
+        }
+
+        public static void RemoveEmailOptIns(AppUser user, EmailOptIn[] emailOptIns)
+        {
+            foreach (var emailOpt in emailOptIns)
+            {
+                RemoveEmailOptIn(user, emailOpt);
+            }
+        }
+
+        public static void RemoveEmailOptIn(AppUser user, EmailOptIn emailOptIn)
+        {
+            if (user.EmailOptIn.IndexOf(emailOptIn.ToString()) != -1)
+            {
+                user.EmailOptIn = string.Join(';', user.EmailOptIn.Split(';').Where(x => x != emailOptIn.ToString()));
+            }
+        }
+
+        public static void SetEmailOptIn(AppUser user, EmailOptIn[] emailOptIns)
+        {
+            user.EmailOptIn = string.Join(';', emailOptIns.Select(x => x.ToString()));
         }
 
         public static EmailOptIn GetEmailOptInMonthlyBalanceReport(DateTime month)

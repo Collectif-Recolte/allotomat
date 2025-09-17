@@ -53,66 +53,82 @@
       <PfFormSection>
         <p class="mb-0 mt-0">{{ t("monthly-balance-report-email") }}</p>
         <div class="inline-flex flex-col gap-x-4 mt-0">
-          <Field v-slot="{ field }" name="monthlyBalanceReportEmailJanuary">
+          <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_JANUARY">
             <PfFormInputCheckbox
-              id="monthlyBalanceReportEmailJanuary"
+              id="MONTHLY_BALANCE_REPORT_EMAIL_JANUARY"
               v-bind="field"
               :checked="field.value"
               :label="t('january')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyBalanceReportEmailFebruary">
+          <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_FEBRUARY">
             <PfFormInputCheckbox
-              id="monthlyBalanceReportEmailFebruary"
+              id="MONTHLY_BALANCE_REPORT_EMAIL_FEBRUARY"
               v-bind="field"
               :checked="field.value"
               :label="t('february')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyBalanceReportEmailMarch">
-            <PfFormInputCheckbox id="monthlyBalanceReportEmailMarch" v-bind="field" :checked="field.value" :label="t('march')" />
-          </Field>
-          <Field v-slot="{ field }" name="monthlyBalanceReportEmailApril">
-            <PfFormInputCheckbox id="monthlyBalanceReportEmailApril" v-bind="field" :checked="field.value" :label="t('april')" />
-          </Field>
-          <Field v-slot="{ field }" name="monthlyBalanceReportEmailMay">
-            <PfFormInputCheckbox id="monthlyBalanceReportEmailMay" v-bind="field" :checked="field.value" :label="t('may')" />
-          </Field>
-          <Field v-slot="{ field }" name="monthlyBalanceReportEmailJune">
-            <PfFormInputCheckbox id="monthlyBalanceReportEmailJune" v-bind="field" :checked="field.value" :label="t('june')" />
-          </Field>
-          <Field v-slot="{ field }" name="monthlyBalanceReportEmailJuly">
-            <PfFormInputCheckbox id="monthlyBalanceReportEmailJuly" v-bind="field" :checked="field.value" :label="t('july')" />
-          </Field>
-          <Field v-slot="{ field }" name="monthlyBalanceReportEmailAugust">
+          <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_MARCH">
             <PfFormInputCheckbox
-              id="monthlyBalanceReportEmailAugust"
+              id="MONTHLY_BALANCE_REPORT_EMAIL_MARCH"
+              v-bind="field"
+              :checked="field.value"
+              :label="t('march')" />
+          </Field>
+          <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_APRIL">
+            <PfFormInputCheckbox
+              id="MONTHLY_BALANCE_REPORT_EMAIL_APRIL"
+              v-bind="field"
+              :checked="field.value"
+              :label="t('april')" />
+          </Field>
+          <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_MAY">
+            <PfFormInputCheckbox id="MONTHLY_BALANCE_REPORT_EMAIL_MAY" v-bind="field" :checked="field.value" :label="t('may')" />
+          </Field>
+          <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_JUNE">
+            <PfFormInputCheckbox
+              id="MONTHLY_BALANCE_REPORT_EMAIL_JUNE"
+              v-bind="field"
+              :checked="field.value"
+              :label="t('june')" />
+          </Field>
+          <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_JULY">
+            <PfFormInputCheckbox
+              id="MONTHLY_BALANCE_REPORT_EMAIL_JULY"
+              v-bind="field"
+              :checked="field.value"
+              :label="t('july')" />
+          </Field>
+          <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_AUGUST">
+            <PfFormInputCheckbox
+              id="MONTHLY_BALANCE_REPORT_EMAIL_AUGUST"
               v-bind="field"
               :checked="field.value"
               :label="t('august')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyBalanceReportEmailSeptember">
+          <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_SEPTEMBER">
             <PfFormInputCheckbox
-              id="monthlyBalanceReportEmailSeptember"
+              id="MONTHLY_BALANCE_REPORT_EMAIL_SEPTEMBER"
               v-bind="field"
               :checked="field.value"
               :label="t('september')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyBalanceReportEmailOctober">
+          <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_OCTOBER">
             <PfFormInputCheckbox
-              id="monthlyBalanceReportEmailOctober"
+              id="MONTHLY_BALANCE_REPORT_EMAIL_OCTOBER"
               v-bind="field"
               :checked="field.value"
               :label="t('october')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyBalanceReportEmailNovember">
+          <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_NOVEMBER">
             <PfFormInputCheckbox
-              id="monthlyBalanceReportEmailNovember"
+              id="MONTHLY_BALANCE_REPORT_EMAIL_NOVEMBER"
               v-bind="field"
               :checked="field.value"
               :label="t('november')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyBalanceReportEmailDecember">
+          <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_DECEMBER">
             <PfFormInputCheckbox
-              id="monthlyBalanceReportEmailDecember"
+              id="MONTHLY_BALANCE_REPORT_EMAIL_DECEMBER"
               v-bind="field"
               :checked="field.value"
               :label="t('december')" />
@@ -121,99 +137,103 @@
 
         <p class="mb-0 mt-0">{{ t("monthly-card-balance-report-email") }}</p>
         <div class="inline-flex flex-col gap-x-4 mt-0">
-          <Field v-slot="{ field }" name="monthlyCardBalanceReportEmailJanuary">
+          <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JANUARY">
             <PfFormInputCheckbox
-              id="monthlyCardBalanceReportEmailJanuary"
+              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JANUARY"
               v-bind="field"
               :checked="field.value"
               :label="t('january')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyCardBalanceReportEmailFebruary">
+          <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_FEBRUARY">
             <PfFormInputCheckbox
-              id="monthlyCardBalanceReportEmailFebruary"
+              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_FEBRUARY"
               v-bind="field"
               :checked="field.value"
               :label="t('february')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyCardBalanceReportEmailMarch">
+          <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_MARCH">
             <PfFormInputCheckbox
-              id="monthlyCardBalanceReportEmailMarch"
+              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_MARCH"
               v-bind="field"
               :checked="field.value"
               :label="t('march')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyCardBalanceReportEmailApril">
+          <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_APRIL">
             <PfFormInputCheckbox
-              id="monthlyCardBalanceReportEmailApril"
+              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_APRIL"
               v-bind="field"
               :checked="field.value"
               :label="t('april')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyCardBalanceReportEmailMay">
-            <PfFormInputCheckbox id="monthlyCardBalanceReportEmailMay" v-bind="field" :checked="field.value" :label="t('may')" />
-          </Field>
-          <Field v-slot="{ field }" name="monthlyCardBalanceReportEmailJune">
+          <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_MAY">
             <PfFormInputCheckbox
-              id="monthlyCardBalanceReportEmailJune"
+              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_MAY"
+              v-bind="field"
+              :checked="field.value"
+              :label="t('may')" />
+          </Field>
+          <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JUNE">
+            <PfFormInputCheckbox
+              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JUNE"
               v-bind="field"
               :checked="field.value"
               :label="t('june')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyCardBalanceReportEmailJuly">
+          <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JULY">
             <PfFormInputCheckbox
-              id="monthlyCardBalanceReportEmailJuly"
+              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JULY"
               v-bind="field"
               :checked="field.value"
               :label="t('july')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyCardBalanceReportEmailAugust">
+          <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_AUGUST">
             <PfFormInputCheckbox
-              id="monthlyCardBalanceReportEmailAugust"
+              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_AUGUST"
               v-bind="field"
               :checked="field.value"
               :label="t('august')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyCardBalanceReportEmailSeptember">
+          <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_SEPTEMBER">
             <PfFormInputCheckbox
-              id="monthlyCardBalanceReportEmailSeptember"
+              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_SEPTEMBER"
               v-bind="field"
               :checked="field.value"
               :label="t('september')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyCardBalanceReportEmailOctober">
+          <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_OCTOBER">
             <PfFormInputCheckbox
-              id="monthlyCardBalanceReportEmailOctober"
+              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_OCTOBER"
               v-bind="field"
               :checked="field.value"
               :label="t('october')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyCardBalanceReportEmailNovember">
+          <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_NOVEMBER">
             <PfFormInputCheckbox
-              id="monthlyCardBalanceReportEmailNovember"
+              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_NOVEMBER"
               v-bind="field"
               :checked="field.value"
               :label="t('november')" />
           </Field>
-          <Field v-slot="{ field }" name="monthlyCardBalanceReportEmailDecember">
+          <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_DECEMBER">
             <PfFormInputCheckbox
-              id="monthlyCardBalanceReportEmailDecember"
+              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_DECEMBER"
               v-bind="field"
               :checked="field.value"
               :label="t('december')" />
           </Field>
         </div>
 
-        <Field v-slot="{ field }" name="createdCardPdfEmail">
+        <Field v-slot="{ field }" name="CREATED_CARD_PDF_EMAIL">
           <PfFormInputCheckbox
-            id="createdCardPdfEmail"
+            id="CREATED_CARD_PDF_EMAIL"
             v-bind="field"
             :checked="field.value"
             :label="t('created-card-csv-email')" />
         </Field>
 
-        <Field v-slot="{ field }" name="subscriptionExpirationEmail">
+        <Field v-slot="{ field }" name="SUBSCRIPTION_EXPIRATION_EMAIL">
           <PfFormInputCheckbox
-            id="subscriptionExpirationEmail"
+            id="SUBSCRIPTION_EXPIRATION_EMAIL"
             v-bind="field"
             :checked="field.value"
             :label="t('subscription-expiration-email')" />
@@ -237,34 +257,34 @@ const { t } = useI18n();
 const { addSuccess } = useNotificationsStore();
 const router = useRouter();
 
-const CreatedCardPdfEmail = "CreatedCardPdfEmail";
-const SubscriptionExpirationEmail = "SubscriptionExpirationEmail";
+const CreatedCardPdfEmail = "CREATED_CARD_PDF_EMAIL";
+const SubscriptionExpirationEmail = "SUBSCRIPTION_EXPIRATION_EMAIL";
 
-const MonthlyCardBalanceReportEmailJanuary = "MonthlyCardBalanceReportEmailJanuary";
-const MonthlyCardBalanceReportEmailFebruary = "MonthlyCardBalanceReportEmailFebruary";
-const MonthlyCardBalanceReportEmailMarch = "MonthlyCardBalanceReportEmailMarch";
-const MonthlyCardBalanceReportEmailApril = "MonthlyCardBalanceReportEmailApril";
-const MonthlyCardBalanceReportEmailMay = "MonthlyCardBalanceReportEmailMay";
-const MonthlyCardBalanceReportEmailJune = "MonthlyCardBalanceReportEmailJune";
-const MonthlyCardBalanceReportEmailJuly = "MonthlyCardBalanceReportEmailJuly";
-const MonthlyCardBalanceReportEmailAugust = "MonthlyCardBalanceReportEmailAugust";
-const MonthlyCardBalanceReportEmailSeptember = "MonthlyCardBalanceReportEmailSeptember";
-const MonthlyCardBalanceReportEmailOctober = "MonthlyCardBalanceReportEmailOctober";
-const MonthlyCardBalanceReportEmailNovember = "MonthlyCardBalanceReportEmailNovember";
-const MonthlyCardBalanceReportEmailDecember = "MonthlyCardBalanceReportEmailDecember";
+const MonthlyCardBalanceReportEmailJanuary = "MONTHLY_CARD_BALANCE_REPORT_EMAIL_JANUARY";
+const MonthlyCardBalanceReportEmailFebruary = "MONTHLY_CARD_BALANCE_REPORT_EMAIL_FEBRUARY";
+const MonthlyCardBalanceReportEmailMarch = "MONTHLY_CARD_BALANCE_REPORT_EMAIL_MARCH";
+const MonthlyCardBalanceReportEmailApril = "MONTHLY_CARD_BALANCE_REPORT_EMAIL_APRIL";
+const MonthlyCardBalanceReportEmailMay = "MONTHLY_CARD_BALANCE_REPORT_EMAIL_MAY";
+const MonthlyCardBalanceReportEmailJune = "MONTHLY_CARD_BALANCE_REPORT_EMAIL_JUNE";
+const MonthlyCardBalanceReportEmailJuly = "MONTHLY_CARD_BALANCE_REPORT_EMAIL_JULY";
+const MonthlyCardBalanceReportEmailAugust = "MONTHLY_CARD_BALANCE_REPORT_EMAIL_AUGUST";
+const MonthlyCardBalanceReportEmailSeptember = "MONTHLY_CARD_BALANCE_REPORT_EMAIL_SEPTEMBER";
+const MonthlyCardBalanceReportEmailOctober = "MONTHLY_CARD_BALANCE_REPORT_EMAIL_OCTOBER";
+const MonthlyCardBalanceReportEmailNovember = "MONTHLY_CARD_BALANCE_REPORT_EMAIL_NOVEMBER";
+const MonthlyCardBalanceReportEmailDecember = "MONTHLY_CARD_BALANCE_REPORT_EMAIL_DECEMBER";
 
-const MonthlyBalanceReportEmailJanuary = "MonthlyBalanceReportEmailJanuary";
-const MonthlyBalanceReportEmailFebruary = "MonthlyBalanceReportEmailFebruary";
-const MonthlyBalanceReportEmailMarch = "MonthlyBalanceReportEmailMarch";
-const MonthlyBalanceReportEmailApril = "MonthlyBalanceReportEmailApril";
-const MonthlyBalanceReportEmailMay = "MonthlyBalanceReportEmailMay";
-const MonthlyBalanceReportEmailJune = "MonthlyBalanceReportEmailJune";
-const MonthlyBalanceReportEmailJuly = "MonthlyBalanceReportEmailJuly";
-const MonthlyBalanceReportEmailAugust = "MonthlyBalanceReportEmailAugust";
-const MonthlyBalanceReportEmailSeptember = "MonthlyBalanceReportEmailSeptember";
-const MonthlyBalanceReportEmailOctober = "MonthlyBalanceReportEmailOctober";
-const MonthlyBalanceReportEmailNovember = "MonthlyBalanceReportEmailNovember";
-const MonthlyBalanceReportEmailDecember = "MonthlyBalanceReportEmailDecember";
+const MonthlyBalanceReportEmailJanuary = "MONTHLY_BALANCE_REPORT_EMAIL_JANUARY";
+const MonthlyBalanceReportEmailFebruary = "MONTHLY_BALANCE_REPORT_EMAIL_FEBRUARY";
+const MonthlyBalanceReportEmailMarch = "MONTHLY_BALANCE_REPORT_EMAIL_MARCH";
+const MonthlyBalanceReportEmailApril = "MONTHLY_BALANCE_REPORT_EMAIL_APRIL";
+const MonthlyBalanceReportEmailMay = "MONTHLY_BALANCE_REPORT_EMAIL_MAY";
+const MonthlyBalanceReportEmailJune = "MONTHLY_BALANCE_REPORT_EMAIL_JUNE";
+const MonthlyBalanceReportEmailJuly = "MONTHLY_BALANCE_REPORT_EMAIL_JULY";
+const MonthlyBalanceReportEmailAugust = "MONTHLY_BALANCE_REPORT_EMAIL_AUGUST";
+const MonthlyBalanceReportEmailSeptember = "MONTHLY_BALANCE_REPORT_EMAIL_SEPTEMBER";
+const MonthlyBalanceReportEmailOctober = "MONTHLY_BALANCE_REPORT_EMAIL_OCTOBER";
+const MonthlyBalanceReportEmailNovember = "MONTHLY_BALANCE_REPORT_EMAIL_NOVEMBER";
+const MonthlyBalanceReportEmailDecember = "MONTHLY_BALANCE_REPORT_EMAIL_DECEMBER";
 
 const props = defineProps({
   user: {
@@ -275,32 +295,32 @@ const props = defineProps({
 
 const initialFormValues = computed(() => {
   return {
-    createdCardPdfEmail: props.user.emailOptIn.includes(CreatedCardPdfEmail),
-    monthlyBalanceReportEmailJanuary: props.user.emailOptIn.includes(MonthlyBalanceReportEmailJanuary),
-    monthlyBalanceReportEmailFebruary: props.user.emailOptIn.includes(MonthlyBalanceReportEmailFebruary),
-    monthlyBalanceReportEmailMarch: props.user.emailOptIn.includes(MonthlyBalanceReportEmailMarch),
-    monthlyBalanceReportEmailApril: props.user.emailOptIn.includes(MonthlyBalanceReportEmailApril),
-    monthlyBalanceReportEmailMay: props.user.emailOptIn.includes(MonthlyBalanceReportEmailMay),
-    monthlyBalanceReportEmailJune: props.user.emailOptIn.includes(MonthlyBalanceReportEmailJune),
-    monthlyBalanceReportEmailJuly: props.user.emailOptIn.includes(MonthlyBalanceReportEmailJuly),
-    monthlyBalanceReportEmailAugust: props.user.emailOptIn.includes(MonthlyBalanceReportEmailAugust),
-    monthlyBalanceReportEmailSeptember: props.user.emailOptIn.includes(MonthlyBalanceReportEmailSeptember),
-    monthlyBalanceReportEmailOctober: props.user.emailOptIn.includes(MonthlyBalanceReportEmailOctober),
-    monthlyBalanceReportEmailNovember: props.user.emailOptIn.includes(MonthlyBalanceReportEmailNovember),
-    monthlyBalanceReportEmailDecember: props.user.emailOptIn.includes(MonthlyBalanceReportEmailDecember),
-    monthlyCardBalanceReportEmailJanuary: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailJanuary),
-    monthlyCardBalanceReportEmailFebruary: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailFebruary),
-    monthlyCardBalanceReportEmailMarch: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailMarch),
-    monthlyCardBalanceReportEmailApril: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailApril),
-    monthlyCardBalanceReportEmailMay: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailMay),
-    monthlyCardBalanceReportEmailJune: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailJune),
-    monthlyCardBalanceReportEmailJuly: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailJuly),
-    monthlyCardBalanceReportEmailAugust: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailAugust),
-    monthlyCardBalanceReportEmailSeptember: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailSeptember),
-    monthlyCardBalanceReportEmailOctober: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailOctober),
-    monthlyCardBalanceReportEmailNovember: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailNovember),
-    monthlyCardBalanceReportEmailDecember: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailDecember),
-    subscriptionExpirationEmail: props.user.emailOptIn.includes(SubscriptionExpirationEmail)
+    CREATED_CARD_PDF_EMAIL: props.user.emailOptIn.includes(CreatedCardPdfEmail),
+    MONTHLY_BALANCE_REPORT_EMAIL_JANUARY: props.user.emailOptIn.includes(MonthlyBalanceReportEmailJanuary),
+    MONTHLY_BALANCE_REPORT_EMAIL_FEBRUARY: props.user.emailOptIn.includes(MonthlyBalanceReportEmailFebruary),
+    MONTHLY_BALANCE_REPORT_EMAIL_MARCH: props.user.emailOptIn.includes(MonthlyBalanceReportEmailMarch),
+    MONTHLY_BALANCE_REPORT_EMAIL_APRIL: props.user.emailOptIn.includes(MonthlyBalanceReportEmailApril),
+    MONTHLY_BALANCE_REPORT_EMAIL_MAY: props.user.emailOptIn.includes(MonthlyBalanceReportEmailMay),
+    MONTHLY_BALANCE_REPORT_EMAIL_JUNE: props.user.emailOptIn.includes(MonthlyBalanceReportEmailJune),
+    MONTHLY_BALANCE_REPORT_EMAIL_JULY: props.user.emailOptIn.includes(MonthlyBalanceReportEmailJuly),
+    MONTHLY_BALANCE_REPORT_EMAIL_AUGUST: props.user.emailOptIn.includes(MonthlyBalanceReportEmailAugust),
+    MONTHLY_BALANCE_REPORT_EMAIL_SEPTEMBER: props.user.emailOptIn.includes(MonthlyBalanceReportEmailSeptember),
+    MONTHLY_BALANCE_REPORT_EMAIL_OCTOBER: props.user.emailOptIn.includes(MonthlyBalanceReportEmailOctober),
+    MONTHLY_BALANCE_REPORT_EMAIL_NOVEMBER: props.user.emailOptIn.includes(MonthlyBalanceReportEmailNovember),
+    MONTHLY_BALANCE_REPORT_EMAIL_DECEMBER: props.user.emailOptIn.includes(MonthlyBalanceReportEmailDecember),
+    MONTHLY_CARD_BALANCE_REPORT_EMAIL_JANUARY: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailJanuary),
+    MONTHLY_CARD_BALANCE_REPORT_EMAIL_FEBRUARY: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailFebruary),
+    MONTHLY_CARD_BALANCE_REPORT_EMAIL_MARCH: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailMarch),
+    MONTHLY_CARD_BALANCE_REPORT_EMAIL_APRIL: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailApril),
+    MONTHLY_CARD_BALANCE_REPORT_EMAIL_MAY: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailMay),
+    MONTHLY_CARD_BALANCE_REPORT_EMAIL_JUNE: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailJune),
+    MONTHLY_CARD_BALANCE_REPORT_EMAIL_JULY: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailJuly),
+    MONTHLY_CARD_BALANCE_REPORT_EMAIL_AUGUST: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailAugust),
+    MONTHLY_CARD_BALANCE_REPORT_EMAIL_SEPTEMBER: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailSeptember),
+    MONTHLY_CARD_BALANCE_REPORT_EMAIL_OCTOBER: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailOctober),
+    MONTHLY_CARD_BALANCE_REPORT_EMAIL_NOVEMBER: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailNovember),
+    MONTHLY_CARD_BALANCE_REPORT_EMAIL_DECEMBER: props.user.emailOptIn.includes(MonthlyCardBalanceReportEmailDecember),
+    SUBSCRIPTION_EXPIRATION_EMAIL: props.user.emailOptIn.includes(SubscriptionExpirationEmail)
   };
 });
 
@@ -318,16 +338,13 @@ const { mutate: changeEmailOptIn } = useMutation(
 );
 
 async function onSubmitChangeEmailOptIn(input) {
-  const toPascalCase = (str) => str.charAt(0).toUpperCase() + str.slice(1);
-
   const result = Object.entries(input)
-    .filter(([, value]) => value === true) // garde uniquement les "true"
-    .map(([key]) => toPascalCase(key)) // transforme en PascalCase
-    .join(";");
+    .filter(([, value]) => value === true)
+    .map(([key]) => key);
 
   await changeEmailOptIn({
     input: {
-      emailOptIn: result
+      emailOptIns: result
     }
   });
 
