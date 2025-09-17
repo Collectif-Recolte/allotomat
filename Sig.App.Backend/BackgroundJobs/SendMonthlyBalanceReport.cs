@@ -120,13 +120,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 }
 
                 var emailOptIn = EmailOptInHelper.GetEmailOptInMonthlyBalanceReport(clock.GetCurrentInstant().ToDateTimeUtc());
-
-                if (emailOptIn == null)
-                {
-                    throw new Exception();
-                }
-
-                projectManagers = projectManagers.Where(x => x.GetIfEmailOptIn(emailOptIn.Value)).ToList();
+                projectManagers = projectManagers.Where(x => x.GetIfEmailOptIn(emailOptIn)).ToList();
 
                 if (projectManagers.Any())
                 {
