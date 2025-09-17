@@ -27,7 +27,7 @@ namespace Sig.App.Backend.Helpers
             SetEmailOptIns(user, GetEmailOptIns(user).Concat(emailOptIn));
         }
 
-        public static void RemoveEmailOptIns(AppUser user, params EmailOptIn[] emailOptIns)
+        public static void RemoveEmailOptIns(this AppUser user, params EmailOptIn[] emailOptIns)
         {
             SetEmailOptIns(user, GetEmailOptIns(user).Except(emailOptIns));
         }
@@ -36,6 +36,38 @@ namespace Sig.App.Backend.Helpers
         {
             return GetEmailOptIns(user).Contains(emailOptIn);
         }
+
+        public static readonly EmailOptIn[] MonthlyBalanceReportEmailOptIns =
+        [
+            EmailOptIn.MonthlyBalanceReportEmailJanuary,
+            EmailOptIn.MonthlyBalanceReportEmailFebruary,
+            EmailOptIn.MonthlyBalanceReportEmailMarch,
+            EmailOptIn.MonthlyBalanceReportEmailApril,
+            EmailOptIn.MonthlyBalanceReportEmailMay,
+            EmailOptIn.MonthlyBalanceReportEmailJune,
+            EmailOptIn.MonthlyBalanceReportEmailJuly,
+            EmailOptIn.MonthlyBalanceReportEmailAugust,
+            EmailOptIn.MonthlyBalanceReportEmailSeptember,
+            EmailOptIn.MonthlyBalanceReportEmailOctober,
+            EmailOptIn.MonthlyBalanceReportEmailNovember,
+            EmailOptIn.MonthlyBalanceReportEmailDecember
+        ];
+
+        public static readonly EmailOptIn[] MonthlyCardBalanceReportEmailOptIns =
+        [
+            EmailOptIn.MonthlyBalanceReportEmailJanuary,
+            EmailOptIn.MonthlyBalanceReportEmailFebruary,
+            EmailOptIn.MonthlyBalanceReportEmailMarch,
+            EmailOptIn.MonthlyBalanceReportEmailApril,
+            EmailOptIn.MonthlyBalanceReportEmailMay,
+            EmailOptIn.MonthlyBalanceReportEmailJune,
+            EmailOptIn.MonthlyBalanceReportEmailJuly,
+            EmailOptIn.MonthlyBalanceReportEmailAugust,
+            EmailOptIn.MonthlyBalanceReportEmailSeptember,
+            EmailOptIn.MonthlyBalanceReportEmailOctober,
+            EmailOptIn.MonthlyBalanceReportEmailNovember,
+            EmailOptIn.MonthlyBalanceReportEmailDecember
+        ];
 
         public static EmailOptIn GetEmailOptInMonthlyBalanceReport(DateTime month)
         {

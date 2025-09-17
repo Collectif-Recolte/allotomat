@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using System.Linq;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
@@ -39,73 +40,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                 throw new UserNotFoundException();
             }
 
-            switch (request.EmailType)
-            {
-                case EmailOptIn.CreatedCardPdfEmail:
-                case EmailOptIn.SubscriptionExpirationEmail:
-                {
-                    EmailOptInHelper.RemoveEmailOptIn(user, request.EmailType);
-                    break;
-                }
-                case EmailOptIn.MonthlyBalanceReportEmailJanuary:
-                case EmailOptIn.MonthlyBalanceReportEmailFebruary:
-                case EmailOptIn.MonthlyBalanceReportEmailMarch:
-                case EmailOptIn.MonthlyBalanceReportEmailApril:
-                case EmailOptIn.MonthlyBalanceReportEmailMay:
-                case EmailOptIn.MonthlyBalanceReportEmailJune:
-                case EmailOptIn.MonthlyBalanceReportEmailJuly:
-                case EmailOptIn.MonthlyBalanceReportEmailAugust:
-                case EmailOptIn.MonthlyBalanceReportEmailSeptember:
-                case EmailOptIn.MonthlyBalanceReportEmailOctober:
-                case EmailOptIn.MonthlyBalanceReportEmailNovember:
-                case EmailOptIn.MonthlyBalanceReportEmailDecember:
-                {
-                    EmailOptInHelper.RemoveEmailOptIns(user, [
-                        EmailOptIn.MonthlyBalanceReportEmailJanuary,
-                        EmailOptIn.MonthlyBalanceReportEmailFebruary,
-                        EmailOptIn.MonthlyBalanceReportEmailMarch,
-                        EmailOptIn.MonthlyBalanceReportEmailApril,
-                        EmailOptIn.MonthlyBalanceReportEmailMay,
-                        EmailOptIn.MonthlyBalanceReportEmailJune,
-                        EmailOptIn.MonthlyBalanceReportEmailJuly,
-                        EmailOptIn.MonthlyBalanceReportEmailAugust,
-                        EmailOptIn.MonthlyBalanceReportEmailSeptember,
-                        EmailOptIn.MonthlyBalanceReportEmailOctober,
-                        EmailOptIn.MonthlyBalanceReportEmailNovember,
-                        EmailOptIn.MonthlyBalanceReportEmailDecember
-                    ]);
-                    break;
-                }
-                case EmailOptIn.MonthlyCardBalanceReportEmailJanuary:
-                case EmailOptIn.MonthlyCardBalanceReportEmailFebruary:
-                case EmailOptIn.MonthlyCardBalanceReportEmailMarch:
-                case EmailOptIn.MonthlyCardBalanceReportEmailApril:
-                case EmailOptIn.MonthlyCardBalanceReportEmailMay:
-                case EmailOptIn.MonthlyCardBalanceReportEmailJune:
-                case EmailOptIn.MonthlyCardBalanceReportEmailJuly:
-                case EmailOptIn.MonthlyCardBalanceReportEmailAugust:
-                case EmailOptIn.MonthlyCardBalanceReportEmailSeptember:
-                case EmailOptIn.MonthlyCardBalanceReportEmailOctober:
-                case EmailOptIn.MonthlyCardBalanceReportEmailNovember:
-                case EmailOptIn.MonthlyCardBalanceReportEmailDecember:
-                {
-                    EmailOptInHelper.RemoveEmailOptIns(user, [
-                        EmailOptIn.MonthlyCardBalanceReportEmailJanuary,
-                        EmailOptIn.MonthlyCardBalanceReportEmailFebruary,
-                        EmailOptIn.MonthlyCardBalanceReportEmailMarch,
-                        EmailOptIn.MonthlyCardBalanceReportEmailApril,
-                        EmailOptIn.MonthlyCardBalanceReportEmailMay,
-                        EmailOptIn.MonthlyCardBalanceReportEmailJune,
-                        EmailOptIn.MonthlyCardBalanceReportEmailJuly,
-                        EmailOptIn.MonthlyCardBalanceReportEmailAugust,
-                        EmailOptIn.MonthlyCardBalanceReportEmailSeptember,
-                        EmailOptIn.MonthlyCardBalanceReportEmailOctober,
-                        EmailOptIn.MonthlyCardBalanceReportEmailNovember,
-                        EmailOptIn.MonthlyCardBalanceReportEmailDecember
-                    ]);
-                    break;
-                }
-            }
+            if (EmailOptInHelper.MonthlyBalanceReportEmailOptIns.Contains(request.EmailType))
+                user.RemoveEmailOptIns(EmailOptInHelper.MonthlyBalanceReportEmailOptIns);
+            else if (EmailOptInHelper.MonthlyCardBalanceReportEmailOptIns.Contains(request.EmailType))
+                user.RemoveEmailOptIns(EmailOptInHelper.MonthlyCardBalanceReportEmailOptIns);
+            else
+                user.RemoveEmailOptIns(request.EmailType);
 
             await db.SaveChangesAsync(cancellationToken);
 
