@@ -59,7 +59,7 @@ namespace Sig.App.Backend.BackgroundJobs
                         ProjectId = subscription.ProjectId,
                     });
 
-                    projectManagers = projectManagers.Where(x => x.GetIfEmailOptIn(EmailOptIn.SubscriptionExpirationEmail)).ToList();
+                    projectManagers = projectManagers.Where(x => x.IsEmailOptedIn(EmailOptIn.SubscriptionExpirationEmail)).ToList();
 
                     var transactions = db.TransactionLogs.Where(x => x.SubscriptionId == subscription.Id);
 

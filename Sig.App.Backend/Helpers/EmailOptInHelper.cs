@@ -2,46 +2,39 @@
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Enums;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Sig.App.Backend.Helpers
 {
     public static class EmailOptInHelper
     {
-        public static bool GetIfEmailOptIn(this AppUser user, EmailOptIn emailOptIn)
+        public static EmailOptIn[] GetEmailOptIns(this AppUser user)
         {
-            return user.EmailOptIn.Split(';').Any(x => x == emailOptIn.ToString());
+            return user.EmailOptIn.Split(';')
+                .Where(x => Enum.TryParse<EmailOptIn>(x, out _))
+                .Select(Enum.Parse<EmailOptIn>)
+                .ToArray();
         }
 
-        public static void AddEmailOptIn(AppUser user, EmailOptIn emailOptIn)
+        public static void SetEmailOptIns(this AppUser user, IEnumerable<EmailOptIn> emailOptIns)
         {
-            if (user.EmailOptIn.IndexOf(emailOptIn.ToString()) == -1)
-            {
-                var emailsOptIns = user.EmailOptIn.Split(';');
-                emailsOptIns.AddRange(new string[] { emailOptIn.ToString() });
-                user.EmailOptIn = string.Join(';', emailsOptIns);
-            }
+            user.EmailOptIn = string.Join(';', emailOptIns.Distinct());
         }
 
-        public static void RemoveEmailOptIns(AppUser user, EmailOptIn[] emailOptIns)
+        public static void AddEmailOptIns(this AppUser user, params EmailOptIn[] emailOptIn)
         {
-            foreach (var emailOpt in emailOptIns)
-            {
-                RemoveEmailOptIn(user, emailOpt);
-            }
+            SetEmailOptIns(user, GetEmailOptIns(user).Concat(emailOptIn));
         }
 
-        public static void RemoveEmailOptIn(AppUser user, EmailOptIn emailOptIn)
+        public static void RemoveEmailOptIns(AppUser user, params EmailOptIn[] emailOptIns)
         {
-            if (user.EmailOptIn.IndexOf(emailOptIn.ToString()) != -1)
-            {
-                user.EmailOptIn = string.Join(';', user.EmailOptIn.Split(';').Where(x => x != emailOptIn.ToString()));
-            }
+            SetEmailOptIns(user, GetEmailOptIns(user).Except(emailOptIns));
         }
 
-        public static void SetEmailOptIn(AppUser user, EmailOptIn[] emailOptIns)
+        public static bool IsEmailOptedIn(this AppUser user, EmailOptIn emailOptIn)
         {
-            user.EmailOptIn = string.Join(';', emailOptIns.Select(x => x.ToString()));
+            return GetEmailOptIns(user).Contains(emailOptIn);
         }
 
         public static EmailOptIn GetEmailOptInMonthlyBalanceReport(DateTime month)

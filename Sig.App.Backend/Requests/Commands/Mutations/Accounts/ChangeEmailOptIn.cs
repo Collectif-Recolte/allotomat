@@ -44,7 +44,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
                 throw new UserNotProjectManager();
             }
 
-            EmailOptInHelper.SetEmailOptIn(user, request.EmailOptIns);
+            user.SetEmailOptIns(request.EmailOptIns);
             
             await db.SaveChangesAsync();
 

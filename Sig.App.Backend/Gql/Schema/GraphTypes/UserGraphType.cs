@@ -26,10 +26,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public bool IsConfirmed => user.EmailConfirmed;
         public UserStatus Status => user.Status;
 
-        public EmailOptIn[] EmailOptIn()
-        {
-            return user.EmailOptIn.Split(";").Select(x => Enum.Parse<EmailOptIn>(x)).ToArray();
-        }
+        public EmailOptIn[] EmailOptIn => user.GetEmailOptIns();
 
         public UserGraphType(AppUser user)
         {

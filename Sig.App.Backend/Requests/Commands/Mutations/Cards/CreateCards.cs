@@ -111,7 +111,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             if (projectManagers != null)
             {
-                projectManagers = projectManagers.Where(x => x.GetIfEmailOptIn(EmailOptIn.CreatedCardPdfEmail)).ToList();
+                projectManagers = projectManagers.Where(x => x.IsEmailOptedIn(EmailOptIn.CreatedCardPdfEmail)).ToList();
 
                 if (projectManagers.Count > 0)
                 {
