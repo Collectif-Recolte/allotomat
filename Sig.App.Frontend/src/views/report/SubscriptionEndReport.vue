@@ -1,11 +1,11 @@
 <i18n>
   {
     "en": {
-      "title": "Subscription end report",
+      "title": "Subscription report",
       "no-results": "No transactions for the selected period"
     },
     "fr": {
-      "title": "Rapport de fin d'abonnement",
+      "title": "Rapport d'abonnement",
       "no-results": "Aucune transaction pour la période sélectionnée"
     }
   }
@@ -38,7 +38,10 @@
       </template>
       <div v-if="subscriptionEndReport">
         <div class="flex flex-col relative mb-6">
-          <SubscriptionEndReportTable v-if="subscriptionEndReport.totalCount > 0" :organizations="subscriptionEndReport.items" />
+          <SubscriptionEndReportTable
+            v-if="subscriptionEndReport.totalCount > 0"
+            :organizations="subscriptionEndReport.items"
+            :total="subscriptionEndReportTotal" />
           <UiEmptyPage v-else>
             <UiCta :img-src="require('@/assets/img/swan.jpg')" :description="t('no-results')"> </UiCta>
           </UiEmptyPage>
@@ -86,6 +89,8 @@ const searchInput = ref("");
 const page = ref(1);
 const organizations = ref([]);
 const subscriptions = ref([]);
+const availableSubscriptions = ref([]);
+const availableOrganizations = ref([]);
 
 if (route.query.dateFrom) {
   dateFrom.value = new Date(route.query.dateFrom);
@@ -135,6 +140,20 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
           id
           name
         }
+        subscriptionEndReportTotal(
+          startDate: $dateFrom
+          endDate: $dateTo
+          withSpecificOrganizations: $organizations
+          withSpecificSubscriptions: $subscriptions
+        ) {
+          totalPurchases
+          cardsWithFunds
+          cardsUsedForPurchases
+          merchantsWithPurchases
+          totalFundsLoaded
+          totalPurchaseValue
+          totalExpiredAmount
+        }
         subscriptionEndReport(
           page: $page
           limit: 30
@@ -179,19 +198,9 @@ const project = useResult(resultProjects, null, (data) => {
     setDateFrom(data.projects[0].reconciliationReportDate);
   }
 
+  availableOrganizations.value = data.projects[0].organizations;
+  availableSubscriptions.value = data.projects[0].subscriptions;
   return data.projects[0];
-});
-
-const availableOrganizations = computed(() => {
-  return project.value?.organizations ?? [];
-});
-
-const availableSubscriptions = computed(() => {
-  if (userType.value === USER_TYPE_PROJECTMANAGER) {
-    return project.value?.subscriptions ?? [];
-  } else {
-    return organization.value?.budgetAllowances?.map((x) => x.subscription) ?? [];
-  }
 });
 
 const { result: resultOrganizations, loading: loadingOrganizations } = useQuery(
@@ -206,6 +215,15 @@ const { result: resultOrganizations, loading: loadingOrganizations } = useQuery(
             id
             name
           }
+        }
+        subscriptionEndReportTotal(startDate: $dateFrom, endDate: $dateTo, withSpecificSubscriptions: $subscriptions) {
+          totalPurchases
+          cardsWithFunds
+          cardsUsedForPurchases
+          merchantsWithPurchases
+          totalFundsLoaded
+          totalPurchaseValue
+          totalExpiredAmount
         }
         subscriptionEndReport(
           page: $page
@@ -250,6 +268,7 @@ const organization = useResult(resultOrganizations, null, (data) => {
     setDateFrom(data.organizations[0].subscriptionEndReportDate);
   }
 
+  availableSubscriptions.value = data.organizations[0].budgetAllowances.map((x) => x.subscription);
   return data.organizations[0];
 });
 
@@ -273,6 +292,14 @@ function setDateFrom(reconciliationReportDate) {
     }
   }
 }
+
+const subscriptionEndReportTotal = computed(() => {
+  return project.value
+    ? project.value.subscriptionEndReportTotal
+    : organization.value
+    ? organization.value.subscriptionEndReportTotal
+    : null;
+});
 
 const subscriptionEndReport = computed(() => {
   var subscriptionEndReport = project.value

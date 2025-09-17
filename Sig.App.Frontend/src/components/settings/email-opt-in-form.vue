@@ -5,7 +5,7 @@
       "created-card-pdf-email": "Email created card pdf",
       "monthly-balance-report-email": "Monthly balance report email",
       "monthly-card-balance-report-email": "Monthly card balance report email",
-      "subscription-expiration-email": "Subscription expiration email",
+      "subscription-expiration-email": "Subscription email",
       "change-email-opt-in-standby-notification": "Your email preferences have been updated"
     },
     "fr": {
@@ -13,7 +13,7 @@
       "created-card-pdf-email": "Email créé lors de la création d'une carte PDF",
       "monthly-balance-report-email": "Email de rapport de solde mensuel",
       "monthly-card-balance-report-email": "Email de rapport de solde mensuel de carte",
-      "subscription-expiration-email": "Email de fin d'abonnement",
+      "subscription-expiration-email": "Email d'abonnement",
       "change-email-opt-in-standby-notification": "Vos préférences d'email ont été mises à jour"
     }
   }

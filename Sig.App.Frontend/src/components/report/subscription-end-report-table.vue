@@ -3,30 +3,32 @@
     "en": {
       "organization-name": "Group",
       "subscription-name": "Subscription",
-      "total-purchases": "Total purchases",
-      "cards-with-funds": "Cards with funds",
+      "total-purchases": "Number of purchases",
+      "cards-with-funds": "Cards that received funds",
       "cards-used-for-purchases": "Cards used for purchases",
       "merchants-with-purchases": "Merchants with purchases",
       "total-funds-loaded": "Total funds loaded",
       "total-purchase-value": "Total purchase value",
-      "total-expired-amount": "Total expired amount"
+      "total-expired-amount": "Total expired amount",
+      "subscription-totals": "Total"
     },
     "fr": {
       "organization-name": "Groupe",
       "subscription-name": "Abonnement",
-      "total-purchases": "Total des achats",
-      "cards-with-funds": "Cartes avec fonds",
+      "total-purchases": "Nombre d’achats",
+      "cards-with-funds": "Cartes qui ont reçu des fonds",
       "cards-used-for-purchases": "Cartes utilisées pour les achats",
       "merchants-with-purchases": "Marchands avec achats",
       "total-funds-loaded": "Total des fonds chargés",
       "total-purchase-value": "Valeur totale des achats",
-      "total-expired-amount": "Montant total expiré"
+      "total-expired-amount": "Montant total expiré",
+      "subscription-totals": "Total"
     }
   }
   </i18n>
 
 <template>
-  <UiTable :items="props.organizations" :cols="cols">
+  <UiTable :items="props.organizations" :cols="cols" :footers="footers">
     <template #default="slotProps">
       <td>
         <div class="inline-flex items-center">
@@ -86,7 +88,8 @@ import { getMoneyFormat } from "@/lib/helpers/money";
 const { t } = useI18n();
 
 const props = defineProps({
-  organizations: { type: Array, required: true }
+  organizations: { type: Array, required: true },
+  total: { type: Object, required: true }
 });
 
 const cols = computed(() => [
@@ -121,4 +124,20 @@ const cols = computed(() => [
     isRight: true
   }
 ]);
+
+const footers = computed(() => {
+  const footers = [];
+
+  footers.push({ value: t("subscription-totals") });
+  footers.push({ value: "" }); // Empty cell subscription-name
+  footers.push({ value: props.total.totalPurchases, isRight: true });
+  footers.push({ value: props.total.cardsWithFunds, isRight: true });
+  footers.push({ value: props.total.cardsUsedForPurchases, isRight: true });
+  footers.push({ value: props.total.merchantsWithPurchases, isRight: true });
+  footers.push({ value: getMoneyFormat(props.total.totalFundsLoaded), isRight: true });
+  footers.push({ value: getMoneyFormat(props.total.totalPurchaseValue), isRight: true });
+  footers.push({ value: getMoneyFormat(props.total.totalExpiredAmount), isRight: true });
+
+  return footers;
+});
 </script>
