@@ -55,18 +55,18 @@ namespace Sig.App.Backend.Helpers
 
         public static readonly EmailOptIn[] MonthlyCardBalanceReportEmailOptIns =
         [
-            EmailOptIn.MonthlyBalanceReportEmailJanuary,
-            EmailOptIn.MonthlyBalanceReportEmailFebruary,
-            EmailOptIn.MonthlyBalanceReportEmailMarch,
-            EmailOptIn.MonthlyBalanceReportEmailApril,
-            EmailOptIn.MonthlyBalanceReportEmailMay,
-            EmailOptIn.MonthlyBalanceReportEmailJune,
-            EmailOptIn.MonthlyBalanceReportEmailJuly,
-            EmailOptIn.MonthlyBalanceReportEmailAugust,
-            EmailOptIn.MonthlyBalanceReportEmailSeptember,
-            EmailOptIn.MonthlyBalanceReportEmailOctober,
-            EmailOptIn.MonthlyBalanceReportEmailNovember,
-            EmailOptIn.MonthlyBalanceReportEmailDecember
+            EmailOptIn.MonthlyCardBalanceReportEmailJanuary,
+            EmailOptIn.MonthlyCardBalanceReportEmailFebruary,
+            EmailOptIn.MonthlyCardBalanceReportEmailMarch,
+            EmailOptIn.MonthlyCardBalanceReportEmailApril,
+            EmailOptIn.MonthlyCardBalanceReportEmailMay,
+            EmailOptIn.MonthlyCardBalanceReportEmailJune,
+            EmailOptIn.MonthlyCardBalanceReportEmailJuly,
+            EmailOptIn.MonthlyCardBalanceReportEmailAugust,
+            EmailOptIn.MonthlyCardBalanceReportEmailSeptember,
+            EmailOptIn.MonthlyCardBalanceReportEmailOctober,
+            EmailOptIn.MonthlyCardBalanceReportEmailNovember,
+            EmailOptIn.MonthlyCardBalanceReportEmailDecember
         ];
 
         public static EmailOptIn GetEmailOptInMonthlyBalanceReport(DateTime month)
