@@ -34,12 +34,6 @@ namespace Sig.App.Backend.Requests.Queries.Projects
                 await db.UserProfiles.Where(x => recruiterIds.Contains(x.UserId)).LoadAsync(cancellationToken);
             }
 
-            if (request.IncludeEmailOptIn)
-            {
-                var recruiterIds = managers.Select(r => r.Id);
-                await db.UserEmailOptIns.Where(x => recruiterIds.Contains(x.UserId)).LoadAsync(cancellationToken);
-            }
-
             return managers;
         }
 
@@ -47,7 +41,6 @@ namespace Sig.App.Backend.Requests.Queries.Projects
         {
             public long ProjectId { get; set; }
             public bool IncludeProfiles { get; set; }
-            public bool IncludeEmailOptIn { get; set; }
         }
     }
 }

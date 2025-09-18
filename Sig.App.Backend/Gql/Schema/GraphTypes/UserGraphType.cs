@@ -1,17 +1,18 @@
-﻿using Sig.App.Backend.Extensions;
-using GraphQL.Conventions;
-using System.Threading.Tasks;
-using NodaTime;
+﻿using GraphQL.Conventions;
 using GraphQL.DataLoader;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using NodaTime;
 using Sig.App.Backend.Authorization;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Interfaces;
-using Microsoft.AspNetCore.Identity;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 using Sig.App.Backend.Helpers;
-using Microsoft.Extensions.Configuration;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Sig.App.Backend.Gql.Schema.GraphTypes
 {
@@ -25,6 +26,8 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public bool IsConfirmed => user.EmailConfirmed;
         public UserStatus Status => user.Status;
 
+        public EmailOptIn[] EmailOptIn => user.GetEmailOptIns();
+
         public UserGraphType(AppUser user)
         {
             this.user = user;
@@ -33,11 +36,6 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<IProfileGraphType> Profile(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadProfileByUserId(user.Id);
-        }
-
-        public IDataLoaderResult<UserEmailOptInGraphType> EmailOptIn(IAppUserContext ctx)
-        {
-            return ctx.DataLoader.LoadEmailOptInByUserId(user.Id);
         }
 
         [ApplyPolicy(AuthorizationPolicies.IsPCAAdmin)]

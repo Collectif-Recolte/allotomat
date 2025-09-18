@@ -6,8 +6,10 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
+using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,7 +32,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
         {
             logger.LogInformation($"[Mutation] ChangeEmailOptIn");
 
-            var user = await db.Users.Include(x => x.EmailOptIn).FirstAsync(x => x.Id == httpContextAccessor.HttpContext.User.GetUserId());
+            var user = await db.Users.FirstAsync(x => x.Id == httpContextAccessor.HttpContext.User.GetUserId());
 
             if (user == null)
             {
@@ -42,11 +44,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
                 throw new UserNotProjectManager();
             }
 
-            user.EmailOptIn.CreatedCardPdfEmail = request.CreatedCardPdfEmail;
-            user.EmailOptIn.MonthlyBalanceReportEmail = request.MonthlyBalanceReportEmail;
-            user.EmailOptIn.MonthlyCardBalanceReportEmail = request.MonthlyCardBalanceReportEmail;
-            user.EmailOptIn.SubscriptionExpirationEmail = request.SubscriptionExpirationEmail;
-
+            user.SetEmailOptIns(request.EmailOptIns);
+            
             await db.SaveChangesAsync();
 
             logger.LogInformation($"[Mutation] ChangeEmailOptIn - User {user.Email} change is email opt-in option.");
@@ -60,10 +59,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Accounts
         [MutationInput]
         public class Input : IRequest<Payload>
         {
-            public bool CreatedCardPdfEmail { get; set; }
-            public bool MonthlyBalanceReportEmail { get; set; }
-            public bool MonthlyCardBalanceReportEmail { get; set; }
-            public bool SubscriptionExpirationEmail { get; set; }
+            public EmailOptIn[] EmailOptIns { get; set; }
         }
 
         [MutationPayload]

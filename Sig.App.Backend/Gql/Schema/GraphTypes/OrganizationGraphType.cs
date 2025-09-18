@@ -1,4 +1,6 @@
-﻿using GraphQL.Conventions;
+﻿using DocumentFormat.OpenXml.Math;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
+using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using MediatR;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
@@ -112,6 +114,20 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<decimal> BudgetAllowancesTotal(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadOrganizationBudgetAllowanceTotal(Id.LongIdentifierForType<Organization>());
+        }
+
+        public async Task<SubscriptionEndReportTotalGraphType> SubscriptionEndReportTotal([Inject] IMediator mediator, DateTime startDate, DateTime endDate,
+            [Description("If specified, only transactions with one of those subscription are returned.")] Id[] withSpecificSubscriptions = null)
+        {
+            var result = await mediator.Send(new SearchOrganizationSubscriptionEndReportTotal.Query
+            {
+                OrganizationId = organization.Id,
+                StartDate = startDate,
+                EndDate = endDate,
+                Subscriptions = withSpecificSubscriptions?.Select(y => y.LongIdentifierForType<Subscription>())
+            });
+
+            return result;
         }
 
         public async Task<Pagination<SubscriptionEndReportGraphType>> SubscriptionEndReport([Inject] IMediator mediator, int page, int limit, DateTime startDate, DateTime endDate,
