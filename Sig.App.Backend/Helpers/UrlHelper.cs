@@ -1,4 +1,7 @@
-﻿namespace Sig.App.Backend.Helpers
+﻿using Sig.App.Backend.DbModel.Entities.Beneficiaries;
+using Sig.App.Backend.DbModel.Enums;
+
+namespace Sig.App.Backend.Helpers
 {
     public static class UrlHelper
     {
@@ -45,6 +48,11 @@
         public static string UnsubscribeFromTransactionReceipt(string beneficiaryId)
         {
             return $"unsubscribe-transaction-receipt?beneficiaryId={beneficiaryId}";
+        }
+
+        public static string UnsubscribeFromEmail(EmailOptIn emailType)
+        {
+            return $"unsubscribe-email?emailType={emailType}";
         }
     }
 }

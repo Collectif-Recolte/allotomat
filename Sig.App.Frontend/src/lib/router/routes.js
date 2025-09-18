@@ -1098,6 +1098,11 @@ export default [
     }
   },
   {
+    name: urls.URL_ACCOUNT_UNSUBSCRIBE_EMAIL,
+    path: "/unsubscribe-email",
+    component: () => import("@/views/account/UnsubscribeEmail.vue")
+  },
+  {
     name: urls.URL_PROJECT_SETTINGS,
     path: "/programs-settings",
     component: () => import("@/views/project-settings/_index.vue"),

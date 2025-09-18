@@ -1,0 +1,32 @@
+﻿namespace Sig.App.Backend.DbModel.Enums
+{
+    public enum EmailOptIn
+    {
+        CreatedCardPdfEmail,
+        MonthlyBalanceReportEmailJanuary,
+        MonthlyBalanceReportEmailFebruary,
+        MonthlyBalanceReportEmailMarch,
+        MonthlyBalanceReportEmailApril,
+        MonthlyBalanceReportEmailMay,
+        MonthlyBalanceReportEmailJune,
+        MonthlyBalanceReportEmailJuly,
+        MonthlyBalanceReportEmailAugust,
+        MonthlyBalanceReportEmailSeptember,
+        MonthlyBalanceReportEmailOctober,
+        MonthlyBalanceReportEmailNovember,
+        MonthlyBalanceReportEmailDecember,
+        MonthlyCardBalanceReportEmailJanuary,
+        MonthlyCardBalanceReportEmailFebruary,
+        MonthlyCardBalanceReportEmailMarch,
+        MonthlyCardBalanceReportEmailApril,
+        MonthlyCardBalanceReportEmailMay,
+        MonthlyCardBalanceReportEmailJune,
+        MonthlyCardBalanceReportEmailJuly,
+        MonthlyCardBalanceReportEmailAugust,
+        MonthlyCardBalanceReportEmailSeptember,
+        MonthlyCardBalanceReportEmailOctober,
+        MonthlyCardBalanceReportEmailNovember,
+        MonthlyCardBalanceReportEmailDecember,
+        SubscriptionExpirationEmail
+    }
+}

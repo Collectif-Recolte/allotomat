@@ -30,7 +30,7 @@ namespace Sig.App.Backend.Extensions
             var existingUser = await userManager.FindByEmailAsync(email);
             if (existingUser == null)
             {
-                existingUser = new AppUser(email) { Type = type, EmailConfirmed = true, Profile = new UserProfile(), EmailOptIn = new UserEmailOptIn()};
+                existingUser = new AppUser(email) { Type = type, EmailConfirmed = true, Profile = new UserProfile()};
 
                 existingUser.Profile.FirstName = firstName;
                 existingUser.Profile.LastName = lastName;
@@ -59,13 +59,6 @@ namespace Sig.App.Backend.Extensions
 
             profile.FirstName = firstName;
             profile.LastName = lastName;
-            
-            var emailOptIn = await db.UserEmailOptIns.FirstOrDefaultAsync(x => x.UserId == existingUser.Id);
-            if (emailOptIn != null)
-            {
-                emailOptIn = new UserEmailOptIn();
-                emailOptIn.UserId = existingUser.Id;
-            }
 
             await db.SaveChangesAsync();
 

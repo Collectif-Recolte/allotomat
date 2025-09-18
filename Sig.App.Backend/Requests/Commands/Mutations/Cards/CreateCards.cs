@@ -6,10 +6,12 @@ using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Projects;
+using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
+using Sig.App.Backend.Helpers;
 using Sig.App.Backend.PdfTemplates;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -104,13 +106,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             var projectManagers = await mediator.Send(new GetProjectProjectManagers.Query
             {
-                ProjectId = project.Id,
-                IncludeEmailOptIn = true
+                ProjectId = project.Id
             });
 
             if (projectManagers != null)
             {
-                projectManagers = projectManagers.Where(x => x.EmailOptIn.CreatedCardPdfEmail).ToList();
+                projectManagers = projectManagers.Where(x => x.IsEmailOptedIn(EmailOptIn.CreatedCardPdfEmail)).ToList();
 
                 if (projectManagers.Count > 0)
                 {
