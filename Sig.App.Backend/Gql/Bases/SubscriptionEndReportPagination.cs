@@ -3,23 +3,36 @@ using Sig.App.Backend.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Sig.App.Backend.Gql.Bases
 {
     public static class SubscriptionEndReportPagination
     {
-        public static Pagination<SubscriptionEndReportGraphType> For(IEnumerable<SubscriptionEndReportGraphType> query, Page page)
+        public static SubscriptionEndReportPagination<SubscriptionEndReportGraphType> For(IEnumerable<SubscriptionEndReportGraphType> query, Page page)
         {
             var totalCount = query.Count();
             var itemPage = page.PageSize > 0
                 ? query.Skip(page.Skip)
                 : query.Where(x => false);
 
-            return new Pagination<SubscriptionEndReportGraphType>(
+            return new SubscriptionEndReportPagination<SubscriptionEndReportGraphType>(
                 page: page,
                 totalCount: totalCount,
                 items: itemPage.Take(page.PageSize));
+        }
+    }
+
+    public class SubscriptionEndReportPagination<T> : Pagination<T>
+    {
+        public SubscriptionEndReportTotalGraphType Total { get; set; }
+
+        public SubscriptionEndReportPagination(Page page, long totalCount, IEnumerable<T> items)
+            : this(page.PageNumber, page.PageSize, totalCount, items)
+        {
+        }
+
+        public SubscriptionEndReportPagination(int pageNumber, int pageSize, long totalCount, IEnumerable<T> items) : base(pageNumber, pageSize, totalCount, items)
+        {
         }
     }
 }

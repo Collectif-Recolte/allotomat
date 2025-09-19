@@ -140,20 +140,6 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
           id
           name
         }
-        subscriptionEndReportTotal(
-          startDate: $dateFrom
-          endDate: $dateTo
-          withSpecificOrganizations: $organizations
-          withSpecificSubscriptions: $subscriptions
-        ) {
-          totalPurchases
-          cardsWithFunds
-          cardsUsedForPurchases
-          merchantsWithPurchases
-          totalFundsLoaded
-          totalPurchaseValue
-          totalExpiredAmount
-        }
         subscriptionEndReport(
           page: $page
           limit: 30
@@ -162,6 +148,15 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
           withSpecificOrganizations: $organizations
           withSpecificSubscriptions: $subscriptions
         ) {
+          total {
+            totalPurchases
+            cardsWithFunds
+            cardsUsedForPurchases
+            merchantsWithPurchases
+            totalFundsLoaded
+            totalPurchaseValue
+            totalExpiredAmount
+          }
           totalCount
           totalPages
           items {
@@ -216,15 +211,6 @@ const { result: resultOrganizations, loading: loadingOrganizations } = useQuery(
             name
           }
         }
-        subscriptionEndReportTotal(startDate: $dateFrom, endDate: $dateTo, withSpecificSubscriptions: $subscriptions) {
-          totalPurchases
-          cardsWithFunds
-          cardsUsedForPurchases
-          merchantsWithPurchases
-          totalFundsLoaded
-          totalPurchaseValue
-          totalExpiredAmount
-        }
         subscriptionEndReport(
           page: $page
           limit: 30
@@ -232,6 +218,15 @@ const { result: resultOrganizations, loading: loadingOrganizations } = useQuery(
           endDate: $dateTo
           withSpecificSubscriptions: $subscriptions
         ) {
+          total {
+            totalPurchases
+            cardsWithFunds
+            cardsUsedForPurchases
+            merchantsWithPurchases
+            totalFundsLoaded
+            totalPurchaseValue
+            totalExpiredAmount
+          }
           totalCount
           totalPages
           items {
@@ -295,9 +290,9 @@ function setDateFrom(reconciliationReportDate) {
 
 const subscriptionEndReportTotal = computed(() => {
   return project.value
-    ? project.value.subscriptionEndReportTotal
+    ? project.value.subscriptionEndReport.total
     : organization.value
-    ? organization.value.subscriptionEndReportTotal
+    ? organization.value.subscriptionEndReport.total
     : null;
 });
 

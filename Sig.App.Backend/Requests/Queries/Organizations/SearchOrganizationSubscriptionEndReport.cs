@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Sig.App.Backend.Requests.Queries.Organizations
 {
-    public class SearchOrganizationSubscriptionEndReport : IRequestHandler<SearchOrganizationSubscriptionEndReport.Query, Pagination<SubscriptionEndReportGraphType>>
+    public class SearchOrganizationSubscriptionEndReport : IRequestHandler<SearchOrganizationSubscriptionEndReport.Query, SubscriptionEndReportPagination<SubscriptionEndReportGraphType>>
     {
         private readonly AppDbContext db;
 
@@ -23,7 +23,7 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
             this.db = db;
         }
 
-        public async Task<Pagination<SubscriptionEndReportGraphType>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<SubscriptionEndReportPagination<SubscriptionEndReportGraphType>> Handle(Query request, CancellationToken cancellationToken)
         {
             IQueryable<TransactionLog> query = db.TransactionLogs.Where(x => x.OrganizationId == request.OrganizationId && x.CreatedAtUtc >= request.StartDate && x.CreatedAtUtc <= request.EndDate);
 
@@ -35,8 +35,8 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
             var transactionLogs = await query.AsNoTracking().ToListAsync();
             var transactionLogsGroupBy = transactionLogs.GroupBy(x => x.OrganizationId);
             var organizations = await db.Organizations.Where(x => transactionLogsGroupBy.Select(x => x.Key).Contains(x.Id)).AsNoTracking().ToListAsync();
-            
-            return SubscriptionEndReportPagination.For(transactionLogsGroupBy.Select(x =>
+
+            var result = SubscriptionEndReportPagination.For(transactionLogsGroupBy.Select(x =>
             {
                 var transactionBySubscription = x.Select(x => x).Where(x => x.SubscriptionId.HasValue).GroupBy(x => x.SubscriptionId.Value);
                 var reportBySubscription = transactionBySubscription.Select(y =>
@@ -59,9 +59,22 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
 
                 return new SubscriptionEndReportGraphType { Organization = new OrganizationGraphType(organizations.First(y => y.Id == x.Key)), SubscriptionEndTransactions = reportBySubscription };
             }), request.Page);
+
+            result.Total = new SubscriptionEndReportTotalGraphType()
+            {
+                TotalPurchases = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).Count(),
+                CardsWithFunds = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.ManuallyAddingFundTransactionLog || z.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog).DistinctBy(z => z.CardNumber).Count(),
+                CardsUsedForPurchases = transactionLogs.DistinctBy(z => z.CardNumber).Count(),
+                MerchantsWithPurchases = transactionLogs.DistinctBy(z => z.MarketId).Count(),
+                TotalFundsLoaded = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.ManuallyAddingFundTransactionLog || z.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog).Sum(z => z.TotalAmount),
+                TotalPurchaseValue = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).Sum(z => z.TotalAmount) - transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.RefundPaymentTransactionLog).Sum(z => z.TotalAmount),
+                TotalExpiredAmount = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog).Sum(z => z.TotalAmount)
+            };
+
+            return result;
         }
 
-        public class Query : IRequest<Pagination<SubscriptionEndReportGraphType>>
+        public class Query : IRequest<SubscriptionEndReportPagination<SubscriptionEndReportGraphType>>
         {
             public Page Page { get; set; }
             public long OrganizationId { get; set; }

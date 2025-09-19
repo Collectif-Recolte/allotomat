@@ -1,6 +1,4 @@
-﻿using DocumentFormat.OpenXml.Math;
-using DocumentFormat.OpenXml.Office2010.ExcelAc;
-using GraphQL.Conventions;
+﻿using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using MediatR;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
@@ -11,7 +9,6 @@ using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Requests.Queries.Beneficiaries;
-using Sig.App.Backend.Requests.Queries.Markets;
 using Sig.App.Backend.Requests.Queries.Organizations;
 using Sig.App.Backend.Utilities;
 using Sig.App.Backend.Utilities.Sorting;
@@ -116,21 +113,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return ctx.DataLoader.LoadOrganizationBudgetAllowanceTotal(Id.LongIdentifierForType<Organization>());
         }
 
-        public async Task<SubscriptionEndReportTotalGraphType> SubscriptionEndReportTotal([Inject] IMediator mediator, DateTime startDate, DateTime endDate,
-            [Description("If specified, only transactions with one of those subscription are returned.")] Id[] withSpecificSubscriptions = null)
-        {
-            var result = await mediator.Send(new SearchOrganizationSubscriptionEndReportTotal.Query
-            {
-                OrganizationId = organization.Id,
-                StartDate = startDate,
-                EndDate = endDate,
-                Subscriptions = withSpecificSubscriptions?.Select(y => y.LongIdentifierForType<Subscription>())
-            });
-
-            return result;
-        }
-
-        public async Task<Pagination<SubscriptionEndReportGraphType>> SubscriptionEndReport([Inject] IMediator mediator, int page, int limit, DateTime startDate, DateTime endDate,
+        public async Task<SubscriptionEndReportPagination<SubscriptionEndReportGraphType>> SubscriptionEndReport([Inject] IMediator mediator, int page, int limit, DateTime startDate, DateTime endDate,
             [Description("If specified, only transactions with one of those subscription are returned.")] Id[] withSpecificSubscriptions = null)
         {
             var results = await mediator.Send(new SearchOrganizationSubscriptionEndReport.Query
