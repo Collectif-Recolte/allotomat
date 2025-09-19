@@ -55,7 +55,7 @@ namespace Sig.App.Backend.Requests.Queries.Projects
                     {
                         Subscription = new SubscriptionGraphType(subscription),
                         TotalPurchases = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).Count(),
-                        CardsWithFunds = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.ManuallyAddingFundTransactionLog || z.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog).Count(),
+                        CardsWithFunds = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.ManuallyAddingFundTransactionLog || z.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog).DistinctBy(z => z.CardNumber).Count(),
                         CardsUsedForPurchases = transactions.DistinctBy(z => z.CardNumber).Count(),
                         MerchantsWithPurchases = transactions.DistinctBy(z => z.MarketId).Count(),
                         TotalFundsLoaded = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.ManuallyAddingFundTransactionLog || z.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog).Sum(z => z.TotalAmount),
