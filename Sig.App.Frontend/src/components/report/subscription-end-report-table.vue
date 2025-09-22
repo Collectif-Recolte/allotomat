@@ -10,7 +10,8 @@
       "total-funds-loaded": "Total funds loaded",
       "total-purchase-value": "Total purchase value",
       "total-expired-amount": "Total expired amount",
-      "subscription-totals": "Total"
+      "subscription-totals": "Total",
+      "no-subscription": "Gift card"
     },
     "fr": {
       "organization-name": "Groupe",
@@ -22,7 +23,8 @@
       "total-funds-loaded": "Total des fonds chargés",
       "total-purchase-value": "Valeur totale des achats",
       "total-expired-amount": "Montant total expiré",
-      "subscription-totals": "Total"
+      "subscription-totals": "Total",
+      "no-subscription": "Carte-cadeau"
     }
   }
   </i18n>
@@ -31,13 +33,16 @@
   <UiTable :items="props.organizations" :cols="cols" :footers="footers">
     <template #default="slotProps">
       <td>
-        <div class="inline-flex items-center">
+        <div v-if="slotProps.item.organization" class="inline-flex items-center">
           {{ slotProps.item.organization.name }}
         </div>
       </td>
       <td>
-        <div class="inline-flex items-center">
+        <div v-if="slotProps.item.subscription" class="inline-flex items-center">
           {{ slotProps.item.subscription.name }}
+        </div>
+        <div v-else class="inline-flex items-center">
+          {{ t("no-subscription") }}
         </div>
       </td>
       <td class="text-right">

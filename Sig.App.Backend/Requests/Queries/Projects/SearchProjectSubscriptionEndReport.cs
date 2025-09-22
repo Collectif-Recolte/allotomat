@@ -1,10 +1,12 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
+using Sig.App.Backend.Migrations;
 using Sig.App.Backend.Utilities;
 using System;
 using System.Collections.Generic;
@@ -43,7 +45,7 @@ namespace Sig.App.Backend.Requests.Queries.Projects
             var subscriptionIds = transactionLogs.Select(x => x.SubscriptionId).Distinct();
             var subscriptions = await db.Subscriptions.Where(x => subscriptionIds.Any(y => y == x.Id)).AsNoTracking().ToListAsync();
 
-            var result = SubscriptionEndReportPagination.For(transactionLogsGroupBy.Select(x =>
+            var items = transactionLogsGroupBy.Select(x =>
             {
                 var transactionBySubscription = x.Select(x => x).Where(x => x.SubscriptionId.HasValue).GroupBy(x => x.SubscriptionId.Value);
                 var reportBySubscription = transactionBySubscription.Select(y =>
@@ -65,7 +67,28 @@ namespace Sig.App.Backend.Requests.Queries.Projects
                 });
 
                 return new SubscriptionEndReportGraphType { Organization = new OrganizationGraphType(organizations.First(y => y.Id == x.Key)), SubscriptionEndTransactions = reportBySubscription };
-            }).OrderBy(x => x.Organization.Id), request.Page);
+            }).OrderBy(x => x.Organization.Id).ToList();
+
+
+            if (items.Count() != request.Page.PageNumber)
+            {
+                items.Add(new SubscriptionEndReportGraphType {
+                    SubscriptionEndTransactions = new List<SubscriptionEndTransactionGraphType>() {
+                        new SubscriptionEndTransactionGraphType()
+                        {
+                            TotalPurchases = transactionLogs.Where(z => z.SubscriptionId == null && z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).Count(),
+                            CardsWithFunds = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.LoyaltyAddingFundTransactionLog).DistinctBy(z => z.CardNumber).Count(),
+                            CardsUsedForPurchases = transactionLogs.Where(z => z.SubscriptionId == null && z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).DistinctBy(z => z.CardNumber).Count(),
+                            MerchantsWithPurchases = transactionLogs.Where(z => z.SubscriptionId == null && z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).DistinctBy(z => z.MarketId).Count(),
+                            TotalFundsLoaded = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.LoyaltyAddingFundTransactionLog).Sum(z => z.TotalAmount),
+                            TotalPurchaseValue = transactionLogs.Where(z => z.SubscriptionId == null && z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).Sum(z => z.TotalAmount) - transactionLogs.Where(z => z.OrganizationId == null && z.Discriminator == TransactionLogDiscriminator.RefundPaymentTransactionLog).Sum(z => z.TotalAmount),
+                            TotalExpiredAmount = transactionLogs.Where(z => z.SubscriptionId == null && z.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog).Sum(z => z.TotalAmount)
+                        }
+                    }
+                });
+            }
+
+            var result = SubscriptionEndReportPagination.For(items, request.Page);
 
             result.Total = new SubscriptionEndReportTotalGraphType()
             {
