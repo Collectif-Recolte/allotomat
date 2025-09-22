@@ -31,7 +31,8 @@
                 @organizationsChecked="onOrganizationsChecked"
                 @organizationsUnchecked="onOrganizationsUnchecked"
                 @subscriptionsUnchecked="onSubscriptionsUnchecked"
-                @subscriptionsChecked="onSubscriptionsChecked" />
+                @subscriptionsChecked="onSubscriptionsChecked"
+                @resetFilters="onResetFilters" />
             </div>
           </template>
         </Title>
@@ -375,6 +376,15 @@ function onSubscriptionsChecked(value) {
 function onSubscriptionsUnchecked(value) {
   page.value = 1;
   subscriptions.value = subscriptions.value.filter((x) => x !== value);
+  updateUrl();
+}
+
+function onResetFilters() {
+  page.value = 1;
+  organizations.value = [];
+  subscriptions.value = [];
+  dateFrom.value = previousMonth;
+  dateTo.value = new Date(Date.now());
   updateUrl();
 }
 </script>

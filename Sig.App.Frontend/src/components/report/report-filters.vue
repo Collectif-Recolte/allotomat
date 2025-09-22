@@ -10,7 +10,8 @@
     "last-year": "Last year",
     "current-year": "Current year",
     "last-month": "Last month",
-    "all-time": "All time"
+    "all-time": "All time",
+    "reset-filters": "Reset"
 	},
 	"fr": {
     "date-selector-from": "Intervalle du",
@@ -22,7 +23,8 @@
     "last-year": "Année dernière",
     "current-year": "Année en cours",
     "last-month": "Mois dernier",
-    "all-time": "Tout les temps"
+    "all-time": "Tout les temps",
+    "reset-filters": "Réinitialiser"
 	}
 }
 </i18n>
@@ -32,6 +34,16 @@
     <div class="flex flex-col gap-y-4">
       <div class="flex flex-row gap-x-4 text-right mb-2 w-full xs:flex xs:gap-x-4 xs:justify-end sm:mb-0 xl:w-auto">
         <div class="flex items-center justify-end gap-x-4 mb-2 xs:mb-0">
+          <PfTooltip v-slot="{ tooltipId }" class="mb-0" :label="t('reset-filters')" position="top">
+            <PfButtonAction
+              class="min-w-0 my-3 sm:my-0"
+              btn-style="link"
+              size="sm"
+              is-icon-only
+              :icon="ICON_RESET"
+              :aria-labelledby="tooltipId"
+              @click="onResetFilters" />
+          </PfTooltip>
           <span class="text-sm text-primary-700">{{ t("date-selector-from") }}</span>
           <UiDatePicker
             id="datefrom"
@@ -91,6 +103,8 @@ import { defineProps, defineEmits, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { subscriptionName } from "@/lib/helpers/subscription";
 
+import ICON_RESET from "@/lib/icons/reset.json";
+
 const { t } = useI18n();
 
 const emit = defineEmits([
@@ -99,7 +113,8 @@ const emit = defineEmits([
   "organizationsChecked",
   "organizationsUnchecked",
   "subscriptionsChecked",
-  "subscriptionsUnchecked"
+  "subscriptionsUnchecked",
+  "resetFilters"
 ]);
 
 const props = defineProps({
@@ -190,5 +205,9 @@ function setDates(type) {
       emit("dateToUpdated", new Date(new Date().getFullYear(), 11, 31));
       break;
   }
+}
+
+function onResetFilters() {
+  emit("resetFilters");
 }
 </script>

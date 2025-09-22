@@ -49,8 +49,8 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
                         Subscription = new SubscriptionGraphType(subscription),
                         TotalPurchases = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).Count(),
                         CardsWithFunds = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.ManuallyAddingFundTransactionLog || z.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog).DistinctBy(z => z.CardNumber).Count(),
-                        CardsUsedForPurchases = transactions.DistinctBy(z => z.CardNumber).Count(),
-                        MerchantsWithPurchases = transactions.DistinctBy(z => z.MarketId).Count(),
+                        CardsUsedForPurchases = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).DistinctBy(z => z.CardNumber).Count(),
+                        MerchantsWithPurchases = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).DistinctBy(z => z.MarketId).Count(),
                         TotalFundsLoaded = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.ManuallyAddingFundTransactionLog || z.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog).Sum(z => z.TotalAmount),
                         TotalPurchaseValue = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).Sum(z => z.TotalAmount) - transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.RefundPaymentTransactionLog).Sum(z => z.TotalAmount),
                         TotalExpiredAmount = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog).Sum(z => z.TotalAmount)
@@ -64,8 +64,8 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
             {
                 TotalPurchases = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).Count(),
                 CardsWithFunds = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.ManuallyAddingFundTransactionLog || z.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog).DistinctBy(z => z.CardNumber).Count(),
-                CardsUsedForPurchases = transactionLogs.DistinctBy(z => z.CardNumber).Count(),
-                MerchantsWithPurchases = transactionLogs.DistinctBy(z => z.MarketId).Count(),
+                CardsUsedForPurchases = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).DistinctBy(z => z.CardNumber).Count(),
+                MerchantsWithPurchases = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).DistinctBy(z => z.MarketId).Count(),
                 TotalFundsLoaded = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.ManuallyAddingFundTransactionLog || z.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog).Sum(z => z.TotalAmount),
                 TotalPurchaseValue = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).Sum(z => z.TotalAmount) - transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.RefundPaymentTransactionLog).Sum(z => z.TotalAmount),
                 TotalExpiredAmount = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog).Sum(z => z.TotalAmount)

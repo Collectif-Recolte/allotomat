@@ -23,7 +23,8 @@
                 :date-from="dateFrom"
                 :date-to="dateTo"
                 @dateFromUpdated="onDateFromUpdated"
-                @dateToUpdated="onDateToUpdated" />
+                @dateToUpdated="onDateToUpdated"
+                @resetFilters="onResetFilters" />
             </div>
           </template>
         </Title>
@@ -256,6 +257,13 @@ function onDateFromUpdated(value) {
 function onDateToUpdated(value) {
   page.value = 1;
   dateTo.value = value;
+  updateUrl();
+}
+
+function onResetFilters() {
+  page.value = 1;
+  dateFrom.value = previousMonth;
+  dateTo.value = new Date(Date.now());
   updateUrl();
 }
 </script>
