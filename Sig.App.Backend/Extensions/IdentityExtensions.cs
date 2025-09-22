@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Sig.App.Backend.Constants;
@@ -31,7 +30,7 @@ namespace Sig.App.Backend.Extensions
             var existingUser = await userManager.FindByEmailAsync(email);
             if (existingUser == null)
             {
-                existingUser = new AppUser(email) { Type = type, EmailConfirmed = true, Profile = new UserProfile() };
+                existingUser = new AppUser(email) { Type = type, EmailConfirmed = true, Profile = new UserProfile()};
 
                 existingUser.Profile.FirstName = firstName;
                 existingUser.Profile.LastName = lastName;
@@ -58,13 +57,12 @@ namespace Sig.App.Backend.Extensions
                 db.UserProfiles.Add(profile);
             }
 
-                profile.FirstName = firstName;
-                profile.LastName = lastName;
+            profile.FirstName = firstName;
+            profile.LastName = lastName;
 
-                await db.SaveChangesAsync();
+            await db.SaveChangesAsync();
 
-                return result;
-            
+            return result;
         }
 
         public static string GetUserId(this ClaimsPrincipal principal)

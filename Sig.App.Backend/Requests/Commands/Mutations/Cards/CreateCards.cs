@@ -6,10 +6,12 @@ using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Projects;
+using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
+using Sig.App.Backend.Helpers;
 using Sig.App.Backend.PdfTemplates;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
@@ -107,16 +109,21 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
                 ProjectId = project.Id
             });
 
-            if (projectManagers != null && projectManagers.Count > 0)
+            if (projectManagers != null)
             {
-                var email = new CreatedCardPdfEmail(string.Join(";", projectManagers.Select(x => x.Email)));
+                projectManagers = projectManagers.Where(x => x.IsEmailOptedIn(EmailOptIn.CreatedCardPdfEmail)).ToList();
 
-                xlsxStream.Position = 0;
-                email.Attachments = new List<EmailAttachmentModel>() {
-                    new EmailAttachmentModel(xlsxFileName, ContentTypes.Xlsx, xlsxStream)
-                };
+                if (projectManagers.Count > 0)
+                {
+                    var email = new CreatedCardPdfEmail(string.Join(";", projectManagers.Select(x => x.Email)));
 
-                await mailer.Send(email);
+                    xlsxStream.Position = 0;
+                    email.Attachments = new List<EmailAttachmentModel>() {
+                        new EmailAttachmentModel(xlsxFileName, ContentTypes.Xlsx, xlsxStream)
+                    };
+
+                    await mailer.Send(email);
+                }
             }
             
             return new Payload()

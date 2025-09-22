@@ -12,7 +12,10 @@
 		"password-confirmation": "Re-enter password",
 		"password-rules": "The password must contain a minimum of 10 characters, 1 capital letter, a number and a special character (for example: %, {'@'}, #, $ and &).",
 		"submit": "Update",
-		"title": "Account settings"
+		"title": "Account settings",
+		"email-opt-in-title": "Automated emails to receive",
+    "password-title": "Password",
+    "email-title": "Email"
 	},
 	"fr": {
 		"change-email-standby-notification": "Un courriel de vérification a été envoyé à {email}. Rendez-vous dans votre boîte courriel pour finaliser le changement.",
@@ -26,7 +29,10 @@
 		"password-confirmation": "Confirmation du mot de passe",
 		"password-rules": "Le mot de passe doit contenir un minimum de 10 caractères, une majuscule, un chiffre et un caractère spécial (par exemple: %, {'@'}, #, $ et &).",
 		"submit": "Mettre à jour",
-		"title": "Réglages du compte"
+		"title": "Réglages du compte",
+		"email-opt-in-title": "Emails automatisés à recevoir",
+    "password-title": "Mot de passe",
+    "email-title": "Courriel"
 	}
 }
 </i18n>
@@ -34,6 +40,7 @@
 <template>
   <AppShell :loading="loading" :title="t('title')">
     <div v-if="user" class="max-w-sm lg:w-96">
+      <h3 class="mt-0">{{ t("email-title") }}</h3>
       <Form
         v-slot="{ isSubmitting }"
         :validation-schema="validationSchemaEmail"
@@ -54,11 +61,8 @@
         </PfForm>
       </Form>
 
-      <Form
-        v-slot="{ isSubmitting }"
-        class="mt-12"
-        :validation-schema="validationSchemaPassword"
-        @submit="onSubmitChangePassword">
+      <h3>{{ t("password-title") }}</h3>
+      <Form v-slot="{ isSubmitting }" :validation-schema="validationSchemaPassword" @submit="onSubmitChangePassword">
         <PfForm has-footer :submit-label="t('submit')" :loading-label="t('loading')" :processing="isSubmitting">
           <PfFormSection>
             <Field v-slot="{ field, errors }" name="oldPassword">
@@ -91,6 +95,9 @@
           </PfFormSection>
         </PfForm>
       </Form>
+
+      <h3>{{ t("email-opt-in-title") }}</h3>
+      <EmailOptInForm v-if="isProjectManager" :user="user" />
     </div>
   </AppShell>
 </template>
@@ -103,7 +110,11 @@ import { useRouter } from "vue-router";
 import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
 import { object, string, ref as yupRef } from "yup";
 
+import EmailOptInForm from "@/components/settings/email-opt-in-form";
+
 import { URL_ROOT } from "@/lib/consts/urls";
+import { USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
+
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 import { useNotificationsStore } from "@/lib/store/notifications";
 import { usePageTitle } from "@/lib/helpers/page-title";
@@ -137,6 +148,9 @@ const validationSchemaPassword = computed(() =>
     passwordConfirmation: string().label(t("password-confirmation")).required().samePassword(yupRef("password"))
   })
 );
+const isProjectManager = computed(() => {
+  return user.value.type === USER_TYPE_PROJECTMANAGER;
+});
 
 const { mutate: changeEmail } = useMutation(
   gql`
@@ -164,6 +178,8 @@ function getUserEmail() {
         me {
           id
           email
+          type
+          emailOptIn
         }
       }
     `

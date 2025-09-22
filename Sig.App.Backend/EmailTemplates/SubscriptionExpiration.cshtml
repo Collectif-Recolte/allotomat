@@ -17,6 +17,9 @@
     <li>Finaliser vos rapports ou conciliations internes.</li>
 </ul>
 <p>N’hésitez pas à nous contacter si vous avez besoin d’assistance ou de précisions supplémentaires.</p>
+<p>
+    Si vous ne souhaitez plus recevoir de courriels, vous pouvez vous désabonner en cliquant ici : <a clicktracking="off" href="@Model.BaseUrl/@UrlHelper.UnsubscribeFromEmail(Sig.App.Backend.DbModel.Enums.EmailOptIn.SubscriptionExpirationEmail)">Se désabonner</a>
+</p>
 <br />
 <p>The subscription @Model.SubscriptionName expired on @Model.Date.ToShortDateString().</p>
 <p>Here is a summary of the data associated with this subscription:</p>
@@ -31,3 +34,6 @@
     <li>Finalize your internal reports or reconciliations.</li>
 </ul>
 <p>Please do not hesitate to contact us if you require any assistance or further clarification.</p>
+<p>
+    If you no longer wish to receive emails, you can unsubscribe by clicking here : <a clicktracking="off" href="@Model.BaseUrl/@UrlHelper.UnsubscribeFromEmail(Sig.App.Backend.DbModel.Enums.EmailOptIn.SubscriptionExpirationEmail)">Unsubscribe</a>
+</p>

@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System;
 using Sig.App.Backend.DbModel.Entities.Profiles;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.EmailTemplates.Models;
+using System;
 
 namespace Sig.App.Backend.DbModel.Entities
 {
@@ -36,5 +37,33 @@ namespace Sig.App.Backend.DbModel.Entities
         public UserState State { get; set; } = UserState.Active;
 
         public UserStatus Status { get; set; } = UserStatus.Actived;
+
+        public string EmailOptIn { get; set; } = string.Join(';',
+                                                    new[] {Enums.EmailOptIn.CreatedCardPdfEmail,
+                                                    Enums.EmailOptIn.MonthlyBalanceReportEmailJanuary,
+                                                    Enums.EmailOptIn.MonthlyBalanceReportEmailFebruary,
+                                                    Enums.EmailOptIn.MonthlyBalanceReportEmailMarch,
+                                                    Enums.EmailOptIn.MonthlyBalanceReportEmailApril,
+                                                    Enums.EmailOptIn.MonthlyBalanceReportEmailMay,
+                                                    Enums.EmailOptIn.MonthlyBalanceReportEmailJune,
+                                                    Enums.EmailOptIn.MonthlyBalanceReportEmailJuly,
+                                                    Enums.EmailOptIn.MonthlyBalanceReportEmailAugust,
+                                                    Enums.EmailOptIn.MonthlyBalanceReportEmailSeptember,
+                                                    Enums.EmailOptIn.MonthlyBalanceReportEmailOctober,
+                                                    Enums.EmailOptIn.MonthlyBalanceReportEmailNovember,
+                                                    Enums.EmailOptIn.MonthlyBalanceReportEmailDecember,
+                                                    Enums.EmailOptIn.MonthlyCardBalanceReportEmailJanuary,
+                                                    Enums.EmailOptIn.MonthlyCardBalanceReportEmailFebruary,
+                                                    Enums.EmailOptIn.MonthlyCardBalanceReportEmailMarch,
+                                                    Enums.EmailOptIn.MonthlyCardBalanceReportEmailApril,
+                                                    Enums.EmailOptIn.MonthlyCardBalanceReportEmailMay,
+                                                    Enums.EmailOptIn.MonthlyCardBalanceReportEmailJune,
+                                                    Enums.EmailOptIn.MonthlyCardBalanceReportEmailJuly,
+                                                    Enums.EmailOptIn.MonthlyCardBalanceReportEmailAugust,
+                                                    Enums.EmailOptIn.MonthlyCardBalanceReportEmailSeptember,
+                                                    Enums.EmailOptIn.MonthlyCardBalanceReportEmailOctober,
+                                                    Enums.EmailOptIn.MonthlyCardBalanceReportEmailNovember,
+                                                    Enums.EmailOptIn.MonthlyCardBalanceReportEmailDecember,
+                                                    Enums.EmailOptIn.SubscriptionExpirationEmail });
     }
 }

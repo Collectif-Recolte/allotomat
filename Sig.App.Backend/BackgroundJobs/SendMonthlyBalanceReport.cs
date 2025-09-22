@@ -7,6 +7,7 @@ using NodaTime;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Transactions;
+using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Requests.Queries.Projects;
@@ -117,6 +118,9 @@ namespace Sig.App.Backend.BackgroundJobs
                         }
                     }
                 }
+
+                var emailOptIn = EmailOptInHelper.GetEmailOptInMonthlyBalanceReport(clock.GetCurrentInstant().ToDateTimeUtc());
+                projectManagers = projectManagers.Where(x => x.IsEmailOptedIn(emailOptIn)).ToList();
 
                 if (projectManagers.Any())
                 {

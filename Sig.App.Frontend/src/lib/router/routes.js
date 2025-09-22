@@ -603,6 +603,14 @@ export default [
     }
   },
   {
+    name: urls.URL_SUBSCRIPTION_END_REPORT,
+    path: "/subscription-end-report",
+    component: () => import("@/views/report/SubscriptionEndReport.vue"),
+    meta: {
+      claim: GLOBAL_MANAGE_TRANSACTIONS
+    }
+  },
+  {
     name: urls.URL_PROJECT_MANAGER_ADMIN,
     path: "/project-managers",
     component: () => import("@/views/project/ListProjectManagers.vue"),
@@ -1088,6 +1096,11 @@ export default [
     meta: {
       anonymous
     }
+  },
+  {
+    name: urls.URL_ACCOUNT_UNSUBSCRIBE_EMAIL,
+    path: "/unsubscribe-email",
+    component: () => import("@/views/account/UnsubscribeEmail.vue")
   },
   {
     name: urls.URL_PROJECT_SETTINGS,

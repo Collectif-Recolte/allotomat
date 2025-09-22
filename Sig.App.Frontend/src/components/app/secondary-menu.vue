@@ -8,6 +8,7 @@
     "manage-marketgroup-managers": "User management",
     "manage-project-export-all-participants": "Export all participants",
     "reconciliation-report": "Reconciliation report",
+    "subscription-end-report": "Subscription report",
     "cash-register": "Cash registers",
     "menu-title-market": "{name} market",
     "menu-title-market-group": "{name} market group"
@@ -20,6 +21,7 @@
     "manage-marketgroup-managers": "Gestion des utilisateurs",
     "manage-project-export-all-participants": "Exporter tous les participants",
     "reconciliation-report": "Rapport de réconciliation",
+    "subscription-end-report": "Rapport d'abonnement",
     "cash-register": "Caisses",
     "menu-title-market": "Marché {name}",
     "menu-title-market-group": "Groupe de commerce {name}"
@@ -68,6 +70,10 @@
         v-if="manageProjectManagers || manageSpecificMarketGroup"
         :router-link="{ name: $consts.urls.URL_RECONCILIATION_REPORT }"
         :label="t('reconciliation-report')" />
+      <SecondaryMenuItem
+        v-if="manageProjectManagers || manageOrganizationManagers"
+        :router-link="{ name: $consts.urls.URL_SUBSCRIPTION_END_REPORT }"
+        :label="t('subscription-end-report')" />
       <SecondaryMenuItem
         v-if="manageSpecificMarket"
         :router-link="{ name: $consts.urls.URL_CASH_REGISTER }"
@@ -171,7 +177,13 @@ const showSecondaryMenu = computed(() => {
     manageOrganizationManagers.value ||
     manageSpecificMarketGroup.value ||
     manageSpecificMarket.value;
-  return (manageSpecificProject.value || manageSpecificMarketGroup.value || manageSpecificMarket.value) && showLink;
+  return (
+    (manageOrganizationManagers.value ||
+      manageSpecificProject.value ||
+      manageSpecificMarketGroup.value ||
+      manageSpecificMarket.value) &&
+    showLink
+  );
 });
 
 const { result: resultProjects } = useQuery(

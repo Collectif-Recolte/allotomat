@@ -180,7 +180,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                 user = new AppUser(email)
                 {
                     Type = UserType.ProjectManager,
-                    Profile = new UserProfile(),
+                    Profile = new UserProfile()
                 };
 
                 var result = await userManager.CreateAsync(user);

@@ -1,24 +1,25 @@
 ﻿using GraphQL.Conventions;
 using MediatR;
-using System.Threading.Tasks;
 using Sig.App.Backend.Authorization;
 using Sig.App.Backend.Constants;
+using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Requests.Commands.Mutations.Accounts;
-using Sig.App.Backend.Requests.Commands.Mutations.Profiles;
+using Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries;
+using Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances;
+using Sig.App.Backend.Requests.Commands.Mutations.Cards;
+using Sig.App.Backend.Requests.Commands.Mutations.CashRegisters;
 using Sig.App.Backend.Requests.Commands.Mutations.Examples;
-using Sig.App.Backend.Services.Permission.Enums;
-using Sig.App.Backend.Requests.Commands.Mutations.Projects;
+using Sig.App.Backend.Requests.Commands.Mutations.MarketGroups;
 using Sig.App.Backend.Requests.Commands.Mutations.Markets;
 using Sig.App.Backend.Requests.Commands.Mutations.Organizations;
-using Sig.App.Backend.Requests.Commands.Mutations.Subscriptions;
-using Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries;
-using Sig.App.Backend.Requests.Commands.Mutations.Cards;
-using Sig.App.Backend.Requests.Commands.Mutations.Transactions;
 using Sig.App.Backend.Requests.Commands.Mutations.ProductGroups;
-using Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances;
-using Sig.App.Backend.Requests.Commands.Mutations.MarketGroups;
-using Sig.App.Backend.Requests.Commands.Mutations.CashRegisters;
+using Sig.App.Backend.Requests.Commands.Mutations.Profiles;
+using Sig.App.Backend.Requests.Commands.Mutations.Projects;
+using Sig.App.Backend.Requests.Commands.Mutations.Subscriptions;
+using Sig.App.Backend.Requests.Commands.Mutations.Transactions;
+using Sig.App.Backend.Services.Permission.Enums;
+using System.Threading.Tasks;
 
 namespace Sig.App.Backend.Gql.Schema
 {
@@ -952,6 +953,25 @@ namespace Sig.App.Backend.Gql.Schema
         {
             await mediator.Send(input.Value);
             return true;
+        }
+
+        public static async Task<bool> UnsubscribeFromEmail(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<UnsubscribeFromEmail.Input> input)
+        {
+            await mediator.Send(input.Value);
+            return true;
+        }
+
+        [ApplyPolicy(AuthorizationPolicies.LoggedIn)]
+        [AnnotateErrorCodes(typeof(ChangeEmailOptIn))]
+        public static Task<ChangeEmailOptIn.Payload> ChangeEmailOptIn(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<ChangeEmailOptIn.Input> input)
+        {
+            return mediator.Send(input.Value);
         }
     }
 }

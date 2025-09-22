@@ -71,6 +71,9 @@ namespace Sig.App.Backend.BackgroundJobs
                     ProjectId = project.Id
                 });
 
+                var emailOptIn = EmailOptInHelper.GetEmailOptInMonthlyCardBalanceReport(clock.GetCurrentInstant().ToDateTimeUtc());
+                projectManagers = projectManagers.Where(x => x.IsEmailOptedIn(emailOptIn)).ToList();
+
                 if (projectManagers.Any())
                 {
                     var email = new MonthlyCardBalanceReportEmail(string.Join(";", projectManagers.Select(x => x.Email)), cardBalanceReports, project);
