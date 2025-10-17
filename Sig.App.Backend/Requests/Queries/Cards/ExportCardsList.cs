@@ -66,7 +66,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
                 .Column("Total", x => MoneyHelper.GetMoneyFormat(x.Total, MoneyHelper.EN))
                 .Column("Date d'expiration des fonds en fonction de l'utilisation", x =>
                 {
-                    if (x.Card.Beneficiary.Subscriptions.Any(x => x.Subscription.IsSubscriptionPaymentBasedCardUsage))
+                    if (x.Card.Beneficiary != null && x.Card.Beneficiary.Subscriptions.Any(x => x.Subscription.IsSubscriptionPaymentBasedCardUsage))
                     {
                         return x.Card != null ? TransactionHelper.GetNearestExpirationDate(x.Card.Transactions) : "";
                     }
