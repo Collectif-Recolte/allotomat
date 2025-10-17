@@ -28,6 +28,18 @@ public static class TransactionHelper
         });
     }
 
+    public static DateTime? GetNearestExpirationDate(IList<Transaction> transactions)
+    {
+        var target = new DateTime(2024, 6, 25);
+        var dates = transactions.Where(x => x is AddingFundTransaction).Select(x => (x as AddingFundTransaction).ExpirationDate);
+        if (dates.Count() > 0)
+        {
+            return dates.Aggregate((x, y) => Math.Abs((x - target).Ticks) < Math.Abs((y - target).Ticks) ? x : y);
+        }
+
+        return null;
+    }
+
     public static string CreateTransactionUniqueId()
     {
         return Guid.NewGuid().ToString();
