@@ -8,8 +8,9 @@
     "transfer-funds-btn": "Transfer funds",
     "amount-label": "Amount",
     "amount-placeholder": "Enter the amount",
-    "budget-allowance-label": "Envelope",
-    "move-budget-allowance-success-notification": "Funds have been transferred successfully."
+    "target-budget-allowance-label": "Target envelope",
+    "move-budget-allowance-success-notification": "Funds have been transferred successfully.",
+    "initial-budget-allowance-name-label": "Initial envelope"
 	},
 	"fr": {
 		"delete-budget-allowance-success-notification": "L'enveloppe pour le groupe {organizationName} a été supprimée avec succès.",
@@ -19,8 +20,9 @@
     "transfer-funds-btn": "Transférer les fonds",
     "amount-label": "Montant",
     "amount-placeholder": "Entrez le montant",
-    "budget-allowance-label": "Enveloppe",
-    "move-budget-allowance-success-notification": "Les fonds ont été transférés avec succès."
+    "target-budget-allowance-label": "Enveloppe de destination",
+    "move-budget-allowance-success-notification": "Les fonds ont été transférés avec succès.",
+    "initial-budget-allowance-name-label": "Enveloppe initiale"
 	}
 }
 </i18n>
@@ -48,11 +50,19 @@
           :processing="isSubmitting"
           :warning-message="t('description')">
           <PfFormSection>
+            <Field v-slot="{ field }" name="initialBudgetAllowanceName">
+              <PfFormInputText
+                id="initialBudgetAllowanceName"
+                :value="field.value"
+                disabled
+                :label="t('initial-budget-allowance-name-label')"
+                col-span-class="sm:col-span-6" />
+            </Field>
             <Field v-slot="{ field: inputField, errors: fieldErrors }" name="budgetAllowanceId">
               <PfFormInputSelect
                 id="budgetAllowanceId"
                 v-bind="inputField"
-                :label="t('budget-allowance-label')"
+                :label="t('target-budget-allowance-label')"
                 :options="availableBudgetAllowances"
                 col-span-class="sm:col-span-6"
                 :errors="fieldErrors"
@@ -107,7 +117,8 @@ const { addSuccess } = useNotificationsStore();
 
 const initialValues = {
   amount: 0,
-  budgetAllowanceId: ""
+  budgetAllowanceId: "",
+  initialBudgetAllowanceName: ""
 };
 
 const { mutate: moveBudgetAllowanceMutation } = useMutation(
@@ -137,6 +148,11 @@ const { result: resultBudgetAllowance } = useQuery(
         availableFund
         organization {
           id
+          name
+        }
+        subscription {
+          id
+          name
         }
       }
     }
@@ -148,6 +164,12 @@ const { result: resultBudgetAllowance } = useQuery(
 
 const budgetAllowance = useResult(resultBudgetAllowance, null, (data) => {
   initialValues.amount = data.budgetAllowance.availableFund;
+  initialValues.initialBudgetAllowanceName =
+    data.budgetAllowance.subscription.name +
+    " - " +
+    data.budgetAllowance.organization.name +
+    " - " +
+    getMoneyFormat(data.budgetAllowance.availableFund);
   return data.budgetAllowance;
 });
 
@@ -181,7 +203,7 @@ const projects = useResult(result);
 
 const validationSchema = computed(() =>
   object({
-    amount: number().label(t("amount-label")).required().min(0.01),
+    amount: number().label(t("amount-label")).required().min(0.01).max(budgetAllowance.value.availableFund),
     budgetAllowanceId: string().label(t("budget-allowance-label")).required()
   })
 );
