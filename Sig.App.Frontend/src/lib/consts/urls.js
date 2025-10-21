@@ -90,6 +90,7 @@ export const URL_SUBSCRIPTION_ARCHIVE = "subscription-archive-url";
 export const URL_SUBSCRIPTION_UNARCHIVE = "subscription-unarchive-url";
 export const URL_SUBSCRIPTION_MANAGE_BUDGET_ALLOWANCE = "subscription-manage-budget-allowance-url";
 export const URL_SUBSCRIPTION_DELETE_BUDGET_ALLOWANCE = "subscription-delete-budget-allowance-url";
+export const URL_SUBSCRIPTION_MOVE_BUDGET_ALLOWANCE = "subscription-move-budget-allowance-url";
 
 export const URL_BENEFICIARY_ADMIN = "beneficiary-list-url";
 export const URL_BENEFICIARY_ADD = "beneficiary-add-url";

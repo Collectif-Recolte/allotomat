@@ -725,6 +725,14 @@ export default [
         meta: {
           claim: GLOBAL_MANAGE_SUBSCRIPTIONS
         }
+      },
+      {
+        name: urls.URL_SUBSCRIPTION_MOVE_BUDGET_ALLOWANCE,
+        path: ":subscriptionId/budgets/:budgetId/move",
+        component: () => import("@/views/budget-allowance/MoveBudgetAllowance.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SUBSCRIPTIONS
+        }
       }
     ]
   },
