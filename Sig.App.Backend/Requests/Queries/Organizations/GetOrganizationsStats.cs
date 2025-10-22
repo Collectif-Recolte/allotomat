@@ -129,7 +129,8 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
             var manuallyAddingBalance = manuallyAddingTransactions.Where(x => x.CardId != null).Sum(x => x.AvailableFund);
             var subscriptionBalance = subscriptionTransactions.Where(x => x.CardId != null).Sum(x => x.AvailableFund);
 
-            return manuallyAddingBalance + subscriptionBalance;
+            // Math.Max to fix issue with manager who use the ManuallyAddingTransaction to remove amount with a negatif transaction
+            return Math.Max(manuallyAddingBalance + subscriptionBalance, 0);
         }
 
         public decimal GetTotalAllocatedOnCardsAmounts(List<ManuallyAddingFundTransaction> manuallyAddingTransactions, List<SubscriptionAddingFundTransaction> subscriptionTransactions)
