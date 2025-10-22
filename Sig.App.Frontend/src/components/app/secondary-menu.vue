@@ -9,6 +9,7 @@
     "manage-project-export-all-participants": "Export all participants",
     "reconciliation-report": "Reconciliation report",
     "subscription-end-report": "Subscription report",
+    "budget-allowance-report": "Budget allowance report",
     "cash-register": "Cash registers",
     "menu-title-market": "{name} market",
     "menu-title-market-group": "{name} market group"
@@ -22,6 +23,7 @@
     "manage-project-export-all-participants": "Exporter tous les participants",
     "reconciliation-report": "Rapport de réconciliation",
     "subscription-end-report": "Rapport d'abonnement",
+    "budget-allowance-report": "Rapport d'enveloppe",
     "cash-register": "Caisses",
     "menu-title-market": "Marché {name}",
     "menu-title-market-group": "Groupe de commerce {name}"
@@ -74,6 +76,10 @@
         v-if="manageProjectManagers || manageOrganizationManagers"
         :router-link="{ name: $consts.urls.URL_SUBSCRIPTION_END_REPORT }"
         :label="t('subscription-end-report')" />
+      <SecondaryMenuItem
+        v-if="manageProjectManagers || manageOrganizationManagers"
+        :router-link="{ name: $consts.urls.URL_BUDGET_ALLOWANCE_REPORT }"
+        :label="t('budget-allowance-report')" />
       <SecondaryMenuItem
         v-if="manageSpecificMarket"
         :router-link="{ name: $consts.urls.URL_CASH_REGISTER }"

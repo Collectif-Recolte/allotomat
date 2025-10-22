@@ -1,8 +1,12 @@
 ﻿using GraphQL.Conventions;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NodaTime;
 using Sig.App.Backend.DbModel;
+using Sig.App.Backend.DbModel.Entities;
+using Sig.App.Backend.DbModel.Entities.BudgetAllowanceLogs;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
@@ -20,12 +24,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
     public class CreateBudgetAllowance : IRequestHandler<CreateBudgetAllowance.Input, CreateBudgetAllowance.Payload>
     {
         private readonly ILogger<CreateBudgetAllowance> logger;
+        private readonly IClock clock;
         private readonly AppDbContext db;
-        
-        public CreateBudgetAllowance(ILogger<CreateBudgetAllowance> logger, AppDbContext db)
+        private readonly IHttpContextAccessor httpContextAccessor;
+
+        public CreateBudgetAllowance(ILogger<CreateBudgetAllowance> logger, AppDbContext db, IClock clock, IHttpContextAccessor httpContextAccessor)
         {
             this.logger = logger;
             this.db = db;
+            this.clock = clock;
+            this.httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -70,6 +78,27 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
             };
 
             db.BudgetAllowances.Add(budgetAllowance);
+            await db.SaveChangesAsync();
+
+            string currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
+            AppUser currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
+
+            db.BudgetAllowanceLogs.Add(new BudgetAllowanceLog()
+            {
+                Discriminator = DbModel.Enums.BudgetAllowanceLogDiscriminator.CreateBudgetAllowanceLog,
+                CreatedAtUtc = clock.GetCurrentInstant().ToDateTimeUtc(),
+                Amount = request.Amount,
+                ProjectId = budgetAllowance.Organization.ProjectId,
+                BudgetAllowanceId = budgetAllowance.Id,
+                InitiatorId = currentUserId,
+                InitiatorEmail = currentUser?.Email,
+                InitiatorFirstname = currentUser?.Profile.FirstName,
+                InitiatorLastname = currentUser?.Profile.LastName,
+                OrganizationId = organization.Id,
+                OrganizationName = organization.Name,
+                SubscriptionId = subscription.Id,
+                SubscriptionName = subscription.Name
+            });
             await db.SaveChangesAsync();
 
             logger.LogInformation($"[Mutation] CreateBudgetAllowance - New budget allowance created for {organization.Name} ({request.Amount})");
