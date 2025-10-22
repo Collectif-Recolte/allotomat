@@ -7,7 +7,9 @@
     "amount-label": "Amount",
     "budget-allowance-minimum-error": "The amount is less than the promised amount.",
     "edit-allowance": "Edit",
-    "delete-allowance": "Delete"
+    "available-fund-label": "Available fund",
+    "delete-allowance": "Delete",
+    "budget-allowance-move": "Transfer funds"
 	},
 	"fr": {
     "budget-allowance-organization": "Groupe",
@@ -16,7 +18,9 @@
     "amount-label": "Montant",
     "budget-allowance-minimum-error": "Le montant est inférieur au montant promis.",
     "edit-allowance": "Modifier",
-    "delete-allowance": "Supprimer"
+    "available-fund-label": "Fonds disponible",
+    "delete-allowance": "Supprimer",
+    "budget-allowance-move": "Transférer des fonds"
 	}
 }
 </i18n>
@@ -51,6 +55,20 @@
             input-type="number"
             min="0"
             :disabled="!isInEdition">
+            <template #trailingIcon>
+              <UiDollarSign :errors="fieldErrors" />
+            </template>
+          </PfFormInputText>
+        </Field>
+        <Field v-if="!props.budgetAllowance.isNew" v-slot="{ field, errors: fieldErrors }" name="availableFund">
+          <PfFormInputText
+            id="availableFund"
+            v-bind="field"
+            :label="t('available-fund-label')"
+            :errors="fieldErrors"
+            input-type="number"
+            min="0"
+            disabled="true">
             <template #trailingIcon>
               <UiDollarSign :errors="fieldErrors" />
             </template>
@@ -94,6 +112,7 @@ import { useI18n } from "vue-i18n";
 
 import ICON_TRASH from "@/lib/icons/trash.json";
 import ICON_PENCIL from "@/lib/icons/pencil.json";
+import ICON_MOVE from "@/lib/icons/arrow-ricochet.json";
 
 const { t } = useI18n();
 const inEdition = ref(null);
@@ -117,13 +136,18 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(["delete", "save"]);
+const emit = defineEmits(["delete", "save", "move"]);
 
 const getBtnGroup = () => [
   {
     icon: ICON_PENCIL,
     label: t("edit-allowance"),
     onClick: () => editBudget()
+  },
+  {
+    icon: ICON_MOVE,
+    label: t("budget-allowance-move"),
+    onClick: () => moveBudget()
   },
   {
     icon: ICON_TRASH,
@@ -166,6 +190,10 @@ function cancelEditBudget(reset) {
 
 function deleteBudget() {
   emit("delete", props.budgetAllowance);
+}
+
+function moveBudget() {
+  emit("move", props.budgetAllowance);
 }
 
 function saveBudget({ organization, originalFund }) {
