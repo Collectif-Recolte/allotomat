@@ -11,7 +11,7 @@
       "project-manager": "Program manager",
       "resend-complete": "A message to complete the account creation was sent to {email}.",
       "resend-confirmation-email": "Resend confirmation email",
-      "role": "Rôle",
+      "role": "Role",
       "status": "Status",
       "user-confirmed": "User confirmed",
       "user-not-confirmed": "User not confirmed",
@@ -22,7 +22,8 @@
       "confirmation-reset-password-link-copied": "Reset password link copied to clipboard.",
       "delete-user": "Delete user",
       "reactivate-user": "Reactivate user",
-      "disable-user": "Disable user"
+      "disable-user": "Disable user",
+      "associated-program-market-group-merchant": "Program, market group, and/or merchant associated"
     },
     "fr": {
       "admin-pca": "Administrateur",
@@ -46,7 +47,8 @@
       "confirmation-reset-password-link-copied": "Lien de réinitialisation du mot de passe copié dans le presse-papiers.",
       "delete-user": "Supprimer l'utilisateur",
       "reactivate-user": "Réactiver l'utilisateur",
-      "disable-user": "Désactiver l'utilisateur"
+      "disable-user": "Désactiver l'utilisateur",
+      "associated-program-market-group-merchant": "Programme, le groupe, et/ou le commerce associé"
     }
   }
   </i18n>
@@ -67,6 +69,15 @@
       </td>
       <td>
         {{ getUserRole(slotProps.item) }}
+      </td>
+      <td>
+        <PfTag
+          v-for="item in getUserAssociatedProgramsMarketGroupsMerchants(slotProps.item)"
+          :key="item.id"
+          class="max-w-full"
+          :label="item"
+          is-dark-theme
+          bg-color-class="bg-primary-700" />
       </td>
       <td>
         <UiButtonGroup :items="getBtnGroup(slotProps.item)" tooltip-position="left" />
@@ -118,6 +129,7 @@ const cols = computed(() => [
   { label: t("status") },
   { label: t("last-login-date") },
   { label: t("role") },
+  { label: t("associated-program-market-group-merchant") },
   {
     label: t("options"),
     hasHiddenLabel: true
@@ -236,5 +248,17 @@ function getUserRole(item) {
     : item?.type === USER_TYPE_MARKETGROUPMANAGER
     ? t("merchant-group-manager")
     : t("merchant");
+}
+
+function getUserAssociatedProgramsMarketGroupsMerchants(item) {
+  return item?.type === USER_TYPE_PCAADMIN
+    ? ""
+    : item?.type === USER_TYPE_PROJECTMANAGER
+    ? item.projects.map((project) => project.name)
+    : item?.type === USER_TYPE_ORGANIZATIONMANAGER
+    ? item.organizations.map((organization) => organization.name)
+    : item?.type === USER_TYPE_MARKETGROUPMANAGER
+    ? item.marketGroups.map((marketGroup) => marketGroup.name)
+    : item.markets.map((market) => market.name);
 }
 </script>
