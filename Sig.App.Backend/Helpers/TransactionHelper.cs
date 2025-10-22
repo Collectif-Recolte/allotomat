@@ -30,7 +30,7 @@ public static class TransactionHelper
 
     public static DateTime? GetNearestExpirationDate(IList<Transaction> transactions)
     {
-        var target = new DateTime(2024, 6, 25);
+        var target = DateTime.Now;
         var dates = transactions.Where(x => x is AddingFundTransaction).Select(x => (x as AddingFundTransaction).ExpirationDate);
         if (dates.Count() > 0)
         {
