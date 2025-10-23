@@ -239,26 +239,32 @@ function getUserLastConnectionTime(item) {
 }
 
 function getUserRole(item) {
-  return item?.type === USER_TYPE_PCAADMIN
-    ? t("admin-pca")
-    : item?.type === USER_TYPE_PROJECTMANAGER
-    ? t("project-manager")
-    : item?.type === USER_TYPE_ORGANIZATIONMANAGER
-    ? t("organization-manager")
-    : item?.type === USER_TYPE_MARKETGROUPMANAGER
-    ? t("merchant-group-manager")
-    : t("merchant");
+  switch (item?.type) {
+    case USER_TYPE_PCAADMIN:
+      return t("admin-pca");
+    case USER_TYPE_PROJECTMANAGER:
+      return t("project-manager");
+    case USER_TYPE_ORGANIZATIONMANAGER:
+      return t("organization-manager");
+    case USER_TYPE_MARKETGROUPMANAGER:
+      return t("merchant-group-manager");
+    default:
+      return t("merchant");
+  }
 }
 
 function getUserAssociatedProgramsMarketGroupsMerchants(item) {
-  return item?.type === USER_TYPE_PCAADMIN
-    ? ""
-    : item?.type === USER_TYPE_PROJECTMANAGER
-    ? item.projects.map((project) => project.name)
-    : item?.type === USER_TYPE_ORGANIZATIONMANAGER
-    ? item.organizations.map((organization) => organization.name)
-    : item?.type === USER_TYPE_MARKETGROUPMANAGER
-    ? item.marketGroups.map((marketGroup) => marketGroup.name)
-    : item.markets.map((market) => market.name);
+  switch (item?.type) {
+    case USER_TYPE_PCAADMIN:
+      return "";
+    case USER_TYPE_PROJECTMANAGER:
+      return item.projects.map((project) => project.name);
+    case USER_TYPE_ORGANIZATIONMANAGER:
+      return item.organizations.map((organization) => organization.name);
+    case USER_TYPE_MARKETGROUPMANAGER:
+      return item.marketGroups.map((marketGroup) => marketGroup.name);
+    default:
+      return item.markets.map((market) => market.name);
+  }
 }
 </script>

@@ -4,10 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Sig.App.Backend.DbModel.Entities.Organizations;
+using Sig.App.Backend.DbModel.Entities.Profiles;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Plugins.BudgetAllowances;
 using Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances;
 using System;
 using System.Collections.Generic;
@@ -25,6 +27,19 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.BudgetAllowances
 
         public CreateBudgetAllowanceTest()
         {
+            var user = AddUser("test@example.com", UserType.ProjectManager, password: "Abcd1234!!");
+            SetLoggedInUser(user);
+
+            user.Profile = new UserProfile()
+            {
+                FirstName = "Test",
+                LastName = "Example",
+                User = user,
+                UpdateTimeUtc = DateTime.UtcNow
+            };
+
+            var budgetAllowanceLogFactory = new BudgetAllowanceLogFactory(Clock, HttpContextAccessor, DbContext);
+
             var project = new Project()
             {
                 Name = "Project 1"
@@ -66,7 +81,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.BudgetAllowances
 
             DbContext.SaveChanges();
 
-            handler = new CreateBudgetAllowance(NullLogger<CreateBudgetAllowance>.Instance, DbContext);
+            handler = new CreateBudgetAllowance(NullLogger<CreateBudgetAllowance>.Instance, DbContext, budgetAllowanceLogFactory);
         }
 
         [Fact]
