@@ -18,13 +18,7 @@
         <Title :title="t('title')">
           <template #subpagesCta>
             <div class="text-right">
-              <ReportFilters
-                v-model="searchInput"
-                :date-from="dateFrom"
-                :date-to="dateTo"
-                @dateFromUpdated="onDateFromUpdated"
-                @dateToUpdated="onDateToUpdated"
-                @resetFilters="onResetFilters" />
+              <ReportFilters v-model="searchInput" @resetFilters="onResetFilters" />
             </div>
           </template>
         </Title>
@@ -48,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult } from "@vue/apollo-composable";
@@ -73,16 +67,17 @@ const router = useRouter();
 let previousMonth = new Date();
 previousMonth.setMonth(previousMonth.getMonth() - 1);
 
-const dateFrom = ref(previousMonth);
-const dateTo = ref(new Date(Date.now()));
-const searchInput = ref("");
+const searchInput = ref({
+  dateFrom: previousMonth,
+  dateTo: new Date(Date.now())
+});
 const page = ref(1);
 
 if (route.query.dateFrom) {
-  dateFrom.value = new Date(route.query.dateFrom);
+  searchInput.value.dateFrom = new Date(route.query.dateFrom);
 }
 if (route.query.dateTo) {
-  dateTo.value = new Date(route.query.dateTo);
+  searchInput.value.dateTo = new Date(route.query.dateTo);
 }
 
 const { t } = useI18n();
@@ -90,10 +85,28 @@ const { t } = useI18n();
 usePageTitle(t("title"));
 
 const dateFromStartOfDay = computed(
-  () => new Date(dateFrom.value.getFullYear(), dateFrom.value.getMonth(), dateFrom.value.getDate(), 0, 0, 0, 0)
+  () =>
+    new Date(
+      searchInput.value.dateFrom.getFullYear(),
+      searchInput.value.dateFrom.getMonth(),
+      searchInput.value.dateFrom.getDate(),
+      0,
+      0,
+      0,
+      0
+    )
 );
 const dateToEndOfDay = computed(
-  () => new Date(dateTo.value.getFullYear(), dateTo.value.getMonth(), dateTo.value.getDate(), 23, 59, 59, 999)
+  () =>
+    new Date(
+      searchInput.value.dateTo.getFullYear(),
+      searchInput.value.dateTo.getMonth(),
+      searchInput.value.dateTo.getDate(),
+      23,
+      59,
+      59,
+      999
+    )
 );
 
 function marketsAmountOwedVariables() {
@@ -196,17 +209,17 @@ function setDateFrom(reconciliationReportDate) {
     case "ONE_MONTH": {
       let previousMonth = new Date();
       previousMonth.setMonth(previousMonth.getMonth() - 1);
-      dateFrom.value = previousMonth;
+      searchInput.value.dateFrom = previousMonth;
       break;
     }
     case "ONE_WEEK": {
       let previousWeek = new Date();
       previousWeek.setDate(previousWeek.getDate() - 7);
-      dateFrom.value = previousWeek;
+      searchInput.value.dateFrom = previousWeek;
       break;
     }
     case "ONE_DAY": {
-      dateFrom.value = new Date();
+      searchInput.value.dateFrom = new Date();
       break;
     }
   }
@@ -242,28 +255,24 @@ function updateUrl() {
   router.replace({
     name: URL_RECONCILIATION_REPORT,
     query: {
-      dateFrom: formatDate(new Date(dateFrom.value), serverFormat),
-      dateTo: formatDate(new Date(dateTo.value), serverFormat)
+      dateFrom: formatDate(new Date(searchInput.value.dateFrom), serverFormat),
+      dateTo: formatDate(new Date(searchInput.value.dateTo), serverFormat)
     }
   });
 }
 
-function onDateFromUpdated(value) {
-  page.value = 1;
-  dateFrom.value = value;
-  updateUrl();
-}
-
-function onDateToUpdated(value) {
-  page.value = 1;
-  dateTo.value = value;
-  updateUrl();
-}
+watch(
+  () => searchInput.value,
+  () => {
+    page.value = 1;
+    updateUrl();
+  }
+);
 
 function onResetFilters() {
   page.value = 1;
-  dateFrom.value = previousMonth;
-  dateTo.value = new Date(Date.now());
+  searchInput.value.dateFrom = previousMonth;
+  searchInput.value.dateTo = new Date(Date.now());
   updateUrl();
 }
 </script>

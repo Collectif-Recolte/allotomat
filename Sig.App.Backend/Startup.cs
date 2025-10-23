@@ -52,6 +52,7 @@ using Sig.App.Backend.Services.Reports;
 using Sig.App.Backend.Services.Cards;
 using Microsoft.AspNetCore.Http.Timeouts;
 using Microsoft.AspNetCore.Http;
+using Sig.App.Backend.Plugins.BudgetAllowances;
 
 namespace Sig.App.Backend
 {
@@ -105,6 +106,7 @@ namespace Sig.App.Backend
 
             services.AddScoped<IUserClaimsPrincipalFactory<AppUser>, AppUserClaimsPrincipalFactory>();
 
+
             services
                 .AddIdentity<AppUser, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
@@ -146,6 +148,7 @@ namespace Sig.App.Backend
             services.AddScoped<IDependencyInjector, DependencyInjector>();
             services.AddScoped<ScopedDependencyInjectorFactory>();
             services.AddScoped<DataLoader>();
+            services.AddScoped<BudgetAllowanceLogFactory>();
             services.AddSingleton(GraphQLEngineFactory.Create());
 
             // MediatR
