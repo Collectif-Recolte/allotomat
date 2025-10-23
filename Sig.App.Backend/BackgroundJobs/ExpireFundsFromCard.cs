@@ -35,7 +35,7 @@ namespace Sig.App.Backend.BackgroundJobs
             var cronFirstDayOfMonth = Cron.Monthly();
             RecurringJob.AddOrUpdate<ExpireFundsFromCard>("ExpireFundsFromCard",
                 x => x.Run(),
-                Cron.Daily(),
+                Cron.Daily(0),
                 new RecurringJobOptions
                 {
                     TimeZone = TimeZoneInfo.FindSystemTimeZoneById(config["systemLocalTimezone"])
