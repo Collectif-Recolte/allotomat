@@ -4,8 +4,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
+using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
+using Sig.App.Backend.Plugins.BudgetAllowances;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
 using System.Threading;
@@ -17,18 +19,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
     {
         private readonly ILogger<MoveBudgetAllowance> logger;
         private readonly AppDbContext db;
+        private readonly BudgetAllowanceLogFactory budgetAllowanceLogFactory;
 
-        public MoveBudgetAllowance(ILogger<MoveBudgetAllowance> logger, AppDbContext db)
+        public MoveBudgetAllowance(ILogger<MoveBudgetAllowance> logger, AppDbContext db, BudgetAllowanceLogFactory budgetAllowanceLogFactory)
         {
             this.logger = logger;
             this.db = db;
+            this.budgetAllowanceLogFactory = budgetAllowanceLogFactory;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
             logger.LogInformation($"[Mutation] MoveBudgetAllowance({request.InitialBudgetAllowanceId}, {request.TargetBudgetAllowanceId}, {request.Amount})");
             var initialBudgetAllowanceId = request.InitialBudgetAllowanceId.LongIdentifierForType<BudgetAllowance>();
-            var initialBudgetAllowance = await db.BudgetAllowances.FirstOrDefaultAsync(x => x.Id == initialBudgetAllowanceId, cancellationToken);
+            var initialBudgetAllowance = await db.BudgetAllowances.Include(x => x.Organization).Include(x => x.Subscription).FirstOrDefaultAsync(x => x.Id == initialBudgetAllowanceId, cancellationToken);
 
             if (initialBudgetAllowance == null)
             {
@@ -37,7 +41,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
             }
 
             var targetBudgetAllowanceId = request.TargetBudgetAllowanceId.LongIdentifierForType<BudgetAllowance>();
-            var targetBudgetAllowance = await db.BudgetAllowances.FirstOrDefaultAsync(x => x.Id == targetBudgetAllowanceId, cancellationToken);
+            var targetBudgetAllowance = await db.BudgetAllowances.Include(x => x.Organization).Include(x => x.Subscription).FirstOrDefaultAsync(x => x.Id == targetBudgetAllowanceId, cancellationToken);
 
             if (targetBudgetAllowance == null)
             {
@@ -56,6 +60,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
 
             targetBudgetAllowance.AvailableFund += request.Amount;
             targetBudgetAllowance.OriginalFund += request.Amount;
+
+            var log = await budgetAllowanceLogFactory.CreateLog(BudgetAllowanceLogDiscriminator.MoveBudgetAllowanceLog, request.Amount, initialBudgetAllowance, targetBudgetAllowance);
+            db.BudgetAllowanceLogs.Add(log);
 
             await db.SaveChangesAsync();
 

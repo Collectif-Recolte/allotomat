@@ -611,6 +611,14 @@ export default [
     }
   },
   {
+    name: urls.URL_BUDGET_ALLOWANCE_REPORT,
+    path: "/budget-allowance-report",
+    component: () => import("@/views/report/BudgetAllowanceReport.vue"),
+    meta: {
+      claim: GLOBAL_MANAGE_TRANSACTIONS
+    }
+  },
+  {
     name: urls.URL_PROJECT_MANAGER_ADMIN,
     path: "/project-managers",
     component: () => import("@/views/project/ListProjectManagers.vue"),
