@@ -47,7 +47,7 @@
           <span class="text-sm text-primary-700">{{ t("date-selector-from") }}</span>
           <UiDatePicker
             id="datefrom"
-            :value="props.dateFrom"
+            :value="props.modelValue.dateFrom"
             class="sm:col-span-6"
             :label="t('date-start-label')"
             has-hidden-label
@@ -57,7 +57,7 @@
           <span class="text-sm text-primary-700">{{ t("date-selector-to") }}</span>
           <UiDatePicker
             id="dateTo"
-            :value="props.dateTo"
+            :value="props.modelValue.dateTo"
             :min-date="props.dateFrom"
             class="sm:col-span-6"
             :label="t('date-end-label')"
@@ -77,7 +77,7 @@
           <PfFormInputCheckboxGroup
             id="organizations"
             is-filter
-            :value="selectedOrganizations"
+            :value="props.modelValue.selectedOrganizations"
             :options="availableOrganizations"
             @input="onOrganizationsChecked" />
         </UiFilterSelect>
@@ -89,7 +89,7 @@
             id="subscriptions"
             class="mt-3"
             is-filter
-            :value="selectedSubscriptions"
+            :value="props.modelValue.selectedSubscriptions"
             :options="availableSubscriptions"
             @input="onSubscriptionsChecked" />
         </UiFilterSelect>
@@ -107,32 +107,21 @@ import ICON_RESET from "@/lib/icons/reset.json";
 
 const { t } = useI18n();
 
-const emit = defineEmits([
-  "dateFromUpdated",
-  "dateToUpdated",
-  "organizationsChecked",
-  "organizationsUnchecked",
-  "subscriptionsChecked",
-  "subscriptionsUnchecked",
-  "resetFilters"
-]);
+const emit = defineEmits(["update:modelValue", "resetFilters"]);
 
 const props = defineProps({
-  dateFrom: {
-    type: Date,
-    default: undefined
-  },
-  dateTo: {
-    type: Date,
-    default: undefined
-  },
-  availableOrganizations: {
-    type: Array,
+  modelValue: {
+    type: Object,
     default() {
-      return [];
+      return {
+        dateFrom: undefined,
+        dateTo: undefined,
+        selectedOrganizations: [],
+        selectedSubscriptions: []
+      };
     }
   },
-  selectedOrganizations: {
+  availableOrganizations: {
     type: Array,
     default() {
       return [];
@@ -143,21 +132,15 @@ const props = defineProps({
     default() {
       return [];
     }
-  },
-  selectedSubscriptions: {
-    type: Array,
-    default() {
-      return [];
-    }
   }
 });
 
 const organizationActiveFiltersCount = computed(() => {
-  return props.selectedOrganizations?.length ?? 0;
+  return props.modelValue.selectedOrganizations?.length ?? 0;
 });
 
 const subscriptionActiveFiltersCount = computed(() => {
-  return props.selectedSubscriptions?.length ?? 0;
+  return props.modelValue.selectedSubscriptions?.length ?? 0;
 });
 
 const availableOrganizations = computed(() => {
@@ -171,39 +154,51 @@ const availableSubscriptions = computed(() => {
 });
 
 function onOrganizationsChecked(input) {
+  let newSelectedOrganizations = [];
   if (input.isChecked) {
-    emit("organizationsChecked", input.value);
+    newSelectedOrganizations = [...props.modelValue.selectedOrganizations, input.value];
   } else {
-    emit("organizationsUnchecked", input.value);
+    newSelectedOrganizations = props.modelValue.selectedOrganizations.filter((x) => x !== input.value);
   }
+  emit("update:modelValue", { ...props.modelValue, selectedOrganizations: newSelectedOrganizations });
 }
 
 function onSubscriptionsChecked(input) {
+  let newSelectedSubscriptions = [];
   if (input.isChecked) {
-    emit("subscriptionsChecked", input.value);
+    newSelectedSubscriptions = [...props.modelValue.selectedSubscriptions, input.value];
   } else {
-    emit("subscriptionsUnchecked", input.value);
+    newSelectedSubscriptions = props.modelValue.selectedSubscriptions.filter((x) => x !== input.value);
   }
+  emit("update:modelValue", { ...props.modelValue, selectedSubscriptions: newSelectedSubscriptions });
 }
 
 function setDates(type) {
   switch (type) {
-    case "last-year":
-      emit("dateFromUpdated", new Date(new Date().getFullYear() - 1, 0, 1));
-      emit("dateToUpdated", new Date(new Date().getFullYear() - 1, 11, 31));
+    case "last-year": {
+      const newDateFrom = new Date(new Date().getFullYear() - 1, 0, 1);
+      const newDateTo = new Date(new Date().getFullYear() - 1, 11, 31);
+      emit("update:modelValue", { ...props.modelValue, dateFrom: newDateFrom, dateTo: newDateTo });
       break;
-    case "current-year":
-      emit("dateFromUpdated", new Date(new Date().getFullYear(), 0, 1));
-      emit("dateToUpdated", new Date(new Date().getFullYear(), 11, 31));
+    }
+    case "current-year": {
+      const newDateFrom = new Date(new Date().getFullYear(), 0, 1);
+      const newDateTo = new Date(new Date().getFullYear(), 11, 31);
+      emit("update:modelValue", { ...props.modelValue, dateFrom: newDateFrom, dateTo: newDateTo });
       break;
-    case "last-month":
-      emit("dateFromUpdated", new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1));
-      emit("dateToUpdated", new Date(new Date().getFullYear(), new Date().getMonth(), 0));
+    }
+    case "last-month": {
+      const newDateFrom = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1);
+      const newDateTo = new Date(new Date().getFullYear(), new Date().getMonth(), 0);
+      emit("update:modelValue", { ...props.modelValue, dateFrom: newDateFrom, dateTo: newDateTo });
       break;
-    case "all-time":
-      emit("dateFromUpdated", new Date(2023, 0, 1));
-      emit("dateToUpdated", new Date(new Date().getFullYear(), 11, 31));
+    }
+    case "all-time": {
+      const newDateFrom = new Date(2023, 0, 1);
+      const newDateTo = new Date(new Date().getFullYear(), 11, 31);
+      emit("update:modelValue", { ...props.modelValue, dateFrom: newDateFrom, dateTo: newDateTo });
       break;
+    }
   }
 }
 
