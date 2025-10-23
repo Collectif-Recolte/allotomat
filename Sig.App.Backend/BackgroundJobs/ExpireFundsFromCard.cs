@@ -50,7 +50,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 .Include(x => x.ProductGroup)
                 .Include(x => x.Card).ThenInclude(x => x.Funds)
                 .Include(x => x.Beneficiary).ThenInclude(x => x.Organization).ThenInclude(x => x.Project)
-                .Where(x => x.Status == FundTransactionStatus.Actived && x.ExpirationDate <= today && x.AvailableFund > 0).ToListAsync();
+                .Where(x => x.Status == FundTransactionStatus.Actived && x.ExpirationDate <= today).ToListAsync();
 
             var transactions = dbTransactions.Where(x =>
                 x is ManuallyAddingFundTransaction or SubscriptionAddingFundTransaction
@@ -66,81 +66,80 @@ namespace Sig.App.Backend.BackgroundJobs
 
             foreach (var transaction in transactions)
             {
-                if (transaction.AvailableFund <= 0)
+                if (transaction.AvailableFund > 0)
                 {
-                    continue;
-                }
-                var transactionProductGroupId = (transaction as IHaveProductGroup).ProductGroupId;
-                var fund = transaction.Card.Funds.FirstOrDefault(x => x.ProductGroupId == transactionProductGroupId);
-                if (fund != null)
-                {
-                    Subscription subscription = null;
-                    if (transaction is ManuallyAddingFundTransaction maft)
-                        subscription = maftSubscriptions.FirstOrDefault(x => x.Id == maft.SubscriptionId);
-                    if (transaction is SubscriptionAddingFundTransaction saft)
-                        subscription = saftSubscriptionTypes.FirstOrDefault(x => x.Id == saft.SubscriptionTypeId)?.Subscription;
-                    fund.Amount -= transaction.AvailableFund;
-
-                    if (subscription != null)
+                    var transactionProductGroupId = (transaction as IHaveProductGroup).ProductGroupId;
+                    var fund = transaction.Card.Funds.FirstOrDefault(x => x.ProductGroupId == transactionProductGroupId);
+                    if (fund != null)
                     {
-                        var budgetAllowance = subscription.BudgetAllowances.First(x => x.Organization == transaction.Beneficiary.Organization);
-                        budgetAllowance.AvailableFund += transaction.AvailableFund;
-                    }
+                        Subscription subscription = null;
+                        if (transaction is ManuallyAddingFundTransaction maft)
+                            subscription = maftSubscriptions.FirstOrDefault(x => x.Id == maft.SubscriptionId);
+                        if (transaction is SubscriptionAddingFundTransaction saft)
+                            subscription = saftSubscriptionTypes.FirstOrDefault(x => x.Id == saft.SubscriptionTypeId)?.Subscription;
+                        fund.Amount -= transaction.AvailableFund;
 
-                    var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
-                    
-                    var transactionLogProductGroups = new List<TransactionLogProductGroup>()
-                    {
-                        new()
+                        if (subscription != null)
                         {
-                            Amount = transaction.AvailableFund,
-                            ProductGroupId = transaction.ProductGroupId,
-                            ProductGroupName = transaction.ProductGroup.Name
+                            var budgetAllowance = subscription.BudgetAllowances.First(x => x.Organization == transaction.Beneficiary.Organization);
+                            budgetAllowance.AvailableFund += transaction.AvailableFund;
                         }
-                    };
-                    
-                    db.TransactionLogs.Add(new TransactionLog()
-                    {
-                        Discriminator = TransactionLogDiscriminator.ExpireFundTransactionLog,
-                        TransactionUniqueId = transactionUniqueId,
-                        CreatedAtUtc = today,
-                        TotalAmount = transaction.AvailableFund,
-                        CardProgramCardId = transaction.Card.ProgramCardId,
-                        CardNumber = transaction.Card.CardNumber,
-                        BeneficiaryId = transaction.BeneficiaryId,
-                        BeneficiaryID1 = transaction.Beneficiary.ID1,
-                        BeneficiaryID2 = transaction.Beneficiary.ID2,
-                        BeneficiaryFirstname = transaction.Beneficiary.Firstname,
-                        BeneficiaryLastname = transaction.Beneficiary.Lastname,
-                        BeneficiaryEmail = transaction.Beneficiary.Email,
-                        BeneficiaryPhone = transaction.Beneficiary.Phone,
-                        BeneficiaryIsOffPlatform = transaction.Beneficiary is OffPlatformBeneficiary,
-                        BeneficiaryTypeId = transaction.Beneficiary.BeneficiaryTypeId,
-                        OrganizationId = transaction.Beneficiary.OrganizationId,
-                        OrganizationName = transaction.Beneficiary.Organization.Name,
-                        SubscriptionId = subscription?.Id,
-                        SubscriptionName = subscription?.Name,
-                        ProjectId = transaction.Beneficiary.Organization.ProjectId,
-                        ProjectName = transaction.Beneficiary.Organization.Project.Name,
-                        TransactionLogProductGroups = transactionLogProductGroups
-                    });
-                    
-                    var expireFundTransaction = new ExpireFundTransaction()
-                    {
-                        TransactionUniqueId = transactionUniqueId,
-                        Amount = transaction.AvailableFund,
-                        Card = transaction.Card,
-                        CreatedAtUtc = today,
-                        ProductGroupId = transactionProductGroupId,
-                        ExpiredSubscription = subscription,
-                        OrganizationId = transaction.OrganizationId,
-                    };
-                    transaction.Card.Transactions.Add(expireFundTransaction);
-                    transaction.ExpireFundTransaction = expireFundTransaction;
 
-                    transaction.AvailableFund = 0;
-                    transaction.Status = FundTransactionStatus.Expired;
+                        var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
+
+                        var transactionLogProductGroups = new List<TransactionLogProductGroup>()
+                        {
+                            new()
+                            {
+                                Amount = transaction.AvailableFund,
+                                ProductGroupId = transaction.ProductGroupId,
+                                ProductGroupName = transaction.ProductGroup.Name
+                            }
+                        };
+
+                        db.TransactionLogs.Add(new TransactionLog()
+                        {
+                            Discriminator = TransactionLogDiscriminator.ExpireFundTransactionLog,
+                            TransactionUniqueId = transactionUniqueId,
+                            CreatedAtUtc = today,
+                            TotalAmount = transaction.AvailableFund,
+                            CardProgramCardId = transaction.Card.ProgramCardId,
+                            CardNumber = transaction.Card.CardNumber,
+                            BeneficiaryId = transaction.BeneficiaryId,
+                            BeneficiaryID1 = transaction.Beneficiary.ID1,
+                            BeneficiaryID2 = transaction.Beneficiary.ID2,
+                            BeneficiaryFirstname = transaction.Beneficiary.Firstname,
+                            BeneficiaryLastname = transaction.Beneficiary.Lastname,
+                            BeneficiaryEmail = transaction.Beneficiary.Email,
+                            BeneficiaryPhone = transaction.Beneficiary.Phone,
+                            BeneficiaryIsOffPlatform = transaction.Beneficiary is OffPlatformBeneficiary,
+                            BeneficiaryTypeId = transaction.Beneficiary.BeneficiaryTypeId,
+                            OrganizationId = transaction.Beneficiary.OrganizationId,
+                            OrganizationName = transaction.Beneficiary.Organization.Name,
+                            SubscriptionId = subscription?.Id,
+                            SubscriptionName = subscription?.Name,
+                            ProjectId = transaction.Beneficiary.Organization.ProjectId,
+                            ProjectName = transaction.Beneficiary.Organization.Project.Name,
+                            TransactionLogProductGroups = transactionLogProductGroups
+                        });
+
+                        var expireFundTransaction = new ExpireFundTransaction()
+                        {
+                            TransactionUniqueId = transactionUniqueId,
+                            Amount = transaction.AvailableFund,
+                            Card = transaction.Card,
+                            CreatedAtUtc = today,
+                            ProductGroupId = transactionProductGroupId,
+                            ExpiredSubscription = subscription,
+                            OrganizationId = transaction.OrganizationId,
+                        };
+                        transaction.Card.Transactions.Add(expireFundTransaction);
+                        transaction.ExpireFundTransaction = expireFundTransaction;
+                    }
                 }
+
+                transaction.AvailableFund = 0;
+                transaction.Status = FundTransactionStatus.Expired;
             }
 
             await db.SaveChangesAsync();
