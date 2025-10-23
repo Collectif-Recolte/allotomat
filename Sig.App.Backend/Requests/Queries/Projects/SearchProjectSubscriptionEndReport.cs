@@ -55,7 +55,7 @@ namespace Sig.App.Backend.Requests.Queries.Projects
 
                     return new SubscriptionEndTransactionGraphType()
                     {
-                        Subscription = new SubscriptionGraphType(subscription),
+                        Subscription = subscription != null ? new SubscriptionGraphType(subscription) : null,
                         TotalPurchases = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).Count(),
                         CardsWithFunds = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.ManuallyAddingFundTransactionLog || z.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog).DistinctBy(z => z.CardNumber).Count(),
                         CardsUsedForPurchases = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).DistinctBy(z => z.CardNumber).Count(),
