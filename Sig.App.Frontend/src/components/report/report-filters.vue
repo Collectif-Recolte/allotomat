@@ -51,7 +51,7 @@
             class="sm:col-span-6"
             :label="t('date-start-label')"
             has-hidden-label
-            @update:modelValue="(e) => emit('dateFromUpdated', e)" />
+            @update:modelValue="onDateFromUpdated" />
         </div>
         <div class="flex items-center justify-end gap-x-4">
           <span class="text-sm text-primary-700">{{ t("date-selector-to") }}</span>
@@ -62,7 +62,7 @@
             class="sm:col-span-6"
             :label="t('date-end-label')"
             has-hidden-label
-            @update:modelValue="(e) => emit('dateToUpdated', e)" />
+            @update:modelValue="onDateToUpdated" />
         </div>
       </div>
       <div class="flex flex-row gap-x-4">
@@ -171,6 +171,14 @@ function onSubscriptionsChecked(input) {
     newSelectedSubscriptions = props.modelValue.selectedSubscriptions.filter((x) => x !== input.value);
   }
   emit("update:modelValue", { ...props.modelValue, selectedSubscriptions: newSelectedSubscriptions });
+}
+
+function onDateFromUpdated(value) {
+  emit("update:modelValue", { ...props.modelValue, dateFrom: value });
+}
+
+function onDateToUpdated(value) {
+  emit("update:modelValue", { ...props.modelValue, dateTo: value });
 }
 
 function setDates(type) {
