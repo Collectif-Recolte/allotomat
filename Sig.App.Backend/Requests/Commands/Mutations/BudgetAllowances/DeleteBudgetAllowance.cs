@@ -49,7 +49,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
 
             db.BudgetAllowances.Remove(budgetAllowance);
 
-            var log = await budgetAllowanceLogFactory.CreateLog(BudgetAllowanceLogDiscriminator.DeleteBudgetAllowanceLog, 0, budgetAllowance);
+            var log = await budgetAllowanceLogFactory.CreateLog(BudgetAllowanceLogDiscriminator.DeleteBudgetAllowanceLog, budgetAllowance.AvailableFund, budgetAllowance);
             db.BudgetAllowanceLogs.Add(log);
 
             await db.SaveChangesAsync();

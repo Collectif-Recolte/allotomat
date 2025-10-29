@@ -48,7 +48,7 @@
       </td>
       <td>
         <div>
-          {{ getMoneyFormat(slotProps.item.amount) }}
+          {{ getBudgetAllowanceLogAmount(slotProps.item) }}
         </div>
       </td>
     </template>
@@ -93,6 +93,25 @@ function getBudgetAllowanceLogDescription(budgetAllowanceLog) {
       return t("move-budget-allowance-transaction");
     case "CREATE_BUDGET_ALLOWANCE_LOG":
       return t("create-budget-allowance-transaction");
+  }
+}
+
+function getBudgetAllowanceLogAmount(budgetAllowanceLog) {
+  var amount = getMoneyFormat(budgetAllowanceLog.amount);
+  switch (budgetAllowanceLog.discriminator) {
+    case "DELETE_BUDGET_ALLOWANCE_LOG":
+      return `-${amount}`;
+    case "EDIT_BUDGET_ALLOWANCE_LOG":
+      if (budgetAllowanceLog.amount > 0) {
+        return `+${amount}`;
+      }
+      return `${amount}`;
+    case "MOVE_BUDGET_ALLOWANCE_LOG":
+      return `-${amount}`;
+    case "CREATE_BUDGET_ALLOWANCE_LOG":
+      if (budgetAllowanceLog.amount > 0) {
+        return `+${amount}`;
+      }
   }
 }
 

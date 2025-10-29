@@ -53,7 +53,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
             budgetAllowance.AvailableFund = budgetAllowance.AvailableFund - budgetDifference;
             budgetAllowance.OriginalFund = request.Amount;
 
-            var log = await budgetAllowanceLogFactory.CreateLog(BudgetAllowanceLogDiscriminator.EditBudgetAllowanceLog, request.Amount, budgetAllowance);
+            var log = await budgetAllowanceLogFactory.CreateLog(BudgetAllowanceLogDiscriminator.EditBudgetAllowanceLog, -budgetDifference, budgetAllowance);
             db.BudgetAllowanceLogs.Add(log);
 
             await db.SaveChangesAsync();
