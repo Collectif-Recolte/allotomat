@@ -23,7 +23,7 @@
     "last-year": "Année dernière",
     "current-year": "Année en cours",
     "last-month": "Mois dernier",
-    "all-time": "Tout les temps",
+    "all-time": "Toutes les dates",
     "reset-filters": "Réinitialiser"
 	}
 }
