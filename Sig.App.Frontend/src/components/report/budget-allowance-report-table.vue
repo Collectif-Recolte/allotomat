@@ -97,22 +97,16 @@ function getBudgetAllowanceLogDescription(budgetAllowanceLog) {
 }
 
 function getBudgetAllowanceLogAmount(budgetAllowanceLog) {
-  var amount = getMoneyFormat(budgetAllowanceLog.amount);
-  switch (budgetAllowanceLog.discriminator) {
-    case "DELETE_BUDGET_ALLOWANCE_LOG":
-      return `-${amount}`;
-    case "EDIT_BUDGET_ALLOWANCE_LOG":
-      if (budgetAllowanceLog.amount > 0) {
-        return `+${amount}`;
-      }
-      return `${amount}`;
-    case "MOVE_BUDGET_ALLOWANCE_LOG":
-      return `-${amount}`;
-    case "CREATE_BUDGET_ALLOWANCE_LOG":
-      if (budgetAllowanceLog.amount > 0) {
-        return `+${amount}`;
-      }
+  var amount = budgetAllowanceLog.amount;
+  
+  const invertedTypes = ["DELETE_BUDGET_ALLOWANCE_LOG", "MOVE_BUDGET_ALLOWANCE_LOG"];
+  if (invertedTypes.includes(budgetAllowanceLog.discriminator)) {
+    amount *= -1;
   }
+  
+  return amount > 0
+    ? `+${getMoneyFormat(amount)}`
+    : `${getMoneyFormat(amount)}`;
 }
 
 const cols = computed(() => [
