@@ -48,7 +48,7 @@
       </td>
       <td>
         <div>
-          {{ getMoneyFormat(slotProps.item.amount) }}
+          {{ getBudgetAllowanceLogAmount(slotProps.item) }}
         </div>
       </td>
     </template>
@@ -94,6 +94,19 @@ function getBudgetAllowanceLogDescription(budgetAllowanceLog) {
     case "CREATE_BUDGET_ALLOWANCE_LOG":
       return t("create-budget-allowance-transaction");
   }
+}
+
+function getBudgetAllowanceLogAmount(budgetAllowanceLog) {
+  var amount = budgetAllowanceLog.amount;
+  
+  const invertedTypes = ["DELETE_BUDGET_ALLOWANCE_LOG", "MOVE_BUDGET_ALLOWANCE_LOG"];
+  if (invertedTypes.includes(budgetAllowanceLog.discriminator)) {
+    amount *= -1;
+  }
+  
+  return amount > 0
+    ? `+${getMoneyFormat(amount)}`
+    : `${getMoneyFormat(amount)}`;
 }
 
 const cols = computed(() => [
