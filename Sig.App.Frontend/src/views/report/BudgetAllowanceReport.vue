@@ -185,6 +185,8 @@ const project = useResult(resultProjects, null, (data) => {
     setDateFrom(data.projects[0].reconciliationReportDate);
   }
 
+  updateUrl();
+
   availableOrganizations.value = data.projects[0].organizations;
   availableSubscriptions.value = data.projects[0].subscriptions;
 
