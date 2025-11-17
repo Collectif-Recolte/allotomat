@@ -68,7 +68,11 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
                 {
                     if (x.Card.Beneficiary != null && x.Card.Beneficiary.Subscriptions.Any(x => x.Subscription.IsSubscriptionPaymentBasedCardUsage))
                     {
-                        return x.Card != null ? TransactionHelper.GetNearestExpirationDate(x.Card.Transactions) : "";
+                        var nearestExpirationDate = TransactionHelper.GetNearestExpirationDate(x.Card.Transactions);
+                        if (nearestExpirationDate != null)
+                        {
+                            return $"{nearestExpirationDate.Value.ToString(DateFormats.RegularExport)}";
+                        }
                     }
 
                     return "";

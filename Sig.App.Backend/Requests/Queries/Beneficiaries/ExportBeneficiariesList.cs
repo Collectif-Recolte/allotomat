@@ -246,9 +246,13 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
             });
             dataWorksheet.Column("Date d'expiration des fonds en fonction de l'utilisation / Expiry date of funds based on card use", x =>
             {
-                if (x.Subscriptions.Any(x => x.Subscription.IsSubscriptionPaymentBasedCardUsage))
+                if (x.Subscriptions.Any(x => x.Subscription.IsSubscriptionPaymentBasedCardUsage) && x.Card != null)
                 {
-                    return x.Card != null ? TransactionHelper.GetNearestExpirationDate(x.Card.Transactions) : "";
+                    var nearestExpirationDate = TransactionHelper.GetNearestExpirationDate(x.Card.Transactions);
+                    if (nearestExpirationDate != null)
+                    {
+                        return $"{nearestExpirationDate.Value.ToString(DateFormats.RegularExport)}";
+                    }
                 }
 
                 return "";
