@@ -434,7 +434,7 @@ export default [
       },
       {
         name: urls.URL_MARKET_OVERVIEW_ENABLED,
-        path: ":marketId/ ",
+        path: ":marketId/enabled",
         component: () => import("@/views/market/EnabledMarket.vue"),
         meta: {
           claim: GLOBAL_MANAGE_ALL_MARKETS
