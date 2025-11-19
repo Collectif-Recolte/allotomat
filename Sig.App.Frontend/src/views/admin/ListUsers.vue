@@ -83,6 +83,22 @@ const {
             lastName
           }
           type
+          organizations {
+            id
+            name
+          }
+          projects {
+            id
+            name
+          }
+          markets {
+            id
+            name
+          }
+          marketGroups {
+            id
+            name
+          }
         }
         totalPages
         totalCount

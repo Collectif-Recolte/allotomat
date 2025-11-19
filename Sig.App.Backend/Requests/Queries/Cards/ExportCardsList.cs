@@ -4,11 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Projects;
+using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Plugins.MediatR;
 using Sig.App.Backend.Requests.Queries.Cards;
 using Sig.App.Backend.Services.Files;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -37,7 +39,8 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
                 throw new ProjectNotFoundException();
             }
 
-            var cards = await db.Cards.Include(x => x.Beneficiary)
+            var cards = await db.Cards.Include(x => x.Beneficiary).ThenInclude(x => x.Subscriptions).ThenInclude(x => x.Subscription)
+                .Include(x => x.Transactions)
                 .Include(x => x.Funds).ThenInclude(x => x.ProductGroup)
                 .Where(x => x.ProjectId == projectId)
                 .ToListAsync();
@@ -60,7 +63,20 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
                 .Column("Status", x => CardHelper.GetCardStatus(x.Card.Status))
                 .Column("Fonds carte cadeau", x => MoneyHelper.GetMoneyFormat(x.Card.LoyaltyFund(), MoneyHelper.EN))
                 .Column("Fonds d'abonnement", x => MoneyHelper.GetMoneyFormat(x.Card.TotalSubscriptionFund(), MoneyHelper.EN))
-                .Column("Total", x => MoneyHelper.GetMoneyFormat(x.Total, MoneyHelper.EN));
+                .Column("Total", x => MoneyHelper.GetMoneyFormat(x.Total, MoneyHelper.EN))
+                .Column("Date d'expiration des fonds en fonction de l'utilisation", x =>
+                {
+                    if (x.Card.Beneficiary != null && x.Card.Beneficiary.Subscriptions.Any(x => x.Subscription.IsSubscriptionPaymentBasedCardUsage))
+                    {
+                        var nearestExpirationDate = TransactionHelper.GetNearestExpirationDate(x.Card.Transactions);
+                        if (nearestExpirationDate != null)
+                        {
+                            return $"{nearestExpirationDate.Value.ToString(DateFormats.RegularExport)}";
+                        }
+                    }
+
+                    return "";
+                });
 
             var result = await mediator.Send(new SaveTemporaryFile.Command
             {

@@ -678,6 +678,16 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         [RequirePermission(GlobalPermission.ManageBudgetAllowance)]
+        [AnnotateErrorCodes(typeof(MoveBudgetAllowance))]
+        public static Task<MoveBudgetAllowance.Payload> MoveBudgetAllowance(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<MoveBudgetAllowance.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(GlobalPermission.ManageBudgetAllowance)]
         [AnnotateErrorCodes(typeof(DeleteBudgetAllowance))]
         public static async Task<bool> DeleteBudgetAllowance(
             this GqlMutation _,

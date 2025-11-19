@@ -1,5 +1,4 @@
-﻿using GraphQL.Conventions;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Sig.App.Backend.DbModel;

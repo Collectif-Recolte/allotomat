@@ -35,7 +35,8 @@
           :organizations="organizations"
           :available-organizations="availableOrganizations"
           @delete="deleteBudgetAllowance"
-          @save="saveBudgetAllowance" />
+          @save="saveBudgetAllowance"
+          @move="moveBudgetAllowance" />
       </template>
       <div v-if="availableOrganizations.length > 0 && canAddBudgetAllowance" class="mt-6 pb-6 border-b border-grey-200">
         <PfButtonAction
@@ -61,7 +62,11 @@ import { useRoute, useRouter } from "vue-router";
 import { subscriptionName } from "@/lib/helpers/subscription";
 import { formatDate, dateUtc, textualFormat } from "@/lib/helpers/date";
 import { useNotificationsStore } from "@/lib/store/notifications";
-import { URL_SUBSCRIPTION_DELETE_BUDGET_ALLOWANCE, URL_SUBSCRIPTION_ADMIN } from "@/lib/consts/urls";
+import {
+  URL_SUBSCRIPTION_DELETE_BUDGET_ALLOWANCE,
+  URL_SUBSCRIPTION_ADMIN,
+  URL_SUBSCRIPTION_MOVE_BUDGET_ALLOWANCE
+} from "@/lib/consts/urls";
 import ICON_PLUS from "@/lib/icons/plus.json";
 
 import BudgetAllowanceItem from "@/components/budget-allowance/item";
@@ -133,7 +138,7 @@ const { result: resultSubscription, refetch } = useQuery(
   }
 );
 const subscription = useResult(resultSubscription, null, (data) => {
-  budgetAllowances.value = budgetAllowances.value = data.subscription.budgetAllowances.map((x) => ({
+  budgetAllowances.value = data.subscription.budgetAllowances.map((x) => ({
     id: x.id,
     availableFund: x.availableFund,
     originalFund: x.originalFund,
@@ -194,8 +199,18 @@ async function saveBudgetAllowance(input) {
     await editBudgetAllowanceMutation({
       input: { amount: input.originalFund, budgetAllowanceId: input.budgetAllowanceId }
     });
+    // Reset the budget allowances list to refetch the new budget allowance values
+    budgetAllowances.value = [];
     addSuccess(t("edit-budget-allowance-success-notification"));
+    refetch();
   }
+}
+
+function moveBudgetAllowance(budgetAllowance) {
+  router.push({
+    name: URL_SUBSCRIPTION_MOVE_BUDGET_ALLOWANCE,
+    params: { subscriptionId: route.params.subscriptionId, budgetId: budgetAllowance.id }
+  });
 }
 
 function deleteBudgetAllowance(budgetAllowance) {
