@@ -10,7 +10,8 @@
     "amount-placeholder": "Enter the amount",
     "target-budget-allowance-label": "Target envelope",
     "move-budget-allowance-success-notification": "Funds have been transferred successfully.",
-    "initial-budget-allowance-name-label": "Initial envelope"
+    "initial-budget-allowance-name-label": "Initial envelope",
+    "available-fund-label": " available"
 	},
 	"fr": {
 		"delete-budget-allowance-success-notification": "L'enveloppe pour le groupe {organizationName} a été supprimée avec succès.",
@@ -22,7 +23,8 @@
     "amount-placeholder": "Entrez le montant",
     "target-budget-allowance-label": "Enveloppe de destination",
     "move-budget-allowance-success-notification": "Les fonds ont été transférés avec succès.",
-    "initial-budget-allowance-name-label": "Enveloppe initiale"
+    "initial-budget-allowance-name-label": "Enveloppe initiale",
+    "available-fund-label": " disponibles"
 	}
 }
 </i18n>
@@ -169,7 +171,8 @@ const budgetAllowance = useResult(resultBudgetAllowance, null, (data) => {
     " - " +
     data.budgetAllowance.organization.name +
     " - " +
-    getMoneyFormat(data.budgetAllowance.availableFund);
+    getMoneyFormat(data.budgetAllowance.availableFund) +
+    t("available-fund-label");
   return data.budgetAllowance;
 });
 
@@ -211,9 +214,11 @@ const validationSchema = computed(() =>
 const availableBudgetAllowances = computed(() => {
   if (!projects.value) return [];
   return projects.value[0].subscriptions
-    .filter((subscription) => subscription.id !== route.params.subscriptionId && !subscription.isArchived)
+    .filter((subscription) => !subscription.isArchived)
     .map((subscription) => subscription.budgetAllowances)
     .flat()
+    .filter((x) => x.id !== budgetAllowance.value.id)
+    .sort((a) => (a.subscription.id === budgetAllowance.value.subscription.id ? -1 : 1))
     .map((x) => ({
       value: x.id,
       label: x.subscription.name + " - " + x.organization.name + " - " + getMoneyFormat(x.availableFund)
