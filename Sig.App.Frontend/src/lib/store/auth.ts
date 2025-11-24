@@ -30,6 +30,7 @@ export const useAuthStore = defineStore("auth", {
   }),
   actions: {
     initialize(claims: Record<string, string> | null, globalPermissions: Array<string>) {
+      // @ts-ignore
       this.$patch((state) => {
         state.initialized = true;
         state.claims = claims;
@@ -39,9 +40,11 @@ export const useAuthStore = defineStore("auth", {
   },
   getters: {
     isLoggedIn(state) {
+      // @ts-ignore
       return !!state.claims;
     },
     userType(state) {
+      // @ts-ignore
       const utype = state.claims == null ? null : state.claims[CLAIM_UTYPE];
 
       switch (utype) {
@@ -60,6 +63,7 @@ export const useAuthStore = defineStore("auth", {
       return USER_TYPE_ANONYMOUS;
     },
     getGlobalPermissions(state) {
+      // @ts-ignore
       return state.globalPermissions;
     }
   }

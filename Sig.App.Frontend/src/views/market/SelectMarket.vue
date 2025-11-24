@@ -45,11 +45,10 @@
           <div class="flex flex-col gap-y-6">
             <PfFormSection v-if="filteredMarketOptions.length > 0">
               <Field v-slot="{ field: inputField, errors: fieldErrors }" name="market">
-                <PfFormInputSelect
+                <UiCombobox
                   id="marketId"
                   required
                   v-bind="inputField"
-                  :placeholder="t('choose-market')"
                   :label="t('select-market')"
                   :options="filteredMarketOptions"
                   :errors="fieldErrors" />

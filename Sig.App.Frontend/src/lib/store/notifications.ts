@@ -48,6 +48,7 @@ export const useNotificationsStore = defineStore("notifications", {
         dismissible
       };
 
+      // @ts-ignore
       this.notifications.push(notification);
 
       if (duration > 0) {
@@ -59,6 +60,7 @@ export const useNotificationsStore = defineStore("notifications", {
       return notification.id;
     },
     dismiss(id: string) {
+      // @ts-ignore
       this.notifications = this.notifications.filter((n) => n.id !== id);
     }
   }

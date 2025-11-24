@@ -94,6 +94,8 @@ export default {
       const isTouched = useIsFormTouched();
       const isValid = useIsFormValid();
 
+      console.log("isDirty::" + isDirty.value + " isTouched::" + isTouched.value + " isValid::" + isValid.value);
+
       return (!isDirty.value && !isTouched.value && !isValid.value) || !isValid.value;
     }
   }
