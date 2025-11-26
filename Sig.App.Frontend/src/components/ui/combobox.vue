@@ -24,6 +24,7 @@
       <div>
         <div>
           <ComboboxInput
+            autocomplete="off"
             class="pf-select text-[18px] min-h-11 shadow-sm block w-full rounded-md transition-colors duration-200 ease-in-out disabled:bg-grey-100 disabled:text-grey-700"
             :class="
               hasErrorState
