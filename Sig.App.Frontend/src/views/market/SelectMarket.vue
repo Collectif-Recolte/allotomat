@@ -41,7 +41,7 @@
         :cancel-label="t('cancel')"
         :processing="isSubmitting"
         @cancel="closeModal">
-        <div>
+        <div class="relative">
           <div class="flex flex-col gap-y-6">
             <PfFormSection v-if="filteredMarketOptions.length > 0">
               <Field v-slot="{ field: inputField, errors: fieldErrors }" name="market">

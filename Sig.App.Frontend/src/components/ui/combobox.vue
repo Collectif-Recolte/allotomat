@@ -56,7 +56,7 @@
             as="template"
             :value="option.value">
             <li
-              class="relative cursor-default select-none py-2 pl-10 pr-4"
+              class="relative cursor-default select-none py-2 px-4"
               :class="{
                 'bg-primary-50 text-black dark:bg-primary-700 dark:text-white': active,
                 'text-gray-900': !active
