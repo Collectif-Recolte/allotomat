@@ -12,7 +12,6 @@ export const useOrganizationStore = defineStore("organization", {
   actions: {
     changeOrganization(newOrganization: string) {
       localStorage.setItem("currentOrganization", newOrganization);
-      // @ts-ignore
       this.currentOrganization = newOrganization;
     }
   }

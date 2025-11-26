@@ -12,7 +12,6 @@ export const useMarketStore = defineStore("market", {
   actions: {
     changeCurrentMarket(newMarket: string) {
       localStorage.setItem("currentMarket", newMarket);
-      // @ts-ignore
       this.currentMarket = newMarket;
     }
   }

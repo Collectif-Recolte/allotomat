@@ -12,7 +12,6 @@ export const useCashRegisterStore = defineStore("cashRegister", {
   actions: {
     changeCashRegister(newCashRegister: string) {
       localStorage.setItem("currentCashRegister", newCashRegister);
-      // @ts-ignore
       this.currentCashRegister = newCashRegister;
     }
   }
