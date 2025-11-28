@@ -27,12 +27,7 @@
 
 <template>
   <UiDialogModal v-slot="{ closeModal }" :return-route="returnRoute()" :title="t('title')" :has-footer="false">
-    <Form
-      v-if="!loadingMarkets && !loadingProject"
-      v-slot="{ isSubmitting, errors: formErrors }"
-      :validation-schema="validationSchema || baseValidationSchema"
-      :initial-values="initialValues"
-      @submit="onSubmit">
+    <Form v-if="!loadingMarkets && !loadingProject" v-slot="{ isSubmitting, errors: formErrors }" @submit="onSubmit">
       <PfForm
         has-footer
         can-cancel
@@ -41,15 +36,14 @@
         :cancel-label="t('cancel')"
         :processing="isSubmitting"
         @cancel="closeModal">
-        <div>
+        <div class="relative">
           <div class="flex flex-col gap-y-6">
             <PfFormSection v-if="filteredMarketOptions.length > 0">
               <Field v-slot="{ field: inputField, errors: fieldErrors }" name="market">
-                <PfFormInputSelect
+                <UiCombobox
                   id="marketId"
                   required
                   v-bind="inputField"
-                  :placeholder="t('choose-market')"
                   :label="t('select-market')"
                   :options="filteredMarketOptions"
                   :errors="fieldErrors" />
@@ -90,7 +84,6 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQuery, useResult } from "@vue/apollo-composable";
-import { string, object } from "yup";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 import {
@@ -181,22 +174,10 @@ const { mutate: addMarketToProject } = useMutation(
   `
 );
 
-const initialValues = {
-  market: null,
-  marketGroup: route.params.marketGroupId !== null ? route.params.marketGroupId : null
-};
-
 const filteredMarketOptions = computed(() => {
   if (!markets.value || !project.value) return [];
   return markets.value.filter((x) => !project.value.markets.some((y) => y.id === x.value));
 });
-
-const validationSchema = computed(() =>
-  object({
-    market: string().label(t("select-market")).required(),
-    marketGroup: string().label(t("selected-market-group")).required()
-  })
-);
 
 const selectMarketGroupEnabled = computed(() => route.name === URL_ADD_MERCHANTS_FROM_MARKET_GROUP);
 const canCreateMarket = computed(() => route.name !== URL_ADD_MERCHANTS_FROM_PROJECT);
