@@ -1,28 +1,28 @@
 <i18n>
-{
-	"en": {
-		"cancel": "Cancel",
-		"clear-date": "Clear selected date",
-		"close-time-picker": "",
-		"locale": "en-US",
-		"open-time-picker": "",
-		"select-date": "Select"
-	},
-	"fr": {
-		"cancel": "Annuler",
-		"clear-date": "Effacer la date sélectionnée",
-		"close-time-picker": "Fermer le sélecteur d'heure",
-		"locale": "fr-CA",
-		"open-time-picker": "Ouvrir le sélecteur d'heure",
-		"select-date": "Sélectionner"
-	}
-}
-</i18n>
+  {
+    "en": {
+      "cancel": "Cancel",
+      "clear-date": "Clear selected date",
+      "close-time-picker": "",
+      "locale": "en-US",
+      "open-time-picker": "",
+      "select-date": "Select"
+    },
+    "fr": {
+      "cancel": "Annuler",
+      "clear-date": "Effacer la date sélectionnée",
+      "close-time-picker": "Fermer le sélecteur d'heure",
+      "locale": "fr-CA",
+      "open-time-picker": "Ouvrir le sélecteur d'heure",
+      "select-date": "Sélectionner"
+    }
+  }
+  </i18n>
 
 <template>
   <Datepicker
     ref="datepicker"
-    :model-value="props.value"
+    :model-value="props.modelValue"
     :locale="t('locale')"
     text-input
     position="left"
@@ -44,7 +44,7 @@
         :label="props.label"
         :has-hidden-label="props.hasHiddenLabel"
         :errors="props.errors"
-        :value="dpValue"
+        :model-value="dpValue"
         :leading-icon="CALENDAR_ICON"
         :disabled="props.disabled"
         is-stroke-icon
@@ -53,7 +53,7 @@
     </template>
     <template #clear-icon>
       <button
-        v-if="props.value"
+        v-if="props.modelValue && props.canClear"
         class="text-grey-600 dark:text-grey-400 hover:text-primary-700 focus:text-primary-700 dark:hover:text-primary-300 focus:hover:text-primary-300"
         @click.stop="clearInput">
         <PfIcon size="sm" :icon="CLOSE_ICON" aria-hidden="true" />
@@ -117,20 +117,20 @@ const props = defineProps({
     type: String,
     required: true
   },
-  value: {
+  modelValue: {
     type: [Date, Array],
     default: undefined
   },
   errors: {
     type: Array,
     default() {
-      [];
+      return [];
     }
   },
   markers: {
     type: Array,
     default() {
-      [];
+      return [];
     }
   },
   minDate: {
@@ -144,7 +144,11 @@ const props = defineProps({
   enableTimePicker: Boolean,
   isInsideModal: Boolean,
   hasHiddenLabel: Boolean,
-  disabled: Boolean
+  disabled: Boolean,
+  canClear: {
+    type: Boolean,
+    default: true
+  }
 });
 
 const emit = defineEmits(["update:modelValue"]);

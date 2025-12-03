@@ -29,7 +29,7 @@
         :aria-invalid="hasErrorState"
         :aria-errormessage="hasErrorState ? `${id}-error` : null"
         :aria-describedby="description ? `${id}-description` : null"
-        @input="$emit('input', $event.target.checked)" />
+        @change="$emit('update:modelValue', $event.target.checked)" />
     </template>
     <template v-if="!description" #description>
       <slot name="description"></slot>
@@ -47,12 +47,12 @@ export default {
   props: {
     ...commonFieldProps,
     checked: Boolean,
-    value: {
+    modelValue: {
       type: [Boolean, String],
       default: false
     },
     isFilter: Boolean
   },
-  emits: ["input"]
+  emits: ["update:modelValue"]
 };
 </script>

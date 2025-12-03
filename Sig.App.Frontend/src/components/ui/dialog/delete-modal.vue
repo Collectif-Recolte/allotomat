@@ -15,15 +15,16 @@
   <UiDialogModal v-slot="{ closeModal }" ref="modal" :return-route="returnRoute" :title="title" :has-footer="false">
     <!-- eslint-disable-next-line vue/no-v-html -->
     <p v-html="description"></p>
-    <Form v-slot="{ isSubmitting, errors: formErrors }" :validation-schema="validationSchema" @submit="deleteEntity">
-      <PfForm ref="form" :disable-submit="Object.keys(formErrors).length > 0" :processing="isSubmitting">
+    <Form v-slot="{ isSubmitting, meta }" :validation-schema="validationSchema" @submit="deleteEntity">
+      <PfForm ref="form" :disable-submit="!meta.valid" :processing="isSubmitting">
         <Field v-slot="{ field, errors: fieldErrors }" name="deleteText">
           <PfFormInputText
             id="deleteText"
-            v-bind="field"
+            :model-value="field.value"
             :label="props.deleteTextLabel"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
         <template #footer>
           <div class="pt-5">

@@ -11,7 +11,7 @@
     <textarea
       :id="id"
       :name="name"
-      :value="value"
+      :value="modelValue"
       :placeholder="placeholder"
       :required="required"
       :disabled="disabled"
@@ -25,7 +25,8 @@
       :aria-invalid="hasErrorState"
       :aria-errormessage="hasErrorState ? `${id}-error` : null"
       :aria-describedby="description ? `${id}-description` : null"
-      @input="$emit('input', $event.target.value)"></textarea>
+      @input="$emit('update:modelValue', $event.target.value)"
+      @blur="$emit('blur', $event)"></textarea>
   </FormField>
 </template>
 
@@ -38,7 +39,7 @@ export default {
   },
   props: {
     ...commonFieldProps,
-    value: {
+    modelValue: {
       type: [String, Number],
       default: ""
     },
@@ -51,6 +52,6 @@ export default {
       default: 3
     }
   },
-  emits: ["input"]
+  emits: ["update:modelValue", "blur"]
 };
 </script>

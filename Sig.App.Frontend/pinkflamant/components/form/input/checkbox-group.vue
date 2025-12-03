@@ -17,7 +17,7 @@
       :disabled="disabled"
       :checked="isChecked(option.value)"
       :is-filter="isFilter"
-      @input="(e) => updateCheckbox(option.value, e)" />
+      @update:modelValue="(isChecked) => updateCheckbox(option.value, isChecked)" />
   </FormFieldset>
 </template>
 
@@ -31,7 +31,7 @@ export default {
   },
   props: {
     ...commonFieldProps,
-    value: {
+    modelValue: {
       type: Array,
       default() {
         return [];
@@ -41,12 +41,12 @@ export default {
       type: Array,
       required: true,
       default() {
-        return null;
+        return [];
       }
     },
     isFilter: Boolean
   },
-  emits: ["input"],
+  emits: ["update:modelValue"],
   computed: {
     hasErrorState() {
       return this.errors && this.errors.length > 0;
@@ -54,10 +54,18 @@ export default {
   },
   methods: {
     updateCheckbox(value, isChecked) {
-      this.$emit("input", { value, isChecked });
+      let newValue;
+      if (isChecked) {
+        // Ajouter la valeur si cochée
+        newValue = [...this.modelValue, value];
+      } else {
+        // Retirer la valeur si décochée
+        newValue = this.modelValue.filter((v) => v !== value);
+      }
+      this.$emit("update:modelValue", newValue);
     },
     isChecked(value) {
-      return this.value.indexOf(value) !== -1;
+      return this.modelValue.indexOf(value) !== -1;
     }
   }
 };

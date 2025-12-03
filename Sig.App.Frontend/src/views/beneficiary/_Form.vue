@@ -50,14 +50,10 @@
 </i18n>
 
 <template>
-  <Form
-    v-slot="{ isSubmitting, errors: formErrors }"
-    :validation-schema="validationSchema"
-    :initial-values="initialValues"
-    @submit="onSubmit">
+  <Form v-slot="{ isSubmitting, meta }" :validation-schema="validationSchema" :initial-values="initialValues" @submit="onSubmit">
     <PfForm
       has-footer
-      :disable-submit="Object.keys(formErrors).length > 0"
+      :disable-submit="!meta.valid"
       :submit-label="props.submitBtn"
       :processing="isSubmitting"
       :warning-message="props.warningMessage"
@@ -67,85 +63,94 @@
           <PfFormInputText
             id="firstname"
             required
-            v-bind="field"
+            :model-value="field.value"
             :label="t('beneficiary-firstname')"
             :placeholder="t('beneficiary-firstname-placeholder')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="lastname">
           <PfFormInputText
             id="lastname"
             required
-            v-bind="field"
+            :model-value="field.value"
             :label="t('beneficiary-lastname')"
             :placeholder="t('beneficiary-lastname-placeholder')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="notes">
           <PfFormInputTextarea
             id="notes"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('beneficiary-notes')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-slot="{ field: inputField, errors: fieldErrors }" name="beneficiaryTypeId">
           <PfFormInputSelect
             id="beneficiaryTypeId"
-            v-bind="inputField"
+            :model-value="inputField.value"
             :label="t('beneficiary-category')"
             :options="beneficiaryTypes"
             col-span-class="sm:col-span-3"
             :errors="fieldErrors"
-            required />
+            required
+            @update:modelValue="inputField.onChange" />
         </Field>
       </PfFormSection>
       <PfFormSection :title="t('communication-means')">
         <Field v-slot="{ field, errors: fieldErrors }" name="email">
           <PfFormInputText
             id="email"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('communication-means-email')"
             :placeholder="t('communication-means-email-placeholder')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-slot="{ field }" name="isUnsubscribeToReceipt">
           <PfFormInputCheckbox
             id="isUnsubscribeToReceipt"
-            v-bind="field"
+            :model-value="field.value"
             :checked="field.value"
             :label="t('unsubscribe-to-transaction-receipt')"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="phone">
           <PfFormInputText
             id="phone"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('communication-means-phone')"
             :placeholder="t('communication-means-phone-placeholder')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="address">
           <PfFormInputText
             id="address"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('communication-means-address')"
             :placeholder="t('communication-means-address-placeholder')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="postalCode">
           <PfFormInputText
             id="postalCode"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('communication-means-postal-code')"
             :placeholder="t('communication-means-postal-code-placeholder')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
       </PfFormSection>
       <PfFormSection :title="t('unique-id-other-system')">
@@ -153,18 +158,20 @@
           <PfFormInputText
             id="id1"
             :required="!props.isNew"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('unique-id-id1')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="id2">
           <PfFormInputText
             id="id2"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('unique-id-id2')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
       </PfFormSection>
       <template #footer>

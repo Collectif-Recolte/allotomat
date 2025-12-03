@@ -25,14 +25,14 @@
   <UiDialogModal v-slot="{ closeModal }" :return-route="returnRoute()" :title="t('title')" :has-footer="false">
     <Form
       v-if="!loadingMarketGroup"
-      v-slot="{ isSubmitting, errors: formErrors }"
+      v-slot="{ isSubmitting, meta }"
       :validation-schema="validationSchema || baseValidationSchema"
       :initial-values="initialValues"
       @submit="onSubmit">
       <PfForm
         has-footer
         can-cancel
-        :disable-submit="Object.keys(formErrors).length > 0"
+        :disable-submit="!meta.valid"
         :submit-label="t('add-market')"
         :cancel-label="t('cancel')"
         :processing="isSubmitting"
@@ -44,11 +44,12 @@
                 <PfFormInputSelect
                   id="marketId"
                   required
-                  v-bind="inputField"
+                  :model-value="inputField.value"
                   :placeholder="t('choose-market')"
                   :label="t('select-market')"
                   :options="filteredMarketOptions"
-                  :errors="fieldErrors" />
+                  :errors="fieldErrors"
+                  @update:modelValue="inputField.onChange" />
               </Field>
             </PfFormSection>
             <template v-else>

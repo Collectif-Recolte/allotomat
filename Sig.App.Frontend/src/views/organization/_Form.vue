@@ -15,14 +15,14 @@
 
 <template>
   <Form
-    v-slot="{ isSubmitting, errors: formErrors }"
+    v-slot="{ isSubmitting, meta }"
     :validation-schema="validationSchema || baseValidationSchema"
     :initial-values="initialValues || baseInitialValues"
     @submit="onSubmit">
     <PfForm
       has-footer
       can-cancel
-      :disable-submit="Object.keys(formErrors).length > 0"
+      :disable-submit="meta.valid === false"
       :submit-label="props.submitBtn"
       :cancel-label="t('cancel')"
       :processing="isSubmitting"
@@ -31,11 +31,12 @@
         <Field v-slot="{ field, errors: fieldErrors }" name="name">
           <PfFormInputText
             id="name"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('organization-name')"
             :placeholder="t('organization-name-placeholder')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
       </PfFormSection>
       <slot></slot>

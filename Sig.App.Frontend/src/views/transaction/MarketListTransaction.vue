@@ -35,6 +35,7 @@
                 id="datefrom"
                 v-model="dateFrom"
                 class="sm:col-span-6"
+                :can-clear="false"
                 :label="t('date-start-label')"
                 has-hidden-label />
             </div>
@@ -47,6 +48,7 @@
                 v-model="dateTo"
                 :min-date="dateFrom"
                 class="sm:col-span-6"
+                :can-clear="false"
                 :label="t('date-end-label')"
                 has-hidden-label />
             </div>
@@ -175,11 +177,11 @@ function getTotalTransactionAmount(transactions) {
 }
 
 function onCashRegistersChecked(value) {
-  cashRegisters.value.push(value);
+  cashRegisters.value = value;
 }
 
 function onCashRegistersUnchecked(value) {
-  cashRegisters.value = cashRegisters.value.filter((x) => x !== value);
+  cashRegisters.value = value;
 }
 
 function onResetFilters() {

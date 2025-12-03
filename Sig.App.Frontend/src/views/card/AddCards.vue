@@ -42,11 +42,11 @@
       </p>
     </template>
     <template v-else #default="{ closeModal }">
-      <Form v-slot="{ isSubmitting, errors: formErrors }" :validation-schema="validationSchema" @submit="onSubmit">
+      <Form v-slot="{ isSubmitting, meta }" :validation-schema="validationSchema" @submit="onSubmit">
         <PfForm
           has-footer
           can-cancel
-          :disable-submit="Object.keys(formErrors).length > 0"
+          :disable-submit="!meta.valid"
           :submit-label="t('generate-card')"
           :cancel-label="t('cancel')"
           :processing="isSubmitting"
@@ -54,13 +54,14 @@
           <Field v-slot="{ field, errors: fieldErrors }" name="cardCount">
             <PfFormInputText
               id="cardCount"
-              v-bind="field"
+              :model-value="field.value"
               :label="t('card-count')"
               :placeholder="t('card-placeholder')"
               :errors="fieldErrors"
               input-type="number"
               min="0"
-              col-span-class="sm:col-span-4" />
+              col-span-class="sm:col-span-4"
+              @update:modelValue="field.onChange" />
           </Field>
         </PfForm>
       </Form>

@@ -39,10 +39,10 @@
   <p class="text-p1">
     {{ t("transaction-in-program-name") }}
   </p>
-  <Form v-slot="{ errors: formErrors, setFieldValue }" :validation-schema="validationSchema" keep-values @submit="nextStep">
+  <Form v-slot="{ setFieldValue, meta }" :validation-schema="validationSchema" keep-values @submit="nextStep">
     <PfForm
       has-footer
-      :disable-submit="Object.keys(formErrors).length > 0"
+      :disable-submit="!meta.valid"
       :submit-label="t('next-step')"
       :cancel-label="t('cancel')"
       footer-alt-style
@@ -52,32 +52,41 @@
         <Field v-slot="{ field: inputField, errors: fieldErrors }" name="marketId">
           <PfFormInputSelect
             id="marketId"
-            v-bind="inputField"
+            :model-value="inputField.value"
             :placeholder="t('choose-market')"
             :label="t('select-market')"
             :options="markets"
             :errors="fieldErrors"
-            @input="onMarketSelected" />
+            @update:modelValue="
+              (e) => {
+                inputField.onChange.forEach((x) => {
+                  x(e);
+                });
+                onMarketSelected(e);
+              }
+            " />
         </Field>
         <Field v-slot="{ field: inputField, errors: fieldErrors }" name="cashRegisterId">
           <PfFormInputSelect
             id="cashRegisterId"
-            v-bind="inputField"
+            :model-value="inputField.value"
             :disabled="!selectedMarket"
             :placeholder="t('choose-cash-register')"
             :label="t('select-cash-register')"
             :options="cashRegisters"
-            :errors="fieldErrors" />
+            :errors="fieldErrors"
+            @update:modelValue="inputField.onChange" />
         </Field>
         <div>
           <Field v-slot="{ field: inputField, errors: fieldErrors }" name="cardNumber">
             <PfFormInputText
               v-if="enterCardNumber"
               id="cardNumber"
-              v-bind="inputField"
+              :model-value="inputField.value"
               :description="t('card-number-description')"
               :label="t('card-number')"
-              :errors="fieldErrors" />
+              :errors="fieldErrors"
+              @update:modelValue="inputField.onChange" />
             <QRCodeScanner
               v-else
               @cancel="enterCardNumber = true"

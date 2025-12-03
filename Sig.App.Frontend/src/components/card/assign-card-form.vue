@@ -99,12 +99,13 @@
             <Field v-slot="{ field, errors: fieldErrors }" v-model="existingCardId" name="existingCardId">
               <PfFormInputText
                 id="existingCardId"
-                v-bind="field"
+                :model-value="field.value"
                 :label="t('existing-card-id')"
                 :placeholder="t('existing-card-id-placeholder')"
                 :errors="fieldErrors"
                 input-type="number"
-                col-span-class="sm:col-span-4" />
+                col-span-class="sm:col-span-4"
+                @update:modelValue="field.onChange" />
             </Field>
             <PfButtonAction
               btn-type="button"
@@ -154,20 +155,6 @@ useGraphQLErrorMessages({
   }
 });
 
-const emit = defineEmits(["cardAssignSuccess"]);
-
-const { getGlobalPermissions } = storeToRefs(useAuthStore());
-const { t } = useI18n();
-const { resolveClient } = useApolloClient();
-const client = resolveClient();
-
-const cardAssignSuccess = ref(false);
-const cardAssignId = ref(0);
-const project = ref(undefined);
-const isScanning = ref(props.showNumber);
-const showError = ref(false);
-const existingCardId = ref("");
-
 const props = defineProps({
   closeModal: {
     type: Function,
@@ -182,6 +169,20 @@ const props = defineProps({
     default: false
   }
 });
+
+const emit = defineEmits(["cardAssignSuccess"]);
+
+const { getGlobalPermissions } = storeToRefs(useAuthStore());
+const { t } = useI18n();
+const { resolveClient } = useApolloClient();
+const client = resolveClient();
+
+const cardAssignSuccess = ref(false);
+const cardAssignId = ref(0);
+const project = ref(undefined);
+const isScanning = ref(props.showNumber);
+const showError = ref(false);
+const existingCardId = ref("");
 
 const { mutate: assignCardToBeneficiary } = useMutation(
   gql`

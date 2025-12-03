@@ -117,6 +117,7 @@ const { mutate: resendConfirmationEmailMutation } = useMutation(
 const verifyToken = useResult(result);
 
 onResult(async (queryResult) => {
+  if (queryResult.loading) return;
   if (queryResult.data.verifyToken.status === TOKEN_STATUS_INVALID) {
     showError.value = true;
   } else if (queryResult.data.verifyToken.status === TOKEN_STATUS_USER_CONFIRMED) {

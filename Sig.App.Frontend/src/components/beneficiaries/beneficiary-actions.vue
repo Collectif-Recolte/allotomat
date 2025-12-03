@@ -132,6 +132,29 @@ onMounted(() => {
   updateItems();
 });
 
+const props = defineProps({
+  beneficiary: {
+    type: Object,
+    required: true
+  },
+  beneficiariesAreAnonymous: {
+    type: Boolean,
+    default: false
+  },
+  haveSubscriptionConflict: {
+    type: Boolean,
+    default: false
+  },
+  organization: {
+    type: Object,
+    required: true
+  },
+  isAllGroupSelected: {
+    type: Boolean,
+    default: false
+  }
+});
+
 watch(
   () => props.beneficiary,
   () => {
@@ -328,29 +351,6 @@ function updateItems() {
     ];
   }
 }
-
-const props = defineProps({
-  beneficiary: {
-    type: Object,
-    required: true
-  },
-  beneficiariesAreAnonymous: {
-    type: Boolean,
-    default: false
-  },
-  haveSubscriptionConflict: {
-    type: Boolean,
-    default: false
-  },
-  organization: {
-    type: Object,
-    required: true
-  },
-  isAllGroupSelected: {
-    type: Boolean,
-    default: false
-  }
-});
 
 function haveCard() {
   return props.beneficiary.card !== null;

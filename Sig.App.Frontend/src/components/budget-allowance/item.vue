@@ -27,34 +27,36 @@
 
 <template>
   <Form
-    v-slot="{ isSubmitting, errors: formErrors, handleReset }"
+    v-slot="{ isSubmitting, handleReset, meta }"
     :validation-schema="validationSchema"
     :initial-values="props.budgetAllowance"
     @submit="saveBudget">
     <PfFormNested
       :is-disabled="!isInEdition"
       :submit-label="t('submit-btn')"
-      :disable-submit="Object.keys(formErrors).length > 0"
+      :disable-submit="!meta.valid"
       :processing="isSubmitting">
       <Field v-slot="{ field, errors }" name="organization">
         <PfFormInputSelect
           id="organization"
-          v-bind="field"
+          :model-value="field.value"
           :errors="errors"
           :label="t('budget-allowance-organization')"
           :options="organizationsList"
-          :disabled="!canEditOrganization" />
+          :disabled="!canEditOrganization"
+          @update:modelValue="field.onChange" />
       </Field>
       <template #lastField>
         <Field v-slot="{ field, errors: fieldErrors }" name="originalFund">
           <PfFormInputText
             id="originalFund"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('amount-label')"
             :errors="fieldErrors"
             input-type="number"
             min="0"
-            :disabled="!isInEdition">
+            :disabled="!isInEdition"
+            @update:modelValue="field.onChange">
             <template #trailingIcon>
               <UiDollarSign :errors="fieldErrors" />
             </template>
@@ -63,7 +65,7 @@
         <Field v-if="!props.budgetAllowance.isNew" v-slot="{ field, errors: fieldErrors }" name="availableFund">
           <PfFormInputText
             id="availableFund"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('available-fund-label')"
             :errors="fieldErrors"
             input-type="number"

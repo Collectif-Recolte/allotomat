@@ -27,11 +27,16 @@
 
 <template>
   <UiDialogModal v-slot="{ closeModal }" :return-route="returnRoute()" :title="t('title')" :has-footer="false">
-    <Form v-if="!loadingMarkets && !loadingProject" v-slot="{ isSubmitting, errors: formErrors }" @submit="onSubmit">
+    <Form
+      v-if="!loadingMarkets && !loadingProject"
+      v-slot="{ isSubmitting, meta }"
+      :validation-schema="validationSchema"
+      :initial-values="initialValues"
+      @submit="onSubmit">
       <PfForm
         has-footer
         can-cancel
-        :disable-submit="Object.keys(formErrors).length > 0"
+        :disable-submit="meta.valid === false"
         :submit-label="t('add-market')"
         :cancel-label="t('cancel')"
         :processing="isSubmitting"
@@ -43,20 +48,23 @@
                 <UiCombobox
                   id="marketId"
                   required
-                  v-bind="inputField"
+                  class="z-10"
+                  :model-value="inputField.value"
                   :label="t('select-market')"
                   :options="filteredMarketOptions"
-                  :errors="fieldErrors" />
+                  :errors="fieldErrors"
+                  @update:modelValue="inputField.onChange" />
               </Field>
               <Field v-slot="{ field, errors: fieldErrors }" name="marketGroup">
                 <PfFormInputSelect
                   id="marketGroup"
                   required
-                  v-bind="field"
+                  :model-value="field.value"
                   :label="t('selected-market-group')"
                   :options="marketGroups"
                   :disabled="selectMarketGroupEnabled"
-                  :errors="fieldErrors" />
+                  :errors="fieldErrors"
+                  @update:modelValue="field.onChange" />
               </Field>
             </PfFormSection>
             <template v-else>
@@ -84,6 +92,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQuery, useResult } from "@vue/apollo-composable";
+import { string, object } from "yup";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 import {
@@ -181,6 +190,18 @@ const filteredMarketOptions = computed(() => {
 
 const selectMarketGroupEnabled = computed(() => route.name === URL_ADD_MERCHANTS_FROM_MARKET_GROUP);
 const canCreateMarket = computed(() => route.name !== URL_ADD_MERCHANTS_FROM_PROJECT);
+
+const initialValues = {
+  market: "",
+  marketGroup: ""
+};
+
+const validationSchema = computed(() =>
+  object({
+    market: string().label(t("select-market")).required(),
+    marketGroup: string().label(t("selected-market-group")).required()
+  })
+);
 
 function createMarket() {
   router.push({ name: URL_MARKET_OVERVIEW_ADD });

@@ -116,7 +116,7 @@
   <p v-if="card && card.isDisabled" class="text-red-500 font-bold">{{ t("card-is-disabled") }}</p>
   <Form
     v-if="funds"
-    v-slot="{ isSubmitting, errors: formErrors }"
+    v-slot="{ isSubmitting, meta }"
     :initial-values="initialValues"
     :validation-schema="currentSchema"
     keep-values
@@ -127,7 +127,7 @@
         has-footer
         footer-alt-style
         can-cancel
-        :disable-submit="Object.keys(formErrors).length > 0 || card.isDisabled"
+        :disable-submit="!meta.valid || card.isDisabled"
         :submit-label="t('create-transaction')"
         :cancel-label="t('cancel')"
         :processing="isSubmitting"
@@ -151,12 +151,13 @@
                   <PfFormInputText
                     :id="`funds[${idx}].amount`"
                     class="grow"
-                    v-bind="inputField"
+                    :model-value="inputField.value"
                     :label="fundLabel(funds[idx].fund, 'amount-label')"
                     :after-label="fundAfterLabel(funds[idx].fund, 'amount-after-label')"
                     :errors="fieldErrors"
                     is-large
-                    input-mode="decimal">
+                    input-mode="decimal"
+                    @update:modelValue="inputField.onChange">
                     <template #trailingIcon>
                       <UiDollarSign :errors="fieldErrors" />
                     </template>

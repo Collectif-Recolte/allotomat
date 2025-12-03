@@ -46,11 +46,11 @@
     :title="t('title')"
     :has-footer="false"
     :return-route="{ name: URL_BENEFICIARY_ADMIN }">
-    <Form v-slot="{ isSubmitting, errors: formErrors }" :validation-schema="validationSchema" @submit="onSubmit">
+    <Form v-slot="{ isSubmitting, meta }" :validation-schema="validationSchema" @submit="onSubmit">
       <PfForm
         has-footer
         can-cancel
-        :disable-submit="Object.keys(formErrors).length > 0"
+        :disable-submit="!meta.valid"
         :submit-label="t('add-amount')"
         :cancel-label="t('cancel')"
         :processing="isSubmitting"
@@ -60,42 +60,56 @@
             v-if="!project.administrationSubscriptionsOffPlatform"
             v-slot="{ field, errors: fieldErrors }"
             name="subscription">
+            subscription - {{ field.value }}
             <PfFormInputSelect
               id="subscription"
-              v-bind="field"
+              :model-value="field.value"
               :label="t('select-subscription-label')"
               :options="subscriptionOptions"
               :description="t('select-subscription-description')"
               :errors="fieldErrors"
-              @input="onSubscriptionSelected" />
+              @update:modelValue="
+                (e) => {
+                  field.onChange.forEach((x) => {
+                    x(e);
+                  });
+                  onSubscriptionSelected(e);
+                }
+              " />
           </Field>
           <Field v-slot="{ field, errors: fieldErrors }" name="expirationDate">
+            expirationDate - {{ field.value }}
             <PfFormInputSelect
               id="expirationDate"
-              v-bind="field"
+              :model-value="field.value"
               :disabled="expirationDateOptions.length === 0"
               :label="t('select-expiration-date-label')"
               :options="expirationDateOptions"
-              :errors="fieldErrors" />
+              :errors="fieldErrors"
+              @update:modelValue="field.onChange" />
           </Field>
           <Field v-slot="{ field, errors: fieldErrors }" name="productGroup">
+            productGroup - {{ field.value }}
             <PfFormInputSelect
               id="productGroup"
-              v-bind="field"
+              :model-value="field.value"
               :disabled="productGroupOptions.length === 0"
               :label="t('select-product-group-label')"
               :options="productGroupOptions"
-              :errors="fieldErrors" />
+              :errors="fieldErrors"
+              @update:modelValue="field.onChange" />
           </Field>
         </PfFormSection>
         <Field v-slot="{ field, errors: fieldErrors }" name="amount">
+          amount - {{ field.value }}
           <PfFormInputText
             id="amount"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('amount-label')"
             :errors="fieldErrors"
             input-type="number"
-            min="0">
+            min="0"
+            @update:modelValue="field.onChange">
             <template #trailingIcon>
               <UiDollarSign :errors="fieldErrors" />
             </template>

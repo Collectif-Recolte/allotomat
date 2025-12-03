@@ -31,11 +31,21 @@
         <PfForm has-footer :submit-label="t('submit')" :loading-label="t('loading')" :processing="isSubmitting">
           <PfFormSection>
             <Field v-slot="{ field, errors }" name="firstName">
-              <PfFormInputText id="firstName" v-bind="field" :label="t('first-name')" :errors="errors" />
+              <PfFormInputText
+                id="firstName"
+                :model-value="field.value"
+                :label="t('first-name')"
+                :errors="errors"
+                @update:modelValue="field.onChange" />
             </Field>
 
             <Field v-slot="{ field, errors }" name="lastName">
-              <PfFormInputText id="lastName" v-bind="field" :label="t('last-name')" :errors="errors" />
+              <PfFormInputText
+                id="lastName"
+                :model-value="field.value"
+                :label="t('last-name')"
+                :errors="errors"
+                @update:modelValue="field.onChange" />
             </Field>
           </PfFormSection>
         </PfForm>

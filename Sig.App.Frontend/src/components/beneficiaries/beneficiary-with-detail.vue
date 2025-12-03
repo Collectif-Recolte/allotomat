@@ -172,18 +172,6 @@ onMounted(() => {
   };
 });
 
-watch(
-  () => props.beneficiary,
-  (item) => {
-    beneficiary.value = {
-      ...item,
-      dropdownIsOpen: false,
-      dropdownMaxHeight: null,
-      rowPaddingBottom: null
-    };
-  }
-);
-
 const props = defineProps({
   beneficiary: {
     type: Object,
@@ -202,6 +190,18 @@ const props = defineProps({
     default: false
   }
 });
+
+watch(
+  () => props.beneficiary,
+  (item) => {
+    beneficiary.value = {
+      ...item,
+      dropdownIsOpen: false,
+      dropdownMaxHeight: null,
+      rowPaddingBottom: null
+    };
+  }
+);
 
 function isBeneficiaryPaymentConflict() {
   for (var i = 0; i < beneficiary.value.beneficiarySubscriptions.length; i++) {

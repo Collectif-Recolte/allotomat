@@ -52,7 +52,7 @@
             <PfFormInputText
               v-if="lostCard"
               id="lostCardNumber"
-              :value="lostCard.programCardId"
+              :model-value="lostCard.programCardId"
               :label="t('lost-card')"
               input-type="number"
               col-span-class="sm:col-span-6"
@@ -60,11 +60,12 @@
             <Field v-slot="{ field, errors: fieldErrors }" name="newCardNumber">
               <PfFormInputText
                 id="newCardNumber"
-                v-bind="field"
+                :model-value="field.value"
                 :label="t('new-card')"
                 :errors="fieldErrors"
                 input-type="number"
-                col-span-class="sm:col-span-6" />
+                col-span-class="sm:col-span-6"
+                @update:modelValue="field.onChange" />
             </Field>
           </PfFormSection>
 

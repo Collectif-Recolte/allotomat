@@ -42,62 +42,79 @@
     <div v-if="user" class="max-w-sm lg:w-96">
       <h3 class="mt-0">{{ t("email-title") }}</h3>
       <Form
-        v-slot="{ isSubmitting }"
-        :validation-schema="validationSchemaEmail"
+        v-slot="{ isSubmitting, meta }"
         :initial-values="initialFormValues"
+        :validation-schema="validationSchemaEmail"
         @submit="onSubmitChangeEmail">
-        <PfForm has-footer :submit-label="t('submit')" :loading-label="t('loading')" :processing="isSubmitting">
+        <PfForm
+          has-footer
+          :submit-label="t('submit')"
+          :loading-label="t('loading')"
+          :processing="isSubmitting"
+          :disable-submit="meta.valid === false">
           <PfFormSection>
             <Field v-slot="{ field, errors }" name="email">
               <PfFormInputText
                 id="email"
-                v-bind="field"
+                :model-value="field.value"
+                :name="field.name"
                 :label="t('email')"
                 :errors="errors"
                 input-type="email"
-                :description="t('email-desc')" />
+                :description="t('email-desc')"
+                @update:modelValue="field.onChange" />
             </Field>
           </PfFormSection>
         </PfForm>
       </Form>
 
       <h3>{{ t("password-title") }}</h3>
-      <Form v-slot="{ isSubmitting }" :validation-schema="validationSchemaPassword" @submit="onSubmitChangePassword">
-        <PfForm has-footer :submit-label="t('submit')" :loading-label="t('loading')" :processing="isSubmitting">
+      <Form v-slot="{ isSubmitting, meta }" :validation-schema="validationSchemaPassword" @submit="onSubmitChangePassword">
+        <PfForm
+          has-footer
+          :submit-label="t('submit')"
+          :loading-label="t('loading')"
+          :processing="isSubmitting"
+          :disable-submit="meta.valid === false">
           <PfFormSection>
             <Field v-slot="{ field, errors }" name="oldPassword">
               <PfFormInputText
                 id="oldPassword"
-                v-bind="field"
+                :model-value="field.value"
                 :label="t('old-password')"
                 :errors="errors"
-                input-type="password" />
+                input-type="password"
+                @update:modelValue="field.onChange" />
             </Field>
 
             <Field v-slot="{ field, errors }" name="password">
               <PfFormInputText
                 id="password"
-                v-bind="field"
+                :model-value="field.value"
                 :label="t('password')"
                 :errors="errors"
                 input-type="password"
-                :description="t('password-rules')" />
+                :description="t('password-rules')"
+                @update:modelValue="field.onChange" />
             </Field>
 
             <Field v-slot="{ field, errors }" name="passwordConfirmation">
               <PfFormInputText
                 id="passwordConfirmation"
-                v-bind="field"
+                :model-value="field.value"
                 :label="t('password-confirmation')"
                 :errors="errors"
-                input-type="password" />
+                input-type="password"
+                @update:modelValue="field.onChange" />
             </Field>
           </PfFormSection>
         </PfForm>
       </Form>
 
-      <h3>{{ t("email-opt-in-title") }}</h3>
-      <EmailOptInForm v-if="isProjectManager" :user="user" />
+      <template v-if="isProjectManager">
+        <h3>{{ t("email-opt-in-title") }}</h3>
+        <EmailOptInForm :user="user" />
+      </template>
     </div>
   </AppShell>
 </template>
@@ -138,9 +155,11 @@ const { user, loading } = getUserEmail();
 const initialFormValues = computed(() => {
   return { email: user?.value?.email };
 });
-const validationSchemaEmail = object({
-  email: string().label(t("email")).required().email()
-});
+const validationSchemaEmail = computed(() =>
+  object({
+    email: string().label(t("email")).required().email()
+  })
+);
 const validationSchemaPassword = computed(() =>
   object({
     oldPassword: string().label(t("old-password")).required(),

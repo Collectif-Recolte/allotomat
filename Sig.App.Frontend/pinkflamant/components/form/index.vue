@@ -35,7 +35,7 @@
                 :class="{ 'text-h4': footerAltStyle }"
                 :btn-style="footerAltStyle ? 'secondary' : 'primary'"
                 btn-type="submit"
-                :is-disabled="disableSubmit || processing || isDisabled"
+                :is-disabled="disableSubmit || processing"
                 :label="submitLabel" />
               <div class="absolute -translate-y-1/2 top-1/2 right-1">
                 <PfSpinner v-if="processing" text-color-class="text-white" :loading-label="loadingLabel" is-small />
@@ -49,8 +49,6 @@
 </template>
 
 <script>
-import { useIsFormDirty, useIsFormValid, useIsFormTouched } from "vee-validate";
-
 export default {
   props: {
     hasFooter: Boolean,
@@ -88,13 +86,6 @@ export default {
   computed: {
     hasWarning() {
       return this.warningMessage || this.$slots.warning;
-    },
-    isDisabled() {
-      const isDirty = useIsFormDirty();
-      const isTouched = useIsFormTouched();
-      const isValid = useIsFormValid();
-
-      return (!isDirty.value && !isTouched.value && !isValid.value) || !isValid.value;
     }
   }
 };

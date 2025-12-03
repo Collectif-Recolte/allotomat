@@ -115,19 +115,21 @@
             <Field v-slot="{ field, errors }" name="email">
               <PfFormInputText
                 id="email"
-                v-bind="field"
+                :model-value="field.value"
                 :label="t('username')"
                 :errors="errors"
-                input-type="email"></PfFormInputText>
+                input-type="email"
+                @update:modelValue="field.onChange"></PfFormInputText>
             </Field>
 
             <Field v-slot="{ field, errors }" name="password">
               <PfFormInputText
                 id="password"
-                v-bind="field"
+                :model-value="field.value"
                 :label="t('password')"
                 :errors="errors"
-                input-type="password"></PfFormInputText>
+                input-type="password"
+                @update:modelValue="field.onChange"></PfFormInputText>
             </Field>
           </PfFormSection>
 

@@ -90,9 +90,9 @@
             has-hidden-label
             col-span-class="sm:col-span-3"
             :label="t('selected-organization')"
-            :value="selectedOrganization"
+            :model-value="selectedOrganization"
             :options="organizations"
-            @input="onOrganizationSelected" />
+            @update:modelValue="onOrganizationSelected" />
         </div>
       </template>
       <template v-if="organizations" #subpagesCta>
@@ -104,9 +104,9 @@
               has-hidden-label
               col-span-class="sm:col-span-3"
               :label="t('selected-subscription')"
-              :value="selectedSubscription"
+              :model-value="selectedSubscription"
               :options="subscriptions"
-              @input="onSubscriptionSelected" />
+              @update:modelValue="onSubscriptionSelected" />
           </div>
           <div class="flex items-center gap-x-4">
             <span class="text-sm text-primary-700" aria-hidden>{{ t("max-allocation") }}</span>
@@ -118,8 +118,8 @@
               col-span-class="sm:col-span-3"
               :disabled="isMaxAllocationInputDisabled"
               :label="t('max-allocation')"
-              :value="maxAllocation"
-              @input="updateMaxAllocation">
+              :model-value="maxAllocation"
+              @update:modelValue="updateMaxAllocation">
               <template #trailingIcon>
                 <UiDollarSign />
               </template>
@@ -312,7 +312,7 @@
             })
           "
           :description="t('replicate-payment-on-attribution-desc')"
-          @input="onReplicatePaymentOnAttributionChecked" />
+          @update:modelValue="onReplicatePaymentOnAttributionChecked" />
       </div>
     </template>
   </UiDialogWarningModal>
@@ -849,42 +849,42 @@ function onOrganizationSelected(e) {
 }
 
 function onBeneficiaryTypesChecked(value) {
-  beneficiaryTypesFilter.value.push(value);
+  beneficiaryTypesFilter.value = value;
   updateUrl();
 }
 
 function onBeneficiaryTypesUnchecked(value) {
-  beneficiaryTypesFilter.value = beneficiaryTypesFilter.value.filter((x) => x !== value);
+  beneficiaryTypesFilter.value = value;
   updateUrl();
 }
 
 function onSubscriptionsChecked(value) {
-  subscriptionsFilter.value.push(value);
+  subscriptionsFilter.value = value;
   updateUrl();
 }
 
 function onSubscriptionsUnchecked(value) {
-  subscriptionsFilter.value = subscriptionsFilter.value.filter((x) => x !== value);
+  subscriptionsFilter.value = value;
   updateUrl();
 }
 
 function onStatusChecked(value) {
-  status.value.push(value);
+  status.value = value;
   updateUrl();
 }
 
 function onStatusUnchecked(value) {
-  status.value = status.value.filter((x) => x !== value);
+  status.value = value;
   updateUrl();
 }
 
 function onCardStatusChecked(value) {
-  cardStatus.value.push(value);
+  cardStatus.value = value;
   updateUrl();
 }
 
 function onCardStatusUnchecked(value) {
-  cardStatus.value = cardStatus.value.filter((x) => x !== value);
+  cardStatus.value = value;
   updateUrl();
 }
 
@@ -902,12 +902,12 @@ function onSubscriptionSelected(e) {
   var availableBeneficiaryType = subscriptions.value
     .find((x) => x.value === selectedSubscription.value)
     .types.map((x) => x.beneficiaryType);
+
   beneficiaryTypesFilter.value = beneficiaryTypesFilter.value.filter((x) =>
     availableBeneficiaryType.map((y) => y.id).includes(x)
   );
   subscriptionsFilter.value = subscriptionsFilter.value.filter((x) => x !== e);
   maxAllocation.value = subscriptions.value.find((x) => x.value === selectedSubscription.value).budgetAllowance;
-
   updateUrl();
 }
 
@@ -1054,7 +1054,7 @@ function beneficiariesVariables() {
     categories: beneficiaryTypesFilter.value.length > 0 ? beneficiaryTypesFilter.value : null,
     withoutSpecificCategories:
       beneficiaryTypes.value !== null && availableBeneficiaryTypes.value !== null
-        ? beneficiaryTypes.value.filter((x) => !availableBeneficiaryTypes.value.includes(x)).map((x) => x.id)
+        ? beneficiaryTypes.value.filter((x) => availableBeneficiaryTypes.value.includes(x)).map((x) => x.id)
         : [],
     status: status.value.length > 0 ? status.value : null,
     withCard: cardStatus.value.length === 1 ? cardStatus.value.indexOf(BENEFICIARY_WITH_CARD) !== -1 : null,

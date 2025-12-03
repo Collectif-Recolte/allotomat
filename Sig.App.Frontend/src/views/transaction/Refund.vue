@@ -52,17 +52,18 @@
         </p>
         <Form
           v-if="productGroups"
-          v-slot="{ isSubmitting, errors: formErrors }"
+          v-slot="{ isSubmitting, meta }"
           :initial-values="initialValues"
           keep-values
           :validation-schema="validationSchema"
           @submit="onSubmit">
           <div>
+            !haveRefundAmount() - {{ !haveRefundAmount() }} meta.valid - {{ meta.valid }}
             <PfForm
               has-footer
               footer-alt-style
               can-cancel
-              :disable-submit="!haveRefundAmount() || Object.keys(formErrors).length > 0"
+              :disable-submit="!haveRefundAmount() || !meta.valid"
               :submit-label="t('refund-transaction')"
               :cancel-label="t('cancel')"
               :processing="isSubmitting"
@@ -86,12 +87,19 @@
                         <PfFormInputText
                           :id="`productGroups[${idx}].amount`"
                           class="grow"
-                          v-bind="inputField"
+                          :model-value="inputField.value"
                           :label="productGroupLabel(productGroups[idx].productGroup)"
                           :after-label="availableAmountLabel(productGroups[idx], 'available-refund')"
                           :errors="fieldErrors"
                           input-mode="decimal"
-                          @input="(value) => onProductGroupAmountInput(idx, value)">
+                          @update:modelValue="
+                            (e) => {
+                              inputField.onChange.forEach((x) => {
+                                x(e);
+                              });
+                              onProductGroupAmountInput(idx, e);
+                            }
+                          ">
                           <template #trailingIcon>
                             <UiDollarSign :errors="fieldErrors" />
                           </template>
@@ -103,10 +111,11 @@
                 <Field v-slot="{ field, errors }" name="password">
                   <PfFormInputText
                     id="password"
-                    v-bind="field"
+                    :model-value="field.value"
                     :label="t('password')"
                     :errors="errors"
-                    input-type="password"></PfFormInputText>
+                    input-type="password"
+                    @update:modelValue="field.onChange"></PfFormInputText>
                 </Field>
               </PfFormSection>
             </PfForm>

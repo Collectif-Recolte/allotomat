@@ -80,7 +80,7 @@
 </template>
 
 <script setup>
-import { ref, computed, defineProps, defineEmits } from "vue";
+import { ref, computed, defineProps, defineEmits, watch } from "vue";
 import { Combobox, ComboboxInput, ComboboxButton, ComboboxOptions, ComboboxOption } from "@headlessui/vue";
 import { useI18n } from "vue-i18n";
 import FormField from "@/../pinkflamant/components/form/field/index";
@@ -91,7 +91,7 @@ import CHEVRON_DOWN_ICON from "@/lib/icons/chevron-down.json";
 
 const { t } = useI18n();
 
-const emit = defineEmits(["input"]);
+const emit = defineEmits(["update:modelValue"]); // ✅ Changé de "input" à "update:modelValue"
 
 const props = defineProps({
   ...commonFieldProps,
@@ -99,19 +99,32 @@ const props = defineProps({
     type: Array,
     required: true
   },
-  value: {
+  modelValue: {
+    // ✅ Changé de "value" à "modelValue"
     type: String,
     default: ""
   }
 });
 
-let selected = ref(props.options.find((option) => option.value === props.value));
+let selected = ref(props.options.find((option) => option.value === props.modelValue));
 let query = ref("");
 let isOpen = ref(false);
 
+// Synchroniser quand modelValue change de l'extérieur
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    const found = props.options.find((option) => option.value === newValue);
+    if (found) {
+      selected.value = found;
+    }
+  },
+  { immediate: true }
+);
+
 function updateSelected(value) {
   selected.value = props.options.find((option) => option.value === value);
-  emit("input", value);
+  emit("update:modelValue", value); // ✅ Changé de "input" à "update:modelValue"
   isOpen.value = false;
 }
 

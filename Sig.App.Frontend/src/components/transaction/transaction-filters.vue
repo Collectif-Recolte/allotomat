@@ -97,64 +97,64 @@
       v-if="availableOrganizations.length > 0"
       id="organizations"
       is-filter
-      :value="selectedOrganizations"
+      :model-value="selectedOrganizations"
       :label="t('organizations')"
       :options="availableOrganizations"
-      @input="onOrganizationsChecked" />
+      @update:modelValue="onOrganizationsChecked" />
     <PfFormInputCheckboxGroup
       v-if="availableBeneficiaryTypes.length > 0"
       id="beneficiary-types"
       class="mt-3"
       is-filter
-      :value="selectedBeneficiaryTypes"
+      :model-value="selectedBeneficiaryTypes"
       :label="t('beneficiary-type')"
       :options="availableBeneficiaryTypes"
-      @input="onBeneficiaryTypesChecked" />
+      @update:modelValue="onBeneficiaryTypesChecked" />
     <PfFormInputCheckboxGroup
       v-if="availableSubscriptions.length > 0"
       id="subscriptions"
       class="mt-3"
       is-filter
-      :value="selectedSubscriptions"
+      :model-value="selectedSubscriptions"
       :label="t('subscription')"
       :options="availableSubscriptions"
-      @input="onSubscriptionsChecked" />
+      @update:modelValue="onSubscriptionsChecked" />
     <PfFormInputCheckboxGroup
       v-if="availableMarkets.length > 0"
       id="markets"
       class="mt-3"
       is-filter
-      :value="selectedMarkets"
+      :model-value="selectedMarkets"
       :label="t('market')"
       :options="availableMarkets"
-      @input="onMarketsChecked" />
+      @update:modelValue="onMarketsChecked" />
     <PfFormInputCheckboxGroup
       v-if="availableCashRegister.length > 0"
       id="cashRegisters"
       class="mt-3"
       is-filter
-      :value="selectedCashRegisters"
+      :model-value="selectedCashRegisters"
       :label="t('cash-register')"
       :options="availableCashRegister"
-      @input="onCashRegistersChecked" />
+      @update:modelValue="onCashRegistersChecked" />
     <PfFormInputCheckboxGroup
       v-if="availableTransactionTypes.length > 0 && !props.hideTransactionType"
       id="transactionTypes"
       class="mt-3"
       is-filter
-      :value="selectedTransactionTypes"
+      :model-value="selectedTransactionTypes"
       :label="t('transaction-log-types')"
       :options="availableTransactionTypes"
-      @input="onTransactionTypesChecked" />
+      @update:modelValue="onTransactionTypesChecked" />
     <PfFormInputCheckboxGroup
       v-if="availableGiftCardTransactionTypes.length > 0 && !props.hideGiftCardTransactionType"
       id="giftCardTransactionTypes"
       class="mt-3"
       is-filter
-      :value="selectedGiftCardTransactionTypes"
+      :model-value="selectedGiftCardTransactionTypes"
       :label="t('gift-card-transaction-types')"
       :options="availableGiftCardTransactionTypes"
-      @input="onGiftCardTransactionTypesChecked" />
+      @update:modelValue="onGiftCardTransactionTypesChecked" />
   </UiFilter>
 </template>
 
@@ -426,57 +426,57 @@ const availableGiftCardTransactionTypes = computed(() => {
 
 function onOrganizationsChecked(input) {
   if (input.isChecked) {
-    emit("organizationsChecked", input.value);
+    emit("organizationsChecked", input);
   } else {
-    emit("organizationsUnchecked", input.value);
+    emit("organizationsUnchecked", input);
   }
 }
 
 function onSubscriptionsChecked(input) {
   if (input.isChecked) {
-    emit("subscriptionsChecked", input.value);
+    emit("subscriptionsChecked", input);
   } else {
-    emit("subscriptionsUnchecked", input.value);
+    emit("subscriptionsUnchecked", input);
   }
 }
 
 function onMarketsChecked(input) {
   if (input.isChecked) {
-    emit("marketsChecked", input.value);
+    emit("marketsChecked", input);
   } else {
-    emit("marketsUnchecked", input.value);
+    emit("marketsUnchecked", input);
   }
 }
 
 function onCashRegistersChecked(input) {
   if (input.isChecked) {
-    emit("cashRegistersChecked", input.value);
+    emit("cashRegistersChecked", input);
   } else {
-    emit("cashRegistersUnchecked", input.value);
+    emit("cashRegistersUnchecked", input);
   }
 }
 
 function onBeneficiaryTypesChecked(input) {
   if (input.isChecked) {
-    emit("beneficiaryTypesChecked", input.value);
+    emit("beneficiaryTypesChecked", input);
   } else {
-    emit("beneficiaryTypesUnchecked", input.value);
+    emit("beneficiaryTypesUnchecked", input);
   }
 }
 
 function onTransactionTypesChecked(input) {
   if (input.isChecked) {
-    emit("transactionTypesChecked", input.value);
+    emit("transactionTypesChecked", input);
   } else {
-    emit("transactionTypesUnchecked", input.value);
+    emit("transactionTypesUnchecked", input);
   }
 }
 
 function onGiftCardTransactionTypesChecked(input) {
   if (input.isChecked) {
-    emit("giftCardTransactionTypesChecked", input.value);
+    emit("giftCardTransactionTypesChecked", input);
   } else {
-    emit("giftCardTransactionTypesUnchecked", input.value);
+    emit("giftCardTransactionTypesUnchecked", input);
   }
 }
 
