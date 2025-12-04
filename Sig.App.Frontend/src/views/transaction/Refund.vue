@@ -58,7 +58,6 @@
           :validation-schema="validationSchema"
           @submit="onSubmit">
           <div>
-            !haveRefundAmount() - {{ !haveRefundAmount() }} meta.valid - {{ meta.valid }}
             <PfForm
               has-footer
               footer-alt-style
