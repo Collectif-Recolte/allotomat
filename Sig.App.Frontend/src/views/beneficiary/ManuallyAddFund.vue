@@ -60,7 +60,6 @@
             v-if="!project.administrationSubscriptionsOffPlatform"
             v-slot="{ field, errors: fieldErrors }"
             name="subscription">
-            subscription - {{ field.value }}
             <PfFormInputSelect
               id="subscription"
               :model-value="field.value"
@@ -78,7 +77,6 @@
               " />
           </Field>
           <Field v-slot="{ field, errors: fieldErrors }" name="expirationDate">
-            expirationDate - {{ field.value }}
             <PfFormInputSelect
               id="expirationDate"
               :model-value="field.value"
@@ -89,7 +87,6 @@
               @update:modelValue="field.onChange" />
           </Field>
           <Field v-slot="{ field, errors: fieldErrors }" name="productGroup">
-            productGroup - {{ field.value }}
             <PfFormInputSelect
               id="productGroup"
               :model-value="field.value"
@@ -101,7 +98,6 @@
           </Field>
         </PfFormSection>
         <Field v-slot="{ field, errors: fieldErrors }" name="amount">
-          amount - {{ field.value }}
           <PfFormInputText
             id="amount"
             :model-value="field.value"
