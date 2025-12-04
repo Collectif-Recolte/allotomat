@@ -26,7 +26,7 @@
   </i18n>
 
 <template>
-  <UiTable :items="props.budgetAllowanceLogs" :cols="cols">
+  <UiTableSimple :items="props.budgetAllowanceLogs" :cols="cols">
     <template #default="slotProps">
       <td>
         {{ getBudgetAllowanceLogDate(slotProps.item) }}
@@ -52,7 +52,7 @@
         </div>
       </td>
     </template>
-  </UiTable>
+  </UiTableSimple>
 </template>
 
 <script setup>
