@@ -11,7 +11,7 @@
     }
   }
 
-  .pf-table-simple {
+  .pf-table-no-scroll {
     @apply text-p2;
 
     td {
