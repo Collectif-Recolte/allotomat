@@ -25,10 +25,10 @@
 
 <template>
   <UiDialogModal :title="t('title')" :has-footer="false" @onClose="closeModal">
-    <Form v-slot="{ errors: formErrors }" :validation-schema="validationSchema" keep-values @submit="nextStep">
+    <Form v-slot="{ meta }" :validation-schema="validationSchema" keep-values @submit="nextStep">
       <PfForm
         has-footer
-        :disable-submit="Object.keys(formErrors).length > 0"
+        :disable-submit="!meta.valid"
         :submit-label="t('next-step')"
         :cancel-label="t('cancel')"
         footer-alt-style
@@ -39,10 +39,11 @@
             <Field v-slot="{ field: inputField, errors: fieldErrors }" name="cardNumber">
               <PfFormInputText
                 id="cardNumber"
-                v-bind="inputField"
+                :model-value="inputField.value"
                 :description="t('card-number-description')"
                 :label="t('card-number')"
-                :errors="fieldErrors" />
+                :errors="fieldErrors"
+                @update:modelValue="inputField.onChange" />
             </Field>
           </div>
           <p class="text-p1">

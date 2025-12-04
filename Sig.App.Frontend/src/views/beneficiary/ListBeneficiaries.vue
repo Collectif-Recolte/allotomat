@@ -70,10 +70,10 @@
                 id="selectedOrganization"
                 has-hidden-label
                 :label="t('selected-organization')"
-                :value="selectedOrganization"
+                :model-value="selectedOrganization"
                 :options="organizations"
                 col-span-class="sm:col-span-3"
-                @input="onOrganizationSelected" />
+                @update:modelValue="onOrganizationSelected" />
               <p v-if="isAllGroupSelected" class="text-sm text-red-500">{{ t("selected-all-group-description") }}</p>
             </div>
           </div>
@@ -842,56 +842,56 @@ function onBeneficiaryTypesChecked(value) {
 }
 
 function onBeneficiaryTypesUnchecked(value) {
-  beneficiaryTypes.value = beneficiaryTypes.value.filter((x) => x !== value);
+  beneficiaryTypes.value = value;
   updateUrl();
 }
 
 function onSubscriptionsChecked(value) {
-  subscriptions.value.push(value);
+  subscriptions.value = value;
   updateUrl();
 }
 
 function onStatusChecked(value) {
-  status.value.push(value);
+  status.value = value;
   updateUrl();
 }
 
 function onStatusUnchecked(value) {
-  status.value = status.value.filter((x) => x !== value);
+  status.value = value;
   updateUrl();
 }
 
 function onCardStatusChecked(value) {
-  cardStatus.value.push(value);
+  cardStatus.value = value;
   updateUrl();
 }
 
 function onCardStatusUnchecked(value) {
-  cardStatus.value = cardStatus.value.filter((x) => x !== value);
+  cardStatus.value = value;
   updateUrl();
 }
 
 function onPaymentConflictStatusChecked(value) {
-  conflictPaymentStatus.value.push(value);
+  conflictPaymentStatus.value = value;
   updateUrl();
 }
 
 function onPaymentConflictStatusUnchecked(value) {
-  conflictPaymentStatus.value = conflictPaymentStatus.value.filter((x) => x !== value);
+  conflictPaymentStatus.value = value;
   updateUrl();
 }
 
 function onCardDisabledChecked(value) {
-  cardDisabled.value.push(value);
+  cardDisabled.value = value;
   updateUrl();
 }
 function onCardDisabledUnchecked(value) {
-  cardDisabled.value = cardDisabled.value.filter((x) => x !== value);
+  cardDisabled.value = value;
   updateUrl();
 }
 
 function onSubscriptionsUnchecked(value) {
-  subscriptions.value = subscriptions.value.filter((x) => x !== value);
+  subscriptions.value = value;
   updateUrl();
 }
 

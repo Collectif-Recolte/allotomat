@@ -33,14 +33,14 @@
 
 <template>
   <Form
-    v-slot="{ isSubmitting, errors: formErrors }"
+    v-slot="{ isSubmitting, meta }"
     :validation-schema="validationSchema || baseValidationSchema"
     :initial-values="initialValues || baseInitialValues"
     @submit="onSubmit">
     <PfForm
       has-footer
       can-cancel
-      :disable-submit="Object.keys(formErrors).length > 0"
+      :disable-submit="!meta.valid"
       :submit-label="props.submitBtn"
       :cancel-label="t('cancel')"
       :processing="isSubmitting"
@@ -52,53 +52,59 @@
         <Field v-slot="{ field, errors: fieldErrors }" name="name">
           <PfFormInputText
             id="name"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('project-name')"
             :placeholder="t('project-name-placeholder')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="url">
           <PfFormInputText
             id="url"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('project-url')"
             :errors="fieldErrors"
             :description="t('project-url-description')"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-slot="{ field }" name="beneficiariesAreAnonymous">
           <PfFormInputCheckbox
             id="beneficiariesAreAnonymous"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('project-beneficiaries-are-anonymous')"
             :checked="field.value"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-slot="{ field }" name="allowOrganizationsAssignCards">
           <PfFormInputCheckbox
             id="allowOrganizationsAssignCards"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('project-allow-organizations-assign-cards')"
             :checked="field.value"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-if="isNewProject" v-slot="{ field }" name="administrationSubscriptionsOffPlatform">
           <PfFormInputCheckbox
             id="administrationSubscriptionsOffPlatform"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('project-administration-subscriptions-off-platform')"
             :checked="field.value"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-slot="{ field }" name="reconciliationReportDate">
           <PfFormInputSelect
             id="reconciliationReportDate"
-            v-bind="field"
+            :model-value="field.value"
             :errors="errors"
             :label="t('reconciliation-report-date')"
             :options="reconciliationReportDateOptions"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
       </PfFormSection>
       <slot></slot>

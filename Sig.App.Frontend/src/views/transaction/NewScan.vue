@@ -64,16 +64,17 @@
         </div>
         <div v-else>
           <p class="text-primary-900 text-h4">{{ t("select-card-text") }}</p>
-          <Form v-slot="{ errors: formErrors }" :validation-schema="validationSchema" @submit="selectCashRegister">
-            <PfForm has-footer :disable-submit="Object.keys(formErrors).length > 0">
+          <Form v-slot="{ meta }" :validation-schema="validationSchema" @submit="selectCashRegister">
+            <PfForm has-footer :disable-submit="!meta.valid">
               <PfFormSection>
                 <Field v-slot="{ field, errors: fieldErrors }" name="selectedCashRegister">
                   <PfFormInputSelect
                     id="selectedCashRegister"
-                    v-bind="field"
+                    :model-value="field.value"
                     :label="t('cash-register-input')"
                     :options="cashRegisterOptions"
-                    :errors="fieldErrors" />
+                    :errors="fieldErrors"
+                    @update:modelValue="field.onChange" />
                 </Field>
               </PfFormSection>
               <template #footer>

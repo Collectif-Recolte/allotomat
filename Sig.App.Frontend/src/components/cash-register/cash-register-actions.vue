@@ -31,6 +31,13 @@ import { URL_CASH_REGISTER_EDIT, URL_CASH_REGISTER_ARCHIVE, URL_CASH_REGISTER_AD
 
 const { t } = useI18n();
 
+const props = defineProps({
+  cashRegister: {
+    type: Object,
+    required: true
+  }
+});
+
 const items = ref([]);
 
 onMounted(() => {
@@ -68,13 +75,6 @@ function updateItems() {
     }
   ];
 }
-
-const props = defineProps({
-  cashRegister: {
-    type: Object,
-    required: true
-  }
-});
 </script>
 
 <style scoped>

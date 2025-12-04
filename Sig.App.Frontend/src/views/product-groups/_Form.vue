@@ -24,15 +24,11 @@
 </i18n>
 
 <template>
-  <Form
-    v-slot="{ isSubmitting, errors: formErrors }"
-    :validation-schema="validationSchema"
-    :initial-values="initialValues"
-    @submit="onSubmit">
+  <Form v-slot="{ isSubmitting, meta }" :validation-schema="validationSchema" :initial-values="initialValues" @submit="onSubmit">
     <PfForm
       has-footer
       can-cancel
-      :disable-submit="Object.keys(formErrors).length > 0"
+      :disable-submit="!meta.valid"
       :submit-label="props.submitBtn"
       :cancel-label="t('cancel')"
       :processing="isSubmitting"
@@ -41,17 +37,18 @@
         <Field v-slot="{ field, errors: fieldErrors }" name="productGroupName">
           <PfFormInputText
             id="productGroupName"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('product-group-name')"
             :placeholder="t('product-group-name-placeholder')"
             :description="t('product-group-name-description')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-12" />
+            col-span-class="sm:col-span-12"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="productGroupOrder">
           <PfFormInputText
             id="productGroupOrder"
-            v-bind="field"
+            :model-value="field.value"
             input-type="number"
             input-mode="numeric"
             :min="0"
@@ -59,12 +56,17 @@
             :placeholder="t('product-group-order-placeholder')"
             :description="t('product-group-order-description')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-6" />
+            col-span-class="sm:col-span-6"
+            @update:modelValue="field.onChange" />
         </Field>
 
         <div class="relative z-10 sm:col-span-6 mb-16">
           <Field v-slot="{ field }" name="productGroupColor">
-            <UiSelectColor v-bind="field" :label="t('product-group-color')" :options="getColorList()" />
+            <UiSelectColor
+              :model-value="field.value"
+              :label="t('product-group-color')"
+              :options="getColorList()"
+              @update:modelValue="field.onChange" />
           </Field>
         </div>
       </PfFormSection>

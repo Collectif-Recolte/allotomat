@@ -26,7 +26,7 @@
             : 'text-primary-700 border-grey-300 focus:ring-yellow-500 focus:border-yellow-500'
         "
         :aria-describedby="option.description ? `${option.id}-description` : null"
-        @input="$emit('input', $event.target.value)" />
+        @input="$emit('update:modelValue', $event.target.value)" />
     </FormField>
   </FormFieldset>
 </template>
@@ -42,7 +42,7 @@ export default {
   },
   props: {
     ...commonFieldProps,
-    value: {
+    modelValue: {
       type: [String, Number],
       default: ""
     },
@@ -54,7 +54,7 @@ export default {
       }
     }
   },
-  emits: ["input"],
+  emits: ["update:modelValue"],
   data() {
     return {
       // Necessary to avoid loop in validation provider
@@ -67,7 +67,7 @@ export default {
     }
   },
   mounted() {
-    this.choice = this.value;
+    this.choice = this.modelValue;
   }
 };
 </script>

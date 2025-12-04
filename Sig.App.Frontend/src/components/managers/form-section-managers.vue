@@ -31,11 +31,12 @@
             <PfFormInputText
               :id="`managers[${slotProps.idx}].email`"
               class="grow"
-              v-bind="inputField"
+              :model-value="inputField.value"
               :label="t('manager-email')"
               :placeholder="t('manager-placeholder')"
               :errors="fieldErrors"
-              col-span-class="col-span-3" />
+              col-span-class="col-span-3"
+              @update:modelValue="inputField.onChange" />
           </Field>
         </template>
       </UiFieldArray>

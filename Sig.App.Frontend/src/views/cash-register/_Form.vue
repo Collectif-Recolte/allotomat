@@ -27,14 +27,14 @@
 
 <template>
   <Form
-    v-slot="{ isSubmitting, errors: formErrors, setFieldValue }"
+    v-slot="{ isSubmitting, meta, setFieldValue }"
     :validation-schema="validationSchema"
     :initial-values="initialValues"
     @submit="onSubmit">
     <PfForm
       has-footer
       can-cancel
-      :disable-submit="Object.keys(formErrors).length > 0"
+      :disable-submit="!meta.valid"
       :submit-label="submitBtn"
       :processing="isSubmitting"
       :cancel-label="t('cancel')"
@@ -45,12 +45,13 @@
           <PfFormInputText
             id="name"
             required
-            v-bind="field"
+            :model-value="field.value"
             :disabled="isAddProject"
             :label="t('cash-register-name')"
             :placeholder="t('cash-register-name-placeholder')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
       </PfFormSection>
       <PfFormSection v-if="!isNew && !isAddProject" :title="t('market-groups')">
@@ -76,22 +77,30 @@
         <Field v-slot="{ field, errors: fieldErrors }" name="selectedProject">
           <PfFormInputSelect
             id="selectedProject"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('selected-project')"
             :options="projectOptions"
             :errors="fieldErrors"
             col-span-class="sm:col-span-3"
-            @input="(e) => onProjectSelected(e, setFieldValue)" />
+            @update:modelValue="
+              (e) => {
+                field.onChange.forEach((x) => {
+                  x(e);
+                });
+                onProjectSelected(e, setFieldValue);
+              }
+            " />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="selectedMarketGroup">
           <PfFormInputSelect
             id="selectedMarketGroup"
             required
-            v-bind="field"
+            :model-value="field.value"
             :label="t('selected-market-group')"
             :options="marketGroupOptions"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-3" />
+            col-span-class="sm:col-span-3"
+            @update:modelValue="field.onChange" />
         </Field>
       </PfFormSection>
     </PfForm>

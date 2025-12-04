@@ -11,7 +11,7 @@
     :required="required">
     <select
       :id="id"
-      :value="value"
+      :value="modelValue"
       :name="name"
       :autocomplete="autocomplete"
       :required="required"
@@ -26,11 +26,12 @@
       :aria-invalid="hasErrorState"
       :aria-errormessage="hasErrorState ? `${id}-error` : null"
       :aria-describedby="description ? `${id}-description` : null"
-      @input="$emit('input', $event.target.value)">
+      @input="$emit('update:modelValue', $event.target.value)"
+      @blur="$emit('blur', $event)">
       <option v-if="placeholder" value="" disabled selected hidden>
         {{ placeholder }}
       </option>
-      <option v-for="option in options" :key="option" :value="option.value" :disabled="!!option.isDisabled">
+      <option v-for="option in options" :key="option.value" :value="option.value" :disabled="!!option.isDisabled">
         {{ option.label }}
       </option>
     </select>
@@ -46,8 +47,8 @@ export default {
   },
   props: {
     ...commonFieldProps,
-    value: {
-      type: [String],
+    modelValue: {
+      type: [String, Number],
       default: ""
     },
     placeholder: {
@@ -65,6 +66,6 @@ export default {
       }
     }
   },
-  emits: ["input"]
+  emits: ["update:modelValue", "blur"]
 };
 </script>

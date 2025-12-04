@@ -12,22 +12,23 @@
 </i18n>
 
 <template>
-  <Form v-if="showSelect" :validation-schema="validationSchema" @submit="onSubmit">
-    <PfForm>
+  <Form v-if="showSelect" v-slot="{ isSubmitting, meta }" :validation-schema="validationSchema" @submit="onSubmit">
+    <PfForm :processing="isSubmitting" :disable-submit="!meta.valid">
       <PfFormSection>
         <div class="xs:flex xs:gap-x-4">
           <Field v-slot="{ field, errors: fieldErrors }" name="selectAndAdd">
             <PfFormInputSelect
               :id="uniqueId"
-              v-bind="field"
+              :model-value="field.value"
               class="w-full col-span-2"
               :label="props.selectLabel"
               has-hidden-label
               :options="props.options"
               :errors="fieldErrors"
-              :placeholder="t('select-placeholder')" />
+              :placeholder="t('select-placeholder')"
+              @update:modelValue="field.onChange" />
           </Field>
-          <PfButtonAction class="w-full col-span-2" :label="t('save')" type="submit" />
+          <PfButtonAction class="w-full col-span-2" :label="t('save')" btn-type="submit" />
         </div>
       </PfFormSection>
     </PfForm>

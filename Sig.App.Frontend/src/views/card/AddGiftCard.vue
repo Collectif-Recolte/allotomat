@@ -48,11 +48,12 @@
           <Field v-slot="{ field, errors: fieldErrors }" name="existingCardId">
             <PfFormInputText
               id="existingCardId"
-              v-bind="field"
+              :model-value="field.value"
               :label="t('existing-card-id')"
               :placeholder="t('existing-card-id-placeholder')"
               :errors="fieldErrors"
-              input-type="number" />
+              input-type="number"
+              @update:modelValue="field.onChange" />
           </Field>
           <PfTooltip
             v-if="project"
@@ -69,11 +70,12 @@
           <Field v-slot="{ field, errors: fieldErrors }" name="amount">
             <PfFormInputText
               id="amount"
-              v-bind="field"
+              :model-value="field.value"
               :label="t('amount-label')"
               :errors="fieldErrors"
               input-type="number"
-              min="0" />
+              min="0"
+              @update:modelValue="field.onChange" />
           </Field>
         </PfFormSection>
       </PfForm>

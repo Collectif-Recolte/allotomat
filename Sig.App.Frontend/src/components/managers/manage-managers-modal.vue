@@ -32,10 +32,10 @@
       has-icon-left
       :icon="ICON_PLUS"
       @click="displayAddManager()" />
-    <Form v-else v-slot="{ isSubmitting, errors: formErrors }" :validation-schema="validationSchema" @submit="addManager">
+    <Form v-else v-slot="{ isSubmitting, meta }" :validation-schema="validationSchema" @submit="addManager">
       <PfFormNested
         can-cancel
-        :disable-submit="Object.keys(formErrors).length > 0"
+        :disable-submit="!meta.valid"
         :submit-label="t('add-manager')"
         :processing="isSubmitting"
         @cancel="addManagerDisplayed = false">
@@ -43,11 +43,12 @@
           <Field v-slot="{ field, errors: fieldErrors }" name="email">
             <PfFormInputText
               id="email"
-              v-bind="field"
+              :model-value="field.value"
               :label="t('email')"
               :placeholder="t('email-placeholder')"
               :errors="fieldErrors"
-              col-span-class="sm:col-span-6" />
+              col-span-class="sm:col-span-6"
+              @update:modelValue="field.onChange" />
           </Field>
         </template>
       </PfFormNested>

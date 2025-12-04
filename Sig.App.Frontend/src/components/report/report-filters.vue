@@ -47,21 +47,23 @@
           <span class="text-sm text-primary-700">{{ t("date-selector-from") }}</span>
           <UiDatePicker
             id="datefrom"
-            :value="props.modelValue.dateFrom"
+            :model-value="props.modelValue.dateFrom"
             class="sm:col-span-6"
             :label="t('date-start-label')"
             has-hidden-label
+            :can-clear="false"
             @update:modelValue="onDateFromUpdated" />
         </div>
         <div class="flex items-center justify-end gap-x-4">
           <span class="text-sm text-primary-700">{{ t("date-selector-to") }}</span>
           <UiDatePicker
             id="dateTo"
-            :value="props.modelValue.dateTo"
+            :model-value="props.modelValue.dateTo"
             :min-date="props.dateFrom"
             class="sm:col-span-6"
             :label="t('date-end-label')"
             has-hidden-label
+            :can-clear="false"
             @update:modelValue="onDateToUpdated" />
         </div>
       </div>

@@ -33,13 +33,13 @@
 
 <template>
   <Form
-    v-slot="{ isSubmitting, errors: formErrors }"
+    v-slot="{ isSubmitting, meta }"
     :validation-schema="validationSchema"
     :initial-values="props.initialValues"
     @submit="onSubmit">
     <PfForm
       has-footer
-      :disable-submit="Object.keys(formErrors).length > 0"
+      :disable-submit="!meta.valid"
       :submit-label="props.submitLabel"
       :cancel-label="t('back')"
       :processing="isSubmitting"
@@ -49,39 +49,52 @@
         <Field v-slot="{ field, errors }" name="email">
           <PfFormInputText
             id="email"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('email')"
             :errors="errors"
             input-type="email"
             :description="!isInEdition ? t('email-desc') : null"
-            :disabled="isInEdition" />
+            :disabled="isInEdition"
+            @update:modelValue="field.onChange" />
         </Field>
 
         <Field v-slot="{ field, errors }" name="firstName">
-          <PfFormInputText id="firstName" v-bind="field" :label="t('first-name')" :errors="errors" />
+          <PfFormInputText
+            id="firstName"
+            :model-value="field.value"
+            :label="t('first-name')"
+            :errors="errors"
+            @update:modelValue="field.onChange" />
         </Field>
 
         <Field v-slot="{ field, errors }" name="lastName">
-          <PfFormInputText id="lastName" v-bind="field" :label="t('last-name')" :errors="errors" />
+          <PfFormInputText
+            id="lastName"
+            :model-value="field.value"
+            :label="t('last-name')"
+            :errors="errors"
+            @update:modelValue="field.onChange" />
         </Field>
 
         <Field v-slot="{ field, errors }" name="password">
           <PfFormInputText
             id="password"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('password')"
             :errors="errors"
             input-type="password"
-            :description="t('password-rules')" />
+            :description="t('password-rules')"
+            @update:modelValue="field.onChange" />
         </Field>
 
         <Field v-slot="{ field, errors }" name="passwordConfirmation">
           <PfFormInputText
             id="passwordConfirmation"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('password-confirmation')"
             :errors="errors"
-            input-type="password" />
+            input-type="password"
+            @update:modelValue="field.onChange" />
         </Field>
       </PfFormSection>
 
@@ -89,14 +102,15 @@
         <Field v-slot="{ field, errors: fieldErrors }" name="tosAccepted">
           <PfFormInputCheckbox
             id="tosAccepted"
-            v-bind="field"
+            :model-value="field.value"
             :label="
               t('tos-accepted', {
                 url1: `/files/TermsOfUse-${locale}-20230505.pdf`,
                 url2: `/files/PrivacyPolicy-${locale}-20230505.pdf`
               })
             "
-            :errors="fieldErrors" />
+            :errors="fieldErrors"
+            @update:modelValue="field.onChange" />
         </Field>
       </PfFormSection>
     </PfForm>

@@ -20,10 +20,10 @@
     :id="props.id"
     class="min-w-60 xs:min-w-72"
     :label="t('label')"
-    :value="modelValue"
+    :model-value="modelValue"
     has-hidden-label
     :placeholder="getPlaceholder"
-    @input="(e) => emit('update:modelValue', e)"
+    @update:modelValue="(e) => emit('update:modelValue', e)"
     @keyup.enter="() => emit('search')">
     <template #trailingIcon>
       <div class="absolute inset-y-0 right-3 flex items-center text-primary-700">

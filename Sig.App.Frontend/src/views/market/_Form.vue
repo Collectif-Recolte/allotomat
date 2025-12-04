@@ -17,14 +17,14 @@
 
 <template>
   <Form
-    v-slot="{ isSubmitting, errors: formErrors }"
+    v-slot="{ isSubmitting, meta }"
     :validation-schema="validationSchema || baseValidationSchema"
     :initial-values="initialValues"
     @submit="onSubmit">
     <PfForm
       has-footer
       can-cancel
-      :disable-submit="Object.keys(formErrors).length > 0"
+      :disable-submit="meta.valid === false"
       :submit-label="props.submitBtn"
       :cancel-label="t('cancel')"
       :processing="isSubmitting"
@@ -33,18 +33,20 @@
         <Field v-slot="{ field, errors: fieldErrors }" name="marketName">
           <PfFormInputText
             id="marketName"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('market-name')"
             :placeholder="t('market-name-placeholder')"
-            :errors="fieldErrors" />
+            :errors="fieldErrors"
+            @update:modelValue="field.onChange" />
         </Field>
         <Field v-if="isInProject" v-slot="{ field, errors: fieldErrors }" name="marketGroup">
           <PfFormInputSelect
             id="marketGroup"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('selected-market-group')"
             :options="marketGroupOptions"
-            :errors="fieldErrors" />
+            :errors="fieldErrors"
+            @update:modelValue="field.onChange" />
         </Field>
       </PfFormSection>
       <slot></slot>

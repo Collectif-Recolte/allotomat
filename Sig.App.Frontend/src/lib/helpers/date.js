@@ -57,13 +57,38 @@ function formattedDate(date) {
 }
 
 function formatDate(date, formatId) {
-  if (date === null) {
+  if (!date || date === null) {
     return "";
   }
-  var lang = i18n.global.locale.value === LANG_FR ? frCA : i18n.global.locale.value === LANG_EN ? enCA : null;
 
+  let validDate;
+
+  if (date instanceof Date) {
+    validDate = date;
+  } else if (typeof date === "string" || typeof date === "number") {
+    validDate = new Date(date);
+  } else if (date && typeof date === "object" && date.toString) {
+    // Cas où c'est un proxy Vue ou autre objet
+    validDate = new Date(date.toString());
+  } else {
+    console.error("Cannot convert to Date:", date);
+    return "";
+  }
+
+  if (isNaN(validDate.getTime())) {
+    console.error("Invalid date after conversion:", date);
+    return "";
+  }
+
+  var lang = i18n.global.locale.value === LANG_FR ? frCA : i18n.global.locale.value === LANG_EN ? enCA : enCA;
   const tokens = getFormat(formatId, lang);
-  return format(date, tokens, { locale: lang });
+
+  try {
+    return format(validDate, tokens, { locale: lang });
+  } catch (error) {
+    console.error("Format error:", error, { date, validDate, tokens });
+    return "";
+  }
 }
 
 function dateUtc(date) {

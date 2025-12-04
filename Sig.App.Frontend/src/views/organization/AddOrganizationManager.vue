@@ -30,14 +30,14 @@
     :title="t('title')"
     :has-footer="false">
     <Form
-      v-slot="{ isSubmitting, errors: formErrors }"
+      v-slot="{ isSubmitting, meta }"
       :validation-schema="validationSchema"
       :initial-values="initialValues"
       @submit="onSubmit">
       <PfForm
         has-footer
         can-cancel
-        :disable-submit="Object.keys(formErrors).length > 0"
+        :disable-submit="!meta.valid"
         :submit-label="t('add-organization-manager')"
         :cancel-label="t('cancel')"
         :processing="isSubmitting"
@@ -45,11 +45,12 @@
         <Field v-slot="{ field, errors: fieldErrors }" name="email">
           <PfFormInputText
             id="email"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('organization-manager-email')"
             :placeholder="t('organization-manager-email-placeholder')"
             :errors="fieldErrors"
-            col-span-class="sm:col-span-4" />
+            col-span-class="sm:col-span-4"
+            @update:modelValue="field.onChange" />
         </Field>
       </PfForm>
     </Form>

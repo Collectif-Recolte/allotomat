@@ -28,7 +28,7 @@
 
       <input
         :id="id"
-        :value="value"
+        :value="modelValue"
         :type="inputType"
         :inputmode="inputMode"
         :name="name"
@@ -52,7 +52,8 @@
         :aria-invalid="hasErrorState"
         :aria-errormessage="hasErrorState ? `${id}-error` : null"
         :aria-describedby="description ? `${id}-description` : null"
-        @input="$emit('input', $event.target.value)"
+        @input="$emit('update:modelValue', $event.target.value)"
+        @blur="$emit('blur', $event)"
         @keypress="$emit('keypress', $event)" />
       <slot name="trailingIcon">
         <div
@@ -75,7 +76,8 @@ export default {
   },
   props: {
     ...commonFieldProps,
-    value: {
+    modelValue: {
+      // ✅ Changé de "value" à "modelValue"
       type: [String, Number],
       default: ""
     },
@@ -124,7 +126,7 @@ export default {
     },
     isLarge: Boolean
   },
-  emits: ["input", "keypress"],
+  emits: ["update:modelValue", "blur", "keypress"], // ✅ Changé "input" en "update:modelValue", ajouté "blur"
   computed: {
     hasLeadingIcon() {
       return this.leadingIcon || this.$slots.leadingIcon;

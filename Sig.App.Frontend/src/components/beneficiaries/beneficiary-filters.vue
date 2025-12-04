@@ -63,63 +63,63 @@
       <template #sortOrder>
         <PfFormInputRadioGroup
           id="sortOrder"
-          :value="sortOrder"
+          :model-value="sortOrder"
           :label="t('sort-order')"
           :options="sortOrderOptions"
-          @input="onSortOrderChanged" />
+          @update:modelValue="onSortOrderChanged" />
       </template>
       <PfFormInputCheckboxGroup
         v-if="availableBeneficiaryTypes.length > 0"
         id="beneficiary-types"
         is-filter
-        :value="selectedBeneficiaryTypes"
+        :model-value="selectedBeneficiaryTypes"
         :label="t('beneficiary-type')"
         :options="availableBeneficiaryTypes"
-        @input="onBeneficiaryTypesChecked" />
+        @update:modelValue="onBeneficiaryTypesChecked" />
       <PfFormInputCheckboxGroup
         v-if="availableSubscriptions.length > 0"
         id="subscriptions"
         class="mt-3"
         is-filter
-        :value="selectedSubscriptions"
+        :model-value="selectedSubscriptions"
         :label="t('subscription')"
         :options="availableSubscriptions"
-        @input="onSubscriptionsChecked" />
+        @update:modelValue="onSubscriptionsChecked" />
       <PfFormInputCheckboxGroup
         v-if="availableStatus.length > 0"
         id="status"
         class="mt-3"
         is-filter
-        :value="selectedStatus"
+        :model-value="selectedStatus"
         :label="t('status')"
         :options="availableStatus"
-        @input="onStatusChecked" />
+        @update:modelValue="onStatusChecked" />
       <PfFormInputCheckboxGroup
         id="cardStatus"
         class="mt-3"
         is-filter
-        :value="selectedCardStatus"
+        :model-value="selectedCardStatus"
         :label="t('cards')"
         :options="cardStatus"
-        @input="onCardStatusChecked" />
+        @update:modelValue="onCardStatusChecked" />
       <PfFormInputCheckboxGroup
         v-if="!props.hideConflictFilter"
         id="paymentConflictStatus"
         class="mt-3"
         is-filter
-        :value="selectedPaymentConflictStatus"
+        :model-value="selectedPaymentConflictStatus"
         :label="t('payment-conflicts')"
         :options="paymentConflictStatus"
-        @input="onPaymentConflictStatusChecked" />
+        @update:modelValue="onPaymentConflictStatusChecked" />
       <PfFormInputCheckboxGroup
         v-if="!props.hideCardIsDisabledFilter"
         id="cardDisabled"
         class="mt-3"
         is-filter
-        :value="selectedCardDisabled"
+        :model-value="selectedCardDisabled"
         :label="t('card-disabled-status')"
         :options="cardDisabled"
-        @input="onCardIsDisabledChecked" />
+        @update:modelValue="onCardIsDisabledChecked" />
     </UiFilter>
   </div>
 </template>
@@ -368,49 +368,49 @@ const cardDisabled = ref([
 
 function onSubscriptionsChecked(input) {
   if (input.isChecked) {
-    emit("subscriptionsChecked", input.value);
+    emit("subscriptionsChecked", input);
   } else {
-    emit("subscriptionsUnchecked", input.value);
+    emit("subscriptionsUnchecked", input);
   }
 }
 
 function onBeneficiaryTypesChecked(input) {
   if (input.isChecked) {
-    emit("beneficiaryTypesChecked", input.value);
+    emit("beneficiaryTypesChecked", input);
   } else {
-    emit("beneficiaryTypesUnchecked", input.value);
+    emit("beneficiaryTypesUnchecked", input);
   }
 }
 
 function onStatusChecked(input) {
   if (input.isChecked) {
-    emit("statusChecked", input.value);
+    emit("statusChecked", input);
   } else {
-    emit("statusUnchecked", input.value);
+    emit("statusUnchecked", input);
   }
 }
 
 function onCardStatusChecked(input) {
   if (input.isChecked) {
-    emit("cardStatusChecked", input.value);
+    emit("cardStatusChecked", input);
   } else {
-    emit("cardStatusUnchecked", input.value);
+    emit("cardStatusUnchecked", input);
   }
 }
 
 function onPaymentConflictStatusChecked(input) {
   if (input.isChecked) {
-    emit("paymentConflictStatusChecked", input.value);
+    emit("paymentConflictStatusChecked", input);
   } else {
-    emit("paymentConflictStatusUnchecked", input.value);
+    emit("paymentConflictStatusUnchecked", input);
   }
 }
 
 function onCardIsDisabledChecked(input) {
   if (input.isChecked) {
-    emit("cardIsDisabledChecked", input.value);
+    emit("cardIsDisabledChecked", input);
   } else {
-    emit("cardIsDisabledUnchecked", input.value);
+    emit("cardIsDisabledUnchecked", input);
   }
 }
 

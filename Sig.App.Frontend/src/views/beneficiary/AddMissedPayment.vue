@@ -49,12 +49,13 @@
           <Field v-slot="{ field, errors: fieldErrors }" name="subscription">
             <PfFormInputSelect
               id="subscription"
-              v-bind="field"
+              :model-value="field.value"
               :label="t('select-subscription-label')"
               :options="subscriptionOptions"
               :description="t('subscription-desc')"
               :errors="fieldErrors"
-              @input="onSubscriptionSelected" />
+              @input="onSubscriptionSelected"
+              @update:modelValue="field.onChange" />
           </Field>
           <div v-if="selectedSubscription" class="flex flex-col">
             <h2 class="my-2">{{ t("amount-allocated", { amount: amountThatWillBeAllocatedMoneyFormat }) }}</h2>

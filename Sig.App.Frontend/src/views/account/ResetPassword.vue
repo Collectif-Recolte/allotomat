@@ -50,10 +50,10 @@
       >
     </div>
 
-    <Form v-else v-slot="{ isSubmitting, errors: formErrors }" :validation-schema="validationSchema" @submit="onSubmit">
+    <Form v-else v-slot="{ isSubmitting, meta }" :validation-schema="validationSchema" @submit="onSubmit">
       <PfForm
         has-footer
-        :disable-submit="Object.keys(formErrors).length > 0"
+        :disable-submit="!meta.valid"
         :submit-label="t('submit')"
         :cancel-label="t('back')"
         :processing="isSubmitting"
@@ -63,20 +63,22 @@
           <Field v-slot="{ field, errors }" name="password">
             <PfFormInputText
               id="password"
-              v-bind="field"
+              :model-value="field.value"
               :label="t('password')"
               :errors="errors"
               input-type="password"
-              :description="t('password-rules')" />
+              :description="t('password-rules')"
+              @update:modelValue="field.onChange" />
           </Field>
 
           <Field v-slot="{ field, errors }" name="passwordConfirmation">
             <PfFormInputText
               id="passwordConfirmation"
-              v-bind="field"
+              :model-value="field.value"
               :label="t('password-confirmation')"
               :errors="errors"
-              input-type="password" />
+              input-type="password"
+              @update:modelValue="field.onChange" />
           </Field>
         </PfFormSection>
       </PfForm>

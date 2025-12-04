@@ -73,21 +73,23 @@
           <span class="text-sm text-primary-700">{{ t("date-selector-from") }}</span>
           <UiDatePicker
             id="datefrom"
-            :value="dateFrom"
+            :model-value="dateFrom"
             class="sm:col-span-6"
             :label="t('date-start-label')"
             has-hidden-label
+            :can-clear="false"
             @update:modelValue="(e) => emit('dateFromUpdated', e)" />
         </div>
         <div class="flex items-center justify-end gap-x-4">
           <span class="text-sm text-primary-700">{{ t("date-selector-to") }}</span>
           <UiDatePicker
             id="dateTo"
-            :value="dateTo"
+            :model-value="dateTo"
             :min-date="dateFrom"
             class="sm:col-span-6"
             :label="t('date-end-label')"
             has-hidden-label
+            :can-clear="false"
             @update:modelValue="(e) => emit('dateToUpdated', e)" />
         </div>
         <slot name="prependElements" />
@@ -154,7 +156,9 @@
             :options="availableTransactionTypes"
             @input="onTransactionTypesChecked" />
         </UiFilterSelect>
-        <UiFilterSelect :label="t('gift-card-transaction-types')" :active-filters-count="giftCardTransactionTypeActiveFiltersCount">
+        <UiFilterSelect
+          :label="t('gift-card-transaction-types')"
+          :active-filters-count="giftCardTransactionTypeActiveFiltersCount">
           <PfFormInputCheckboxGroup
             v-if="availableGiftCardTransactionTypes.length > 0 && !props.hideGiftCardTransactionType"
             id="giftCardTransactionTypes"

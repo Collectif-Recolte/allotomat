@@ -24,15 +24,11 @@
 </i18n>
 
 <template>
-  <Form
-    v-slot="{ isSubmitting, errors: formErrors }"
-    :validation-schema="validationSchema"
-    :initial-values="initialValues"
-    @submit="onSubmit">
+  <Form v-slot="{ isSubmitting, meta }" :validation-schema="validationSchema" :initial-values="initialValues" @submit="onSubmit">
     <PfForm
       has-footer
       can-cancel
-      :disable-submit="Object.keys(formErrors).length > 0"
+      :disable-submit="!meta.valid"
       :submit-label="props.submitBtn"
       :cancel-label="t('cancel')"
       :processing="isSubmitting"
@@ -41,10 +37,11 @@
         <Field v-slot="{ field, errors: fieldErrors }" name="categoryName">
           <PfFormInputText
             id="categoryName"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('category-name')"
             :placeholder="t('category-placeholder')"
-            :errors="fieldErrors" />
+            :errors="fieldErrors"
+            @update:modelValue="field.onChange" />
         </Field>
       </PfFormSection>
 
@@ -61,11 +58,12 @@
                 <PfFormInputText
                   :id="`categoryKeys[${slotProps.idx}].name`"
                   class="grow"
-                  v-bind="inputField"
+                  :model-value="inputField.value"
                   :label="t('keyword-name')"
                   :placeholder="t('keyword-name-placeholder')"
                   :errors="fieldErrors"
-                  col-span-class="col-span-3" />
+                  col-span-class="col-span-3"
+                  @update:modelValue="inputField.onChange" />
               </Field>
             </template>
           </UiFieldArray>

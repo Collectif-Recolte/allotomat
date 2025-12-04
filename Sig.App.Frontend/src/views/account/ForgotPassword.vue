@@ -37,10 +37,10 @@
       >
     </div>
 
-    <Form v-else v-slot="{ isSubmitting, errors: formErrors }" :validation-schema="validationSchema" @submit="onSubmit">
+    <Form v-else v-slot="{ isSubmitting, meta }" :validation-schema="validationSchema" @submit="onSubmit">
       <PfForm
         has-footer
-        :disable-submit="Object.keys(formErrors).length > 0"
+        :disable-submit="!meta.valid"
         :submit-label="t('submit')"
         :cancel-label="t('back')"
         :processing="isSubmitting"
@@ -50,11 +50,12 @@
           <Field v-slot="{ field, errors }" name="email">
             <PfFormInputText
               id="email"
-              v-bind="field"
+              :model-value="field.value"
               :label="t('email')"
               :errors="errors"
               input-type="email"
-              :description="t('email-desc')"></PfFormInputText>
+              :description="t('email-desc')"
+              @update:modelValue="field.onChange"></PfFormInputText>
           </Field>
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <p v-html="t('reset-password-troubleshooting')"></p>

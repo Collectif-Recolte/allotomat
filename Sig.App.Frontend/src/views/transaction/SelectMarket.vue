@@ -31,7 +31,7 @@
       {{ userType === USER_TYPE_ORGANIZATIONMANAGER ? t("transaction-in-organization-name") : t("transaction-in-project-name") }}
     </p>
     <Form
-      v-slot="{ errors: formErrors }"
+      v-slot="{ meta }"
       :validation-schema="validationSchema"
       :initial-values="initialValues"
       :initial-touched="initialTouched"
@@ -39,7 +39,7 @@
       @submit="nextStep">
       <PfForm
         has-footer
-        :disable-submit="Object.keys(formErrors).length > 0"
+        :disable-submit="!meta.valid"
         :submit-label="t('next-step')"
         :cancel-label="t('cancel')"
         footer-alt-style
@@ -49,22 +49,24 @@
           <Field v-slot="{ field: inputField, errors: fieldErrors }" name="marketId">
             <PfFormInputSelect
               id="marketId"
-              v-bind="inputField"
+              :model-value="inputField.value"
               :placeholder="t('choose-market')"
               :label="t('select-market')"
               :options="markets"
               :errors="fieldErrors"
-              @input="onMarketSelected" />
+              @input="onMarketSelected"
+              @update:modelValue="inputField.onChange" />
           </Field>
           <Field v-slot="{ field: inputField, errors: fieldErrors }" name="cashRegisterId">
             <PfFormInputSelect
               id="cashRegisterId"
-              v-bind="inputField"
+              :model-value="inputField.value"
               :disabled="!selectedMarket"
               :placeholder="t('choose-cash-register')"
               :label="t('select-cash-register')"
               :options="cashRegisters"
-              :errors="fieldErrors" />
+              :errors="fieldErrors"
+              @update:modelValue="inputField.onChange" />
           </Field>
         </PfFormSection>
       </PfForm>

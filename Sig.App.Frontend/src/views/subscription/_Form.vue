@@ -97,7 +97,7 @@
 
 <template>
   <Form
-    v-slot="{ isSubmitting, errors: formErrors, values, validateField, setFieldValue }"
+    v-slot="{ isSubmitting, meta, values, validateField, setFieldValue, errors: formErrors }"
     :initial-values="initialValues"
     :validation-schema="currentSchema"
     keep-values
@@ -111,7 +111,7 @@
       v-if="currentStep === 0"
       has-footer
       can-cancel
-      :disable-submit="Object.keys(formErrors).length > 0"
+      :disable-submit="meta.valid === false"
       :submit-label="t('set-expiration')"
       :cancel-label="t('cancel')"
       :processing="isSubmitting"
@@ -121,32 +121,47 @@
           <PfFormInputText
             id="subscriptionName"
             col-span-class="sm:col-span-12"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('subscription-name')"
             :placeholder="t('subscription-name-placeholder')"
-            :errors="fieldErrors" />
+            :errors="fieldErrors"
+            @update:modelValue="field.onChange" />
         </Field>
         <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
         <div class="flex sm:col-span-12" v-html="t('subscription-name-desc')"></div>
         <Field v-slot="{ field, errors: fieldErrors }" name="startDate">
           <DatePicker
             id="startDate"
-            v-bind="field"
+            :model-value="field.value"
             class="sm:col-span-6"
             :label="t('subscription-start-date')"
             :errors="fieldErrors"
             is-inside-modal
-            @update:modelValue="forceValidation(values, validateField)" />
+            @update:modelValue="
+              (e) => {
+                field.onChange.forEach((x) => {
+                  x(e);
+                });
+                forceValidation(values, validateField);
+              }
+            " />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="endDate">
           <DatePicker
             id="endDate"
-            v-bind="field"
+            :model-value="field.value"
             class="sm:col-span-6"
             :label="t('subscription-end-date')"
             :errors="fieldErrors"
             is-inside-modal
-            @update:modelValue="forceValidation(values, validateField)" />
+            @update:modelValue="
+              (e) => {
+                field.onChange.forEach((x) => {
+                  x(e);
+                });
+                forceValidation(values, validateField);
+              }
+            " />
         </Field>
         <div class="flex flex-col sm:col-span-12">
           <span
@@ -171,9 +186,14 @@
               }}</span>
               <UiSwitch
                 id="isSubscriptionPaymentBasedCardUsage"
-                v-model="subscriptionPaymentBasedCardUsageValue"
+                :model-value="subscriptionPaymentBasedCardUsageValue"
                 class="mx-auto mr-0"
-                @update:modelValue="(e) => updateIsSubscriptionPaymentBasedCardUsage(setFieldValue, validateField, e)">
+                @update:modelValue="
+                  (e) => {
+                    subscriptionPaymentBasedCardUsageValue = e;
+                    updateIsSubscriptionPaymentBasedCardUsage(setFieldValue, validateField, e);
+                  }
+                ">
                 <template #left>
                   <span class="mr-2 text-p3 font-semibold">{{
                     subscriptionPaymentBasedCardUsageValue
@@ -200,23 +220,29 @@
         <Field v-slot="{ errors: fieldErrors }" name="monthlyPaymentMoment">
           <PfFormInputSelect
             id="monthlyPaymentMoment"
+            v-model="monthlyPaymentMomentValue"
             class="sm:col-span-6"
-            :value="monthlyPaymentMomentValue"
             :label="t('monthly-payment-moment')"
             :options="monthlyPaymentMomentOptions"
             :errors="fieldErrors"
-            @input="(e) => updateMonthlyPaymentMoment(setFieldValue, validateField, e)" />
+            @update:modelValue="
+              (e) => {
+                monthlyPaymentMomentValue = e;
+                updateMonthlyPaymentMoment(setFieldValue, validateField, e);
+              }
+            " />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="maxNumberOfPayments">
           <PfFormInputText
             id="maxNumberOfPayments"
             class="sm:col-span-6"
-            v-bind="field"
+            :model-value="field.value"
             :label="t('subscription-max-number-of-payments')"
             :errors="fieldErrors"
             input-type="number"
             min="0"
-            :disabled="!subscriptionPaymentBasedCardUsageValue">
+            :disabled="!subscriptionPaymentBasedCardUsageValue"
+            @update:modelValue="field.onChange">
           </PfFormInputText>
         </Field>
       </PfFormSection>
@@ -226,7 +252,7 @@
       v-if="currentStep === 1"
       has-footer
       can-cancel
-      :disable-submit="Object.keys(formErrors).length > 0"
+      :disable-submit="!meta.valid"
       :submit-label="t('set-amounts')"
       :cancel-label="t('previous')"
       :processing="isSubmitting"
@@ -268,11 +294,17 @@
           <PfFormInputSelect
             id="triggerFundExpiration"
             class="sm:col-span-12"
-            :value="triggerFundExpirationValue"
+            :model-value="triggerFundExpirationValue"
             :label="t('subscription-trigger-fund-expiration')"
             :options="triggerFundExpirationOptions"
             :description="t('subscription-trigger-fund-expiration-desc')"
-            @input="(e) => updateTriggerFundExpirationValue(setFieldValue, validateField, e)" />
+            @update:modelValue="
+              (e) => {
+                triggerFundExpirationValue = e;
+                updateTriggerFundExpirationValue(setFieldValue, validateField, e);
+              }
+            ">
+          </PfFormInputSelect>
         </Field>
         <div v-if="triggerFundExpirationValue === NUMBER_OF_DAYS" class="flex sm:col-span-12">
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
@@ -290,24 +322,35 @@
           <DatePicker
             id="fundsExpirationDate"
             class="sm:col-span-6"
-            v-bind="inputField"
+            :model-value="inputField.value"
             :label="t('subscription-funds-expiration-date')"
             :errors="isFundsAccumulableValue ? fieldErrors : []"
             :disabled="!isFundsAccumulableValue"
             is-inside-modal
-            @update:modelValue="forceValidation(values, validateField)" />
+            @update:modelValue="
+              (e) => {
+                inputField.onChange.forEach((x) => {
+                  x(e);
+                });
+                forceValidation(values, validateField);
+              }
+            " />
         </Field>
         <Field v-slot="{ errors: fieldErrors }" name="numberDaysUntilFundsExpire">
           <PfFormInputText
             id="numberDaysUntilFundsExpire"
             class="sm:col-span-6"
-            :value="numberDaysUntilFundsExpire"
+            :model-value="numberDaysUntilFundsExpire"
             :label="t('subscription-days-until-funds-expire-after-first-use')"
             :errors="fieldErrors"
             input-type="number"
             min="0"
             :disabled="triggerFundExpirationValue !== NUMBER_OF_DAYS"
-            @input="(e) => updateNumberDaysUntilFundsExpireValue(setFieldValue, validateField, e)">
+            @update:modelValue="
+              (e) => {
+                updateNumberDaysUntilFundsExpireValue(setFieldValue, validateField, e);
+              }
+            ">
           </PfFormInputText>
         </Field>
       </PfFormSection>
@@ -317,7 +360,7 @@
       v-if="currentStep === 2"
       has-footer
       can-cancel
-      :disable-submit="Object.keys(formErrors).length > 0"
+      :disable-submit="!meta.valid"
       :submit-label="props.submitBtn"
       :cancel-label="t('previous')"
       :processing="isSubmitting"
@@ -340,10 +383,11 @@
                   :name="`productGroupSubscriptionTypes[${slotProps.idx}].productGroupId`">
                   <PfFormInputSelect
                     :key="`productGroupSubscriptionTypes[${slotProps.idx}].productGroupId`"
-                    v-bind="field"
+                    :model-value="field.value"
                     :label="t('product-group-select')"
                     :options="productGroups"
-                    :errors="fieldErrors" />
+                    :errors="fieldErrors"
+                    @update:modelValue="field.onChange" />
                 </Field>
                 <FieldArray
                   v-slot="{ fields: fieldsChild, remove: removeChild, push: pushChild }"
@@ -365,23 +409,25 @@
                         <PfFormInputSelect
                           :id="`productGroupSubscriptionTypes[${slotProps.idx}].types[${slotPropsType.idx}].type`"
                           class="grow"
-                          v-bind="inputField"
+                          :model-value="inputField.value"
                           :label="t('subscription-type-category')"
                           :options="beneficiaryTypes"
                           :errors="fieldErrors"
-                          col-span-class="sm:col-span-6" />
+                          col-span-class="sm:col-span-6"
+                          @update:modelValue="inputField.onChange" />
                       </Field>
                       <Field
                         v-slot="{ field: inputField, errors: fieldErrors }"
                         :name="`productGroupSubscriptionTypes[${slotProps.idx}].types[${slotPropsType.idx}].amount`">
                         <PfFormInputText
                           :id="`productGroupSubscriptionTypes[${slotProps.idx}].types[${slotPropsType.idx}].amount`"
-                          v-bind="inputField"
+                          :model-value="inputField.value"
                           :label="t('subscription-type-amount')"
                           :errors="fieldErrors"
                           input-type="number"
                           min="0"
-                          col-span-class="sm:col-span-6">
+                          col-span-class="sm:col-span-6"
+                          @update:modelValue="inputField.onChange">
                           <template #trailingIcon>
                             <UiDollarSign :errors="fieldErrors" />
                           </template>

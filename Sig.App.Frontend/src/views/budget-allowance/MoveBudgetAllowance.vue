@@ -38,7 +38,7 @@
       <p class="text-sm text-gray-500">{{ t("description") }}</p>
       <Form
         v-if="budgetAllowance"
-        v-slot="{ isSubmitting, errors: formErrors }"
+        v-slot="{ isSubmitting, meta }"
         :validation-schema="validationSchema"
         :initial-values="initialValues"
         @submit="onSubmit"
@@ -46,7 +46,7 @@
         <PfForm
           can-cancel
           has-footer
-          :disable-submit="Object.keys(formErrors).length > 0"
+          :disable-submit="!meta.valid"
           :submit-label="t('transfer-funds-btn')"
           :cancel-label="t('cancel-btn')"
           :processing="isSubmitting"
@@ -55,7 +55,7 @@
             <Field v-slot="{ field }" name="initialBudgetAllowanceName">
               <PfFormInputText
                 id="initialBudgetAllowanceName"
-                :value="field.value"
+                :model-value="field.value"
                 disabled
                 :label="t('initial-budget-allowance-name-label')"
                 col-span-class="sm:col-span-6" />
@@ -63,33 +63,31 @@
             <Field v-slot="{ field: inputField, errors: fieldErrors }" name="budgetAllowanceId">
               <PfFormInputSelect
                 id="budgetAllowanceId"
-                v-bind="inputField"
+                :model-value="inputField.value"
                 :label="t('target-budget-allowance-label')"
                 :options="availableBudgetAllowances"
                 col-span-class="sm:col-span-6"
                 :errors="fieldErrors"
-                required />
+                required
+                @update:modelValue="inputField.onChange" />
             </Field>
             <Field v-slot="{ field, errors: fieldErrors }" name="amount">
               <PfFormInputText
                 id="amount"
                 required
-                v-bind="field"
+                :model-value="field.value"
                 :label="t('amount-label')"
                 :placeholder="t('amount-placeholder')"
                 :errors="fieldErrors"
-                col-span-class="sm:col-span-6" />
+                col-span-class="sm:col-span-6"
+                @update:modelValue="field.onChange" />
             </Field>
           </PfFormSection>
           <template #footer>
             <div class="pt-5">
               <div class="flex gap-x-6 items-center justify-end">
                 <PfButtonAction :label="t('cancel-btn')" btn-style="link" @click="closeModal" />
-                <PfButtonAction
-                  type="submit"
-                  :disabled="Object.keys(formErrors).length > 0"
-                  :label="t('transfer-funds-btn')"
-                  @click="submit" />
+                <PfButtonAction type="submit" :disabled="!meta.valid" :label="t('transfer-funds-btn')" @click="submit" />
               </div>
             </div>
           </template>
