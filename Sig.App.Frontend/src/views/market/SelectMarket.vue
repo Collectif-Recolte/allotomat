@@ -45,7 +45,7 @@
           <div class="flex flex-col gap-y-6">
             <PfFormSection v-if="filteredMarketOptions.length > 0">
               <Field v-slot="{ field: inputField, errors: fieldErrors }" name="market">
-                <PfFormInputSelect
+                <PfFormInputSelectSearchable
                   id="marketId"
                   required
                   v-bind="inputField"
@@ -188,7 +188,9 @@ const initialValues = {
 
 const filteredMarketOptions = computed(() => {
   if (!markets.value || !project.value) return [];
-  return markets.value.filter((x) => !project.value.markets.some((y) => y.id === x.value));
+  return markets.value
+    .filter((x) => !project.value.markets.some((y) => y.id === x.value))
+    .sort((a, b) => a.label.localeCompare(b.label));
 });
 
 const validationSchema = computed(() =>
