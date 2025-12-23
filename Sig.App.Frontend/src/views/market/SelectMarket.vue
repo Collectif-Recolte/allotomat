@@ -9,7 +9,8 @@
     "select-market": "Market",
     "cancel": "Cancel",
     "no-associated-merchant": "All available markets are associated with the program.",
-    "selected-market-group": "Market group"
+    "selected-market-group": "Market group",
+    "no-results-found": "No markets found"
 	},
 	"fr": {
 		"add-market": "Ajouter",
@@ -20,7 +21,8 @@
     "select-market": "Commerce",
     "cancel": "Annuler",
     "no-associated-merchant": "Tous les commerces disponibles sont associés au programme.",
-    "selected-market-group": "Groupe de commerce"
+    "selected-market-group": "Groupe de commerce",
+    "no-results-found": "Aucun commerce trouvé"
 	}
 }
 </i18n>
@@ -51,6 +53,7 @@
                   v-bind="inputField"
                   :placeholder="t('choose-market')"
                   :label="t('select-market')"
+                  :no-results-found="t('no-results-found')"
                   :options="filteredMarketOptions"
                   :errors="fieldErrors" />
               </Field>

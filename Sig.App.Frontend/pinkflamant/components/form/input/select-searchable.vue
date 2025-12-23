@@ -104,10 +104,6 @@ export default {
       type: String,
       default: ""
     },
-    autocomplete: {
-      type: String,
-      default: ""
-    },
     noResultsFound: {
       type: String,
       default: ""
