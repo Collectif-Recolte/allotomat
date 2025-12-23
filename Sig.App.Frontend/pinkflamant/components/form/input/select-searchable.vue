@@ -12,6 +12,10 @@
     :has-hidden-label="hasHiddenLabel"
     :required="required">
     <div class="relative">
+      <PfIcon
+        class="absolute top-1/2 -translate-y-1/2 left-3 flex items-center text-grey-500 pointer-events-none"
+        :icon="leadingIcon"
+        :size="24" />
       <!-- Input de recherche -->
       <input
         :id="id"
@@ -22,7 +26,7 @@
         :required="required"
         :disabled="disabled"
         :placeholder="placeholder"
-        class="pf-select text-[18px] min-h-11 shadow-sm block w-full rounded-md transition-colors duration-200 ease-in-out disabled:bg-grey-100 disabled:text-grey-700 pr-10"
+        class="pf-select text-[18px] min-h-11 shadow-sm block w-full rounded-md transition-colors duration-200 ease-in-out disabled:bg-grey-100 disabled:text-grey-700 px-10"
         :class="
           hasErrorState
             ? 'border-3 text-red-600 border-red-600 placeholder-red-300 focus:ring-red-600 focus:border-red-600'
@@ -55,21 +59,21 @@
       <!-- Liste déroulante -->
       <div
         v-if="isOpen && filteredOptions.length > 0"
-        class="absolute z-50 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto outline-1"
+        class="absolute z-50 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-grey-50 overflow-auto outline-1"
         role="listbox"
         @mousedown.stop>
         <div
           v-for="(option, index) in filteredOptions"
           :key="option.value"
           :class="[
-            'cursor-pointer select-none relative py-2 pl-3 pr-9',
-            index === highlightedIndex ? 'bg-secondary-500 text-white' : 'text-primary-900 hover:bg-grey-100'
+            'cursor-pointer select-none relative py-2 pl-3 pr-9 transition-colors duration-200 ease-in-out',
+            index === highlightedIndex ? 'bg-secondary-500' : 'text-primary-900 hover:bg-grey-100'
           ]"
           role="option"
           :aria-selected="index === highlightedIndex"
           @mousedown.prevent="selectOption(option)"
           @mouseenter="highlightedIndex = index">
-          <span class="block truncate" :class="{ 'font-semibold': index === highlightedIndex }">
+          <span class="block truncate">
             {{ option.label }}
           </span>
         </div>
@@ -90,6 +94,8 @@
 
 <script>
 import FormField, { commonFieldProps } from "../field/index";
+import ICON_SEARCH from "../../../icons/search.json";
+
 export default {
   components: {
     FormField
@@ -121,7 +127,8 @@ export default {
       searchValue: "",
       isOpen: false,
       highlightedIndex: -1,
-      blurTimeout: null
+      blurTimeout: null,
+      leadingIcon: ICON_SEARCH
     };
   },
   computed: {
