@@ -5,22 +5,24 @@
 		"add-market-success-notification": "Successfully added market {marketName} to the program.",
 		"title": "Add a market to the program",
     "create-market": "Create Market",
-    "choose-market": "Select",
+    "choose-market": "Search for a market...",
     "select-market": "Market",
     "cancel": "Cancel",
     "no-associated-merchant": "All available markets are associated with the program.",
-    "selected-market-group": "Market group"
+    "selected-market-group": "Market group",
+    "no-results-found": "No markets found"
 	},
 	"fr": {
 		"add-market": "Ajouter",
 		"add-market-success-notification": "L’ajout du commerce {marketName} au programme a été un succès.",
 		"title": "Ajouter un commerce au programme",
     "create-market": "Créer un commerce",
-    "choose-market": "Sélectionner",
+    "choose-market": "Chercher un commerce...",
     "select-market": "Commerce",
     "cancel": "Annuler",
     "no-associated-merchant": "Tous les commerces disponibles sont associés au programme.",
-    "selected-market-group": "Groupe de commerce"
+    "selected-market-group": "Groupe de commerce",
+    "no-results-found": "Aucun commerce trouvé"
 	}
 }
 </i18n>
@@ -45,12 +47,13 @@
           <div class="flex flex-col gap-y-6">
             <PfFormSection v-if="filteredMarketOptions.length > 0">
               <Field v-slot="{ field: inputField, errors: fieldErrors }" name="market">
-                <PfFormInputSelect
+                <PfFormInputSelectSearchable
                   id="marketId"
                   required
                   v-bind="inputField"
                   :placeholder="t('choose-market')"
                   :label="t('select-market')"
+                  :no-results-found="t('no-results-found')"
                   :options="filteredMarketOptions"
                   :errors="fieldErrors" />
               </Field>
@@ -188,7 +191,9 @@ const initialValues = {
 
 const filteredMarketOptions = computed(() => {
   if (!markets.value || !project.value) return [];
-  return markets.value.filter((x) => !project.value.markets.some((y) => y.id === x.value));
+  return markets.value
+    .filter((x) => !project.value.markets.some((y) => y.id === x.value))
+    .sort((a, b) => a.label.localeCompare(b.label));
 });
 
 const validationSchema = computed(() =>
