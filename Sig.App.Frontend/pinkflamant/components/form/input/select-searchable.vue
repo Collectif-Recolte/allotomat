@@ -166,7 +166,7 @@ export default {
     onSearchInput(event) {
       this.searchValue = event.target.value;
       this.isOpen = true;
-      this.highlightedIndex = -1;
+      this.highlightedIndex = 0;
       // Si la recherche ne correspond à aucune option, émettre une valeur vide
       if (!this.filteredOptions.length) {
         this.$emit("input", "");
@@ -230,10 +230,6 @@ export default {
       this.isOpen = false;
       this.highlightedIndex = -1;
       this.$emit("input", option.value);
-      // Focus sur l'input après sélection
-      this.$nextTick(() => {
-        this.$refs.searchInput.focus();
-      });
     }
   }
 };
