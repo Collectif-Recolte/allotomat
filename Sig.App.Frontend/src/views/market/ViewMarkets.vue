@@ -60,7 +60,9 @@
           :markets="markets"
           :url-name-market-archive="URL_MARKET_OVERVIEW_ARCHIVE"
           :url-name-market-edit="URL_MARKET_OVERVIEW_EDIT"
-          :url-name-market-manage-managers="URL_MARKET_OVERVIEW_MANAGE_MANAGERS" />
+          :url-name-market-manage-managers="URL_MARKET_OVERVIEW_MANAGE_MANAGERS"
+          :url-name-market-enabled="URL_MARKET_OVERVIEW_ENABLED"
+          :url-name-market-disabled="URL_MARKET_OVERVIEW_DISABLED" />
         <UiEmptyPage v-else-if="!loading">
           <UiCta
             :description="t('empty-list')"
@@ -94,7 +96,9 @@ import {
   URL_MARKET_OVERVIEW_SELECT,
   URL_MARKET_OVERVIEW_ARCHIVE,
   URL_MARKET_OVERVIEW_EDIT,
-  URL_MARKET_OVERVIEW_MANAGE_MANAGERS
+  URL_MARKET_OVERVIEW_MANAGE_MANAGERS,
+  URL_MARKET_OVERVIEW_ENABLED,
+  URL_MARKET_OVERVIEW_DISABLED
 } from "@/lib/consts/urls";
 
 import { USER_TYPE_PROJECTMANAGER, USER_TYPE_MARKETGROUPMANAGER } from "@/lib/consts/enums";

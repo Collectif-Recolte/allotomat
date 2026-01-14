@@ -38,14 +38,14 @@
               btn-style="outline"
               size="sm"
               :label="t('disabled-market')"
-              :to="{ name: URL_MARKET_DISABLED, params: { marketId: slotProps.item.id } }" />
+              :to="{ name: props.urlNameMarketDisabled, params: { marketId: slotProps.item.id } }" />
             <PfButtonLink
               v-else
               tag="routerLink"
               btn-style="outline"
               size="sm"
               :label="t('enabled-market')"
-              :to="{ name: URL_MARKET_ENABLED, params: { marketId: slotProps.item.id } }" />
+              :to="{ name: props.urlNameMarketEnabled, params: { marketId: slotProps.item.id } }" />
           </template>
           <UiButtonGroup :items="getBtnGroup(slotProps.item)" tooltip-position="left" />
         </div>
@@ -72,6 +72,8 @@ const props = defineProps({
   urlNameMarketDelete: { type: String, default: "" },
   urlNameMarketEdit: { type: String, default: "" },
   urlNameMarketManageManagers: { type: String, default: "" },
+  urlNameMarketEnabled: { type: String, default: URL_MARKET_ENABLED },
+  urlNameMarketDisabled: { type: String, default: URL_MARKET_DISABLED },
   canEdit: Boolean,
   canDelete: Boolean,
   orderByMarketName: { type: Boolean, default: false }
