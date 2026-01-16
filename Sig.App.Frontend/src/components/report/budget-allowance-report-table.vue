@@ -4,23 +4,23 @@
       "budget-allowance-name": "Budget allowance",
       "transaction-date-hour": "Date and time",
       "operation-name": "Operation",
-      "amount": "Amount",
+      "amount": "Envelope adjustment",
       "delete-budget-allowance-transaction": "Delete budget allowance transaction",
       "edit-budget-allowance-transaction": "Edit budget allowance transaction",
       "move-budget-allowance-transaction": "Move budget allowance transaction",
       "create-budget-allowance-transaction": "Create budget allowance transaction",
-      "target-budget-allowance-name": "Target budget allowance name"
+      "target-budget-allowance-name": "Recipient envelope"
     },
     "fr": {
       "budget-allowance-name": "Enveloppe",
       "transaction-date-hour": "Date et heure",
       "operation-name": "Opération",
-      "amount": "Montant",
+      "amount": "Ajustement de l’enveloppe",
       "delete-budget-allowance-transaction": "Suppression d'une enveloppe",
       "edit-budget-allowance-transaction": "Modification d'une enveloppe",
       "move-budget-allowance-transaction": "Transfert d'une enveloppe",
       "create-budget-allowance-transaction": "Création d'une enveloppe",
-      "target-budget-allowance-name": "Enveloppe cible"
+      "target-budget-allowance-name": "Enveloppe destinataire"
     }
   }
   </i18n>
@@ -33,22 +33,22 @@
       </td>
       <td>
         <div>
-          {{ getBudgetAllowanceName(slotProps.item) }}
-        </div>
-      </td>
-      <td>
-        <div>
-          {{ getTargetBudgetAllowanceName(slotProps.item) }}
-        </div>
-      </td>
-      <td>
-        <div>
           <b>{{ getBudgetAllowanceLogDescription(slotProps.item) }}</b>
         </div>
       </td>
       <td>
         <div>
+          {{ getBudgetAllowanceName(slotProps.item) }}
+        </div>
+      </td>
+      <td>
+        <div>
           {{ getBudgetAllowanceLogAmount(slotProps.item) }}
+        </div>
+      </td>
+      <td>
+        <div>
+          {{ getTargetBudgetAllowanceName(slotProps.item) }}
         </div>
       </td>
     </template>
@@ -98,22 +98,20 @@ function getBudgetAllowanceLogDescription(budgetAllowanceLog) {
 
 function getBudgetAllowanceLogAmount(budgetAllowanceLog) {
   var amount = budgetAllowanceLog.amount;
-  
+
   const invertedTypes = ["DELETE_BUDGET_ALLOWANCE_LOG", "MOVE_BUDGET_ALLOWANCE_LOG"];
   if (invertedTypes.includes(budgetAllowanceLog.discriminator)) {
     amount *= -1;
   }
-  
-  return amount > 0
-    ? `+${getMoneyFormat(amount)}`
-    : `${getMoneyFormat(amount)}`;
+
+  return amount > 0 ? `+${getMoneyFormat(amount)}` : `${getMoneyFormat(amount)}`;
 }
 
 const cols = computed(() => [
   { label: t("transaction-date-hour") },
-  { label: t("budget-allowance-name") },
-  { label: t("target-budget-allowance-name") },
   { label: t("operation-name") },
-  { label: t("amount") }
+  { label: t("budget-allowance-name") },
+  { label: t("amount") },
+  { label: t("target-budget-allowance-name") }
 ]);
 </script>
