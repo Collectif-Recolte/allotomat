@@ -167,10 +167,6 @@ export default {
       this.searchValue = event.target.value;
       this.isOpen = true;
       this.highlightedIndex = 0;
-      // Si la recherche ne correspond à aucune option, émettre une valeur vide
-      if (!this.filteredOptions.length) {
-        this.$emit("input", "");
-      }
     },
     onFocus() {
       this.isOpen = true;
