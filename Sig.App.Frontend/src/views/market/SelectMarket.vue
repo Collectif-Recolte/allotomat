@@ -6,11 +6,12 @@
 		"title": "Add a market to the program",
     "create-market": "Create Market",
     "choose-market": "Search for a market...",
-    "select-market": "Market",
+    "select-market": "Search Existing Tomat Merchants",
     "cancel": "Cancel",
     "no-associated-merchant": "All available markets are associated with the program.",
     "selected-market-group": "Market group",
-    "no-results-found": "No markets found"
+    "no-results-found": "No markets found",
+    "warning-message":"Note: This list contains merchants from other programs on Tomat. Adding one of these merchants to your program will allow them to accept your cards, and will also create a new Cash Register that will need to be selected when they open Tomat. Please proceed with caution."
 	},
 	"fr": {
 		"add-market": "Ajouter",
@@ -18,17 +19,19 @@
 		"title": "Ajouter un commerce au programme",
     "create-market": "Créer un commerce",
     "choose-market": "Chercher un commerce...",
-    "select-market": "Commerce",
+    "select-market": "Trouver un commerce déjà sur Tomat",
     "cancel": "Annuler",
     "no-associated-merchant": "Tous les commerces disponibles sont associés au programme.",
     "selected-market-group": "Groupe de commerce",
-    "no-results-found": "Aucun commerce trouvé"
+    "no-results-found": "Aucun commerce trouvé",
+    "warning-message":"Attention : Cette liste contient des commerces provenant d’autres programmes qui utilisent Tomat. L'ajout de l'un de ces commerces à votre programme leur permettra d'accepter vos cartes et créera également une nouvelle Caisse qui devra être sélectionnée lorsqu'ils ouvriront Tomat. Veuillez procéder avec prudence."
 	}
 }
 </i18n>
 
 <template>
   <UiDialogModal v-slot="{ closeModal }" :return-route="returnRoute()" :title="t('title')" :has-footer="false">
+    <p class="text-sm text-gray-500">{{ t("warning-message") }}</p>
     <Form
       v-if="!loadingMarkets && !loadingProject"
       v-slot="{ isSubmitting, errors: formErrors }"
