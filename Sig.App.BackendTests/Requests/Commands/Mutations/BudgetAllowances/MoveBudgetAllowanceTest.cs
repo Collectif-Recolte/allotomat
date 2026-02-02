@@ -19,11 +19,13 @@ using Xunit;
 
 namespace Sig.App.BackendTests.Requests.Commands.Mutations.BudgetAllowances
 {
-    public class EditBudgetAllowanceTest : TestBase
+    public class MoveBudgetAllowanceTest : TestBase
     {
-        private readonly EditBudgetAllowance handler;
-        private readonly BudgetAllowance budgetAllowance;
-        public EditBudgetAllowanceTest()
+        private readonly MoveBudgetAllowance handler;
+        private readonly BudgetAllowance initialBudgetAllowance;
+        private readonly BudgetAllowance targetBudgetAllowance;
+
+        public MoveBudgetAllowanceTest()
         {
             var user = AddUser("test@example.com", UserType.ProjectManager, password: "Abcd1234!!");
             SetLoggedInUser(user);
@@ -77,61 +79,91 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.BudgetAllowances
             };
             DbContext.Subscriptions.Add(subscription);
 
-            budgetAllowance = new BudgetAllowance()
+            initialBudgetAllowance = new BudgetAllowance()
             {
                 AvailableFund = 20,
                 Organization = organization,
                 Subscription = subscription,
                 OriginalFund = 25
             };
-            DbContext.BudgetAllowances.Add(budgetAllowance);
+            DbContext.BudgetAllowances.Add(initialBudgetAllowance);
+
+            targetBudgetAllowance = new BudgetAllowance()
+            {
+                AvailableFund = 20,
+                Organization = organization,
+                Subscription = subscription,
+                OriginalFund = 25
+            };
+            DbContext.BudgetAllowances.Add(targetBudgetAllowance);
 
             DbContext.SaveChanges();
 
-            handler = new EditBudgetAllowance(NullLogger<EditBudgetAllowance>.Instance, DbContext, budgetAllowanceLogFactory);
+            handler = new MoveBudgetAllowance(NullLogger<MoveBudgetAllowance>.Instance, DbContext, budgetAllowanceLogFactory);
         }
 
         [Fact]
-        public async Task EditBudgetAllowance()
+        public async Task MoveBudgetAllowance()
         {
-            var input = new EditBudgetAllowance.Input()
+            var input = new MoveBudgetAllowance.Input()
             {
-                BudgetAllowanceId = budgetAllowance.GetIdentifier(),
+                InitialBudgetAllowanceId = initialBudgetAllowance.GetIdentifier(),
+                TargetBudgetAllowanceId = targetBudgetAllowance.GetIdentifier(),
                 Amount = 10
             };
 
             await handler.Handle(input, CancellationToken.None);
 
-            var localBudgetAllowance = await DbContext.BudgetAllowances.FirstAsync();
-            
-            localBudgetAllowance.AvailableFund.Should().Be(5);
-            localBudgetAllowance.OriginalFund.Should().Be(10);
+            var localInitialBudgetAllowance = await DbContext.BudgetAllowances.FirstAsync(x => x.Id == initialBudgetAllowance.Id);
+            var localTargetBudgetAllowance = await DbContext.BudgetAllowances.FirstAsync(x => x.Id == targetBudgetAllowance.Id);
+
+            localInitialBudgetAllowance.AvailableFund.Should().Be(10);
+            localInitialBudgetAllowance.OriginalFund.Should().Be(15);
+
+            localTargetBudgetAllowance.AvailableFund.Should().Be(30);
+            localTargetBudgetAllowance.OriginalFund.Should().Be(35);
         }
 
         [Fact]
-        public async Task ThrowsIfBudgetAllowanceNotFound()
+        public async Task ThrowsIfInitialBudgetAllowanceNotFound()
         {
-            var input = new EditBudgetAllowance.Input()
+            var input = new MoveBudgetAllowance.Input()
             {
-                BudgetAllowanceId = Id.New<BudgetAllowance>(123456),
+                InitialBudgetAllowanceId = Id.New<BudgetAllowance>(123456),
+                TargetBudgetAllowanceId = targetBudgetAllowance.GetIdentifier(),
                 Amount = 25
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<EditBudgetAllowance.BudgetAllowanceNotFoundException>();
+                .Should().ThrowAsync<MoveBudgetAllowance.InitialBudgetAllowanceNotFoundException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfTargetBudgetAllowanceNotFound()
+        {
+            var input = new MoveBudgetAllowance.Input()
+            {
+                InitialBudgetAllowanceId = initialBudgetAllowance.GetIdentifier(),
+                TargetBudgetAllowanceId = Id.New<BudgetAllowance>(123456),
+                Amount = 25
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<MoveBudgetAllowance.TargetBudgetAllowanceNotFoundException>();
         }
 
         [Fact]
         public async Task ThrowsIfAvailableBudgetOverNewBudget()
         {
-            var input = new EditBudgetAllowance.Input()
+            var input = new MoveBudgetAllowance.Input()
             {
-                BudgetAllowanceId = budgetAllowance.GetIdentifier(),
-                Amount = 4
+                InitialBudgetAllowanceId = initialBudgetAllowance.GetIdentifier(),
+                TargetBudgetAllowanceId = targetBudgetAllowance.GetIdentifier(),
+                Amount = 40
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<EditBudgetAllowance.AvailableBudgetOverNewBudgetException>();
+                .Should().ThrowAsync<MoveBudgetAllowance.AvailableBudgetUnderRequestAmountException>();
         }
     }
 }

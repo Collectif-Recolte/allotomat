@@ -37,7 +37,7 @@ namespace Sig.App.Backend.BackgroundJobs
         {
             RecurringJob.AddOrUpdate<ExpireSubscription>("ExpireSubscription",
                 x => x.Run(),
-                Cron.Daily(),
+                Cron.Daily(4),
                 new RecurringJobOptions
                 {
                     TimeZone = TimeZoneInfo.FindSystemTimeZoneById(config["systemLocalTimezone"])

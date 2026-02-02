@@ -20,18 +20,8 @@
             <div class="text-right">
               <ReportFilters
                 v-model="searchInput"
-                :date-from="dateFrom"
-                :date-to="dateTo"
                 :available-organizations="availableOrganizations"
-                :selected-organizations="organizations"
                 :available-subscriptions="availableSubscriptions"
-                :selected-subscriptions="subscriptions"
-                @dateFromUpdated="onDateFromUpdated"
-                @dateToUpdated="onDateToUpdated"
-                @organizationsChecked="onOrganizationsChecked"
-                @organizationsUnchecked="onOrganizationsUnchecked"
-                @subscriptionsUnchecked="onSubscriptionsUnchecked"
-                @subscriptionsChecked="onSubscriptionsChecked"
                 @resetFilters="onResetFilters" />
             </div>
           </template>
@@ -59,7 +49,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult } from "@vue/apollo-composable";
@@ -84,26 +74,27 @@ const router = useRouter();
 let previousMonth = new Date();
 previousMonth.setMonth(previousMonth.getMonth() - 1);
 
-const dateFrom = ref(previousMonth);
-const dateTo = ref(new Date(Date.now()));
-const searchInput = ref("");
+const searchInput = ref({
+  dateFrom: previousMonth,
+  dateTo: new Date(Date.now()),
+  selectedOrganizations: [],
+  selectedSubscriptions: []
+});
 const page = ref(1);
-const organizations = ref([]);
-const subscriptions = ref([]);
 const availableSubscriptions = ref([]);
 const availableOrganizations = ref([]);
 
 if (route.query.dateFrom) {
-  dateFrom.value = new Date(route.query.dateFrom);
+  searchInput.value.dateFrom = new Date(route.query.dateFrom);
 }
 if (route.query.dateTo) {
-  dateTo.value = new Date(route.query.dateTo);
+  searchInput.value.dateTo = new Date(route.query.dateTo);
 }
 if (route.query.subscriptions) {
-  subscriptions.value = route.query.subscriptions.split(",");
+  searchInput.value.selectedSubscriptions = route.query.subscriptions.split(",");
 }
 if (route.query.organizations) {
-  organizations.value = route.query.organizations.split(",");
+  searchInput.value.selectedOrganizations = route.query.organizations.split(",");
 }
 
 const { t } = useI18n();
@@ -111,10 +102,28 @@ const { t } = useI18n();
 usePageTitle(t("title"));
 
 const dateFromStartOfDay = computed(
-  () => new Date(dateFrom.value.getFullYear(), dateFrom.value.getMonth(), dateFrom.value.getDate(), 0, 0, 0, 0)
+  () =>
+    new Date(
+      searchInput.value.dateFrom.getFullYear(),
+      searchInput.value.dateFrom.getMonth(),
+      searchInput.value.dateFrom.getDate(),
+      0,
+      0,
+      0,
+      0
+    )
 );
 const dateToEndOfDay = computed(
-  () => new Date(dateTo.value.getFullYear(), dateTo.value.getMonth(), dateTo.value.getDate(), 23, 59, 59, 999)
+  () =>
+    new Date(
+      searchInput.value.dateTo.getFullYear(),
+      searchInput.value.dateTo.getMonth(),
+      searchInput.value.dateTo.getDate(),
+      23,
+      59,
+      59,
+      999
+    )
 );
 
 function subscriptionEndReportVariables() {
@@ -122,8 +131,8 @@ function subscriptionEndReportVariables() {
     page: page.value,
     dateFrom: dateFromStartOfDay.value,
     dateTo: dateToEndOfDay.value,
-    organizations: organizations.value,
-    subscriptions: subscriptions.value
+    organizations: searchInput.value.selectedOrganizations,
+    subscriptions: searchInput.value.selectedSubscriptions
   };
 }
 
@@ -273,17 +282,17 @@ function setDateFrom(reconciliationReportDate) {
     case "ONE_MONTH": {
       let previousMonth = new Date();
       previousMonth.setMonth(previousMonth.getMonth() - 1);
-      dateFrom.value = previousMonth;
+      searchInput.value.dateFrom = previousMonth;
       break;
     }
     case "ONE_WEEK": {
       let previousWeek = new Date();
       previousWeek.setDate(previousWeek.getDate() - 7);
-      dateFrom.value = previousWeek;
+      searchInput.value.dateFrom = previousWeek;
       break;
     }
     case "ONE_DAY": {
-      dateFrom.value = new Date();
+      searchInput.value.dateFrom = new Date();
       break;
     }
   }
@@ -335,56 +344,30 @@ function updateUrl() {
   router.replace({
     name: URL_SUBSCRIPTION_END_REPORT,
     query: {
-      dateFrom: formatDate(new Date(dateFrom.value), serverFormat),
-      dateTo: formatDate(new Date(dateTo.value), serverFormat),
-      organizations: organizations.value.length > 0 ? organizations.value.toString() : undefined,
-      subscriptions: subscriptions.value.length > 0 ? subscriptions.value.toString() : undefined
+      dateFrom: formatDate(new Date(searchInput.value.dateFrom), serverFormat),
+      dateTo: formatDate(new Date(searchInput.value.dateTo), serverFormat),
+      organizations:
+        searchInput.value.selectedOrganizations.length > 0 ? searchInput.value.selectedOrganizations.toString() : undefined,
+      subscriptions:
+        searchInput.value.selectedSubscriptions.length > 0 ? searchInput.value.selectedSubscriptions.toString() : undefined
     }
   });
 }
 
-function onDateFromUpdated(value) {
-  page.value = 1;
-  dateFrom.value = value;
-  updateUrl();
-}
-
-function onDateToUpdated(value) {
-  page.value = 1;
-  dateTo.value = value;
-  updateUrl();
-}
-
-function onOrganizationsChecked(value) {
-  page.value = 1;
-  organizations.value.push(value);
-  updateUrl();
-}
-
-function onOrganizationsUnchecked(value) {
-  page.value = 1;
-  organizations.value = organizations.value.filter((x) => x !== value);
-  updateUrl();
-}
-
-function onSubscriptionsChecked(value) {
-  page.value = 1;
-  subscriptions.value.push(value);
-  updateUrl();
-}
-
-function onSubscriptionsUnchecked(value) {
-  page.value = 1;
-  subscriptions.value = subscriptions.value.filter((x) => x !== value);
-  updateUrl();
-}
+watch(
+  () => searchInput.value,
+  () => {
+    page.value = 1;
+    updateUrl();
+  }
+);
 
 function onResetFilters() {
   page.value = 1;
-  organizations.value = [];
-  subscriptions.value = [];
-  dateFrom.value = previousMonth;
-  dateTo.value = new Date(Date.now());
+  searchInput.value.selectedOrganizations = [];
+  searchInput.value.selectedSubscriptions = [];
+  searchInput.value.dateFrom = previousMonth;
+  searchInput.value.dateTo = new Date(Date.now());
   updateUrl();
 }
 </script>

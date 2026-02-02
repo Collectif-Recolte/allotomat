@@ -249,5 +249,25 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
             return results;
         }
+
+        public async Task<Pagination<BudgetAllowanceLogGraphType>> BudgetAllowanceReport([Inject] IMediator mediator, int page, int limit, DateTime startDate, DateTime endDate,
+            [Description("If specified, only transactions with one of those subscription are returned.")] Id[] withSpecificSubscriptions = null,
+            [Description("If specified, only transactions with one of those organization are returned.")] Id[] withSpecificOrganizations = null)
+        {
+            var results = await mediator.Send(new SearchProjectBudgetAllowanceReport.Query
+            {
+                ProjectId = project.Id,
+                Page = new Page(page, limit),
+                StartDate = startDate,
+                EndDate = endDate,
+                Subscriptions = withSpecificSubscriptions?.Select(y => y.LongIdentifierForType<Subscription>()),
+                Organizations = withSpecificOrganizations?.Select(y => y.LongIdentifierForType<Organization>())
+            });
+
+            return results.Map(x =>
+            {
+                return new BudgetAllowanceLogGraphType(x);
+            });
+        }
     }
 }

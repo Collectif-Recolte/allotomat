@@ -174,14 +174,14 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
 
             var sorted = Sort(query, request.Sort?.Field ?? BeneficiarySort.Default);
             var beneficiaries = await sorted.ToListAsync(cancellationToken: cancellationToken);
-            
+
             var productGroups = beneficiaries.Where(x => x.Card != null).SelectMany(x => x.Card.Funds).Select(x => x.ProductGroup).DistinctBy(x => x.Id);
 
             var generator = new ExcelGenerator();
             var dataWorksheet = generator.AddDataWorksheet("Liste des participants", beneficiaries);
             dataWorksheet.Column("Id 1", x => x.ID1);
             dataWorksheet.Column("Id 2", x => x.ID2);
-            
+
             if (currentUserCanSeeAllBeneficiaryInfo)
             {
                 dataWorksheet.Column("Prénom/Firstname", x => x.Firstname);
@@ -192,7 +192,7 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
                 dataWorksheet.Column("Code postal/Postal code", x => x.PostalCode);
                 dataWorksheet.Column("Notes/Briefing", x => x.Notes);
             }
-            
+
             dataWorksheet.Column("Catégorie/Category", x => x.BeneficiaryType.GetKeys().First());
             dataWorksheet.Column("Solde total/Total balance", x => x.Card != null ? x.Card.TotalFund() : "", "0.00 $");
             dataWorksheet.Column("Solde abonnement/Subscription balance", x => x.Card != null ? x.Card.TotalSubscriptionFund() : "", "0.00 $");
@@ -239,6 +239,19 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
                     {
                         var lastTransaction = paymentTransactions.OrderBy(x => x.CreatedAtUtc).Last();
                         return $"{TimeZoneInfo.ConvertTime(lastTransaction.CreatedAtUtc, TimeZoneInfo.Utc, TimeZoneInfo.FindSystemTimeZoneById(request.TimeZoneId)).ToString(DateFormats.RegularWithTime)}";
+                    }
+                }
+
+                return "";
+            });
+            dataWorksheet.Column("Date d'expiration des fonds en fonction de l'utilisation / Expiry date of funds based on card use", x =>
+            {
+                if (x.Subscriptions.Any(x => x.Subscription.IsSubscriptionPaymentBasedCardUsage) && x.Card != null)
+                {
+                    var nearestExpirationDate = TransactionHelper.GetNearestExpirationDate(x.Card.Transactions);
+                    if (nearestExpirationDate != null)
+                    {
+                        return $"{nearestExpirationDate.Value.ToString(DateFormats.RegularExport)}";
                     }
                 }
 

@@ -611,6 +611,14 @@ export default [
     }
   },
   {
+    name: urls.URL_BUDGET_ALLOWANCE_REPORT,
+    path: "/budget-allowance-report",
+    component: () => import("@/views/report/BudgetAllowanceReport.vue"),
+    meta: {
+      claim: GLOBAL_MANAGE_TRANSACTIONS
+    }
+  },
+  {
     name: urls.URL_PROJECT_MANAGER_ADMIN,
     path: "/project-managers",
     component: () => import("@/views/project/ListProjectManagers.vue"),
@@ -722,6 +730,14 @@ export default [
         name: urls.URL_SUBSCRIPTION_DELETE_BUDGET_ALLOWANCE,
         path: ":subscriptionId/budgets/:budgetId/delete",
         component: () => import("@/views/budget-allowance/DeleteBudgetAllowance.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SUBSCRIPTIONS
+        }
+      },
+      {
+        name: urls.URL_SUBSCRIPTION_MOVE_BUDGET_ALLOWANCE,
+        path: ":subscriptionId/budgets/:budgetId/move",
+        component: () => import("@/views/budget-allowance/MoveBudgetAllowance.vue"),
         meta: {
           claim: GLOBAL_MANAGE_SUBSCRIPTIONS
         }

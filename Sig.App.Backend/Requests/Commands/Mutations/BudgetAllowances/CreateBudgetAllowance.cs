@@ -1,14 +1,15 @@
-﻿using GraphQL.Conventions;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
+using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
+using Sig.App.Backend.Plugins.BudgetAllowances;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
 using System.Linq;
@@ -21,11 +22,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
     {
         private readonly ILogger<CreateBudgetAllowance> logger;
         private readonly AppDbContext db;
-        
-        public CreateBudgetAllowance(ILogger<CreateBudgetAllowance> logger, AppDbContext db)
+        private readonly BudgetAllowanceLogFactory budgetAllowanceLogFactory;
+
+        public CreateBudgetAllowance(ILogger<CreateBudgetAllowance> logger, AppDbContext db, BudgetAllowanceLogFactory budgetAllowanceLogFactory)
         {
             this.logger = logger;
             this.db = db;
+            this.budgetAllowanceLogFactory = budgetAllowanceLogFactory;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -70,6 +73,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
             };
 
             db.BudgetAllowances.Add(budgetAllowance);
+            await db.SaveChangesAsync();
+
+            var log = await budgetAllowanceLogFactory.CreateLog(BudgetAllowanceLogDiscriminator.CreateBudgetAllowanceLog, request.Amount, budgetAllowance);
+            db.BudgetAllowanceLogs.Add(log);
             await db.SaveChangesAsync();
 
             logger.LogInformation($"[Mutation] CreateBudgetAllowance - New budget allowance created for {organization.Name} ({request.Amount})");

@@ -21,6 +21,7 @@ using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.DbModel.Entities.BackgroundJobs;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
+using Sig.App.Backend.DbModel.Entities.BudgetAllowanceLogs;
 
 namespace Sig.App.Backend.DbModel
 {
@@ -74,6 +75,7 @@ namespace Sig.App.Backend.DbModel
         public DbSet<BeneficiaryType> BeneficiaryTypes { get; set; }
 
         public DbSet<BudgetAllowance> BudgetAllowances { get; set; }
+        public DbSet<BudgetAllowanceLog> BudgetAllowanceLogs { get; set; }
 
         public DbSet<ProductGroup> ProductGroups { get; set; }
 

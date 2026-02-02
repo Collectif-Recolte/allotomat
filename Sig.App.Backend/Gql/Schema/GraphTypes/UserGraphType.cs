@@ -1,16 +1,22 @@
 ﻿using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using NodaTime;
 using Sig.App.Backend.Authorization;
 using Sig.App.Backend.Constants;
+using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Helpers;
+using Sig.App.Backend.Plugins.GraphQL;
+using Sig.App.Backend.Services.Permission;
+using Sig.App.Backend.Services.Permission.Enums;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -93,6 +99,62 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
             string token = await userManager.GeneratePasswordResetTokenAsync(user);
             return $"{config["Mailer:BaseUrl"]}/{UrlHelper.ResetPassword(user.UserName, token)}";
+        }
+
+        [ApplyPolicy(AuthorizationPolicies.IsPCAAdmin)]
+        [Description("All projects manageable by current user")]
+        public async Task<IEnumerable<ProjectGraphType>> Projects(IAppUserContext ctx)
+        {
+            if (user.Type == UserType.ProjectManager)
+            {
+                return await ctx.DataLoader.LoadProjectOwnedByUser(user.Id).GetResultAsync();
+            }
+            else
+            {
+                return new ProjectGraphType[0];
+            }
+        }
+
+        [ApplyPolicy(AuthorizationPolicies.IsPCAAdmin)]
+        [Description("All organizations manageable by current user")]
+        public async Task<IEnumerable<OrganizationGraphType>> Organizations(IAppUserContext ctx)
+        {
+            if (user.Type == UserType.OrganizationManager)
+            { 
+                return await ctx.DataLoader.LoadOrganizationsOwnedByUser(user.Id).GetResultAsync();
+            }
+            else
+            {
+                return new OrganizationGraphType[0];
+            }
+        }
+
+        [ApplyPolicy(AuthorizationPolicies.IsPCAAdmin)]
+        [Description("All markets manageable by current user")]
+        public async Task<IEnumerable<MarketGraphType>> Markets(IAppUserContext ctx)
+        {
+            if (user.Type == UserType.Merchant)
+            {
+                return await ctx.DataLoader.LoadMarketOwnedByUser(user.Id).GetResultAsync();
+            }
+            else
+            {
+                return new MarketGraphType[0];
+            }
+        }
+
+        [ApplyPolicy(AuthorizationPolicies.IsPCAAdmin)]
+        [Description("All market groups manageable by current user")]
+        public async Task<IEnumerable<MarketGroupGraphType>> MarketGroups(IAppUserContext ctx)
+        {
+            if (user.Type == UserType.MarketGroupManager)
+            {
+                return await ctx.DataLoader.LoadMarketGroupOwnedByUser(user.Id).GetResultAsync();
+            }
+            else
+            {
+                return new MarketGroupGraphType[0];
+            }
         }
     }
 }

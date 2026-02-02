@@ -3,8 +3,11 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
+using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
+using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Plugins.BudgetAllowances;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
 using System.Linq;
@@ -17,18 +20,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
     {
         private readonly ILogger<DeleteBudgetAllowance> logger;
         private readonly AppDbContext db;
+        private readonly BudgetAllowanceLogFactory budgetAllowanceLogFactory;
 
-        public DeleteBudgetAllowance(ILogger<DeleteBudgetAllowance> logger, AppDbContext db)
+        public DeleteBudgetAllowance(ILogger<DeleteBudgetAllowance> logger, AppDbContext db, BudgetAllowanceLogFactory budgetAllowanceLogFactory)
         {
             this.logger = logger;
             this.db = db;
+            this.budgetAllowanceLogFactory = budgetAllowanceLogFactory;
         }
 
         public async Task Handle(Input request, CancellationToken cancellationToken)
         {
             logger.LogInformation($"[Mutation] DeleteBudgetAllowance({request.BudgetAllowanceId})");
             var budgetAllowanceId = request.BudgetAllowanceId.LongIdentifierForType<BudgetAllowance>();
-            var budgetAllowance = await db.BudgetAllowances.Include(x => x.Beneficiaries).FirstOrDefaultAsync(x => x.Id == budgetAllowanceId, cancellationToken);
+            var budgetAllowance = await db.BudgetAllowances.Include(x => x.Beneficiaries).Include(x => x.Organization).Include(x => x.Subscription).FirstOrDefaultAsync(x => x.Id == budgetAllowanceId, cancellationToken);
 
             if (budgetAllowance == null)
             {
@@ -43,6 +48,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
             }
 
             db.BudgetAllowances.Remove(budgetAllowance);
+
+            var log = await budgetAllowanceLogFactory.CreateLog(BudgetAllowanceLogDiscriminator.DeleteBudgetAllowanceLog, budgetAllowance.AvailableFund, budgetAllowance);
+            db.BudgetAllowanceLogs.Add(log);
 
             await db.SaveChangesAsync();
             logger.LogInformation($"[Mutation] DeleteBudgetAllowance - Budget allowance deleted ({budgetAllowanceId})");

@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
-using SixLabors.ImageSharp.Web.Commands;
 
 namespace Sig.App.Backend.Services.Files
 {

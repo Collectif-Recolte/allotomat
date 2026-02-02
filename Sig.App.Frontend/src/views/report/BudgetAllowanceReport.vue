@@ -1,11 +1,11 @@
 <i18n>
   {
     "en": {
-      "title": "Reconciliation report",
+      "title": "Budget allowance report",
       "no-results": "No transactions for the selected period"
     },
     "fr": {
-      "title": "Rapport de réconciliation",
+      "title": "Rapport d'enveloppe",
       "no-results": "Aucune transaction pour la période sélectionnée"
     }
   }
@@ -13,27 +13,33 @@
 
 <template>
   <RouterView v-slot="{ Component }">
-    <AppShell :loading="loadingProjects || loadingMarketGroups" class="markets-list-vue">
+    <AppShell :loading="loadingProjects" class="markets-list-vue">
       <template #title>
         <Title :title="t('title')">
           <template #subpagesCta>
             <div class="text-right">
-              <ReportFilters v-model="searchInput" @resetFilters="onResetFilters" />
+              <ReportFilters
+                v-model="searchInput"
+                :available-organizations="availableOrganizations"
+                :available-subscriptions="availableSubscriptions"
+                @resetFilters="onResetFilters" />
             </div>
           </template>
         </Title>
       </template>
-      <div v-if="marketsAmountOwed">
+      <div v-if="budgetAllowanceReport">
         <div class="flex flex-col relative mb-6">
-          <MarketAmountOwedTable v-if="marketsAmountOwed.totalCount > 0" :markets="marketsAmountOwed.items" />
+          <BudgetAllowanceReportTable
+            v-if="budgetAllowanceReport.totalCount > 0"
+            :budget-allowance-logs="budgetAllowanceReport.items" />
           <UiEmptyPage v-else>
             <UiCta :img-src="require('@/assets/img/swan.jpg')" :description="t('no-results')"> </UiCta>
           </UiEmptyPage>
           <UiPagination
-            v-if="marketsAmountOwed.totalPages > 1"
+            v-if="budgetAllowanceReport.totalPages > 1"
             v-model:page="page"
             class="mb-6"
-            :total-pages="marketsAmountOwed.totalPages" />
+            :total-pages="budgetAllowanceReport.totalPages" />
         </div>
       </div>
       <Component :is="Component" />
@@ -51,14 +57,14 @@ import { storeToRefs } from "pinia";
 
 import Title from "@/components/app/title";
 import ReportFilters from "@/components/report/report-filters";
-import MarketAmountOwedTable from "@/components/report/market-amount-owed-table";
+import BudgetAllowanceReportTable from "@/components/report/budget-allowance-report-table";
 
 import { formatDate, serverFormat } from "@/lib/helpers/date";
 import { useAuthStore } from "@/lib/store/auth";
 import { usePageTitle } from "@/lib/helpers/page-title";
 
-import { URL_RECONCILIATION_REPORT } from "@/lib/consts/urls";
-import { USER_TYPE_PROJECTMANAGER, USER_TYPE_MARKETGROUPMANAGER } from "@/lib/consts/enums";
+import { URL_BUDGET_ALLOWANCE_REPORT } from "@/lib/consts/urls";
+import { USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
 
 const { userType } = storeToRefs(useAuthStore());
 const route = useRoute();
@@ -69,15 +75,26 @@ previousMonth.setMonth(previousMonth.getMonth() - 1);
 
 const searchInput = ref({
   dateFrom: previousMonth,
-  dateTo: new Date(Date.now())
+  dateTo: new Date(Date.now()),
+  selectedOrganizations: [],
+  selectedSubscriptions: []
 });
+
 const page = ref(1);
+const availableSubscriptions = ref([]);
+const availableOrganizations = ref([]);
 
 if (route.query.dateFrom) {
   searchInput.value.dateFrom = new Date(route.query.dateFrom);
 }
 if (route.query.dateTo) {
   searchInput.value.dateTo = new Date(route.query.dateTo);
+}
+if (route.query.subscriptions) {
+  searchInput.value.subscriptions = route.query.subscriptions.split(",");
+}
+if (route.query.organizations) {
+  searchInput.value.organizations = route.query.organizations.split(",");
 }
 
 const { t } = useI18n();
@@ -109,43 +126,55 @@ const dateToEndOfDay = computed(
     )
 );
 
-function marketsAmountOwedVariables() {
+function budgetAllowanceReportVariables() {
   return {
     page: page.value,
     dateFrom: dateFromStartOfDay.value,
-    dateTo: dateToEndOfDay.value
+    dateTo: dateToEndOfDay.value,
+    organizations: searchInput.value.selectedOrganizations,
+    subscriptions: searchInput.value.selectedSubscriptions
   };
 }
 
 const { result: resultProjects, loading: loadingProjects } = useQuery(
   gql`
-    query Projects($page: Int!, $dateFrom: DateTime!, $dateTo: DateTime!) {
+    query Projects($page: Int!, $dateFrom: DateTime!, $dateTo: DateTime!, $organizations: [ID!]!, $subscriptions: [ID!]!) {
       projects {
         id
         reconciliationReportDate
-        name
-        marketsAmountOwed(page: $page, limit: 30, startDate: $dateFrom, endDate: $dateTo) {
+        organizations {
+          id
+          name
+        }
+        subscriptions {
+          id
+          name
+        }
+        budgetAllowanceReport(
+          page: $page
+          limit: 30
+          startDate: $dateFrom
+          endDate: $dateTo
+          withSpecificOrganizations: $organizations
+          withSpecificSubscriptions: $subscriptions
+        ) {
           totalCount
           totalPages
           items {
-            market {
-              id
-              name
-            }
+            id
+            discriminator
+            createdAt
             amount
-            amountByCashRegister {
-              cashRegister {
-                id
-                name
-              }
-              amount
-            }
+            organizationName
+            subscriptionName
+            targetOrganizationName
+            targetSubscriptionName
           }
         }
       }
     }
   `,
-  marketsAmountOwedVariables,
+  budgetAllowanceReportVariables,
   () => ({
     enabled: userType.value === USER_TYPE_PROJECTMANAGER
   })
@@ -156,52 +185,12 @@ const project = useResult(resultProjects, null, (data) => {
     setDateFrom(data.projects[0].reconciliationReportDate);
   }
 
+  updateUrl();
+
+  availableOrganizations.value = data.projects[0].organizations;
+  availableSubscriptions.value = data.projects[0].subscriptions;
+
   return data.projects[0];
-});
-
-const { result: resultMarketGroups, loading: loadingMarketGroups } = useQuery(
-  gql`
-    query MarketGroups($page: Int!, $dateFrom: DateTime!, $dateTo: DateTime!) {
-      marketGroups {
-        id
-        name
-        project {
-          id
-          reconciliationReportDate
-        }
-        marketsAmountOwed(page: $page, limit: 30, startDate: $dateFrom, endDate: $dateTo) {
-          totalCount
-          totalPages
-          items {
-            market {
-              id
-              name
-            }
-            amount
-            amountByCashRegister {
-              cashRegister {
-                id
-                name
-              }
-              amount
-            }
-          }
-        }
-      }
-    }
-  `,
-  marketsAmountOwedVariables,
-  () => ({
-    enabled: userType.value === USER_TYPE_MARKETGROUPMANAGER
-  })
-);
-
-const marketGroup = useResult(resultMarketGroups, null, (data) => {
-  if (!route.query.dateFrom && !route.query.dateTo) {
-    setDateFrom(data.marketGroups[0].project.reconciliationReportDate);
-  }
-
-  return data.marketGroups[0];
 });
 
 function setDateFrom(reconciliationReportDate) {
@@ -225,38 +214,20 @@ function setDateFrom(reconciliationReportDate) {
   }
 }
 
-const marketsAmountOwed = computed(() => {
-  var marketsAmountOwed = project.value
-    ? project.value.marketsAmountOwed
-    : marketGroup.value
-    ? marketGroup.value.marketsAmountOwed
-    : null;
-  let items = [];
-  let totalCount = 0;
-
-  if (marketsAmountOwed) {
-    totalCount = marketsAmountOwed.totalCount;
-    marketsAmountOwed.items.forEach((item) => {
-      item.amountByCashRegister.forEach((cashRegisterItem) => {
-        let marketData = {
-          market: item.market,
-          cashRegister: cashRegisterItem.cashRegister,
-          amount: cashRegisterItem.amount
-        };
-        items.push(marketData);
-      });
-    });
-  }
-
-  return { items, totalCount };
+const budgetAllowanceReport = computed(() => {
+  return project.value ? project.value.budgetAllowanceReport : null;
 });
 
 function updateUrl() {
   router.replace({
-    name: URL_RECONCILIATION_REPORT,
+    name: URL_BUDGET_ALLOWANCE_REPORT,
     query: {
       dateFrom: formatDate(new Date(searchInput.value.dateFrom), serverFormat),
-      dateTo: formatDate(new Date(searchInput.value.dateTo), serverFormat)
+      dateTo: formatDate(new Date(searchInput.value.dateTo), serverFormat),
+      organizations:
+        searchInput.value.selectedOrganizations.length > 0 ? searchInput.value.selectedOrganizations.toString() : undefined,
+      subscriptions:
+        searchInput.value.selectedSubscriptions.length > 0 ? searchInput.value.selectedSubscriptions.toString() : undefined
     }
   });
 }
@@ -271,6 +242,8 @@ watch(
 
 function onResetFilters() {
   page.value = 1;
+  searchInput.value.organizations = [];
+  searchInput.value.subscriptions = [];
   searchInput.value.dateFrom = previousMonth;
   searchInput.value.dateTo = new Date(Date.now());
   updateUrl();

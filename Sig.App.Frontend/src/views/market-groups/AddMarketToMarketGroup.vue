@@ -7,7 +7,8 @@
       "choose-market": "Select",
       "select-market": "Market",
       "cancel": "Cancel",
-      "no-associated-merchant": "All available markets are associated with the market group."
+      "no-associated-merchant": "All available markets are associated with the market group.",
+      "warning-message": "Note: Adding one of these merchants to this group will create a new Cash Register that will need to be selected when they open Tomat. Please choose carefully."
     },
     "fr": {
       "add-market": "Ajouter",
@@ -16,13 +17,15 @@
       "choose-market": "Sélectionner",
       "select-market": "Commerce",
       "cancel": "Annuler",
-      "no-associated-merchant": "Tous les commerces disponibles sont associés au groupe de commerce."
+      "no-associated-merchant": "Tous les commerces disponibles sont associés au groupe de commerce.",
+      "warning-message":"Attention : L'ajout de l'un de ces commerces à ce groupe créera une nouvelle Caisse qui devra être sélectionnée lorsqu'ils ouvriront Tomat. Veuillez faire votre choix avec soin."
     }
   }
 </i18n>
 
 <template>
   <UiDialogModal v-slot="{ closeModal }" :return-route="returnRoute()" :title="t('title')" :has-footer="false">
+    <p class="text-sm text-gray-500">{{ t("warning-message") }}</p>
     <Form
       v-if="!loadingMarketGroup"
       v-slot="{ isSubmitting, errors: formErrors }"
