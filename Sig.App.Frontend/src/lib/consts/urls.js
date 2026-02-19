@@ -136,6 +136,7 @@ export const URL_CARDS_LOST = "cards-lost-url";
 export const URL_CARDS_QRCODE_PREVIEW = "cards-qrcode-preview-url";
 export const URL_CARDS_UNASSIGN = "cards-unassign-url";
 export const URL_GIFT_CARD_ADD = "cards-gift-card-add-url";
+export const URL_GIFT_CARD_EDIT = "cards-gift-card-edit-url";
 export const URL_CARDS_BRANDING = "cards-branding-url";
 export const URL_CARDS_ENABLE = "cards-enable-url";
 export const URL_CARDS_DISABLE = "cards-disable-url";

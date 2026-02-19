@@ -273,6 +273,8 @@ namespace Sig.App.Backend.Services.Reports
                     return $"Remboursement d'enveloppe, participant sans carte lors de l'ajout de fond automatique/Budget allowance refund, participant had no cards when automatically adding fund";
                 case TransactionLogDiscriminator.RefundPaymentTransactionLog:
                     return $"Remboursement d'un paiement/Refund of a payment";
+                case TransactionLogDiscriminator.LoyaltyEditFundTransactionLog:
+                    return "Modification Carte-cadeau/Edit Gift card";
                 default:
                     return "Type inconnu/Unknown type";
             }

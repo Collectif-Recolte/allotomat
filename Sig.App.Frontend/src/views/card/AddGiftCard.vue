@@ -13,7 +13,7 @@
     "amount-label": "Amount",
     "amount-placeholder": "Ex. {amount}",
     "warning-create-gift-card": "A gift card is activated as soon as it is created, please do not lose it!",
-    "gift-card-fund-sucessfully-added": "The gift card {cardId} is now activated and has {amount}."
+    "gift-card-fund-successfully-added": "The gift card {cardId} is now activated and has {amount}."
 	},
 	"fr": {
 		"assign-card": "Créer la carte-cadeau",
@@ -28,7 +28,7 @@
     "amount-label": "Montant",
     "amount-placeholder": "Ex. {amount}",
     "warning-create-gift-card": "Une carte-cadeau est activée dès sa création, veuillez ne pas la perdre!",
-    "gift-card-fund-sucessfully-added": "La carte ({cardId}) est maintenant activée en tant que carte-cadeau et possède {amount}."
+    "gift-card-fund-successfully-added": "La carte ({cardId}) est maintenant activée en tant que carte-cadeau et possède {amount}."
 	}
 }
 </i18n>
@@ -182,7 +182,7 @@ async function onSubmit({ amount, existingCardId }) {
     }
   });
 
-  addSuccess(t("gift-card-fund-sucessfully-added", { amount: getMoneyFormat(parseFloat(amount)), cardId: existingCardId }));
+  addSuccess(t("gift-card-fund-successfully-added", { amount: getMoneyFormat(parseFloat(amount)), cardId: existingCardId }));
   router.push({ name: URL_CARDS });
 }
 </script>
