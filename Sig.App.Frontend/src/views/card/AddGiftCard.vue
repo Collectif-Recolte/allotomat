@@ -57,24 +57,26 @@
         :warning-message="t('warning-create-gift-card')"
         @cancel="closeModal">
         <PfFormSection>
-          <Field v-slot="{ field, errors: fieldErrors }" name="existingCardId">
-            <PfFormInputText
-              id="existingCardId"
-              v-bind="field"
-              :label="t('existing-card-id')"
-              :placeholder="t('existing-card-id-placeholder')"
-              :errors="fieldErrors"
-              input-type="number"
-              @input="(e) => updateCardIdToQuery(e)" />
-            <p v-if="cardById && showAlreadyUsedWarning" class="text-red-500">
-              {{
-                t("warning-create-gift-card-already-used", {
-                  cardStatus: cardStatusLabel,
-                  subscriptionAmount: getMoneyFormat(cardById.totalFund),
-                  giftCardAmount: getMoneyFormat(cardById.loyaltyFund?.amount ?? 0)
-                })
-              }}
-            </p>
+          <Field v-slot="{ field, errors: fieldErrors }" name="existingCardId" class="grid grid-cols-1 gap-y-2">
+            <div class="flex flex-col gap-y-2">
+              <PfFormInputText
+                id="existingCardId"
+                v-bind="field"
+                :label="t('existing-card-id')"
+                :placeholder="t('existing-card-id-placeholder')"
+                :errors="fieldErrors"
+                input-type="number"
+                @input="(e) => updateCardIdToQuery(e)" />
+              <p v-if="cardById && showAlreadyUsedWarning" class="text-red-500">
+                {{
+                  t("warning-create-gift-card-already-used", {
+                    cardStatus: cardStatusLabel,
+                    subscriptionAmount: getMoneyFormat(cardById.totalFund),
+                    giftCardAmount: getMoneyFormat(cardById.loyaltyFund?.amount ?? 0)
+                  })
+                }}
+              </p>
+            </div>
           </Field>
           <PfTooltip
             v-if="project"
