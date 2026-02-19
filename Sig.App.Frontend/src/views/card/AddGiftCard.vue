@@ -13,7 +13,13 @@
     "amount-label": "Amount",
     "amount-placeholder": "Ex. {amount}",
     "warning-create-gift-card": "A gift card is activated as soon as it is created, please do not lose it!",
-    "gift-card-fund-sucessfully-added": "The gift card {cardId} is now activated and has {amount}."
+    "gift-card-fund-sucessfully-added": "The gift card {cardId} is now activated and has {amount}.",
+    "warning-create-gift-card-already-used": "This card is already used (status: {cardStatus}): it contains {subscriptionAmount} subscription and {giftCardAmount} gift card, do you want to confirm the addition of funds?",
+    "card-status-assigned": "assigned to a participant",
+    "card-status-gift-card": "gift card",
+    "card-status-unassigned": "unassigned card",
+    "card-status-lost": "lost card",
+    "card-status-deactivated": "deactivated card"
 	},
 	"fr": {
 		"assign-card": "Créer la carte-cadeau",
@@ -28,7 +34,13 @@
     "amount-label": "Montant",
     "amount-placeholder": "Ex. {amount}",
     "warning-create-gift-card": "Une carte-cadeau est activée dès sa création, veuillez ne pas la perdre!",
-    "gift-card-fund-sucessfully-added": "La carte ({cardId}) est maintenant activée en tant que carte-cadeau et possède {amount}."
+    "gift-card-fund-sucessfully-added": "La carte ({cardId}) est maintenant activée en tant que carte-cadeau et possède {amount}.", 
+    "warning-create-gift-card-already-used": "Cette carte est déjà utilisée (statut : {cardStatus}) : elle contient {subscriptionAmount} d’abonnement et {giftCardAmount} de carte-cadeau. Voulez-vous confirmer l’ajout de fonds ?",
+    "card-status-assigned": "attribuée à un-e participant-e",
+    "card-status-gift-card": "carte-cadeau",
+    "card-status-unassigned": "carte non attribuée",
+    "card-status-lost": "carte perdue",
+    "card-status-deactivated": "carte désactivée"
 	}
 }
 </i18n>
@@ -52,7 +64,17 @@
               :label="t('existing-card-id')"
               :placeholder="t('existing-card-id-placeholder')"
               :errors="fieldErrors"
-              input-type="number" />
+              input-type="number"
+              @input="(e) => updateCardIdToQuery(e)" />
+            <p v-if="cardById && showAlreadyUsedWarning" class="text-red-500">
+              {{
+                t("warning-create-gift-card-already-used", {
+                  cardStatus: cardStatusLabel,
+                  subscriptionAmount: getMoneyFormat(cardById.totalFund),
+                  giftCardAmount: getMoneyFormat(cardById.loyaltyFund?.amount ?? 0)
+                })
+              }}
+            </p>
           </Field>
           <PfTooltip
             v-if="project"
@@ -83,13 +105,14 @@
 
 <script setup>
 import gql from "graphql-tag";
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
 import { useI18n } from "vue-i18n";
 import { string, number, object, lazy } from "yup";
 import { useRoute, useRouter } from "vue-router";
 
 import { URL_CARDS } from "@/lib/consts/urls";
+import { CARD_STATUS_UNASSIGNED } from "@/lib/consts/enums";
 
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 import { getMoneyFormat } from "@/lib/helpers/money";
@@ -100,6 +123,19 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const { addSuccess } = useNotificationsStore();
+
+const showAlreadyUsedWarning = computed(() => {
+  const card = cardById.value;
+  return card && card.status !== CARD_STATUS_UNASSIGNED;
+});
+
+const cardStatusLabel = computed(() => {
+  const status = cardById.value?.status;
+  if (!status) return "";
+  const key = "card-status-" + String(status).toLowerCase().replace(/_/g, "-");
+  const label = t(key);
+  return label !== key ? label : String(status);
+});
 
 const validationSchema = computed(() =>
   object({
@@ -138,6 +174,9 @@ const { result: resultProjects } = useQuery(
     }
   `
 );
+
+const existingCardIdToQuery = ref(0);
+
 const project = useResult(resultProjects, null, (data) => {
   return data.projects[0];
 });
@@ -156,6 +195,39 @@ const nextUnassignedCard = useResult(resultForecastNextUnassignedCard, null, (da
   return data.forecastNextUnassignedCard;
 });
 
+const cardIdToQuery = computed(() => {
+  return existingCardIdToQuery.value;
+});
+
+const { result: resultCardById } = useQuery(
+  gql`
+    query CardByProgramCardId($projectId: ID!, $programCardId: String!) {
+      project(id: $projectId) {
+        id
+        cardByProgramCardId(programCardId: $programCardId) {
+          id
+          status
+          totalFund
+          loyaltyFund {
+            id
+            amount
+          }
+        }
+      }
+    }
+  `,
+  {
+    projectId: route.query.projectId,
+    programCardId: cardIdToQuery
+  },
+  () => ({
+    enabled: cardIdToQuery.value !== null
+  })
+);
+const cardById = useResult(resultCardById, null, (data) => {
+  return data.project.cardByProgramCardId;
+});
+
 const { mutate: addLoyaltyFundToCard } = useMutation(
   gql`
     mutation AddLoyaltyFundToCard($input: AddLoyaltyFundToCardInput!) {
@@ -171,6 +243,10 @@ const { mutate: addLoyaltyFundToCard } = useMutation(
 
 function assignCardAutomatically(callback) {
   callback("existingCardId", nextUnassignedCard.value);
+}
+
+function updateCardIdToQuery(val) {
+  existingCardIdToQuery.value = val;
 }
 
 async function onSubmit({ amount, existingCardId }) {
