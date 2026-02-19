@@ -22,15 +22,15 @@
 <template>
   <h1 class="font-semibold text-center mt-4">{{ t("title") }}</h1>
   <div v-if="transaction" class="flex mx-2 gap-x-2">
-    <p class="w-1/3 leading-tight text-right">
+    <p class="w-1/3 leading-tight text-center">
       <span class="inline-block max-w-32 uppercase text-p3 font-bold leading-none">{{ t("card-id") }}</span>
       <span class="block font-bold text-primary-700 text-h3 xs:text-h2">{{ transaction.card?.programCardId }}</span>
     </p>
-    <p class="w-1/3 leading-tight text-right">
+    <p class="w-1/3 leading-tight text-center">
       <span class="inline-block max-w-32 uppercase text-p3 font-bold leading-none">{{ t("payment-description") }}</span>
       <span class="block font-bold text-primary-700 text-h3 xs:text-h2">{{ getMoneyFormat(amount) }}</span>
     </p>
-    <p class="w-1/3 leading-tight text-right">
+    <p class="w-1/3 leading-tight text-center">
       <span class="inline-block max-w-24 uppercase text-p3 font-bold leading-none">{{ t("card-description") }}</span>
       <span class="block font-bold text-primary-700 text-h3 xs:text-h2">{{ getMoneyFormat(fund) }}</span>
     </p>
