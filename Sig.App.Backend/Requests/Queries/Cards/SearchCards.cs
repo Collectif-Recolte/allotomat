@@ -12,7 +12,6 @@ using System.Linq;
 using Sig.App.Backend.Utilities.Sorting;
 using System;
 using Sig.App.Backend.Extensions;
-using Sig.App.Backend.Constants;
 
 namespace Sig.App.Backend.Requests.Queries.Cards
 {
