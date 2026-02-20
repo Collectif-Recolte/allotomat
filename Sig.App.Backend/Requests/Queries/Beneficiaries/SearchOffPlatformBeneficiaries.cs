@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MediatR;
 using System.Linq;
 using System.Threading;
@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Services.Beneficiaries;
+using Sig.App.Backend.Constants;
 
 namespace Sig.App.Backend.Requests.Queries.Beneficiaries
 {
@@ -57,11 +58,11 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
                 {
                     if (currentUserCanSeeAllBeneficiaryInfo)
                     {
-                        query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text) || x.Email.Contains(text) || x.Firstname.Contains(text) || x.Lastname.Contains(text));
+                        query = query.Where(x => EF.Functions.Collate(x.ID1, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.ID2, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.Email, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.Firstname, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.Lastname, SearchCollation.AccentInsensitive).Contains(text));
                     }
                     else
                     {
-                        query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text));
+                        query = query.Where(x => EF.Functions.Collate(x.ID1, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.ID2, SearchCollation.AccentInsensitive).Contains(text));
                     }
                 }
             }

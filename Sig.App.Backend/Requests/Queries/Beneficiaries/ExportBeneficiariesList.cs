@@ -1,4 +1,4 @@
-﻿using GraphQL.Conventions;
+using GraphQL.Conventions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
@@ -141,11 +141,11 @@ namespace Sig.App.Backend.Requests.Commands.Queries.Beneficiaries
                 {
                     if (currentUserCanSeeAllBeneficiaryInfo)
                     {
-                        query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text) || x.Email.Contains(text) || x.Firstname.Contains(text) || x.Lastname.Contains(text) || (x.Card != null && x.Card.CardNumber.Contains(text) || x.Card.CardNumber.Replace("-", string.Empty).Contains(text) || x.Card.ProgramCardId.ToString().Contains(text)));
+                        query = query.Where(x => EF.Functions.Collate(x.ID1, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.ID2, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.Email, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.Firstname, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.Lastname, SearchCollation.AccentInsensitive).Contains(text) || (x.Card != null && x.Card.CardNumber.Contains(text) || x.Card.CardNumber.Replace("-", string.Empty).Contains(text) || x.Card.ProgramCardId.ToString().Contains(text)));
                     }
                     else
                     {
-                        query = query.Where(x => x.ID1.Contains(text) || x.ID2.Contains(text) || (x.Card != null && x.Card.CardNumber.Contains(text) || x.Card.CardNumber.Replace("-", "").Contains(text) || x.Card.ProgramCardId.ToString().Contains(text)));
+                        query = query.Where(x => EF.Functions.Collate(x.ID1, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.ID2, SearchCollation.AccentInsensitive).Contains(text) || (x.Card != null && x.Card.CardNumber.Contains(text) || x.Card.CardNumber.Replace("-", "").Contains(text) || x.Card.ProgramCardId.ToString().Contains(text)));
                     }
                 }
             }

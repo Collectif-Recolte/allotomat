@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.Utilities;
@@ -12,6 +12,7 @@ using System.Linq;
 using Sig.App.Backend.Utilities.Sorting;
 using System;
 using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Constants;
 
 namespace Sig.App.Backend.Requests.Queries.Cards
 {

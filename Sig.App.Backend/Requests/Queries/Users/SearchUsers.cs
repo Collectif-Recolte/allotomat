@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MediatR;
 using System.Linq;
 using System.Threading;
@@ -11,6 +11,8 @@ using Sig.App.Backend.DbModel.Enums;
 using System.Collections.Generic;
 using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Extensions;
+using Microsoft.EntityFrameworkCore;
+using Sig.App.Backend.Constants;
 
 namespace Sig.App.Backend.Requests.Queries.Users
 {
@@ -33,7 +35,7 @@ namespace Sig.App.Backend.Requests.Queries.Users
 
                 foreach (var text in searchText)
                 {
-                    query = query.Where(x => x.Email.Contains(text) || x.Profile.FirstName.Contains(text) || x.Profile.LastName.Contains(text));
+                    query = query.Where(x => EF.Functions.Collate(x.Email, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.Profile.FirstName, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.Profile.LastName, SearchCollation.AccentInsensitive).Contains(text));
                 }
             }
 

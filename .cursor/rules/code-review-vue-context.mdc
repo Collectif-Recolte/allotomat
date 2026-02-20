@@ -1,0 +1,15 @@
+---
+description: Vue frontend context for code review and editing (Sig.App.Frontend)
+globs: Sig.App.Frontend/**/*.vue
+alwaysApply: false
+---
+
+# Vue frontend context
+
+When editing or reviewing Vue in Sig.App.Frontend:
+
+- Use i18n for user-facing strings (t()); no hardcoded copy in template.
+- Prefer stable refs for props (no inline objects in template that change every tick).
+- Use semantic HTML and accessibility (labels, aria, focus in modals).
+- Avoid v-if and v-for on the same element; use computed or wrapper.
+- For code review requests, apply the code-review-vue skill (Vue code review agent).
