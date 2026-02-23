@@ -14,7 +14,7 @@
     "amount-placeholder": "Ex. {amount}",
     "warning-create-gift-card": "A gift card is activated as soon as it is created, please do not lose it!",
     "gift-card-fund-sucessfully-added": "The gift card {cardId} is now activated and has {amount}.",
-    "warning-create-gift-card-already-used": "This card is already used (status: {cardStatus}): it contains {subscriptionAmount} subscription and {giftCardAmount} gift card, do you want to confirm the addition of funds?",
+    "warning-create-gift-card-already-used": "This card is already used (status: {cardStatus}): it contains <b>{subscriptionAmount}</b> subscription and <b>{giftCardAmount}</b> gift card, ensure it is the correct card for the addition of funds.",
     "card-status-assigned": "assigned to a participant",
     "card-status-gift-card": "gift card",
     "card-status-unassigned": "unassigned card",
@@ -35,7 +35,7 @@
     "amount-placeholder": "Ex. {amount}",
     "warning-create-gift-card": "Une carte-cadeau est activée dès sa création, veuillez ne pas la perdre!",
     "gift-card-fund-sucessfully-added": "La carte ({cardId}) est maintenant activée en tant que carte-cadeau et possède {amount}.", 
-    "warning-create-gift-card-already-used": "Cette carte est déjà utilisée (statut : {cardStatus}) : elle contient {subscriptionAmount} d’abonnement et {giftCardAmount} de carte-cadeau. Voulez-vous confirmer l’ajout de fonds ?",
+    "warning-create-gift-card-already-used": "Cette carte est déjà utilisée (statut : {cardStatus}) : elle contient <b>{subscriptionAmount}</b> d’abonnement et <b>{giftCardAmount}</b> de carte-cadeau. Assurez-vous qu'il s'agit de la bonne carte pour l'ajout de fonds.",
     "card-status-assigned": "attribuée à un-e participant-e",
     "card-status-gift-card": "carte-cadeau",
     "card-status-unassigned": "carte non attribuée",
@@ -67,15 +67,17 @@
                 :errors="fieldErrors"
                 input-type="number"
                 @input="(e) => updateCardIdToQuery(e)" />
-              <p v-if="cardById && showAlreadyUsedWarning" class="text-red-500">
-                {{
-                  t("warning-create-gift-card-already-used", {
+              <UiCallout
+                v-if="cardById && showAlreadyUsedWarning"
+                :variant="CALLOUT_WARNING"
+                :message="
+                  t('warning-create-gift-card-already-used', {
                     cardStatus: cardStatusLabel,
                     subscriptionAmount: getMoneyFormat(cardById.totalFund),
                     giftCardAmount: getMoneyFormat(cardById.loyaltyFund?.amount ?? 0)
                   })
-                }}
-              </p>
+                "
+                allow-html />
             </div>
           </Field>
           <PfTooltip
@@ -115,9 +117,12 @@ import { useRoute, useRouter } from "vue-router";
 
 import { URL_CARDS } from "@/lib/consts/urls";
 import { CARD_STATUS_UNASSIGNED } from "@/lib/consts/enums";
+import { CALLOUT_WARNING } from "@/lib/consts/callout";
 
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 import { getMoneyFormat } from "@/lib/helpers/money";
+
+import UiCallout from "@/components/ui/callout.vue";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 
