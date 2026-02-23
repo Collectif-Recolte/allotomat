@@ -58,11 +58,20 @@ namespace Sig.App.Backend.Requests.Queries.Beneficiaries
                 {
                     if (currentUserCanSeeAllBeneficiaryInfo)
                     {
-                        query = query.Where(x => EF.Functions.Collate(x.ID1, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.ID2, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.Email, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.Firstname, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.Lastname, SearchCollation.AccentInsensitive).Contains(text));
+                        query = query.Where(x => 
+                            EF.Functions.Collate(x.ID1, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.ID2, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.Email, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.Firstname, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.Lastname, SearchCollation.AccentInsensitive).Contains(text)
+                        );
                     }
                     else
                     {
-                        query = query.Where(x => EF.Functions.Collate(x.ID1, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.ID2, SearchCollation.AccentInsensitive).Contains(text));
+                        query = query.Where(x =>
+                            EF.Functions.Collate(x.ID1, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.ID2, SearchCollation.AccentInsensitive).Contains(text)
+                        );
                     }
                 }
             }

@@ -35,7 +35,11 @@ namespace Sig.App.Backend.Requests.Queries.Users
 
                 foreach (var text in searchText)
                 {
-                    query = query.Where(x => EF.Functions.Collate(x.Email, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.Profile.FirstName, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.Profile.LastName, SearchCollation.AccentInsensitive).Contains(text));
+                    query = query.Where(x =>
+                        EF.Functions.Collate(x.Email, SearchCollation.AccentInsensitive).Contains(text) ||
+                        EF.Functions.Collate(x.Profile.FirstName, SearchCollation.AccentInsensitive).Contains(text) ||
+                        EF.Functions.Collate(x.Profile.LastName, SearchCollation.AccentInsensitive).Contains(text)
+                    );
                 }
             }
 

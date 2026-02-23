@@ -174,13 +174,19 @@ namespace Sig.App.Backend.Services.Reports
                     if (currentUserCanSeeAllBeneficiaryInfo)
                     {
                         query = query.Where(x =>
-                            EF.Functions.Collate(x.BeneficiaryID1, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.BeneficiaryID2, SearchCollation.AccentInsensitive).Contains(text) ||
-                            EF.Functions.Collate(x.BeneficiaryEmail, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.BeneficiaryFirstname, SearchCollation.AccentInsensitive).Contains(text) ||
-                            EF.Functions.Collate(x.BeneficiaryLastname, SearchCollation.AccentInsensitive).Contains(text));
+                            EF.Functions.Collate(x.BeneficiaryID1, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryID2, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryEmail, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryFirstname, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryLastname, SearchCollation.AccentInsensitive).Contains(text)
+                        );
                     }
                     else
                     {
-                        query = query.Where(x => EF.Functions.Collate(x.BeneficiaryID1, SearchCollation.AccentInsensitive).Contains(text) || EF.Functions.Collate(x.BeneficiaryID2, SearchCollation.AccentInsensitive).Contains(text));
+                        query = query.Where(x =>
+                            EF.Functions.Collate(x.BeneficiaryID1, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryID2, SearchCollation.AccentInsensitive).Contains(text)
+                        );
                     }
                 }
             }
