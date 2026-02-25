@@ -532,7 +532,7 @@ namespace Sig.App.Backend.Gql.Schema
                 TransactionTypes = transactionTypes,
                 GiftCardTransactionTypes = giftCardTransactionTypes,
                 SearchText = searchText,
-                TimeZoneId = timeZoneId,
+                TimeZoneId = timeZoneId
             });
 
             return results.Map(x => new TransactionLogGraphType(x));

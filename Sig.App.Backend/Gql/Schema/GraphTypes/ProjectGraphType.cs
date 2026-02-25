@@ -174,6 +174,31 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             });
         }
 
+        public async Task<Pagination<CardGraphType>> GiftCards([Inject] IMediator mediator, int page, int limit,
+            [Description("If specified, only card with specific status are returned")] CardStatus[] status = null,
+            [Description("If specified, only card enabled or disabled is returned.")] bool? withCardDisabled = null,
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+            [Description("If specified, only that match text is returned.")] string? searchText = "",
+#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+            Sort<CardSort> sort = null)
+        {
+            var results = await mediator.Send(new SearchCards.Query
+            {
+                ProjectId = project.Id,
+                Page = new Page(page, limit),
+                Status = status,
+                SearchText = searchText,
+                WithCardDisabled = withCardDisabled,
+                Sort = sort,
+                HaveLoyaltyFund = true
+            });
+
+            return results.Map(x =>
+            {
+                return new CardGraphType(x);
+            });
+        }
+
         public async Task<PaymentConflictPagination<IBeneficiaryGraphType>> Beneficiaries([Inject] IMediator mediator, int page, int limit,
             [Description("If specified, only beneficiaries without or with a subscription are returned.")] bool? withoutSubscription = null,
             [Description("If specified, only beneficiaries with one of those subscription are returned.")] Id[] subscriptions = null,

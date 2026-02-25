@@ -554,7 +554,7 @@ namespace Sig.App.Backend.Gql.Schema
             return mediator.Send(input.Value);
         }
 
-        [RequirePermission(BeneficiaryPermission.AssignCard)]
+        [RequirePermission(CardPermission.TransfertCard)]
         [AnnotateErrorCodes(typeof(TransfertCard))]
         public static Task<TransfertCard.Payload> TransfertCard(
             this GqlMutation _,

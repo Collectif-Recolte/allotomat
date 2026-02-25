@@ -141,11 +141,11 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
                         query = query.Where(x =>
                             x.BeneficiaryID1.Contains(text) || x.BeneficiaryID1.Contains(text) ||
                             x.BeneficiaryEmail.Contains(text) || x.BeneficiaryFirstname.Contains(text) ||
-                            x.BeneficiaryLastname.Contains(text));
+                            x.BeneficiaryLastname.Contains(text) || x.CardNumber.Contains(text));
                     }
                     else
                     {
-                        query = query.Where(x => x.BeneficiaryID1.Contains(text) || x.BeneficiaryID2.Contains(text));
+                        query = query.Where(x => x.BeneficiaryID1.Contains(text) || x.BeneficiaryID2.Contains(text) || x.CardNumber.Contains(text));
                     }
                 }
             }

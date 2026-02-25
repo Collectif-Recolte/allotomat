@@ -39,7 +39,12 @@
   <p class="text-p1">
     {{ t("transaction-in-program-name") }}
   </p>
-  <Form v-slot="{ errors: formErrors, setFieldValue }" :validation-schema="validationSchema" keep-values @submit="nextStep">
+  <Form
+    v-slot="{ errors: formErrors, setFieldValue }"
+    :validation-schema="validationSchema"
+    :initial-values="initialValues"
+    keep-values
+    @submit="nextStep">
     <PfForm
       has-footer
       :disable-submit="Object.keys(formErrors).length > 0"
@@ -72,9 +77,11 @@
         <div>
           <Field v-slot="{ field: inputField, errors: fieldErrors }" name="cardNumber">
             <PfFormInputText
-              v-if="enterCardNumber"
+              v-if="enterCardNumber || props.cardNumber !== ''"
               id="cardNumber"
               v-bind="inputField"
+              :value="props.cardNumber"
+              :disabled="props.cardNumber !== ''"
               :description="t('card-number-description')"
               :label="t('card-number')"
               :errors="fieldErrors" />
@@ -87,7 +94,7 @@
         </div>
       </PfFormSection>
       <PfButtonAction
-        v-if="enterCardNumber"
+        v-if="enterCardNumber && props.cardNumber === ''"
         class="w-full"
         btn-style="secondary"
         :label="t('scan-card-btn')"
@@ -98,7 +105,7 @@
 
 <script setup>
 import gql from "graphql-tag";
-import { computed, defineEmits, ref } from "vue";
+import { computed, defineEmits, ref, defineProps } from "vue";
 import { useI18n } from "vue-i18n";
 import { string, object } from "yup";
 import { useQuery, useResult, useApolloClient } from "@vue/apollo-composable";
@@ -109,7 +116,20 @@ import { useNotificationsStore } from "@/lib/store/notifications";
 
 import QRCodeScanner from "@/components/transaction/qr-code-scanner.vue";
 
-const enterCardNumber = ref(true);
+const props = defineProps({
+  cardNumber: {
+    type: String,
+    default: ""
+  }
+});
+
+const initialValues = computed(() => {
+  return {
+    cardNumber: props.cardNumber
+  };
+});
+
+const enterCardNumber = ref(props.cardNumber === "");
 const selectedMarket = ref("");
 
 const { t } = useI18n();

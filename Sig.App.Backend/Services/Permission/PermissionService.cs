@@ -197,7 +197,8 @@ namespace Sig.App.Backend.Services.Permission
 
         private static readonly CardPermission[] ProjectManagerCardPermissions = new[]
         {
-            CardPermission.EnableDisableCard
+            CardPermission.EnableDisableCard,
+            CardPermission.TransfertCard
         };
 
         private static readonly CardPermission[] OrganizationManagerCardPermissionsWithAssignCard = new[]
