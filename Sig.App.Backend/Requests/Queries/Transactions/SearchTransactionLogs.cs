@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MediatR;
 using System.Linq;
 using System.Threading;
@@ -139,13 +139,19 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
                     if (currentUserCanSeeAllBeneficiaryInfo)
                     {
                         query = query.Where(x =>
-                            x.BeneficiaryID1.Contains(text) || x.BeneficiaryID1.Contains(text) ||
-                            x.BeneficiaryEmail.Contains(text) || x.BeneficiaryFirstname.Contains(text) ||
-                            x.BeneficiaryLastname.Contains(text));
+                            EF.Functions.Collate(x.BeneficiaryID1, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryID2, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryEmail, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryFirstname, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryLastname, SearchCollation.AccentInsensitive).Contains(text)
+                        );
                     }
                     else
                     {
-                        query = query.Where(x => x.BeneficiaryID1.Contains(text) || x.BeneficiaryID2.Contains(text));
+                        query = query.Where(x =>
+                            EF.Functions.Collate(x.BeneficiaryID1, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryID2, SearchCollation.AccentInsensitive).Contains(text)
+                        );
                     }
                 }
             }
