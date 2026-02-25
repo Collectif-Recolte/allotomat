@@ -278,7 +278,7 @@ const canManageOrganizations = () => {
   return getGlobalPermissions.value.includes(GLOBAL_MANAGE_ORGANIZATIONS);
 };
 
-const { result: resultProjects, refetch: refetchCards } = useQuery(
+const { result: resultProjects, refetch: refetchCards, loading: loadingProjects } = useQuery(
   gql`
     query Projects($page: Int!, $status: [CardStatus!], $searchText: String, $withCardDisabled: Boolean, $sort: CardSortSort) {
       projects {
@@ -329,7 +329,7 @@ const { result: resultProjects, refetch: refetchCards } = useQuery(
   `,
   projectsVariables,
   {
-    enabled: canManageOrganizations
+    enabled: computed(() => canManageOrganizations())
   }
 );
 
@@ -351,6 +351,8 @@ watch(resultProjects, (value) => {
   cardsPagination.value = value.projects[0]?.cards;
   cards.value = value.projects[0]?.cards.items;
 });
+
+const administrationSubscriptionsOffPlatform = computed(() => project.value?.administrationSubscriptionsOffPlatform);
 
 async function onExportReport() {
   const result = await client.query({

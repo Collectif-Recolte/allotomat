@@ -985,6 +985,14 @@ export default [
             meta: {
               claim: GLOBAL_MANAGE_CARDS
             }
+          },
+          {
+            name: urls.URL_CARDS_GIFT_CARD_QRCODE_PREVIEW,
+            path: ":cardId/preview",
+            component: () => import("@/views/card/PreviewQRCode.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_CARDS
+            }
           }
         ]
       },

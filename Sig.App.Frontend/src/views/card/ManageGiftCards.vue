@@ -74,107 +74,109 @@
   </i18n>
 
 <template>
-  <RouterView v-slot="{ Component }">
-    <Title :title="t('title')" :subpages="subpages">
-      <template v-if="project" #bottom>
-        <div class="flex flex-col gap-y-4 sm:flex-row sm:gap-x-4 sm:justify-between sm:items-center">
-          <div class="flex flex-wrap gap-x-4">
-            <h2 class="my-0">{{ t("total-card-count", { count: project.giftCards.totalCount }) }}</h2>
-            <p class="my-1">{{ t("available-card", { count: project.cardStats.cardsUnassigned }) }}</p>
+  <Loading :loading="loadingProjects" is-full-height>
+    <RouterView v-slot="{ Component }">
+      <Title :title="t('title')" :subpages="subpages">
+        <template v-if="project" #bottom>
+          <div class="flex flex-col gap-y-4 sm:flex-row sm:gap-x-4 sm:justify-between sm:items-center">
+            <div class="flex flex-wrap gap-x-4">
+              <h2 class="my-0">{{ t("total-card-count", { count: project.giftCards.totalCount }) }}</h2>
+              <p class="my-1">{{ t("available-card", { count: project.cardStats.cardsUnassigned }) }}</p>
+            </div>
+            <div class="flex flex-wrap gap-x-4 gap-y-3">
+              <PfButtonLink
+                v-if="project"
+                btn-style="outline"
+                tag="routerLink"
+                :label="t('create-gift-card')"
+                :to="showCreateGiftCardBtn" />
+            </div>
           </div>
-          <div class="flex flex-wrap gap-x-4 gap-y-3">
-            <PfButtonLink
-              v-if="project"
-              btn-style="outline"
-              tag="routerLink"
-              :label="t('create-gift-card')"
-              :to="showCreateGiftCardBtn" />
-          </div>
-        </div>
-      </template>
-    </Title>
-    <div v-if="giftCards && giftCardsPagination" class="px-section md:px-8 py-5">
-      <UiTableHeader>
-        <template #right>
-          <UiFilter
-            v-model="searchInput"
-            has-search
-            has-filters
-            has-sort
-            :sort-order="sortOrderDirection"
-            :sort-label="sortLabel"
-            :placeholder="t('search-placeholder')"
-            :has-active-filters="!!searchText || activeFiltersCount > 0"
-            :active-filters-count="activeFiltersCount"
-            :beneficiaries-are-anonymous="project.beneficiariesAreAnonymous && canManageOrganizations"
-            @resetFilters="resetSearch"
-            @search="onSearch">
-            <template #sortOrder>
-              <PfFormInputRadioGroup
-                id="sortOrder"
-                :value="sortOrder"
-                :label="t('sort-order')"
-                :options="sortOrderOptions"
-                @input="onSortOrderChanged" />
-            </template>
-            <PfFormInputCheckboxGroup
-              v-if="availableCardStatus.length > 0"
-              id="card-status"
-              is-filter
-              :value="selectedCardStatus"
-              :label="t('card-status')"
-              :options="availableCardStatus"
-              @input="onCardStatusChecked" />
-            <PfFormInputCheckboxGroup
-              id="cardDisabled"
-              class="mt-3"
-              is-filter
-              :value="selectedCardDisabled"
-              :label="t('card-disabled-status')"
-              :options="cardDisabled"
-              @input="onCardIsDisabledChecked" />
-          </UiFilter>
         </template>
-      </UiTableHeader>
-      <UiEmptyPage v-if="giftCardsPagination.totalCount === 0 && activeFiltersCount === 0 && searchText === ''">
-        <UiCta
-          :img-src="require('@/assets/img/cards.jpg')"
-          :description="t('empty-card-list')"
-          :primary-btn-label="t('create-gift-card')"
-          :primary-btn-route="{ name: URL_CARDS_GIFT_CARD_ADD, query: { projectId: project.id } }"
-          @onPrimaryBtnClick="resetSearch">
-        </UiCta>
-      </UiEmptyPage>
-      <UiEmptyPage v-else-if="giftCardsPagination.totalCount === 0">
-        <UiCta
-          :img-src="require('@/assets/img/cards.jpg')"
-          :description="t('no-results')"
-          :primary-btn-label="t('reset-search')"
-          primary-btn-is-action
-          @onPrimaryBtnClick="resetSearch">
-        </UiCta>
-      </UiEmptyPage>
-      <div v-else>
-        <CardSummaryTable
-          :cards="giftCards"
-          :beneficiaries-are-anonymous="project.beneficiariesAreAnonymous && canManageOrganizations"
-          :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform">
-          <template #beforeActions="{ card }">
-            <UiButtonGroup :items="getBeforeBtnGroup(card)" tooltip-position="right" />
+      </Title>
+      <div v-if="giftCards && giftCardsPagination" class="px-section md:px-8 py-5">
+        <UiTableHeader>
+          <template #right>
+            <UiFilter
+              v-model="searchInput"
+              has-search
+              has-filters
+              has-sort
+              :sort-order="sortOrderDirection"
+              :sort-label="sortLabel"
+              :placeholder="t('search-placeholder')"
+              :has-active-filters="!!searchText || activeFiltersCount > 0"
+              :active-filters-count="activeFiltersCount"
+              :beneficiaries-are-anonymous="project.beneficiariesAreAnonymous && canManageOrganizations"
+              @resetFilters="resetSearch"
+              @search="onSearch">
+              <template #sortOrder>
+                <PfFormInputRadioGroup
+                  id="sortOrder"
+                  :value="sortOrder"
+                  :label="t('sort-order')"
+                  :options="sortOrderOptions"
+                  @input="onSortOrderChanged" />
+              </template>
+              <PfFormInputCheckboxGroup
+                v-if="availableCardStatus.length > 0"
+                id="card-status"
+                is-filter
+                :value="selectedCardStatus"
+                :label="t('card-status')"
+                :options="availableCardStatus"
+                @input="onCardStatusChecked" />
+              <PfFormInputCheckboxGroup
+                id="cardDisabled"
+                class="mt-3"
+                is-filter
+                :value="selectedCardDisabled"
+                :label="t('card-disabled-status')"
+                :options="cardDisabled"
+                @input="onCardIsDisabledChecked" />
+            </UiFilter>
           </template>
-          <template #afterActions="{ card }">
-            <UiButtonGroup :items="getAfterBtnGroup(card)" tooltip-position="left" />
-          </template>
-        </CardSummaryTable>
-        <UiPagination
-          v-if="giftCardsPagination && giftCardsPagination.totalPages > 1"
-          v-model:page="page"
-          :total-pages="giftCardsPagination.totalPages">
-        </UiPagination>
+        </UiTableHeader>
+        <UiEmptyPage v-if="giftCardsPagination.totalCount === 0 && activeFiltersCount === 0 && searchText === ''">
+          <UiCta
+            :img-src="require('@/assets/img/cards.jpg')"
+            :description="t('empty-card-list')"
+            :primary-btn-label="t('create-gift-card')"
+            :primary-btn-route="{ name: URL_CARDS_GIFT_CARD_ADD, query: { projectId: project.id } }"
+            @onPrimaryBtnClick="resetSearch">
+          </UiCta>
+        </UiEmptyPage>
+        <UiEmptyPage v-else-if="giftCardsPagination.totalCount === 0">
+          <UiCta
+            :img-src="require('@/assets/img/cards.jpg')"
+            :description="t('no-results')"
+            :primary-btn-label="t('reset-search')"
+            primary-btn-is-action
+            @onPrimaryBtnClick="resetSearch">
+          </UiCta>
+        </UiEmptyPage>
+        <div v-else>
+          <CardSummaryTable
+            :cards="giftCards"
+            :beneficiaries-are-anonymous="project.beneficiariesAreAnonymous && canManageOrganizations"
+            :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform">
+            <template #beforeActions="{ card }">
+              <UiButtonGroup :items="getBeforeBtnGroup(card)" tooltip-position="right" />
+            </template>
+            <template #afterActions="{ card }">
+              <UiButtonGroup :items="getAfterBtnGroup(card)" tooltip-position="left" />
+            </template>
+          </CardSummaryTable>
+          <UiPagination
+            v-if="giftCardsPagination && giftCardsPagination.totalPages > 1"
+            v-model:page="page"
+            :total-pages="giftCardsPagination.totalPages">
+          </UiPagination>
+        </div>
+        <Component :is="Component" />
       </div>
-      <Component :is="Component" />
-    </div>
-  </RouterView>
+    </RouterView>
+  </Loading>
 </template>
 
 <script setup>
@@ -191,7 +193,7 @@ import { useAuthStore } from "@/lib/store/auth";
 import {
   URL_CARDS,
   URL_CARDS_GIFT_CARD_ADD,
-  URL_CARDS_QRCODE_PREVIEW,
+  URL_CARDS_GIFT_CARD_QRCODE_PREVIEW,
   URL_CARDS_UNASSIGN,
   URL_CARDS_GIFT_CARD_LOST,
   URL_CARDS_GIFT_CARD_DISABLE,
@@ -261,13 +263,11 @@ const subpages = computed(() => {
   return [
     {
       route: { name: URL_CARDS_MANAGE },
-      label: t("manage-cards"),
-      isActive: true
+      label: t("manage-cards")
     },
     {
       route: { name: URL_CARDS_MANAGE_GIFT_CARDS },
-      label: t("manage-gift-cards"),
-      isActive: false
+      label: t("manage-gift-cards")
     }
   ];
 });
@@ -276,7 +276,11 @@ const canManageOrganizations = () => {
   return getGlobalPermissions.value.includes(GLOBAL_MANAGE_ORGANIZATIONS);
 };
 
-const { result: resultProjects, refetch: refetchCards } = useQuery(
+const {
+  result: resultProjects,
+  refetch: refetchCards,
+  loading: loadingProjects
+} = useQuery(
   gql`
     query Projects($page: Int!, $status: [CardStatus!], $searchText: String, $withCardDisabled: Boolean, $sort: CardSortSort) {
       projects {
@@ -327,7 +331,7 @@ const { result: resultProjects, refetch: refetchCards } = useQuery(
   `,
   projectsVariables,
   {
-    enabled: canManageOrganizations
+    enabled: computed(() => canManageOrganizations())
   }
 );
 
@@ -350,6 +354,8 @@ watch(resultProjects, (value) => {
   giftCards.value = value.projects[0]?.giftCards.items;
 });
 
+const administrationSubscriptionsOffPlatform = computed(() => project.value?.administrationSubscriptionsOffPlatform);
+
 const showCreateGiftCardBtn = computed(() => {
   return project.value ? { name: URL_CARDS_GIFT_CARD_ADD, query: { projectId: project.value.id } } : null;
 });
@@ -367,7 +373,7 @@ const getBeforeBtnGroup = (card) => [
     label: t("display-qr-code"),
     icon: ICON_QR_CODE,
     route: {
-      name: URL_CARDS_QRCODE_PREVIEW,
+      name: URL_CARDS_GIFT_CARD_QRCODE_PREVIEW,
       params: { cardId: card.id }
     }
   }

@@ -83,9 +83,7 @@ const { onResult: onResultCard } = useQuery(
       }
     }
   `,
-  {
-    id: route.params.cardId
-  }
+  () => ({ id: route.params.cardId })
 );
 onResultCard((result) => {
   const card = result?.data?.card;

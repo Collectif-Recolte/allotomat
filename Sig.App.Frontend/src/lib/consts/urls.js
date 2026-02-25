@@ -146,6 +146,7 @@ export const URL_CARDS_MANAGE_GIFT_CARDS = "cards-manage-gift-cards-url";
 export const URL_CARD_TRANSACTION_ADD = "card-transaction-add-url";
 export const URL_CARDS_GIFT_CARD_DISABLE = "cards-gift-card-disable-url";
 export const URL_CARDS_GIFT_CARD_ENABLE = "cards-gift-card-enable-url";
+export const URL_CARDS_GIFT_CARD_QRCODE_PREVIEW = "cards-gift-card-qrcode-preview-url";
 
 export const URL_CARD_CHECK = "card-check-url";
 export const URL_CARD_ERROR = "card-error-url";
