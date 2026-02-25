@@ -265,13 +265,11 @@ const subpages = computed(() => {
   return [
     {
       route: { name: URL_CARDS_MANAGE },
-      label: t("manage-cards"),
-      isActive: true
+      label: t("manage-cards")
     },
     {
       route: { name: URL_CARDS_MANAGE_GIFT_CARDS },
-      label: t("manage-gift-cards"),
-      isActive: false
+      label: t("manage-gift-cards")
     }
   ];
 });
@@ -396,7 +394,7 @@ const getAfterBtnGroup = (card) => {
           icon: ICON_CARD_LOST,
           route: {
             name: URL_CARDS_LOST,
-            params: { beneficiaryId: card.beneficiary.id, cardId: card.id }
+            params: { cardId: card.id }
           }
         },
         {
@@ -423,7 +421,7 @@ const getAfterBtnGroup = (card) => {
           icon: ICON_CARD_LOST,
           route: {
             name: URL_CARDS_LOST,
-            params: { beneficiaryId: card.beneficiary.id, cardId: card.id }
+            params: { cardId: card.id }
           }
         },
         {

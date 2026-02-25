@@ -80,7 +80,6 @@
               v-if="enterCardNumber || props.cardNumber !== ''"
               id="cardNumber"
               v-bind="inputField"
-              :value="props.cardNumber"
               :disabled="props.cardNumber !== ''"
               :description="t('card-number-description')"
               :label="t('card-number')"

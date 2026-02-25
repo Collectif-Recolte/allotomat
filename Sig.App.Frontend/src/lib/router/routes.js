@@ -969,6 +969,22 @@ export default [
             meta: {
               claim: GLOBAL_MANAGE_CARDS
             }
+          },
+          {
+            name: urls.URL_CARDS_GIFT_CARD_DISABLE,
+            path: ":cardId/disable-card",
+            component: () => import("@/views/card/DisableCard.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_CARDS
+            }
+          },
+          {
+            name: urls.URL_CARDS_GIFT_CARD_ENABLE,
+            path: ":cardId/enable-card",
+            component: () => import("@/views/card/EnableCard.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_CARDS
+            }
           }
         ]
       },

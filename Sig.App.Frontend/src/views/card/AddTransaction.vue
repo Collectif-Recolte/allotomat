@@ -88,7 +88,10 @@ const { onResult: onResultCard } = useQuery(
   }
 );
 onResultCard((result) => {
-  cardNumber.value = result.data.card.cardNumber.replaceAll("-", " ");
+  const card = result?.data?.card;
+  if (card?.cardNumber) {
+    cardNumber.value = card.cardNumber.replaceAll("-", " ");
+  }
 });
 
 const activeStep = ref(TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER);

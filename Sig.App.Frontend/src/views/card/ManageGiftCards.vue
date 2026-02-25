@@ -140,8 +140,8 @@
         <UiCta
           :img-src="require('@/assets/img/cards.jpg')"
           :description="t('empty-card-list')"
-          :primary-btn-label="t('generate-cards')"
-          :primary-btn-route="{ name: URL_CARDS_ADD, query: { projectId: project.id } }"
+          :primary-btn-label="t('create-gift-card')"
+          :primary-btn-route="{ name: URL_CARDS_GIFT_CARD_ADD, query: { projectId: project.id } }"
           @onPrimaryBtnClick="resetSearch">
         </UiCta>
       </UiEmptyPage>
@@ -190,24 +190,21 @@ import { useAuthStore } from "@/lib/store/auth";
 
 import {
   URL_CARDS,
-  URL_CARDS_ADD,
   URL_CARDS_GIFT_CARD_ADD,
   URL_CARDS_QRCODE_PREVIEW,
   URL_CARDS_UNASSIGN,
   URL_CARDS_GIFT_CARD_LOST,
-  URL_CARDS_ENABLE,
-  URL_CARDS_DISABLE,
-  URL_CARDS_UNLOCK
-} from "@/lib/consts/urls";
-import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
-import { CARD_STATUS_ASSIGNED, CARD_STATUS_LOST, CARD_STATUS_GIFT, CARD_IS_DISABLED, CARD_IS_ENABLED } from "@/lib/consts/enums";
-import { BY_ID, BY_BALANCE, ASC, DESC } from "@/lib/consts/card-sort-order";
-import {
+  URL_CARDS_GIFT_CARD_DISABLE,
+  URL_CARDS_UNLOCK,
+  URL_CARDS_GIFT_CARD_ENABLE,
   URL_CARDS_MANAGE,
   URL_CARDS_MANAGE_GIFT_CARDS,
   URL_TRANSACTION_ADMIN,
   URL_CARD_TRANSACTION_ADD
 } from "@/lib/consts/urls";
+import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
+import { CARD_STATUS_ASSIGNED, CARD_STATUS_LOST, CARD_STATUS_GIFT, CARD_IS_DISABLED, CARD_IS_ENABLED } from "@/lib/consts/enums";
+import { BY_ID, BY_BALANCE, ASC, DESC } from "@/lib/consts/card-sort-order";
 
 import Title from "@/components/app/title";
 import CardSummaryTable from "@/components/card/card-summary-table.vue";
@@ -222,6 +219,8 @@ import ICON_TRANSACTION from "@/lib/icons/add-square.json";
 
 const { getGlobalPermissions } = storeToRefs(useAuthStore());
 const { t } = useI18n();
+
+const TRANSACTION_HISTORY_DATE_FROM = "2023-01-01";
 
 const page = ref(1);
 const searchInput = ref("");
@@ -402,7 +401,7 @@ const getAfterBtnGroup = (card) => {
       label: t("beneficiary-enable-card"),
       icon: ICON_CARD_LINK,
       route: {
-        name: URL_CARDS_ENABLE,
+        name: URL_CARDS_GIFT_CARD_ENABLE,
         params: { cardId: card.id }
       }
     });
@@ -411,7 +410,7 @@ const getAfterBtnGroup = (card) => {
       label: t("beneficiary-disable-card"),
       icon: ICON_CLOSE,
       route: {
-        name: URL_CARDS_DISABLE,
+        name: URL_CARDS_GIFT_CARD_DISABLE,
         params: { cardId: card.id }
       }
     });
@@ -431,7 +430,7 @@ const getAfterBtnGroup = (card) => {
   buttons.push({
     icon: ICON_CLOCK,
     label: t("card-transactions-history"),
-    route: { name: URL_TRANSACTION_ADMIN, query: { text: card.cardNumber, dateFrom: "2023-01-01" } } // Set datefrom to a farthest date to get all transactions
+    route: { name: URL_TRANSACTION_ADMIN, query: { text: card.cardNumber, dateFrom: TRANSACTION_HISTORY_DATE_FROM } } // Set datefrom to a farthest date to get all transactions
   });
 
   buttons.push({
