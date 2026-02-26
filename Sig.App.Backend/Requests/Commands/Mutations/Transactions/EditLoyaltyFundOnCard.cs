@@ -50,7 +50,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var cardId = request.CardId.LongIdentifierForType<Card>();
             var card = await db
                 .Cards.Include(x => x.Beneficiary).ThenInclude(x => x.Organization)
-                .Include(x => x.Transactions)
                 .Include(x => x.Funds).ThenInclude(x => x.ProductGroup)
                 .Include(x => x.Project)
                 .FirstOrDefaultAsync(x => x.Id == cardId, cancellationToken);
@@ -77,7 +76,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 CreatedAtUtc = clock.GetCurrentInstant().ToDateTimeUtc(),
                 ProductGroup = loyaltyProductGroup
             };
-            card.Transactions.Add(transaction);
 
             var transactionLogProductGroups = new List<TransactionLogProductGroup>();
 

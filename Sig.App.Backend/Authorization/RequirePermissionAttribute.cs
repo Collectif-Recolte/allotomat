@@ -168,8 +168,13 @@ namespace Sig.App.Backend.Authorization
             }
             if (input is HaveCardId hci)
             {
-                var card = db.Cards.Include(x => x.Project).Where(x => x.Id == hci.CardId.LongIdentifierForType<Card>()).FirstOrDefault();
-                return card.Project.GetIdentifier().IdentifierForType<Project>();
+                var cardId = hci.CardId.LongIdentifierForType<Card>();
+                var card = db.Cards.Find(cardId);
+                if (card != null)
+                {
+                    var projectId = Id.New<Project>(card.ProjectId);
+                    return projectId.IdentifierForType<Project>();
+                }
             }
             if (input is Id id)
             {

@@ -27,24 +27,26 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
                 .Where(c => request.Ids.Contains(c.Id))
                 .ToListAsync(cancellationToken);
 
-            return transactions.ToDictionary(x => x.Id, x =>
-            {
-                switch (x)
+            return transactions.ToDictionary<AddingFundTransaction, long, IAddingFundTransactionGraphType>(
+                x => x.Id,
+                x =>
                 {
-                    case ManuallyAddingFundTransaction maft:
-                        return new ManuallyAddingFundTransactionGraphType(maft);
-                    case SubscriptionAddingFundTransaction saft:
-                        return new SubscriptionAddingFundTransactionGraphType(saft);
-                    case OffPlatformAddingFundTransaction opaft:
-                        return new OffPlatformAddingFundTransactionGraphType(opaft);
-                    case LoyaltyAddingFundTransaction laft:
-                        return new LoyaltyAddingFundTransactionGraphType(laft);
-                    case LoyaltyEditFundTransaction left:
-                        return new LoyaltyEditFundTransactionGraphType(left) as IAddingFundTransactionGraphType;
-                }
+                    switch (x)
+                    {
+                        case ManuallyAddingFundTransaction maft:
+                            return new ManuallyAddingFundTransactionGraphType(maft);
+                        case SubscriptionAddingFundTransaction saft:
+                            return new SubscriptionAddingFundTransactionGraphType(saft);
+                        case OffPlatformAddingFundTransaction opaft:
+                            return new OffPlatformAddingFundTransactionGraphType(opaft);
+                        case LoyaltyAddingFundTransaction laft:
+                            return new LoyaltyAddingFundTransactionGraphType(laft);
+                        case LoyaltyEditFundTransaction left:
+                            return new LoyaltyEditFundTransactionGraphType(left);
+                    }
 
-                return null;
-            });
+                    return null;
+                });
         }
     }
 }
