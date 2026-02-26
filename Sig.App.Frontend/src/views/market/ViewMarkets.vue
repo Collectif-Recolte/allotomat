@@ -47,7 +47,7 @@
                   @input="onMarketGroupsChecked" />
               </UiFilter>
               <PfButtonLink
-                v-if="userType === USER_TYPE_PROJECTMANAGER"
+                v-if="userType === USER_TYPE_PROJECTMANAGER || userType === USER_TYPE_MARKETGROUPMANAGER"
                 tag="RouterLink"
                 :to="addMarketRoute"
                 :label="t('add-market')" />
@@ -240,8 +240,11 @@ const activeFiltersCount = computed(() => {
 
 onBeforeRouteUpdate((to) => {
   if (to.name === URL_MARKET_OVERVIEW) {
-    refetch();
-    refetchMarketGroups();
+    if (userType.value === USER_TYPE_MARKETGROUPMANAGER) {
+      refetchMarketGroups();
+    } else {
+      refetch();
+    }
   }
 });
 </script>
