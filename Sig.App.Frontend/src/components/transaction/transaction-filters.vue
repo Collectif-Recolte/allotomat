@@ -12,6 +12,7 @@
     "transaction-log-types": "Transaction types",
     "transaction-log-type-expired": "Funds expired",
     "transaction-log-type-loyalty": "Gift Card",
+    "transaction-log-type-loyalty-editing": "Gift Card editing",
     "transaction-log-type-manually": "Fund added manually",
     "transaction-log-type-off-platform": "Adding Fund (Off-Platform Participant)",
     "transaction-log-type-subscription": "Subscription",
@@ -39,6 +40,7 @@
     "transaction-log-types": "Types de transactions",
     "transaction-log-type-expired": "Expiration des fonds",
     "transaction-log-type-loyalty": "Carte-cadeau",
+    "transaction-log-type-loyalty-editing": "Modification des fonds d'une carte-cadeau",
     "transaction-log-type-manually": "Fond ajouté manuellement",
     "transaction-log-type-off-platform": "Ajout de fond (participant hors plateforme)",
     "transaction-log-type-subscription": "Abonnement",
@@ -396,6 +398,7 @@ const availableTransactionTypes = computed(() => {
   return [
     { value: "ExpireFundTransactionLog", label: t("transaction-log-type-expired") },
     { value: "LoyaltyAddingFundTransactionLog", label: t("transaction-log-type-loyalty") },
+    { value: "LoyaltyEditingFundTransactionLog", label: t("transaction-log-type-loyalty-editing") },
     { value: "ManuallyAddingFundTransactionLog", label: t("transaction-log-type-manually") },
     { value: "OffPlatformAddingFundTransactionLog", label: t("transaction-log-type-off-platform") },
     { value: "SubscriptionAddingFundTransactionLog", label: t("transaction-log-type-subscription") },

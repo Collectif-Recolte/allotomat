@@ -7,6 +7,7 @@
       "loyalty-adding-fund-transaction": "{amount} of gift funds added to the card",
       "refund-transaction": "{amount} refunded",
       "expire-fund-transaction": "{amount} expired",
+      "loyalty-editing-fund-transaction": "{amount} edited",
       "no-transactions": "No transactions"
     },
     "fr": {
@@ -16,6 +17,7 @@
       "loyalty-adding-fund-transaction": "{amount} de fonds cadeaux ajoutés à la carte",
       "refund-transaction": "{amount} remboursés",
       "expire-fund-transaction": "Expiration de {amount}",
+      "loyalty-editing-fund-transaction": "Modification des fonds de {amount}",
       "no-transactions": "Aucune transactions"
     }
   }
@@ -79,6 +81,10 @@ function getTransactionDescription(transaction) {
       return t("refund-transaction", { amount });
     case "ExpireFundTransactionGraphType":
       return t("expire-fund-transaction", { amount });
+    case "LoyaltyEditingFundTransactionGraphType":
+      return t("loyalty-editing-fund-transaction", { amount });
+    default:
+      return t("adding-fund-transaction", { amount });
   }
 }
 

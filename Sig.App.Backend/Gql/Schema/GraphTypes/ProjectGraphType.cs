@@ -10,6 +10,7 @@ using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Requests.Queries.Beneficiaries;
 using Sig.App.Backend.Requests.Queries.Cards;
 using Sig.App.Backend.Requests.Queries.Markets;
@@ -111,6 +112,12 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<IEnumerable<ProductGroupGraphType>> ProductGroups(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadProjectProductGroups(Id.LongIdentifierForType<Project>());
+        }
+
+        public async Task<CardGraphType> CardByProgramCardId(IAppUserContext ctx, string programCardId)
+        {
+            var result = await ctx.DataLoader.LoadCardByProjectIdAndCardProgramId(project.Id, long.Parse(programCardId)).GetResultAsync();
+            return result.FirstOrDefault();
         }
 
         [RequirePermission(GlobalPermission.ManageSpecificProject)]

@@ -33,7 +33,8 @@
       "manage-cards": "Manage cards",
       "manage-gift-cards": "Manage gift cards",
       "card-transactions-history": "Transactions history",
-      "card-create-transaction": "Create a transaction"
+      "card-create-transaction": "Create a transaction",
+      "edit-funds-gift-card": "Edit funds"
     },
     "fr": {
       "generate-cards": "Générer de nouvelles cartes",
@@ -68,7 +69,8 @@
       "manage-cards": "Gérer les cartes",
       "manage-gift-cards": "Gérer les cartes-cadeaux",
       "card-transactions-history": "Historique des transactions",
-      "card-create-transaction": "Créer une transaction"
+      "card-create-transaction": "Créer une transaction",
+      "edit-funds-gift-card": "Modifier les fonds"
     }
   }
   </i18n>
@@ -158,6 +160,7 @@
         <div v-else>
           <CardSummaryTable
             :cards="giftCards"
+            is-gift-card
             :beneficiaries-are-anonymous="project.beneficiariesAreAnonymous && canManageOrganizations"
             :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform">
             <template #beforeActions="{ card }">
@@ -202,7 +205,8 @@ import {
   URL_CARDS_MANAGE,
   URL_CARDS_MANAGE_GIFT_CARDS,
   URL_TRANSACTION_ADMIN,
-  URL_CARD_TRANSACTION_ADD
+  URL_CARD_TRANSACTION_ADD,
+  URL_GIFT_CARD_EDIT
 } from "@/lib/consts/urls";
 import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
 import { CARD_STATUS_ASSIGNED, CARD_STATUS_LOST, CARD_STATUS_GIFT, CARD_IS_DISABLED, CARD_IS_ENABLED } from "@/lib/consts/enums";
@@ -218,6 +222,7 @@ import ICON_CLOSE from "@/lib/icons/close.json";
 import ICON_CARD_LINK from "@/lib/icons/card-link.json";
 import ICON_CLOCK from "@/lib/icons/clock.json";
 import ICON_TRANSACTION from "@/lib/icons/add-square.json";
+import ICON_ADD_CASH from "@/lib/icons/add-cash.json";
 
 const { getGlobalPermissions } = storeToRefs(useAuthStore());
 const { t } = useI18n();
@@ -432,6 +437,15 @@ const getAfterBtnGroup = (card) => {
       }
     });
   }
+
+  buttons.push({
+    label: t("edit-funds-gift-card"),
+    icon: ICON_ADD_CASH,
+    route: {
+      name: URL_GIFT_CARD_EDIT,
+      params: { cardId: card.id }
+    }
+  });
 
   buttons.push({
     icon: ICON_CLOCK,

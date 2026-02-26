@@ -9,6 +9,8 @@
       "operation-transaction-expire-fund-title": "Expire fund",
       "operation-transaction-loyalty-adding-fund-title": "Adding fund",
       "operation-transaction-loyalty-adding-fund-desc": "Gift card",
+      "operation-transaction-loyalty-editing-fund-title": "Editing fund",
+      "operation-transaction-loyalty-editing-fund-desc": "Gift card",
       "operation-transaction-manually-adding-fund-title": "Adding fund",
       "operation-transaction-manually-adding-fund-desc": "Manually",
       "operation-transaction-off-platform-adding-fund-title": "Adding fund",
@@ -38,6 +40,8 @@
       "operation-transaction-expire-fund-title": "Expiration de fonds",
       "operation-transaction-loyalty-adding-fund-title": "Ajout de fonds",
       "operation-transaction-loyalty-adding-fund-desc": "Carte-cadeau",
+      "operation-transaction-loyalty-editing-fund-title": "Modification de fonds",
+      "operation-transaction-loyalty-editing-fund-desc": "Carte-cadeau",
       "operation-transaction-manually-adding-fund-title": "Ajout de fonds",
       "operation-transaction-manually-adding-fund-desc": "Manuellement",
       "operation-transaction-off-platform-adding-fund-title": "Ajout de fonds",
@@ -103,6 +107,7 @@ import { formatDate, textualWithTimeFormat } from "@/lib/helpers/date";
 import {
   EXPIRE_FUND_TRANSACTION_LOG,
   LOYALTY_ADDING_FUND_TRANSACTION_LOG,
+  LOYALTY_EDIT_FUND_TRANSACTION_LOG,
   MANUALLY_ADDING_FUND_TRANSACTION_LOG,
   OFF_PLATFORM_ADDING_FUND_TRANSACTION_LOG,
   PAYMENT_TRANSACTION_LOG,
@@ -189,6 +194,8 @@ function getOperationName(transaction) {
       return t("operation-transaction-expire-fund-title");
     case LOYALTY_ADDING_FUND_TRANSACTION_LOG:
       return t("operation-transaction-loyalty-adding-fund-title");
+    case LOYALTY_EDIT_FUND_TRANSACTION_LOG:
+      return t("operation-transaction-loyalty-editing-fund-title");
     case MANUALLY_ADDING_FUND_TRANSACTION_LOG:
       return t("operation-transaction-manually-adding-fund-title");
     case OFF_PLATFORM_ADDING_FUND_TRANSACTION_LOG:
@@ -221,6 +228,8 @@ function getOperationDetail(transaction) {
   switch (transaction.discriminator) {
     case LOYALTY_ADDING_FUND_TRANSACTION_LOG:
       return t("operation-transaction-loyalty-adding-fund-desc");
+    case LOYALTY_EDIT_FUND_TRANSACTION_LOG:
+      return t("operation-transaction-loyalty-editing-fund-desc");
     case MANUALLY_ADDING_FUND_TRANSACTION_LOG:
       return t("operation-transaction-manually-adding-fund-desc");
     case OFF_PLATFORM_ADDING_FUND_TRANSACTION_LOG:

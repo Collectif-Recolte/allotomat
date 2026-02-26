@@ -8,6 +8,7 @@
         ManageAllProjects,
         CreateOrganization,
         CreateCard,
-        AddLoyaltyFundToCard
+        AddLoyaltyFundToCard,
+        EditLoyaltyFundOnCard
     }
 }

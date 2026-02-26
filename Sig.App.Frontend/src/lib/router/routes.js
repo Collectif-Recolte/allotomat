@@ -993,6 +993,14 @@ export default [
             meta: {
               claim: GLOBAL_MANAGE_CARDS
             }
+          },
+          {
+            name: urls.URL_GIFT_CARD_EDIT,
+            path: ":cardId/edit-gift-card",
+            component: () => import("@/views/card/EditGiftCard.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_CARDS
+            }
           }
         ]
       },

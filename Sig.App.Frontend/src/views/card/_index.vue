@@ -5,5 +5,3 @@
     </AppShell>
   </RouterView>
 </template>
-
-<script setup></script>
