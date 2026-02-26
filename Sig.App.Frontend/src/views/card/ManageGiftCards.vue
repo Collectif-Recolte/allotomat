@@ -448,15 +448,15 @@ const getAfterBtnGroup = (card) => {
   });
 
   buttons.push({
-    icon: ICON_CLOCK,
-    label: t("card-transactions-history"),
-    route: { name: URL_TRANSACTION_ADMIN, query: { text: card.cardNumber, dateFrom: TRANSACTION_HISTORY_DATE_FROM } } // Set datefrom to a farthest date to get all transactions
-  });
-
-  buttons.push({
     icon: ICON_TRANSACTION,
     label: t("card-create-transaction"),
     route: { name: URL_CARD_TRANSACTION_ADD, params: { cardId: card.id } }
+  });
+
+  buttons.push({
+    icon: ICON_CLOCK,
+    label: t("card-transactions-history"),
+    route: { name: URL_TRANSACTION_ADMIN, query: { text: card.cardNumber, dateFrom: TRANSACTION_HISTORY_DATE_FROM } } // Set datefrom to a farthest date to get all transactions
   });
 
   return buttons;
