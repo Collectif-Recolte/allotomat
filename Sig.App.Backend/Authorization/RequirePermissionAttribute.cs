@@ -376,6 +376,10 @@ namespace Sig.App.Backend.Authorization
             {
                 return cgt.Id.IdentifierForType<Card>();
             }
+            if (input is HaveOriginalCardId hoci)
+            {
+                return hoci.OriginalCardId.IdentifierForType<Card>();
+            }
             if (input is Id id)
             {
                 return id.IdentifierForType<Card>();

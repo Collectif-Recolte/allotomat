@@ -61,9 +61,7 @@ namespace Sig.App.Backend.Gql.Schema
         public static async Task<Pagination<UserGraphType>> Users(
             this GqlQuery _,
             [Inject] IMediator mediator,
-#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-            int page, int limit, string? searchText, UserType[] userTypes = null)
-#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+            int page, int limit, string searchText, UserType[] userTypes = null)
         {
             var results = await mediator.Send(new SearchUsers.Query
             {
@@ -432,9 +430,7 @@ namespace Sig.App.Backend.Gql.Schema
             [Description("If specified, only beneficiaries with or without card is returned.")] bool? withCard = null,
             [Description("If specified, only beneficiaries with or without payment conflict is returned.")] bool? withConflictPayment = null,
             [Description("If specified, only card enabled or disabled is returned.")] bool? withCardDisabled = null,
-#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-            [Description("If specified, only that match text is returned.")] string? searchText = "",
-#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+            [Description("If specified, only that match text is returned.")] string searchText = "",
             Sort<BeneficiarySort> sort = null)
         {
             return await mediator.Send(new ExportBeneficiariesList.Input()
@@ -534,7 +530,7 @@ namespace Sig.App.Backend.Gql.Schema
                 TransactionTypes = transactionTypes,
                 GiftCardTransactionTypes = giftCardTransactionTypes,
                 SearchText = searchText,
-                TimeZoneId = timeZoneId,
+                TimeZoneId = timeZoneId
             });
 
             return results.Map(x => new TransactionLogGraphType(x));

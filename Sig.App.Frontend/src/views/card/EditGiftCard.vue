@@ -24,7 +24,11 @@
 </i18n>
 
 <template>
-  <UiDialogModal v-slot="{ closeModal }" :return-route="{ name: URL_CARDS }" :title="t('title')" :has-footer="false">
+  <UiDialogModal
+    v-slot="{ closeModal }"
+    :return-route="{ name: URL_CARDS_MANAGE_GIFT_CARDS }"
+    :title="t('title')"
+    :has-footer="false">
     <Form
       v-if="card"
       v-slot="{ isSubmitting }"
@@ -62,7 +66,7 @@ import { useI18n } from "vue-i18n";
 import { string, number, object, lazy } from "yup";
 import { useRouter, useRoute } from "vue-router";
 
-import { URL_CARDS } from "@/lib/consts/urls";
+import { URL_CARDS_MANAGE_GIFT_CARDS } from "@/lib/consts/urls";
 
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 
@@ -140,6 +144,6 @@ async function onSubmit({ amount }) {
   });
 
   addSuccess(t("gift-card-fund-successfully-edited"));
-  router.push({ name: URL_CARDS });
+  router.push({ name: URL_CARDS_MANAGE_GIFT_CARDS });
 }
 </script>

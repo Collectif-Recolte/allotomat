@@ -46,7 +46,11 @@
 </i18n>
 
 <template>
-  <UiDialogModal v-slot="{ closeModal }" :return-route="{ name: URL_CARDS }" :title="t('title')" :has-footer="false">
+  <UiDialogModal
+    v-slot="{ closeModal }"
+    :return-route="{ name: URL_CARDS_MANAGE_GIFT_CARDS }"
+    :title="t('title')"
+    :has-footer="false">
     <Form v-if="project" v-slot="{ isSubmitting, setFieldValue }" :validation-schema="validationSchema" @submit="onSubmit">
       <PfForm
         has-footer
@@ -115,7 +119,7 @@ import { useI18n } from "vue-i18n";
 import { string, number, object, lazy } from "yup";
 import { useRoute, useRouter } from "vue-router";
 
-import { URL_CARDS } from "@/lib/consts/urls";
+import { URL_CARDS_MANAGE_GIFT_CARDS } from "@/lib/consts/urls";
 import { CARD_STATUS_UNASSIGNED } from "@/lib/consts/enums";
 import { CALLOUT_WARNING } from "@/lib/consts/callout";
 
@@ -265,7 +269,7 @@ async function onSubmit({ amount, existingCardId }) {
     }
   });
 
-  addSuccess(t("gift-card-fund-successfully-added", { amount: getMoneyFormat(parseFloat(amount)), cardId: existingCardId }));
-  router.push({ name: URL_CARDS });
+  addSuccess(t("gift-card-fund-sucessfully-added", { amount: getMoneyFormat(parseFloat(amount)), cardId: existingCardId }));
+  router.push({ name: URL_CARDS_MANAGE_GIFT_CARDS });
 }
 </script>
