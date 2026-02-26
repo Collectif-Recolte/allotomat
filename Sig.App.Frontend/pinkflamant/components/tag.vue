@@ -1,13 +1,13 @@
 <template>
   <span
     v-if="showTag"
-    class="pf-tag inline-flex text-p2"
+    class="pf-tag inline-flex text-p2 max-w-full"
     :class="[
       bgColorClass,
       borderColorClass,
       { border: borderColorClass },
       { dark: isDarkTheme },
-      allowWrap ? 'w-fit max-w-48 flex-none self-start items-start gap-x-2 py-1.5 px-2.5 rounded-lg' : 'max-w-full items-center',
+      allowWrap ? 'w-fit flex-none self-start items-start gap-x-2 py-1.5 px-2.5 rounded-lg' : 'items-center',
       !allowWrap && (isSquared ? 'rounded-md px-1.5 py-0.5' : 'rounded-full px-2.5 py-1')
     ]">
     <span
