@@ -29,7 +29,8 @@
     "sort-order-by-id": "Sort by ID",
     "sort-order-by-balance": "Sort by balance",
     "unlock-card": "Mark card as found",
-    "export-cards-list": "Export"
+    "export-cards-list": "Export",
+    "edit-funds-gift-card": "Edit funds"
 	},
 	"fr": {
 		"generate-cards": "Générer de nouvelles cartes",
@@ -60,7 +61,8 @@
     "sort-order-by-id": "Trier par ID",
     "sort-order-by-balance": "Trier par solde",
     "unlock-card": "Marquer la carte comme retrouvée",
-    "export-cards-list": "Exporter"
+    "export-cards-list": "Exporter",
+    "edit-funds-gift-card": "Modifier les fonds"
 	}
 }
 </i18n>
@@ -204,7 +206,8 @@ import {
   URL_CARDS_LOST,
   URL_CARDS_ENABLE,
   URL_CARDS_DISABLE,
-  URL_CARDS_UNLOCK
+  URL_CARDS_UNLOCK,
+  URL_GIFT_CARD_EDIT
 } from "@/lib/consts/urls";
 import { GLOBAL_MANAGE_ORGANIZATIONS } from "@/lib/consts/permissions";
 import {
@@ -225,6 +228,7 @@ import ICON_QR_CODE from "@/lib/icons/qrcode.json";
 import ICON_MINUS from "@/lib/icons/minus.json";
 import ICON_CLOSE from "@/lib/icons/close.json";
 import ICON_CARD_LINK from "@/lib/icons/card-link.json";
+import ICON_ADD_CASH from "@/lib/icons/add-cash.json";
 
 const { getGlobalPermissions } = storeToRefs(useAuthStore());
 const { t } = useI18n();
@@ -446,28 +450,36 @@ const getAfterBtnGroup = (card) => {
     }
   }
   if (card.status === CARD_STATUS_GIFT) {
-    if (card.isDisabled) {
-      return [
-        {
-          label: t("beneficiary-enable-card"),
-          icon: ICON_CARD_LINK,
-          route: {
-            name: URL_CARDS_ENABLE,
-            params: { cardId: card.id }
-          }
-        }
-      ];
-    }
-    return [
+    const result = [
       {
+        label: t("edit-funds-gift-card"),
+        icon: ICON_ADD_CASH,
+        route: {
+          name: URL_GIFT_CARD_EDIT,
+          params: { cardId: card.id }
+        }
+      }
+    ];
+    if (card.isDisabled) {
+      result.push({
+        label: t("beneficiary-enable-card"),
+        icon: ICON_CARD_LINK,
+        route: {
+          name: URL_CARDS_ENABLE,
+          params: { cardId: card.id }
+        }
+      });
+    } else {
+      result.push({
         label: t("beneficiary-disable-card"),
         icon: ICON_CLOSE,
         route: {
           name: URL_CARDS_DISABLE,
           params: { cardId: card.id }
         }
-      }
-    ];
+      });
+    }
+    return result;
   }
   if (card.status === CARD_STATUS_LOST) {
     return [

@@ -12,5 +12,6 @@ public enum TransactionLogDiscriminator
     RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog,
     RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog,
     RefundBudgetAllowanceFromUnassignedCardTransactionLog,
-    RefundPaymentTransactionLog
+    RefundPaymentTransactionLog,
+    LoyaltyEditFundTransactionLog
 }

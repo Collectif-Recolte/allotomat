@@ -13,7 +13,7 @@
     "amount-label": "Amount",
     "amount-placeholder": "Ex. {amount}",
     "warning-create-gift-card": "A gift card is activated as soon as it is created, please do not lose it!",
-    "gift-card-fund-sucessfully-added": "The gift card {cardId} is now activated and has {amount}.",
+    "gift-card-fund-successfully-added": "The gift card {cardId} is now activated and has {amount}.",
     "warning-create-gift-card-already-used": "This card is already used (status: {cardStatus}): it contains <b>{subscriptionAmount}</b> subscription and <b>{giftCardAmount}</b> gift card, ensure it is the correct card for the addition of funds.",
     "card-status-assigned": "assigned to a participant",
     "card-status-gift-card": "gift card",
@@ -34,7 +34,7 @@
     "amount-label": "Montant",
     "amount-placeholder": "Ex. {amount}",
     "warning-create-gift-card": "Une carte-cadeau est activée dès sa création, veuillez ne pas la perdre!",
-    "gift-card-fund-sucessfully-added": "La carte ({cardId}) est maintenant activée en tant que carte-cadeau et possède {amount}.", 
+    "gift-card-fund-successfully-added": "La carte ({cardId}) est maintenant activée en tant que carte-cadeau et possède {amount}.",
     "warning-create-gift-card-already-used": "Cette carte est déjà utilisée (statut : {cardStatus}) : elle contient <b>{subscriptionAmount}</b> d’abonnement et <b>{giftCardAmount}</b> de carte-cadeau. Assurez-vous qu'il s'agit de la bonne carte pour l'ajout de fonds.",
     "card-status-assigned": "attribuée à un-e participant-e",
     "card-status-gift-card": "carte-cadeau",
@@ -265,7 +265,7 @@ async function onSubmit({ amount, existingCardId }) {
     }
   });
 
-  addSuccess(t("gift-card-fund-sucessfully-added", { amount: getMoneyFormat(parseFloat(amount)), cardId: existingCardId }));
+  addSuccess(t("gift-card-fund-successfully-added", { amount: getMoneyFormat(parseFloat(amount)), cardId: existingCardId }));
   router.push({ name: URL_CARDS });
 }
 </script>
