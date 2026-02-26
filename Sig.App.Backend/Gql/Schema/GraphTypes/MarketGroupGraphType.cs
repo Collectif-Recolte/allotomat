@@ -70,9 +70,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         }
 
         public async Task<Pagination<MarketGraphType>> MarketsSearch([Inject] IMediator mediator, int page, int limit,
-#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-            [Description("If specified, only that match text is returned.")] string? searchText = "",
-#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+            [Description("If specified, only that match text is returned.")] string searchText = "",
             Sort<MarketSort> sort = null
             )
         {
