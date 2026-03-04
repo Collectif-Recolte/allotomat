@@ -18,7 +18,8 @@
       "september": "September",
       "october": "October",
       "november": "November",
-      "december": "December"
+      "december": "December",
+      "loading": "Loading email preferences..."
     },
     "fr": {
       "submit": "Mettre à jour",
@@ -38,7 +39,8 @@
       "september": "Septembre",
       "october": "Octobre",
       "november": "Novembre",
-      "december": "Décembre"
+      "december": "Décembre",
+      "loading": "Chargement des préférences d'email..."
     }
   }
 </i18n>

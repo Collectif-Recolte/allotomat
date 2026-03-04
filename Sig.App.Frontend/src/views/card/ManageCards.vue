@@ -278,7 +278,11 @@ const canManageOrganizations = () => {
   return getGlobalPermissions.value.includes(GLOBAL_MANAGE_ORGANIZATIONS);
 };
 
-const { result: resultProjects, refetch: refetchCards, loading: loadingProjects } = useQuery(
+const {
+  result: resultProjects,
+  refetch: refetchCards,
+  loading: loadingProjects
+} = useQuery(
   gql`
     query Projects($page: Int!, $status: [CardStatus!], $searchText: String, $withCardDisabled: Boolean, $sort: CardSortSort) {
       projects {

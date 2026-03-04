@@ -6,12 +6,13 @@
       </div>
       <div class="ml-3 text-sm mb-0" :class="theme.text">
         <slot>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <p
-            v-if="message"
-            class="mb-0"
-            :class="{ 'callout-message-html': allowHtml }"
-            v-html="allowHtml ? message : undefined" />
+          <p v-if="message" class="mb-0" :class="{ 'callout-message-html': allowHtml }">
+            <template v-if="allowHtml">
+              <!-- eslint-disable-next-line vue/no-v-html -->
+              <span v-html="message" />
+            </template>
+            <template v-else>{{ message }}</template>
+          </p>
         </slot>
       </div>
     </div>

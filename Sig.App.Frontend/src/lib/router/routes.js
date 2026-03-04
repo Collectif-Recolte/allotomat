@@ -884,6 +884,22 @@ export default [
             }
           },
           {
+            name: urls.URL_BENEFICIARY_TRANSFER_FUNDS,
+            path: ":beneficiaryId/transfer-funds",
+            component: () => import("@/views/beneficiary/TransferFund.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_BENEFICIARIES
+            }
+          },
+          {
+            name: urls.URL_BENEFICIARY_EDIT_GIFT_CARD,
+            path: ":cardId/edit-gift-card",
+            component: () => import("@/views/card/EditGiftCard.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_CARDS
+            }
+          },
+          {
             name: urls.URL_BENEFICIARY_ADD_MISSED_PAYMENT,
             path: ":beneficiaryId/add-missed-payment",
             component: () => import("@/views/beneficiary/AddMissedPayment.vue"),

@@ -269,7 +269,7 @@ async function onSubmit({ amount, existingCardId }) {
     }
   });
 
-  addSuccess(t("gift-card-fund-sucessfully-added", { amount: getMoneyFormat(parseFloat(amount)), cardId: existingCardId }));
+  addSuccess(t("gift-card-fund-successfully-added", { amount: getMoneyFormat(parseFloat(amount)), cardId: existingCardId }));
   router.push({ name: URL_CARDS_MANAGE_GIFT_CARDS });
 }
 </script>

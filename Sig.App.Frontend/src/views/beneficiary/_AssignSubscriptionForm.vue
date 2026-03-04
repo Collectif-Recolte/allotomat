@@ -184,37 +184,37 @@ const subscriptionsOrderByDate = computed(() => {
   });
 
   return subscriptions
-      .filter(
-        (x) =>
-          !x.isArchived &&
-          x.budgetAllowances.find((y) => y.organization.id === beneficiary.value.organization.id) &&
-          new Date(x.fundsExpirationDate) >= new Date()
-      )
-      .map((subscription) => {
-    return {
-      id: subscription.id,
-      name: subscriptionName(subscription),
-      monthlyPaymentMoment: subscription.monthlyPaymentMoment,
-      startDate: subscription.startDate,
-      endDate: subscription.endDate,
-      maxNumberOfPayments: subscription.maxNumberOfPayments,
-      isSubscriptionPaymentBasedCardUsage: subscription.isSubscriptionPaymentBasedCardUsage,
-      isFundsAccumulable: subscription.isFundsAccumulable,
-      fundsExpirationDate: subscription.fundsExpirationDate,
-      numberDaysUntilFundsExpire: subscription.numberDaysUntilFundsExpire,
-      dontHaveBudgetAllowance: !subscription.budgetAllowances.some((budgetAllowance) => {
-        return budgetAllowance.organization.id === beneficiary.value.organization.id;
-      }),
-      isBudgetAllowanceIsEnough: isBudgetAllowanceIsEnough(subscription),
-      dontHaveBeneficiaryType: !subscription.types.some((type) => {
-        return type.beneficiaryType.id === beneficiary.value.beneficiaryType.id;
-      }),
-      paymentRemaining: subscription.paymentRemaining,
-      totalPayment: subscription.totalPayment,
-      types: subscription.types,
-      budgetAllowances: subscription.budgetAllowances
-    };
-  });
+    .filter(
+      (x) =>
+        !x.isArchived &&
+        x.budgetAllowances.find((y) => y.organization.id === beneficiary.value.organization.id) &&
+        new Date(x.fundsExpirationDate) >= new Date()
+    )
+    .map((subscription) => {
+      return {
+        id: subscription.id,
+        name: subscriptionName(subscription),
+        monthlyPaymentMoment: subscription.monthlyPaymentMoment,
+        startDate: subscription.startDate,
+        endDate: subscription.endDate,
+        maxNumberOfPayments: subscription.maxNumberOfPayments,
+        isSubscriptionPaymentBasedCardUsage: subscription.isSubscriptionPaymentBasedCardUsage,
+        isFundsAccumulable: subscription.isFundsAccumulable,
+        fundsExpirationDate: subscription.fundsExpirationDate,
+        numberDaysUntilFundsExpire: subscription.numberDaysUntilFundsExpire,
+        dontHaveBudgetAllowance: !subscription.budgetAllowances.some((budgetAllowance) => {
+          return budgetAllowance.organization.id === beneficiary.value.organization.id;
+        }),
+        isBudgetAllowanceIsEnough: isBudgetAllowanceIsEnough(subscription),
+        dontHaveBeneficiaryType: !subscription.types.some((type) => {
+          return type.beneficiaryType.id === beneficiary.value.beneficiaryType.id;
+        }),
+        paymentRemaining: subscription.paymentRemaining,
+        totalPayment: subscription.totalPayment,
+        types: subscription.types,
+        budgetAllowances: subscription.budgetAllowances
+      };
+    });
 });
 
 function closeModal() {

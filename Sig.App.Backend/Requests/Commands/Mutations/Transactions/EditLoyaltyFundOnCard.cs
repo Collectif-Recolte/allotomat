@@ -120,8 +120,19 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var fund = card.Funds.FirstOrDefault(x => x.ProductGroup.Name == ProductGroupType.LOYALTY);
             if (fund == null)
             {
-                logger.LogWarning("[Mutation] EditLoyaltyFundOnCard - Card has no loyalty fund (not a gift card)");
-                throw new CardIsNotGiftCardException();
+                if (loyaltyProductGroup == null)
+                {
+                    logger.LogWarning("[Mutation] EditLoyaltyFundOnCard - Project has no loyalty product group");
+                    throw new CardIsNotGiftCardException();
+                }
+
+                fund = new Fund()
+                {
+                    Card = card,
+                    ProductGroup = loyaltyProductGroup
+                };
+
+                db.Funds.Add(fund);
             }
 
             fund.Amount = request.Amount;

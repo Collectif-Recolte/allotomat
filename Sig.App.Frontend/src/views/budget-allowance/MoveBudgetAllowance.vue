@@ -207,7 +207,7 @@ const projects = useResult(result);
 const validationSchema = computed(() =>
   object({
     amount: number().label(t("amount-label")).required().min(0.01).max(budgetAllowance.value.availableFund),
-    budgetAllowanceId: string().label(t("budget-allowance-label")).required()
+    budgetAllowanceId: string().label(t("target-budget-allowance-label")).required()
   })
 );
 
