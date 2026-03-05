@@ -116,6 +116,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 ProjectName = card.Project.Name,
                 TransactionLogProductGroups = transactionLogProductGroups
             });
+            db.Transactions.Add(transaction);
 
             var fund = card.Funds.FirstOrDefault(x => x.ProductGroup.Name == ProductGroupType.LOYALTY);
             if (fund == null)
