@@ -13,7 +13,7 @@ module.exports = {
     "Helvetica Neue",
     "Helvetica",
     "Arial",
-    "sans-serif",
+    "sans-serif"
   ],
   display: [
     "BlinkMacSystemFont",
@@ -28,6 +28,6 @@ module.exports = {
     "Helvetica Neue",
     "Helvetica",
     "Arial",
-    "sans-serif",
-  ],
+    "sans-serif"
+  ]
 };

@@ -24,11 +24,7 @@
 </i18n>
 
 <template>
-  <UiDialogModal
-    v-slot="{ closeModal }"
-    :return-route="{ name: URL_CARDS_MANAGE_GIFT_CARDS }"
-    :title="t('title')"
-    :has-footer="false">
+  <UiDialogModal v-slot="{ closeModal }" :return-route="returnRoute" :title="t('title')" :has-footer="false">
     <Form
       v-if="card"
       v-slot="{ isSubmitting }"
@@ -66,7 +62,7 @@ import { useI18n } from "vue-i18n";
 import { string, number, object, lazy } from "yup";
 import { useRouter, useRoute } from "vue-router";
 
-import { URL_CARDS_MANAGE_GIFT_CARDS } from "@/lib/consts/urls";
+import { URL_CARDS_MANAGE_GIFT_CARDS, URL_BENEFICIARY_ADMIN, URL_BENEFICIARY_EDIT_GIFT_CARD } from "@/lib/consts/urls";
 
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 
@@ -76,6 +72,14 @@ const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const { addSuccess } = useNotificationsStore();
+
+const returnRoute = computed(() => {
+  if (route.name === URL_BENEFICIARY_EDIT_GIFT_CARD) {
+    return { name: URL_BENEFICIARY_ADMIN };
+  } else {
+    return { name: URL_CARDS_MANAGE_GIFT_CARDS };
+  }
+});
 
 const validationSchema = computed(() =>
   object({
@@ -144,6 +148,6 @@ async function onSubmit({ amount }) {
   });
 
   addSuccess(t("gift-card-fund-successfully-edited"));
-  router.push({ name: URL_CARDS_MANAGE_GIFT_CARDS });
+  router.push(returnRoute.value);
 }
 </script>
