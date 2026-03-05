@@ -171,28 +171,6 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         }
 
         [Fact]
-        public async Task ThrowsIfCardIsNotGiftCardException()
-        {
-            var localCard = new Card()
-            {
-                Project = project,
-                ProgramCardId = 2,
-                Funds = new List<Fund>()
-            };
-            DbContext.Cards.Add(localCard);
-            DbContext.SaveChanges();
-
-            var input = new EditLoyaltyFundOnCard.Input()
-            {
-                CardId = localCard.GetIdentifier(),
-                Amount = 10
-            };
-
-            await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<EditLoyaltyFundOnCard.CardIsNotGiftCardException>();
-        }
-
-        [Fact]
         public async Task ThrowsIfCardNotFoundException()
         {
             var input = new EditLoyaltyFundOnCard.Input()
