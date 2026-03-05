@@ -40,26 +40,26 @@
       "beneficiary-delete": "Supprimer {firstname}",
       "beneficiary-delete-participant-anonymous": "le participant",
       "beneficiary-transactions-history": "Historique de transactions",
-      "beneficiary-edit-disabled": "Vous n'avez pas la permission de modifier ce participant-e",
-      "beneficiary-display-qrcode-disabled": "Vous ne pouvez pas afficher un code QR si le participant-e n'a pas de carte",
-      "beneficiary-lost-card-disabled": "Vous ne pouvez pas déclarer une carte perdue si le participant-e n'a pas de carte",
-      "beneficiary-delete-disabled": "Vous ne pouvez pas supprimer un participant-e avec une carte assignée",
-      "beneficiary-delete-disabled-anonymous": "Vous ne pouvez pas supprimer un participant-e anonyme",
+      "beneficiary-edit-disabled": "Vous n'avez pas la permission de modifier ce-la participant-e",
+      "beneficiary-display-qrcode-disabled": "Vous ne pouvez pas afficher un code QR si le-a participant-e n'a pas de carte",
+      "beneficiary-lost-card-disabled": "Vous ne pouvez pas déclarer une carte perdue si le-a participant-e n'a pas de carte",
+      "beneficiary-delete-disabled": "Vous ne pouvez pas supprimer un-e participant-e avec une carte assignée",
+      "beneficiary-delete-disabled-anonymous": "Vous ne pouvez pas supprimer un-e participant-e anonyme",
       "beneficiary-disable-card": "Désactiver la carte",
       "beneficiary-enable-card": "Réactiver la carte",
       "beneficiary-payment-conflict": "Corriger les conflits",
-      "beneficiary-payment-conflict-disabled": "Le participant-e n'a pas de conflit de paiement",
+      "beneficiary-payment-conflict-disabled": "Le-a participant-e n'a pas de conflit de paiement",
       "beneficiary-payment-conflict-all-group-selected": "Vous ne pouvez pas corriger un conflit si tous les groupes sont sélectionnés",
       "beneficiary-assign-subscription": "Attribuer un abonnement",
       "beneficiary-assign-subscription-disabled": "Vous ne pouvez pas attribuer un abonnement si tous les groupes sont sélectionnés",
       "beneficiary-create-transaction": "Créer une transaction",
       "beneficiary-create-transaction-no-market": "Vous ne pouvez pas créer une transaction si le groupe n'a pas de commerce",
-      "beneficiary-create-transaction-no-card": "Vous ne pouvez pas créer une transaction si le participant-e n'a pas de carte",
+      "beneficiary-create-transaction-no-card": "Vous ne pouvez pas créer une transaction si le-a participant-e n'a pas de carte",
       "beneficiary-create-transaction-card-disabled": "Vous ne pouvez pas créer une transaction si la carte du participant-e est désactivée",
       "beneficiary-create-transaction-all-group": "Vous ne pouvez pas créer une transaction si tous les groupes sont sélectionnés",
       "transfer-funds": "Transférer des fonds",
-      "beneficiary-transfer-funds-disabled-no-card": "Vous ne pouvez pas transférer des fonds si le participant-e n'a pas de carte",
-      "beneficiary-transfer-funds-disabled-no-subscription": "Vous ne pouvez pas transférer des fonds si le participant-e n'a pas d'abonnement",
+      "beneficiary-transfer-funds-disabled-no-card": "Vous ne pouvez pas transférer des fonds si le-a participant-e n'a pas de carte",
+      "beneficiary-transfer-funds-disabled-no-subscription": "Vous ne pouvez pas transférer des fonds si le-a participant-e n'a pas d'abonnement",
       "beneficiary-transfer-funds-disabled-all-group": "Vous ne pouvez pas transférer des fonds si tous les groupes sont sélectionnés"
     }
   }
@@ -160,8 +160,8 @@ function updateItems() {
         reason: !haveCard()
           ? t("beneficiary-create-transaction-no-card")
           : isCardDisabled()
-          ? t("beneficiary-create-transaction-card-disabled")
-          : t("beneficiary-create-transaction-all-group")
+            ? t("beneficiary-create-transaction-card-disabled")
+            : t("beneficiary-create-transaction-all-group")
       },
       {
         isExtra: true,
@@ -172,8 +172,8 @@ function updateItems() {
         reason: !haveCard()
           ? t("beneficiary-transfer-funds-disabled-no-card")
           : !haveSubscriptions()
-          ? t("beneficiary-transfer-funds-disabled-no-subscription")
-          : t("beneficiary-transfer-funds-disabled-all-group")
+            ? t("beneficiary-transfer-funds-disabled-no-subscription")
+            : t("beneficiary-transfer-funds-disabled-all-group")
       },
       {
         isExtra: true,
@@ -265,8 +265,8 @@ function updateItems() {
         reason: !haveCard()
           ? t("beneficiary-transfer-funds-disabled-no-card")
           : !haveSubscriptions()
-          ? t("beneficiary-transfer-funds-disabled-no-subscription")
-          : t("beneficiary-transfer-funds-disabled-all-group")
+            ? t("beneficiary-transfer-funds-disabled-no-subscription")
+            : t("beneficiary-transfer-funds-disabled-all-group")
       },
       {
         isExtra: true,
@@ -277,8 +277,8 @@ function updateItems() {
         reason: !haveCard()
           ? t("beneficiary-create-transaction-no-card")
           : !haveMarketsInOrganization()
-          ? t("beneficiary-create-transaction-no-market")
-          : t("beneficiary-create-transaction-card-disabled")
+            ? t("beneficiary-create-transaction-no-market")
+            : t("beneficiary-create-transaction-card-disabled")
       }
     ];
   }

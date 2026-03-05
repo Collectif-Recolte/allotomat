@@ -20,9 +20,9 @@
     "manually-add-funds-title": "Versement sur mesure",
     "manually-add-funds-desc": "Ajouter un montant sur la carte du participant avec une date d'expiration au choix.",
     "manually-add-funds": "Versement sur mesure",
-    "add-gift-card-funds-title": "Ajouter des fonds cadeau à la carte",
-    "add-gift-card-funds-desc": "Ajouter un montant cadeau à la carte du participant sans date d'expiration.",
-    "add-gift-card-funds": "Ajouter des fonds cadeau à la carte"
+    "add-gift-card-funds-title": "Ajouter des fonds carte-cadeau",
+    "add-gift-card-funds-desc": "Ajouter un montant carte-cadeau à la carte du participant-e sans date d'expiration.",
+    "add-gift-card-funds": "Ajouter des fonds carte-cadeau"
   }
 }
 </i18n>
@@ -30,51 +30,36 @@
 <template>
   <UiDialogModal v-if="!loading" :title="t('title')" :has-footer="true" :return-route="returnRoute">
     <div class="flex flex-col gap-6">
-      <section class="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-        <UiCallout class="min-w-0 flex-1" :variant="CALLOUT_INFO">
+      <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
+        <UiCallout class="min-w-0" :variant="CALLOUT_INFO">
           <p class="font-medium mb-1 m-0">{{ t("add-missing-payment-title") }}</p>
           <p class="m-0">{{ t("add-missing-payment-desc") }}</p>
         </UiCallout>
-        <PfButtonLink
-          tag="routerLink"
-          class="w-full sm:w-auto sm:min-w-[11rem] px-6 py-3 text-base shrink-0"
-          :to="{
-            name: URL_BENEFICIARY_ADD_MISSED_PAYMENT,
-            params: { beneficiaryId: route.params.beneficiaryId }
-          }"
-          :label="t('add-missing-payment')"
-          :is-disabled="!haveMissedPayment" />
-      </section>
-      <section class="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-        <UiCallout class="min-w-0 flex-1" :variant="CALLOUT_INFO">
+        <PfButtonLink tag="routerLink" class="w-full sm:w-auto sm:min-w-[11rem] px-6 py-3 text-base shrink-0" :to="{
+          name: URL_BENEFICIARY_ADD_MISSED_PAYMENT,
+          params: { beneficiaryId: route.params.beneficiaryId }
+        }" :label="t('add-missing-payment')" :is-disabled="!haveMissedPayment" />
+      </div>
+      <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
+        <UiCallout class="min-w-0" :variant="CALLOUT_INFO">
           <p class="font-medium mb-1 m-0">{{ t("manually-add-funds-title") }}</p>
           <p class="m-0">{{ t("manually-add-funds-desc") }}</p>
         </UiCallout>
-        <PfButtonLink
-          tag="routerLink"
-          class="w-full sm:w-auto sm:min-w-[11rem] px-6 py-3 text-base shrink-0"
-          :to="{
-            name: URL_BENEFICIARY_MANUALLY_ADD_FUND,
-            params: { beneficiaryId: route.params.beneficiaryId }
-          }"
-          :label="t('manually-add-funds')"
-          :is-disabled="!haveActiveSubscription" />
-      </section>
-      <section class="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-        <UiCallout class="min-w-0 flex-1" :variant="CALLOUT_INFO">
+        <PfButtonLink tag="routerLink" class="w-full sm:w-auto sm:min-w-[11rem] px-6 py-3 text-base shrink-0" :to="{
+          name: URL_BENEFICIARY_MANUALLY_ADD_FUND,
+          params: { beneficiaryId: route.params.beneficiaryId }
+        }" :label="t('manually-add-funds')" :is-disabled="!haveActiveSubscription" />
+      </div>
+      <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
+        <UiCallout class="min-w-0" :variant="CALLOUT_INFO">
           <p class="font-medium mb-1 m-0">{{ t("add-gift-card-funds-title") }}</p>
           <p class="m-0">{{ t("add-gift-card-funds-desc") }}</p>
         </UiCallout>
-        <PfButtonLink
-          tag="routerLink"
-          class="w-full sm:w-auto sm:min-w-[11rem] px-6 py-3 text-base shrink-0"
-          :to="{
-            name: URL_BENEFICIARY_EDIT_GIFT_CARD,
-            params: { cardId: beneficiary?.card?.id }
-          }"
-          :label="t('add-gift-card-funds')"
-          :is-disabled="!beneficiary?.card?.id" />
-      </section>
+        <PfButtonLink tag="routerLink" class="w-full sm:w-auto sm:min-w-[11rem] px-6 py-3 text-base shrink-0" :to="{
+          name: URL_BENEFICIARY_EDIT_GIFT_CARD,
+          params: { cardId: beneficiary?.card?.id }
+        }" :label="t('add-gift-card-funds')" :is-disabled="!beneficiary?.card?.id" />
+      </div>
     </div>
   </UiDialogModal>
 </template>
