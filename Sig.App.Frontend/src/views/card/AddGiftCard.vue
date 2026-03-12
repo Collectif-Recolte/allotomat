@@ -46,64 +46,34 @@
 </i18n>
 
 <template>
-  <UiDialogModal
-    v-slot="{ closeModal }"
-    :return-route="{ name: URL_CARDS_MANAGE_GIFT_CARDS }"
-    :title="t('title')"
+  <UiDialogModal v-slot="{ closeModal }" :return-route="{ name: URL_CARDS_MANAGE_GIFT_CARDS }" :title="t('title')"
     :has-footer="false">
-    <Form v-if="project" v-slot="{ isSubmitting, setFieldValue }" :validation-schema="validationSchema" @submit="onSubmit">
-      <PfForm
-        has-footer
-        can-cancel
-        :submit-label="t('assign-card')"
-        :cancel-label="t('cancel')"
-        :processing="isSubmitting"
-        :warning-message="t('warning-create-gift-card')"
-        @cancel="closeModal">
+    <Form v-if="project" v-slot="{ isSubmitting, setFieldValue }" :validation-schema="validationSchema"
+      @submit="onSubmit">
+      <PfForm has-footer can-cancel :submit-label="t('assign-card')" :cancel-label="t('cancel')"
+        :processing="isSubmitting" :warning-message="t('warning-create-gift-card')" @cancel="closeModal">
         <PfFormSection>
           <Field v-slot="{ field, errors: fieldErrors }" name="existingCardId" class="grid grid-cols-1 gap-y-2">
             <div class="flex flex-col gap-y-2">
-              <PfFormInputText
-                id="existingCardId"
-                v-bind="field"
-                :label="t('existing-card-id')"
-                :placeholder="t('existing-card-id-placeholder')"
-                :errors="fieldErrors"
-                input-type="number"
+              <PfFormInputText id="existingCardId" v-bind="field" :label="t('existing-card-id')"
+                :placeholder="t('existing-card-id-placeholder')" :errors="fieldErrors" input-type="number"
                 @input="(e) => updateCardIdToQuery(e)" />
-              <UiCallout
-                v-if="cardById && showAlreadyUsedWarning"
-                :variant="CALLOUT_WARNING"
-                :message="
-                  t('warning-create-gift-card-already-used', {
-                    cardStatus: cardStatusLabel,
-                    subscriptionAmount: getMoneyFormat(cardById.totalFund),
-                    giftCardAmount: getMoneyFormat(cardById.loyaltyFund?.amount ?? 0)
-                  })
-                "
-                allow-html />
+              <UiCallout v-if="cardById && showAlreadyUsedWarning" :variant="CALLOUT_WARNING" :message="t('warning-create-gift-card-already-used', {
+                cardStatus: cardStatusLabel,
+                subscriptionAmount: getMoneyFormat(cardById.totalFund),
+                giftCardAmount: getMoneyFormat(cardById.loyaltyFund?.amount ?? 0)
+              })
+                " allow-html />
             </div>
           </Field>
-          <PfTooltip
-            v-if="project"
-            :hide-tooltip="project.cardStats.cardsUnassigned > 0"
-            class="group-pfone"
+          <PfTooltip v-if="project" :hide-tooltip="project.cardStats.cardsUnassigned > 0" class="group-pfone"
             :label="t('no-available-cards')">
-            <PfButtonAction
-              class="mb-5"
-              type="button"
-              :label="t('auto-assign-card')"
-              :is-disabled="project.cardStats.cardsUnassigned === 0"
-              @click="assignCardAutomatically(setFieldValue)" />
+            <PfButtonAction class="mb-5" type="button" :label="t('auto-assign-card')"
+              :is-disabled="project.cardStats.cardsUnassigned === 0" @click="assignCardAutomatically(setFieldValue)" />
           </PfTooltip>
           <Field v-slot="{ field, errors: fieldErrors }" name="amount">
-            <PfFormInputText
-              id="amount"
-              v-bind="field"
-              :label="t('amount-label')"
-              :errors="fieldErrors"
-              input-type="number"
-              min="0" />
+            <PfFormInputText id="amount" v-bind="field" :label="t('amount-label')" :errors="fieldErrors"
+              input-type="number" min="0" />
           </Field>
         </PfFormSection>
       </PfForm>
@@ -254,6 +224,7 @@ const { mutate: addLoyaltyFundToCard } = useMutation(
 
 function assignCardAutomatically(callback) {
   callback("existingCardId", nextUnassignedCard.value);
+  updateCardIdToQuery(nextUnassignedCard.value);
 }
 
 function updateCardIdToQuery(val) {
