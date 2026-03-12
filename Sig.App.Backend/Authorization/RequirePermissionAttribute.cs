@@ -166,6 +166,16 @@ namespace Sig.App.Backend.Authorization
             {
                 return pgt.Id.IdentifierForType<Project>();
             }
+            if (input is HaveCardId hci)
+            {
+                var cardId = hci.CardId.LongIdentifierForType<Card>();
+                var card = db.Cards.Find(cardId);
+                if (card != null)
+                {
+                    var projectId = Id.New<Project>(card.ProjectId);
+                    return projectId.IdentifierForType<Project>();
+                }
+            }
             if (input is Id id)
             {
                 return id.IdentifierForType<Project>();
@@ -365,6 +375,10 @@ namespace Sig.App.Backend.Authorization
             if (input is CardGraphType cgt)
             {
                 return cgt.Id.IdentifierForType<Card>();
+            }
+            if (input is HaveOriginalCardId hoci)
+            {
+                return hoci.OriginalCardId.IdentifierForType<Card>();
             }
             if (input is Id id)
             {

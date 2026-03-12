@@ -10,6 +10,7 @@ using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Interfaces;
+using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Requests.Queries.Beneficiaries;
 using Sig.App.Backend.Requests.Queries.Cards;
 using Sig.App.Backend.Requests.Queries.Markets;
@@ -56,9 +57,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         }
 
         public async Task<Pagination<MarketGraphType>> MarketsSearch([Inject] IMediator mediator, int page, int limit, Id[] marketGroups,
-#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-            [Description("If specified, only that match text is returned.")] string? searchText = "",
-#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+            [Description("If specified, only that match text is returned.")] string searchText = "",
             Sort<MarketSort> sort = null
             )
         {
@@ -113,6 +112,12 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return ctx.DataLoader.LoadProjectProductGroups(Id.LongIdentifierForType<Project>());
         }
 
+        public async Task<CardGraphType> CardByProgramCardId(IAppUserContext ctx, string programCardId)
+        {
+            var result = await ctx.DataLoader.LoadCardByProjectIdAndCardProgramId(project.Id, long.Parse(programCardId)).GetResultAsync();
+            return result.FirstOrDefault();
+        }
+
         [RequirePermission(GlobalPermission.ManageSpecificProject)]
         public async Task<ProjectStatsGraphType> ProjectStats([Inject] IMediator mediator)
         {
@@ -153,9 +158,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public async Task<Pagination<CardGraphType>> Cards([Inject] IMediator mediator, int page, int limit,
             [Description("If specified, only card with specific status are returned")] CardStatus[] status = null,
             [Description("If specified, only card enabled or disabled is returned.")] bool? withCardDisabled = null,
-#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-            [Description("If specified, only that match text is returned.")] string? searchText = "",
-#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+            [Description("If specified, only that match text is returned.")] string searchText = "",
             Sort<CardSort> sort = null)
         {
             var results = await mediator.Send(new SearchCards.Query
@@ -174,6 +177,29 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             });
         }
 
+        public async Task<Pagination<CardGraphType>> GiftCards([Inject] IMediator mediator, int page, int limit,
+            [Description("If specified, only card with specific status are returned")] CardStatus[] status = null,
+            [Description("If specified, only card enabled or disabled is returned.")] bool? withCardDisabled = null,
+            [Description("If specified, only that match text is returned.")] string searchText = "",
+            Sort<CardSort> sort = null)
+        {
+            var results = await mediator.Send(new SearchCards.Query
+            {
+                ProjectId = project.Id,
+                Page = new Page(page, limit),
+                Status = status,
+                SearchText = searchText,
+                WithCardDisabled = withCardDisabled,
+                Sort = sort,
+                HaveLoyaltyFund = true
+            });
+
+            return results.Map(x =>
+            {
+                return new CardGraphType(x);
+            });
+        }
+
         public async Task<PaymentConflictPagination<IBeneficiaryGraphType>> Beneficiaries([Inject] IMediator mediator, int page, int limit,
             [Description("If specified, only beneficiaries without or with a subscription are returned.")] bool? withoutSubscription = null,
             [Description("If specified, only beneficiaries with one of those subscription are returned.")] Id[] subscriptions = null,
@@ -184,9 +210,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             [Description("If specified, only beneficiaries with or without card is returned.")] bool? withCard = null,
             [Description("If specified, only beneficiaries with or without payment conflict is returned.")] bool? withConflictPayment = null,
             [Description("If specified, only card enabled or disabled is returned.")] bool? withCardDisabled = null,
-#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-            [Description("If specified, only that match text is returned.")] string? searchText = "",
-#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+            [Description("If specified, only that match text is returned.")] string searchText = "",
             Sort<BeneficiarySort> sort = null)
         {
             var results = await mediator.Send(new SearchBeneficiaries.Query

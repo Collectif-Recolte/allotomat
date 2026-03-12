@@ -43,7 +43,13 @@ import { useRoute, useRouter } from "vue-router";
 import { computed } from "vue";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
-import { URL_CARDS, URL_BENEFICIARY_ADMIN, URL_BENEFICIARY_CARD_DISABLE } from "@/lib/consts/urls";
+import {
+  URL_CARDS,
+  URL_BENEFICIARY_ADMIN,
+  URL_BENEFICIARY_CARD_DISABLE,
+  URL_CARDS_GIFT_CARD_DISABLE,
+  URL_CARDS_MANAGE_GIFT_CARDS
+} from "@/lib/consts/urls";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -120,6 +126,7 @@ async function onDisableCard() {
 
 function returnRoute() {
   if (route.name === URL_BENEFICIARY_CARD_DISABLE) return { name: URL_BENEFICIARY_ADMIN };
+  else if (route.name === URL_CARDS_GIFT_CARD_DISABLE) return { name: URL_CARDS_MANAGE_GIFT_CARDS };
   else return { name: URL_CARDS };
 }
 </script>

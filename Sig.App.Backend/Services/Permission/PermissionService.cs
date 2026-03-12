@@ -106,7 +106,8 @@ namespace Sig.App.Backend.Services.Permission
             ProjectPermission.ManageProject,
             ProjectPermission.CreateOrganization,
             ProjectPermission.CreateCard,
-            ProjectPermission.AddLoyaltyFundToCard
+            ProjectPermission.AddLoyaltyFundToCard,
+            ProjectPermission.EditLoyaltyFundOnCard
         };
 
         private static readonly BeneficiaryTypePermission[] ProjectManagerBeneficiaryTypePermission = new[]
@@ -197,7 +198,8 @@ namespace Sig.App.Backend.Services.Permission
 
         private static readonly CardPermission[] ProjectManagerCardPermissions = new[]
         {
-            CardPermission.EnableDisableCard
+            CardPermission.EnableDisableCard,
+            CardPermission.TransfertCard
         };
 
         private static readonly CardPermission[] OrganizationManagerCardPermissionsWithAssignCard = new[]

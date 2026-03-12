@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.Utilities;
@@ -49,6 +49,16 @@ namespace Sig.App.Backend.Requests.Queries.Cards
                 query = query.Where(x => x.IsDisabled == request.WithCardDisabled.Value);
             }
 
+            if (request.HaveLoyaltyFund)
+            {
+                query = query.Where(x => x.Funds.Any(x => x.ProductGroup.Name == ProductGroupType.LOYALTY));
+            }
+            else
+            {
+                // Force hide Gift-Card when searching for Cards
+                query = query.Where(x => x.Status != CardStatus.GiftCard);
+            }
+
             var sorted = Sort(query, request.Sort?.Field ?? CardSort.Default, SortOrder.Asc);
             return await Pagination.For(sorted, request.Page);
         }
@@ -61,6 +71,7 @@ namespace Sig.App.Backend.Requests.Queries.Cards
             public Maybe<string> SearchText { get; set; }
             public Maybe<bool> WithCardDisabled { get; set; }
             public Sort<CardSort> Sort { get; set; }
+            public bool HaveLoyaltyFund { get; set; } = false;
         }
 
         private static IOrderedQueryable<Card> Sort(IQueryable<Card> query, CardSort sort, SortOrder order)

@@ -40,6 +40,8 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
                         return new ManuallyAddingFundTransactionGraphType(maft) as ITransactionGraphType;
                     case LoyaltyAddingFundTransaction laft:
                         return new LoyaltyAddingFundTransactionGraphType(laft) as ITransactionGraphType;
+                    case LoyaltyEditFundTransaction left:
+                        return new LoyaltyEditFundTransactionGraphType(left) as ITransactionGraphType;
                     case RefundTransaction rft:
                         return new RefundTransactionGraphType(rft) as ITransactionGraphType;
                     case OffPlatformAddingFundTransaction opaft:

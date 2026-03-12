@@ -554,7 +554,7 @@ namespace Sig.App.Backend.Gql.Schema
             return mediator.Send(input.Value);
         }
 
-        [RequirePermission(BeneficiaryPermission.AssignCard)]
+        [RequirePermission(CardPermission.TransfertCard)]
         [AnnotateErrorCodes(typeof(TransfertCard))]
         public static Task<TransfertCard.Payload> TransfertCard(
             this GqlMutation _,
@@ -620,6 +620,16 @@ namespace Sig.App.Backend.Gql.Schema
             this GqlMutation _,
             [Inject] IMediator mediator,
             NonNull<AddLoyaltyFundToCard.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(ProjectPermission.EditLoyaltyFundOnCard)]
+        [AnnotateErrorCodes(typeof(EditLoyaltyFundOnCard))]
+        public static Task<EditLoyaltyFundOnCard.Payload> EditLoyaltyFundOnCard(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<EditLoyaltyFundOnCard.Input> input)
         {
             return mediator.Send(input.Value);
         }

@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.Utilities;
 using System.Threading.Tasks;
@@ -9,6 +9,7 @@ using System.Linq;
 using Sig.App.Backend.Utilities.Sorting;
 using System;
 using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using GraphQL.Conventions;
 using System.Collections.Generic;
@@ -48,7 +49,7 @@ namespace Sig.App.Backend.Requests.Queries.Markets
 
                 foreach (var text in searchText)
                 {
-                    query = query.Where(x => x.Name.ToString().Contains(text));
+                    query = query.Where(x => EF.Functions.Collate(x.Name.ToString(), SearchCollation.AccentInsensitive).Contains(text));
                 }
             }
 

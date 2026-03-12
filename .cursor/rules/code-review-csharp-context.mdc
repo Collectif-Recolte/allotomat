@@ -1,0 +1,15 @@
+---
+description: C# backend context for code review and editing (Sig.App.Backend)
+globs: Sig.App.Backend/**/*.cs
+alwaysApply: false
+---
+
+# C# backend context
+
+When editing or reviewing C# in Sig.App.Backend:
+
+- Prefer async/await; avoid .Result/.Wait() on async code.
+- Use constructor injection; keep resolvers thin, logic in services.
+- Check authorization before operations; validate inputs.
+- Avoid N+1 queries; use batch loading or AsNoTracking for read-only.
+- For code review requests, apply the code-review-csharp skill (C# code review agent).
