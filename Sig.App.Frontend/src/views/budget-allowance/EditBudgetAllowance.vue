@@ -4,7 +4,7 @@
     "date-separator": " to ",
 		"title": "Configure envelopes",
     "subscription-name": "Subscription period",
-    "add-budget-allowance": "Add budget allowance",
+    "add-budget-allowance": "Add budget envelope",
     "close-modal": "Close",
     "edit-budget-allowance-success-notification": "The envelope was saved successfully.",
     "add-budget-allowance-success-notification": "Adding an envelope with the amount of {amount} for the subscription period {subscriptionName} was successful.",
