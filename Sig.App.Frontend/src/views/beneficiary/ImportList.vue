@@ -4,15 +4,15 @@
 		"title": "Import participants",
     "import-beneficiaries-success-notification": "Import of {count} participants was successful.",
     "import-beneficiaries-warning-notification":"Import of {count} participants was successful. However {failedCount} participants could not be imported.",
-    "import-beneficiairies-empty-list-notification": "Import did not work. Please check your file before trying again.",
+    "import-beneficiairies-empty-list-notification": "Import unsuccessful. Please check your file before trying again.",
     "import-beneficiairies-duplicate-uniqueid-notification": "The import of participants could not be completed. Several participants have the same Unique Id 1.",
     "warning-import": "Warning: This import will overwrite the information currently in the platform.",
-    "error-summary": "An error prevents importing your file | {count} errors prevent importing your file",
+    "error-summary": "An error has prevented importing your file | {count} errors prevent importing your file",
     "error-row": "Row {row}:",
     "mandatory-field": "Field {fieldName} is mandatory.",
     "invalid-email": "Email ({email}) is invalid.",
     "invalid-beneficiary-category": "Category ('{category}') is invalid.",
-    "beneficiary-type-not-found": "Import did not work. One or more categories are missing in the platform.",
+    "beneficiary-type-not-found": "Import unsuccessful. One or more categories in the file are not present on Tomat.",
     "invalid-postal-code": "Postal code ({postalCode}) is invalid."
 	},
 	"fr": {
@@ -27,7 +27,7 @@
     "mandatory-field": "Le champ {fieldName} est obligatoire.",
     "invalid-email": "Le courriel ({email}) est invalide.",
     "invalid-beneficiary-category": "La catégorie ('{category}') est invalide.",
-    "beneficiary-type-not-found": "L'importation n'a pu être complétée. Une ou plusieurs catégories sont manquantes dans la plateforme.",
+    "beneficiary-type-not-found": "L'importation n'a pu être complétée. Une ou plusieurs catégories dans le fichier n'existent pas sur Tomat.",
     "invalid-postal-code": "Le code postal ({postalCode}) est invalide."
 	}
 }
