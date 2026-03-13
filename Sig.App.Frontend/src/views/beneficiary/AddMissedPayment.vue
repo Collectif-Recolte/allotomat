@@ -10,7 +10,7 @@
     "amount-allocated": "{amount} will be allocated",
     "budget-allowance-available": "Remaining budget allowance after allocation: {amount}",
     "add-payment": "Add payment",
-    "manually-add-missed-payment-success-notification": "The missed payment has been successfully added for {name} for an amount of {amount}."
+    "manually-add-missed-payment-success-notification": "The missed payment has been successfully added for {name} with an amount of {amount}."
 	},
 	"fr": {
 		"title": "Versement d’un paiement manqué",
