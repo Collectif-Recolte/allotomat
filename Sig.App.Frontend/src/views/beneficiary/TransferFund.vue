@@ -3,7 +3,7 @@
   "en": {
     "title": "Transfer funds",
     "add-missing-payment-title": "Add a missed subscription payment",
-    "add-missing-payment-desc": "According to the subscription settings, the funds will be added to the card of the participant.",
+    "add-missing-payment-desc": "Funds will be added to the participant's card according to the subscription settings.",
     "add-missing-payment": "Add a missed payment",
     "manually-add-funds-title": "Manually add funds",
     "manually-add-funds-desc": "Add a specific amount to the participant's card with a chosen expiration date.",
