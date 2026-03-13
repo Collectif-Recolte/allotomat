@@ -2,7 +2,7 @@
 {
 	"en": {
 		"edit-beneficiary": "Edit",
-		"edit-beneficiary-success-notification": "Edition of {firstname} {lastname} was successful.",
+		"edit-beneficiary-success-notification": "{firstname} {lastname} successfully updated.",
 		"title": "Edit a participant",
     "warning-message": "These changes will permanently delete previous data.",
     "beneficiary-with-same-id1-already-exists": "A participant with the same ID 1 already exists.",
