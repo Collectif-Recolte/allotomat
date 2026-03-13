@@ -7,7 +7,7 @@
 		"beneficiary-lastname-placeholder": "Ex. Doe",
     "beneficiary-category": "Category",
 		"cancel": "Cancel",
-		"communication-means": "Means of communication",
+		"communication-means": "Contact Details",
 		"communication-means-address": "Address",
 		"communication-means-address-placeholder": "Ex. 123, example road",
     "communication-means-postal-code": "Postal code",
@@ -21,7 +21,7 @@
     "unique-id-other-system": "Other System Unique Identifier",
     "unique-id-id1": "Unique Identifier 1",
     "unique-id-id2": "Unique Identifier 2",
-    "unsubscribe-to-transaction-receipt": "Do not receive transaction receipts"
+    "unsubscribe-to-transaction-receipt": "Do not send transaction receipts to this participant"
 	},
 	"fr": {
 		"beneficiary-firstname": "Prénom",
@@ -44,7 +44,7 @@
     "unique-id-other-system": "Identifiant unique d'autre système",
     "unique-id-id1": "Identifiant unique 1",
     "unique-id-id2": "Identifiant unique 2",
-    "unsubscribe-to-transaction-receipt": "Ne pas recevoir les reçus des transactions"
+    "unsubscribe-to-transaction-receipt": "Ne pas envoyer de reçus de transaction à ce-tte participant-e"
 	}
 }
 </i18n>
