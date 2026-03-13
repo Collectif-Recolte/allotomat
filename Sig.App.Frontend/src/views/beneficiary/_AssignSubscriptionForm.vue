@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "assign-subscription-description": "Even if this participant will not receive automated funds, they require a subscription in order for you to transfer any funds onto their card.",
+      "assign-subscription-description": "Even if this participant will not receive automated funds, they require a subscription in order for you to transfer funds onto their card.",
       "assign-subscription-need-card": "This participant will not receive any funds unless a card is assigned to them.",
       "close":"Close"
     },
