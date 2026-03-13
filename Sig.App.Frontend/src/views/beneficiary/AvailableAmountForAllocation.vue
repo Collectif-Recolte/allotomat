@@ -1,7 +1,7 @@
 <i18n>
 {
 	"en": {
-		"title": "Details of budget allowances"
+		"title": "Details of budget envelopes"
 	},
 	"fr": {
 		"title": "Détails des enveloppes"
