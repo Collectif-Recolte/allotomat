@@ -11,7 +11,7 @@
       "empty-list": "There are no participants.",
       "import-new-list": "Import a list",
       "export-beneficiaries-list": "Export",
-      "no-results": "Your search yields no results",
+      "no-results": "Your search has yielded no results",
       "reset-search": "Reset search",
       "empty-organizations-list": "No group is associated with the program.",
       "add-organization": "Add a group",
@@ -19,7 +19,7 @@
       "manage-participants": "Manage",
       "assign-subscriptions": "Assignments",
       "all-group": "All groups",
-      "selected-all-group-description": "Some actions are not available if all groups are selected",
+      "selected-all-group-description": "Some actions are not available when the \"All Groups\" option is selected",
       "available-amount-for-allocation-details": "Show details"
     },
     "fr": {
@@ -41,7 +41,7 @@
       "manage-participants": "Gestion",
       "assign-subscriptions": "Attribution",
       "all-group": "Tous les Groupes",
-      "selected-all-group-description": "Certaines actions ne sont pas disponibles si tous les groupes sont sélectionnés",
+      "selected-all-group-description": "Certaines actions ne sont pas disponibles lorsque l'option « Tous les groupes » est sélectionnée",
       "available-amount-for-allocation-details": "Voir détails"
     }
   }
