@@ -2,7 +2,7 @@
 {
 	"en": {
 		"delete-budget-allowance-success-notification": "Envelope for group {organizationName} has been successfully deleted.",
-		"description": "Warning ! The transfer of funds from the envelope cannot be undone. If you continue, the funds will be transferred to another envelope.",
+		"description": "Warning ! If you continue, the funds will be transferred to another envelope.",
 		"title": "Transfer funds to another envelope",
     "cancel-btn": "Cancel",
     "transfer-funds-btn": "Transfer funds",
@@ -15,7 +15,7 @@
 	},
 	"fr": {
 		"delete-budget-allowance-success-notification": "L'enveloppe pour le groupe {organizationName} a été supprimée avec succès.",
-		"description": "Avertissement ! Le transfert des fonds de l'enveloppe ne peut pas être annulée. Si vous continuez, les fonds seront transférés vers une autre enveloppe.",
+		"description": "Avertissement ! Si vous continuez, les fonds seront transférés vers une autre enveloppe.",
 		"title": "Transférer des fonds vers une autre enveloppe",
     "cancel-btn": "Annuler",
     "transfer-funds-btn": "Transférer les fonds",
