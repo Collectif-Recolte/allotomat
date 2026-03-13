@@ -1,8 +1,8 @@
-# FCP
+# Tomat
 
-[Version en français](#PCA)
+[Version en français](#tomat-fr)
 
-PCA is a web platform for managing food stamp programs that use rechargeable gift cards. Initially developed for the specific needs of the Carte Proximité program.
+Tomat is a web platform for managing food coupon programs that use rechargeable gift cards.
 
 ## Configuration
 
@@ -62,9 +62,9 @@ By default, 8 accounts are created when the backend is started in development mo
 
 ---
 
-# PCA
+# <a name="tomat-fr">Tomat</a>
 
-PCA est une plateforme électronique pour effectuer la gestion des programmes de coupons alimentaires basés sur des cartes cadeau rechargeables. Initialement conçue pour répondre aux besoins spécifiques du programme Carte Proximité.
+Tomat est une plateforme électronique pour effectuer la gestion des programmes de coupons alimentaires basés sur des cartes cadeau rechargeables.
 
 ### Logiciels requis
 
