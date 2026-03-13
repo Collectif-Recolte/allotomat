@@ -3,7 +3,7 @@
 	"en": {
 		"back": "Cancel",
 		"bad-token-message": "This password reset link is invalid or expired.",
-		"confirm-message": "Un message pour réinitialiser votre mot de passe a été envoyé à {email}.",
+		"confirm-message": "A message to reset your password has been sent to {email}.",
 		"loading": "Update in progress...",
 		"password": "Password",
 		"password-confirmation": "Re-enter password",
