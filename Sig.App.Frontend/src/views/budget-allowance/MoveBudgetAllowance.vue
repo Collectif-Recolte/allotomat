@@ -2,7 +2,7 @@
 {
 	"en": {
 		"delete-budget-allowance-success-notification": "Envelope for group {organizationName} has been successfully deleted.",
-		"description": "Warning ! If you continue, the funds will be transferred to another envelope.",
+		"description": "Warning! If you continue, the funds will be transferred to another envelope.",
 		"title": "Transfer funds to another envelope",
     "cancel-btn": "Cancel",
     "transfer-funds-btn": "Transfer funds",
