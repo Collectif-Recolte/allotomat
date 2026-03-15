@@ -11,7 +11,7 @@
 	},
 	"fr": {
 		"add-market-group": "Ajouter",
-		"add-market-group-success-notification": "L’ajout du groupe de commerce {marketGroupName} a été un succès. Les gestionnaires vont recevoir un courriel pour la création de leur compte dans les prochaines minutes.",
+		"add-market-group-success-notification": "L’ajout du groupe de commerces {marketGroupName} a été un succès. Les gestionnaires vont recevoir un courriel pour la création de leur compte dans les prochaines minutes.",
 		"title": "Ajouter un groupe de commerces",
 		"user-already-manager": "Un-e des gestionnaires est déjà gestionnaire d'un groupe de commerces.",
 		"user-not-market-group-manager": "Un-e des gestionnaires n'est pas du type gestionnaire de groupe de commerces.",
