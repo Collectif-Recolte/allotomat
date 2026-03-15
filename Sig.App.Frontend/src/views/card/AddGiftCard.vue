@@ -2,7 +2,7 @@
 {
 	"en": {
 		"assign-card": "Create the gift card",
-		"auto-assign-card": "Automatically assign to an ID",
+		"auto-assign-card": "Use the first unassigned card",
 		"cancel": "Cancel",
 		"card-not-found": "Card ID does not exist.",
     "card-lost": "The card you are trying to use is lost",
@@ -12,9 +12,9 @@
     "no-available-cards": "No available cards",
     "amount-label": "Amount",
     "amount-placeholder": "Ex. {amount}",
-    "warning-create-gift-card": "A gift card is activated as soon as it is created, please do not lose it!",
+    "warning-create-gift-card": "A gift card is activated as soon as it is created. Please do not lose it!",
     "gift-card-fund-successfully-added": "The gift card {cardId} is now activated and has {amount}.",
-    "warning-create-gift-card-already-used": "This card is already used (status: {cardStatus}): it contains <b>{subscriptionAmount}</b> subscription and <b>{giftCardAmount}</b> gift card, ensure it is the correct card for the addition of funds.",
+    "warning-create-gift-card-already-used": "This card is already in use (status: {cardStatus}). It contains <b>{subscriptionAmount}</b> in subscription funds and <b>{giftCardAmount}</b> in gift funds. Before proceeding, please make sure you would like to add gift funds onto this card.",
     "card-status-assigned": "assigned to a participant",
     "card-status-gift-card": "gift card",
     "card-status-unassigned": "unassigned card",
@@ -23,7 +23,7 @@
 	},
 	"fr": {
 		"assign-card": "Créer la carte-cadeau",
-		"auto-assign-card": "Assigner automatiquement à un ID",
+		"auto-assign-card": "Utiliser la première carte non assignée",
 		"cancel": "Annuler",
 		"card-not-found": "L'ID de la carte n'existe pas.",
     "card-lost": "La carte que vous tentez d'utiliser est perdue.",
@@ -35,7 +35,7 @@
     "amount-placeholder": "Ex. {amount}",
     "warning-create-gift-card": "Une carte-cadeau est activée dès sa création, veuillez ne pas la perdre!",
     "gift-card-fund-successfully-added": "La carte ({cardId}) est maintenant activée en tant que carte-cadeau et possède {amount}.",
-    "warning-create-gift-card-already-used": "Cette carte est déjà utilisée (statut : {cardStatus}) : elle contient <b>{subscriptionAmount}</b> d’abonnement et <b>{giftCardAmount}</b> de carte-cadeau. Assurez-vous qu'il s'agit de la bonne carte pour l'ajout de fonds.",
+    "warning-create-gift-card-already-used": "Cette carte est déjà utilisée (statut : {cardStatus}) : elle contient <b>{subscriptionAmount}</b> de fonds d’abonnement et <b>{giftCardAmount}</b> de fonds cadeaux. Assurez-vous qu'il s'agit de la bonne carte pour l'ajout de fonds cadeaux.",
     "card-status-assigned": "attribuée à un-e participant-e",
     "card-status-gift-card": "carte-cadeau",
     "card-status-unassigned": "carte non attribuée",
