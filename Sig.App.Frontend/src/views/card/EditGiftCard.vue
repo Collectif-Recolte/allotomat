@@ -1,22 +1,22 @@
 <i18n>
 {
 	"en": {
-		"edit-funds-gift-card": "Edit funds",
+		"edit-funds-gift-card": "Adjust balance",
 		"cancel": "Cancel",
-		"title": "Edit funds of a gift card",
+		"title": "Adjust gift card balance",
 		"funds-label": "Gift card funds",
 		"funds-placeholder": "Ex. 100",
-		"gift-card-fund-successfully-edited": "Gift card funds successfully edited.",
+		"gift-card-fund-successfully-edited": "Gift card balance successfully edited.",
 		"card-not-found": "Card ID does not exist.",
 		"card-lost": "The card you are trying to use is lost."
 	},
 	"fr": {
-		"edit-funds-gift-card": "Modifier les fonds",
+		"edit-funds-gift-card": "Modifier le solde",
 		"cancel": "Annuler",
-		"title": "Modifier les fonds d'une carte-cadeau",
+		"title": "Modifier le solde d'une carte-cadeau",
 		"funds-label": "Fonds carte-cadeau",
 		"funds-placeholder": "Ex. 100",
-		"gift-card-fund-successfully-edited": "Les fonds de la carte-cadeau ont été modifiés avec succès.",
+		"gift-card-fund-successfully-edited": "Le solde de la carte-cadeau a été modifié avec succès.",
 		"card-not-found": "L'ID de la carte n'existe pas.",
 		"card-lost": "La carte que vous tentez d'utiliser est perdue."
 	},
