@@ -3,7 +3,7 @@
     "en": {
       "selected-organization": "Group",
       "title": "Participants",
-      "available-amount-for-allocation": "Budget envelope",
+      "available-amount-for-allocation": "Remaining budget",
       "amount-of-payment-remaining": "Remaining payments",
       "manage-participants": "Manage",
       "assign-subscriptions": "Assignments",
@@ -35,7 +35,7 @@
     "fr": {
       "selected-organization": "Groupe",
       "title": "Participant-e-s",
-      "available-amount-for-allocation": "Enveloppe",
+      "available-amount-for-allocation": "Budget restant",
       "amount-of-payment-remaining": "Versements restants",
       "manage-participants": "Gestion",
       "assign-subscriptions": "Attribution",
