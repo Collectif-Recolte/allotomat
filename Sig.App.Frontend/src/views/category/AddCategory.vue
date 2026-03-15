@@ -4,13 +4,13 @@
 		"add-category": "Add category",
 		"add-category-success-notification": "Adding category {categoryName} was successful.",
 		"title": "Add a category",
-    "beneficiary-type-key-already-in-use": "An «Association Key» is already in use in another category."
+    "beneficiary-type-key-already-in-use": "One of the keys you've entered is already associated with another category."
 	},
 	"fr": {
 		"add-category": "Ajouter la catégorie",
 		"add-category-success-notification": "L'ajout de la catégorie {categoryName} a été un succès.",
 		"title": "Ajouter une catégorie",
-    "beneficiary-type-key-already-in-use": "Une «Clé d'association» est déjà utilisée pour une autre catégorie."
+    "beneficiary-type-key-already-in-use": "L'une des clés que vous avez saisies est déjà associée à une autre catégorie."
 	}
 }
 </i18n>
