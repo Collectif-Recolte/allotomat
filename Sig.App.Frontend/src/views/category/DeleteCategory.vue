@@ -4,7 +4,7 @@
 		"delete-category-success-notification": "The category {categoryName} has been successfully deleted.",
 		"delete-text-error": "The text must match the name of the category",
 		"delete-text-label": "Type the name of the category to confirm",
-		"description": "Warning ! The deletion of <strong>{categoryName}</strong> cannot be undone. If you continue, the category will be deleted.",
+		"description": "Warning! Deleting <strong>{categoryName}</strong> cannot be undone. If you continue, the category will be deleted.",
 		"title": "Delete - {categoryName}"
 	},
 	"fr": {
