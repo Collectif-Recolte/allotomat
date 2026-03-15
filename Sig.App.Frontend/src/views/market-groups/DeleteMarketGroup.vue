@@ -1,17 +1,17 @@
 <i18n>
 {
 	"en": {
-		"delete-market-group-success-notification": "The market group {marketGroupName} has been successfully deleted.",
-		"delete-text-error": "The text must match the name of the market group",
-		"delete-text-label": "Type the name of the market group to confirm",
-		"description": "Warning ! The deletion of <strong>{marketGroupName}</strong> cannot be undone. If you continue, the market group will be permanently deleted along with all the elements it contains. Card payments can no longer be traced. However, the funds of the cards will remain unchanged.",
+		"delete-market-group-success-notification": "The merchant group {marketGroupName} has been successfully deleted.",
+		"delete-text-error": "The text must match the name of the merchant group",
+		"delete-text-label": "Type the name of the merchant group to confirm",
+		"description": "Warning! Deleting <strong>{marketGroupName}</strong> cannot be undone. If you continue, the merchant group will be permanently deleted along with all the elements it contains. Card payments can no longer be traced. However, the funds of the cards will remain unchanged.",
 		"title": "Delete - {marketGroupName}"
 	},
 	"fr": {
-		"delete-market-group-success-notification": "Le groupe de commerce {marketGroupName} a été supprimé avec succès.",
-		"delete-text-error": "Le texte doit correspondre au nom du groupe de commerce",
-		"delete-text-label": "Taper le nom du groupe de commerce pour confirmer",
-		"description": "Avertissement ! La suppression de <strong>{marketGroupName}</strong> ne peut pas être annulée. Si vous continuez, le groupe de commerce sera supprimé ainsi que tous les éléments qu'il contient de façon définitive. Les paiements sur les cartes ne pourront plus être retracés. Par contre, les fonds des cartes vont rester inchangés.",
+		"delete-market-group-success-notification": "Le groupe de commerces {marketGroupName} a été supprimé avec succès.",
+		"delete-text-error": "Le texte doit correspondre au nom du groupe de commerces",
+		"delete-text-label": "Taper le nom du groupe de commerces pour confirmer",
+		"description": "Avertissement ! La suppression de <strong>{marketGroupName}</strong> ne peut pas être annulée. Si vous continuez, le groupe de commerces sera supprimé ainsi que tous les éléments qu'il contient de façon définitive. Les paiements sur les cartes ne pourront plus être retracés. Par contre, les fonds des cartes vont rester inchangés.",
 		"title": "Supprimer - {marketGroupName}"
 	}
 }
