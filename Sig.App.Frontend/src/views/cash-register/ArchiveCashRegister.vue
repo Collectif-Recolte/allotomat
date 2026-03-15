@@ -4,7 +4,7 @@
 		"archive-cash-register-success-notification": "The cash register {cashRegisterName} has been successfully archived.",
 		"archive-text-error": "The text must match the name of the cash register",
 		"archive-text-label": "Type the name of the cash register to confirm",
-		"description": "Warning ! The archive of <strong>{cashRegisterName}</strong> cannot be undone. If you continue, the cash register will be permanently archived along with all the elements it contains. However, the transaction of the cash register will remain unchanged.",
+		"description": "Warning! Archiving <strong>{cashRegisterName}</strong> cannot be undone. If you continue, the cash register will be permanently archived along with all the elements it contains. However, the transaction history of the cash register will remain unaffected.",
 		"title": "Archive - {cashRegisterName}",
     "archive-btn-label": "Archive"
 	},
