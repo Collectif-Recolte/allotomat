@@ -3,7 +3,7 @@
 	"en": {
 		"delete-text-error": "Text must match recipient's first name and recipient's last name",
 		"delete-text-label": "Type the participant name to confirm",
-		"description": "Warning ! The unassignation of <strong>{beneficiaryName}</strong> card cannot be undone. If you continue, the card will be unassigned and the card funds will be removed. Payments to the card can no longer be traced.",
+		"description": "Warning! Unassigning the card currently belonging to <strong>{beneficiaryName}</strong> cannot be undone. If you continue, the card will be unassigned and the card funds will be removed. Payments to the card can no longer be traced.",
 		"title": "Unassign card - {beneficiaryName}",
 		"unassign-btn-label": "Unassign",
 		"unassign-card-success-notification": "The card has been successfully unassigned."
