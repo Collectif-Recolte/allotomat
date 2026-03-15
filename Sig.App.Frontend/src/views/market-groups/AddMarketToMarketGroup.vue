@@ -2,22 +2,22 @@
   {
     "en": {
       "add-market": "Add",
-      "add-market-success-notification": "Successfully added market {marketName} to the market group.",
-      "title": "Add a market to the market group",
+      "add-market-success-notification": "Successfully added merchant {marketName} to the merchant group.",
+      "title": "Add a merchant to the merchant group",
       "choose-market": "Select",
-      "select-market": "Market",
+      "select-market": "Merchant",
       "cancel": "Cancel",
-      "no-associated-merchant": "All available markets are associated with the market group.",
+      "no-associated-merchant": "All available merchants are associated with the merchant group.",
       "warning-message": "Note: Adding one of these merchants to this group will create a new Cash Register that will need to be selected when they open Tomat. Please choose carefully."
     },
     "fr": {
       "add-market": "Ajouter",
-      "add-market-success-notification": "L’ajout du commerce {marketName} au groupe de commerce a été un succès.",
-      "title": "Ajouter un commerce au groupe de commerce",
+      "add-market-success-notification": "L’ajout du commerce {marketName} au groupe de commerces a été un succès.",
+      "title": "Ajouter un commerce au groupe de commerces",
       "choose-market": "Sélectionner",
       "select-market": "Commerce",
       "cancel": "Annuler",
-      "no-associated-merchant": "Tous les commerces disponibles sont associés au groupe de commerce.",
+      "no-associated-merchant": "Tous les commerces disponibles sont associés au groupe de commerces.",
       "warning-message":"Attention : L'ajout de l'un de ces commerces à ce groupe créera une nouvelle Caisse qui devra être sélectionnée lorsqu'ils ouvriront Tomat. Veuillez faire votre choix avec soin."
     }
   }
