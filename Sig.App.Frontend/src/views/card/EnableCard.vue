@@ -5,7 +5,7 @@
     "delete-text-card-number-error": "Text must match card number",
 		"delete-text-beneficiary-name-label": "Type the participant name to confirm",
     "delete-text-card-number-label": "Type the card number to confirm",
-		"description": "Warning ! If you continue, the card will be enabled and the participant will be able to use the card.",
+		"description": "Warning! If you continue, the card will be enabled and the participant will be able to use the card.",
 		"title": "Enable card - {beneficiaryName}",
 		"enable-btn-label": "Enable",
 		"enable-card-success-notification": "The card has been successfully enabled."
