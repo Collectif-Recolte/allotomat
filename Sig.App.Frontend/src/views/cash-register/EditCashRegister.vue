@@ -3,7 +3,7 @@
     "en": {
       "title": "Edit",
       "edit-cash-register": "Save",
-      "edit-cash-register-success-notification": "Edition of cash register {name} was successful."
+      "edit-cash-register-success-notification": "Modification of cash register {name} was successful."
     },
     "fr": {
       "title": "Modifier",
