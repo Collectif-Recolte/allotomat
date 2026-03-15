@@ -2,21 +2,21 @@
 {
 	"en": {
 		"add-market-group": "Add",
-		"add-market-group-success-notification": "The addition of the market group {marketGroupName} was successful. The managers will receive an email to create their account in the next few minutes.",
-		"title": "Add a market group",
-		"user-already-manager": "One of the managers is already the manager of a market group.",
-		"user-not-market-group-manager": "One of the managers is not a market group manager.",
+		"add-market-group-success-notification": "The merchant group {marketGroupName} was successfully added. The managers will receive an email to finish creating their accounts in the next few minutes.",
+		"title": "Add a merchant group",
+		"user-already-manager": "One of the managers is already the manager of a merchant group.",
+		"user-not-market-group-manager": "One of the managers is not a merchant group manager.",
     "manager-email": "Email",
-    "market-group-name": "Market group name"
+    "market-group-name": "Merchant group name"
 	},
 	"fr": {
 		"add-market-group": "Ajouter",
 		"add-market-group-success-notification": "L’ajout du groupe de commerce {marketGroupName} a été un succès. Les gestionnaires vont recevoir un courriel pour la création de leur compte dans les prochaines minutes.",
-		"title": "Ajouter un groupe de commerce",
-		"user-already-manager": "Un des gestionnaires est déjà gestionnaire d'un groupe de commerce.",
-		"user-not-market-group-manager": "Un des gestionnaires n'est pas du type gestionnaire de groupe de commerce.",
+		"title": "Ajouter un groupe de commerces",
+		"user-already-manager": "Un-e des gestionnaires est déjà gestionnaire d'un groupe de commerces.",
+		"user-not-market-group-manager": "Un-e des gestionnaires n'est pas du type gestionnaire de groupe de commerces.",
     "manager-email": "Courriel",
-    "market-group-name": "Nom du groupe de commerce"
+    "market-group-name": "Nom du groupe de commerces"
 	}
 }
 </i18n>
