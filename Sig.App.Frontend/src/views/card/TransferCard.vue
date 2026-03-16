@@ -28,9 +28,9 @@
       "confirm-desc": "La carte #{cardNumber} est maintenant active et prête à l'emploi.",
       "close": "Fermer",
       "original-card-not-found": "L'ID de la carte perdue n'existe pas.",
-      "original-card-not-assign": "La carte perdue n'est pas assignée à un-e participant-e.",
+      "original-card-not-assign": "La carte perdue n'est pas assignée à un·e participant·e.",
       "new-card-not-found": "L'ID de la nouvelle carte n'existe pas.",
-      "new-card-already-assign": "La carte que vous essayez d'assigner est déjà assignée à un-e autre participant-e.",
+      "new-card-already-assign": "La carte que vous essayez d'assigner est déjà assignée à un·e autre participant·e.",
       "new-card-already-lost": "La carte que vous essayez d'assigner est déjà perdue ou endommagée.",
       "new-card-already-gift-card": "La carte que vous essayez d'assigner est une carte-cadeau."
     }
