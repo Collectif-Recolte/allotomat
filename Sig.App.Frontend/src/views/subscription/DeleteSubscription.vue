@@ -4,7 +4,7 @@
 		"delete-subscription-success-notification": "The subscription {subscriptionName} has been successfully deleted.",
 		"delete-text-error": "The text must match the name of the subscription",
 		"delete-text-label": "Type the name of the subscription to confirm",
-		"description": "Warning ! The deletion of <strong>{subscriptionName}</strong> cannot be undone. If you continue, the subscription will be deleted along with all the elements it contains. Transfers on the cards can no longer be traced. However, the funds of the cards will remain unchanged.",
+		"description": "Warning! Deleting <strong>{subscriptionName}</strong> cannot be undone. If you continue, the subscription will be deleted along with all the elements it contains. Transactions on the cards can no longer be traced. However, the funds of the cards will remain unchanged.",
     "title": "Delete - {subscriptionName}",
     "cant-delete-subscription-with-beneficiaries": "It is not possible to delete a subscription that is already assigned to participants"
 	},
