@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "title": "Transfer a lost or damaged card",
+      "title": "Transfer a Lost or Damaged Card",
       "lost-card": "Lost card",
       "new-card": "New card",
       "warning-message": "All subscriptions and gift card funds will be transferred to the new card.",
