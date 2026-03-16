@@ -1,16 +1,16 @@
 <i18n>
 {
 	"en": {
-		"description": "Warning ! If you continue, <strong>{beneficiaryName}</strong> will no longer receive transfers for subscription <strong>{subscriptionName}</strong>.",
+		"description": "Warning! If you continue, <strong>{beneficiaryName}</strong> will no longer receive transfers for subscription <strong>{subscriptionName}</strong>.",
 		"remove-beneficiary-from-subscription-success-notification": "The participant has been successfully removed from subscription {subscriptionName}.",
 		"remove-text-error": "Text must match subscription name",
 		"remove-text-label": "Type the subscription name to confirm",
-		"title": "Remove subscription: {subscriptionName}",
+		"title": "Remove Subscription: {subscriptionName}",
     "anonymous-beneficiary": "Beneficiary {beneficiaryId1}",
 	},
 	"fr": {
 		"description": "Avertissement ! Si vous continuez, <strong>{beneficiaryName}</strong> ne recevra plus de virement pour l'abonnement <strong>{subscriptionName}</strong>.",
-		"remove-beneficiary-from-subscription-success-notification": "Le participant a été retiré-e avec succès de l'abonnement {subscriptionName}.",
+		"remove-beneficiary-from-subscription-success-notification": "Le·a participant·e a été retiré·e avec succès de l'abonnement {subscriptionName}.",
 		"remove-text-error": "Le texte doit correspondre au nom de l'abonnement",
 		"remove-text-label": "Taper le nom de l'abonnement",
 		"title": "Retirer l'abonnement {subscriptionName}",
