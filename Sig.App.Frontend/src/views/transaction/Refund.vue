@@ -14,7 +14,7 @@
     "no-amount-to-refund": "No amount to refund.",
     "wrong-password-error-notification": "The password is invalid.",
     "expired-funds": "Some of the funds used in this transaction have expired and can no longer be refunded.",
-    "market-disabled": "This merchant is disabled and cannot process refunds."
+    "market-disabled": "This merchant is deactivated and cannot process refunds."
 	},
 	"fr": {
 		"title": "Remboursement",
