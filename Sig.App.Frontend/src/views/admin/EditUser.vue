@@ -10,7 +10,7 @@
 		"submit": "Mettre à jour",
 		"general-profile-success-notification": "Le profil de {name} a bien été mis à jour.",
     "my-profile-success-notification": "Votre profil a bien été mis à jour.",
-		"title": "Édition d'utilisateur"
+		"title": "Édition de profil"
 	}
 }
 </i18n>
