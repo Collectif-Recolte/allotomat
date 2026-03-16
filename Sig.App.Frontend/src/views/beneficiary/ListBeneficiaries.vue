@@ -6,7 +6,7 @@
       "selected-organization": "Group",
       "title": "Participants",
       "download-template-file": "Download a template",
-      "available-amount-for-allocation": "Remaining budget allowance",
+      "available-amount-for-allocation": "Remaining budget envelope",
       "participant-count": "{count} participants",
       "empty-list": "There are no participants.",
       "import-new-list": "Import a list",
@@ -23,14 +23,14 @@
       "available-amount-for-allocation-details": "Show details"
     },
     "fr": {
-      "add-beneficiary": "Ajouter un participant",
+      "add-beneficiary": "Ajouter un·e participant·e",
       "import-beneficiaries-list": "Importer une liste",
       "selected-organization": "Groupe",
-      "title": "Participant-e-s",
+      "title": "Participant·e·s",
       "download-template-file": "Télécharger un modèle",
       "available-amount-for-allocation": "Enveloppe restante",
-      "participant-count": "{count} participant-e-s",
-      "empty-list": "Il n'y a pas de participant-e-s.",
+      "participant-count": "{count} participant·e·s",
+      "empty-list": "Il n'y a pas de participant·e·s.",
       "import-new-list": "Importer une liste",
       "export-beneficiaries-list": "Exporter",
       "no-results": "Votre recherche ne donne aucun résultat",
@@ -41,7 +41,7 @@
       "manage-participants": "Gestion",
       "assign-subscriptions": "Attribution",
       "all-group": "Tous les Groupes",
-      "selected-all-group-description": "Certaines actions ne sont pas disponibles lorsque l'option « Tous les groupes » est sélectionnée",
+      "selected-all-group-description": "Certaines actions ne sont pas disponibles lorsque l'option «Tous les groupes» est sélectionnée",
       "available-amount-for-allocation-details": "Voir détails"
     }
   }
