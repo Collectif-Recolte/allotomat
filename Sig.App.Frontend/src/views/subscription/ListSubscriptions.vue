@@ -2,7 +2,7 @@
   {
     "en": {
       "add-subscription": "Add",
-      "title": "Subscription management",
+      "title": "Subscription Management",
       "subscription-count": "{count} subscription | {count} subscriptions",
       "empty-list": "There is no subscription for this program",
       "create-subscription": "Create a subscription"
