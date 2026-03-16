@@ -1,13 +1,13 @@
 <i18n>
   {
     "en": {
-      "title": "Manually enter card number",
+      "title": "Manually Enter Card Number",
       "card-number": "Card number",
       "card-number-description": "Card number must be of format \"1234 5678 9012 3456\"",
       "card-number-error": "Card number must be of format \"1234 5678 9012 3456\"",
       "next-step": "Next",
       "cancel": "Cancel",
-      "card-number-invalid": "Card number does not match any card linked to the market.",
+      "card-number-invalid": "Card number does not match any card eligible at this merchant.",
       "warning-text": "The program that issued this card may require that a physical card be present to make purchases. Your business may be responsible for improper purchases, so please use caution."
     },
     "fr": {
@@ -17,7 +17,7 @@
       "card-number-error": "Le numéro de carte doit être de format \"1234 5678 9012 3456\"",
       "next-step": "Suivant",
       "cancel": "Annuler",
-      "card-number-invalid": "Le numéro de carte ne correspond à aucune carte reliée au marché.",
+      "card-number-invalid": "Le numéro de carte ne correspond à aucune carte acceptée par ce commerce.",
       "warning-text": "Attention : Le programme qui a émis cette carte peut exiger la présence d'une carte physique pour effectuer des achats. Votre entreprise peut être tenue pour responsable des achats non conformes ; soyez donc prudent."
     }
   }
