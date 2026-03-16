@@ -1,21 +1,21 @@
 <i18n>
 {
 	"en": {
-		"card-cant-be-use-in-market": "The participant cannot make a purchase in this market",
+		"card-cant-be-use-in-market": "The participant cannot make a purchase in this market.",
 		"card-deactivated": "The card is disabled.",
-		"card-not-found": "QR code does not equate to a known user.",
+		"card-not-found": "QR code does not equate to a known card.",
 		"create-new-transaction-btn": "Create a new transaction",
-		"not-enought-fund": "The participant does not have enough funds",
-    "card-cant-be-use-in-cash-register": "The participant cannot make a purchase with this cash register",
+		"not-enought-fund": "The participant does not have enough funds.",
+    "card-cant-be-use-in-cash-register": "The participant cannot make a purchase at this cash register.",
 		"title": "Error during payment 🚫"
 	},
 	"fr": {
-		"card-cant-be-use-in-market": "Le-la participant-e ne peut pas faire d'achat dans ce commerce",
+		"card-cant-be-use-in-market": "Le·a  participant·e ne peut pas faire d'achat dans ce commerce.",
 		"card-deactivated": "La carte est désactivée.",
-		"card-not-found": "Le code QR n'équivaut pas à un utilisateur connu.",
+		"card-not-found": "Le code QR n'équivaut pas à une cartre connue.",
 		"create-new-transaction-btn": "Créer une nouvelle transaction",
-		"not-enought-fund": "Le-la participant-e ne possède pas assez de fond",
-    "card-cant-be-use-in-cash-register": "Le-la participant-e ne peut pas faire d'achat avec cette caisse",
+		"not-enought-fund": "Le·a  participant·e ne possède pas assez de fond.",
+    "card-cant-be-use-in-cash-register": "Le·a  participant·e ne peut pas faire d'achat avec cette caisse.",
 		"title": "Erreur lors du paiement 🚫"
 	}
 }
