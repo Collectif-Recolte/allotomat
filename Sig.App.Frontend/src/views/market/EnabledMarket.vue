@@ -1,10 +1,10 @@
 <i18n>
 {
 	"en": {
-		"enabled-market-success-notification": "The market {marketName} has been successfully enabled.",
-		"enabled-text-error": "The text must match the name of the market",
-		"enabled-text-label": "Type the name of the market to confirm",
-		"description": "Warning ! If you continue, the market will be enabled and the market will be able to process transactions.",
+		"enabled-market-success-notification": "The merchant {marketName} has been successfully enabled.",
+		"enabled-text-error": "The text must match the name of the merchant",
+		"enabled-text-label": "Type the name of the merchant to confirm",
+		"description": "Warning! If you continue, the merchant will be enabled and will be able to process transactions.",
 		"title": "Enabled - {marketName}",
     "enabled-btn-label": "Enabled"
 	},
@@ -12,7 +12,7 @@
 		"enabled-market-success-notification": "Le commerce {marketName} a été activé avec succès.",
 		"enabled-text-error": "Le texte doit correspondre au nom du commerce",
 		"enabled-text-label": "Taper le nom du commerce pour confirmer",
-		"description": "Avertissement ! Si vous continuez, le commerce sera activé et le commerce pourra traiter les transactions.",
+		"description": "Avertissement ! Si vous continuez, le commerce sera activé et pourra traiter les transactions.",
 		"title": "Réactiver - {marketName}",
     "enabled-btn-label": "Réactiver"
 	}
