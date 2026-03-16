@@ -8,7 +8,7 @@
     "card-lost": "The card you are trying to use is lost",
 		"existing-card-id": "ID of an existing card",
 		"existing-card-id-placeholder": "Ex. 98671",
-		"title": "Creation of a gift card",
+		"title": "Create a Gift Card",
     "no-available-cards": "No available cards",
     "amount-label": "Amount",
     "amount-placeholder": "Ex. {amount}",
