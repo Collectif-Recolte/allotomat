@@ -6,7 +6,7 @@
 		"remove-text-error": "Text must match subscription name",
 		"remove-text-label": "Type the subscription name to confirm",
 		"title": "Remove Subscription: {subscriptionName}",
-    "anonymous-beneficiary": "Beneficiary {beneficiaryId1}",
+    "anonymous-beneficiary": "Participant {beneficiaryId1}",
 	},
 	"fr": {
 		"description": "Avertissement ! Si vous continuez, <strong>{beneficiaryName}</strong> ne recevra plus de virement pour l'abonnement <strong>{subscriptionName}</strong>.",
@@ -14,7 +14,7 @@
 		"remove-text-error": "Le texte doit correspondre au nom de l'abonnement",
 		"remove-text-label": "Taper le nom de l'abonnement",
 		"title": "Retirer l'abonnement {subscriptionName}",
-    "anonymous-beneficiary": "Bénéficiaire {beneficiaryId1}",
+    "anonymous-beneficiary": "Participant·e {beneficiaryId1}",
 	}
 }
 </i18n>
