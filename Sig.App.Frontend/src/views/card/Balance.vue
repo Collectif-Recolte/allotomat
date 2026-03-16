@@ -4,7 +4,7 @@
 		"card-description": "Program {programName}",
     "card-id": "Card #{cardId}",
 		"done": "Check another card",
-		"title": "Card balance",
+		"title": "Card Balance",
     "card-is-disabled": "The card is disabled."
 	},
 	"fr": {
