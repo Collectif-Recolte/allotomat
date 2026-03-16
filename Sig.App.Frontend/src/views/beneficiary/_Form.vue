@@ -44,7 +44,7 @@
     "unique-id-other-system": "Identifiant unique d'autre système",
     "unique-id-id1": "Identifiant unique 1",
     "unique-id-id2": "Identifiant unique 2",
-    "unsubscribe-to-transaction-receipt": "Ne pas envoyer de reçus de transaction à ce-tte participant-e"
+    "unsubscribe-to-transaction-receipt": "Ne pas envoyer de reçus de transaction à ce·tte participant·e"
 	}
 }
 </i18n>
