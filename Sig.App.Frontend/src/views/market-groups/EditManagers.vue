@@ -6,8 +6,8 @@
 		"title": "Managers - {marketGroupName}"
 	},
 	"fr": {
-		"add-market-group-manager-success-notification": "L’ajout du gestionnaire du groupe de commerces a été un succès. La-e gestionnaire va recevoir un courriel pour compléter la création de son compte dans les prochaines minutes.",
-		"remove-manager-success-notification": "Le-a gestionnaire {email} a été enlevé avec succès.",
+		"add-market-group-manager-success-notification": "L’ajout du ou de la gestionnaire du groupe de commerces a été un succès. La·a gestionnaire va recevoir un courriel pour compléter la création de son compte dans les prochaines minutes.",
+		"remove-manager-success-notification": "Le·a gestionnaire {email} a été enlevé·a avec succès.",
 		"title": "Gestionnaires - {marketGroupName}"
 	}
 }
