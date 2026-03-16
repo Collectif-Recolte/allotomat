@@ -14,7 +14,7 @@
       "scan-card-btn": "Scan a card",
       "select-cash-register": "Cash Register",
       "choose-cash-register": "Select",
-      "market-disabled-label": "{market} is disabled"
+      "market-disabled-label": "{market} is deactivated"
     },
     "fr": {
       "select-market": "Commerce",
