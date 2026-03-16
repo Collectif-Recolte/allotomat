@@ -2,14 +2,14 @@
 {
 	"en": {
     "participants-without-card": "{amount} participants without a card",
-    "empty-list": "Here will be displayed the participants without a card",
+    "empty-list": "Participants without a card will be displayed here",
     "no-results": "Your search yields no results",
     "reset-search": "Reset search",
     "switch-view": "Go to list of active cards"
 	},
 	"fr": {
-		"participants-without-card": "{amount} participant-e-s sans carte",
-    "empty-list": "Ici s'afficheront les participant-e-s sans carte",
+		"participants-without-card": "{amount} participant·e·s sans carte",
+    "empty-list": "Ici s'afficheront les participant·e·s sans carte",
     "no-results": "Votre recherche ne donne aucun résultat",
     "reset-search": "Réinitialiser la recherche",
     "switch-view": "Aller à la liste des cartes actives"
