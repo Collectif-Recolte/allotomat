@@ -8,7 +8,7 @@
 		"organization-manager-email-placeholder": "Ex. john.doe{'@'}exemple.com",
 		"title": "Add Group Manager",
 		"user-already-manager": "One of the managers is already the manager of a program.",
-		"user-not-organization-manager": "One of the managers is not an program manager."
+		"user-not-organization-manager": "One of the managers is not a program manager."
 	},
 	"fr": {
 		"add-organization-manager": "Ajouter le·a gestionnaire",
