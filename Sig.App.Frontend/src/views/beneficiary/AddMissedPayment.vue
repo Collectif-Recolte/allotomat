@@ -1,14 +1,14 @@
 <i18n>
 {
 	"en": {
-		"title": "Add a missed payment",
+		"title": "Add a Missed Payment",
 		"select-subscription-label": "Subscription",
 		"cancel": "Cancel",
 		"add-missed-payment": "Add missed payment",
 		"subscription-label": "{name} - expires on {date}",
     "subscription-desc": "This will transfer the appropriate funds to the card according to the rules of the subscription. If the subscription has a maximum number of payments, this will count towards that maximum.",
     "amount-allocated": "{amount} will be allocated",
-    "budget-allowance-available": "Remaining budget allowance after allocation: {amount}",
+    "budget-allowance-available": "Remaining budget envelope after allocation: {amount}",
     "add-payment": "Add payment",
     "manually-add-missed-payment-success-notification": "The missed payment has been successfully added for {name} with an amount of {amount}."
 	},
