@@ -10,8 +10,8 @@
 	"fr": {
 		"delete-text-error": "Le texte doit correspondre au courriel du ou de la gestionnaire",
 		"delete-text-label": "Taper le courriel du ou de la gestionnaire pour confirmer",
-		"description": "Avertissement ! Le retrait du ou de la gestionnaire <strong>{managerName}</strong> ne peut pas être annulé. Si vous continuez, la-e gestionnaire sera retiré-e du programme de façon définitive.",
-		"remove-manager-success-notification": "Le-a gestionnaire {managerName} a été retiré-e deu programme avec succès.",
+		"description": "Avertissement ! Le retrait du ou de la gestionnaire <strong>{managerName}</strong> ne peut pas être annulé. Si vous continuez, la·e gestionnaire sera retiré·e du programme de façon définitive.",
+		"remove-manager-success-notification": "Le·a gestionnaire {managerName} a été retiré·e deu programme avec succès.",
 		"title": "Retirer - {managerEmail}"
 	}
 }
