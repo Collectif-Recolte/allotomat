@@ -2,8 +2,8 @@
 {
 	"en": {
 		"add-market-group": "Add",
-		"add-market-group-success-notification": "The merchant group {marketGroupName} was successfully added. The managers will receive an email to finish creating their accounts in the next few minutes.",
-		"title": "Add a merchant group",
+		"add-market-group-success-notification": "The merchant group {marketGroupName} has been successfully added. The managers will receive an email to finish creating their accounts in the next few minutes.",
+		"title": "Add Merchant Group",
 		"user-already-manager": "One of the managers is already the manager of a merchant group.",
 		"user-not-market-group-manager": "One of the managers is not a merchant group manager.",
     "manager-email": "Email",
