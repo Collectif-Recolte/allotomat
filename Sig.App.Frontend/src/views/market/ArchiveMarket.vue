@@ -1,10 +1,10 @@
 <i18n>
 {
 	"en": {
-		"archive-market-success-notification": "The market {marketName} has been successfully archived.",
-		"archive-text-error": "The text must match the name of the market",
-		"archive-text-label": "Type the name of the market to confirm",
-		"description": "Warning ! The archive of <strong>{marketName}</strong> cannot be undone. If you continue, the market will be permanently archived along with all the elements it contains. However, the funds of the cards will remain unchanged.",
+		"archive-market-success-notification": "The merchant {marketName} has been successfully archived.",
+		"archive-text-error": "The text must match the name of the merchant",
+		"archive-text-label": "Type the name of the merchant to confirm",
+		"description": "Warning! Archiving <strong>{marketName}</strong> cannot be undone. If you continue, the merchant will be permanently archived along with all the elements it contains. However, no transactions will be deleted.",
 		"title": "Archive - {marketName}",
     "archive-btn-label": "Archive"
 	},
@@ -12,7 +12,7 @@
 		"archive-market-success-notification": "Le commerce {marketName} a été archivé avec succès.",
 		"archive-text-error": "Le texte doit correspondre au nom du commerce",
 		"archive-text-label": "Taper le nom du commerce pour confirmer",
-		"description": "Avertissement ! L'archivage de <strong>{marketName}</strong> ne peut pas être annulé. Si vous continuez, le commerce sera archivé ainsi que tous les éléments qu'il contient de façon définitive. Par contre, les fonds des cartes vont rester inchangés.",
+		"description": "Avertissement ! L'archivage de <strong>{marketName}</strong> ne peut pas être annulé. Si vous continuez, le commerce sera archivé ainsi que tous les éléments qu'il contient de façon définitive. Par contre, aucune transaction sera supprimée.",
 		"title": "Archiver - {marketName}",
     "archive-btn-label": "Archiver"
 	}
