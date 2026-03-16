@@ -2,15 +2,15 @@
 {
 	"en": {
 		"delete-project-success-notification": "The program {projectName} has been successfully deleted.",
-		"delete-text-error": "The text must match the name of the program",
+		"delete-text-error": "The text must match the name of the program.",
 		"delete-text-label": "Type the name of the program to confirm",
-		"description": "Warning ! Deleting <strong>{projectName}</strong> cannot be undone. If you continue, the program will be permanently deleted along with all the elements it contains.",
+		"description": "Warning! Deleting <strong>{projectName}</strong> cannot be undone. If you continue, the program will be permanently deleted along with all the elements it contains.",
 		"title": "Delete - {projectName}",
     "cant-delete-project-with-subscriptions": "It is not possible to delete a program that has active subscriptions."
 	},
 	"fr": {
 		"delete-project-success-notification": "Le programme {projectName} a été supprimé avec succès.",
-		"delete-text-error": "Le texte doit correspondre au nom du programme",
+		"delete-text-error": "Le texte doit correspondre au nom du programme.",
 		"delete-text-label": "Taper le nom du programme pour confirmer",
 		"description": "Avertissement ! La suppression de <strong>{projectName}</strong> ne peut pas être annulée. Si vous continuez, le programme sera supprimé ainsi que tous les éléments qu'il contient de façon définitive.",
 		"title": "Supprimer - {projectName}",
