@@ -1,7 +1,7 @@
 <i18n>
 {
 	"en": {
-		"delete-text-beneficiary-name-error": "Text must match participant's first name and last name",
+		"delete-text-beneficiary-name-error": "Text must match participant's first name and last name.",
     "delete-text-card-number-error": "Text must match card number",
 		"delete-text-beneficiary-name-label": "Type the participant's full name to confirm",
     "delete-text-card-number-label": "Type the card number to confirm",
