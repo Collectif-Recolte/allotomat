@@ -16,7 +16,7 @@
 		"cancel": "Annuler",
 		"project-manager-email": "Courriel",
 		"project-manager-email-placeholder": "Ex. john.doe{'@'}example.com",
-		"title": "Ajouter un-e gestionnaire du programme",
+		"title": "Ajouter un·e gestionnaire du programme",
 		"user-already-manager": "Un·e des gestionnaires est déjà gestionnaire d'un programme.",
 		"user-not-project-manager": "Un·e des gestionnaires n'est pas du type gestionnaire de programme."
 	}
