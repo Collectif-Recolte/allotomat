@@ -1,7 +1,7 @@
 <i18n>
 {
 	"en": {
-		"title": "Manually add funds",
+		"title": "Manual Fund Transfer",
 		"select-subscription-label": "Subscription",
 		"cancel": "Cancel",
 		"add-amount": "Add amount",
@@ -19,7 +19,7 @@
     "fifteenth-day-of-the-month": "payment on the 15th day of the month"
 	},
 	"fr": {
-		"title": "Ajouter manuellement des fonds",
+		"title": "Transfert manuel de fonds",
 		"select-subscription-label": "Période d'abonnement",
 		"cancel": "Annuler",
 		"add-amount": "Ajouter le montant",
