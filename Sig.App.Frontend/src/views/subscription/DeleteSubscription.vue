@@ -14,7 +14,7 @@
 		"delete-text-label": "Taper le nom de l'abonnement pour confirmer",
 		"description": "Avertissement ! La suppression de <strong>{subscriptionName}</strong> ne peut pas être annulée. Si vous continuez, l'abonnement sera supprimé ainsi que tous les éléments qu'il contient de façon définitive. Les transferts sur les cartes ne pourront plus être retracés. Par contre, les fonds des cartes vont rester inchangés.",
 		"title": "Supprimer - {subscriptionName}",
-    "cant-delete-subscription-with-beneficiaries": "Il n'est pas possible de supprimer un abonnement qui est déjà attribué a des participants"
+    "cant-delete-subscription-with-beneficiaries": "Il n'est pas possible de supprimer un abonnement qui est déjà attribué a des participant·e·s"
 	}
 }
 </i18n>
