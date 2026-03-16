@@ -2,7 +2,7 @@
 {
 	"en": {
 		"archive-market-success-notification": "The merchant {marketName} has been successfully archived.",
-		"archive-text-error": "The text must match the name of the merchant",
+		"archive-text-error": "The text must match the name of the merchant.",
 		"archive-text-label": "Type the name of the merchant to confirm",
 		"description": "Warning! Archiving <strong>{marketName}</strong> cannot be undone. If you continue, the merchant will be permanently archived along with all the elements it contains. However, no transactions will be deleted.",
 		"title": "Archive - {marketName}",
