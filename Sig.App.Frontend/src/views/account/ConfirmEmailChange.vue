@@ -2,7 +2,7 @@
 {
 	"en": {
 		"confirm-email-text": "Confirmation in progress ...",
-		"info-confirm-change-email": "Your email change has been completed successfully.",
+		"info-confirm-change-email": "Your email has been successfully updated.",
 		"title": "Email change confirmation"
 	},
 	"fr": {
