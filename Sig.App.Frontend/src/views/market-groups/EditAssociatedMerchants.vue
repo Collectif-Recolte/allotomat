@@ -2,8 +2,8 @@
   {
     "en": {
       "add-merchant": "Add a merchant",
-      "market-already-in-market-group": "The merchant is already part of the merchant group",
-      "no-associated-merchant": "No associated merchant",
+      "market-already-in-market-group": "The merchant is already part of the merchant group.",
+      "no-associated-merchant": "No associated merchants",
       "title": "Merchants - {marketGroupName}",
       "selected-market": "Selected merchant"
     },
