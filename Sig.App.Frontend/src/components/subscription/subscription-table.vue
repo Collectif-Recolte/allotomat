@@ -8,11 +8,11 @@
           "subscription-archived": "(Archived)",
           "subscription-unarchive": "Unarchive",
           "subscription-edit": "Edit configuration",
-          "subscription-edit-budget-allowance": "Manage budgets allowances",
+          "subscription-edit-budget-allowance": "Manage budgets envelopes",
           "subscription-name": "Subscription period name",
           "subscription-period": "Active interval",
           "subscription-type": "Type",
-          "subscription-budget-allowance-total": "Budget allowance total"
+          "subscription-budget-allowance-total": "Budget envelope total"
       },
       "fr": {
           "date-separator": " au ",
