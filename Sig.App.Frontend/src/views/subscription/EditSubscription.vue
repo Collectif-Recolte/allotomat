@@ -2,17 +2,17 @@
 {
 	"en": {
 		"edit-subscription": "Edit",
-		"edit-subscription-success-notification": "The subscription modification {subscriptionName} was successful.",
-    "title": "Edit a subscription",
-    "cant-edit-subscription-with-beneficiaries": "It is not possible to modify a subscription that is already assigned to participants",
-    "beneficiary-type-can-only-be-assign-once": "A category cannot be linked to more than one type."
+		"edit-subscription-success-notification": "The subscription {subscriptionName} has been successfully updated.",
+    "title": "Edit a Subscription",
+    "cant-edit-subscription-with-beneficiaries": "It is not possible to edit a subscription that is already assigned to participants",
+    "beneficiary-type-can-only-be-assign-once": "A participant category can only be added once per product group."
 	},
 	"fr": {
 		"edit-subscription": "Modifier",
 		"edit-subscription-success-notification": "La modification de l’abonnement {subscriptionName} a été un succès.",
     "title": "Modifier un abonnement",
-    "cant-edit-subscription-with-beneficiaries": "Il n'est pas possible de modifier un abonnement qui est déjà attribué a des participants",
-    "beneficiary-type-can-only-be-assign-once": "Une catégorie ne peut pas être liée à plus d'un type."
+    "cant-edit-subscription-with-beneficiaries": "Il n'est pas possible de modifier un abonnement qui est déjà attribué a des participant·e·s",
+    "beneficiary-type-can-only-be-assign-once": "Une catégorie de participant·e·s ne peut être ajoutée qu'une seule fois par groupe de produits."
 	}
 }
 </i18n>
