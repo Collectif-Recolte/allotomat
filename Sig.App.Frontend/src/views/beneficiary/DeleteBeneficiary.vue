@@ -1,7 +1,7 @@
 <i18n>
 {
 	"en": {
-		"delete-beneficiary-success-notification": "The participant was successfully deleted.",
+		"delete-beneficiary-success-notification": "The participant has been successfully deleted.",
 		"delete-text-error": "Text must match participant's first and last name",
 		"delete-text-label": "Type the participant's name to confirm",
 		"description": "Warning! Deleting <strong>{beneficiaryName}</strong> cannot be undone. If you continue, the participant and all their data will be permanently deleted.",
