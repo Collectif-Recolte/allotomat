@@ -21,7 +21,7 @@
     "beneficiary-enable-card": "Enable card",
     "card-disabled-status": "Card status",
     "card-is-disabled": "Temporarily deactivated",
-    "card-is-enabled": "Card is enabled",
+    "card-is-enabled": "Not deactivated",
     "sort-by-balance": "Balance",
     "sort-by-id": "ID",
     "sort-order": "Sort order",
