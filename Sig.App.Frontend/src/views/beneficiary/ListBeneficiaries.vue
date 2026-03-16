@@ -41,7 +41,7 @@
       "manage-participants": "Gestion",
       "assign-subscriptions": "Attribution",
       "all-group": "Tous les Groupes",
-      "selected-all-group-description": "Certaines actions ne sont pas disponibles lorsque l'option «Tous les groupes» est sélectionnée",
+      "selected-all-group-description": "Certaines actions ne sont pas disponibles lorsque l'option « Tous les groupes » est sélectionnée",
       "available-amount-for-allocation-details": "Voir détails"
     }
   }
