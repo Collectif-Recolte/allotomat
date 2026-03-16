@@ -4,7 +4,7 @@
 		"submit": "Update",
 		"general-profile-success-notification": "The profile of {name} has been successfully updated.",
     "my-profile-success-notification": "Your profile has been successfully updated.",
-		"title": "User edition"
+		"title": "Edit Profile"
 	},
 	"fr": {
 		"submit": "Mettre à jour",
