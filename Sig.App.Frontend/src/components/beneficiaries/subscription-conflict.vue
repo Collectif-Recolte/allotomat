@@ -12,7 +12,7 @@
     "remaining-budget-allowance": "→ Enveloppe restante pour cet abonnement : <b>{amount}</b>",
     "remaining-budget-allowance-after-adjustment": "→ Enveloppe restante pour cet abonnement : <b>{amount}</b> après l'ajustement",
     "payment-to-receive": "→ <b>Un</b> versement restant | → <b>{count}</b> versements restants",
-    "participant-category-detail": "→ Le-a participant-e passera de la catégorie <b>{previousCategory} ({previousCategoryAmount})</b> à la catégorie <b>{newCategory} ({newCategoryAmount})</b> pour les versements futurs",
+    "participant-category-detail": "→ Le·a participant·e passera de la catégorie <b>{previousCategory} ({previousCategoryAmount})</b> à la catégorie <b>{newCategory} ({newCategoryAmount})</b> pour les versements futurs",
 	}
 }
 </i18n>
