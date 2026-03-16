@@ -16,7 +16,7 @@
     "adjustment-amount-positif": "→ L'enveloppe sera créditée d'un montant de <b>{amount}</b> suite à l'ajustement",
     "adjustment-amount-negatif": "→ L'enveloppe sera débitée d'un montant de <b>{amount}</b> suite à l'ajustement",
     "adjustement-amount-not-enought": "→ Ce changement nécessiterait un total de <b>{amount}</b>, mais il n'y a pas assez de fonds disponibles dans l'enveloppe",
-    "confirm-message": "Les ajustements ont été effectués pour le participant"
+    "confirm-message": "Les ajustements ont été effectués pour le·a participant·e"
 	}
 }
 </i18n>
