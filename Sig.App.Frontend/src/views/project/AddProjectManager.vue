@@ -2,7 +2,7 @@
 {
 	"en": {
 		"add-project-manager": "Add manager",
-		"add-project-manager-success-notification": "The program manager was successfully added. The manager will receive an email to finish creating their account in the next few minutes.",
+		"add-project-manager-success-notification": "The program manager has been successfully added. The manager will receive an email to finish creating their account in the next few minutes.",
 		"cancel": "Cancel",
 		"project-manager-email": "Email",
 		"project-manager-email-placeholder": "Ex. john.doe{'@'}exemple.com",
