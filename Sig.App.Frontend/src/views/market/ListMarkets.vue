@@ -2,7 +2,7 @@
   {
     "en": {
       "add-market": "Add",
-      "title": "Merchant management",
+      "title": "Merchant Management",
       "empty-list": "No merchants have been created yet.",
       "create-market": "Create a merchant",
       "market-count": "{count} merchant | {count} merchants",
