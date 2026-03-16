@@ -4,7 +4,7 @@
 		"archive-subscription-success-notification": "The subscription {subscriptionName} has been successfully archived.",
 		"archive-text-error": "The text must match the name of the subscription",
 		"archive-subscription-success-notification-text-label": "Type the name of the subscription to confirm",
-		"description": "Warning ! If you continue, the subscription will be archived and it will be impossible to assign it to a participant. However, the funds of the cards will remain unchanged. (This action can be reversed later.)",
+		"description": "Warning! If you continue, the subscription will be archived and it will be impossible to assign it to a participant. However, the funds of the cards will remain unchanged. (This action can be reversed later.)",
     "title": "Archive - {subscriptionName}",
     "archive-btn": "Archive"
 	},
