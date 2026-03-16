@@ -2,14 +2,14 @@
     {
         "en": {
             "add-manager": "Add manager",
-            "empty-managers-list-error": "The list of «Manager» must contain at least 1 element",
+            "empty-managers-list-error": "At least one manager account is required.",
             "manager-email": "Email",
             "manager-placeholder": "Ex. john.doe{'@'}example.com",
             "managers-section-title": "Managers"
         },
         "fr": {
-            "add-manager": "Ajouter un gestionnaire",
-            "empty-managers-list-error": "La liste de «Gestionnaire» doit contenir au moins 1 élément",
+            "add-manager": "Ajouter un·e gestionnaire",
+            "empty-managers-list-error": "Au moins un compte gestionnaire est requis.",
             "manager-email": "Courriel",
             "manager-placeholder": "Ex. john.doe{'@'}exemple.com",
             "managers-section-title": "Gestionnaires"
