@@ -2,8 +2,8 @@
 {
 	"en": {
 		"add-category": "Edit",
-		"add-category-success-notification": "The modification to {categoryName} was successful.",
-		"title": "Edit a category",
+		"add-category-success-notification": "The category {categoryName} has been successfully updated.",
+		"title": "Edit Category",
     "beneficiary-type-key-already-in-use": "One of the keys you've entered is already associated with another category."
 	},
 	"fr": {
