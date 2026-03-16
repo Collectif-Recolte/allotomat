@@ -7,7 +7,7 @@
       "beneficiary-balance": "Balance",
       "beneficiary-without-subscription": "No subscription",
       "beneficiary-no-card": "No card",
-      "beneficiary-card-disabled": "Temporarily disabled",
+      "beneficiary-card-disabled": "Temporarily deactivated",
       "beneficiary-card-last-usage": "Last use",
       "beneficiary-organization": "Group"
     },
