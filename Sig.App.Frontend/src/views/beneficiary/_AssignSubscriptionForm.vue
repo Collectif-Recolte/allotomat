@@ -6,8 +6,8 @@
       "close":"Close"
     },
     "fr": {
-      "assign-subscription-description": "Même si cette personne ne recevra pas de fonds automatisés, elle a besoin d'un abonnement pour pouvoir transférer des fonds sur sa carte.",
-      "assign-subscription-need-card": "Cette personne ne recevra aucun fonds à moins qu'une carte ne lui soit attribuée.",
+      "assign-subscription-description": "Même si ce·tte participant·e ne recevra pas de fonds automatisés, il·elle a besoin d'un abonnement pour pouvoir transférer des fonds sur sa carte.",
+      "assign-subscription-need-card": "Ce·tte participant·e ne recevra aucun fonds à moins qu'une carte ne lui soit attribuée.",
       "close":"Fermer",
     }
   }
