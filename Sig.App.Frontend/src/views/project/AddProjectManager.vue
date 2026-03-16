@@ -2,23 +2,23 @@
 {
 	"en": {
 		"add-project-manager": "Add manager",
-		"add-project-manager-success-notification": "The addition of the project manager was a success. The manager will receive an email for the creation of his account in the next few minutes.",
+		"add-project-manager-success-notification": "The program manager was successfully added. The manager will receive an email to finish creating their account in the next few minutes.",
 		"cancel": "Cancel",
 		"project-manager-email": "Email",
 		"project-manager-email-placeholder": "Ex. john.doe{'@'}exemple.com",
-		"title": "Add a project manager",
+		"title": "Add a Program Manager",
 		"user-already-manager": "One of the managers is already the manager of a program.",
-		"user-not-project-manager": "One of the managers is not an program manager."
+		"user-not-project-manager": "One of the managers is not a program manager."
 	},
 	"fr": {
-		"add-project-manager": "Ajouter le gestionnaire",
-		"add-project-manager-success-notification": "L’ajout du gestionnaire de programme a été un succès. Le gestionnaire va recevoir un courriel pour la création de son compte dans les prochaines minutes.",
+		"add-project-manager": "Ajouter le-a gestionnaire",
+		"add-project-manager-success-notification": "L’ajout du ou de la gestionnaire de programme a été un succès. La-e gestionnaire va recevoir pour compléter la création de son compte dans les prochaines minutes.",
 		"cancel": "Annuler",
 		"project-manager-email": "Courriel",
 		"project-manager-email-placeholder": "Ex. john.doe{'@'}example.com",
-		"title": "Ajouter un gestionnaire du programme",
-		"user-already-manager": "Un des gestionnaires est déjà gestionnaire d'un programme.",
-		"user-not-project-manager": "Un des gestionnaires n'est pas du type gestionnaire de programme."
+		"title": "Ajouter un-e gestionnaire du programme",
+		"user-already-manager": "Un-e des gestionnaires est déjà gestionnaire d'un programme.",
+		"user-not-project-manager": "Un-e des gestionnaires n'est pas du type gestionnaire de programme."
 	}
 }
 </i18n>
