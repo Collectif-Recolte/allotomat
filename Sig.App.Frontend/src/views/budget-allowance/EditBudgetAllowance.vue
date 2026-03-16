@@ -2,13 +2,13 @@
 {
 	"en": {
     "date-separator": " to ",
-		"title": "Configure envelopes",
+		"title": "Configure Envelopes",
     "subscription-name": "Subscription period",
     "add-budget-allowance": "Add budget envelope",
     "close-modal": "Close",
     "edit-budget-allowance-success-notification": "The envelope was saved successfully.",
-    "add-budget-allowance-success-notification": "Adding an envelope with the amount of {amount} for the subscription period {subscriptionName} was successful.",
-    "cant-remove-budget-allowance-with-participant-error": "Deleting an envelope is impossible for envelopes that already have an assigned participant list."
+    "add-budget-allowance-success-notification": "Successfully added an envelope with the amount of {amount} for the subscription period {subscriptionName}.",
+    "cant-remove-budget-allowance-with-participant-error": "Cannot delete an envelope that already has an assigned participant list."
 	},
 	"fr": {
     "date-separator": " au ",
@@ -18,7 +18,7 @@
     "close-modal": "Terminer",
     "edit-budget-allowance-success-notification": "L’enveloppe a été sauvegardée avec succès.",
     "add-budget-allowance-success-notification": "L’ajout d’une enveloppe d’un montant de {amount} pour la période d’abonnement {subscriptionName} a été un succès.",
-    "cant-remove-budget-allowance-with-participant-error": "La suppression d’une enveloppe est impossible pour les enveloppes qui possèdent déjà une liste de participant-e-s attitrée."
+    "cant-remove-budget-allowance-with-participant-error": "La suppression d’une enveloppe est impossible pour les enveloppes qui possèdent déjà une liste de participant·e·s attitrée."
 	}
 }
 </i18n>
