@@ -1,7 +1,7 @@
 <i18n>
 {
 	"en": {
-		"title": "Fix payment conflict(s)",
+		"title": "Fix Payment Conflicts",
     "cancel": "Cancel",
     "confirm": "Confirm",
     "adjustment-amount-positif": "→ The envelope will be credited with an amount of <b>{amount}</b> following the adjustment",
@@ -10,7 +10,7 @@
     "confirm-message": "The adjustments have been made for the participant"
 	},
 	"fr": {
-		"title": "Résoudre les conflits de paiement(s)",
+		"title": "Résoudre les conflits de paiement",
     "cancel": "Annuler",
     "confirm": "Confirmer",
     "adjustment-amount-positif": "→ L'enveloppe sera créditée d'un montant de <b>{amount}</b> suite à l'ajustement",
