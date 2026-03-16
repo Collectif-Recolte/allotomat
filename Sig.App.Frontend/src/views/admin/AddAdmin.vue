@@ -1,7 +1,7 @@
 <i18n>
 {
 	"en": {
-		"confirm-message": "A message to complete the account creation was sent to {email}.",
+		"confirm-message": "An email to finish creating the account was sent to {email}.",
 		"submit": "Add",
 		"title": "Add an admin"
 	},
