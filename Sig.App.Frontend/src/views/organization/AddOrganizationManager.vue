@@ -6,19 +6,19 @@
 		"cancel": "Cancel",
 		"organization-manager-email": "Email",
 		"organization-manager-email-placeholder": "Ex. john.doe{'@'}exemple.com",
-		"title": "Add a group manager",
+		"title": "Add Group Manager",
 		"user-already-manager": "One of the managers is already the manager of a program.",
 		"user-not-organization-manager": "One of the managers is not an program manager."
 	},
 	"fr": {
-		"add-organization-manager": "Ajouter le gestionnaire",
-		"add-organization-manager-success-notification": "L’ajout du ou de la gestionnaire de groupe a été un succès. Le-a gestionnaire va recevoir un courriel pour compléter la création de son compte dans les prochaines minutes.",
+		"add-organization-manager": "Ajouter le·a gestionnaire",
+		"add-organization-manager-success-notification": "L’ajout du ou de la gestionnaire de groupe a été un succès. Le·a gestionnaire va recevoir un courriel pour compléter la création de son compte dans les prochaines minutes.",
 		"cancel": "Annuler",
 		"organization-manager-email": "Courriel",
 		"organization-manager-email-placeholder": "Ex. john.doe{'@'}example.com",
-		"title": "Ajouter un-e gestionnaire de groupe",
-		"user-already-manager": "Un-e des gestionnaires est déjà gestionnaire d'un programme.",
-		"user-not-organization-manager": "Un-e des gestionnaires n'est pas du type gestionnaire de programme."
+		"title": "Ajouter un·e gestionnaire de groupe",
+		"user-already-manager": "Un·e des gestionnaires est déjà gestionnaire d'un programme.",
+		"user-not-organization-manager": "Un·e des gestionnaires n'est pas du type gestionnaire de programme."
 	}
 }
 </i18n>
