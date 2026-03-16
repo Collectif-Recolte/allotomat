@@ -2,7 +2,7 @@
 {
 	"en": {
 		"add-organization": "Add",
-		"add-organization-success-notification": "Adding group {organizationName} was successful. Managers will receive an email for the creation of their account in the next few minutes.",
+		"add-organization-success-notification": "Adding group {organizationName} was successful. Managers will receive an email to finish creating their account in the next few minutes.",
 		"manager-email": "Email",
 		"organization-name": "Name",
 		"title": "Add a group",
@@ -11,12 +11,12 @@
 	},
 	"fr": {
 		"add-organization": "Ajouter",
-		"add-organization-success-notification": "L’ajout du groupe {organizationName} a été un succès. Les gestionnaires vont recevoir un courriel pour la création de leur compte dans les prochaines minutes.",
+		"add-organization-success-notification": "L’ajout du groupe {organizationName} a été un succès. Les gestionnaires vont recevoir un courriel pour compléter la création de leur compte dans les prochaines minutes.",
 		"manager-email": "Courriel",
 		"organization-name": "Nom",
 		"title": "Ajouter un groupe",
-		"user-already-manager": "Un des gestionnaires est déjà gestionnaire d'un groupe.",
-		"user-not-oganization-manager": "Un des gestionnaires n'est pas du type gestionnaire de groupe."
+		"user-already-manager": "Un-e des gestionnaires est déjà gestionnaire d'un groupe.",
+		"user-not-oganization-manager": "Un-e des gestionnaires n'est pas du type gestionnaire de groupe."
 	}
 }
 </i18n>
