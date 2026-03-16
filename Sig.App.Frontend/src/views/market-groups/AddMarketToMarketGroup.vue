@@ -2,8 +2,8 @@
   {
     "en": {
       "add-market": "Add",
-      "add-market-success-notification": "Successfully added merchant {marketName} to the merchant group.",
-      "title": "Add a merchant to the merchant group",
+      "add-market-success-notification": "The merchant {marketName} has been successfully added to the merchant group.",
+      "title": "Add Merchant to Merchant Group",
       "choose-market": "Select",
       "select-market": "Merchant",
       "cancel": "Cancel",
