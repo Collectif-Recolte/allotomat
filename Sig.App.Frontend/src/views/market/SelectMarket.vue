@@ -2,7 +2,7 @@
 {
 	"en": {
 		"add-market": "Add",
-		"add-market-success-notification": "Successfully added merchant {marketName} to the program.",
+		"add-market-success-notification": "The merchant {marketName} has been successfully added to the program.",
 		"title": "Add a merchant to the program",
     "create-market": "Create Merchant",
     "choose-market": "Search for a merchant...",
@@ -11,7 +11,7 @@
     "no-associated-merchant": "All available merchants are associated with the program.",
     "selected-market-group": "Merchant Group",
     "no-results-found": "No merchants found",
-    "warning-message":"Note: This list contains merchants from other programs on Tomat. Adding one of these merchants to your program will allow them to accept your cards, and will also create a new Cash Register that will need to be selected when they open Tomat. Please proceed with caution."
+    "warning-message":"Note: This list contains merchants from other programs on Tomat. Adding one of these merchants to your program will allow them to accept your cards, and will also create a new cash register that will need to be selected when they open Tomat. Please proceed with caution."
 	},
 	"fr": {
 		"add-market": "Ajouter",
@@ -24,7 +24,7 @@
     "no-associated-merchant": "Tous les commerces disponibles sont associés au programme.",
     "selected-market-group": "Groupe de commerces",
     "no-results-found": "Aucun commerce trouvé",
-    "warning-message":"Attention : Cette liste contient des commerces provenant d’autres programmes qui utilisent Tomat. L'ajout de l'un de ces commerces à votre programme leur permettra d'accepter vos cartes et créera également une nouvelle Caisse qui devra être sélectionnée lorsqu'ils ouvriront Tomat. Veuillez procéder avec prudence."
+    "warning-message":"Attention : Cette liste contient des commerces provenant d’autres programmes qui utilisent Tomat. L'ajout de l'un de ces commerces à votre programme leur permettra d'accepter vos cartes et créera également une nouvelle caisse qui devra être sélectionnée lorsqu'ils ouvriront Tomat. Veuillez procéder avec prudence."
 	}
 }
 </i18n>
