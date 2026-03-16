@@ -1,12 +1,12 @@
 <i18n>
   {
     "en": {
-      "disabled-market-success-notification": "The merchant {marketName} has been successfully disabled.",
+      "disabled-market-success-notification": "The merchant {marketName} has been successfully deactivated.",
       "disabled-text-error": "The text must match the name of the merchant.",
       "disabled-text-label": "Type the name of the merchant to confirm",
-      "description": "Warning! If you continue, the merchant will be disabled and will not be able to process transactions.",
-      "title": "Disabled - {marketName}",
-      "disabled-btn-label": "Disabled"
+      "description": "Warning! If you continue, the merchant will be deactivated and will not be able to process transactions.",
+      "title": "Deactivated - {marketName}",
+      "disabled-btn-label": "Deactivated"
     },
     "fr": {
       "disabled-market-success-notification": "Le commerce {marketName} a été désactivé avec succès.",
