@@ -1,7 +1,7 @@
 <i18n>
 {
   "en": {
-    "title": "Transfer funds",
+    "title": "Transfer Funds",
     "add-missing-payment-title": "Add a missed subscription payment",
     "add-missing-payment-desc": "Funds will be added to the participant's card according to the subscription settings.",
     "add-missing-payment": "Add a missed payment",
