@@ -2,7 +2,7 @@
 {
 	"en": {
 		"add-product-group": "Add product group",
-		"add-product-group-success-notification": "Adding product group {productGroupName} was successful.",
+		"add-product-group-success-notification": "The product group {productGroupName} has been successfully added.",
 		"title": "Add a product group"
 	},
 	"fr": {
