@@ -3,7 +3,7 @@
     "en": {
       "add-missed-payment-description": "Select missed payments to add",
       "no-missed-payment-description": "The subscriptions do not have any missed payments. It is possible to manually add funds to the cards if required.",
-      "budget-allowance-not-enought": "<b>The budget allowance is not sufficient to cover the additional payment</b>",
+      "budget-allowance-not-enought": "<b>The budget envelope is not sufficient to cover the additional payment</b>",
       "close":"Close",
       "budget-allowance-needed": "<b>{amountByPayment} $ required for assignment</b>",
       "submit": "Add missed payments",
