@@ -2,7 +2,7 @@
 {
 	"en": {
 		"card-cant-be-use-in-market": "The participant cannot make a purchase in this market.",
-		"card-deactivated": "The card is disabled.",
+		"card-deactivated": "The card is deactivated.",
 		"card-not-found": "QR code does not equate to a known card.",
 		"create-new-transaction-btn": "Create a new transaction",
 		"not-enought-fund": "The participant does not have enough funds.",
