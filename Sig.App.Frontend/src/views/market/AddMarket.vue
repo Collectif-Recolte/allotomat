@@ -12,7 +12,7 @@
 	},
 	"fr": {
 		"add-market": "Ajouter",
-		"add-market-success-notification": "L’ajout du commerce {marketName} a été un succès. Les gestionnaires vont recevoir un courriel pour compléter la création de leur comptes dans les prochaines minutes.",
+		"add-market-success-notification": "L’ajout du commerce {marketName} a été un succès. Les gestionnaires vont recevoir un courriel pour compléter la création de leurs comptes dans les prochaines minutes.",
 		"title": "Créer un commerce",
 		"user-already-manager": "Un·e des gestionnaires est déjà gestionnaire d'un commerce.",
 		"user-not-market-manager": "Un·e des gestionnaires n'est pas du type gestionnaire de commerce.",
