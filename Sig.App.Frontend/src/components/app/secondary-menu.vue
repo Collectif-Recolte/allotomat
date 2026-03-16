@@ -17,9 +17,9 @@
 	"fr": {
 		"menu-title-program": "Programme {name}",
     "program-settings": "Paramètres du programme",
-		"manage-organization-managers": "Gestion des utilisateurs",
-		"manage-project-managers": "Gestion des utilisateurs",
-    "manage-marketgroup-managers": "Gestion des utilisateurs",
+		"manage-organization-managers": "Gestion des comptes",
+		"manage-project-managers": "Gestion des comptes",
+    "manage-marketgroup-managers": "Gestion des comptes",
     "manage-project-export-all-participants": "Exporter tous les participant·e·s",
     "reconciliation-report": "Rapport de réconciliation",
     "subscription-end-report": "Rapport d'abonnement",
