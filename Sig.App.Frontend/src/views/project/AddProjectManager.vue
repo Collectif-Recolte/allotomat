@@ -11,14 +11,14 @@
 		"user-not-project-manager": "One of the managers is not a program manager."
 	},
 	"fr": {
-		"add-project-manager": "Ajouter le-a gestionnaire",
-		"add-project-manager-success-notification": "L’ajout du ou de la gestionnaire de programme a été un succès. La-e gestionnaire va recevoir pour compléter la création de son compte dans les prochaines minutes.",
+		"add-project-manager": "Ajouter le·a gestionnaire",
+		"add-project-manager-success-notification": "L’ajout du ou de la gestionnaire de programme a été un succès. La·e gestionnaire va recevoir pour compléter la création de son compte dans les prochaines minutes.",
 		"cancel": "Annuler",
 		"project-manager-email": "Courriel",
 		"project-manager-email-placeholder": "Ex. john.doe{'@'}example.com",
 		"title": "Ajouter un-e gestionnaire du programme",
-		"user-already-manager": "Un-e des gestionnaires est déjà gestionnaire d'un programme.",
-		"user-not-project-manager": "Un-e des gestionnaires n'est pas du type gestionnaire de programme."
+		"user-already-manager": "Un·e des gestionnaires est déjà gestionnaire d'un programme.",
+		"user-not-project-manager": "Un·e des gestionnaires n'est pas du type gestionnaire de programme."
 	}
 }
 </i18n>
