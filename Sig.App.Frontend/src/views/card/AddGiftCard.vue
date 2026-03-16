@@ -36,7 +36,7 @@
     "warning-create-gift-card": "Une carte-cadeau est activée dès sa création, veuillez ne pas la perdre!",
     "gift-card-fund-successfully-added": "La carte ({cardId}) est maintenant activée en tant que carte-cadeau et possède {amount}.",
     "warning-create-gift-card-already-used": "Cette carte est déjà utilisée (statut : {cardStatus}) : elle contient <b>{subscriptionAmount}</b> de fonds d’abonnement et <b>{giftCardAmount}</b> de fonds cadeaux. Assurez-vous qu'il s'agit de la bonne carte pour l'ajout de fonds cadeaux.",
-    "card-status-assigned": "attribuée à un-e participant-e",
+    "card-status-assigned": "attribuée à un·e participant·e",
     "card-status-gift-card": "carte-cadeau",
     "card-status-unassigned": "carte non attribuée",
     "card-status-lost": "carte perdue",
