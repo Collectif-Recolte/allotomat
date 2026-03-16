@@ -1,16 +1,16 @@
 <i18n>
 {
 	"en": {
-		"delete-text-error": "Text must match recipient's first name and recipient's last name",
-		"delete-text-label": "Type the participant name to confirm",
+		"delete-text-error": "Text must match participant's first and last name.",
+		"delete-text-label": "Type the participant's full name to confirm",
 		"description": "Warning! Unassigning the card currently belonging to <strong>{beneficiaryName}</strong> cannot be undone. If you continue, the card will be unassigned and the card funds will be removed. Payments to the card can no longer be traced.",
-		"title": "Unassign card - {beneficiaryName}",
+		"title": "Unassign Card - {beneficiaryName}",
 		"unassign-btn-label": "Unassign",
 		"unassign-card-success-notification": "The card has been successfully unassigned."
 	},
 	"fr": {
-		"delete-text-error": "Le texte doit correspondre au prénom et au nom de famille du-de la participant-e",
-		"delete-text-label": "Taper le nom du-de la participant-e pour confirmer",
+		"delete-text-error": "Le texte doit correspondre au prénom et au nom de famille du ou de la participant·e",
+		"delete-text-label": "Taper le nom complet du ou de la participant·e pour confirmer",
 		"description": "Avertissement ! La désassignation de la carte de <strong>{beneficiaryName}</strong> ne peut pas être annulée. Si vous continuez, la carte sera désassignée et les fonds de la carte vont être supprimé. Les paiements sur la carte ne pourront plus être retracés.",
 		"title": "Désassigner la carte - {beneficiaryName}",
 		"unassign-btn-label": "Désassigner",
