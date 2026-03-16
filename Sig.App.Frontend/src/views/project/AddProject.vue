@@ -12,12 +12,12 @@
 	},
 	"fr": {
     "add-project": "Ajouter",
-		"add-project-success-notification": "L’ajout du programme {projectName} a été un succès. Les gestionnaires vont recevoir un courriel pour compléter la création de leur comptes dans les prochaines minutes.",
+		"add-project-success-notification": "L’ajout du programme {projectName} a été un succès. Les gestionnaires vont recevoir un courriel pour compléter la création de leurs comptes dans les prochaines minutes.",
 		"manager-email": "Courriel",
 		"project-name": "Nom",
 		"title": "Ajouter un programme",
-		"user-already-manager": "Un-e des gestionnaires est déjà gestionnaire d'un programme.",
-		"user-not-project-manager": "Un-e des gestionnaires n'est pas du type gestionnaire de programme.",
+		"user-already-manager": "Un·e des gestionnaires est déjà gestionnaire d'un programme.",
+		"user-not-project-manager": "Un·e des gestionnaires n'est pas du type gestionnaire de programme.",
 		"project-url": "Site web du programme"
 	}
 }
