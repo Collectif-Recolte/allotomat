@@ -3,10 +3,10 @@
 	"en": {
 		"edit-funds-gift-card": "Adjust balance",
 		"cancel": "Cancel",
-		"title": "Adjust gift card balance",
+		"title": "Adjust Gift Card Balance",
 		"funds-label": "Gift card funds",
 		"funds-placeholder": "Ex. 100",
-		"gift-card-fund-successfully-edited": "Gift card balance successfully edited.",
+		"gift-card-fund-successfully-edited": "Gift card balance successfully udpated.",
 		"card-not-found": "Card ID does not exist.",
 		"card-lost": "The card you are trying to use is lost."
 	},
