@@ -2,7 +2,7 @@
 {
 	"en": {
 		"edit-project": "Edit",
-		"edit-project-success-notification": "Editing project {projectName} was successful.",
+		"edit-project-success-notification": "The program {projectName} has been successfully updated.",
 		"title": "Edit a project"
 	},
 	"fr": {
