@@ -15,13 +15,13 @@
   "fr": {
     "title": "Transférer des fonds",
     "add-missing-payment-title": "Versement d'un paiement manqué",
-    "add-missing-payment-desc": "Selon les paramètres de l'abonnement, les fonds seront ajoutés à la carte du participant.",
+    "add-missing-payment-desc": "Selon les paramètres de l'abonnement, les fonds seront ajoutés à la carte du ou de la participant·e.",
     "add-missing-payment": "Ajouter un versement manqué",
     "manually-add-funds-title": "Versement sur mesure",
-    "manually-add-funds-desc": "Ajouter un montant sur la carte du participant avec une date d'expiration au choix.",
+    "manually-add-funds-desc": "Ajouter un montant sur la carte du ou de la participant·e avec une date d'expiration au choix.",
     "manually-add-funds": "Versement sur mesure",
     "add-gift-card-funds-title": "Ajouter des fonds carte-cadeau",
-    "add-gift-card-funds-desc": "Ajouter un montant carte-cadeau à la carte du participant-e sans date d'expiration.",
+    "add-gift-card-funds-desc": "Ajouter un montant carte-cadeau à la carte du ou de la participant·e sans date d'expiration.",
     "add-gift-card-funds": "Ajouter des fonds carte-cadeau"
   }
 }
