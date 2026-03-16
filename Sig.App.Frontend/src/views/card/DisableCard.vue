@@ -5,10 +5,10 @@
     "delete-text-card-number-error": "Text must match card number",
 		"delete-text-beneficiary-name-label": "Type the participant's full name to confirm",
     "delete-text-card-number-label": "Type the card number to confirm",
-		"description": "Warning! If you continue, the card will be disabled and the participant will not be able to use the card until it is reactivated.",
-		"title": "Disable Card - {beneficiaryName}",
-		"disable-btn-label": "Disable",
-		"disable-card-success-notification": "The card has been successfully disabled."
+		"description": "Warning! If you continue, the card will be deactivated and the participant will not be able to use the card until it is reactivated.",
+		"title": "Deactivate Card - {beneficiaryName}",
+		"disable-btn-label": "Deactivate",
+		"disable-card-success-notification": "The card has been successfully deactivated."
 	},
 	"fr": {
 		"delete-text-beneficiary-name-error": "Le texte doit correspondre au prénom et au nom de famille du ou de la participant·e",
