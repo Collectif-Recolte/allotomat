@@ -53,7 +53,7 @@
       "subscription-count": "{participantCount} participant·e·s se verront attribuer l'abonnement {subscriptionName}",
       "usage-amount": "<b>{amount}</b> seront répartis de la façon suivante :</br> {detail}",	
       "remaining-amount": "L'enveloppe restante sera de : <b>{amount}</b>",
-      "success-assign-beneficiaries-to-subscription": "L'abonnement «{subscriptionName}» a été assigné avec succès à {assignedBeneficiariesCount} participant·e·s.",
+      "success-assign-beneficiaries-to-subscription": "L'abonnement « {subscriptionName} » a été assigné avec succès à {assignedBeneficiariesCount} participant·e·s.",
       "load-more-beneficiaries": "Charger plus de participant·e·s",
       "sort": "Trier la liste",
       "randomize": "Trier la liste aléatoirement",
