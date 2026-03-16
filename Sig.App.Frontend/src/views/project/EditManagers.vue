@@ -6,8 +6,8 @@
 		"title": "Managers - {projectName}"
 	},
 	"fr": {
-		"add-project-manager-success-notification": "L’ajout du ou de la gestionnaire de programme a été un succès. Le-a gestionnaire va recevoir un courriel pour compléter la création de son compte dans les prochaines minutes.",
-		"remove-manager-success-notification": "La-e gestionnaire {email} a été enlevé-e avec succès.",
+		"add-project-manager-success-notification": "L’ajout du ou de la gestionnaire de programme a été un succès. Le·a gestionnaire va recevoir un courriel pour compléter la création de son compte dans les prochaines minutes.",
+		"remove-manager-success-notification": "La·e gestionnaire {email} a été enlevé-e avec succès.",
 		"title": "Gestionnaires - {projectName}"
 	}
 }
