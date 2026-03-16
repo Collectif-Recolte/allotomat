@@ -5,8 +5,8 @@
 		"email-confirmed": "You can now log in with your email.",
 		"error": "There was a problem confirming your account.",
 		"resend": "Resend link",
-		"resend-complete": "A message to complete the account creation was sent to {email}.",
-		"title": "Email confirmation"
+		"resend-complete": "An email to finish creating the account was sent to {email}.",
+		"title": "Email Confirmation"
 	},
 	"fr": {
 		"confirming": "Confirmation de votre compte...",
