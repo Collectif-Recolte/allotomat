@@ -1,15 +1,15 @@
 <i18n>
 {
 	"en": {
-		"delete-budget-allowance-success-notification": "Envelope for group {organizationName} has been successfully deleted.",
+		"delete-budget-allowance-success-notification": "The envelope for group {organizationName} has been successfully deleted.",
 		"description": "Warning! If you continue, the funds will be transferred to another envelope.",
-		"title": "Transfer funds to another envelope",
+		"title": "Transfer Funds to Another Envelope",
     "cancel-btn": "Cancel",
     "transfer-funds-btn": "Transfer funds",
     "amount-label": "Amount",
     "amount-placeholder": "Enter the amount",
     "target-budget-allowance-label": "Target envelope",
-    "move-budget-allowance-success-notification": "Funds have been transferred successfully.",
+    "move-budget-allowance-success-notification": "The funds have been transferred successfully.",
     "initial-budget-allowance-name-label": "Initial envelope",
     "available-fund-label": " available"
 	},
