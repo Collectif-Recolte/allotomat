@@ -6,7 +6,7 @@
 		"manager-email": "Email",
 		"project-name": "Name",
 		"title": "Add a Program",
-		"user-already-manager": "One of the managers is already the manager of an program.",
+		"user-already-manager": "One of the managers is already the manager of a program.",
 		"user-not-project-manager": "One of the managers is not a program manager.",
 		"project-url": "Program website"
 	},
