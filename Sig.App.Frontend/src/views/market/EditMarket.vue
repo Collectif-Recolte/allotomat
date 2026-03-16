@@ -2,8 +2,8 @@
 {
 	"en": {
 		"edit-market": "Edit",
-		"edit-market-success-notification": "Editing merchant {marketName} was successful.",
-		"title": "Edit a merchant"
+		"edit-market-success-notification": "The merchant {marketName} has been successfully updated.",
+		"title": "Edit Merchant"
 	},
 	"fr": {
 		"edit-market": "Modifier",
