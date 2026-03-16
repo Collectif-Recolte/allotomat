@@ -2,11 +2,11 @@
   {
     "en": {
       "add-market": "Add",
-      "title": "Market management",
-      "empty-list": "No markets have been created yet.",
-      "create-market": "Create a market",
-      "market-count": "{count} market | {count} markets",
-      "search-placeholder": "Search by market name, email address, person name"
+      "title": "Merchant management",
+      "empty-list": "No merchants have been created yet.",
+      "create-market": "Create a merchant",
+      "market-count": "{count} merchant | {count} merchants",
+      "search-placeholder": "Search by merchant name, email address, person name"
     },
     "fr": {
       "add-market": "Ajouter",
