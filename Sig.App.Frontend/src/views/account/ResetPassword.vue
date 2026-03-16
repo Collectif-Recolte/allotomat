@@ -10,7 +10,7 @@
 		"password-rules": "The password must contain a minimum of 10 characters, 1 capital letter, a number and a special character (for example: %, {'@'}, #, $ and &).",
 		"resend-reset-password": "Resend link",
 		"submit": "Reset password",
-		"title": "Password reset"
+		"title": "Password Reset"
 	},
 	"fr": {
 		"back": "Annuler",
