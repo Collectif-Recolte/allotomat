@@ -9,8 +9,8 @@
     },
     "fr": {
       "delete-user-success-notification": "Le compte {userName} a été supprimé avec succès.",
-      "delete-text-error": "Le texte doit correspondre au nom du compte",
-      "delete-text-label": "Taper le nom du compte pour confirmer",
+      "delete-text-error": "Le texte doit correspondre au nom associé au compte",
+      "delete-text-label": "Taper le nom associé au compte pour confirmer",
       "description": "Avertissement ! La suppression de <strong>{userName}</strong> ne peut pas être annulée. Si vous continuez, le compte sera supprimé.",
       "title": "Supprimer - {userName}"
     }
