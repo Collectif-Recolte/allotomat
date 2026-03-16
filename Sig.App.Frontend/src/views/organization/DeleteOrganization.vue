@@ -4,7 +4,7 @@
 		"delete-organization-success-notification": "The group {organizationName} has been successfully deleted.",
 		"delete-text-error": "The text must match the name of the group",
 		"delete-text-label": "Type the name of the group to confirm",
-		"description": "Warning ! The deletion of <strong>{organizationName}</strong> cannot be undone. If you continue, the group will be permanently deleted along with all the elements it contains. Card payments can no longer be traced. However, the funds of the cards will remain unchanged.",
+		"description": "Warning! Deleting <strong>{organizationName}</strong> cannot be undone. If you continue, the group will be permanently deleted along with all the elements it contains. Card payments can no longer be traced. However, the funds of the cards will remain unchanged.",
 		"title": "Delete - {organizationName}"
 	},
 	"fr": {
