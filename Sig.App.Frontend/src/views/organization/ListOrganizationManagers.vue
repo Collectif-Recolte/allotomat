@@ -7,8 +7,8 @@
       "manager-count": "{count} manager | {count} managers"
     },
     "fr": {
-      "add-user": "Ajouter un gestionnaire de groupe",
-      "cant-remove-self-info": "Il est impossible de se retirer soi-même de la liste de gestionnaire d'un groupe",
+      "add-user": "Ajouter un-e gestionnaire de groupe",
+      "cant-remove-self-info": "Il est impossible de se retirer soi-même de la liste de gestionnaires d'un groupe",
       "title": "Gestion des utilisateurs",
       "manager-count": "{count} gestionnaire | {count} gestionnaires"
     }
