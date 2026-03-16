@@ -3,7 +3,7 @@
 	"en": {
 		"confirm-message": "An email to finish creating the account was sent to {email}.",
 		"submit": "Add",
-		"title": "Add an admin"
+		"title": "Add an Admin"
 	},
 	"fr": {
 		"confirm-message": "Un message pour compléter la création de compte a été envoyé à {email}.",
