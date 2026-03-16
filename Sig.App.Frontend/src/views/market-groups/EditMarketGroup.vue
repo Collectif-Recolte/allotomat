@@ -2,8 +2,8 @@
 {
 	"en": {
 		"edit-market-group": "Edit",
-		"edit-market-group-success-notification": "Editing merchant group {marketGroupName} was successful.",
-		"title": "Edit a merchant group"
+		"edit-market-group-success-notification": "The merchant group {marketGroupName} has been successfully updated.",
+		"title": "Edit Merchant Group"
 	},
 	"fr": {
 		"edit-market-group": "Modifier",
