@@ -1,17 +1,17 @@
 <i18n>
 {
 	"en": {
-		"delete-market-success-notification": "The market {marketName} has been successfully deleted.",
-		"delete-text-error": "The text must match the name of the market",
-		"delete-text-label": "Type the name of the market to confirm",
-		"description": "Warning ! The withdrawal of the market <strong>{marketName}</strong> cannot be undone. If you continue, the market will be removed from the group permanently.",
+		"delete-market-success-notification": "The merchant {marketName} has been successfully removed from the group.",
+		"delete-text-error": "The text must match the name of the merchant",
+		"delete-text-label": "Type the name of the merchant to confirm",
+		"description": "Warning! If you continue, <strong>{marketName}</strong> will be removed from the group permanently.",
 		"title": "Remove - {marketName}"
 	},
 	"fr": {
-		"delete-market-success-notification": "Le commerce {marketName} a été retiré avec succès.",
+		"delete-market-success-notification": "Le commerce {marketName} a été retiré du groupe avec succès.",
 		"delete-text-error": "Le texte doit correspondre au nom du commerce",
 		"delete-text-label": "Taper le nom du commerce pour confirmer",
-		"description": "Avertissement ! Le retrait du commerce <strong>{marketName}</strong> ne peut pas être annulé. Si vous continuez, le commerce sera retiré du groupe de façon définitive.",
+		"description": "Avertissement ! Si vous continuez, <strong>{marketName}</strong> sera retiré du groupe de façon.",
 		"title": "Retirer - {marketName}"
 	}
 }
