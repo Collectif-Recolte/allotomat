@@ -4,6 +4,7 @@
 		"edit-funds-gift-card": "Edit funds",
 		"cancel": "Cancel",
 		"title": "Edit funds of a gift card",
+    "desc": "Gift funds do not expire and are not connected to a budget envelope.",
 		"funds-label": "Gift card funds",
 		"funds-placeholder": "Ex. 100",
 		"gift-card-fund-successfully-edited": "Gift card funds successfully edited.",
@@ -14,6 +15,7 @@
 		"edit-funds-gift-card": "Modifier les fonds",
 		"cancel": "Annuler",
 		"title": "Modifier les fonds d'une carte-cadeau",
+    "desc": "Les fonds cadeaux n’expirent jamais et ne sont pas associés avec une enveloppe budgétaire.",
 		"funds-label": "Fonds carte-cadeau",
 		"funds-placeholder": "Ex. 100",
 		"gift-card-fund-successfully-edited": "Les fonds de la carte-cadeau ont été modifiés avec succès.",
@@ -25,28 +27,15 @@
 
 <template>
   <UiDialogModal v-slot="{ closeModal }" :return-route="returnRoute" :title="t('title')" :has-footer="false">
-    <Form
-      v-if="card"
-      v-slot="{ isSubmitting }"
-      :validation-schema="validationSchema"
-      :initial-values="initialValues"
+    <p class="text-sm text-gray-500">{{ t("desc") }}</p>
+    <Form v-if="card" v-slot="{ isSubmitting }" :validation-schema="validationSchema" :initial-values="initialValues"
       @submit="onSubmit">
-      <PfForm
-        has-footer
-        can-cancel
-        :submit-label="t('edit-funds-gift-card')"
-        :cancel-label="t('cancel')"
-        :processing="isSubmitting"
-        @cancel="closeModal">
+      <PfForm has-footer can-cancel :submit-label="t('edit-funds-gift-card')" :cancel-label="t('cancel')"
+        :processing="isSubmitting" @cancel="closeModal">
         <PfFormSection>
           <Field v-slot="{ field, errors: fieldErrors }" name="amount">
-            <PfFormInputText
-              id="amount"
-              v-bind="field"
-              :label="t('funds-label')"
-              :errors="fieldErrors"
-              input-type="number"
-              min="0" />
+            <PfFormInputText id="amount" v-bind="field" :label="t('funds-label')" :errors="fieldErrors"
+              input-type="number" min="0" />
           </Field>
         </PfFormSection>
       </PfForm>
