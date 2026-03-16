@@ -7,7 +7,7 @@
     "user-type-projectmanager": "Program manager",
     "user-type-organizationmanager": "Group manager",
     "user-type-merchant": "Merchant",
-    "user-type-marketmanager": "Market group manager"
+    "user-type-marketmanager": "Merchant group manager"
 	},
 	"fr": {
 		"user-type": "Type d'utilisateur",
