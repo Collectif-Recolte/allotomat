@@ -2,7 +2,7 @@
 {
 	"en": {
 		"delete-market-success-notification": "The merchant {marketName} has been successfully deleted.",
-		"delete-text-error": "The text must match the name of the merchant",
+		"delete-text-error": "The text must match the name of the merchant.",
 		"delete-text-label": "Type the name of the merchant to confirm",
 		"description": "Warning! Deleting <strong>{marketName}</strong> cannot be undone. If you continue, the merchant will be permanently deleted along with all the elements it contains. No card balances will be affected, but transactions for this merchant will no longer be available.",
 		"title": "Delete - {marketName}"
