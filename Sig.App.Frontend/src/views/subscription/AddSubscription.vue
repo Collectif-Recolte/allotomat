@@ -18,7 +18,7 @@
     "confirm-desc": "Désirez-vous configurer les enveloppes budgétaires disponibles pour les groupes tout de suite ?",
     "configure-envelopes": "Configurer les enveloppes",
     "later": "Plus tard",
-    "product-group-type-can-only-be-assign-once-by-beneficiary-type": "Un groupe de produits ne peut être ajouté qu'une seule fois par catégorie de participants."
+    "product-group-type-can-only-be-assign-once-by-beneficiary-type": "Un groupe de produits ne peut être ajouté qu'une seule fois par catégorie de participant·e·s."
 
 	}
 }
