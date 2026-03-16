@@ -2,7 +2,7 @@
 {
 	"en": {
 		"add-market": "Add",
-		"add-market-success-notification": "The merchant {marketName} has been successfully created. Managers will receive an email to finish creating their account in the next few minutes.",
+		"add-market-success-notification": "The merchant {marketName} has been successfully created. Managers will receive an email to finish creating their accounts in the next few minutes.",
 		"title": "Create a merchant",
 		"user-already-manager": "One of the managers is already the manager of a merchant.",
 		"user-not-market-manager": "One of the managers is not a merchant manager.",
