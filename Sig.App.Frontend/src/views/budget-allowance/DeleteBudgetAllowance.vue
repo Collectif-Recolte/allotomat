@@ -1,15 +1,15 @@
 <i18n>
 {
 	"en": {
-		"delete-budget-allowance-success-notification": "Envelope for group {organizationName} has been successfully deleted.",
-		"delete-text-error": "The text must match the name of the organization",
+		"delete-budget-allowance-success-notification": "The envelope for group {organizationName} has been successfully deleted.",
+		"delete-text-error": "The text must match the name of the group.",
 		"delete-text-label": "Type the name of the group to confirm",
-		"description": "Warning ! Deleting the envelope cannot be undone. If you continue, the envelope will be deleted.",
-		"title": "Remove envelope for group {organizationName}"
+		"description": "Warning! Deleting the envelope cannot be undone. If you continue, the envelope will be deleted.",
+		"title": "Remove Envelope for Group {organizationName}"
 	},
 	"fr": {
 		"delete-budget-allowance-success-notification": "L'enveloppe pour le groupe {organizationName} a été supprimée avec succès.",
-		"delete-text-error": "Le texte doit correspondre au nom du groupe",
+		"delete-text-error": "Le texte doit correspondre au nom du groupe.",
 		"delete-text-label": "Taper le nom du groupe pour confirmer",
 		"description": "Avertissement ! La suppression de l'enveloppe ne peut pas être annulée. Si vous continuez, l'enveloppe sera supprimée.",
 		"title": "Supprimer l'enveloppe pour le groupe {organizationName}"
