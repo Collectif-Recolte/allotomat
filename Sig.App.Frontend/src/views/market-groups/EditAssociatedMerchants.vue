@@ -2,14 +2,14 @@
   {
     "en": {
       "add-merchant": "Add a merchant",
-      "market-already-in-market-group": "The market is already part of the market group",
+      "market-already-in-market-group": "The merchant is already part of the merchant group",
       "no-associated-merchant": "No associated merchant",
       "title": "Merchants - {marketGroupName}",
-      "selected-market": "Selected market"
+      "selected-market": "Selected merchant"
     },
     "fr": {
       "add-merchant": "Ajouter un commerce",
-      "market-already-in-market-group": "Le commerce fait déjà parti du groupe de commerce",
+      "market-already-in-market-group": "Le commerce fait déjà parti du groupe de commerces",
       "no-associated-merchant": "Aucun commerce associé",
       "title": "Commerces - {marketGroupName}",
       "selected-market": "Commerce sélectionné"
