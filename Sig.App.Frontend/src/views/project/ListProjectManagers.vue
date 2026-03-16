@@ -7,7 +7,7 @@
       "manager-count": "{count} manager | {count} managers"
     },
     "fr": {
-      "add-user": "Ajouter un-e gestionnaire de programme",
+      "add-user": "Ajouter un·e gestionnaire de programme",
       "cant-remove-self-info": "Il est impossible de se retirer soi-même de la liste de gestionnaires d'un programme",
       "title": "Gestion des comptes",
       "manager-count": "{count} gestionnaire | {count} gestionnaires"
