@@ -8,11 +8,11 @@
       "no-associated-managers": "No associated manager",
     },
     "fr": {
-      "add-button-label": "Ajouter un gestionnaire",
+      "add-button-label": "Ajouter un·e gestionnaire",
       "add-manager": "Ajouter",
       "email": "Courriel",
       "email-placeholder": "john.doe{'@'}example.com",
-      "no-associated-managers": "Aucun gestionnaire associé",
+      "no-associated-managers": "Aucun·e gestionnaire associé",
     }
   }
 </i18n>
