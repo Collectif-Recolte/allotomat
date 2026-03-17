@@ -10,7 +10,9 @@
     "manually-add-funds": "Manually add funds",
     "add-gift-card-funds-title": "Add gift card funds to the card",
     "add-gift-card-funds-desc": "Add a gift card amount to the participant's card without an expiration date.",
-    "add-gift-card-funds": "Add gift card funds to the card"
+    "add-gift-card-funds": "Add gift card funds to the card",
+    "add-missing-payment-tooltip": "No missed payment found",
+    "manually-add-funds-tooltip": "No active subscription found"
   },
   "fr": {
     "title": "Transférer des fonds",
@@ -22,7 +24,9 @@
     "manually-add-funds": "Versement sur mesure",
     "add-gift-card-funds-title": "Ajouter des fonds carte-cadeau",
     "add-gift-card-funds-desc": "Ajouter un montant carte-cadeau à la carte du participant-e sans date d'expiration.",
-    "add-gift-card-funds": "Ajouter des fonds carte-cadeau"
+    "add-gift-card-funds": "Ajouter des fonds carte-cadeau",
+    "add-missing-payment-tooltip": "Aucun paiement manqué trouvé",
+    "manually-add-funds-tooltip": "Aucun abonnement actif trouvé"
   }
 }
 </i18n>
@@ -35,20 +39,26 @@
           <p class="font-medium mb-1 m-0">{{ t("add-missing-payment-title") }}</p>
           <p class="m-0">{{ t("add-missing-payment-desc") }}</p>
         </UiCallout>
-        <PfButtonLink tag="routerLink" class="w-full sm:w-auto sm:min-w-[11rem] px-6 py-3 text-base shrink-0" :to="{
-          name: URL_BENEFICIARY_ADD_MISSED_PAYMENT,
-          params: { beneficiaryId: route.params.beneficiaryId }
-        }" :label="t('add-missing-payment')" :is-disabled="!haveMissedPayment" />
+        <PfTooltip :hide-tooltip="haveMissedPayment"
+          :label="!haveMissedPayment ? t('add-missing-payment-tooltip') : undefined">
+          <PfButtonLink tag="routerLink" class="w-full sm:w-auto sm:min-w-[11rem] px-6 py-3 text-base shrink-0" :to="{
+            name: URL_BENEFICIARY_ADD_MISSED_PAYMENT,
+            params: { beneficiaryId: route.params.beneficiaryId }
+          }" :label="t('add-missing-payment')" :is-disabled="!haveMissedPayment" />
+        </PfTooltip>
       </div>
       <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
         <UiCallout class="min-w-0" :variant="CALLOUT_INFO">
           <p class="font-medium mb-1 m-0">{{ t("manually-add-funds-title") }}</p>
           <p class="m-0">{{ t("manually-add-funds-desc") }}</p>
         </UiCallout>
-        <PfButtonLink tag="routerLink" class="w-full sm:w-auto sm:min-w-[11rem] px-6 py-3 text-base shrink-0" :to="{
-          name: URL_BENEFICIARY_MANUALLY_ADD_FUND,
-          params: { beneficiaryId: route.params.beneficiaryId }
-        }" :label="t('manually-add-funds')" :is-disabled="!haveActiveSubscription" />
+        <PfTooltip :hide-tooltip="haveActiveSubscription"
+          :label="!haveActiveSubscription ? t('manually-add-funds-tooltip') : undefined">
+          <PfButtonLink tag="routerLink" class="w-full sm:w-auto sm:min-w-[11rem] px-6 py-3 text-base shrink-0" :to="{
+            name: URL_BENEFICIARY_MANUALLY_ADD_FUND,
+            params: { beneficiaryId: route.params.beneficiaryId }
+          }" :label="t('manually-add-funds')" :is-disabled="!haveActiveSubscription" />
+        </PfTooltip>
       </div>
       <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
         <UiCallout class="min-w-0" :variant="CALLOUT_INFO">
