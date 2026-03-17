@@ -25,15 +25,9 @@
 
 <template>
   <UiDialogModal v-slot="{ closeModal }" :return-route="returnRoute()" :title="t('title')" :has-footer="false">
-    <MarketForm
-      :submit-btn="t('add-market')"
-      :initial-values="initialValues"
-      :validation-schema="validationSchema"
-      :is-in-project="route.name === URL_MARKET_OVERVIEW_ADD"
-      :market-group-options="marketGroups"
-      is-new
-      @closeModal="closeModal"
-      @submit="onSubmit">
+    <MarketForm :submit-btn="t('add-market')" :initial-values="initialValues" :validation-schema="validationSchema"
+      :is-in-project="route.name === URL_MARKET_OVERVIEW_ADD" :market-group-options="marketGroups" is-new
+      @closeModal="closeModal" @submit="onSubmit">
       <FormSectionManagers />
     </MarketForm>
   </UiDialogModal>
@@ -41,13 +35,17 @@
 
 <script setup>
 import gql from "graphql-tag";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQuery, useResult } from "@vue/apollo-composable";
 import { string, object, array, lazy } from "yup";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
+import { useAuthStore } from "@/lib/store/auth";
+import { storeToRefs } from "pinia";
+
+import { USER_TYPE_MARKETGROUPMANAGER } from "@/lib/consts/enums";
 import { URL_MARKET_ADMIN, URL_MARKET_OVERVIEW_ADD, URL_MARKET_OVERVIEW } from "@/lib/consts/urls";
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 
@@ -67,6 +65,8 @@ const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const { addSuccess } = useNotificationsStore();
+const marketGroups = ref([]);
+const { userType } = storeToRefs(useAuthStore());
 
 const { result: resultProject } = useQuery(
   gql`
@@ -78,10 +78,27 @@ const { result: resultProject } = useQuery(
           id
           name
         }
-        marketGroups {
+      }
+    }
+  `,
+  null,
+  () => ({
+    enabled: route.name === URL_MARKET_OVERVIEW_ADD
+  })
+);
+
+const project = useResult(resultProject, null, (data) => {
+  return data.projects[0];
+});
+
+const { result: resultMarketGroups } = useQuery(
+  gql`
+    query MarketGroups {
+      marketGroups {
+        id
+        name
+        project {
           id
-          name
-          isArchived
         }
       }
     }
@@ -91,14 +108,17 @@ const { result: resultProject } = useQuery(
     enabled: route.name === URL_MARKET_OVERVIEW_ADD
   })
 );
-const project = useResult(resultProject, null, (data) => {
-  return data.projects[0];
-});
-const marketGroups = useResult(resultProject, null, (data) => {
-  return data.projects[0].marketGroups.map((marketGroup) => ({
+
+const marketGroup = useResult(resultMarketGroups, null, (data) => {
+  marketGroups.value = data.marketGroups.map((marketGroup) => ({
     value: marketGroup.id,
     label: marketGroup.name
   }));
+
+  if (data.marketGroups.length === 1) {
+    return data.marketGroups[0];
+  }
+  return null;
 });
 
 const { mutate: createMarket } = useMutation(
@@ -114,9 +134,18 @@ const { mutate: createMarket } = useMutation(
   `
 );
 
-const initialValues = {
-  managers: [{ email: "" }]
-};
+const initialValues = computed(() => {
+  return {
+    market: null,
+    marketGroup:
+      route.params.marketGroupId !== null && route.params.marketGroupId !== undefined
+        ? route.params.marketGroupId
+        : marketGroup != null && marketGroup.value !== undefined && marketGroup.value !== null
+          ? marketGroup.value.id
+          : null,
+    managers: [{ email: "" }]
+  };
+});
 
 const validationSchema = computed(() =>
   object({
@@ -140,8 +169,18 @@ async function onSubmit(values) {
   let input = {
     name: values.marketName,
     managerEmails: values.managers.map((x) => x.email),
-    projectId: route.name === URL_MARKET_OVERVIEW_ADD ? { value: project.value.id } : null,
-    marketGroupId: route.name === URL_MARKET_OVERVIEW_ADD ? { value: values.marketGroup } : null
+    projectId:
+      userType.value === USER_TYPE_MARKETGROUPMANAGER
+        ? { value: marketGroup.value?.project?.id }
+        : route.name === URL_MARKET_OVERVIEW_ADD
+          ? { value: project.value.id }
+          : null,
+    marketGroupId:
+      userType.value === USER_TYPE_MARKETGROUPMANAGER
+        ? { value: marketGroup.value?.id }
+        : route.name === URL_MARKET_OVERVIEW_ADD
+          ? { value: values.marketGroup }
+          : null
   };
 
   await createMarket({ input });
