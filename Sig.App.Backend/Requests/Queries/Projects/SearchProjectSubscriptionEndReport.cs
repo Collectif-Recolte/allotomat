@@ -77,10 +77,10 @@ namespace Sig.App.Backend.Requests.Queries.Projects
                         new SubscriptionEndTransactionGraphType()
                         {
                             TotalPurchases = transactionLogs.Where(z => z.SubscriptionId == null && z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).Count(),
-                            CardsWithFunds = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.LoyaltyAddingFundTransactionLog).DistinctBy(z => z.CardNumber).Count(),
+                            CardsWithFunds = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.LoyaltyAddingFundTransactionLog || z.Discriminator == TransactionLogDiscriminator.LoyaltyEditFundTransactionLog).DistinctBy(z => z.CardNumber).Count(),
                             CardsUsedForPurchases = transactionLogs.Where(z => z.SubscriptionId == null && z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).DistinctBy(z => z.CardNumber).Count(),
                             MerchantsWithPurchases = transactionLogs.Where(z => z.SubscriptionId == null && z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).DistinctBy(z => z.MarketId).Count(),
-                            TotalFundsLoaded = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.LoyaltyAddingFundTransactionLog).Sum(z => z.TotalAmount),
+                            TotalFundsLoaded = transactionLogs.Where(z => z.Discriminator == TransactionLogDiscriminator.LoyaltyAddingFundTransactionLog || z.Discriminator == TransactionLogDiscriminator.LoyaltyEditFundTransactionLog).Sum(z => z.TotalAmount),
                             TotalPurchaseValue = transactionLogs.Where(z => z.SubscriptionId == null && z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).Sum(z => z.TotalAmount) - transactionLogs.Where(z => z.OrganizationId == null && z.Discriminator == TransactionLogDiscriminator.RefundPaymentTransactionLog).Sum(z => z.TotalAmount),
                             TotalExpiredAmount = transactionLogs.Where(z => z.SubscriptionId == null && z.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog).Sum(z => z.TotalAmount)
                         }
