@@ -143,10 +143,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var beneficiary = card.Beneficiary;
             var organizationId = beneficiary?.OrganizationId;
             var loyaltyFundTransactions = card.Transactions
-                .Where(x => (x is LoyaltyAddingFundTransaction || x is LoyaltyEditFundTransaction) 
-                    && (x as AddingFundTransaction).Status == FundTransactionStatus.Actived && (x as AddingFundTransaction).AvailableFund > 0)
-                .Cast<AddingFundTransaction>()
-                .ToList();
+              .OfType<AddingFundTransaction>()
+              .Where(x => (x is LoyaltyAddingFundTransaction || x is LoyaltyEditFundTransaction)
+                  && x.Status == FundTransactionStatus.Actived && x.AvailableFund > 0)
+              .ToList();
 
             var transactionByProductGroups = new List<PaymentTransactionProductGroup>();
             decimal loyaltyFundToRemove = request.Transactions.Sum(x => x.Amount);
