@@ -1,21 +1,21 @@
 <i18n>
 {
 	"en": {
-		"delete-text-beneficiary-name-error": "Text must match recipient's first name and recipient's last name",
+		"delete-text-beneficiary-name-error": "Text must match participant's first name and last name.",
     "delete-text-card-number-error": "Text must match card number",
-		"delete-text-beneficiary-name-label": "Type the participant name to confirm",
+		"delete-text-beneficiary-name-label": "Type the participant's full name to confirm",
     "delete-text-card-number-label": "Type the card number to confirm",
-		"description": "Warning ! If you continue, the card will be disabled and the participant will not be able to use the card until it is reactivated.",
-		"title": "Disable card - {beneficiaryName}",
-		"disable-btn-label": "Disable",
-		"disable-card-success-notification": "The card has been successfully disabled."
+		"description": "Warning! If you continue, the card will be deactivated and the participant will not be able to use the card until it is reactivated.",
+		"title": "Deactivate Card - {beneficiaryName}",
+		"disable-btn-label": "Deactivate",
+		"disable-card-success-notification": "The card has been successfully deactivated."
 	},
 	"fr": {
-		"delete-text-beneficiary-name-error": "Le texte doit correspondre au prénom et au nom de famille du-de la participant-e",
+		"delete-text-beneficiary-name-error": "Le texte doit correspondre au prénom et au nom de famille du ou de la participant·e",
     "delete-text-card-number-error": "Le texte doit correspondre au numéro de la carte",
-		"delete-text-beneficiary-name-label": "Taper le nom du-de la participant-e pour confirmer",
+		"delete-text-beneficiary-name-label": "Taper le nom complet du ou de la participant·e pour confirmer",
     "delete-text-card-number-label": "Taper le numéro de la carte pour confirmer",
-		"description": "Avertissement ! Si vous continuez, la carte sera désactivée et le-la participant-e ne pourra plus utiliser la carte tant qu'elle n'est pas réactivée.",
+		"description": "Avertissement ! Si vous continuez, la carte sera désactivée et le·a participant·e ne pourra plus utiliser la carte tant qu'elle n'est pas réactivée.",
 		"title": "Désactiver la carte - {beneficiaryName}",
 		"disable-btn-label": "Désactiver",
 		"disable-card-success-notification": "La carte a été désactivée avec succès."
@@ -43,7 +43,13 @@ import { useRoute, useRouter } from "vue-router";
 import { computed } from "vue";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
-import { URL_CARDS, URL_BENEFICIARY_ADMIN, URL_BENEFICIARY_CARD_DISABLE } from "@/lib/consts/urls";
+import {
+  URL_CARDS,
+  URL_BENEFICIARY_ADMIN,
+  URL_BENEFICIARY_CARD_DISABLE,
+  URL_CARDS_GIFT_CARD_DISABLE,
+  URL_CARDS_MANAGE_GIFT_CARDS
+} from "@/lib/consts/urls";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -120,6 +126,7 @@ async function onDisableCard() {
 
 function returnRoute() {
   if (route.name === URL_BENEFICIARY_CARD_DISABLE) return { name: URL_BENEFICIARY_ADMIN };
+  else if (route.name === URL_CARDS_GIFT_CARD_DISABLE) return { name: URL_CARDS_MANAGE_GIFT_CARDS };
   else return { name: URL_CARDS };
 }
 </script>

@@ -1,13 +1,13 @@
 <i18n>
 {
 	"en": {
-		"add-market-group-manager-success-notification": "The addition of the market group manager was a success. The manager will receive an email for the creation of his account in the next few minutes.",
+		"add-market-group-manager-success-notification": "The merchant group manager was successfully added. The manager will receive an email to finish creating their account in the next few minutes.",
 		"remove-manager-success-notification": "The manager {email} has been successfully removed.",
 		"title": "Managers - {marketGroupName}"
 	},
 	"fr": {
-		"add-market-group-manager-success-notification": "L’ajout du gestionnaire du groupe de commerce a été un succès. Le gestionnaire va recevoir un courriel pour la création de son compte dans les prochaines minutes.",
-		"remove-manager-success-notification": "Le gestionnaire {email} a été enlevé avec succès.",
+		"add-market-group-manager-success-notification": "L’ajout du ou de la gestionnaire du groupe de commerces a été un succès. La·e gestionnaire va recevoir un courriel pour compléter la création de son compte dans les prochaines minutes.",
+		"remove-manager-success-notification": "Le·a gestionnaire {email} a été enlevé·a avec succès.",
 		"title": "Gestionnaires - {marketGroupName}"
 	}
 }

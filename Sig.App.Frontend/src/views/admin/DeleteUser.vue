@@ -4,14 +4,14 @@
       "delete-user-success-notification": "The user {userName} has been successfully deleted.",
       "delete-text-error": "The text must match the name of the user",
       "delete-text-label": "Type the name of the user to confirm",
-      "description": "Warning ! The deletion of <strong>{userName}</strong> cannot be undone. If you continue, the user will be permanently deleted.",
+      "description": "Warning! Deleting <strong>{userName}</strong> cannot be undone. If you continue, the user will be permanently deleted.",
       "title": "Delete - {userName}"
     },
     "fr": {
-      "delete-user-success-notification": "L'utilisateur {userName} a été supprimé avec succès.",
-      "delete-text-error": "Le texte doit correspondre au nom de l'utilisateur",
-      "delete-text-label": "Taper le nom de l'utilisateur pour confirmer",
-      "description": "Avertissement ! La suppression de <strong>{userName}</strong> ne peut pas être annulée. Si vous continuez, l'utilisateur sera supprimé.",
+      "delete-user-success-notification": "Le compte {userName} a été supprimé avec succès.",
+      "delete-text-error": "Le texte doit correspondre au nom associé au compte",
+      "delete-text-label": "Taper le nom associé au compte pour confirmer",
+      "description": "Avertissement ! La suppression de <strong>{userName}</strong> ne peut pas être annulée. Si vous continuez, le compte sera supprimé.",
       "title": "Supprimer - {userName}"
     }
   }

@@ -3,12 +3,12 @@
 	"en": {
 		"cancel": "Cancel",
 		"market-group-name": "Name",
-		"market-group-name-placeholder": "Ex. Central market"
+		"market-group-name-placeholder": "Ex. Central Market"
 	},
 	"fr": {
 		"cancel": "Annuler",
 		"market-group-name": "Nom",
-		"market-group-name-placeholder": "Ex. Commerce du Marché centrale",
+		"market-group-name-placeholder": "Ex. Commerces du Marché centrale",
 	}
 }
 </i18n>

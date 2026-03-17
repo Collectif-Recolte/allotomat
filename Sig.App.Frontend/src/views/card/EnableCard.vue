@@ -1,21 +1,21 @@
 <i18n>
 {
 	"en": {
-		"delete-text-beneficiary-name-error": "Text must match recipient's first name and recipient's last name",
+		"delete-text-beneficiary-name-error": "Text must match participant's first and last name.",
     "delete-text-card-number-error": "Text must match card number",
-		"delete-text-beneficiary-name-label": "Type the participant name to confirm",
+		"delete-text-beneficiary-name-label": "Type the participant's full name to confirm",
     "delete-text-card-number-label": "Type the card number to confirm",
-		"description": "Warning ! If you continue, the card will be enabled and the participant will be able to use the card.",
-		"title": "Enable card - {beneficiaryName}",
+		"description": "Warning! If you continue, the card will be enabled and the participant will be able to use the card.",
+		"title": "Enable Card - {beneficiaryName}",
 		"enable-btn-label": "Enable",
 		"enable-card-success-notification": "The card has been successfully enabled."
 	},
 	"fr": {
-		"delete-text-beneficiary-name-error": "Le texte doit correspondre au prénom et au nom de famille du-de la participant-e",
+		"delete-text-beneficiary-name-error": "Le texte doit correspondre au prénom et au nom de famille du ou de la participant·e",
     "delete-text-card-number-error": "Le texte doit correspondre au numéro de la carte",
-		"delete-text-beneficiary-name-label": "Taper le nom du-de la participant-e pour confirmer",
+		"delete-text-beneficiary-name-label": "Taper le nom complet du ou de la participant·e pour confirmer",
     "delete-text-card-number-label": "Taper le numéro de la carte pour confirmer",
-		"description": "Avertissement ! Si vous continuez, la carte sera réactivée et le-la participant-e ne pourra plus utiliser la carte.",
+		"description": "Avertissement ! Si vous continuez, la carte sera réactivée et le·a participant·e pourra utiliser la carte.",
 		"title": "Activer la carte - {beneficiaryName}",
 		"enable-btn-label": "Activer",
 		"enable-card-success-notification": "La carte a été réactivée avec succès."
@@ -43,7 +43,13 @@ import { useRoute, useRouter } from "vue-router";
 import { computed } from "vue";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
-import { URL_CARDS, URL_BENEFICIARY_ADMIN, URL_BENEFICIARY_CARD_ENABLE } from "@/lib/consts/urls";
+import {
+  URL_CARDS,
+  URL_BENEFICIARY_ADMIN,
+  URL_BENEFICIARY_CARD_ENABLE,
+  URL_CARDS_GIFT_CARD_ENABLE,
+  URL_CARDS_MANAGE_GIFT_CARDS
+} from "@/lib/consts/urls";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -120,6 +126,7 @@ async function onEnableCard() {
 
 function returnRoute() {
   if (route.name === URL_BENEFICIARY_CARD_ENABLE) return { name: URL_BENEFICIARY_ADMIN };
+  else if (route.name === URL_CARDS_GIFT_CARD_ENABLE) return { name: URL_CARDS_MANAGE_GIFT_CARDS };
   else return { name: URL_CARDS };
 }
 </script>

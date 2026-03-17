@@ -2,23 +2,23 @@
 {
 	"en": {
 		"add-subscription": "Add",
-		"add-subscription-success-notification": "Adding subscription {subscriptionName} was successful. You can now assign the new subscription to participants.",
-		"title": "Add a subscription",
-    "confirm-title": "Subscription added!",
-    "confirm-desc": "Do you want to configure the monetary envelopes available to groups right away?",
+		"add-subscription-success-notification": "The subscription {subscriptionName} has been successfully added. You can now assign the new subscription to participants.",
+		"title": "Add a Subscription",
+    "confirm-title": "Subscription Added",
+    "confirm-desc": "Do you want to configure the budget envelopes available to groups right away?",
     "configure-envelopes": "Configure envelopes",
     "later": "Later",
-    "product-group-type-can-only-be-assign-once-by-beneficiary-type": "A product group cannot be linked to more than one type."
+    "product-group-type-can-only-be-assign-once-by-beneficiary-type": "A product group can only be added once per participant category."
 	},
 	"fr": {
 		"add-subscription": "Ajouter",
-		"add-subscription-success-notification": "L’ajout de l’abonnement {subscriptionName} a été un succès. Vous pouvez maintenant assigner le nouvel abonnement à des participant-e-s.",
+		"add-subscription-success-notification": "L’ajout de l’abonnement {subscriptionName} a été un succès. Vous pouvez maintenant assigner le nouvel abonnement à des participant·e·s.",
 		"title": "Ajouter un abonnement",
     "confirm-title": "Abonnement ajouté!",
-    "confirm-desc": "Désirez-vous configurer les enveloppes monétaires disponibles pour les groupes tout de suite ?",
+    "confirm-desc": "Désirez-vous configurer les enveloppes budgétaires disponibles pour les groupes tout de suite ?",
     "configure-envelopes": "Configurer les enveloppes",
     "later": "Plus tard",
-    "product-group-type-can-only-be-assign-once-by-beneficiary-type": "Un groupe de produit ne peut pas être liée à plus d'un type."
+    "product-group-type-can-only-be-assign-once-by-beneficiary-type": "Un groupe de produits ne peut être ajouté qu'une seule fois par catégorie de participant·e·s."
 
 	}
 }

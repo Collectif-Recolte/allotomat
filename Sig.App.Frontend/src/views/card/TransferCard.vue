@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "title": "Transfer a lost or damaged card",
+      "title": "Transfer a Lost or Damaged Card",
       "lost-card": "Lost card",
       "new-card": "New card",
       "warning-message": "All subscriptions and gift card funds will be transferred to the new card.",
@@ -28,9 +28,9 @@
       "confirm-desc": "La carte #{cardNumber} est maintenant active et prête à l'emploi.",
       "close": "Fermer",
       "original-card-not-found": "L'ID de la carte perdue n'existe pas.",
-      "original-card-not-assign": "La carte perdue n'est pas assignée à un-e participant-e.",
+      "original-card-not-assign": "La carte perdue n'est pas assignée à un·e participant·e.",
       "new-card-not-found": "L'ID de la nouvelle carte n'existe pas.",
-      "new-card-already-assign": "La carte que vous essayez d'assigner est déjà assignée à un-e autre participant-e.",
+      "new-card-already-assign": "La carte que vous essayez d'assigner est déjà assignée à un·e autre participant·e.",
       "new-card-already-lost": "La carte que vous essayez d'assigner est déjà perdue ou endommagée.",
       "new-card-already-gift-card": "La carte que vous essayez d'assigner est une carte-cadeau."
     }
@@ -92,7 +92,13 @@ import { useRoute } from "vue-router";
 import { useMutation, useResult, useQuery } from "@vue/apollo-composable";
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 
-import { URL_CARDS, URL_BENEFICIARY_ADMIN, URL_CARDS_LOST } from "@/lib/consts/urls";
+import {
+  URL_CARDS,
+  URL_BENEFICIARY_ADMIN,
+  URL_CARDS_LOST,
+  URL_CARDS_GIFT_CARD_LOST,
+  URL_CARDS_MANAGE_GIFT_CARDS
+} from "@/lib/consts/urls";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -171,6 +177,7 @@ async function onSubmit({ newCardNumber }) {
 
 function returnRoute() {
   if (route.name === URL_CARDS_LOST) return { name: URL_CARDS };
+  else if (route.name === URL_CARDS_GIFT_CARD_LOST) return { name: URL_CARDS_MANAGE_GIFT_CARDS };
   else return { name: URL_BENEFICIARY_ADMIN };
 }
 </script>

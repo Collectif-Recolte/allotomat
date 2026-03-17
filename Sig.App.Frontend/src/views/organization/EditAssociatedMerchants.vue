@@ -2,10 +2,10 @@
   {
     "en": {
       "add-merchant": "Add a merchant",
-      "market-already-in-organization": "The market is already part of the group",
+      "market-already-in-organization": "The merchant is already part of the group",
       "no-associated-merchant": "No associated merchant",
       "title": "Merchants - {organizationName}",
-      "selected-market": "Selected market"
+      "selected-market": "Selected merchant"
     },
     "fr": {
       "add-merchant": "Ajouter un commerce",
@@ -26,7 +26,12 @@
         <p class="text-sm">{{ t("no-associated-merchant") }}</p>
       </div>
 
-      <MarketTable v-else :markets="organization.markets" can-delete :url-name-market-delete="URL_REMOVE_MERCHANTS_FROM_ORGANIZATION" order-by-market-name />
+      <MarketTable
+        v-else
+        :markets="organization.markets"
+        can-delete
+        :url-name-market-delete="URL_REMOVE_MERCHANTS_FROM_ORGANIZATION"
+        order-by-market-name />
 
       <UiSelectAndAdd
         v-if="filteredMarketOptions.length > 0"

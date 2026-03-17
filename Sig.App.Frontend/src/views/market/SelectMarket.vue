@@ -2,16 +2,16 @@
 {
 	"en": {
 		"add-market": "Add",
-		"add-market-success-notification": "Successfully added market {marketName} to the program.",
-		"title": "Add a market to the program",
-    "create-market": "Create Market",
-    "choose-market": "Search for a market...",
+		"add-market-success-notification": "The merchant {marketName} has been successfully added to the program.",
+		"title": "Add a merchant to the program",
+    "create-market": "Create Merchant",
+    "choose-market": "Search for a merchant...",
     "select-market": "Search Existing Tomat Merchants",
     "cancel": "Cancel",
-    "no-associated-merchant": "All available markets are associated with the program.",
-    "selected-market-group": "Market group",
-    "no-results-found": "No markets found",
-    "warning-message":"Note: This list contains merchants from other programs on Tomat. Adding one of these merchants to your program will allow them to accept your cards, and will also create a new Cash Register that will need to be selected when they open Tomat. Please proceed with caution."
+    "no-associated-merchant": "All available merchants are associated with the program.",
+    "selected-market-group": "Merchant Group",
+    "no-results-found": "No merchants found",
+    "warning-message":"Note: This list contains merchants from other programs on Tomat. Adding one of these merchants to your program will allow them to accept your cards, and will also create a new cash register that will need to be selected when they open Tomat. Please proceed with caution."
 	},
 	"fr": {
 		"add-market": "Ajouter",
@@ -22,9 +22,9 @@
     "select-market": "Trouver un commerce déjà sur Tomat",
     "cancel": "Annuler",
     "no-associated-merchant": "Tous les commerces disponibles sont associés au programme.",
-    "selected-market-group": "Groupe de commerce",
+    "selected-market-group": "Groupe de commerces",
     "no-results-found": "Aucun commerce trouvé",
-    "warning-message":"Attention : Cette liste contient des commerces provenant d’autres programmes qui utilisent Tomat. L'ajout de l'un de ces commerces à votre programme leur permettra d'accepter vos cartes et créera également une nouvelle Caisse qui devra être sélectionnée lorsqu'ils ouvriront Tomat. Veuillez procéder avec prudence."
+    "warning-message":"Attention : Cette liste contient des commerces provenant d’autres programmes qui utilisent Tomat. L'ajout de l'un de ces commerces à votre programme leur permettra d'accepter vos cartes et créera également une nouvelle caisse qui devra être sélectionnée lorsqu'ils ouvriront Tomat. Veuillez procéder avec prudence."
 	}
 }
 </i18n>
@@ -33,10 +33,11 @@
   <UiDialogModal v-slot="{ closeModal }" :return-route="returnRoute()" :title="t('title')" :has-footer="false">
     <p class="text-sm text-gray-500">{{ t("warning-message") }}</p>
     <Form
-      v-if="!loadingMarkets && !loadingProject"
+      v-if="!loadingMarkets && !loadingProject && !loadingMarketGroups"
       v-slot="{ isSubmitting, errors: formErrors }"
-      :validation-schema="validationSchema || baseValidationSchema"
+      :validation-schema="validationSchema"
       :initial-values="initialValues"
+      keep-values
       @submit="onSubmit">
       <PfForm
         has-footer
@@ -60,14 +61,24 @@
                   :options="filteredMarketOptions"
                   :errors="fieldErrors" />
               </Field>
-              <Field v-slot="{ field, errors: fieldErrors }" name="marketGroup">
+              <Field v-if="marketGroup" v-slot="{ errors: fieldErrors }" name="marketGroup">
+                <PfFormInputSelect
+                  id="marketGroup"
+                  required
+                  :value="marketGroup.id"
+                  :label="t('selected-market-group')"
+                  :options="marketGroups"
+                  disabled
+                  :errors="fieldErrors" />
+              </Field>
+              <Field v-else v-slot="{ field, errors: fieldErrors }" name="marketGroup">
                 <PfFormInputSelect
                   id="marketGroup"
                   required
                   v-bind="field"
                   :label="t('selected-market-group')"
                   :options="marketGroups"
-                  :disabled="selectMarketGroupEnabled"
+                  :disabled="isMarketGroupSelectionDisabled"
                   :errors="fieldErrors" />
               </Field>
             </PfFormSection>
@@ -77,7 +88,7 @@
               </div>
             </template>
             <PfButtonAction
-              v-if="!selectMarketGroupEnabled && canCreateMarket"
+              v-if="(!isMarketGroupSelectionDisabled || !marketGroup) && canCreateMarket"
               btn-style="dash"
               has-icon-left
               type="button"
@@ -92,13 +103,17 @@
 
 <script setup>
 import gql from "graphql-tag";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQuery, useResult } from "@vue/apollo-composable";
 import { string, object } from "yup";
+import { storeToRefs } from "pinia";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
+import { useAuthStore } from "@/lib/store/auth";
+
+import { USER_TYPE_MARKETGROUPMANAGER } from "@/lib/consts/enums";
 import {
   URL_MARKET_ADMIN,
   URL_MARKET_OVERVIEW_SELECT,
@@ -111,9 +126,11 @@ import {
 } from "@/lib/consts/urls";
 
 const { t } = useI18n();
+const { userType } = storeToRefs(useAuthStore());
 const router = useRouter();
 const route = useRoute();
 const { addSuccess } = useNotificationsStore();
+const marketGroups = ref([]);
 
 const { result, loading: loadingMarkets } = useQuery(
   gql`
@@ -151,23 +168,54 @@ const { result: resultProject, loading: loadingProject } = useQuery(
     }
   `
 );
+
+const { result: resultMarketGroups, loading: loadingMarketGroups } = useQuery(
+  gql`
+    query MarketGroups {
+      marketGroups {
+        id
+        name
+        markets {
+          id
+          name
+        }
+      }
+    }
+  `
+);
+
 const project = useResult(resultProject, null, (data) => {
   if (route.params.projectId) {
-    return data.projects.find((project) => project.id === route.params.projectId);
-  }
-  return data.projects[0];
-});
-
-const marketGroups = useResult(resultProject, null, (data) => {
-  var project = data.projects[0];
-  if (route.params.projectId) {
-    project = data.projects.find((project) => project.id === route.params.projectId);
+    const project = data.projects.find((project) => project.id === route.params.projectId);
+    marketGroups.value = project.marketGroups.map((marketGroup) => ({
+      value: marketGroup.id,
+      label: marketGroup.name
+    }));
+    return project;
   }
 
-  return project.marketGroups.map((marketGroup) => ({
+  marketGroups.value = data.projects[0].marketGroups.map((marketGroup) => ({
     value: marketGroup.id,
     label: marketGroup.name
   }));
+  return data.projects[0];
+});
+
+const marketGroup = useResult(resultMarketGroups, null, (data) => {
+  if (userType.value === USER_TYPE_MARKETGROUPMANAGER) {
+    if (route.params.marketGroupId) {
+      return data.marketGroups.find((marketGroup) => marketGroup.id === route.params.marketGroupId);
+    }
+
+    marketGroups.value = [
+      {
+        value: data.marketGroups[0].id,
+        label: data.marketGroups[0].name
+      }
+    ];
+    return data.marketGroups[0];
+  }
+  return null;
 });
 
 const { mutate: addMarketToProject } = useMutation(
@@ -187,16 +235,48 @@ const { mutate: addMarketToProject } = useMutation(
   `
 );
 
-const initialValues = {
-  market: null,
-  marketGroup: route.params.marketGroupId !== null ? route.params.marketGroupId : null
-};
+const { mutate: addMarketToMarketGroup } = useMutation(
+  gql`
+    mutation AddMarketToMarketGroup($input: AddMarketToMarketGroupInput!) {
+      addMarketToMarketGroup(input: $input) {
+        marketGroup {
+          id
+          name
+          markets {
+            id
+            name
+          }
+        }
+      }
+    }
+  `
+);
+
+const initialValues = computed(() => {
+  return {
+    market: null,
+    marketGroup:
+      route.params.marketGroupId !== null && route.params.marketGroupId !== undefined
+        ? route.params.marketGroupId
+        : marketGroup != null && marketGroup.value !== null
+        ? marketGroup.value.id
+        : null
+  };
+});
 
 const filteredMarketOptions = computed(() => {
-  if (!markets.value || !project.value) return [];
-  return markets.value
-    .filter((x) => !project.value.markets.some((y) => y.id === x.value))
-    .sort((a, b) => a.label.localeCompare(b.label));
+  if (!markets.value || (!project.value && !marketGroup.value)) return [];
+  if (project.value) {
+    return markets.value
+      .filter((x) => !project.value.markets.some((y) => y.id === x.value))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }
+  if (marketGroup.value) {
+    return markets.value
+      .filter((x) => !marketGroup.value.markets.some((y) => y.id === x.value))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }
+  return [];
 });
 
 const validationSchema = computed(() =>
@@ -206,23 +286,35 @@ const validationSchema = computed(() =>
   })
 );
 
-const selectMarketGroupEnabled = computed(() => route.name === URL_ADD_MERCHANTS_FROM_MARKET_GROUP);
-const canCreateMarket = computed(() => route.name !== URL_ADD_MERCHANTS_FROM_PROJECT);
+const isMarketGroupSelectionDisabled = computed(() => route.name === URL_ADD_MERCHANTS_FROM_MARKET_GROUP);
+const canCreateMarket = computed(
+  () => route.name !== URL_ADD_MERCHANTS_FROM_PROJECT && userType.value !== USER_TYPE_MARKETGROUPMANAGER
+);
 
 function createMarket() {
   router.push({ name: URL_MARKET_OVERVIEW_ADD });
 }
 
 async function onSubmit(values) {
-  await addMarketToProject({
-    input: {
-      projectId: project.value.id,
-      marketId: values.market,
-      marketGroupId: values.marketGroup
-    }
-  });
+  if (userType.value === USER_TYPE_MARKETGROUPMANAGER) {
+    await addMarketToMarketGroup({
+      input: {
+        marketGroupId: values.marketGroup,
+        marketId: values.market
+      }
+    });
+  } else {
+    await addMarketToProject({
+      input: {
+        projectId: project.value.id,
+        marketId: values.market,
+        marketGroupId: values.marketGroup
+      }
+    });
+  }
   router.push(returnRoute());
-  addSuccess(t("add-market-success-notification", { ...values.market }));
+  const marketName = markets.value?.find((m) => m.value === values.market)?.label ?? "";
+  addSuccess(t("add-market-success-notification", { marketName }));
 }
 
 function returnRoute() {

@@ -1,7 +1,7 @@
 <i18n>
 {
 	"en": {
-		"title": "Manually add funds",
+		"title": "Manual Fund Transfer",
 		"select-subscription-label": "Subscription",
 		"cancel": "Cancel",
 		"add-amount": "Add amount",
@@ -12,14 +12,14 @@
     "select-product-group-label": "Product group",
     "available-fund-cant-be-less-than-zero-error-notification": "The card balance cannot be negative.",
     "card-current-balance": "Current balance: {amount}",
-    "select-subscription-description": "Subscriptions that have expired or subscriptions that are not assigned to the participant are not displayed and selectable for manual fund addition.",
+    "select-subscription-description": "Subscriptions that have expired or that are not assigned to the participant are not available for manual fund transfers.",
     "select-expiration-date-label": "Expiration date",
     "first-day-of-the-month": "payment on the 1st day of the month",
     "first-and-fifteenth-day-of-the-month": "payment on the 1st and 15th day of the month",
     "fifteenth-day-of-the-month": "payment on the 15th day of the month"
 	},
 	"fr": {
-		"title": "Ajouter manuellement des fonds",
+		"title": "Transfert manuel de fonds",
 		"select-subscription-label": "Période d'abonnement",
 		"cancel": "Annuler",
 		"add-amount": "Ajouter le montant",
@@ -30,7 +30,7 @@
     "select-product-group-label": "Groupe de produits",
     "available-fund-cant-be-less-than-zero-error-notification": "Le solde de la carte ne peut pas être négatif.",
     "card-current-balance": "Solde actuel: {amount}",
-    "select-subscription-description": "Les abonnements qui ont expiré ou les abonnements qui ne sont pas assignés au participant ne sont pas affichés et sélectionnables pour l'ajout manuel de fonds.",
+    "select-subscription-description": "Les abonnements qui ont expiré ou qui ne sont pas assignés au ou à la participant·e ne sont pas disponibles pour le transfert manuel de fonds.",
     "select-expiration-date-label": "Date d'expiration",
     "first-day-of-the-month": "versement le 1er jour du mois",
     "first-and-fifteenth-day-of-the-month": "versement le 1er et 15ème jour du mois",

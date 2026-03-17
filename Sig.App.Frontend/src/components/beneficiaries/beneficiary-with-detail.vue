@@ -7,7 +7,7 @@
       "beneficiary-balance": "Balance",
       "beneficiary-without-subscription": "No subscription",
       "beneficiary-no-card": "No card",
-      "beneficiary-card-disabled": "Temporarily disabled",
+      "beneficiary-card-disabled": "Temporarily deactivated",
       "beneficiary-card-last-usage": "Last use",
       "beneficiary-organization": "Group"
     },
@@ -65,16 +65,16 @@
           <ul class="inline-flex flex-col justify-start items-start gap-y-1 mb-4 sm:mb-0 max-w-full">
             <li v-for="item in getBeneficiarySubscriptions()" :key="item.subscription.id" class="max-w-full">
               <PfTag
-                class="max-w-full"
                 :label="subscriptionName(item.subscription)"
                 is-dark-theme
                 :bg-color-class="isSubscriptionPaymentConflict(item) ? 'bg-red-500' : 'bg-primary-700'"
                 can-dismiss
+                allow-wrap
                 @dismiss="removeSubscription(beneficiary, item.subscription)" />
             </li>
           </ul>
         </template>
-        <PfTag v-else :label="t('beneficiary-without-subscription')" bg-color-class="bg-primary-300" />
+        <PfTag v-else :label="t('beneficiary-without-subscription')" bg-color-class="bg-primary-300" allow-wrap />
       </div>
       <div class="col-span-4 text-p4 text-primary-900 mb-4 sm:mb-0">
         <UiGenericContactInfo v-if="!beneficiariesAreAnonymous" :person="beneficiary" />
@@ -99,7 +99,8 @@
                     v-if="beneficiary.card.isDisabled"
                     :label="t('beneficiary-card-disabled')"
                     is-dark-theme
-                    bg-color-class="bg-red-500" />
+                    bg-color-class="bg-red-500"
+                    allow-wrap />
                 </span>
                 <span class="block text-p4">
                   {{ getCardNumber() }}
@@ -109,7 +110,8 @@
                 v-else
                 :label="t('beneficiary-no-card')"
                 :is-dark-theme="haveAnySubscriptions()"
-                :bg-color-class="haveAnySubscriptions() ? 'bg-red-500' : 'bg-primary-300'" />
+                :bg-color-class="haveAnySubscriptions() ? 'bg-red-500' : 'bg-primary-300'"
+                allow-wrap />
             </dd>
           </div>
           <div v-if="getCardProgramId() || getCardNumber()" :class="dlGroupClasses" class="mb-2.5">

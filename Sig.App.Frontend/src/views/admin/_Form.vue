@@ -14,7 +14,7 @@
 		"email-desc": "Exemple: vous{'@'}exemple.com",
 		"first-name": "Prénom",
 		"last-name": "Nom",
-		"loading-user-list": "Chargement de la liste des utilisateurs..."
+		"loading-user-list": "Chargement de la liste de comptes..."
 	}
 }
 </i18n>

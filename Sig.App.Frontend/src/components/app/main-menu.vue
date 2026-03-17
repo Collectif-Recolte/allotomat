@@ -5,7 +5,7 @@
     "manage-beneficiaries": "Participants",
     "manage-cards": "Cards",
     "manage-markets": "Markets",
-    "manage-market-groups": "Market Groups",
+    "manage-market-groups": "Merchant Groups",
     "manage-organizations": "Groups",
     "manage-programs": "Programs",
     "manage-subscriptions": "Subscriptions",
@@ -16,7 +16,7 @@
 	},
 	"fr": {
     "create-transaction": "Créer une transaction",
-    "manage-beneficiaries": "Participant-e-s",
+    "manage-beneficiaries": "Participant·e·s",
     "manage-cards": "Cartes",
     "manage-markets": "Commerces",
     "manage-market-groups": "Groupes de commerces",

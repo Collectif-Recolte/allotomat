@@ -277,6 +277,14 @@ namespace Sig.App.Backend.DbModel
                 _.HasOne(x => x.ProductGroup).WithMany().OnDelete(DeleteBehavior.NoAction);
             });
 
+            Configure<LoyaltyEditFundTransaction>(_ => {
+                _.HasOne(x => x.Beneficiary);
+
+                _.HasMany(x => x.Transactions);
+
+                _.HasOne(x => x.ProductGroup).WithMany().OnDelete(DeleteBehavior.NoAction);
+            });
+
             Configure<ManuallyAddingFundTransaction>(_ => {
                 _.HasOne(x => x.Beneficiary);
 

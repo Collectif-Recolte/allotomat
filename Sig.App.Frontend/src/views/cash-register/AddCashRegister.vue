@@ -3,7 +3,7 @@
     "en": {
       "title": "Add Cash Register",
       "add-cash-register": "Add",
-      "add-cash-register-success-notification": "Adding cash register {name} was successful."
+      "add-cash-register-success-notification": "The cash register {name} has been successfully added."
     },
     "fr": {
       "title": "Ajouter une caisse",

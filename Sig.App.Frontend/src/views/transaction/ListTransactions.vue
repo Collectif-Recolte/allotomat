@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "title": "Transaction history",
+      "title": "Transaction History",
       "transaction-count": "No transaction | {count} transaction | {count} transactions",
       "export-btn": "Export report",
       "create-transaction": "New transaction"

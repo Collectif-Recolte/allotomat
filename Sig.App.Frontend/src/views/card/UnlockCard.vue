@@ -1,10 +1,10 @@
 <i18n>
 {
 	"en": {
-    "delete-text-card-number-error": "Text must match card number",
+    "delete-text-card-number-error": "Text must match card number.",
     "delete-text-card-number-label": "Type the card number to confirm",
 		"description": "Warning! If you continue, the card will be available for assignment. Make sure you have found the card before marking it as found.",
-    "title": "Mark card as found - {cardId}",
+    "title": "Mark Card as Found - {cardId}",
 		"unlock-btn-label": "Unlock",
 		"unlock-card-success-notification": "The card is now available for assignment."
 	},

@@ -2,7 +2,7 @@
 {
 	"en": {
 		"add-project": "Add",
-		"title": "Program management",
+		"title": "Program Management",
     "create-project": "Create a program",
     "empty-list": "No programs have been created yet.",
     "project-count": "{count} program | {count} programs"

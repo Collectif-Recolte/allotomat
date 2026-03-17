@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "title": "Budget allowance report",
+      "title": "Budget Envelope Report",
       "no-results": "No transactions for the selected period"
     },
     "fr": {

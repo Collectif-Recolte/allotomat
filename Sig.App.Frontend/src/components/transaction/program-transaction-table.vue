@@ -9,18 +9,20 @@
       "operation-transaction-expire-fund-title": "Expire fund",
       "operation-transaction-loyalty-adding-fund-title": "Adding fund",
       "operation-transaction-loyalty-adding-fund-desc": "Gift card",
+      "operation-transaction-loyalty-editing-fund-title": "Editing fund",
+      "operation-transaction-loyalty-editing-fund-desc": "Gift card",
       "operation-transaction-manually-adding-fund-title": "Adding fund",
       "operation-transaction-manually-adding-fund-desc": "Manually",
       "operation-transaction-off-platform-adding-fund-title": "Adding fund",
       "operation-transaction-off-platform-adding-fund-desc": "Off platform user",
       "operation-transaction-payment-title": "Payment - {subscriptionName}",
       "operation-transaction-payment-desc": "By: {x}",
-      "operation-transaction-refund-budget-allowance-from-no-card-when-adding-fund-title": "Refund budget allowance from no card when adding fund",
-      "operation-transaction-refund-budget-allowance-from-no-card-when-adding-fund-desc": "Refund budget allowance from no card when adding fund",
-      "operation-transaction-refund-budget-allowance-from-removed-beneficiary-from-subscription-title": "Refund budget allowance from removed beneficiary from subscription",
-      "operation-transaction-refund-budget-allowance-from-removed-beneficiary-from-subscription-desc": "Refund budget allowance from removed beneficiary from subscription",
-      "operation-transaction-refund-budget-allowance-from-unassigned-card-title": "Refund budget allowance from unassigned card",
-      "operation-transaction-refund-budget-allowance-from-unassigned-card-desc": "Refund budget allowance from unassigned card",
+      "operation-transaction-refund-budget-allowance-from-no-card-when-adding-fund-title": "Refund budget envelope from no card when adding fund",
+      "operation-transaction-refund-budget-allowance-from-no-card-when-adding-fund-desc": "Refund budget envelope from no card when adding fund",
+      "operation-transaction-refund-budget-allowance-from-removed-beneficiary-from-subscription-title": "Refund budget envelope from removed participant from subscription",
+      "operation-transaction-refund-budget-allowance-from-removed-beneficiary-from-subscription-desc": "Refund budget envelope from removed participant from subscription",
+      "operation-transaction-refund-budget-allowance-from-unassigned-card-title": "Refund budget envelope from unassigned card",
+      "operation-transaction-refund-budget-allowance-from-unassigned-card-desc": "Refund budget envelope from unassigned card",
       "operation-transaction-refund-payment-title": "Refund payment",
       "operation-transaction-refund-payment-desc": "By: {x}",
       "operation-transaction-subscription-adding-fund-title": "Adding fund",
@@ -31,13 +33,15 @@
     },
     "fr": {
       "transaction-date-hour": "Date et heure",
-      "transaction-beneficiary-name":"Participant-e-s",
+      "transaction-beneficiary-name":"Participant·e·s",
       "transaction-operation": "Opération",
       "transaction-amount": "Montant",
       "transaction-refund": "Remboursement",
       "operation-transaction-expire-fund-title": "Expiration de fonds",
       "operation-transaction-loyalty-adding-fund-title": "Ajout de fonds",
       "operation-transaction-loyalty-adding-fund-desc": "Carte-cadeau",
+      "operation-transaction-loyalty-editing-fund-title": "Modification de fonds",
+      "operation-transaction-loyalty-editing-fund-desc": "Carte-cadeau",
       "operation-transaction-manually-adding-fund-title": "Ajout de fonds",
       "operation-transaction-manually-adding-fund-desc": "Manuellement",
       "operation-transaction-off-platform-adding-fund-title": "Ajout de fonds",
@@ -47,7 +51,7 @@
       "operation-transaction-refund-budget-allowance-from-no-card-when-adding-fund-title": "Remboursement",
       "operation-transaction-refund-budget-allowance-from-no-card-when-adding-fund-desc": "Allocation budgétaire sans carte lors d'un ajout de fonds",
       "operation-transaction-refund-budget-allowance-from-removed-beneficiary-from-subscription-title": "Remboursement",
-      "operation-transaction-refund-budget-allowance-from-removed-beneficiary-from-subscription-desc": "Allocation budgétaire d'un participant supprimé d'un abonnement",
+      "operation-transaction-refund-budget-allowance-from-removed-beneficiary-from-subscription-desc": "Allocation budgétaire d'un·e participant·e supprimé·e d'un abonnement",
       "operation-transaction-refund-budget-allowance-from-unassigned-card-title": "Remboursement",
       "operation-transaction-refund-budget-allowance-from-unassigned-card-desc": "Allocation budgétaire d'une carte non assignée",
       "operation-transaction-refund-payment-title": "Remboursement",
@@ -103,6 +107,7 @@ import { formatDate, textualWithTimeFormat } from "@/lib/helpers/date";
 import {
   EXPIRE_FUND_TRANSACTION_LOG,
   LOYALTY_ADDING_FUND_TRANSACTION_LOG,
+  LOYALTY_EDIT_FUND_TRANSACTION_LOG,
   MANUALLY_ADDING_FUND_TRANSACTION_LOG,
   OFF_PLATFORM_ADDING_FUND_TRANSACTION_LOG,
   PAYMENT_TRANSACTION_LOG,
@@ -189,6 +194,8 @@ function getOperationName(transaction) {
       return t("operation-transaction-expire-fund-title");
     case LOYALTY_ADDING_FUND_TRANSACTION_LOG:
       return t("operation-transaction-loyalty-adding-fund-title");
+    case LOYALTY_EDIT_FUND_TRANSACTION_LOG:
+      return t("operation-transaction-loyalty-editing-fund-title");
     case MANUALLY_ADDING_FUND_TRANSACTION_LOG:
       return t("operation-transaction-manually-adding-fund-title");
     case OFF_PLATFORM_ADDING_FUND_TRANSACTION_LOG:
@@ -221,6 +228,8 @@ function getOperationDetail(transaction) {
   switch (transaction.discriminator) {
     case LOYALTY_ADDING_FUND_TRANSACTION_LOG:
       return t("operation-transaction-loyalty-adding-fund-desc");
+    case LOYALTY_EDIT_FUND_TRANSACTION_LOG:
+      return t("operation-transaction-loyalty-editing-fund-desc");
     case MANUALLY_ADDING_FUND_TRANSACTION_LOG:
       return t("operation-transaction-manually-adding-fund-desc");
     case OFF_PLATFORM_ADDING_FUND_TRANSACTION_LOG:

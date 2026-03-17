@@ -3,13 +3,13 @@
     "en": {
       "add-subscription": "Add a subscription",
       "no-associated-subscription": "No subscription assigned",
-      "title": "Subscription(s) - {beneficiaryName}",
+      "title": "Subscriptions - {beneficiaryName}",
       "selected-subscription": "Selected subscription"
     },
     "fr": {
       "add-subscription": "Ajouter un abonnement",
       "no-associated-subscription": "Aucun abonnement associé",
-      "title": "Abonnement(s) - {beneficiaryName}",
+      "title": "Abonnements - {beneficiaryName}",
       "selected-subscription": "Abonnement sélectionné"
     }
   }

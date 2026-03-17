@@ -11,7 +11,13 @@ import { useQuery, useResult } from "@vue/apollo-composable";
 
 import QrCodePreview from "@/components/card/qr-code-preview.vue";
 
-import { URL_CARDS, URL_BENEFICIARY_ADMIN, URL_CARDS_QRCODE_PREVIEW } from "@/lib/consts/urls";
+import {
+  URL_CARDS,
+  URL_BENEFICIARY_ADMIN,
+  URL_CARDS_QRCODE_PREVIEW,
+  URL_CARDS_GIFT_CARD_QRCODE_PREVIEW,
+  URL_CARDS_MANAGE_GIFT_CARDS
+} from "@/lib/consts/urls";
 
 const route = useRoute();
 
@@ -34,6 +40,7 @@ const qrCode = useResult(result, null, (data) => {
 
 function returnRoute() {
   if (route.name === URL_CARDS_QRCODE_PREVIEW) return { name: URL_CARDS };
+  else if (route.name === URL_CARDS_GIFT_CARD_QRCODE_PREVIEW) return { name: URL_CARDS_MANAGE_GIFT_CARDS };
   else return { name: URL_BENEFICIARY_ADMIN };
 }
 </script>

@@ -1,18 +1,18 @@
 <i18n>
   {
     "en": {
-      "disabled-market-success-notification": "The market {marketName} has been successfully disabled.",
-      "disabled-text-error": "The text must match the name of the market",
-      "disabled-text-label": "Type the name of the market to confirm",
-      "description": "Warning ! If you continue, the market will be disabled and the market will not be able to process transactions.",
-      "title": "Disabled - {marketName}",
-      "disabled-btn-label": "Disabled"
+      "disabled-market-success-notification": "The merchant {marketName} has been successfully deactivated.",
+      "disabled-text-error": "The text must match the name of the merchant.",
+      "disabled-text-label": "Type the name of the merchant to confirm",
+      "description": "Warning! If you continue, the merchant will be deactivated and will not be able to process transactions.",
+      "title": "Deactivated - {marketName}",
+      "disabled-btn-label": "Deactivated"
     },
     "fr": {
       "disabled-market-success-notification": "Le commerce {marketName} a été désactivé avec succès.",
-      "disabled-text-error": "Le texte doit correspondre au nom du commerce",
+      "disabled-text-error": "Le texte doit correspondre au nom du commerce.",
       "disabled-text-label": "Taper le nom du commerce pour confirmer",
-      "description": "Avertissement ! Si vous continuez, le commerce sera désactivé et le commerce ne pourra pas traiter les transactions.",
+      "description": "Avertissement ! Si vous continuez, le commerce sera désactivé et ne pourra pas traiter les transactions.",
       "title": "Désactiver - {marketName}",
       "disabled-btn-label": "Désactiver"
     }

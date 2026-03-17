@@ -5,7 +5,7 @@
 		"product-group-name": "Product group name",
 		"product-group-name-placeholder": "Ex. Fruits",
     "product-group-name-description": "Will be displayed in French and English.",
-    "product-group-order": "Display order for the market",
+    "product-group-order": "Display order for the merchant",
 		"product-group-order-placeholder": "Ex. 4",
     "product-group-order-description": "A lower number will be displayed first in the merchant's list.",
     "product-group-color": "Color"
@@ -15,9 +15,9 @@
 		"product-group-name": "Nom du groupe",
 		"product-group-name-placeholder": "Ex. Fruits",
     "product-group-name-description": "Sera affiché en français et en anglais.",
-    "product-group-order": "Ordre d’affichage pour le commerçant",
+    "product-group-order": "Ordre d’affichage pour le commerce",
 		"product-group-order-placeholder": "Ex. 4",
-    "product-group-order-description": "Un chiffre moins élevé sera affiché en premier dans la liste du commerçant.",
+    "product-group-order-description": "Un chiffre moins élevé sera affiché en premier dans la liste du commerce.",
     "product-group-color": "Couleur"
 	}
 }

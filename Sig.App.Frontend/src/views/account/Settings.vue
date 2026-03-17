@@ -12,7 +12,7 @@
 		"password-confirmation": "Re-enter password",
 		"password-rules": "The password must contain a minimum of 10 characters, 1 capital letter, a number and a special character (for example: %, {'@'}, #, $ and &).",
 		"submit": "Update",
-		"title": "Account settings",
+		"title": "Account Settings",
 		"email-opt-in-title": "Automated emails to receive",
     "password-title": "Password",
     "email-title": "Email"

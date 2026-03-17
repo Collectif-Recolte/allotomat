@@ -11,17 +11,18 @@
     "without-subscription-option": "None",
     "transaction-log-types": "Transaction types",
     "transaction-log-type-expired": "Funds expired",
-    "transaction-log-type-loyalty": "Gift Card",
+    "transaction-log-type-loyalty": "Gift card",
+    "transaction-log-type-loyalty-editing": "Gift card balance adjustment",
     "transaction-log-type-manually": "Fund added manually",
-    "transaction-log-type-off-platform": "Adding Fund (Off-Platform Participant)",
+    "transaction-log-type-off-platform": "Fund added (off-platform participant)",
     "transaction-log-type-subscription": "Subscription",
-    "transaction-log-type-payment": "Payment",
+    "transaction-log-type-payment": "Purchase",
     "transaction-log-type-transfer": "Fund transferred",
-    "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Budget allowance refund from unassigned card",
-    "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Budget allowances refund from participant having no cards",
-    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Budget allowance refund from participant removed from subscription",
-    "transaction-log-type-refund-payment": "Payment refund",
-    "market": "Markets",
+    "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Budget envelope refund from unassigned card",
+    "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Budget envelope refund from participant having no card",
+    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Budget envelope refund from participant removed from subscription",
+    "transaction-log-type-refund-payment": "Purchase refund",
+    "market": "Merchants",
     "cash-register": "Cash Registers",
     "gift-card-transaction-types": "Gift Card Transaction Types",
     "with-gift-card": "With Gift Card",
@@ -39,15 +40,16 @@
     "transaction-log-types": "Types de transactions",
     "transaction-log-type-expired": "Expiration des fonds",
     "transaction-log-type-loyalty": "Carte-cadeau",
+    "transaction-log-type-loyalty-editing": "Modification des fonds d'une carte-cadeau",
     "transaction-log-type-manually": "Fond ajouté manuellement",
-    "transaction-log-type-off-platform": "Ajout de fond (participant hors plateforme)",
+    "transaction-log-type-off-platform": "Ajout de fond (participant·e hors plateforme)",
     "transaction-log-type-subscription": "Abonnement",
-    "transaction-log-type-payment": "Paiement",
+    "transaction-log-type-payment": "Achat",
     "transaction-log-type-transfer": "Fond transféré",
     "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Enveloppe remboursées après la désassignation d'une carte",
-    "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Enveloppe remboursée en raison d'un participant sans carte",
-    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppe remboursée après avoir retiré un participant d'un abonnement",
-    "transaction-log-type-refund-payment": "Remboursement d'un paiement",
+    "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Enveloppe remboursée en raison d'un·e participant·e sans carte",
+    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppe remboursée après avoir retiré un·e participant·e d'un abonnement",
+    "transaction-log-type-refund-payment": "Remboursement d'un achat",
     "market": "Commerces",
     "cash-register": "Caisses",
     "gift-card-transaction-types": "Carte-cadeaux",
@@ -154,7 +156,9 @@
             :options="availableTransactionTypes"
             @input="onTransactionTypesChecked" />
         </UiFilterSelect>
-        <UiFilterSelect :label="t('gift-card-transaction-types')" :active-filters-count="giftCardTransactionTypeActiveFiltersCount">
+        <UiFilterSelect
+          :label="t('gift-card-transaction-types')"
+          :active-filters-count="giftCardTransactionTypeActiveFiltersCount">
           <PfFormInputCheckboxGroup
             v-if="availableGiftCardTransactionTypes.length > 0 && !props.hideGiftCardTransactionType"
             id="giftCardTransactionTypes"
@@ -435,6 +439,7 @@ const availableTransactionTypes = computed(() => {
   return [
     { value: "ExpireFundTransactionLog", label: t("transaction-log-type-expired") },
     { value: "LoyaltyAddingFundTransactionLog", label: t("transaction-log-type-loyalty") },
+    { value: "LoyaltyEditingFundTransactionLog", label: t("transaction-log-type-loyalty-editing") },
     { value: "ManuallyAddingFundTransactionLog", label: t("transaction-log-type-manually") },
     { value: "OffPlatformAddingFundTransactionLog", label: t("transaction-log-type-off-platform") },
     { value: "SubscriptionAddingFundTransactionLog", label: t("transaction-log-type-subscription") },

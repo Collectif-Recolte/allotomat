@@ -9,7 +9,7 @@
 		"amount-placeholder": "Ex. {amount}",
 		"cancel": "Cancel",
     "product-groups": "Product groups",
-		"product-group-fund-not-enought": "The product group does not have enough funds",
+		"product-group-fund-not-enought": "There are not enough funds in this product group.",
 		"card-selected": "Card #{cardProgramCardId}",
 		"create-transaction": "Pay",
 		"title": "Transaction",
@@ -18,12 +18,12 @@
     "confirm": "Confirm",
     "edit": "Revise",
     "gift-card": "Gift card",
-    "no-product-group-transaction":"At least one product group must have an amount to create a transaction.",
+    "no-product-group-transaction": "At least one product group must have an amount to create a transaction.",
     "no-funds-message": "There are no available funds on this card.",
     "product-group-amount-isnan": "The amount must be a number.",
-    "card-is-disabled": "The card is disabled.",
+    "card-is-disabled": "The card is deactivated.",
     "beneficiary-card-last-usage": "Last usage : {date}",
-    "subscriptions-title": "Beneficiary subscriptions",
+    "subscriptions-title": "Participant Subscriptions",
     "amount-received-each-payment": "→ Amount(s) received by this card at each payment: <b>{amountByPayment}</b>",
     "remaining-payment-on-card": "→ <b>{remainingPayment}</b> remaining payments on this card",
     "payment-dates": "→ Payment dates: <b>Payments on the {paymentMoment} of the month between {startDate} and {endDate}</b>",
@@ -43,7 +43,7 @@
 		"amount-placeholder": "Ex. {amount}",
 		"cancel": "Annuler",
     "product-groups": "Groupes de produits",
-		"product-group-fund-not-enought": "Le groupe de produits ne possède pas assez de fonds",
+		"product-group-fund-not-enought": "Il n'y a pas assez de fonds pour ce groupe de produits.",
 		"card-selected": "{marketName} - Carte #{cardProgramCardId}",
 		"create-transaction": "Payer",
 		"title": "Transaction",
@@ -52,12 +52,12 @@
     "confirm": "Confirmer",
     "edit": "Réviser",
     "gift-card": "Carte-cadeau",
-    "no-product-group-transaction":"Au minimum un groupe de produit doit avoir un montant pour créer une transaction.",
+    "no-product-group-transaction": "Au minimum un groupe de produit doit avoir un montant pour créer une transaction.",
     "no-funds-message": "Il n'y a pas de fonds disponibles sur cette carte.",
     "product-group-amount-isnan": "Le montant doit être un nombre.",
     "card-is-disabled": "La carte est désactivée.",
     "beneficiary-card-last-usage": "Dernier usage : {date}",
-    "subscriptions-title": "Abonnements du participant-e",
+    "subscriptions-title": "Abonnements du ou de la participant·e",
     "amount-received-each-payment": "→ Montant(s) reçu(s) par cette carte à chaque versement : <b>{amountByPayment}</b>",
     "remaining-payment-on-card": "→ <b>{remainingPayment}</b> versement(s) restant(s) sur cette carte",
     "payment-dates": "→ Dates des versements : <b>Versements le {paymentMoment} du mois entre le {startDate} et le {endDate}</b>",
@@ -87,20 +87,18 @@
           :key="beneficiarySubscription.subscription.id"
           class="mb-4">
           <b>{{ subscriptionName(beneficiarySubscription.subscription) }}</b>
-          <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
+          <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <div
             v-html="
               t('amount-received-each-payment', { amountByPayment: amountByPayment(beneficiarySubscription.subscription) })
-            "></div>
-          <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
+            " />
           <div
             v-html="
               t('remaining-payment-on-card', { remainingPayment: beneficiarySubscription.subscription.paymentRemaining })
-            "></div>
-          <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <div v-html="getPaymentDates(beneficiarySubscription.subscription)"></div>
-          <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <div v-html="getExpirationDate(beneficiarySubscription.subscription)"></div>
+            " />
+          <div v-html="getPaymentDates(beneficiarySubscription.subscription)" />
+          <div v-html="getExpirationDate(beneficiarySubscription.subscription)" />
+          <!-- eslint-enable vue/no-v-html @intlify/vue-i18n/no-v-html -->
         </li>
       </ul>
     </template>

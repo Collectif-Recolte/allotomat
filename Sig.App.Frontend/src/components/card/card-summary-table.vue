@@ -11,7 +11,7 @@
     "card-number":"N°",
     "card-assigned": "Assigned",
     "card-unassigned": "Unassigned",
-    "card-disabled": "Temporarily disabled",
+    "card-disabled": "Temporarily deactivated",
 	},
 	"fr": {
     "fund": "Soldes",
@@ -64,7 +64,7 @@
           }" />
       </td>
       <td :class="CELL_CLASSES" :style="slotProps.item.rowPaddingBottom">
-        {{ getCardFundTotal(slotProps.item) }}
+        {{ getCardFund(slotProps.item) }}
       </td>
       <td :class="CELL_CLASSES" :style="slotProps.item.rowPaddingBottom">
         {{ getBeneficiaryOrganization(slotProps.item) }}
@@ -99,6 +99,10 @@ const props = defineProps({
     default: false
   },
   administrationSubscriptionsOffPlatform: {
+    type: Boolean,
+    default: false
+  },
+  isGiftCard: {
     type: Boolean,
     default: false
   }
@@ -175,8 +179,11 @@ function getCardStatus(card) {
   return "";
 }
 
-function getCardFundTotal(card) {
+function getCardFund(card) {
   const loyaltyFund = card.loyaltyFund?.amount ?? 0;
+  if (props.isGiftCard) {
+    return getMoneyFormat(loyaltyFund);
+  }
   return getMoneyFormat(card.totalFund + loyaltyFund);
 }
 

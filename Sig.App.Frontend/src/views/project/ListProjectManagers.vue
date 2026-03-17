@@ -1,15 +1,15 @@
 <i18n>
   {
     "en": {
-      "add-user": "Add a project manager",
-      "cant-remove-self-info": "It is impossible to remove yourself from the list of project manager",
-      "title": "User management",
+      "add-user": "Add a program manager",
+      "cant-remove-self-info": "It is impossible to remove yourself from the list of program managers",
+      "title": "User Management",
       "manager-count": "{count} manager | {count} managers"
     },
     "fr": {
-      "add-user": "Ajouter un gestionnaire de programme",
-      "cant-remove-self-info": "Il est impossible de se retirer soi-même de la liste de gestionnaire d'un programme",
-      "title": "Gestion des utilisateurs",
+      "add-user": "Ajouter un·e gestionnaire de programme",
+      "cant-remove-self-info": "Il est impossible de se retirer soi-même de la liste de gestionnaires d'un programme",
+      "title": "Gestion des comptes",
       "manager-count": "{count} gestionnaire | {count} gestionnaires"
     }
   }

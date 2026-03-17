@@ -25,11 +25,11 @@
 	},
 	"fr": {
 		"title-step-1": "Avant d'importer votre liste",
-    "title-step-2": "Importer des participant-e-s",
-    "title-step-3": "Confirmer l'importation des participant-e-s",
-    "import-beneficiaries-success-notification": "L'importation des {count} participant-e-s a été un succès.",
+    "title-step-2": "Importer des participant·e·s",
+    "title-step-3": "Confirmer l'importation des participant·e·s",
+    "import-beneficiaries-success-notification": "L'importation des {count} participant·e·s a été un succès.",
     "import-beneficiairies-empty-list-notification": "L'importation n'a pas fonctionné. Veuillez vérifier votre fichier avant de réessayer.",
-    "import-beneficiairies-duplicate-uniqueid-notification": "L'importation n'a pu être complétée. Plusieurs participant-e-s possèdent le même Id 1.",
+    "import-beneficiairies-duplicate-uniqueid-notification": "L'importation n'a pu être complétée. Plusieurs participant·e·s possèdent le même Id 1.",
     "warning-import": "Avertissement: Cet import écrasera les informations actuellement dans la plateforme.",
     "error-summary": "Une erreur empêche d'importer votre fichier | {count} erreurs empêchent d'importer votre fichier",  
     "error-row": "Ligne {row}:",
@@ -37,14 +37,14 @@
     "step-1-confirm": "J'ai compris, continuer",
     "step-1-cancel": "Annuler",
     "step-1-confirmation-text-1": "L'importation va écraser les données existantes et",
-    "step-1-confirmation-text-2": "rendre inactifs les participants qui ne se trouvent pas dans le fichier.",
+    "step-1-confirmation-text-2": "rendre inactifs les participant·e·s qui ne se trouvent pas dans le fichier.",
     "step-2-cancel": "Annuler",
     "step-3-cancel": "Retour",
     "step-3-confirm": "Confirmer",
-    "forecast-added-beneficiaries": "Ajouté-e-s",
-    "forecast-modified-beneficiaries": "Modifié-e-s",
-    "forecast-missing-beneficiaries-line-1": "Manquant-e-s",
-    "forecast-missing-beneficiaries-line-2": "(devenu-e-s inactif-ve-s)"
+    "forecast-added-beneficiaries": "Ajouté·e·s",
+    "forecast-modified-beneficiaries": "Modifié·e·s",
+    "forecast-missing-beneficiaries-line-1": "Manquant·e·s",
+    "forecast-missing-beneficiaries-line-2": "(devenu·e·s inactif·ve·s)"
 	}
 }
 </i18n>

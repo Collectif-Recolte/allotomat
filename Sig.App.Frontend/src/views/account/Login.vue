@@ -5,7 +5,7 @@
 		"loading": "Loading...",
 		"login": "Login",
 		"logo": "Tomat logo",
-		"market-manager-without-market-warning": "No market is associated with your account. If you believe there has been an error, contact the Tomat team.",
+		"market-manager-without-market-warning": "No merchant is associated with your account. If you believe there has been an error, contact the Tomat team.",
 		"organization-manager-without-organization-warning": "No group is associated with your account. If you believe there has been an error, contact the Tomat team.",
 		"password": "Password",
 		"project-manager-without-project-warning": "No program is associated with your account. If you believe there has been an error, contact the Tomat team.",

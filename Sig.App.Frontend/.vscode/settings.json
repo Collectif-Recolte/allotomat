@@ -9,5 +9,10 @@
   "editor.tabSize": 2,
 
   "eslint.validate": ["vue", "html", "javascript", "graphql"],
-  "i18n-ally.localesPaths": ["src/lib/i18n"]
+  "i18n-ally.localesPaths": [
+    "src/lib/i18n"
+  ],
+  "[vue]": {
+    "editor.defaultFormatter": "Vue.volar"
+  }
 }

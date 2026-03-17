@@ -2,13 +2,13 @@
 {
 	"en": {
 		"edit-market-group": "Edit",
-		"edit-market-group-success-notification": "Editing market group {marketGroupName} was successful.",
-		"title": "Edit a market group"
+		"edit-market-group-success-notification": "The merchant group {marketGroupName} has been successfully updated.",
+		"title": "Edit Merchant Group"
 	},
 	"fr": {
 		"edit-market-group": "Modifier",
-		"edit-market-group-success-notification": "L’édition du groupe de commerce {marketGroupName} a été un succès.",
-		"title": "Modifier un groupe de commerce"
+		"edit-market-group-success-notification": "L’édition du groupe de commerces {marketGroupName} a été un succès.",
+		"title": "Modifier un groupe de commerces"
 	}
 }
 </i18n>
