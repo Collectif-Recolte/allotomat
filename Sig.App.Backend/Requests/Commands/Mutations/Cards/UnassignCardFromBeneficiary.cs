@@ -97,7 +97,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             if (card.Transactions.Any())
             {
                 var addingFundTransactions = card.Transactions.OfType<AddingFundTransaction>()
-                    .Where(x => x is not LoyaltyAddingFundTransaction)
+                    .Where(x => x is not LoyaltyAddingFundTransaction and not LoyaltyEditFundTransaction)
                     .Where(x => x.Status == FundTransactionStatus.Actived && x.AvailableFund > 0).ToList();
 
                 var addingFundTransactionsBySubscriptionId =
@@ -112,7 +112,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
                 
                 foreach (var transaction in card.Transactions)
                 {
-                    if (transaction is IExpiringFundTransaction eft and not LoyaltyAddingFundTransaction)
+                    if (transaction is IExpiringFundTransaction eft and not LoyaltyAddingFundTransaction and not LoyaltyEditFundTransaction)
                     {
                         eft.Status = FundTransactionStatus.Unassigned;
                     }
