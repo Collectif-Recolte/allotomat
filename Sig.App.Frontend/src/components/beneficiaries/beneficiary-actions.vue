@@ -116,7 +116,7 @@ onMounted(() => {
 });
 
 watch(
-  () => props.beneficiary,
+  () => [props.beneficiary, props.isAllGroupSelected],
   () => {
     updateItems();
   }
