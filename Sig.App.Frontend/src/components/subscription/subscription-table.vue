@@ -9,10 +9,10 @@
           "subscription-unarchive": "Unarchive",
           "subscription-edit": "Edit configuration",
           "subscription-edit-budget-allowance": "Manage budgets envelopes",
-          "subscription-name": "Subscription period name",
-          "subscription-period": "Active interval",
+          "subscription-name": "Subscription",
+          "subscription-period": "Payment Period",
           "subscription-type": "Type",
-          "subscription-budget-allowance-total": "Budget envelope total"
+          "subscription-budget-allowance-total": "Total Budget Envelope"
       },
       "fr": {
           "date-separator": " au ",
@@ -23,8 +23,8 @@
           "subscription-unarchive": "Désarchiver",
           "subscription-edit": "Modifier la configuration",
           "subscription-edit-budget-allowance": "Configurer les enveloppes",
-          "subscription-name": "Nom de la période",
-          "subscription-period": "Intervalle actif",
+          "subscription-name": "Abonnement",
+          "subscription-period": "Période de versements",
           "subscription-type": "Type",
           "subscription-budget-allowance-total": "Total des enveloppes"
       }
