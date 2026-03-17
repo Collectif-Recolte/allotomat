@@ -143,8 +143,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var beneficiary = card.Beneficiary;
             var organizationId = beneficiary?.OrganizationId;
             var loyaltyFundTransactions = card.Transactions
-                .OfType<LoyaltyAddingFundTransaction>()
-                .Where(x => x.Status == FundTransactionStatus.Actived && x.AvailableFund > 0)
+                .Where(x => (x is LoyaltyAddingFundTransaction || x is LoyaltyEditFundTransaction) 
+                    && (x as AddingFundTransaction).Status == FundTransactionStatus.Actived && (x as AddingFundTransaction).AvailableFund > 0)
+                .Cast<AddingFundTransaction>()
                 .ToList();
 
             var transactionByProductGroups = new List<PaymentTransactionProductGroup>();
