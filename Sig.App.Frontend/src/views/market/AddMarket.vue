@@ -142,7 +142,7 @@ const initialValues = computed(() => {
         ? route.params.marketGroupId
         : marketGroup != null && marketGroup.value !== undefined && marketGroup.value !== null
           ? marketGroup.value.id
-          : null,
+          : undefined,
     managers: [{ email: "" }]
   };
 });
