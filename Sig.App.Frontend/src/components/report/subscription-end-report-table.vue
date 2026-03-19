@@ -39,7 +39,9 @@
       </td>
       <td>
         <div v-if="slotProps.item.subscription" class="inline-flex items-center">
-          {{ slotProps.item.subscription.name }}
+          <span class="whitespace-normal break-words">
+            {{ slotProps.item.subscription.name }}
+          </span>
         </div>
         <div v-else class="inline-flex items-center">
           {{ t("no-subscription") }}

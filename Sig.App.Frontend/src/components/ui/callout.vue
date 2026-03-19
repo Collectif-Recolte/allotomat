@@ -58,7 +58,7 @@ const theme = computed(() => {
       icon: "text-primary-500 dark:text-primary-400"
     },
     [CALLOUT_WARNING]: {
-      bg: "bg-yellow-50 dark:bg-grey-800",
+      bg: "bg-grey-50 dark:bg-grey-800",
       border: "border-yellow-500 dark:border-yellow-500",
       text: "text-yellow-800 dark:text-yellow-300",
       icon: "text-yellow-500 dark:text-yellow-400"
