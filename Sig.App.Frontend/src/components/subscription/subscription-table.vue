@@ -11,8 +11,11 @@
           "subscription-edit-budget-allowance": "Manage budgets allowances",
           "subscription-name": "Subscription period name",
           "subscription-period": "Active interval",
+          "subscription-expiration-date": "Expiration date",
           "subscription-type": "Type",
-          "subscription-budget-allowance-total": "Budget allowance total"
+          "subscription-budget-allowance-total": "Budget allowance total",
+          "subscription-non-cumulative": "Non-cumulative",
+          "subscription-expiration-date-description": "{expirationDate} / {days} days after usage"
       },
       "fr": {
           "date-separator": " au ",
@@ -25,8 +28,11 @@
           "subscription-edit-budget-allowance": "Configurer les enveloppes",
           "subscription-name": "Nom de la période",
           "subscription-period": "Intervalle actif",
+          "subscription-expiration-date": "Date d'expiration",
           "subscription-type": "Type",
-          "subscription-budget-allowance-total": "Total des enveloppes"
+          "subscription-budget-allowance-total": "Total des enveloppes",
+          "subscription-non-cumulative": "Non cumulable",
+          "subscription-expiration-date-description": "{expirationDate} / {days} jours après usage"
       }
   }
 </i18n>
@@ -45,6 +51,9 @@
       </td>
       <td v-if="showSubscriptionPeriod" :class="{ 'text-primary-500': slotProps.item.isArchived }">
         {{ getSubscriptionPeriod(slotProps.item) }}
+      </td>
+      <td v-if="showSubscriptionExpirationDate" :class="{ 'text-primary-500': slotProps.item.isArchived }">
+        {{ getSubscriptionExpirationDate(slotProps.item) }}
       </td>
       <td v-if="showSubscriptionType">
         {{ getSubscriptionType(slotProps.item) }}
@@ -95,13 +104,15 @@ const props = defineProps({
   canEdit: Boolean,
   showSubscriptionPeriod: Boolean,
   showSubscriptionType: Boolean,
-  showBudgetAllowanceTotal: Boolean
+  showBudgetAllowanceTotal: Boolean,
+  showSubscriptionExpirationDate: Boolean
 });
 
 const cols = computed(() => {
   let cols = [];
   cols.push({ label: t("subscription-name") });
   if (props.showSubscriptionPeriod) cols.push({ label: t("subscription-period") });
+  if (props.showSubscriptionExpirationDate) cols.push({ label: t("subscription-expiration-date") });
   if (props.showSubscriptionType) cols.push({ label: t("subscription-type") });
   if (props.showBudgetAllowanceTotal) cols.push({ label: t("subscription-budget-allowance-total"), isRight: true });
   cols.push({
@@ -148,5 +159,18 @@ function getSubscriptionPeriod(item) {
     dateUtc(item.endDate),
     textualFormat
   )}`;
+}
+
+function getSubscriptionExpirationDate(item) {
+  if (!item.isFundsAccumulable) {
+    return t("subscription-non-cumulative");
+  }
+  if (item.numberDaysUntilFundsExpire > 0) {
+    return t("subscription-expiration-date-description", {
+      expirationDate: formatDate(dateUtc(item.fundsExpirationDate), textualFormat),
+      days: item.numberDaysUntilFundsExpire
+    });
+  }
+  return formatDate(dateUtc(item.fundsExpirationDate), textualFormat);
 }
 </script>
