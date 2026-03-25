@@ -24,9 +24,7 @@ public class ScopedFieldResolver : IFieldResolver
         innerResolver = new FieldResolver(fieldInfo);
     }
 
-#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-    public async ValueTask<object?> ResolveAsync(IResolveFieldContext context)
-#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+    public async ValueTask<object> ResolveAsync(IResolveFieldContext context)
     {
         if (!fieldInfo.IsMethod) return await innerResolver.ResolveAsync(context);
         if (context.GetDependencyInjector() is not DependencyInjector originalInjector) return await innerResolver.ResolveAsync(context);

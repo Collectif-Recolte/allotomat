@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.Helpers;
 using System;
@@ -174,13 +174,19 @@ namespace Sig.App.Backend.Services.Reports
                     if (currentUserCanSeeAllBeneficiaryInfo)
                     {
                         query = query.Where(x =>
-                            x.BeneficiaryID1.Contains(text) || x.BeneficiaryID1.Contains(text) ||
-                            x.BeneficiaryEmail.Contains(text) || x.BeneficiaryFirstname.Contains(text) ||
-                            x.BeneficiaryLastname.Contains(text));
+                            EF.Functions.Collate(x.BeneficiaryID1, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryID2, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryEmail, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryFirstname, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryLastname, SearchCollation.AccentInsensitive).Contains(text)
+                        );
                     }
                     else
                     {
-                        query = query.Where(x => x.BeneficiaryID1.Contains(text) || x.BeneficiaryID2.Contains(text));
+                        query = query.Where(x =>
+                            EF.Functions.Collate(x.BeneficiaryID1, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.BeneficiaryID2, SearchCollation.AccentInsensitive).Contains(text)
+                        );
                     }
                 }
             }
@@ -273,6 +279,8 @@ namespace Sig.App.Backend.Services.Reports
                     return $"Remboursement d'enveloppe, participant sans carte lors de l'ajout de fond automatique/Budget allowance refund, participant had no cards when automatically adding fund";
                 case TransactionLogDiscriminator.RefundPaymentTransactionLog:
                     return $"Remboursement d'un paiement/Refund of a payment";
+                case TransactionLogDiscriminator.LoyaltyEditFundTransactionLog:
+                    return "Modification Carte-cadeau/Edit Gift card";
                 default:
                     return "Type inconnu/Unknown type";
             }

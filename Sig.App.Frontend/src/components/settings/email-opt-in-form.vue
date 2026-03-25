@@ -18,7 +18,8 @@
       "september": "September",
       "october": "October",
       "november": "November",
-      "december": "December"
+      "december": "December",
+      "loading": "Loading email preferences..."
     },
     "fr": {
       "submit": "Mettre à jour",
@@ -38,99 +39,65 @@
       "september": "Septembre",
       "october": "Octobre",
       "november": "Novembre",
-      "december": "Décembre"
+      "december": "Décembre",
+      "loading": "Chargement des préférences de courriel..."
     }
   }
 </i18n>
 
 <template>
-  <Form
-    v-slot="{ isSubmitting }"
-    :validation-schema="validationSchemaEmail"
-    :initial-values="initialFormValues"
+  <Form v-slot="{ isSubmitting }" :validation-schema="validationSchemaEmail" :initial-values="initialFormValues"
     @submit="onSubmitChangeEmailOptIn">
     <PfForm has-footer :submit-label="t('submit')" :loading-label="t('loading')" :processing="isSubmitting">
       <PfFormSection>
         <p class="mb-0 mt-0">{{ t("monthly-balance-report-email") }}</p>
         <div class="inline-flex flex-col gap-x-4 mt-0">
           <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_JANUARY">
-            <PfFormInputCheckbox
-              id="MONTHLY_BALANCE_REPORT_EMAIL_JANUARY"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_BALANCE_REPORT_EMAIL_JANUARY" v-bind="field" :checked="field.value"
               :label="t('january')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_FEBRUARY">
-            <PfFormInputCheckbox
-              id="MONTHLY_BALANCE_REPORT_EMAIL_FEBRUARY"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_BALANCE_REPORT_EMAIL_FEBRUARY" v-bind="field" :checked="field.value"
               :label="t('february')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_MARCH">
-            <PfFormInputCheckbox
-              id="MONTHLY_BALANCE_REPORT_EMAIL_MARCH"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_BALANCE_REPORT_EMAIL_MARCH" v-bind="field" :checked="field.value"
               :label="t('march')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_APRIL">
-            <PfFormInputCheckbox
-              id="MONTHLY_BALANCE_REPORT_EMAIL_APRIL"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_BALANCE_REPORT_EMAIL_APRIL" v-bind="field" :checked="field.value"
               :label="t('april')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_MAY">
-            <PfFormInputCheckbox id="MONTHLY_BALANCE_REPORT_EMAIL_MAY" v-bind="field" :checked="field.value" :label="t('may')" />
+            <PfFormInputCheckbox id="MONTHLY_BALANCE_REPORT_EMAIL_MAY" v-bind="field" :checked="field.value"
+              :label="t('may')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_JUNE">
-            <PfFormInputCheckbox
-              id="MONTHLY_BALANCE_REPORT_EMAIL_JUNE"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_BALANCE_REPORT_EMAIL_JUNE" v-bind="field" :checked="field.value"
               :label="t('june')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_JULY">
-            <PfFormInputCheckbox
-              id="MONTHLY_BALANCE_REPORT_EMAIL_JULY"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_BALANCE_REPORT_EMAIL_JULY" v-bind="field" :checked="field.value"
               :label="t('july')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_AUGUST">
-            <PfFormInputCheckbox
-              id="MONTHLY_BALANCE_REPORT_EMAIL_AUGUST"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_BALANCE_REPORT_EMAIL_AUGUST" v-bind="field" :checked="field.value"
               :label="t('august')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_SEPTEMBER">
-            <PfFormInputCheckbox
-              id="MONTHLY_BALANCE_REPORT_EMAIL_SEPTEMBER"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_BALANCE_REPORT_EMAIL_SEPTEMBER" v-bind="field" :checked="field.value"
               :label="t('september')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_OCTOBER">
-            <PfFormInputCheckbox
-              id="MONTHLY_BALANCE_REPORT_EMAIL_OCTOBER"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_BALANCE_REPORT_EMAIL_OCTOBER" v-bind="field" :checked="field.value"
               :label="t('october')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_NOVEMBER">
-            <PfFormInputCheckbox
-              id="MONTHLY_BALANCE_REPORT_EMAIL_NOVEMBER"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_BALANCE_REPORT_EMAIL_NOVEMBER" v-bind="field" :checked="field.value"
               :label="t('november')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_BALANCE_REPORT_EMAIL_DECEMBER">
-            <PfFormInputCheckbox
-              id="MONTHLY_BALANCE_REPORT_EMAIL_DECEMBER"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_BALANCE_REPORT_EMAIL_DECEMBER" v-bind="field" :checked="field.value"
               :label="t('december')" />
           </Field>
         </div>
@@ -138,104 +105,62 @@
         <p class="mb-0 mt-0">{{ t("monthly-card-balance-report-email") }}</p>
         <div class="inline-flex flex-col gap-x-4 mt-0">
           <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JANUARY">
-            <PfFormInputCheckbox
-              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JANUARY"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JANUARY" v-bind="field" :checked="field.value"
               :label="t('january')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_FEBRUARY">
-            <PfFormInputCheckbox
-              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_FEBRUARY"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_FEBRUARY" v-bind="field" :checked="field.value"
               :label="t('february')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_MARCH">
-            <PfFormInputCheckbox
-              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_MARCH"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_MARCH" v-bind="field" :checked="field.value"
               :label="t('march')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_APRIL">
-            <PfFormInputCheckbox
-              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_APRIL"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_APRIL" v-bind="field" :checked="field.value"
               :label="t('april')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_MAY">
-            <PfFormInputCheckbox
-              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_MAY"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_MAY" v-bind="field" :checked="field.value"
               :label="t('may')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JUNE">
-            <PfFormInputCheckbox
-              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JUNE"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JUNE" v-bind="field" :checked="field.value"
               :label="t('june')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JULY">
-            <PfFormInputCheckbox
-              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JULY"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_JULY" v-bind="field" :checked="field.value"
               :label="t('july')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_AUGUST">
-            <PfFormInputCheckbox
-              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_AUGUST"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_AUGUST" v-bind="field" :checked="field.value"
               :label="t('august')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_SEPTEMBER">
-            <PfFormInputCheckbox
-              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_SEPTEMBER"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_SEPTEMBER" v-bind="field" :checked="field.value"
               :label="t('september')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_OCTOBER">
-            <PfFormInputCheckbox
-              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_OCTOBER"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_OCTOBER" v-bind="field" :checked="field.value"
               :label="t('october')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_NOVEMBER">
-            <PfFormInputCheckbox
-              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_NOVEMBER"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_NOVEMBER" v-bind="field" :checked="field.value"
               :label="t('november')" />
           </Field>
           <Field v-slot="{ field }" name="MONTHLY_CARD_BALANCE_REPORT_EMAIL_DECEMBER">
-            <PfFormInputCheckbox
-              id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_DECEMBER"
-              v-bind="field"
-              :checked="field.value"
+            <PfFormInputCheckbox id="MONTHLY_CARD_BALANCE_REPORT_EMAIL_DECEMBER" v-bind="field" :checked="field.value"
               :label="t('december')" />
           </Field>
         </div>
 
         <Field v-slot="{ field }" name="CREATED_CARD_PDF_EMAIL">
-          <PfFormInputCheckbox
-            id="CREATED_CARD_PDF_EMAIL"
-            v-bind="field"
-            :checked="field.value"
+          <PfFormInputCheckbox id="CREATED_CARD_PDF_EMAIL" v-bind="field" :checked="field.value"
             :label="t('created-card-csv-email')" />
         </Field>
 
         <Field v-slot="{ field }" name="SUBSCRIPTION_EXPIRATION_EMAIL">
-          <PfFormInputCheckbox
-            id="SUBSCRIPTION_EXPIRATION_EMAIL"
-            v-bind="field"
-            :checked="field.value"
+          <PfFormInputCheckbox id="SUBSCRIPTION_EXPIRATION_EMAIL" v-bind="field" :checked="field.value"
             :label="t('subscription-expiration-email')" />
         </Field>
       </PfFormSection>

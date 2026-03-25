@@ -106,7 +106,8 @@ namespace Sig.App.Backend.Services.Permission
             ProjectPermission.ManageProject,
             ProjectPermission.CreateOrganization,
             ProjectPermission.CreateCard,
-            ProjectPermission.AddLoyaltyFundToCard
+            ProjectPermission.AddLoyaltyFundToCard,
+            ProjectPermission.EditLoyaltyFundOnCard
         };
 
         private static readonly BeneficiaryTypePermission[] ProjectManagerBeneficiaryTypePermission = new[]
@@ -155,6 +156,11 @@ namespace Sig.App.Backend.Services.Permission
             MarketPermission.RefundTransaction
         };
 
+        private static readonly MarketPermission[] MarketGroupManagerCreateMarketPermission = new[]
+        {
+            MarketPermission.CreateMarket
+        };
+
         private static readonly MarketPermission[] MarketGroupManagerMarketPermission = new[]
         {
             MarketPermission.ManageMarket,
@@ -197,7 +203,8 @@ namespace Sig.App.Backend.Services.Permission
 
         private static readonly CardPermission[] ProjectManagerCardPermissions = new[]
         {
-            CardPermission.EnableDisableCard
+            CardPermission.EnableDisableCard,
+            CardPermission.TransfertCard
         };
 
         private static readonly CardPermission[] OrganizationManagerCardPermissionsWithAssignCard = new[]
@@ -360,16 +367,21 @@ namespace Sig.App.Backend.Services.Permission
 
             if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.MarketGroupManager.ToString()))
             {
-                var marketLongId = Id.New<Market>(marketId).LongIdentifierForType<Market>();
-                var marketGroupMarkets = db.MarketGroupMarkets.Where(x => x.MarketId == marketLongId).ToList();
+                if (!string.IsNullOrEmpty(marketId))
+                { 
+                    var marketLongId = Id.New<Market>(marketId).LongIdentifierForType<Market>();
+                    var marketGroupMarkets = db.MarketGroupMarkets.Where(x => x.MarketId == marketLongId).ToList();
 
-                foreach (var marketGroupMarket in marketGroupMarkets)
-                {
-                    if (claimsPrincipal.HasClaim(AppClaimTypes.MarketGroupManagerOf, marketGroupMarket.MarketGroupId.ToString()))
+                    foreach (var marketGroupMarket in marketGroupMarkets)
                     {
-                        return Task.FromResult(MarketGroupManagerMarketPermission);
+                        if (claimsPrincipal.HasClaim(AppClaimTypes.MarketGroupManagerOf, marketGroupMarket.MarketGroupId.ToString()))
+                        {
+                            return Task.FromResult(MarketGroupManagerMarketPermission);
+                        }
                     }
                 }
+
+                return Task.FromResult(MarketGroupManagerCreateMarketPermission);
             }
 
             return Task.FromResult(Array.Empty<MarketPermission>());

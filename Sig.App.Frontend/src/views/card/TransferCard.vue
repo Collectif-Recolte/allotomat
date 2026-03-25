@@ -92,7 +92,13 @@ import { useRoute } from "vue-router";
 import { useMutation, useResult, useQuery } from "@vue/apollo-composable";
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 
-import { URL_CARDS, URL_BENEFICIARY_ADMIN, URL_CARDS_LOST } from "@/lib/consts/urls";
+import {
+  URL_CARDS,
+  URL_BENEFICIARY_ADMIN,
+  URL_CARDS_LOST,
+  URL_CARDS_GIFT_CARD_LOST,
+  URL_CARDS_MANAGE_GIFT_CARDS
+} from "@/lib/consts/urls";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -171,6 +177,7 @@ async function onSubmit({ newCardNumber }) {
 
 function returnRoute() {
   if (route.name === URL_CARDS_LOST) return { name: URL_CARDS };
+  else if (route.name === URL_CARDS_GIFT_CARD_LOST) return { name: URL_CARDS_MANAGE_GIFT_CARDS };
   else return { name: URL_BENEFICIARY_ADMIN };
 }
 </script>

@@ -1,16 +1,18 @@
-﻿using GraphQL.DataLoader;
+﻿using GraphQL.Conventions;
+using GraphQL.DataLoader;
 using MediatR;
+using Sig.App.Backend.DbModel.Entities.Beneficiaries;
+using Sig.App.Backend.DbModel.Entities.Projects;
+using Sig.App.Backend.DbModel.Entities.Transactions;
+using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Gql.Schema.GraphTypes;
+using Sig.App.Backend.Plugins.GraphQL;
+using Sig.App.Backend.Requests.Queries.DataLoaders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using GraphQL.Conventions;
-using Sig.App.Backend.Gql.Schema.GraphTypes;
-using Sig.App.Backend.Plugins.GraphQL;
-using Sig.App.Backend.Requests.Queries.DataLoaders;
-using Sig.App.Backend.DbModel.Entities.Transactions;
-using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 
 namespace Sig.App.Backend.Gql
 {
@@ -218,6 +220,10 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<IEnumerable<SubscriptionTypeGraphType>> LoadSubscriptionTypeByBeneficiaryAndSubscriptionId(long beneficiaryId, long subscriptionId) =>
             LoadCollection<GetSubscriptionTypeByBeneficiaryAndSubscriptionId.Query, SubscriptionTypeGraphType, long, long>(beneficiaryId, subscriptionId, x => x.ToString());
 
+        public IDataLoaderResult<IEnumerable<CardGraphType>> LoadCardByProjectIdAndCardProgramId(long projectId, long cardProgramId) =>
+            LoadCollection<GetCardByProjectIdAndCardProgramId.Query, CardGraphType, long, long>(projectId, cardProgramId, x => x.ToString());
+
+
         private IDataLoaderResult<TResult> LoadOne<TQuery, TResult, TKey>(TKey id) where TQuery : IRequest<IDictionary<TKey, TResult>>, IIdListQuery<TKey>, new()
         {
             return LoadOne(typeof(TQuery).FullName, DoLoad, id);
@@ -228,23 +234,6 @@ namespace Sig.App.Backend.Gql
                 var mediator = scope.Resolve<IMediator>();
                 
                 var query = new TQuery { Ids = ids };
-                return await mediator.Send(query, cancellationToken);
-            }
-        }
-
-        private IDataLoaderResult<TResult> LoadOne<TQuery, TResult, TGroup, TKey>(TGroup group, TKey id, Func<TGroup, string> stringifyGroup = null)
-            where TQuery : IRequest<IDictionary<TKey, TResult>>, IIdListQuery<TKey>, IHaveGroup<TGroup>, new()
-        {
-            if (stringifyGroup == null) stringifyGroup = x => x.ToString();
-
-            return LoadOne($"{typeof(TQuery).FullName}:{stringifyGroup(group)}", DoLoad, id);
-
-            async Task<IDictionary<TKey, TResult>> DoLoad(IEnumerable<TKey> ids, CancellationToken cancellationToken)
-            {
-                using var scope = scopeFactory.CreateScopedInjector();
-                var mediator = scope.Resolve<IMediator>();
-                
-                var query = new TQuery { Group = group, Ids = ids };
                 return await mediator.Send(query, cancellationToken);
             }
         }

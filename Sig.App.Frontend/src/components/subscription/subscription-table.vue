@@ -34,13 +34,14 @@
 <template>
   <UiTable v-if="props.subscriptions" :items="props.subscriptions" :cols="cols">
     <template #default="slotProps">
-      <td :class="{ 'text-primary-500': slotProps.item.isArchived }">
-        <span
-          v-if="slotProps.item.isArchived"
+      <td class="py-3" :class="{ 'text-primary-500': slotProps.item.isArchived }">
+        <span v-if="slotProps.item.isArchived"
           class="bg-grey-50 border border-grey-100 rounded-md px-1.5 py-0.5 text-xs font-semibold mr-1">
           {{ t("subscription-archived") }}
         </span>
-        {{ getSubscriptionName(slotProps.item) }}
+        <span class="whitespace-normal break-words">
+          {{ getSubscriptionName(slotProps.item) }}
+        </span>
       </td>
       <td v-if="showSubscriptionPeriod" :class="{ 'text-primary-500': slotProps.item.isArchived }">
         {{ getSubscriptionPeriod(slotProps.item) }}
@@ -54,19 +55,10 @@
       <td>
         <div class="inline-flex items-center gap-x-2">
           <template v-if="props.canEdit">
-            <PfButtonLink
-              v-if="!slotProps.item.isArchived"
-              tag="routerLink"
-              btn-style="outline"
-              size="sm"
+            <PfButtonLink v-if="!slotProps.item.isArchived" tag="routerLink" btn-style="outline" size="sm"
               :label="t('subscription-archive')"
               :to="{ name: URL_SUBSCRIPTION_ARCHIVE, params: { subscriptionId: slotProps.item.id } }" />
-            <PfButtonLink
-              v-else
-              tag="routerLink"
-              btn-style="outline"
-              size="sm"
-              :label="t('subscription-unarchive')"
+            <PfButtonLink v-else tag="routerLink" btn-style="outline" size="sm" :label="t('subscription-unarchive')"
               :to="{ name: URL_SUBSCRIPTION_UNARCHIVE, params: { subscriptionId: slotProps.item.id } }" />
           </template>
           <UiButtonGroup :items="getBtnGroup(slotProps.item)" tooltip-position="left" />

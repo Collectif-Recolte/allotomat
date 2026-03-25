@@ -1,4 +1,4 @@
 module.exports = {
   inherit: "inherit",
-  normal: 1.5,
+  normal: 1.5
 };

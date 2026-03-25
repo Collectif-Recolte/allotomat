@@ -19,6 +19,7 @@ using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Gql.Bases;
+using System;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 {
@@ -59,7 +60,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
                 throw new NewCardNotFoundException();
             }
 
-            if (originalCard.Status != CardStatus.Assigned)
+            if (originalCard.Status != CardStatus.Assigned && originalCard.Status != CardStatus.GiftCard)
             {
                 logger.LogWarning("[Mutation] TransfertCard - OriginalCardNotAssignException");
                 throw new OriginalCardNotAssignException();
@@ -100,7 +101,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             newCard.Funds = originalCard.Funds;
             newCard.Transactions = originalCard.Transactions;
-            newCard.Status = CardStatus.Assigned;
+            newCard.Status = originalCard.Status;
             newCard.Beneficiary = originalCard.Beneficiary;
             newCard.IsDisabled = originalCard.IsDisabled;
 
@@ -114,12 +115,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             var productGroups = await db.ProductGroups
                 .Where(x => originalCard.Transactions.OfType<AddingFundTransaction>().Select(y => y.ProductGroupId)
                     .Contains(x.Id)).ToListAsync(cancellationToken);
-            
+
             foreach (var group in addingFundTransactionsBySubscriptionId)
             {
                 var transactions = group.ToList();
                 var subscription = subscriptions.FirstOrDefault(x => x.Id == group.Key);
-                
+
                 var transactionLogProductGroups = new List<TransactionLogProductGroup>();
                 foreach (var productGroup in transactions.GroupBy(x => x.ProductGroupId))
                 {
@@ -131,7 +132,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
                         ProductGroupName = currentProductGroup.Name
                     });
                 }
-                
+
                 db.TransactionLogs.Add(new TransactionLog()
                 {
                     Discriminator = TransactionLogDiscriminator.TransferFundTransactionLog,
@@ -141,20 +142,20 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
                     FundTransferredFromCardNumber = originalCard.CardNumber,
                     CardProgramCardId = newCard.ProgramCardId,
                     CardNumber = newCard.CardNumber,
-                    BeneficiaryId = newCard.Beneficiary.Id,
-                    BeneficiaryID1 = newCard.Beneficiary.ID1,
-                    BeneficiaryID2 = newCard.Beneficiary.ID2,
-                    BeneficiaryFirstname = newCard.Beneficiary.Firstname,
-                    BeneficiaryLastname = newCard.Beneficiary.Lastname,
-                    BeneficiaryEmail = newCard.Beneficiary.Email,
-                    BeneficiaryPhone = newCard.Beneficiary.Phone,
+                    BeneficiaryId = newCard.Beneficiary != null ? newCard.Beneficiary.Id : null,
+                    BeneficiaryID1 = newCard.Beneficiary?.ID1,
+                    BeneficiaryID2 = newCard.Beneficiary?.ID2,
+                    BeneficiaryFirstname = newCard.Beneficiary?.Firstname,
+                    BeneficiaryLastname = newCard.Beneficiary?.Lastname,
+                    BeneficiaryEmail = newCard.Beneficiary?.Email,
+                    BeneficiaryPhone = newCard.Beneficiary?.Phone,
                     BeneficiaryIsOffPlatform = newCard.Beneficiary is OffPlatformBeneficiary,
-                    BeneficiaryTypeId = newCard.Beneficiary.BeneficiaryTypeId,
-                    OrganizationId = newCard.Beneficiary.OrganizationId,
-                    OrganizationName = newCard.Beneficiary.Organization.Name,
+                    BeneficiaryTypeId = newCard.Beneficiary?.BeneficiaryTypeId,
+                    OrganizationId = newCard.Beneficiary?.OrganizationId,
+                    OrganizationName = newCard.Beneficiary?.Organization.Name,
                     SubscriptionId = subscription?.Id,
                     SubscriptionName = subscription?.Name,
-                    ProjectId = newCard.Beneficiary.Organization.ProjectId,
+                    ProjectId = originalCard.ProjectId,
                     ProjectName = originalCard.Project.Name,
                     TransactionLogProductGroups = transactionLogProductGroups,
                     TransactionInitiatorId = currentUserId,

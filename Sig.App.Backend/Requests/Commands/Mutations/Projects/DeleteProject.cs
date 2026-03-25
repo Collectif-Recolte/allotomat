@@ -170,7 +170,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Projects
                     refundTransaction.RefundByProductGroups = null;
                     refundTransaction.CashRegister = null;
                 }
-                else if(type == typeof(OffPlatformAddingFundTransaction) || type == typeof(LoyaltyAddingFundTransaction))
+                else if(type == typeof(OffPlatformAddingFundTransaction) || type == typeof(LoyaltyAddingFundTransaction) || type == typeof(LoyaltyEditFundTransaction))
                 {
                     var addingFundTransaction = transaction as AddingFundTransaction;
                     addingFundTransaction.Card = null;

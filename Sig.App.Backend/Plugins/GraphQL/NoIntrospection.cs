@@ -24,9 +24,7 @@ namespace Sig.App.Backend.Plugins.GraphQL
                     )
                 );
             });
-#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-            return ValueTask.FromResult<INodeVisitor?>(visitor);
-#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+            return ValueTask.FromResult<INodeVisitor>(visitor);
         }
     }
 }

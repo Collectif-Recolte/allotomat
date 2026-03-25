@@ -2,6 +2,7 @@
 {
     public enum CardPermission
     {
-        EnableDisableCard
+        EnableDisableCard,
+        TransfertCard
     }
 }
