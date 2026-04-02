@@ -29,7 +29,9 @@
       "transfer-funds": "Transfer funds",
       "beneficiary-transfer-funds-disabled-no-card": "You can't transfer funds if the beneficiary doesn't have a card",
       "beneficiary-transfer-funds-disabled-no-subscription": "You can't transfer funds if the beneficiary doesn't have a subscription",
-      "beneficiary-transfer-funds-disabled-all-group": "You can't transfer funds if all groups are selected"
+      "beneficiary-transfer-funds-disabled-all-group": "You can't transfer funds if all groups are selected",
+      "change-max-number-of-payments": "Change maximum number of payments",
+      "change-max-number-of-payments-disabled": "You can't change the maximum number of payments if the participant has no eligible subscriptions"
     },
     "fr": {
       "beneficiary-edit": "Modifier les détails",
@@ -60,7 +62,9 @@
       "transfer-funds": "Transférer des fonds",
       "beneficiary-transfer-funds-disabled-no-card": "Vous ne pouvez pas transférer des fonds si le-a participant-e n'a pas de carte",
       "beneficiary-transfer-funds-disabled-no-subscription": "Vous ne pouvez pas transférer des fonds si le-a participant-e n'a pas d'abonnement",
-      "beneficiary-transfer-funds-disabled-all-group": "Vous ne pouvez pas transférer des fonds si tous les groupes sont sélectionnés"
+      "beneficiary-transfer-funds-disabled-all-group": "Vous ne pouvez pas transférer des fonds si tous les groupes sont sélectionnés",
+      "change-max-number-of-payments": "Modifier le nombre maximum de paiements",
+      "change-max-number-of-payments-disabled": "Vous ne pouvez pas modifier le nombre maximum de paiements si le-a participant-e n'a pas d'abonnement admissible"
     }
   }
 </i18n>
@@ -89,6 +93,7 @@ import ICON_CLOSE from "@/lib/icons/close.json";
 import ICON_CONFLICT from "@/lib/icons/exclamation-circle.json";
 import ICON_IDENTIFICATION from "@/lib/icons/identification.json";
 import ICON_TRANSACTION from "@/lib/icons/add-square.json";
+import ICON_RECEIPT_TAX from "@/lib/icons/receipt-tax.json";
 
 import {
   URL_BENEFICIARY_EDIT,
@@ -103,7 +108,8 @@ import {
   URL_BENEFICIARY_MANAGE_CONFLICT,
   URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS,
   URL_BENEFICIARY_TRANSACTION_ADD,
-  URL_BENEFICIARY_TRANSFER_FUNDS
+  URL_BENEFICIARY_TRANSFER_FUNDS,
+  URL_BENEFICIARY_CHANGE_MAX_NUMBER_OF_PAYMENTS
 } from "@/lib/consts/urls";
 
 import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
@@ -174,6 +180,14 @@ function updateItems() {
           : !haveSubscriptions()
             ? t("beneficiary-transfer-funds-disabled-no-subscription")
             : t("beneficiary-transfer-funds-disabled-all-group")
+      },
+      {
+        isExtra: true,
+        icon: ICON_RECEIPT_TAX,
+        label: t("change-max-number-of-payments"),
+        route: { name: URL_BENEFICIARY_CHANGE_MAX_NUMBER_OF_PAYMENTS, params: { beneficiaryId: props.beneficiary.id } },
+        disabled: !havePaymentBasedSubscriptions(),
+        reason: t("change-max-number-of-payments-disabled")
       },
       {
         isExtra: true,
@@ -321,6 +335,10 @@ function isCardDisabled() {
 
 function haveSubscriptions() {
   return props.beneficiary.beneficiarySubscriptions.length > 0;
+}
+
+function havePaymentBasedSubscriptions() {
+  return props.beneficiary.beneficiarySubscriptions.some((x) => x.subscription.isSubscriptionPaymentBasedCardUsage);
 }
 
 function haveMarketsInOrganization() {

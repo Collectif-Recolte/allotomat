@@ -19,3 +19,7 @@ ClientApp
 npm-debug.log
 
 nCrunchTemp*
+
+// Come from Claude-Code test
+Sig.App.Backend/binTestOutput/*
+Sig.App.BackendTests/binTestOutput/*

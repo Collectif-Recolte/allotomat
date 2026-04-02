@@ -617,6 +617,7 @@ const {
                   isArchived
                   name
                   endDate
+                  isSubscriptionPaymentBasedCardUsage
                   types {
                     id
                     beneficiaryType {
@@ -758,6 +759,7 @@ const {
                   isArchived
                   name
                   endDate
+                  isSubscriptionPaymentBasedCardUsage
                   types {
                     id
                     beneficiaryType {

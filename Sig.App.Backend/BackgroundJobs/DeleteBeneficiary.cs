@@ -83,7 +83,7 @@ namespace Sig.App.Backend.BackgroundJobs
 
         private DateTime ExpirationDate(Beneficiary beneficiary)
         {
-            if (beneficiary.Subscriptions.Where(x => x.Subscription.GetPaymentRemaining(clock) > 0 && x.Subscription.GetExpirationDate(clock) > DateTime.UtcNow).Any())
+            if (beneficiary.Subscriptions.Where(x => x.GetPaymentRemaining(clock) > 0 && x.Subscription.GetExpirationDate(clock) > DateTime.UtcNow).Any())
             {
                 return DateTime.MaxValue;
             }

@@ -108,16 +108,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .Include(x => x.SubscriptionType)
                 .Where(x => x.BeneficiaryId == beneficiary.Id && x.SubscriptionType.SubscriptionId == subscription.Id).ToListAsync();
 
-            var subscriptionTotalPayment = subscription.GetTotalPayment();
-            var subscriptionPaymentRemaining = subscription.GetPaymentRemaining(clock);
+            var subscriptionTotalPayment = subscriptionBeneficiary.GetTotalPayment();
+            var subscriptionPaymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock);
 
-            if (subscription.MaxNumberOfPayments.HasValue)
+            if ((subscriptionBeneficiary.MaxNumberOfPaymentsOverride.HasValue || subscription.MaxNumberOfPayments.HasValue)
+                && transactions.Count() >= subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments())
             {
-                if (transactions.Count() == subscription.MaxNumberOfPayments)
-                {
-                    logger.LogWarning("[Mutation] AddMissingPayment - SubscriptionDontHaveMissedPaymentException");
-                    throw new SubscriptionDontHaveMissedPaymentException();
-                }
+                logger.LogWarning("[Mutation] AddMissingPayment - SubscriptionDontHaveMissedPaymentException");
+                throw new SubscriptionDontHaveMissedPaymentException();
             }
             else if (transactions.Count() >= subscriptionTotalPayment - subscriptionPaymentRemaining)
             {
@@ -125,7 +123,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 throw new SubscriptionDontHaveMissedPaymentException();
             }
 
-            var maxNumberOfPayments = subscription.MaxNumberOfPayments.HasValue ? subscription.MaxNumberOfPayments.Value : subscriptionTotalPayment;
+            var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
             var isBudgetAllowanceAlreadyAllocated = maxNumberOfPayments - transactions.Count <= Math.Min(maxNumberOfPayments - transactions.Count(), subscriptionPaymentRemaining);
             if (!isBudgetAllowanceAlreadyAllocated)
             {
