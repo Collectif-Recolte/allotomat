@@ -43,6 +43,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
             var subscription = await db.Subscriptions.Include(x => x.Types).ThenInclude(x => x.ProductGroup)
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.BudgetAllowance)
+                .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary)
+                .Include(x => x.Beneficiaries).ThenInclude(x => x.BeneficiaryType)
                 .FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
             if (subscription == null)
@@ -80,7 +82,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             beneficiary.Subscriptions.Remove(subscriptionBeneficiary);
 
-            var paymentsRemaining = subscription.GetPaymentRemaining(clock);
+            var paymentsRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock);
             var subscriptionTypes = subscription.Types.Where(x => x.BeneficiaryTypeId == subscriptionBeneficiary.BeneficiaryTypeId).ToList();
             var totalRefund = paymentsRemaining * subscriptionTypes.Sum(x => x.Amount);
             
@@ -92,7 +94,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                     subscriptionAddingFundTransactionCount = beneficiaryTransactions.OfType<SubscriptionAddingFundTransaction>().Where(x => x.SubscriptionType.SubscriptionId == subscription.Id).Count();
                 }
 
-                paymentsRemaining = Math.Max(0, Math.Min(paymentsRemaining, subscription.MaxNumberOfPayments.Value - subscriptionAddingFundTransactionCount));
+                var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
+                paymentsRemaining = Math.Max(0, Math.Min(paymentsRemaining, maxNumberOfPayments - subscriptionAddingFundTransactionCount));
                 totalRefund = paymentsRemaining * subscriptionTypes.Sum(x => x.Amount);
             }
 

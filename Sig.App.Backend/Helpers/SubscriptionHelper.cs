@@ -7,7 +7,26 @@ namespace Sig.App.Backend.Helpers
 {
     public static class SubscriptionHelper
     {
+        public static int GetEffectiveMaxNumberOfPayments(this SubscriptionBeneficiary subscriptionBeneficiary)
+        {
+            return subscriptionBeneficiary.MaxNumberOfPaymentsOverride
+                ?? subscriptionBeneficiary.Subscription.MaxNumberOfPayments
+                ?? subscriptionBeneficiary.GetTotalPayment();
+        }
+
+        public static int GetPaymentRemaining(this SubscriptionBeneficiary subscriptionBeneficiary, IClock clock)
+        {
+            var cardPaymentRemaining = GetCardPaymentRemaining(subscriptionBeneficiary.Subscription, clock);
+            return Math.Max(0, subscriptionBeneficiary.Subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(cardPaymentRemaining, subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments()) : cardPaymentRemaining);
+        }
+
         public static int GetPaymentRemaining(this Subscription subscription, IClock clock)
+        {
+            var cardPaymentRemaining = GetCardPaymentRemaining(subscription, clock);
+            return Math.Max(0, subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(cardPaymentRemaining, subscription.MaxNumberOfPayments.Value) : cardPaymentRemaining);
+        }
+
+        private static int GetCardPaymentRemaining(this Subscription subscription, IClock clock)
         {
             var cardPaymentRemaining = 0;
             var today = clock
@@ -46,13 +65,25 @@ namespace Sig.App.Backend.Helpers
 
             if (needExtraDay) cardPaymentRemaining++;
 
-            return Math.Max(0, subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(cardPaymentRemaining, subscription.MaxNumberOfPayments.Value) : cardPaymentRemaining);
+            return cardPaymentRemaining;
         }
 
         public static int GetTotalPayment(this Subscription subscription)
         {
-            var cardPaymentRemaining = 0;
-            
+            var totalPayment = GetTotalPaymentBySubscription(subscription);
+            return subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(subscription.MaxNumberOfPayments.Value, totalPayment) : totalPayment;
+        }
+
+        public static int GetTotalPayment(this SubscriptionBeneficiary subscriptionBeneficiary)
+        {
+            var totalPayment = GetTotalPaymentBySubscription(subscriptionBeneficiary.Subscription);
+            return subscriptionBeneficiary.Subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments(), totalPayment) : totalPayment;
+        }
+
+        private static int GetTotalPaymentBySubscription(Subscription subscription)
+        {
+            var totalPayment = 0;
+
             var startDate = subscription.StartDate;
             var endDate = subscription.EndDate;
 
@@ -61,8 +92,8 @@ namespace Sig.App.Backend.Helpers
             {
                 int monthsApart = 12 * (endDate.Year - startDate.Year) + endDate.Month - startDate.Month;
 
-                cardPaymentRemaining += monthsApart;
-                if (startDate.Day == 1) cardPaymentRemaining++;
+                totalPayment += monthsApart;
+                if (startDate.Day == 1) totalPayment++;
             }
 
             if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth ||
@@ -78,12 +109,12 @@ namespace Sig.App.Backend.Helpers
                     monthsApart--;
                 }
 
-                cardPaymentRemaining += monthsApart;
+                totalPayment += monthsApart;
 
-                if (startDate.Day == 15) cardPaymentRemaining++;
+                if (startDate.Day == 15) totalPayment++;
             }
 
-            return subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(subscription.MaxNumberOfPayments.Value, cardPaymentRemaining) : cardPaymentRemaining;
+            return totalPayment;
         }
 
         public static DateTime GetFirstPaymentDateTime(this Subscription subscription, IClock clock)

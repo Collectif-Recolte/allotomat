@@ -31,6 +31,7 @@ namespace Sig.App.BackendTests.BackgroundJobs
         private readonly AddingFundToCard job;
         private readonly BeneficiaryType beneficiaryType;
         private readonly ProductGroup productGroup;
+        private readonly SubscriptionBeneficiary subscriptionBeneficiary;
 
         public AddingFundToCardTest()
         {
@@ -143,19 +144,21 @@ namespace Sig.App.BackendTests.BackgroundJobs
             DbContext.Projects.Add(project);
 
             DbContext.SaveChanges();
-            
+
+            subscriptionBeneficiary = new SubscriptionBeneficiary()
+            {
+                Beneficiary = beneficiary,
+                Subscription = subscription,
+                BeneficiaryType = beneficiary.BeneficiaryType
+            };
+
             subscription.BudgetAllowances = new List<BudgetAllowance>()
             {
                 new BudgetAllowance()
                 {
                     Beneficiaries = new List<SubscriptionBeneficiary>()
                     {
-                        new SubscriptionBeneficiary()
-                        {
-                            Beneficiary = beneficiary, 
-                            Subscription = subscription, 
-                            BeneficiaryType = beneficiary.BeneficiaryType
-                        }
+                        subscriptionBeneficiary
                     },
                     Organization = organization,
                     AvailableFund = 2500,
@@ -406,6 +409,105 @@ namespace Sig.App.BackendTests.BackgroundJobs
             var transactionLog = await DbContext.TransactionLogs.FirstAsync(x =>
                 x.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog);
             transactionLog.TotalAmount.Should().Be(25);
+        }
+
+        [Fact]
+        public async Task AddFundIfParticipantHaveMaxNumberOfPaymentsOverride()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
+
+            var budgetAllowance = DbContext.BudgetAllowances.First();
+            var availableFundsInitially = budgetAllowance.AvailableFund;
+
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 1;
+            subscriptionBeneficiary.MaxNumberOfPaymentsOverride = 2;
+
+            beneficiary.Card.Transactions.Add(new SubscriptionAddingFundTransaction()
+            {
+                TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(),
+                Amount = 1,
+                Card = beneficiary.Card,
+                Beneficiary = beneficiary,
+                OrganizationId = beneficiary.OrganizationId,
+                CreatedAtUtc = today,
+                ExpirationDate = today.AddMonths(1),
+                SubscriptionType = subscription.Types.First(),
+                AvailableFund = 1,
+            });
+
+            beneficiary.Card.Transactions.Add(new PaymentTransaction()
+            {
+                TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(),
+                Amount = 1,
+                Card = beneficiary.Card,
+                Beneficiary = beneficiary,
+                OrganizationId = beneficiary.OrganizationId,
+                CreatedAtUtc = today
+            });
+
+            DbContext.SaveChanges();
+
+            await job.Run("AddFundToCard", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            var card = DbContext.Cards.Include(x => x.Funds).First();
+            card.Funds.First().Amount.Should().Be(45);
+
+            budgetAllowance = DbContext.BudgetAllowances.First();
+            var addedFunds = budgetAllowance.AvailableFund - availableFundsInitially;
+            addedFunds.Should().Be(0);
+
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync(x =>
+                x.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog);
+            transactionLog.TotalAmount.Should().Be(25);
+        }
+
+        [Fact]
+        public async Task DontAddFundIfParticipantHaveMaxNumberOfPaymentsOverrideAndMaxNumberOfTransaction()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
+
+            var budgetAllowance = DbContext.BudgetAllowances.First();
+            var availableFundsInitially = budgetAllowance.AvailableFund;
+
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 1;
+            subscriptionBeneficiary.MaxNumberOfPaymentsOverride = 2;
+
+            beneficiary.Card.Transactions.Add(new SubscriptionAddingFundTransaction()
+            {
+                TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(),
+                Amount = 1,
+                Card = beneficiary.Card,
+                Beneficiary = beneficiary,
+                OrganizationId = beneficiary.OrganizationId,
+                CreatedAtUtc = today,
+                ExpirationDate = today.AddMonths(1),
+                SubscriptionType = subscription.Types.First(),
+                AvailableFund = 1,
+            });
+
+            beneficiary.Card.Transactions.Add(new SubscriptionAddingFundTransaction()
+            {
+                TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(),
+                Amount = 1,
+                Card = beneficiary.Card,
+                Beneficiary = beneficiary,
+                OrganizationId = beneficiary.OrganizationId,
+                CreatedAtUtc = today,
+                ExpirationDate = today.AddMonths(1),
+                SubscriptionType = subscription.Types.First(),
+                AvailableFund = 1,
+            });
+
+            DbContext.SaveChanges();
+
+            await job.Run("AddFundToCard", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            var card = DbContext.Cards.Include(x => x.Funds).First();
+            card.Funds.First().Amount.Should().Be(20);
         }
     }
 }
