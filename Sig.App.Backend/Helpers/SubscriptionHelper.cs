@@ -17,7 +17,11 @@ namespace Sig.App.Backend.Helpers
         public static int GetPaymentRemaining(this SubscriptionBeneficiary subscriptionBeneficiary, IClock clock)
         {
             var cardPaymentRemaining = GetCardPaymentRemaining(subscriptionBeneficiary.Subscription, clock);
-            return Math.Max(0, subscriptionBeneficiary.Subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(cardPaymentRemaining, subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments()) : cardPaymentRemaining);
+            if (subscriptionBeneficiary.Subscription.IsSubscriptionPaymentBasedCardUsage)
+            {
+                cardPaymentRemaining = Math.Min(cardPaymentRemaining, subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments());
+            }
+            return Math.Max(0, cardPaymentRemaining);
         }
 
         public static int GetPaymentRemaining(this Subscription subscription, IClock clock)

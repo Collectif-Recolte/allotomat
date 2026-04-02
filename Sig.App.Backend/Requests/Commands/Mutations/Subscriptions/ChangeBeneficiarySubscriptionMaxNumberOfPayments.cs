@@ -48,9 +48,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             var subscription = subscriptionBeneficiary.Subscription;
-            var currentMax = subscriptionBeneficiary.MaxNumberOfPaymentsOverride
-                ?? subscription.MaxNumberOfPayments
-                ?? subscriptionBeneficiary.GetTotalPayment();
+            var currentMax = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
 
             if (request.MaxNumberOfPayments <= currentMax)
             {

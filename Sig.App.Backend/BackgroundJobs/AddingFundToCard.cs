@@ -115,8 +115,9 @@ namespace Sig.App.Backend.BackgroundJobs
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary).ThenInclude(x => x.Card).ThenInclude(x => x.Funds)
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary).ThenInclude(x => x.Organization).ThenInclude(x => x.Project)
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.BeneficiaryType)
+                .AsSplitQuery()
                 .Include(x => x.BudgetAllowances)
-                .AsSplitQuery().Include(x => x.Types).ThenInclude(x => x.ProductGroup)
+                .Include(x => x.Types).ThenInclude(x => x.ProductGroup)
                 .Where(x => x.StartDate <= today && x.EndDate >= today && monthlyPaymentMoment.Contains(x.MonthlyPaymentMoment)).ToListAsync();
 
             foreach (var subscription in activeSubscriptions)
@@ -257,9 +258,9 @@ namespace Sig.App.Backend.BackgroundJobs
                 if (subscription.IsSubscriptionPaymentBasedCardUsage && initiatedBy == null)
                 {
                     var subscriptionAddedFundCount = beneficiary.Card.Transactions.OfType<SubscriptionAddingFundTransaction>().Count(x => subscriptionTypes.Any(y => y.Id == x.SubscriptionTypeId));
+                    var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
 
                     // The beneficiary already received all the funds
-                    var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
                     if (maxNumberOfPayments == subscriptionAddedFundCount * subscriptionTypes.Count()) return;
 
                     var previousPaymentDateTime = SubscriptionHelper.GetPreviousPaymentDateTime(clock, subscription.MonthlyPaymentMoment);

@@ -46,7 +46,7 @@
               :label="t('max-number-of-payments-label')" :disabled="selectedSubscription === ''" :errors="fieldErrors"
               @input="onMaxPaymentsInput" />
           </Field>
-          <div v-if="selectedSubscription !== ''" class="flex flex-col">
+          <div v-if="selectedSubscription !== ''">
             <h2 class="my-2">{{ t("additional-cost", { amount: additionalCostMoneyFormat }) }}</h2>
             <p class="my-0" :class="{ 'text-red-500 font-bold': budgetAllowanceAvailableAfterChange < 0 }">
               {{ t("budget-allowance-available", { amount: budgetAllowanceAvailableAfterChangeMoneyFormat }) }}
