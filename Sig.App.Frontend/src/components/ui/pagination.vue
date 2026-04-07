@@ -104,7 +104,7 @@ const paginationItems = computed(() => {
   for (let i = Math.max(total - edgeCount + 1, 1); i <= total; i++) pageSet.add(i);
   for (let i = Math.max(1, current - windowCount); i <= Math.min(total, current + windowCount); i++) pageSet.add(i);
 
-  const sorted = Array.from(pageSet).sort((a, b) => a - b);
+  const sorted = [...pageSet].sort((a, b) => a - b);
   const result = [];
 
   for (let i = 0; i < sorted.length; i++) {
