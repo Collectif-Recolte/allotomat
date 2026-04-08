@@ -36,6 +36,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         private readonly Project project;
         private readonly Project offPlatformProject;
         private readonly CashRegister cashRegister;
+        private readonly MarketGroup marketGroup;
         private readonly Card card;
         private readonly Card offPlatformCard;
         private readonly Beneficiary beneficiary;
@@ -71,7 +72,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 CashRegisters = new List<CashRegister>()
             };
 
-            var marketGroup = new MarketGroup()
+            marketGroup = new MarketGroup()
             {
                 Name = "Market group 1",
                 Project = project,
@@ -724,6 +725,45 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<CreateTransaction.NotEnoughtFundException>();
+        }
+
+        [Fact]
+        public async Task CreateTransactionCreatesTransactionLogWithCorrectFields()
+        {
+            SetupRequestHandler(new VerifyCardCanBeUsedInMarket(DbContext));
+
+            var input = new CreateTransaction.Input()
+            {
+                MarketId = market.GetIdentifier(),
+                Transactions = new List<CreateTransaction.TransactionInput>(),
+                CardId = card.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
+            };
+            input.Transactions.Add(new CreateTransaction.TransactionInput()
+            {
+                Amount = 10,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transaction = await DbContext.Transactions.OfType<PaymentTransaction>().FirstAsync();
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync();
+
+            transactionLog.TransactionUniqueId.Should().Be(transaction.TransactionUniqueId);
+            transactionLog.Discriminator.Should().Be(TransactionLogDiscriminator.PaymentTransactionLog);
+            transactionLog.TotalAmount.Should().Be(10);
+            transactionLog.MarketId.Should().Be(market.Id);
+            transactionLog.MarketName.Should().Be(market.Name);
+            transactionLog.CashRegisterId.Should().Be(cashRegister.Id);
+            transactionLog.CashRegisterName.Should().Be(cashRegister.Name);
+            transactionLog.MarketGroupId.Should().Be(marketGroup.Id);
+            transactionLog.MarketGroupName.Should().Be(marketGroup.Name);
+            transactionLog.BeneficiaryId.Should().Be(beneficiary.Id);
+            transactionLog.BeneficiaryFirstname.Should().Be(beneficiary.Firstname);
+            transactionLog.BeneficiaryLastname.Should().Be(beneficiary.Lastname);
+            transactionLog.OrganizationId.Should().Be(organization.Id);
+            transactionLog.ProjectId.Should().Be(project.Id);
         }
     }
 }

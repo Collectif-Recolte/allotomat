@@ -78,6 +78,8 @@ namespace Sig.App.Backend.Services.Reports
             dataWorksheet.Column("Id de la carte/Card id", x => x.CardProgramCardId);
             dataWorksheet.Column("Numéro de la carte/Card number", x => x.CardNumber != null ? x.CardNumber.Replace("-", " ") : "");
             dataWorksheet.Column("Caisse/Cash register", x => x.CashRegisterName);
+            dataWorksheet.Column("ID Groupe de commerces/ID Market group", x => x.MarketGroupId);
+            dataWorksheet.Column("Groupe de commerces/Market group", x => x.MarketGroupName);
 
             return generator.Render();
         }
@@ -239,6 +241,8 @@ namespace Sig.App.Backend.Services.Reports
             dataWorksheet.Column("Initiateur transaction/Transaction initiator", GetTransactionInitiatorName);
             dataWorksheet.Column("Courriel initiateur transaction/Transaction initiator email", x => x.TransactionInitiatorEmail);
             dataWorksheet.Column("Caisse/Cash register", x => x.CashRegisterName);
+            dataWorksheet.Column("ID Groupe de commerces/ID Market group", x => x.MarketGroupId);
+            dataWorksheet.Column("Groupe de commerces/Market group", x => x.MarketGroupName);
 
             return generator.Render();
         }
