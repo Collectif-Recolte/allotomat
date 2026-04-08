@@ -97,6 +97,29 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         }
 
         [Fact]
+        public async Task AddLoyaltyFundToCardCreatesTransactionLogWithCorrectFields()
+        {
+            var input = new AddLoyaltyFundToCard.Input()
+            {
+                ProjectId = project.GetIdentifier(),
+                CardId = card.ProgramCardId,
+                Amount = 10
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transaction = await DbContext.Transactions.OfType<LoyaltyAddingFundTransaction>().FirstAsync();
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync(x => x.TransactionUniqueId == transaction.TransactionUniqueId);
+
+            transactionLog.Discriminator.Should().Be(TransactionLogDiscriminator.LoyaltyAddingFundTransactionLog);
+            transactionLog.TotalAmount.Should().Be(10);
+            transactionLog.CardProgramCardId.Should().Be(card.ProgramCardId);
+            transactionLog.BeneficiaryId.Should().Be(beneficiary.Id);
+            transactionLog.OrganizationId.Should().Be(organization.Id);
+            transactionLog.ProjectId.Should().Be(project.Id);
+        }
+
+        [Fact]
         public async Task ThrowsIfCardNotFoundExceptiond()
         {
             var input = new AddLoyaltyFundToCard.Input()

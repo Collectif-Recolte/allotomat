@@ -29,16 +29,18 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         private readonly IRequestHandler<RemoveBeneficiaryFromSubscription.Input> handler;
         private readonly Subscription subscription;
         private readonly Beneficiary beneficiary;
+        private readonly Organization organization;
+        private readonly Project project;
 
         public RemoveBeneficiaryFromSubscriptionTest()
         {
-            var project = new Project()
+            project = new Project()
             {
                 Name = "Project 1"
             };
             DbContext.Projects.Add(project);
 
-            var organization = new Organization()
+            organization = new Organization()
             {
                 Name = "Organization 1",
                 Project = project
@@ -289,6 +291,31 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             // totalRefund = 2 * 25 = 50
             localBudgetAllowance.AvailableFund.Should().Be(75);
             transactionLogCreated.Should().Be(true);
+        }
+
+        [Fact]
+        public async Task RemoveBeneficiaryFromSubscriptionCreatesTransactionLogWithCorrectFields()
+        {
+            var input = new RemoveBeneficiaryFromSubscription.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync(x =>
+                x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog);
+
+            transactionLog.TotalAmount.Should().Be(25);
+            transactionLog.BeneficiaryId.Should().Be(beneficiary.Id);
+            transactionLog.BeneficiaryFirstname.Should().Be(beneficiary.Firstname);
+            transactionLog.BeneficiaryLastname.Should().Be(beneficiary.Lastname);
+            transactionLog.OrganizationId.Should().Be(organization.Id);
+            transactionLog.OrganizationName.Should().Be(organization.Name);
+            transactionLog.SubscriptionId.Should().Be(subscription.Id);
+            transactionLog.SubscriptionName.Should().Be(subscription.Name);
+            transactionLog.ProjectId.Should().Be(project.Id);
         }
 
         [Fact]
