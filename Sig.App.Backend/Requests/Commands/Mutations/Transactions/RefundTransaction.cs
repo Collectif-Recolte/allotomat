@@ -65,6 +65,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var initialTransaction = await db.Transactions.OfType<PaymentTransaction>()
                 .Include(x => x.Card).ThenInclude(x => x.Funds).ThenInclude(x => x.ProductGroup)
                 .Include(x => x.Card).ThenInclude(x => x.Project)
+                .AsSplitQuery()
                 .Include(x => x.Beneficiary)
                 .Include(x => x.Market)
                 .Include(x => x.TransactionByProductGroups)
