@@ -11,7 +11,7 @@
       "beneficiary-status-inactive": "Inactive"
     },
     "fr": {
-      "beneficiary-name": "Participant-e",
+      "beneficiary-name": "Participant·e",
       "contact-info": "Coordonnées",
       "category": "Catégorie",
       "subscriptions": "Abonnements",

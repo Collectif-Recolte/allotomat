@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "title": "Reconciliation report",
+      "title": "Reconciliation Report",
       "no-results": "No transactions for the selected period"
     },
     "fr": {

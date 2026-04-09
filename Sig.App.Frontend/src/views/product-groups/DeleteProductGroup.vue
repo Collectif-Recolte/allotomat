@@ -4,7 +4,7 @@
 		"delete-product-group-success-notification": "The product group {productGroupName} has been successfully deleted.",
 		"delete-text-error": "The text must match the name of the product group",
 		"delete-text-label": "Type the name of the product group to confirm",
-		"description": "Warning ! The deletion of <strong>{productGroupName}</strong> cannot be undone. If you continue, the product group will be deleted.",
+		"description": "Warning! Deleting <strong>{productGroupName}</strong> cannot be undone. If you continue, the product group will be deleted.",
 		"title": "Delete - {productGroupName}"
 	},
 	"fr": {

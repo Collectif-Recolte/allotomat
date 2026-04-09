@@ -2,13 +2,13 @@
 {
 	"en": {
 		"add-user": "Add admin",
-		"title": "Admin management",
+		"title": "Admin Management",
     "user-count": "{count} user | {count} users"
 	},
 	"fr": {
-		"add-user": "Ajouter un administrateur",
-		"title": "Gestion des utilisateurs",
-    "user-count": "{count} utilisateur | {count} utilisateurs"
+		"add-user": "Ajouter un compte administrateur",
+		"title": "Gestion des comptes",
+    "user-count": "{count} compte | {count} comptes"
 	}
 }
 </i18n>

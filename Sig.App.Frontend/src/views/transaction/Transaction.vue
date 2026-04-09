@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "title": "Create a transaction"
+      "title": "Create a Transaction"
     },
     "fr": {
       "title": "Créer une transaction"

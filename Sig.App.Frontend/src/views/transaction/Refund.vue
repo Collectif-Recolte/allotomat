@@ -2,8 +2,8 @@
 {
 	"en": {
 		"title": "Refund",
-    "subtitle": "Transaction of {date} — Card #{cardLongId}",
-    "cancel":"Cancel",
+    "subtitle": "Transaction on {date} — Card #{cardLongId}",
+    "cancel": "Cancel",
     "refund-transaction": "Refund",
     "available-refund": "Available for refund: {amountAvailable}",
     "amount-validation-label": "Refund amount",
@@ -13,13 +13,13 @@
     "password": "Password",
     "no-amount-to-refund": "No amount to refund.",
     "wrong-password-error-notification": "The password is invalid.",
-    "expired-funds":"Some of the funds used in this transaction have expired and can no longer be refunded.",
-    "market-disabled": "The market is disabled. Refund is not possible."
+    "expired-funds": "Some of the funds used in this transaction have expired and can no longer be refunded.",
+    "market-disabled": "This merchant is deactivated and cannot process refunds."
 	},
 	"fr": {
 		"title": "Remboursement",
     "subtitle": "Transaction du {date} — Carte #{cardLongId}",
-    "cancel":"Annuler",
+    "cancel": "Annuler",
     "refund-transaction": "Rembourser",
     "available-refund": "Disponible au remboursement : {amountAvailable}",
     "amount-validation-label": "Montant de remboursement",
@@ -29,8 +29,8 @@
     "password": "Mot de passe",
     "no-amount-to-refund": "Aucun montant à rembourser.",
     "wrong-password-error-notification": "Le mot de passe est invalide.",
-    "expired-funds":"Certains des fonds utilisés dans cette transaction ont expiré et ne peuvent plus être remboursés.",
-    "market-disabled": "Impossible d’effectuer un remboursement pour un marchand désactivé."
+    "expired-funds": "Certains des fonds utilisés dans cette transaction ont expiré et ne peuvent plus être remboursés.",
+    "market-disabled": "Commerce désactivé — impossible d’effectuer un remboursement."
 	}
 }
 </i18n>

@@ -4,15 +4,15 @@
       "beneficiary-count-label": "Number of participants",
       "manage-beneficiary-btn": "Manage participants",
       "unspend-loyalty-fund-label": "Unspent amount on gift cards",
-      "total-active-subscriptions-envelopes-label": "Budget allowance total (active subscriptions)",
+      "total-active-subscriptions-envelopes-label": "Total budget envelope (active subscriptions)",
       "organization-list-stats": "By subscription",
       "empty-list": "No group is associated with the program.",
       "funds-expiration-trigger-number-of-days":"{numberOfDays} days after the first use",
       "funds-not-accumulable-expiration": "Expiration at the next payment period"
     },
     "fr": {
-      "beneficiary-count-label": "Nombre de participants",
-      "manage-beneficiary-btn": "Gérer les participants",
+      "beneficiary-count-label": "Nombre de participant·e·s",
+      "manage-beneficiary-btn": "Gérer les participant·e·s",
       "unspend-loyalty-fund-label": "Montant non-dépensé sur les cartes-cadeaux",
       "total-active-subscriptions-envelopes-label": "Total des enveloppes (abonnements actifs)",
       "organization-list-stats": "Par abonnement",

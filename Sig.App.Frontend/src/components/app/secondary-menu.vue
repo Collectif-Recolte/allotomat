@@ -2,31 +2,31 @@
 {
 	"en": {
 		"menu-title-program": "{name} program",
-    "program-settings": "Program settings",
-		"manage-organization-managers": "User management",
-		"manage-project-managers": "User management",
-    "manage-marketgroup-managers": "User management",
-    "manage-project-export-all-participants": "Export all participants",
-    "reconciliation-report": "Reconciliation report",
-    "subscription-end-report": "Subscription report",
-    "budget-allowance-report": "Budget allowance report",
-    "cash-register": "Cash registers",
-    "menu-title-market": "{name} market",
-    "menu-title-market-group": "{name} market group"
+    "program-settings": "Program Settings",
+		"manage-organization-managers": "User Management",
+		"manage-project-managers": "User Management",
+    "manage-marketgroup-managers": "User Management",
+    "manage-project-export-all-participants": "Export All Participants",
+    "reconciliation-report": "Reconciliation Report",
+    "subscription-end-report": "Subscription Report",
+    "budget-allowance-report": "Budget Envelope Report",
+    "cash-register": "Cash Registers",
+    "menu-title-market": "{name} merchant",
+    "menu-title-market-group": "{name} merchant group"
 	},
 	"fr": {
 		"menu-title-program": "Programme {name}",
     "program-settings": "Paramètres du programme",
-		"manage-organization-managers": "Gestion des utilisateurs",
-		"manage-project-managers": "Gestion des utilisateurs",
-    "manage-marketgroup-managers": "Gestion des utilisateurs",
-    "manage-project-export-all-participants": "Exporter tous les participants",
+		"manage-organization-managers": "Gestion des comptes",
+		"manage-project-managers": "Gestion des comptes",
+    "manage-marketgroup-managers": "Gestion des comptes",
+    "manage-project-export-all-participants": "Exporter tous les participant·e·s",
     "reconciliation-report": "Rapport de réconciliation",
     "subscription-end-report": "Rapport d'abonnement",
     "budget-allowance-report": "Rapport d'enveloppe",
     "cash-register": "Caisses",
-    "menu-title-market": "Marché {name}",
-    "menu-title-market-group": "Groupe de commerce {name}"
+    "menu-title-market": "Commerce {name}",
+    "menu-title-market-group": "Groupe de commerces {name}"
 	}
 }
 </i18n>

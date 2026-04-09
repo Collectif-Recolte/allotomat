@@ -1,11 +1,11 @@
 <i18n>
   {
     "en": {
-      "title": "Create a transaction",
+      "title": "Create a Transaction",
       "start-transaction": "Scan a card",
       "manually-enter-card-number": "Manually enter card number",
       "select-card-text": "Please select a cash register below to continue.",
-      "no-available-cash-register": "The market has no more cash register.",
+      "no-available-cash-register": "The market has no available cash registers.",
       "select-cash-register": "Save",
       "cash-register-input": "Cash Register",
       "cash-register-saved": "Cash register saved successfully!"

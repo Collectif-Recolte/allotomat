@@ -2,8 +2,8 @@
 {
 	"en": {
 		"add-product-group": "Add product group",
-		"add-product-group-success-notification": "Adding product group {productGroupName} was successful.",
-		"title": "Add a product group"
+		"add-product-group-success-notification": "The product group {productGroupName} has been successfully added.",
+		"title": "Add Product Group"
 	},
 	"fr": {
 		"add-product-group": "Ajouter le groupe de produits",

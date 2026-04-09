@@ -2,7 +2,7 @@
 {
 	"en": {
 		"add-organization": "Add",
-		"title": "Management of group",
+		"title": "Group Management",
     "empty-list": "No group is associated with the program.",
     "organization-count": "{count} group | {count} groups"
 	},

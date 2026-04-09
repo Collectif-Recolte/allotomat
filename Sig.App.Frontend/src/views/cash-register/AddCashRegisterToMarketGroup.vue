@@ -1,9 +1,9 @@
 <i18n>
   {
     "en": {
-      "title": "Add a cash register to a program",
+      "title": "Add Cash Register to Program",
       "add-cash-register": "Add",
-      "add-cash-register-success-notification": "Successfully added cash register {cashRegisterName} to program {projectName}."
+      "add-cash-register-success-notification": "The cash register {cashRegisterName} has been successfully added to program {projectName}."
     },
     "fr": {
       "title": "Ajouter une caisse à un programme",

@@ -7,7 +7,7 @@
       "project-edit-associated-merchants": "Edit associated merchants",
       "project-edit-managers": "Edit managers",
       "project-name": "Name",
-      "project-beneficiaries-are-anonymous-tooltip": "Anonymous beneficiaries"
+      "project-beneficiaries-are-anonymous-tooltip": "Anonymous participants"
     },
     "fr": {
       "edit-project": "Modifier",
@@ -16,7 +16,7 @@
       "project-edit-associated-merchants": "Modifier les commerces associés",
       "project-edit-managers": "Modifier les gestionnaires",
       "project-name": "Nom",
-      "project-beneficiaries-are-anonymous-tooltip": "Participant-e-s anonymes"
+      "project-beneficiaries-are-anonymous-tooltip": "Participant·e·s anonymes"
     }
   }
   </i18n>

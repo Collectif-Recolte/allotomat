@@ -7,12 +7,12 @@
     "display-printing-file-xlsx": "See the file (XLSX)",
 		"generate-card": "Generate",
 		"generate-cards-success-detail": "The generation of {cardCountCreated} cards is completed. The next step is to make a print request for the cards. To access the print files, click on See the file (XLSX).",
-		"printing-cards-detail": "In addition, the print file was emailed to program managers.",
+		"printing-cards-detail": "The print file has also been emailed to program managers.",
 		"title": "Generate new cards"
 	},
 	"fr": {
 		"cancel": "Annuler",
-		"card-count": "Nombre de carte à générer",
+		"card-count": "Nombre de cartes à générer",
 		"card-placeholder": "Ex. 40",
     "display-printing-file-xlsx": "Voir le fichier (XLSX)",
 		"generate-card": "Générer",

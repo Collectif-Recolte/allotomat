@@ -2,7 +2,7 @@
   {
     "en": {
       "add-category": "Add a category",
-      "title": "Category management",
+      "title": "Category Management",
       "empty-list": "This program does not contain any categories.",
       "create-category": "Create a category",
       "category-count": "{count} categorie | {count} categories"

@@ -3,14 +3,14 @@
 	"en": {
 		"back": "Cancel",
 		"bad-token-message": "This password reset link is invalid or expired.",
-		"confirm-message": "Un message pour réinitialiser votre mot de passe a été envoyé à {email}.",
+		"confirm-message": "A message to reset your password has been sent to {email}.",
 		"loading": "Update in progress...",
 		"password": "Password",
 		"password-confirmation": "Re-enter password",
 		"password-rules": "The password must contain a minimum of 10 characters, 1 capital letter, a number and a special character (for example: %, {'@'}, #, $ and &).",
 		"resend-reset-password": "Resend link",
 		"submit": "Reset password",
-		"title": "Password reset"
+		"title": "Password Reset"
 	},
 	"fr": {
 		"back": "Annuler",

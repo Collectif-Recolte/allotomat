@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "title": "Check card balance"
+      "title": "Check Card Balance"
     },
     "fr": {
       "title": "Vérifier le solde d'une carte"

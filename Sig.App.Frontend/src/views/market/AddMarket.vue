@@ -2,23 +2,23 @@
 {
 	"en": {
 		"add-market": "Add",
-		"add-market-success-notification": "Adding market {marketName} was successful. Managers will receive an email for the creation of their account in the next few minutes.",
-		"title": "Create a market",
-		"user-already-manager": "One of the managers is already the manager of a market.",
-		"user-not-market-manager": "One of the managers is not a market manager.",
+		"add-market-success-notification": "The merchant {marketName} has been successfully created. Managers will receive an email to finish creating their accounts in the next few minutes.",
+		"title": "Create a merchant",
+		"user-already-manager": "One of the managers is already the manager of a merchant.",
+		"user-not-market-manager": "One of the managers is not a merchant manager.",
     "manager-email": "Email",
-    "market-name": "Market name",
-    "selected-market-group": "Location"
+    "market-name": "Merchant name",
+    "selected-market-group": "Merchant Group"
 	},
 	"fr": {
 		"add-market": "Ajouter",
-		"add-market-success-notification": "L’ajout du commerce {marketName} a été un succès. Les gestionnaires vont recevoir un courriel pour la création de leur compte dans les prochaines minutes.",
+		"add-market-success-notification": "L’ajout du commerce {marketName} a été un succès. Les gestionnaires vont recevoir un courriel pour compléter la création de leurs comptes dans les prochaines minutes.",
 		"title": "Créer un commerce",
-		"user-already-manager": "Un des gestionnaires est déjà gestionnaire d'un commerce.",
-		"user-not-market-manager": "Un des gestionnaires n'est pas du type gestionnaire de commerce.",
+		"user-already-manager": "Un·e des gestionnaires est déjà gestionnaire d'un commerce.",
+		"user-not-market-manager": "Un·e des gestionnaires n'est pas du type gestionnaire de commerce.",
     "manager-email": "Courriel",
-    "market-name": "Nom du marché",
-    "selected-market-group": "Lieu"
+    "market-name": "Nom du commerce",
+    "selected-market-group": "Groupe de commerces"
 	}
 }
 </i18n>

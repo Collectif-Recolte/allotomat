@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "title": "Cash registers",
+      "title": "Cash Registers",
       "add-cash-register": "Add",
       "available-cash-register": "{count} cash register(s)"
     },
