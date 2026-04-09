@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Sig.App.Backend.DbModel;
 
@@ -11,9 +12,11 @@ using Sig.App.Backend.DbModel;
 namespace Sig.App.Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260324181157_DefaultCashRegisterNameFromMarketGroup")]
+    partial class DefaultCashRegisterNameFromMarketGroup
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -927,9 +930,6 @@ namespace Sig.App.Backend.Migrations
                     b.Property<long?>("BudgetAllowanceId")
                         .HasColumnType("bigint");
 
-                    b.Property<int?>("MaxNumberOfPaymentsOverride")
-                        .HasColumnType("int");
-
                     b.HasKey("BeneficiaryId", "SubscriptionId");
 
                     b.HasIndex("BeneficiaryTypeId");
@@ -1036,12 +1036,6 @@ namespace Sig.App.Backend.Migrations
 
                     b.Property<bool>("InitiatedByProject")
                         .HasColumnType("bit");
-
-                    b.Property<long?>("MarketGroupId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("MarketGroupName")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("MarketId")
                         .HasColumnType("bigint");

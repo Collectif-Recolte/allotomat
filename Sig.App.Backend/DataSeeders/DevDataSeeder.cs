@@ -519,7 +519,7 @@ public class DevDataSeeder : IDataSeeder
         var project = db.Projects.FirstOrDefault(x => x.Name == "SeedDev - Programme 1");
         var market = db.Markets.FirstOrDefault(x => x.Name == "SeedDev - Commerce 1");
         var productGroup = db.ProductGroups.FirstOrDefault(x => x.Name == "SeedDev - Groupe1");
-        var cashRegister = db.CashRegisters.FirstOrDefault(x => x.Name == "SeedDev - Caisse 1");
+        var cashRegister = db.CashRegisters.Include(x => x.MarketGroups).ThenInclude(x => x.MarketGroup).FirstOrDefault(x => x.Name == "SeedDev - Caisse 1");
 
         if (beneficiary == null || project == null || market == null)
         {
@@ -593,7 +593,9 @@ public class DevDataSeeder : IDataSeeder
             MarketName = market.Name,
             TransactionLogProductGroups = transactionLogProductGroups,
             CashRegisterId = cashRegister.Id,
-            CashRegisterName = cashRegister.Name
+            CashRegisterName = cashRegister.Name,
+            MarketGroupId = cashRegister?.MarketGroups?.FirstOrDefault(x => x.MarketGroup.ProjectId == card.ProjectId)?.MarketGroupId,
+            MarketGroupName = cashRegister?.MarketGroups?.FirstOrDefault(x => x.MarketGroup.ProjectId == card.ProjectId)?.MarketGroup?.Name
         });
         
         var transaction2 = new PaymentTransaction() { TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(), Amount = 32.33m, CreatedAtUtc = DateTime.UtcNow.AddMonths(-1), Card = card, Beneficiary = beneficiary, Organization = beneficiary.Organization, Market = market, Transactions = new List<AddingFundTransaction>(), PaymentTransactionAddingFundTransactions = new List<PaymentTransactionAddingFundTransaction>(), CashRegister = cashRegister };
@@ -649,7 +651,9 @@ public class DevDataSeeder : IDataSeeder
             MarketName = market.Name,
             TransactionLogProductGroups = transactionLogProductGroups,
             CashRegisterId = cashRegister.Id,
-            CashRegisterName = cashRegister.Name
+            CashRegisterName = cashRegister.Name,
+            MarketGroupId = cashRegister?.MarketGroups?.FirstOrDefault(x => x.MarketGroup.ProjectId == card.ProjectId)?.MarketGroupId,
+            MarketGroupName = cashRegister?.MarketGroups?.FirstOrDefault(x => x.MarketGroup.ProjectId == card.ProjectId)?.MarketGroup?.Name
         });
 
         await db.SaveChangesAsync();

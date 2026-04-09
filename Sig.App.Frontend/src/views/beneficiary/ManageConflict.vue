@@ -123,6 +123,7 @@ const { result: resultBeneficiary } = useQuery(
               name
             }
             paymentReceived
+            maxNumberOfPayments
             subscription {
               id
               isArchived
@@ -202,7 +203,7 @@ const beneficiarySubscriptionsWithConflict = computed(() => {
 
       const numberOfPaymentToReceive = Math.min(
         beneficiarySubscription.subscription.maxNumberOfPayments !== null
-          ? beneficiarySubscription.subscription.maxNumberOfPayments - beneficiarySubscription.paymentReceived
+          ? beneficiarySubscription.maxNumberOfPayments - beneficiarySubscription.paymentReceived
           : paymentRemaining,
         paymentRemaining
       );

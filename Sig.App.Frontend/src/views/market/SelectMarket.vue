@@ -32,54 +32,26 @@
 <template>
   <UiDialogModal v-slot="{ closeModal }" :return-route="returnRoute()" :title="t('title')" :has-footer="false">
     <p class="text-sm text-gray-500">{{ t("warning-message") }}</p>
-    <Form
-      v-if="!loadingMarkets && !loadingProject && !loadingMarketGroups"
-      v-slot="{ isSubmitting, errors: formErrors }"
-      :validation-schema="validationSchema"
-      :initial-values="initialValues"
-      keep-values
-      @submit="onSubmit">
-      <PfForm
-        has-footer
-        can-cancel
-        :disable-submit="Object.keys(formErrors).length > 0"
-        :submit-label="t('add-market')"
-        :cancel-label="t('cancel')"
-        :processing="isSubmitting"
-        @cancel="closeModal">
+    <Form v-if="!loadingMarkets && !loadingProject && !loadingMarketGroups"
+      v-slot="{ isSubmitting, errors: formErrors }" :validation-schema="validationSchema"
+      :initial-values="initialValues" keep-values @submit="onSubmit">
+      <PfForm has-footer can-cancel :disable-submit="Object.keys(formErrors).length > 0" :submit-label="t('add-market')"
+        :cancel-label="t('cancel')" :processing="isSubmitting" @cancel="closeModal">
         <div>
           <div class="flex flex-col gap-y-6">
             <PfFormSection v-if="filteredMarketOptions.length > 0">
               <Field v-slot="{ field: inputField, errors: fieldErrors }" name="market">
-                <PfFormInputSelectSearchable
-                  id="marketId"
-                  required
-                  v-bind="inputField"
-                  :placeholder="t('choose-market')"
-                  :label="t('select-market')"
-                  :no-results-found="t('no-results-found')"
-                  :options="filteredMarketOptions"
-                  :errors="fieldErrors" />
+                <PfFormInputSelectSearchable id="marketId" required v-bind="inputField"
+                  :placeholder="t('choose-market')" :label="t('select-market')"
+                  :no-results-found="t('no-results-found')" :options="filteredMarketOptions" :errors="fieldErrors" />
               </Field>
               <Field v-if="marketGroup" v-slot="{ errors: fieldErrors }" name="marketGroup">
-                <PfFormInputSelect
-                  id="marketGroup"
-                  required
-                  :value="marketGroup.id"
-                  :label="t('selected-market-group')"
-                  :options="marketGroups"
-                  disabled
-                  :errors="fieldErrors" />
+                <PfFormInputSelect id="marketGroup" required :value="marketGroup.id" :label="t('selected-market-group')"
+                  :options="marketGroups" disabled :errors="fieldErrors" />
               </Field>
               <Field v-else v-slot="{ field, errors: fieldErrors }" name="marketGroup">
-                <PfFormInputSelect
-                  id="marketGroup"
-                  required
-                  v-bind="field"
-                  :label="t('selected-market-group')"
-                  :options="marketGroups"
-                  :disabled="isMarketGroupSelectionDisabled"
-                  :errors="fieldErrors" />
+                <PfFormInputSelect id="marketGroup" required v-bind="field" :label="t('selected-market-group')"
+                  :options="marketGroups" :disabled="isMarketGroupSelectionDisabled" :errors="fieldErrors" />
               </Field>
             </PfFormSection>
             <template v-else>
@@ -87,13 +59,8 @@
                 <p class="text-sm">{{ t("no-associated-merchant") }}</p>
               </div>
             </template>
-            <PfButtonAction
-              v-if="(!isMarketGroupSelectionDisabled || !marketGroup) && canCreateMarket"
-              btn-style="dash"
-              has-icon-left
-              type="button"
-              :label="t('create-market')"
-              @click="createMarket" />
+            <PfButtonAction v-if="!isMarketGroupSelectionDisabled || !marketGroup" btn-style="dash" has-icon-left
+              type="button" :label="t('create-market')" @click="createMarket" />
           </div>
         </div>
       </PfForm>
@@ -259,8 +226,8 @@ const initialValues = computed(() => {
       route.params.marketGroupId !== null && route.params.marketGroupId !== undefined
         ? route.params.marketGroupId
         : marketGroup != null && marketGroup.value !== null
-        ? marketGroup.value.id
-        : null
+          ? marketGroup.value.id
+          : null
   };
 });
 
@@ -287,9 +254,6 @@ const validationSchema = computed(() =>
 );
 
 const isMarketGroupSelectionDisabled = computed(() => route.name === URL_ADD_MERCHANTS_FROM_MARKET_GROUP);
-const canCreateMarket = computed(
-  () => route.name !== URL_ADD_MERCHANTS_FROM_PROJECT && userType.value !== USER_TYPE_MARKETGROUPMANAGER
-);
 
 function createMarket() {
   router.push({ name: URL_MARKET_OVERVIEW_ADD });

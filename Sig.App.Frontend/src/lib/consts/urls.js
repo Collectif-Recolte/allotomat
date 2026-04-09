@@ -115,6 +115,7 @@ export const URL_BENEFICIARY_TRANSACTION_ADD = "beneficiary-transaction-add-url"
 export const URL_BENEFICIARY_ADMIN_AVAILABLE_AMOUNT_FOR_ALLOCATION = "beneficiary-admin-available-amount-for-allocation-url";
 export const URL_BENEFICIARY_TRANSFER_FUNDS = "beneficiary-transfer-funds-url";
 export const URL_BENEFICIARY_EDIT_GIFT_CARD = "beneficiary-edit-gift-card-url";
+export const URL_BENEFICIARY_CHANGE_MAX_NUMBER_OF_PAYMENTS = "beneficiary-change-max-number-of-payments-url";
 
 export const URL_PROJECT_MANAGER_ADMIN = "project-manager-list-url";
 export const URL_PROJECT_MANAGER_ADD = "project-manager-add-url";

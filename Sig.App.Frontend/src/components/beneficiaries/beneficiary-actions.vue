@@ -18,18 +18,20 @@
       "beneficiary-enable-card": "Re-enable card",
       "beneficiary-payment-conflict": "Fix conflicts",
       "beneficiary-payment-conflict-disabled": "The participant doesn't have a payment conflict",
-      "beneficiary-payment-conflict-all-group-selected": "You can't fix a conflict if the "All Groups" option is selected",
+      "beneficiary-payment-conflict-all-group-selected": "You can't fix a conflict if the \"All Groups\" option is selected",
       "beneficiary-assign-subscription": "Assign subscription",
-      "beneficiary-assign-subscription-disabled": "You can't assign a subscription if the "All Groups" option is selected",
+      "beneficiary-assign-subscription-disabled": "You can't assign a subscription if the \"All Groups\" option is selected",
       "beneficiary-create-transaction": "Create transaction",
       "beneficiary-create-transaction-no-market": "You can't create a transaction if the group doesn't have a market",
       "beneficiary-create-transaction-no-card": "You can't create a transaction if the participant doesn't have a card",
       "beneficiary-create-transaction-card-disabled": "You can't create a transaction if the participant's card is deactivated",
-      "beneficiary-create-transaction-all-group": "You can't create a transaction if the "All Groups" option is selected",
+      "beneficiary-create-transaction-all-group": "You can't create a transaction if the \"All Groups\" option is selected",
       "transfer-funds": "Transfer funds",
       "beneficiary-transfer-funds-disabled-no-card": "You can't transfer funds if the participant doesn't have a card",
       "beneficiary-transfer-funds-disabled-no-subscription": "You can't transfer funds if the participant doesn't have a subscription",
-      "beneficiary-transfer-funds-disabled-all-group": "You can't transfer funds if the "All Groups" option is selected"
+      "beneficiary-transfer-funds-disabled-all-group": "You can't transfer funds if the \"All Groups\" option is selected",
+      "change-max-number-of-payments": "Change maximum number of payments",
+      "change-max-number-of-payments-disabled": "You can't change the maximum number of payments if the participant has no eligible subscriptions"
     },
     "fr": {
       "beneficiary-edit": "Modifier les détails",
@@ -60,7 +62,9 @@
       "transfer-funds": "Transférer des fonds",
       "beneficiary-transfer-funds-disabled-no-card": "Vous ne pouvez pas transférer des fonds si le·a participant·e n'a pas de carte",
       "beneficiary-transfer-funds-disabled-no-subscription": "Vous ne pouvez pas transférer des fonds si le·a participant·e n'a pas d'abonnement",
-      "beneficiary-transfer-funds-disabled-all-group": "Vous ne pouvez pas transférer des fonds si l'option « Tous les groups » est sélectionnée"
+      "beneficiary-transfer-funds-disabled-all-group": "Vous ne pouvez pas transférer des fonds si l'option « Tous les groups » est sélectionnée",
+      "change-max-number-of-payments": "Modifier le nombre maximum de paiements",
+      "change-max-number-of-payments-disabled": "Vous ne pouvez pas modifier le nombre maximum de paiements si le-a participant-e n'a pas d'abonnement admissible"
     }
   }
 </i18n>
@@ -89,6 +93,7 @@ import ICON_CLOSE from "@/lib/icons/close.json";
 import ICON_CONFLICT from "@/lib/icons/exclamation-circle.json";
 import ICON_IDENTIFICATION from "@/lib/icons/identification.json";
 import ICON_TRANSACTION from "@/lib/icons/add-square.json";
+import ICON_RECEIPT_TAX from "@/lib/icons/receipt-tax.json";
 
 import {
   URL_BENEFICIARY_EDIT,
@@ -103,7 +108,8 @@ import {
   URL_BENEFICIARY_MANAGE_CONFLICT,
   URL_BENEFICIARY_ASSIGN_SUBSCRIPTIONS,
   URL_BENEFICIARY_TRANSACTION_ADD,
-  URL_BENEFICIARY_TRANSFER_FUNDS
+  URL_BENEFICIARY_TRANSFER_FUNDS,
+  URL_BENEFICIARY_CHANGE_MAX_NUMBER_OF_PAYMENTS
 } from "@/lib/consts/urls";
 
 import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
@@ -116,7 +122,7 @@ onMounted(() => {
 });
 
 watch(
-  () => props.beneficiary,
+  () => [props.beneficiary, props.isAllGroupSelected],
   () => {
     updateItems();
   }
@@ -160,8 +166,8 @@ function updateItems() {
         reason: !haveCard()
           ? t("beneficiary-create-transaction-no-card")
           : isCardDisabled()
-            ? t("beneficiary-create-transaction-card-disabled")
-            : t("beneficiary-create-transaction-all-group")
+          ? t("beneficiary-create-transaction-card-disabled")
+          : t("beneficiary-create-transaction-all-group")
       },
       {
         isExtra: true,
@@ -172,8 +178,16 @@ function updateItems() {
         reason: !haveCard()
           ? t("beneficiary-transfer-funds-disabled-no-card")
           : !haveSubscriptions()
-            ? t("beneficiary-transfer-funds-disabled-no-subscription")
-            : t("beneficiary-transfer-funds-disabled-all-group")
+          ? t("beneficiary-transfer-funds-disabled-no-subscription")
+          : t("beneficiary-transfer-funds-disabled-all-group")
+      },
+      {
+        isExtra: true,
+        icon: ICON_RECEIPT_TAX,
+        label: t("change-max-number-of-payments"),
+        route: { name: URL_BENEFICIARY_CHANGE_MAX_NUMBER_OF_PAYMENTS, params: { beneficiaryId: props.beneficiary.id } },
+        disabled: !havePaymentBasedSubscriptions(),
+        reason: t("change-max-number-of-payments-disabled")
       },
       {
         isExtra: true,
@@ -265,8 +279,8 @@ function updateItems() {
         reason: !haveCard()
           ? t("beneficiary-transfer-funds-disabled-no-card")
           : !haveSubscriptions()
-            ? t("beneficiary-transfer-funds-disabled-no-subscription")
-            : t("beneficiary-transfer-funds-disabled-all-group")
+          ? t("beneficiary-transfer-funds-disabled-no-subscription")
+          : t("beneficiary-transfer-funds-disabled-all-group")
       },
       {
         isExtra: true,
@@ -277,8 +291,8 @@ function updateItems() {
         reason: !haveCard()
           ? t("beneficiary-create-transaction-no-card")
           : !haveMarketsInOrganization()
-            ? t("beneficiary-create-transaction-no-market")
-            : t("beneficiary-create-transaction-card-disabled")
+          ? t("beneficiary-create-transaction-no-market")
+          : t("beneficiary-create-transaction-card-disabled")
       }
     ];
   }
@@ -321,6 +335,10 @@ function isCardDisabled() {
 
 function haveSubscriptions() {
   return props.beneficiary.beneficiarySubscriptions.length > 0;
+}
+
+function havePaymentBasedSubscriptions() {
+  return props.beneficiary.beneficiarySubscriptions.some((x) => x.subscription.isSubscriptionPaymentBasedCardUsage);
 }
 
 function haveMarketsInOrganization() {

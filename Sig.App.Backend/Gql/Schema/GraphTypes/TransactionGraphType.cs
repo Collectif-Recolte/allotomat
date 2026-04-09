@@ -20,6 +20,10 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
                 {
                     return Id.New<LoyaltyAddingFundTransaction>(transaction.Id);
                 }
+                case "LoyaltyEditFundTransaction":
+                {
+                    return Id.New<LoyaltyEditFundTransaction>(transaction.Id);
+                }
                 case "AddingFundTransaction":
                 {
                     return Id.New<AddingFundTransaction>(transaction.Id);

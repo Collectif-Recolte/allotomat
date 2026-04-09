@@ -143,9 +143,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var beneficiary = card.Beneficiary;
             var organizationId = beneficiary?.OrganizationId;
             var loyaltyFundTransactions = card.Transactions
-                .OfType<LoyaltyAddingFundTransaction>()
-                .Where(x => x.Status == FundTransactionStatus.Actived && x.AvailableFund > 0)
-                .ToList();
+              .OfType<AddingFundTransaction>()
+              .Where(x => (x is LoyaltyAddingFundTransaction || x is LoyaltyEditFundTransaction)
+                  && x.Status == FundTransactionStatus.Actived && x.AvailableFund > 0)
+              .ToList();
 
             var transactionByProductGroups = new List<PaymentTransactionProductGroup>();
             decimal loyaltyFundToRemove = request.Transactions.Sum(x => x.Amount);
@@ -403,7 +404,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     InitiatedByProject = currentUser?.Type == UserType.ProjectManager,
                     InitiatedByOrganization = currentUser?.Type == UserType.OrganizationManager,
                     CashRegisterId = paymentTransaction.CashRegister != null ? paymentTransaction.CashRegister.Id : null,
-                    CashRegisterName = paymentTransaction.CashRegister != null ? paymentTransaction.CashRegister.Name : ""
+                    CashRegisterName = paymentTransaction.CashRegister != null ? paymentTransaction.CashRegister.Name : "",
+                    MarketGroupId = paymentTransaction.CashRegister?.MarketGroups?.FirstOrDefault(x => x.MarketGroup.ProjectId == card.ProjectId)?.MarketGroupId,
+                    MarketGroupName = paymentTransaction.CashRegister?.MarketGroups?.FirstOrDefault(x => x.MarketGroup.ProjectId == card.ProjectId)?.MarketGroup?.Name
                 };
                 transactionLogs.Add(transactionLog);
             }

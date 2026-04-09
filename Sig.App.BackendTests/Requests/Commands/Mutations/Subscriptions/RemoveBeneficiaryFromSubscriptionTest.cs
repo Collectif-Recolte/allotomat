@@ -29,16 +29,18 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         private readonly IRequestHandler<RemoveBeneficiaryFromSubscription.Input> handler;
         private readonly Subscription subscription;
         private readonly Beneficiary beneficiary;
+        private readonly Organization organization;
+        private readonly Project project;
 
         public RemoveBeneficiaryFromSubscriptionTest()
         {
-            var project = new Project()
+            project = new Project()
             {
                 Name = "Project 1"
             };
             DbContext.Projects.Add(project);
 
-            var organization = new Organization()
+            organization = new Organization()
             {
                 Name = "Organization 1",
                 Project = project
@@ -241,6 +243,79 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             localSubscription.Beneficiaries.Should().HaveCount(0);
             localBudgetAllowance.AvailableFund.Should().Be(50);
             transactionLogCreated.Should().Be(true);
+        }
+
+        [Fact]
+        public async Task RemoveBeneficiaryFromSubscriptionWithMaxNumberOfPaymentsOverride()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 1;
+            subscription.EndDate = new DateTime(today.Year, today.Month, 2).AddMonths(4);
+            var subscriptionBeneficiary = subscription.Beneficiaries.First();
+            subscriptionBeneficiary.MaxNumberOfPaymentsOverride = 3;
+
+            beneficiary.Card = new Card()
+            {
+                Transactions = new List<Transaction>() {
+                    new SubscriptionAddingFundTransaction()
+                    {
+                        Amount = 25,
+                        SubscriptionType = new SubscriptionType()
+                        {
+                            Subscription = subscription,
+                            ProductGroup = subscription.Types.First(x => x.BeneficiaryType == beneficiary.BeneficiaryType).ProductGroup,
+                            BeneficiaryType = beneficiary.BeneficiaryType
+                        },
+                        Beneficiary = beneficiary
+                    }
+                }
+            };
+
+            DbContext.SaveChanges();
+
+            var input = new RemoveBeneficiaryFromSubscription.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBudgetAllowance = await DbContext.BudgetAllowances.FirstAsync();
+            var transactionLogCreated = await DbContext.TransactionLogs.AnyAsync(x => x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog);
+
+            // maxNumberOfPayments = override=3, transactionCount=1
+            // paymentsRemaining = max(0, min(calendarRemaining>=3, 3-1)) = 2
+            // totalRefund = 2 * 25 = 50
+            localBudgetAllowance.AvailableFund.Should().Be(75);
+            transactionLogCreated.Should().Be(true);
+        }
+
+        [Fact]
+        public async Task RemoveBeneficiaryFromSubscriptionCreatesTransactionLogWithCorrectFields()
+        {
+            var input = new RemoveBeneficiaryFromSubscription.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync(x =>
+                x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog);
+
+            transactionLog.TotalAmount.Should().Be(25);
+            transactionLog.BeneficiaryId.Should().Be(beneficiary.Id);
+            transactionLog.BeneficiaryFirstname.Should().Be(beneficiary.Firstname);
+            transactionLog.BeneficiaryLastname.Should().Be(beneficiary.Lastname);
+            transactionLog.OrganizationId.Should().Be(organization.Id);
+            transactionLog.OrganizationName.Should().Be(organization.Name);
+            transactionLog.SubscriptionId.Should().Be(subscription.Id);
+            transactionLog.SubscriptionName.Should().Be(subscription.Name);
+            transactionLog.ProjectId.Should().Be(project.Id);
         }
 
         [Fact]

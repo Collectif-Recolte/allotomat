@@ -22,20 +22,15 @@
     <AppShell :title="t('title')" :loading="loading">
       <div v-if="projects && projects.length > 0">
         <template v-if="showSubscriptionList">
-          <UiTableHeader :title="subscriptionCount" :cta-label="t('add-subscription')" :cta-route="addSubscriptionRoute" />
-          <SubscriptionTable
-            can-edit
-            show-subscription-period
-            show-budget-allowance-total
-            :subscriptions="subscriptionsOrderByDate" />
+          <UiTableHeader :title="subscriptionCount" :cta-label="t('add-subscription')"
+            :cta-route="addSubscriptionRoute" />
+          <SubscriptionTable can-edit show-subscription-period show-budget-allowance-total
+            show-subscription-expiration-date :subscriptions="subscriptionsOrderByDate" />
         </template>
 
         <UiEmptyPage v-else>
-          <UiCta
-            :img-src="require('@/assets/img/abonnements.jpg')"
-            :description="t('empty-list')"
-            :primary-btn-label="t('create-subscription')"
-            :primary-btn-route="addSubscriptionRoute" />
+          <UiCta :img-src="require('@/assets/img/abonnements.jpg')" :description="t('empty-list')"
+            :primary-btn-label="t('create-subscription')" :primary-btn-route="addSubscriptionRoute" />
         </UiEmptyPage>
       </div>
 
@@ -74,6 +69,7 @@ const { result, loading, refetch } = useQuery(
           fundsExpirationDate
           isFundsAccumulable
           isArchived
+          numberDaysUntilFundsExpire
           budgetAllowances {
             id
             originalFund
