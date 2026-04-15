@@ -61,6 +61,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return Math.Min(maxNumberOfPayments - transactions.Count(), subscriptionPaymentRemaining);
         }
 
+        public async Task<int> AvailablePaymentRemaining(IAppUserContext ctx, [Inject] IClock clock)
+        {
+            return subscription.GetCardPaymentRemaining(clock);
+        }
+
         public int MaxNumberOfPayments()
         {
             return subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();

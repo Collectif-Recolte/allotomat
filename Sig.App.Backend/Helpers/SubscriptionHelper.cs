@@ -30,7 +30,7 @@ namespace Sig.App.Backend.Helpers
             return Math.Max(0, subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(cardPaymentRemaining, subscription.MaxNumberOfPayments.Value) : cardPaymentRemaining);
         }
 
-        private static int GetCardPaymentRemaining(this Subscription subscription, IClock clock)
+        public static int GetCardPaymentRemaining(this Subscription subscription, IClock clock)
         {
             var cardPaymentRemaining = 0;
             var today = clock

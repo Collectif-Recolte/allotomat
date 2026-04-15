@@ -10,6 +10,7 @@
     "budget-allowance-available": "Remaining budget allowance after change: {amount}",
     "success-notification": "The maximum number of payments has been updated successfully.",
     "must-be-greater-than-current": "Must be greater than the current maximum ({current})",
+    "must-not-exceed-payment-remaining": "Must not exceed the number of potential remaining versements ({remaining})",
     "must-be-a-number": "Must be a valid number"
   },
   "fr": {
@@ -22,6 +23,7 @@
     "budget-allowance-available": "Enveloppe restante après modification : {amount}",
     "success-notification": "Le nombre maximum de paiements a été mis à jour avec succès.",
     "must-be-greater-than-current": "Doit être supérieur au maximum actuel ({current})",
+    "must-not-exceed-payment-remaining": "Ne doit pas dépasser le nombre potentiel de versements restants ({remaining})",
     "must-be-a-number": "Doit être un nombre valide"
   }
 }
@@ -82,6 +84,7 @@ const newMaxNumberOfPayments = ref(0);
 
 const validationSchema = computed(() => {
   const currentMax = selectedSubscriptionData.value?.currentMax ?? 0;
+  const availablePaymentRemaining = selectedSubscriptionData.value?.availablePaymentRemaining ?? Infinity;
   return object({
     subscription: string().label(t("select-subscription-label")).required(),
     maxNumberOfPayments: number()
@@ -90,6 +93,7 @@ const validationSchema = computed(() => {
       .required()
       .integer()
       .min(currentMax + 1, t("must-be-greater-than-current", { current: currentMax }))
+      .max(availablePaymentRemaining, t("must-not-exceed-payment-remaining", { remaining: availablePaymentRemaining }))
   });
 });
 
@@ -107,6 +111,8 @@ const { result: resultBeneficiary, loading } = useQuery(
           }
           beneficiarySubscriptions {
             maxNumberOfPayments
+            paymentRemaining
+            availablePaymentRemaining
             subscription {
               id
               name
@@ -146,6 +152,8 @@ const subscriptionOptions = useResult(resultBeneficiary, [], (data) => {
       label: subscriptionName(x.subscription),
       value: x.subscription.id,
       currentMax: x.maxNumberOfPayments,
+      paymentRemaining: x.paymentRemaining,
+      availablePaymentRemaining: x.availablePaymentRemaining,
       types: x.subscription.types,
       budgetAllowance:
         x.subscription.budgetAllowances.find((b) => b.organization.id === data.beneficiary.organization.id)?.availableFund ?? 0
