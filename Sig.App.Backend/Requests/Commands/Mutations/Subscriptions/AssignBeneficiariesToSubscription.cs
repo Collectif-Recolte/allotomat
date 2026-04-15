@@ -56,7 +56,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             var subscriptionId = request.SubscriptionId.LongIdentifierForType<Subscription>();
-            var subscription = await db.Subscriptions.Include(x => x.Types).Include(x => x.Beneficiaries).FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
+            var subscription = await db.Subscriptions.Include(x => x.Types).ThenInclude(x => x.ProductGroup).Include(x => x.Beneficiaries).FirstOrDefaultAsync(x => x.Id == subscriptionId, cancellationToken);
 
             if (subscription == null)
             {
@@ -98,7 +98,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             AppUser currentUser = null;
             if (request.ReplicatePaymentOnAttribution)
             {
-                query = query.Include(x => x.Card);
+                query = query
+                    .Include(x => x.Card).ThenInclude(x => x.Transactions)
+                    .Include(x => x.Card).ThenInclude(x => x.Funds)
+                    .Include(x => x.Organization).ThenInclude(x => x.Project);
                 addingFundToCardJob = new AddingFundToCard(db, clock, addingFundLogger);
                 currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
                 currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
@@ -135,13 +138,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 beneficiariesWhoGetSubscriptions = beneficiaries.Length;
                 foreach (var beneficiary in beneficiaries)
                 {
-                    subscription.Beneficiaries.Add(new SubscriptionBeneficiary()
+                    var subscriptionBeneficiary = new SubscriptionBeneficiary()
                     {
                         BeneficiaryId = beneficiary.Id,
                         SubscriptionId = subscriptionId,
                         BudgetAllowanceId = budgetAllowance.Id,
-                        BeneficiaryType = beneficiary.BeneficiaryType
-                    });
+                        BeneficiaryType = beneficiary.BeneficiaryType,
+                        Beneficiary = beneficiary,
+                        Subscription = subscription
+                    };
+                    subscription.Beneficiaries.Add(subscriptionBeneficiary);
 
                     if (request.ReplicatePaymentOnAttribution && beneficiary.Card != null)
                     {
@@ -153,11 +159,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                             : paymentRemaining;
 
                         var amount = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId).Sum(x => x.Amount) * beneficiaryPaymentRemaining;
-                        
+
                         if (budgetAllowance.AvailableFund >= amount)
                         {
                             budgetAllowance.AvailableFund -= amount;
-                            await addingFundToCardJob.AddFundToSpecificBeneficiary(beneficiary.GetIdentifier(), beneficiary.BeneficiaryType, subscription.GetIdentifier(), new AddingFundToCard.InitiatedBy()
+                            addingFundToCardJob.AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, new AddingFundToCard.InitiatedBy()
                             {
                                 TransactionInitiatorId = currentUserId,
                                 TransactionInitiatorEmail = currentUser?.Email,
@@ -201,20 +207,23 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
                     if (budgetAllowance.AvailableFund >= amount)
                     {
-                        subscription.Beneficiaries.Add(new SubscriptionBeneficiary()
+                        var subscriptionBeneficiary = new SubscriptionBeneficiary()
                         {
                             BeneficiaryId = beneficiary.Id,
                             SubscriptionId = subscriptionId,
                             BudgetAllowanceId = budgetAllowance.Id,
-                            BeneficiaryType = beneficiary.BeneficiaryType
-                        });
+                            BeneficiaryType = beneficiary.BeneficiaryType,
+                            Beneficiary = beneficiary,
+                            Subscription = subscription
+                        };
+                        subscription.Beneficiaries.Add(subscriptionBeneficiary);
 
                         budgetAllowance.AvailableFund -= amount;
                         beneficiariesWhoGetSubscriptions++;
 
                         if (replicatePaymentOnAttribution)
                         {
-                            await addingFundToCardJob.AddFundToSpecificBeneficiary(beneficiary.GetIdentifier(), beneficiary.BeneficiaryType, subscription.GetIdentifier(), new AddingFundToCard.InitiatedBy()
+                            addingFundToCardJob.AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, new AddingFundToCard.InitiatedBy()
                             {
                                 TransactionInitiatorId = currentUserId,
                                 TransactionInitiatorEmail = currentUser?.Email,

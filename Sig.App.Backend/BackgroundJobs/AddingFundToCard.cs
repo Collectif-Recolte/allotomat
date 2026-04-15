@@ -240,8 +240,13 @@ namespace Sig.App.Backend.BackgroundJobs
 
             if (subscriptionBeneficiary == null) return;
 
-            CreateTransaction(subscriptionBeneficiary, initiatedBy);
+            AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, initiatedBy);
             await db.SaveChangesAsync();
+        }
+
+        public void AddFundToExistingSubscriptionBeneficiary(SubscriptionBeneficiary subscriptionBeneficiary, InitiatedBy initiatedBy = null)
+        {
+            CreateTransaction(subscriptionBeneficiary, initiatedBy);
         }
 
         private void CreateTransaction(SubscriptionBeneficiary subscriptionBeneficiary, InitiatedBy initiatedBy = null)
