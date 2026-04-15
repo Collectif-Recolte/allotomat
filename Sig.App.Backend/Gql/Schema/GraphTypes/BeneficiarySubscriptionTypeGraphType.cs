@@ -71,9 +71,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             var subscriptionTotalPayment = subscriptionBeneficiary.GetTotalPayment();
             var subscriptionPaymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock);
 
-            if (subscription.MaxNumberOfPayments.HasValue)
+            if (subscriptionBeneficiary.MaxNumberOfPaymentsOverride.HasValue || subscription.MaxNumberOfPayments.HasValue)
             {
-                return subscription.GetExpirationDate(clock) > clock.GetCurrentInstant().ToDateTimeUtc() && subscription.GetFirstPaymentDateTime(clock) < clock.GetCurrentInstant().ToDateTimeUtc() && transactions.Count() < subscriptionTotalPayment;
+                return subscription.GetExpirationDate(clock) > clock.GetCurrentInstant().ToDateTimeUtc() && subscription.GetFirstPaymentDateTime(clock) < clock.GetCurrentInstant().ToDateTimeUtc() && transactions.Count() < subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
             }
 
             return subscription.GetExpirationDate(clock) > clock.GetCurrentInstant().ToDateTimeUtc() && transactions.Count() < subscriptionTotalPayment - subscriptionPaymentRemaining;
