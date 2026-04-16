@@ -2,8 +2,8 @@
 {
 	"en": {
 		"edit-beneficiary": "Edit",
-		"edit-beneficiary-success-notification": "Edition of {firstname} {lastname} was successful.",
-		"title": "Edit a participant",
+		"edit-beneficiary-success-notification": "{firstname} {lastname} has been successfully updated.",
+		"title": "Edit Participant",
     "warning-message": "These changes will permanently delete previous data.",
     "beneficiary-with-same-id1-already-exists": "A participant with the same ID 1 already exists.",
     "beneficiary-with-same-id2-already-exists": "A participant with the same ID 2 already exists."
@@ -11,10 +11,10 @@
 	"fr": {
 		"edit-beneficiary": "Modifier",
 		"edit-beneficiary-success-notification": "L’édition de {firstname} {lastname} a été un succès.",
-		"title": "Modifier un-e participant-e",
+		"title": "Modifier un·e participant·e",
     "warning-message": "Ces changements supprimeront définitivement les données précédentes.",
-    "beneficiary-with-same-id1-already-exists": "Un-e participant-e avec le même identifiant 1 existe déjà.",
-    "beneficiary-with-same-id2-already-exists": "Un-e participant-e avec le même identifiant 2 existe déjà."
+    "beneficiary-with-same-id1-already-exists": "Un·e participant·e avec le même identifiant 1 existe déjà.",
+    "beneficiary-with-same-id2-already-exists": "Un·e participant·e avec le même identifiant 2 existe déjà."
 	}
 }
 </i18n>

@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "title": "Subscription report",
+      "title": "Subscription Report",
       "no-results": "No transactions for the selected period"
     },
     "fr": {

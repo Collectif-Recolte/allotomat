@@ -190,6 +190,30 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Cards
         }
 
         [Fact]
+        public async Task UnassignCardToBeneficiaryCreatesTransactionLogWithCorrectFields()
+        {
+            var input = new UnassignCardFromBeneficiary.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                CardId = card.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync(x =>
+                x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromUnassignedCardTransactionLog
+                && x.SubscriptionId == subscription1.Id);
+
+            transactionLog.TotalAmount.Should().Be(50);
+            transactionLog.BeneficiaryId.Should().Be(beneficiary.Id);
+            transactionLog.BeneficiaryFirstname.Should().Be(beneficiary.Firstname);
+            transactionLog.BeneficiaryLastname.Should().Be(beneficiary.Lastname);
+            transactionLog.OrganizationId.Should().Be(organization.Id);
+            transactionLog.SubscriptionId.Should().Be(subscription1.Id);
+            transactionLog.ProjectId.Should().Be(project.Id);
+        }
+
+        [Fact]
         public async Task ThrowsIfBeneficiaryNotFound()
         {
             var input = new UnassignCardFromBeneficiary.Input()

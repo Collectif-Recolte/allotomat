@@ -1,13 +1,13 @@
 <i18n>
   {
     "en": {
-      "assign-subscription-description": "Even if this participant will not receive automated funds, they require a subscription in order for you to transfer any funds onto their card.",
+      "assign-subscription-description": "Even if this participant will not receive automated funds, they require a subscription in order for you to transfer funds onto their card.",
       "assign-subscription-need-card": "This participant will not receive any funds unless a card is assigned to them.",
       "close":"Close"
     },
     "fr": {
-      "assign-subscription-description": "Même si cette personne ne recevra pas de fonds automatisés, elle a besoin d'un abonnement pour pouvoir transférer des fonds sur sa carte.",
-      "assign-subscription-need-card": "Cette personne ne recevra aucun fonds à moins qu'une carte ne lui soit attribuée.",
+      "assign-subscription-description": "Même si ce·tte participant·e ne recevra pas de fonds automatisés, il·elle a besoin d'un abonnement pour pouvoir transférer des fonds sur sa carte.",
+      "assign-subscription-need-card": "Ce·tte participant·e ne recevra aucun fonds à moins qu'une carte ne lui soit attribuée.",
       "close":"Fermer",
     }
   }

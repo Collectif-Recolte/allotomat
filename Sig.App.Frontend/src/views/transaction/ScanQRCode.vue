@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "title": "Scan a card",
+      "title": "Scan a Card",
       
     },
     "fr": {

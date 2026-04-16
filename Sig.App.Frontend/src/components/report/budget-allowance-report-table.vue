@@ -1,14 +1,14 @@
 <i18n>
   {
     "en": {
-      "budget-allowance-name": "Budget allowance",
+      "budget-allowance-name": "Budget envelope",
       "transaction-date-hour": "Date and time",
       "operation-name": "Operation",
       "amount": "Envelope adjustment",
-      "delete-budget-allowance-transaction": "Delete budget allowance transaction",
-      "edit-budget-allowance-transaction": "Edit budget allowance transaction",
-      "move-budget-allowance-transaction": "Move budget allowance transaction",
-      "create-budget-allowance-transaction": "Create budget allowance transaction",
+      "delete-budget-allowance-transaction": "Delete budget envelope",
+      "edit-budget-allowance-transaction": "Edit budget envelope",
+      "move-budget-allowance-transaction": "Move budget envelope",
+      "create-budget-allowance-transaction": "Create budget envelope",
       "target-budget-allowance-name": "Recipient envelope"
     },
     "fr": {

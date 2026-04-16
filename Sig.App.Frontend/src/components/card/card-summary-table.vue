@@ -11,7 +11,7 @@
     "card-number":"N°",
     "card-assigned": "Assigned",
     "card-unassigned": "Unassigned",
-    "card-disabled": "Temporarily disabled",
+    "card-disabled": "Temporarily deactivated",
 	},
 	"fr": {
     "fund": "Soldes",

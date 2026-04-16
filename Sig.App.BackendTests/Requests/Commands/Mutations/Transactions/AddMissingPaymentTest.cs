@@ -404,6 +404,81 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         }
 
         [Fact]
+        public async Task ThrowsIfMaxNumberOfPaymentsOverrideIsReached()
+        {
+            subscription.StartDate = Clock.GetCurrentInstant().ToDateTimeUtc().AddMonths(-4);
+            var subscriptionBeneficiary = beneficiary.Subscriptions.First();
+            subscriptionBeneficiary.MaxNumberOfPaymentsOverride = 1;
+
+            card.Transactions.Add(new SubscriptionAddingFundTransaction()
+            {
+                Amount = 25,
+                AvailableFund = 25,
+                Beneficiary = beneficiary,
+                Card = card,
+                CreatedAtUtc = Clock.GetCurrentInstant().ToDateTimeUtc(),
+                ExpirationDate = subscription.GetExpirationDate(Clock),
+                Organization = organization,
+                ProductGroup = productGroup,
+                Status = FundTransactionStatus.Actived,
+                SubscriptionType = subscription.Types.First(),
+            });
+
+            DbContext.SaveChanges();
+
+            var input = new AddMissingPayment.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier()
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<AddMissingPayment.SubscriptionDontHaveMissedPaymentException>();
+        }
+
+        [Fact]
+        public async Task AllowsPaymentWhenOverrideIsHigherThanSubscriptionMax()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.MaxNumberOfPayments = 1;
+            subscription.StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(-4);
+            subscription.EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(6);
+            subscription.FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(7);
+
+            var subscriptionBeneficiary = beneficiary.Subscriptions.First();
+            subscriptionBeneficiary.MaxNumberOfPaymentsOverride = 2;
+
+            card.Transactions.Add(new SubscriptionAddingFundTransaction()
+            {
+                Amount = 25,
+                AvailableFund = 25,
+                Beneficiary = beneficiary,
+                Card = card,
+                CreatedAtUtc = Clock.GetCurrentInstant().ToDateTimeUtc(),
+                ExpirationDate = subscription.GetExpirationDate(Clock),
+                Organization = organization,
+                ProductGroup = productGroup,
+                Status = FundTransactionStatus.Actived,
+                SubscriptionType = subscription.Types.First(),
+            });
+
+            DbContext.SaveChanges();
+
+            var input = new AddMissingPayment.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier()
+            };
+
+            // override=2 > transactionCount=1, so no exception; budget already allocated
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBudgetAllowance = DbContext.BudgetAllowances.First();
+            localBudgetAllowance.AvailableFund.Should().Be(100);
+        }
+
+        [Fact]
         public async Task SubscriptionDontHaveEnoughtAvailableAmount()
         {
             budgetAllowance.AvailableFund = 0;

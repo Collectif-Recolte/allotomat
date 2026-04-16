@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "title": "Check card balance",
+      "title": "Check Card Balance",
       "restart-scan": "Scan a card",
       "camera-access": "You must have access to a camera."
     },

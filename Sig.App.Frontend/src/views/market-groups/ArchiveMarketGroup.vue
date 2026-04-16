@@ -1,18 +1,18 @@
 <i18n>
 {
 	"en": {
-		"archive-market-group-success-notification": "The market group {marketGroupName} has been successfully archived.",
-		"archive-text-error": "The text must match the name of the market group",
-		"archive-text-label": "Type the name of the market group to confirm",
-		"description": "Warning ! The archive of <strong>{marketGroupName}</strong> cannot be undone. If you continue, the market group will be permanently archived along with all the elements it contains. However, the funds of the cards will remain unchanged.",
+		"archive-market-group-success-notification": "The merchant group {marketGroupName} has been successfully archived.",
+		"archive-text-error": "The text must match the name of the merchant group",
+		"archive-text-label": "Type the name of the merchant group to confirm",
+		"description": "Warning! Archiving <strong>{marketGroupName}</strong> cannot be undone. If you continue, the merchant group will be permanently archived along with all the elements it contains. However, no cards or transactions will be affected.",
 		"title": "Archive - {marketGroupName}",
     "archive-btn-label": "Archive"
 	},
 	"fr": {
-		"archive-market-group-success-notification": "Le groupe de commerce {marketGroupName} a été archivé avec succès.",
-		"archive-text-error": "Le texte doit correspondre au nom du groupe de commerce",
-		"archive-text-label": "Taper le nom du groupe de commerce pour confirmer",
-		"description": "Avertissement ! L'archivage de <strong>{marketGroupName}</strong> ne peut pas être annulé. Si vous continuez, le groupe de commerce sera archivé ainsi que tous les éléments qu'il contient de façon définitive. Par contre, les fonds des cartes vont rester inchangés.",
+		"archive-market-group-success-notification": "Le groupe de commerces {marketGroupName} a été archivé avec succès.",
+		"archive-text-error": "Le texte doit correspondre au nom du groupe de commerces",
+		"archive-text-label": "Taper le nom du groupe de commerces pour confirmer",
+		"description": "Avertissement ! L'archivage de <strong>{marketGroupName}</strong> ne peut pas être annulé. Si vous continuez, le groupe de commerces sera archivé ainsi que tous les éléments qu'il contient de façon définitive. Toutefois, aucune carte ni aucune transaction ne sera affectée.",
 		"title": "Archiver - {marketGroupName}",
     "archive-btn-label": "Archiver"
 	}

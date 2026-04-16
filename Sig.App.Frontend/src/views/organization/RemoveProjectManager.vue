@@ -1,17 +1,17 @@
 <i18n>
 {
 	"en": {
-		"delete-text-error": "Text must match manager email",
+		"delete-text-error": "Text must match manager email.",
 		"delete-text-label": "Type the manager's email to confirm",
-		"description": "Warning ! The removal of the manager <strong>{managerName}</strong> cannot be undone. If you continue, the handler will be permanently removed from the group.",
-		"remove-manager-success-notification": "Manager {managerName} has been successfully removed.",
+		"description": "Warning! Removing <strong>{managerName}</strong> cannot be undone. If you continue, the manager will be permanently removed from the group.",
+		"remove-manager-success-notification": "The manager {managerName} has been successfully removed from the group.",
 		"title": "Remove - {managerEmail}"
 	},
 	"fr": {
-		"delete-text-error": "Le texte doit correspondre au courriel du gestionnaire",
-		"delete-text-label": "Taper le courriel du gestionnaire pour confirmer",
-		"description": "Avertissement ! Le retrait du gestionnaire <strong>{managerName}</strong> ne peut pas être annulé. Si vous continuez, le gestionnaire sera retiré du groupe de façon définitive.",
-		"remove-manager-success-notification": "Le gestionnaire {managerName} a été retiré avec succès.",
+		"delete-text-error": "Le texte doit correspondre au courriel du ou de la gestionnaire.",
+		"delete-text-label": "Taper le courriel du ou de la gestionnaire pour confirmer",
+		"description": "Avertissement ! Le retrait du ou de la gestionnaire <strong>{managerName}</strong> ne peut pas être annulé. Si vous continuez, le·a gestionnaire sera retiré·e du groupe de façon définitive.",
+		"remove-manager-success-notification": "Le·a gestionnaire {managerName} a été retiré·e avec succès.",
 		"title": "Retirer - {managerEmail}"
 	}
 }

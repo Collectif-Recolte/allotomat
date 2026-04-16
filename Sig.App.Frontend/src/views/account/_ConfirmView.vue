@@ -4,7 +4,7 @@
 		"submit": "Create my account",
     "error": "There was a problem confirming your account.",
     "resend": "Resend link",
-    "resend-complete": "A message to complete the account creation was sent to {email}.",
+    "resend-complete": "An email to finish creating your account was sent to {email}.",
 		"title": "Hello"
 	},
 	"fr": {

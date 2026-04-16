@@ -5,19 +5,19 @@
       "choose-market": "Select",
       "next-step": "Next",
       "cancel": "Cancel",
-      "transaction-in-project-name": "Purchase on behalf of project",
-      "transaction-in-organization-name": "Purchase on behalf of organization",
+      "transaction-in-project-name": "Purchase on behalf of a merchant",
+      "transaction-in-organization-name": "Purchase on behalf of an organization",
       "select-cash-register": "Cash Register",
       "choose-cash-register": "Select",
-      "market-disabled-label": "{market} is disabled"
+      "market-disabled-label": "{market} is deactivated"
     },
     "fr": {
-      "select-market": "Marchand",
+      "select-market": "Commerce",
       "choose-market": "Sélectionner",
       "next-step": "Suivant",
       "cancel": "Annuler",
-      "transaction-in-project-name": "Achat au nom d'un programme",
-      "transaction-in-organization-name": "Achat au nom d'une organisation",
+      "transaction-in-project-name": "Achat au nom d'un commerce",
+      "transaction-in-organization-name": "Achat au nom d'un groupe de participant·e·s",
       "select-cash-register": "Caisse",
       "choose-cash-register": "Sélectionner",
       "market-disabled-label": "{market} est désactivé"

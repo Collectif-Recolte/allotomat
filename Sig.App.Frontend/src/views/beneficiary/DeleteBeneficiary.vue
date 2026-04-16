@@ -1,20 +1,20 @@
 <i18n>
 {
 	"en": {
-		"delete-beneficiary-success-notification": "The deletion was successful.",
+		"delete-beneficiary-success-notification": "The participant has been successfully deleted.",
 		"delete-text-error": "Text must match participant's first and last name",
 		"delete-text-label": "Type the participant's name to confirm",
-		"description": "Warning ! The deletion of <strong>{beneficiaryName}</strong> cannot be undone. If you continue, the participant and all their data will be permanently deleted.",
+		"description": "Warning! Deleting <strong>{beneficiaryName}</strong> cannot be undone. If you continue, the participant and all their data will be permanently deleted.",
 		"title": "Supprimer - {beneficiaryName}",
     "beneficiary-cant-have-active-subscription-error-notification": "The participant cannot be deleted because they have an active subscription."
 	},
 	"fr": {
 		"delete-beneficiary-success-notification": "La supression a été effectuée avec succès.",
-		"delete-text-error": "Le texte doit correspondre au prénom et au nom de famille du-de la participant-e",
-		"delete-text-label": "Taper le nom du-de la participant-e pour confirmer",
-		"description": "Avertissement ! La suppression de <strong>{beneficiaryName}</strong> ne peut pas être annulée. Si vous continuez, le participant ou la participante ainsi que toutes ses données seront supprimé-e-s de façon définitive.",
+		"delete-text-error": "Le texte doit correspondre au prénom et au nom de famille du ou de la participant·e",
+		"delete-text-label": "Taper le nom du ou de la participant·e pour confirmer",
+		"description": "Avertissement ! La suppression de <strong>{beneficiaryName}</strong> ne peut pas être annulée. Si vous continuez, le·a participant·e ainsi que toutes ses données seront supprimé·e·s de façon définitive.",
 		"title": "Supprimer - {beneficiaryName}",
-    "beneficiary-cant-have-active-subscription-error-notification": "Le participant ne peut pas être supprimé car il a un abonnement actif."
+    "beneficiary-cant-have-active-subscription-error-notification": "Le·a participant·e ne peut pas être supprimé·e car il·elle a un abonnement actif."
 	}
 }
 </i18n>

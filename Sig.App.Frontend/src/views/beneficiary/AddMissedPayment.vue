@@ -1,16 +1,16 @@
 <i18n>
 {
 	"en": {
-		"title": "Add a missed payment",
+		"title": "Add a Missed Payment",
 		"select-subscription-label": "Subscription",
 		"cancel": "Cancel",
 		"add-missed-payment": "Add missed payment",
 		"subscription-label": "{name} - expires on {date}",
     "subscription-desc": "This will transfer the appropriate funds to the card according to the rules of the subscription. If the subscription has a maximum number of payments, this will count towards that maximum.",
     "amount-allocated": "{amount} will be allocated",
-    "budget-allowance-available": "Remaining budget allowance after allocation: {amount}",
+    "budget-allowance-available": "Remaining budget envelope after allocation: {amount}",
     "add-payment": "Add payment",
-    "manually-add-missed-payment-success-notification": "The missed payment has been successfully added for {name} for an amount of {amount}."
+    "manually-add-missed-payment-success-notification": "The missed payment has been successfully added for {name} with an amount of {amount}."
 	},
 	"fr": {
 		"title": "Versement d’un paiement manqué",
@@ -38,9 +38,7 @@
       <PfForm
         has-footer
         can-cancel
-        :disable-submit="
-          Object.keys(formErrors).length > 0 || (selectedSubscription !== '' && budgetAllowanceAvailableAfterAllocation < 0)
-        "
+        :disable-submit="Object.keys(formErrors).length > 0 || (selectedSubscription !== '' && budgetAllowanceAvailableAfterAllocation < 0)"
         :submit-label="t('add-payment')"
         :cancel-label="t('cancel')"
         :processing="isSubmitting"
@@ -152,7 +150,7 @@ const beneficiary = useResult(resultBeneficiary, null, (data) => data.beneficiar
 
 const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
   var localBeneficiary = data.beneficiary;
-  return data.beneficiary.beneficiarySubscriptions
+return data.beneficiary.beneficiarySubscriptions
     .filter(
       (x) =>
         (x.hasMissedPayment && dateUtc(x.subscription.fundsExpirationDate) > Date.now()) ||

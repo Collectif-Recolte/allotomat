@@ -2,8 +2,8 @@
   {
     "en": {
       "add-missed-payment-description": "Select missed payments to add",
-      "no-missed-payment-description": "The subscriptions do not have any missed payments. It is possible to manually add funds to the cards in case of urgent need.",
-      "budget-allowance-not-enought": "<b>The budget allowance is not sufficient to cover the additional payment</b>",
+      "no-missed-payment-description": "The subscriptions do not have any missed payments. It is possible to manually add funds to the cards if required.",
+      "budget-allowance-not-enought": "<b>The budget envelope is not sufficient to cover the additional payment</b>",
       "close":"Close",
       "budget-allowance-needed": "<b>{amountByPayment} $ required for assignment</b>",
       "submit": "Add missed payments",
@@ -12,7 +12,7 @@
     },
     "fr": {
       "add-missed-payment-description": "Sélectionnez les paiements manqués à ajouter",
-      "no-missed-payment-description": "Les abonnements ne comportent aucun paiement manqué. Il est possible d'ajouter manuellement des fonds sur les cartes en cas de besoin urgent.",
+      "no-missed-payment-description": "Les abonnements ne comportent aucun paiement manqué. Il est possible d'ajouter manuellement des fonds sur les cartes si nécessaire.",
       "budget-allowance-not-enought": "<b>L'enveloppe budgétaire n'est pas suffisante pour couvrir le versement supplémentaire</b>",
       "close":"Fermer",
       "budget-allowance-needed": "<b>{amountByPayment} $ requis pour l'attribution</b>",

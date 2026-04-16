@@ -65,6 +65,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var initialTransaction = await db.Transactions.OfType<PaymentTransaction>()
                 .Include(x => x.Card).ThenInclude(x => x.Funds).ThenInclude(x => x.ProductGroup)
                 .Include(x => x.Card).ThenInclude(x => x.Project)
+                .AsSplitQuery()
                 .Include(x => x.Beneficiary)
                 .Include(x => x.Market)
                 .Include(x => x.TransactionByProductGroups)
@@ -72,7 +73,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .Include(x => x.Organization)
                 .Include(x => x.Transactions)
                 .Include(x => x.PaymentTransactionAddingFundTransactions).ThenInclude(x => x.AddingFundTransaction)
-                .Include(x => x.CashRegister)
+                .Include(x => x.CashRegister).ThenInclude(x => x.MarketGroups).ThenInclude(x => x.MarketGroup)
                 .FirstOrDefaultAsync(x => x.Id == initialTransactionId, cancellationToken);
 
             if (initialTransaction == null)
@@ -145,7 +146,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 InitiatedByProject = currentUser?.Type == UserType.ProjectManager,
                 InitiatedByOrganization = currentUser?.Type == UserType.OrganizationManager,
                 CashRegisterId = initialTransaction.CashRegisterId,
-                CashRegisterName = initialTransaction.CashRegister?.Name
+                CashRegisterName = initialTransaction.CashRegister?.Name,
+                MarketGroupId = initialTransaction.CashRegister?.MarketGroups?.FirstOrDefault(x => x.MarketGroup.ProjectId == card.ProjectId)?.MarketGroupId,
+                MarketGroupName = initialTransaction.CashRegister?.MarketGroups?.FirstOrDefault(x => x.MarketGroup.ProjectId == card.ProjectId)?.MarketGroup?.Name
             };
             transactionLogs.Add(baseTransactionLog);
 

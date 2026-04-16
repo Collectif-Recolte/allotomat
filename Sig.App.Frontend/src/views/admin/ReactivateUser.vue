@@ -8,9 +8,9 @@
       "reactivate-button-label": "Reactivate"
     },
     "fr": {
-      "reactivate-user-success-notification": "L'utilisateur {userName} a été réactivé avec succès.",
-      "reactivate-text-error": "Le texte doit correspondre au nom de l'utilisateur",
-      "reactivate-text-label": "Taper le nom de l'utilisateur pour confirmer",
+      "reactivate-user-success-notification": "Le compte {userName} a été réactivé avec succès.",
+      "reactivate-text-error": "Le texte doit correspondre au nom associé au compte",
+      "reactivate-text-label": "Taper le nom associé au compte pour confirmer",
       "title": "Réactiver - {userName}",
       "reactivate-button-label": "Réactiver"
     }

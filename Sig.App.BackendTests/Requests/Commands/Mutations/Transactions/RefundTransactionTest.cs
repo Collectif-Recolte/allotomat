@@ -2,6 +2,8 @@
 using Moq;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Cards;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
+using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
@@ -43,6 +45,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
         private readonly PaymentTransaction initialPaymentTransaction1;
         private readonly PaymentTransaction initialPaymentTransaction2;
+
+        private readonly CashRegister cashRegister;
+        private readonly MarketGroup marketGroup;
 
         private readonly ProductGroup productGroup;
         private readonly ProductGroup loyaltyProductgroup;
@@ -193,6 +198,29 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 ProductGroup = productGroup
             };
 
+            marketGroup = new MarketGroup()
+            {
+                Name = "Market group 1",
+                Project = project,
+                Markets = new List<MarketGroupMarket>(),
+                CashRegisters = new List<CashRegisterMarketGroup>()
+            };
+
+            cashRegister = new CashRegister()
+            {
+                Name = "Cash register 1",
+                Market = market,
+                MarketGroups = new List<CashRegisterMarketGroup>()
+            };
+
+            var cashRegisterMarketGroup = new CashRegisterMarketGroup()
+            {
+                CashRegister = cashRegister,
+                MarketGroup = marketGroup
+            };
+            marketGroup.CashRegisters.Add(cashRegisterMarketGroup);
+            cashRegister.MarketGroups.Add(cashRegisterMarketGroup);
+
             initialPaymentTransaction1 = new PaymentTransaction()
             {
                 Amount = 20,
@@ -200,6 +228,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 Beneficiary = beneficiary,
                 Market = market,
                 Organization = organization,
+                CashRegister = cashRegister,
                 TransactionByProductGroups = new List<PaymentTransactionProductGroup>()
                 {
                     new PaymentTransactionProductGroup()
@@ -278,6 +307,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             project.Organizations = new List<Organization>() { organization };
             project.Cards = new List<Card> { card };
 
+            DbContext.MarketGroups.Add(marketGroup);
+            DbContext.CashRegisters.Add(cashRegister);
             DbContext.Markets.Add(market);
             DbContext.Cards.Add(card);
             DbContext.Beneficiaries.Add(beneficiary);
@@ -666,6 +697,40 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.MarketDisabledException>();
+        }
+
+        [Fact]
+        public async Task CreateRefundTransactionCreatesTransactionLogWithCorrectFields()
+        {
+            var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
+            {
+                InitialTransactionId = initialPaymentTransaction1.GetIdentifier(),
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
+                Password = "Abcd1234!!"
+            };
+            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
+            {
+                Amount = 10,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync();
+
+            transactionLog.Discriminator.Should().Be(TransactionLogDiscriminator.RefundPaymentTransactionLog);
+            transactionLog.TotalAmount.Should().Be(10);
+            transactionLog.MarketId.Should().Be(market.Id);
+            transactionLog.MarketName.Should().Be(market.Name);
+            transactionLog.CashRegisterId.Should().Be(cashRegister.Id);
+            transactionLog.CashRegisterName.Should().Be(cashRegister.Name);
+            transactionLog.MarketGroupId.Should().Be(marketGroup.Id);
+            transactionLog.MarketGroupName.Should().Be(marketGroup.Name);
+            transactionLog.BeneficiaryId.Should().Be(beneficiary.Id);
+            transactionLog.BeneficiaryFirstname.Should().Be(beneficiary.Firstname);
+            transactionLog.BeneficiaryLastname.Should().Be(beneficiary.Lastname);
+            transactionLog.OrganizationId.Should().Be(organization.Id);
+            transactionLog.ProjectId.Should().Be(project.Id);
         }
     }
 }

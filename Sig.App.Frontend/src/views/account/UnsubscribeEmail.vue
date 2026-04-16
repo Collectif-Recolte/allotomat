@@ -12,7 +12,7 @@
 	},
 	"fr": {
 		"unsubscribing": "Désabonnement des courriels de {emailType}...",
-		"unsubscribed": "Vous avez été désabonné des courriels de {emailType}.",
+		"unsubscribed": "Vous avez été désabonné·e des courriels de {emailType}.",
 		"error": "Il y a eu un problème lors du désabonnement des courriels de {emailType}.",
 		"title": "Désabonnement",
     "created-card-csv-email": "fichier d'impression des cartes",

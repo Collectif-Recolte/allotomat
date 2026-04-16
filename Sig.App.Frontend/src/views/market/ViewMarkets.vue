@@ -1,13 +1,13 @@
 <i18n>
   {
     "en": {
-      "add-market": "Add Market",
-      "title": "Markets",
-      "empty-list": "No markets are linked to this program.",
-      "market-count": "{count} market | {count} markets",
-      "search-placeholder": "Search by market name, email address, person name",
+      "add-market": "Add Merchant",
+      "title": "Merchants",
+      "empty-list": "No merchants are associated with this program.",
+      "market-count": "{count} merchant | {count} merchants",
+      "search-placeholder": "Search by merchant name, email address, person name",
       "reset-search": "Reset search",
-      "market-groups": "Market Groups"
+      "market-groups": "Merchant Groups"
     },
     "fr": {
       "add-market": "Ajouter un commerce",
@@ -16,7 +16,7 @@
       "market-count": "{count} commerce | {count} commerces",
       "search-placeholder": "Chercher par nom du commerce, addresse courriel, nom de la personne",
       "reset-search": "Réinitialiser la recherche",
-      "market-groups": "Groupes de commerce"
+      "market-groups": "Groupes de commerces"
     }
   }
 </i18n>

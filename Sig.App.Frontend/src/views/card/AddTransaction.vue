@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "title-new-transaction": "New transaction"
+      "title-new-transaction": "New Transaction"
     },
     "fr": {
       "title-new-transaction": "Nouvelle transaction"

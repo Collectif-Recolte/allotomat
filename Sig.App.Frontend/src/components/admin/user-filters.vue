@@ -7,16 +7,16 @@
     "user-type-projectmanager": "Program manager",
     "user-type-organizationmanager": "Group manager",
     "user-type-merchant": "Merchant",
-    "user-type-marketmanager": "Market group manager"
+    "user-type-marketmanager": "Merchant group manager"
 	},
 	"fr": {
-		"user-type": "Type d'utilisateur",
+		"user-type": "Type de compte",
     "search-placeholder": "Chercher par courriel ou nom",
     "user-type-admin": "Administrateur",
     "user-type-projectmanager": "Gestionnaire de projet",
     "user-type-organizationmanager": "Gestionnaire de groupe",
-    "user-type-merchant": "Marchand",
-    "user-type-marketmanager": "Gestionnaire de groupe de commerce"
+    "user-type-merchant": "Commerce",
+    "user-type-marketmanager": "Gestionnaire de groupe de commerces"
 	}
 }
 </i18n>

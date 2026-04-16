@@ -64,7 +64,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.MarketGroups
 
             await db.SaveChangesAsync(cancellationToken);
 
-            await mediator.Send(new CreateCashRegister.Input() { MarketGroupId = request.MarketGroupId, MarketId = market.GetIdentifier(), Name = "Caisse - " + marketGroup.Name + " / " + market.Name });
+            await mediator.Send(new CreateCashRegister.Input() { MarketGroupId = request.MarketGroupId, MarketId = market.GetIdentifier(), Name = marketGroup.Name });
 
             logger.LogInformation($"[Mutation] AddMarketToMarketGroup - Market {market.Name} added to Market group {marketGroup.Name}");
 

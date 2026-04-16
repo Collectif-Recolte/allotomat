@@ -46,6 +46,8 @@ public class TransactionLog : IHaveLongIdentifier
 
     public long? CashRegisterId { get; set; }
     public string CashRegisterName { get; set; }
+    public long? MarketGroupId { get; set; }
+    public string MarketGroupName { get; set; }
 
     public List<TransactionLogProductGroup> TransactionLogProductGroups { get; set; }
 }

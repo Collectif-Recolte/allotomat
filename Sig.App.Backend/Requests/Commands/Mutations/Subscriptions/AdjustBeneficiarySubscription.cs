@@ -66,8 +66,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 var newPaymentAmount = GetAmountPayment(subscriptionBeneficiary.Subscription, beneficiary.BeneficiaryTypeId.Value);
 
                 var paymentReceived = beneficiaryTransactions.Where(x => x.SubscriptionType.SubscriptionId == subscriptionBeneficiary.SubscriptionId).Count();
-                var paymentRemaining = subscriptionBeneficiary.Subscription.GetPaymentRemaining(clock);
-                var numberOfPaymentToReceive = Math.Min(subscriptionBeneficiary.Subscription.MaxNumberOfPayments.HasValue ? subscriptionBeneficiary.Subscription.MaxNumberOfPayments.Value - paymentReceived : paymentRemaining, paymentRemaining);
+                var paymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock);
+                var cap = subscriptionBeneficiary.MaxNumberOfPaymentsOverride.HasValue || subscriptionBeneficiary.Subscription.MaxNumberOfPayments.HasValue
+                    ? subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments() - paymentReceived
+                    : paymentRemaining;
+                var numberOfPaymentToReceive = Math.Min(cap, paymentRemaining);
 
                 if (subscriptionBeneficiary.BudgetAllowance.AvailableFund + (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive > 0)
                 {

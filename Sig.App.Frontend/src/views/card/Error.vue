@@ -1,15 +1,15 @@
 <i18n>
 {
 	"en": {
-		"card-deactivated": "The card is disabled.",
-		"card-not-found": "QR code does not equate to a known user.",
+		"card-deactivated": "The card is deactivated.",
+		"card-not-found": "QR code does not equate to a known card.",
 		"scan-btn": "Scan another card",
 		"error-description": "Balance check could not be completed for the following reason:",
 		"title": "Error 🚫"
 	},
 	"fr": {
 		"card-deactivated": "La carte est désactivée.",
-		"card-not-found": "Le code QR n'équivaut pas à un utilisateur connu.",
+		"card-not-found": "Le code QR n'équivaut pas à une carte connue.",
 		"scan-btn": "Scanner une autre carte",
 		"error-description": "La vérification du solde n'a pas pu être complétée pour la raison suivante:",
 		"title": "Erreur 🚫"
