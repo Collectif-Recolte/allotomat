@@ -271,5 +271,33 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<ChangeBeneficiarySubscriptionMaxNumberOfPayments.EffectiveMaxNumberOfPaymentsIsLowerThanOverrideException>();
         }
+
+        [Fact]
+        public async Task IncreaseMaxNumberOfPaymentsSucceedsWhenSubscriptionIsPaymentBasedCardUsage()
+        {
+            // With IsSubscriptionPaymentBasedCardUsage=true, the old code used
+            // subscriptionBeneficiary.GetPaymentRemaining() which was capped at
+            // GetEffectiveMaxNumberOfPayments() (3), incorrectly blocking any increase
+            // beyond the current max even when calendar slots allowed it.
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            DbContext.SaveChanges();
+
+            var input = new ChangeBeneficiarySubscriptionMaxNumberOfPayments.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier(),
+                MaxNumberOfPayments = 5 // > current max (3) but <= calendar payment slots (~6)
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localSubscriptionBeneficiary = await DbContext.SubscriptionBeneficiaries
+                .Include(x => x.BudgetAllowance)
+                .FirstAsync(x => x.BeneficiaryId == beneficiary.Id && x.SubscriptionId == subscription.Id);
+
+            // 5 - 3 = 2 additional payments * 50 = 100 deducted
+            localSubscriptionBeneficiary.MaxNumberOfPaymentsOverride.Should().Be(5);
+            localSubscriptionBeneficiary.BudgetAllowance.AvailableFund.Should().Be(400);
+        }
     }
 }

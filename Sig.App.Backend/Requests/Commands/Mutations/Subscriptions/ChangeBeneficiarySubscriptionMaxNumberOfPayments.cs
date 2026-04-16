@@ -51,7 +51,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             var subscription = subscriptionBeneficiary.Subscription;
-            var paymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock);
+            var paymentRemaining = subscription.GetCardPaymentRemaining(clock);
             var currentMax = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
 
             if (paymentRemaining < request.MaxNumberOfPayments)
