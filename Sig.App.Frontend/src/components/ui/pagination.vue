@@ -7,8 +7,8 @@
 		"previous": "Previous"
 	},
 	"fr": {
-		"first": "Première",
-		"last": "Dernière",
+		"first": "Début",
+		"last": "Fin",
 		"next": "Suivant",
 		"previous": "Précédent"
 	}
@@ -16,7 +16,7 @@
 </i18n>
 
 <template>
-  <nav class="border-t border-grey-200 dark:border-grey-800 px-4 flex items-center justify-between sm:px-0">
+  <nav class="border-t border-grey-200 dark:border-grey-800 px-4 grid grid-cols-3 items-start sm:px-0">
     <div class="-mt-px flex gap-x-1">
       <button v-if="props.page > 1"
         class="border-t-2 border-transparent pt-4 pr-1 inline-flex items-center text-sm font-semibold text-grey-500 hover:text-grey-700 hover:border-grey-300 dark:text-grey-400 dark:hover:text-grey-300 dark:hover:border-grey-700"
@@ -32,7 +32,7 @@
       </button>
     </div>
 
-    <div class="hidden md:-mt-px md:flex">
+    <div class="hidden md:-mt-px md:flex justify-center">
       <template v-for="(pageItem, index) in paginationItems" :key="index">
         <span v-if="pageItem === '...'"
           class="border-transparent text-grey-500 dark:text-grey-400 border-t-2 pt-4 px-4 inline-flex items-center text-sm font-semibold">{{
@@ -98,6 +98,10 @@ const paginationItems = computed(() => {
   const total = props.totalPages;
   const current = props.page;
 
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => (i + 1).toString());
+  }
+
   const pageSet = new Set();
 
   for (let i = 1; i <= Math.min(edgeCount, total); i++) pageSet.add(i);
@@ -108,7 +112,13 @@ const paginationItems = computed(() => {
   const result = [];
 
   for (let i = 0; i < sorted.length; i++) {
-    if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push("...");
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) {
+      if (sorted[i] - sorted[i - 1] === 2) {
+        result.push((sorted[i - 1] + 1).toString());
+      } else {
+        result.push("...");
+      }
+    }
     result.push(sorted[i].toString());
   }
 
