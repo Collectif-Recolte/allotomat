@@ -124,7 +124,7 @@ namespace Sig.App.Backend.BackgroundJobs
             {
                 foreach (var subscriptionBeneficiary in subscription.Beneficiaries)
                 {
-                    CreateTransaction(subscriptionBeneficiary);
+                    await CreateTransaction(subscriptionBeneficiary);
                 }
             }
 
@@ -240,17 +240,41 @@ namespace Sig.App.Backend.BackgroundJobs
 
             if (subscriptionBeneficiary == null) return;
 
-            AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, initiatedBy);
+            await AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, initiatedBy);
             await db.SaveChangesAsync();
         }
 
-        public void AddFundToExistingSubscriptionBeneficiary(SubscriptionBeneficiary subscriptionBeneficiary, InitiatedBy initiatedBy = null)
+        public async Task AddFundToExistingSubscriptionBeneficiary(SubscriptionBeneficiary subscriptionBeneficiary, InitiatedBy initiatedBy = null)
         {
-            CreateTransaction(subscriptionBeneficiary, initiatedBy);
+            await CreateTransaction(subscriptionBeneficiary, initiatedBy);
         }
 
-        private void CreateTransaction(SubscriptionBeneficiary subscriptionBeneficiary, InitiatedBy initiatedBy = null)
+        private async Task CreateTransaction(SubscriptionBeneficiary subscriptionBeneficiary, InitiatedBy initiatedBy = null)
         {
+            if (subscriptionBeneficiary.Subscription == null)
+            {
+                subscriptionBeneficiary.Subscription = await db.Subscriptions
+                    .Include(x => x.BudgetAllowances)
+                    .Include(x => x.Types).ThenInclude(x => x.ProductGroup)
+                    .FirstAsync(x => x.Id == subscriptionBeneficiary.SubscriptionId);
+            }
+
+            if (subscriptionBeneficiary.Beneficiary == null)
+            {
+                subscriptionBeneficiary.Beneficiary = await db.Beneficiaries
+                    .Include(x => x.Card).ThenInclude(x => x.Transactions)
+                    .Include(x => x.Card).ThenInclude(x => x.Funds)
+                    .Include(x => x.Organization).ThenInclude(x => x.Project)
+                    .AsSplitQuery()
+                    .FirstAsync(x => x.Id == subscriptionBeneficiary.BeneficiaryId);
+            }
+
+            if (subscriptionBeneficiary.BeneficiaryType == null && subscriptionBeneficiary.BeneficiaryTypeId.HasValue)
+            {
+                subscriptionBeneficiary.BeneficiaryType = await db.BeneficiaryTypes
+                    .FirstAsync(x => x.Id == subscriptionBeneficiary.BeneficiaryTypeId.Value);
+            }
+
             var subscription = subscriptionBeneficiary.Subscription;
             var beneficiary = subscriptionBeneficiary.Beneficiary;
             var beneficiaryType = subscriptionBeneficiary.BeneficiaryType;

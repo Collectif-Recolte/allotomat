@@ -163,7 +163,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         if (budgetAllowance.AvailableFund >= amount)
                         {
                             budgetAllowance.AvailableFund -= amount;
-                            addingFundToCardJob.AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, new AddingFundToCard.InitiatedBy()
+                            await addingFundToCardJob.AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, new AddingFundToCard.InitiatedBy()
                             {
                                 TransactionInitiatorId = currentUserId,
                                 TransactionInitiatorEmail = currentUser?.Email,
@@ -223,7 +223,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
                         if (replicatePaymentOnAttribution)
                         {
-                            addingFundToCardJob.AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, new AddingFundToCard.InitiatedBy()
+                            await addingFundToCardJob.AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, new AddingFundToCard.InitiatedBy()
                             {
                                 TransactionInitiatorId = currentUserId,
                                 TransactionInitiatorEmail = currentUser?.Email,

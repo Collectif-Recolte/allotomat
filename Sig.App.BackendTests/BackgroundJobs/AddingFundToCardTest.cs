@@ -464,6 +464,33 @@ namespace Sig.App.BackendTests.BackgroundJobs
         }
 
         [Fact]
+        public async Task AddFundToExistingSubscriptionBeneficiaryLoadsNavPropsWhenNull()
+        {
+            // Arrange: SubscriptionBeneficiary with only FK scalars — simulates a caller that forgot .Include()
+            var partialSb = new SubscriptionBeneficiary
+            {
+                SubscriptionId = subscription.Id,
+                BeneficiaryId = beneficiary.Id,
+                BeneficiaryTypeId = beneficiaryType.Id
+                // Subscription, Beneficiary, BeneficiaryType are intentionally null
+            };
+
+            var fundBefore = card.Funds.First().Amount;
+
+            // Act
+            await job.AddFundToExistingSubscriptionBeneficiary(partialSb);
+            await DbContext.SaveChangesAsync();
+
+            // Assert: fund was added despite null nav props (lazy-load kicked in)
+            var updatedCard = DbContext.Cards.Include(x => x.Funds).First();
+            updatedCard.Funds.First().Amount.Should().Be(fundBefore + 25);
+
+            var transaction = DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().FirstOrDefault();
+            transaction.Should().NotBeNull();
+            transaction.Amount.Should().Be(25);
+        }
+
+        [Fact]
         public async Task DontAddFundIfParticipantHaveMaxNumberOfPaymentsOverrideAndMaxNumberOfTransaction()
         {
             var today = Clock.GetCurrentInstant().ToDateTimeUtc();
