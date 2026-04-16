@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NodaTime;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
@@ -20,11 +21,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
     {
         private readonly ILogger<ChangeBeneficiarySubscriptionMaxNumberOfPayments> logger;
         private readonly AppDbContext db;
+        private readonly IClock clock;
 
-        public ChangeBeneficiarySubscriptionMaxNumberOfPayments(ILogger<ChangeBeneficiarySubscriptionMaxNumberOfPayments> logger, AppDbContext db)
+        public ChangeBeneficiarySubscriptionMaxNumberOfPayments(ILogger<ChangeBeneficiarySubscriptionMaxNumberOfPayments> logger, AppDbContext db, IClock clock)
         {
             this.logger = logger;
             this.db = db;
+            this.clock = clock;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -48,7 +51,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             var subscription = subscriptionBeneficiary.Subscription;
+            var paymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock);
             var currentMax = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
+
+            if (paymentRemaining < request.MaxNumberOfPayments)
+            {
+                logger.LogWarning("[Mutation] ChangeBeneficiarySubscriptionMaxNumberOfPayments - EffectiveMaxNumberOfPaymentsIsLowerThanOverrideException");
+                throw new EffectiveMaxNumberOfPaymentsIsLowerThanOverrideException();
+            }
 
             if (request.MaxNumberOfPayments <= currentMax)
             {
@@ -93,5 +103,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         public class BeneficiaryNotInSubscriptionException : RequestValidationException { }
         public class MaxNumberOfPaymentsMustBeGreaterThanCurrentException : RequestValidationException { }
         public class NotEnoughBudgetAllowanceException : RequestValidationException { }
+        public class EffectiveMaxNumberOfPaymentsIsLowerThanOverrideException : RequestValidationException { }
     }
 }

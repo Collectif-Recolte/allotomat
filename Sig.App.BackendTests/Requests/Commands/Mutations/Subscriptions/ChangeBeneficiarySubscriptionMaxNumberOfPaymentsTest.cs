@@ -79,7 +79,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 StartDate = new DateTime(today.Year, today.Month, 1),
                 EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(6),
                 MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
-                IsSubscriptionPaymentBasedCardUsage = true,
+                IsSubscriptionPaymentBasedCardUsage = false,
                 MaxNumberOfPayments = 3,
                 Types = new List<SubscriptionType>()
                 {
@@ -116,7 +116,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
             handler = new ChangeBeneficiarySubscriptionMaxNumberOfPayments(
                 NullLogger<ChangeBeneficiarySubscriptionMaxNumberOfPayments>.Instance,
-                DbContext);
+                DbContext,
+                Clock);
         }
 
         [Fact]
@@ -143,14 +144,14 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         [Fact]
         public async Task IncreaseFromExistingOverrideDeductsOnlyDifference()
         {
-            subscriptionBeneficiary.MaxNumberOfPaymentsOverride = 5;
+            subscriptionBeneficiary.MaxNumberOfPaymentsOverride = 4;
             DbContext.SaveChanges();
 
             var input = new ChangeBeneficiarySubscriptionMaxNumberOfPayments.Input()
             {
                 BeneficiaryId = beneficiary.GetIdentifier(),
                 SubscriptionId = subscription.GetIdentifier(),
-                MaxNumberOfPayments = 7
+                MaxNumberOfPayments = 5
             };
 
             await handler.Handle(input, CancellationToken.None);
@@ -159,9 +160,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 .Include(x => x.BudgetAllowance)
                 .FirstAsync(x => x.BeneficiaryId == beneficiary.Id && x.SubscriptionId == subscription.Id);
 
-            // 7 - 5 = 2 additional payments * 50 = 100 deducted
-            localSubscriptionBeneficiary.MaxNumberOfPaymentsOverride.Should().Be(7);
-            localSubscriptionBeneficiary.BudgetAllowance.AvailableFund.Should().Be(400);
+            // 5 - 4 = 1 additional payment * 50 = 50 deducted
+            localSubscriptionBeneficiary.MaxNumberOfPaymentsOverride.Should().Be(5);
+            localSubscriptionBeneficiary.BudgetAllowance.AvailableFund.Should().Be(450);
         }
 
         [Fact]
@@ -255,6 +256,20 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<ChangeBeneficiarySubscriptionMaxNumberOfPayments.NotEnoughBudgetAllowanceException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfEffectiveMaxNumberOfPaymentsIsLowerThanOverride()
+        {
+            var input = new ChangeBeneficiarySubscriptionMaxNumberOfPayments.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier(),
+                MaxNumberOfPayments = 7 // exceeds the 6 calendar payment slots remaining
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<ChangeBeneficiarySubscriptionMaxNumberOfPayments.EffectiveMaxNumberOfPaymentsIsLowerThanOverrideException>();
         }
     }
 }
