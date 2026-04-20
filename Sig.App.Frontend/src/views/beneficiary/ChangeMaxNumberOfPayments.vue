@@ -117,6 +117,7 @@ const { result: resultBeneficiary, loading } = useQuery(
               id
               name
               isArchived
+              endDate
               isSubscriptionPaymentBasedCardUsage
               types {
                 id
@@ -147,7 +148,11 @@ const beneficiary = useResult(resultBeneficiary, null, (data) => data.beneficiar
 
 const subscriptionOptions = useResult(resultBeneficiary, [], (data) => {
   return data.beneficiary.beneficiarySubscriptions
-    .filter((x) => x.subscription.isSubscriptionPaymentBasedCardUsage && !x.subscription.isArchived)
+    .filter((x) => {
+        const now = new Date();
+        const endDate = new Date(x.subscription.endDate);
+        return x.subscription.isSubscriptionPaymentBasedCardUsage && !x.subscription.isArchived && endDate >= now;
+      })
     .map((x) => ({
       label: subscriptionName(x.subscription),
       value: x.subscription.id,
