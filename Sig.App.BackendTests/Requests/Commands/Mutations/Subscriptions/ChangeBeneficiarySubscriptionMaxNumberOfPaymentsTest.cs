@@ -273,6 +273,23 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         }
 
         [Fact]
+        public async Task ThrowsIfSubscriptionIsExpired()
+        {
+            subscription.EndDate = new DateTime(Clock.GetCurrentInstant().ToDateTimeUtc().Year - 1, 1, 1);
+            DbContext.SaveChanges();
+
+            var input = new ChangeBeneficiarySubscriptionMaxNumberOfPayments.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier(),
+                MaxNumberOfPayments = 5
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<ChangeBeneficiarySubscriptionMaxNumberOfPayments.SubscriptionExpiredException>();
+        }
+
+        [Fact]
         public async Task IncreaseMaxNumberOfPaymentsSucceedsWhenSubscriptionIsPaymentBasedCardUsage()
         {
             // With IsSubscriptionPaymentBasedCardUsage=true, the old code used

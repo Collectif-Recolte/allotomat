@@ -338,7 +338,10 @@ function haveSubscriptions() {
 }
 
 function havePaymentBasedSubscriptions() {
-  return props.beneficiary.beneficiarySubscriptions.some((x) => x.subscription.isSubscriptionPaymentBasedCardUsage);
+  const now = new Date();
+  return props.beneficiary.beneficiarySubscriptions.some(
+    (x) => x.subscription.isSubscriptionPaymentBasedCardUsage && new Date(x.subscription.endDate) >= now
+  );
 }
 
 function haveMarketsInOrganization() {

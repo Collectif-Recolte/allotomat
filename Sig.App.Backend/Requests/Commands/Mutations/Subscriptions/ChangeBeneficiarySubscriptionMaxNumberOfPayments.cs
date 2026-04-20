@@ -51,6 +51,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             var subscription = subscriptionBeneficiary.Subscription;
+            var today = clock.GetCurrentInstant().ToDateTimeUtc();
+
+            if (subscription.EndDate.Date < today.Date)
+            {
+                logger.LogWarning("[Mutation] ChangeBeneficiarySubscriptionMaxNumberOfPayments - SubscriptionExpiredException");
+                throw new SubscriptionExpiredException();
+            }
+
             var paymentRemaining = subscription.GetCardPaymentRemaining(clock);
             var currentMax = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
 
@@ -101,6 +109,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         }
 
         public class BeneficiaryNotInSubscriptionException : RequestValidationException { }
+        public class SubscriptionExpiredException : RequestValidationException { }
         public class MaxNumberOfPaymentsMustBeGreaterThanCurrentException : RequestValidationException { }
         public class NotEnoughBudgetAllowanceException : RequestValidationException { }
         public class EffectiveMaxNumberOfPaymentsIsLowerThanOverrideException : RequestValidationException { }
