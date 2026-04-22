@@ -2,15 +2,15 @@
   {
     "en": {
       "add-market-group": "Add",
-      "title": "Manage Market Groups",
-      "empty-list": "No market groups have been created yet.",
-      "create-market-group": "Create a market group",
-      "market-group-count": "{count} market group | {count} market groups"
+      "title": "Manage Merchant Groups",
+      "empty-list": "No merchant groups have been created yet.",
+      "create-market-group": "Create a merchant group",
+      "market-group-count": "{count} merchant group | {count} merchant groups"
     },
     "fr": {
       "add-market-group": "Ajouter",
       "title": "Gestion des groupes de commerces",
-      "empty-list": "Aucun groupe de commerce n'a encore été créé.",
+      "empty-list": "Aucun groupe de commerces n'a encore été créé.",
       "create-market-group": "Créer un groupe de commerces",
       "market-group-count": "{count} groupe de commerces | {count} groupes de commerces"
     }

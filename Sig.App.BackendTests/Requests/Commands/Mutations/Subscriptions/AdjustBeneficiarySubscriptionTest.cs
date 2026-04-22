@@ -334,6 +334,40 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         }
 
         [Fact]
+        public async Task AdjustBeneficiarySubscription_WithMaxNumberOfPaymentsOverride()
+        {
+            // Override=5 > MaxNumberOfPayments=4, so override drives the budget calculation
+            beneficiary.BeneficiaryType = beneficiaryType2;
+            var subscriptionBeneficiary3 = subscription3.Beneficiaries.First();
+            subscriptionBeneficiary3.MaxNumberOfPaymentsOverride = 5;
+            DbContext.SaveChanges();
+
+            var input = new AdjustBeneficiarySubscription.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionIds = new List<Id>()
+                {
+                    subscription3.GetIdentifier()
+                }
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBeneficiary = await DbContext.Beneficiaries
+                .Include(x => x.Subscriptions).ThenInclude(x => x.BudgetAllowance)
+                .Include(x => x.Subscriptions).ThenInclude(x => x.BeneficiaryType)
+                .FirstAsync();
+
+            var localSubscriptionBeneficiary = localBeneficiary.Subscriptions.First(x => x.SubscriptionId == subscription3.Id);
+            // paymentReceived=0, paymentRemaining>=5 (biweekly over ~3 months)
+            // numberOfPaymentToReceive = min(override=5, paymentRemaining) = 5
+            // previousAmount (type1)=25, newAmount (type2)=50
+            // budgetChange = (25-50)*5 = -125 → 600-125 = 475
+            localSubscriptionBeneficiary.BudgetAllowance.AvailableFund.Should().Be(475);
+            localSubscriptionBeneficiary.BeneficiaryTypeId.Should().Be(beneficiaryType2.Id);
+        }
+
+        [Fact]
         public async Task ThrowsIfBeneficiaryNotFound()
         {
             var input = new AdjustBeneficiarySubscription.Input()

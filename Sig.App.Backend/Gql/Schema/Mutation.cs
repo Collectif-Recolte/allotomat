@@ -950,6 +950,15 @@ namespace Sig.App.Backend.Gql.Schema
             return mediator.Send(input.Value);
         }
 
+        [AnnotateErrorCodes(typeof(ChangeBeneficiarySubscriptionMaxNumberOfPayments))]
+        public static Task<ChangeBeneficiarySubscriptionMaxNumberOfPayments.Payload> ChangeBeneficiarySubscriptionMaxNumberOfPayments(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<ChangeBeneficiarySubscriptionMaxNumberOfPayments.Input> input)
+        {
+            return mediator.Send(input.Value);
+        }
+
         public static Task<AddMissingPayment.Payload> AddMissingPayment(
             this GqlMutation _,
             [Inject] IMediator mediator,

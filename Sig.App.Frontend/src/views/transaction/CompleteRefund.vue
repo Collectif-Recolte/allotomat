@@ -4,7 +4,7 @@
 		"card-description": "Balance",
 		"create-new-transaction-btn": "Done",
 		"payment-description": "Refund",
-		"title": "Refund completed",
+		"title": "Refund Completed",
     "gift-card": "Gift card"
 	},
 	"fr": {

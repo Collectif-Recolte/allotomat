@@ -2,10 +2,10 @@
   {
     "en": {
       "add-merchant": "Add a merchant",
-      "market-already-in-project": "The market is already part of the program",
-      "no-associated-merchant": "No associated merchant",
+      "market-already-in-project": "The merchant is already part of the program",
+      "no-associated-merchant": "No associated merchants",
       "title": "Merchants - {projectName}",
-      "selected-market": "Selected market"
+      "selected-market": "Selected merchant"
     },
     "fr": {
       "add-merchant": "Ajouter un commerce",

@@ -8,7 +8,7 @@
 	},
 	"fr": {
 		"unsubscribing": "Désabonnement des courriels de reçu de paiement...",
-		"unsubscribed": "Vous avez été désabonné des courriels de reçu de paiement.",
+		"unsubscribed": "Vous avez été désabonné·e des courriels de reçu de paiement.",
 		"error": "Il y a eu un problème lors du désabonnement des courriels de reçu de paiement.",
 		"title": "Désabonnement"
 	}

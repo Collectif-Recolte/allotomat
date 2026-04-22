@@ -5,10 +5,12 @@ using NodaTime;
 using Sig.App.Backend.BackgroundJobs;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
+using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
+using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Requests.Commands.Mutations.Subscriptions;
@@ -594,6 +596,102 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<AssignBeneficiariesToSubscription.NotEnoughBudgetAllowanceException>();
+        }
+
+        [Fact]
+        public async Task AssignSubscriptionWithReplicatePaymentOnAttributionShouldCreatesTransactionOnCard()
+        {
+            var card = new Card()
+            {
+                Status = CardStatus.Assigned,
+                Project = project,
+                Funds = new List<Fund>(),
+                Transactions = new List<Transaction>()
+            };
+            DbContext.Cards.Add(card);
+            beneficiary1.Card = card;
+            DbContext.SaveChanges();
+
+            var input = new AssignBeneficiariesToSubscription.Input()
+            {
+                OrganizationId = organization.GetIdentifier(),
+                SubscriptionId = subscription1.GetIdentifier(),
+                Beneficiaries = [beneficiary1.GetIdentifier()],
+                ReplicatePaymentOnAttribution = true
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transactions = DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().ToList();
+            transactions.Should().HaveCount(1);
+            transactions.First().Amount.Should().Be(50);
+
+            var cardFund = DbContext.Funds.First();
+            cardFund.Amount.Should().Be(50);
+
+            // Budget is reserved for all remaining + current payment (replication adds 1)
+            var localBudgetAllowance = DbContext.BudgetAllowances.First(x => x.Id == budgetAllowance1.Id);
+            localBudgetAllowance.AvailableFund.Should().Be(600);
+        }
+
+        [Fact]
+        public async Task AssignSubscriptionWithReplicatePaymentOnAttributionNoBeneficiaryCardShouldNotCreateTransaction()
+        {
+            // beneficiary1 has no card — replication should be skipped
+            var input = new AssignBeneficiariesToSubscription.Input()
+            {
+                OrganizationId = organization.GetIdentifier(),
+                SubscriptionId = subscription1.GetIdentifier(),
+                Beneficiaries = [beneficiary1.GetIdentifier()],
+                ReplicatePaymentOnAttribution = true
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transactions = DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().ToList();
+            transactions.Should().BeEmpty();
+
+            var localBudgetAllowance = DbContext.BudgetAllowances.First(x => x.Id == budgetAllowance1.Id);
+            localBudgetAllowance.AvailableFund.Should().Be(650);
+        }
+
+        [Fact]
+        public async Task AssignSubscriptionWithReplicatePaymentOnAttributionWithMultipleBeneficiariesShouldCreatesOneTransactionPerBeneficiary()
+        {
+            var card1 = new Card()
+            {
+                Status = CardStatus.Assigned,
+                Project = project,
+                Funds = new List<Fund>(),
+                Transactions = new List<Transaction>()
+            };
+            var card2 = new Card()
+            {
+                Status = CardStatus.Assigned,
+                Project = project,
+                Funds = new List<Fund>(),
+                Transactions = new List<Transaction>()
+            };
+            DbContext.Cards.AddRange(card1, card2);
+            beneficiary1.Card = card1;
+            beneficiary2.Card = card2;
+            DbContext.SaveChanges();
+
+            var input = new AssignBeneficiariesToSubscription.Input()
+            {
+                OrganizationId = organization.GetIdentifier(),
+                SubscriptionId = subscription1.GetIdentifier(),
+                Beneficiaries = [beneficiary1.GetIdentifier(), beneficiary2.GetIdentifier()],
+                ReplicatePaymentOnAttribution = true
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transactions = DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().ToList();
+            transactions.Should().HaveCount(2);
+
+            var localBudgetAllowance = DbContext.BudgetAllowances.First(x => x.Id == budgetAllowance1.Id);
+            localBudgetAllowance.AvailableFund.Should().Be(500); // 700 - (2 × 100)
         }
     }
 }

@@ -2,7 +2,7 @@
 {
 	"en": {
 		"add-product-group": "Edit",
-		"add-product-group-success-notification": "The modification to {productGroupName} was successful.",
+		"add-product-group-success-notification": "{productGroupName} was successfully updated.",
 		"title": "Edit a product group"
 	},
 	"fr": {

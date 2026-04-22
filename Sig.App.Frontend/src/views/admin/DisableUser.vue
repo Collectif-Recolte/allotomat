@@ -1,16 +1,16 @@
 <i18n>
   {
     "en": {
-      "disable-user-success-notification": "The user {userName} has been successfully disabled.",
+      "disable-user-success-notification": "The user {userName} has been successfully deactivated.",
       "disable-text-error": "The text must match the name of the user",
       "disable-text-label": "Type the name of the user to confirm",
-      "title": "Disable - {userName}",
-      "disable-button-label": "Disable"
+      "title": "Deactivate - {userName}",
+      "disable-button-label": "Deactivate"
     },
     "fr": {
-      "disable-user-success-notification": "L'utilisateur {userName} a été désactivé avec succès.",
-      "disable-text-error": "Le texte doit correspondre au nom de l'utilisateur",
-      "disable-text-label": "Taper le nom de l'utilisateur pour confirmer",
+      "disable-user-success-notification": "Le compte {userName} a été désactivé avec succès.",
+      "disable-text-error": "Le texte doit correspondre au nom associé au compte",
+      "disable-text-label": "Taper le nom associé au compte pour confirmer",
       "title": "Désactiver - {userName}",
       "disable-button-label": "Désactiver"
     }

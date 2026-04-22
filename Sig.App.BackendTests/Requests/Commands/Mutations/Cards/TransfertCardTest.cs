@@ -26,10 +26,11 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Cards
         private readonly Card originalCard;
         private readonly Card newCard;
         private readonly ProductGroup productGroup;
+        private readonly Project project;
 
         public TransfertCardTest()
         {
-            var project = new Project()
+            project = new Project()
             {
                 Name = "Project 1"
             };
@@ -155,6 +156,25 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Cards
             var transactionLogCreated = await DbContext.TransactionLogs
                 .Where(x => x.Discriminator == TransactionLogDiscriminator.TransferFundTransactionLog).ToListAsync();
             transactionLogCreated.Count.Should().Be(2);
+        }
+
+        [Fact]
+        public async Task TransfertCardCreatesTransactionLogWithCorrectFields()
+        {
+            var input = new TransfertCard.Input()
+            {
+                OriginalCardId = originalCard.GetIdentifier(),
+                NewCardId = newCard.ProgramCardId
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync(x => x.Discriminator == TransactionLogDiscriminator.TransferFundTransactionLog);
+
+            transactionLog.Discriminator.Should().Be(TransactionLogDiscriminator.TransferFundTransactionLog);
+            transactionLog.FundTransferredFromProgramCardId.Should().Be(originalCard.ProgramCardId);
+            transactionLog.CardProgramCardId.Should().Be(newCard.ProgramCardId);
+            transactionLog.ProjectId.Should().Be(project.Id);
         }
 
         [Fact]

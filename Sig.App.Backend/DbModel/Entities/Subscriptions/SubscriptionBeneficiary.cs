@@ -10,6 +10,8 @@ namespace Sig.App.Backend.DbModel.Entities.Subscriptions
         public long? BeneficiaryTypeId { get; set; }
         public long? BudgetAllowanceId { get; set; }
 
+        public int? MaxNumberOfPaymentsOverride { get; set; }
+
         public Subscription Subscription { get; set; }
         public Beneficiary Beneficiary { get; set; }
         public BeneficiaryType BeneficiaryType { get; set; }

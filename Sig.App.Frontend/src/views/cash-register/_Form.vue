@@ -2,14 +2,14 @@
 {
 	"en": {
     "project-name": "Program",
-    "market-group-name": "Market group",
+    "market-group-name": "Merchant group",
 		"cash-register-name": "Name",
 		"cash-register-name-placeholder": "Ex. Grand Market Cash Register",
 		"cancel": "Cancel",
     "market-groups": "Program(s)",
     "selected-project": "Program",
     "selected-market-group": "Location",
-    "no-associated-market-groups": "All available market groups are associated with the cash register."
+    "no-associated-market-groups": "All available merchant groups are associated with the cash register."
 	},
 	"fr": {
     "project-name": "Programme",

@@ -158,6 +158,26 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         }
 
         [Fact]
+        public async Task EditLoyaltyFundOnCardCreatesTransactionLogWithCorrectFields()
+        {
+            var input = new EditLoyaltyFundOnCard.Input()
+            {
+                CardId = card.GetIdentifier(),
+                Amount = 20
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transaction = await DbContext.Transactions.OfType<LoyaltyEditFundTransaction>().FirstAsync();
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync(x => x.TransactionUniqueId == transaction.TransactionUniqueId);
+
+            transactionLog.Discriminator.Should().Be(TransactionLogDiscriminator.LoyaltyEditFundTransactionLog);
+            transactionLog.TotalAmount.Should().Be(10);
+            transactionLog.CardProgramCardId.Should().Be(card.ProgramCardId);
+            transactionLog.ProjectId.Should().Be(project.Id);
+        }
+
+        [Fact]
         public async Task ThrowsIfLoyaltyFundCantBeNegativeException()
         {
             var input = new EditLoyaltyFundOnCard.Input()

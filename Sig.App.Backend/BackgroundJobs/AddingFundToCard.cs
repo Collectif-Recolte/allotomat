@@ -115,16 +115,16 @@ namespace Sig.App.Backend.BackgroundJobs
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary).ThenInclude(x => x.Card).ThenInclude(x => x.Funds)
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary).ThenInclude(x => x.Organization).ThenInclude(x => x.Project)
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.BeneficiaryType)
+                .AsSplitQuery()
                 .Include(x => x.BudgetAllowances)
-                .AsSplitQuery().Include(x => x.Types).ThenInclude(x => x.ProductGroup)
+                .Include(x => x.Types).ThenInclude(x => x.ProductGroup)
                 .Where(x => x.StartDate <= today && x.EndDate >= today && monthlyPaymentMoment.Contains(x.MonthlyPaymentMoment)).ToListAsync();
 
             foreach (var subscription in activeSubscriptions)
             {
                 foreach (var subscriptionBeneficiary in subscription.Beneficiaries)
                 {
-                    var beneficiary = subscriptionBeneficiary.Beneficiary;
-                    CreateTransaction(beneficiary, subscriptionBeneficiary.BeneficiaryType, subscription);
+                    await CreateTransaction(subscriptionBeneficiary);
                 }
             }
 
@@ -229,24 +229,56 @@ namespace Sig.App.Backend.BackgroundJobs
             var beneficiaryIdLong = beneficiaryId.LongIdentifierForType<Beneficiary>();
             var subscriptionIdLong = subscriptionId.LongIdentifierForType<Subscription>();
 
-            var subscription = await db.Subscriptions
-                .Include(x => x.BudgetAllowances)
-                .AsSplitQuery().Include(x => x.Types).ThenInclude(x => x.ProductGroup)
-                .Where(x => x.Id == subscriptionIdLong).FirstAsync();
+            var subscriptionBeneficiary = await db.SubscriptionBeneficiaries
+                .Include(x => x.Subscription).ThenInclude(x => x.BudgetAllowances)
+                .AsSplitQuery().Include(x => x.Subscription.Types).ThenInclude(x => x.ProductGroup)
+                .Include(x => x.Beneficiary).ThenInclude(x => x.Card).ThenInclude(x => x.Transactions)
+                .Include(x => x.Beneficiary).ThenInclude(x => x.Card).ThenInclude(x => x.Funds)
+                .Include(x => x.Beneficiary).ThenInclude(x => x.Organization).ThenInclude(x => x.Project)
+                .Where(x => x.SubscriptionId == subscriptionIdLong && x.BeneficiaryId == beneficiaryIdLong && x.BeneficiaryTypeId == beneficiaryType.Id)
+                .FirstOrDefaultAsync();
 
-            var beneficiary = await db.Beneficiaries
-                .Include(x => x.Card).ThenInclude(x => x.Transactions)
-                .Include(x => x.Card).ThenInclude(x => x.Funds)
-                .Include(x => x.Organization).ThenInclude(x => x.Project)
-                .Where(x => x.Id== beneficiaryIdLong)
-                .FirstAsync();
+            if (subscriptionBeneficiary == null) return;
 
-            CreateTransaction(beneficiary, beneficiaryType, subscription, initiatedBy);
+            await AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, initiatedBy);
             await db.SaveChangesAsync();
         }
 
-        private void CreateTransaction(Beneficiary beneficiary, BeneficiaryType beneficiaryType, Subscription subscription, InitiatedBy initiatedBy = null)
+        public async Task AddFundToExistingSubscriptionBeneficiary(SubscriptionBeneficiary subscriptionBeneficiary, InitiatedBy initiatedBy = null)
         {
+            await CreateTransaction(subscriptionBeneficiary, initiatedBy);
+        }
+
+        private async Task CreateTransaction(SubscriptionBeneficiary subscriptionBeneficiary, InitiatedBy initiatedBy = null)
+        {
+            if (subscriptionBeneficiary.Subscription == null)
+            {
+                subscriptionBeneficiary.Subscription = await db.Subscriptions
+                    .Include(x => x.BudgetAllowances)
+                    .Include(x => x.Types).ThenInclude(x => x.ProductGroup)
+                    .FirstAsync(x => x.Id == subscriptionBeneficiary.SubscriptionId);
+            }
+
+            if (subscriptionBeneficiary.Beneficiary == null)
+            {
+                subscriptionBeneficiary.Beneficiary = await db.Beneficiaries
+                    .Include(x => x.Card).ThenInclude(x => x.Transactions)
+                    .Include(x => x.Card).ThenInclude(x => x.Funds)
+                    .Include(x => x.Organization).ThenInclude(x => x.Project)
+                    .AsSplitQuery()
+                    .FirstAsync(x => x.Id == subscriptionBeneficiary.BeneficiaryId);
+            }
+
+            if (subscriptionBeneficiary.BeneficiaryType == null && subscriptionBeneficiary.BeneficiaryTypeId.HasValue)
+            {
+                subscriptionBeneficiary.BeneficiaryType = await db.BeneficiaryTypes
+                    .FirstAsync(x => x.Id == subscriptionBeneficiary.BeneficiaryTypeId.Value);
+            }
+
+            var subscription = subscriptionBeneficiary.Subscription;
+            var beneficiary = subscriptionBeneficiary.Beneficiary;
+            var beneficiaryType = subscriptionBeneficiary.BeneficiaryType;
+
             var subscriptionTypes = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiaryType.Id);
 
             if (beneficiary.Card != null)
@@ -255,14 +287,15 @@ namespace Sig.App.Backend.BackgroundJobs
                 if (subscription.IsSubscriptionPaymentBasedCardUsage && initiatedBy == null)
                 {
                     var subscriptionAddedFundCount = beneficiary.Card.Transactions.OfType<SubscriptionAddingFundTransaction>().Count(x => subscriptionTypes.Any(y => y.Id == x.SubscriptionTypeId));
+                    var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
 
                     // The beneficiary already received all the funds
-                    if (subscription.MaxNumberOfPayments.Value == subscriptionAddedFundCount * subscriptionTypes.Count()) return;
+                    if (maxNumberOfPayments == subscriptionAddedFundCount * subscriptionTypes.Count()) return;
 
                     var previousPaymentDateTime = SubscriptionHelper.GetPreviousPaymentDateTime(clock, subscription.MonthlyPaymentMoment);
                     if (subscriptionAddedFundCount != 0 && !beneficiary.Card.Transactions.Where(x => x is PaymentTransaction).Any(x => x.CreatedAtUtc >= previousPaymentDateTime))
                     {
-                        if (subscription.MaxNumberOfPayments - subscriptionAddedFundCount >= subscription.GetPaymentRemaining(clock))
+                        if (maxNumberOfPayments - subscriptionAddedFundCount >= subscriptionBeneficiary.GetPaymentRemaining(clock))
                         {
                             RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
                         }
@@ -351,7 +384,8 @@ namespace Sig.App.Backend.BackgroundJobs
             {
                 if (subscription.IsSubscriptionPaymentBasedCardUsage)
                 {
-                    if (subscription.MaxNumberOfPayments >= subscription.GetPaymentRemaining(clock))
+                    var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
+                    if (maxNumberOfPayments >= subscriptionBeneficiary.GetPaymentRemaining(clock))
                     {
                         RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
                     }

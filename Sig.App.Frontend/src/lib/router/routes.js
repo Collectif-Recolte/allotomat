@@ -908,6 +908,14 @@ export default [
             }
           },
           {
+            name: urls.URL_BENEFICIARY_CHANGE_MAX_NUMBER_OF_PAYMENTS,
+            path: ":beneficiaryId/change-max-payments",
+            component: () => import("@/views/beneficiary/ChangeMaxNumberOfPayments.vue"),
+            meta: {
+              claim: GLOBAL_MANAGE_BENEFICIARIES
+            }
+          },
+          {
             name: urls.URL_BENEFICIARY_IMPORT_LIST,
             path: "import",
             component: () => import("@/views/beneficiary/ImportList.vue"),

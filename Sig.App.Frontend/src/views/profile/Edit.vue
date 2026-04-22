@@ -6,7 +6,7 @@
 		"loading": "Update in progress...",
 		"submit": "Update",
 		"success-notification": "Your profile has been successfully updated.",
-		"title": "Profile editing"
+		"title": "Edit Profile"
 	},
 	"fr": {
 		"first-name": "Prénom",

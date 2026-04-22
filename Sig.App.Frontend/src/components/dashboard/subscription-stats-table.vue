@@ -5,9 +5,9 @@
       "subscription-start-date": "Start date",
       "subscription-end-date": "End date",
       "subscription-expiration": "Expiration",
-      "subscription-total-budget-allowance" : "Total budget allowance",
-      "subscription-available-fund": "Available fund",
-      "subscription-amount-allocated": "Funds removed from budget allowance",
+      "subscription-total-budget-allowance" : "Total budget envelope",
+      "subscription-available-fund": "Available funds",
+      "subscription-amount-allocated": "Funds removed from budget envelope",
       "subscription-totals": "Total"
     },
     "fr": {

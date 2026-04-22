@@ -2,11 +2,11 @@
   {
     "en": {
       "organization-name": "Group",
-      "organization-total-active-subscriptions-envelopes": "Budget allowance (before allocation)",
+      "organization-total-active-subscriptions-envelopes": "Budget enevelope (before allocation)",
       "organization-total-allocated-on-cards": "Total allocated on cards",
       "organization-remaining-per-envelope": "Remaining per envelope",
       "organization-balance-on-cards": "Balance on cards",
-      "organization-card-spending-amounts": "Card spending",
+      "organization-card-spending-amounts": "Spent by cards",
       "organization-expired-amounts": "Expired amounts",
       "organization-totals": "Total"
     },
@@ -14,7 +14,7 @@
       "organization-name": "Groupe",
       "organization-total-active-subscriptions-envelopes": "Enveloppe (avant allocation)",
       "organization-total-allocated-on-cards": "Total alloué sur les cartes",
-      "organization-remaining-per-envelope":"Restants par enveloppe",
+      "organization-remaining-per-envelope": "Restants par enveloppe",
       "organization-balance-on-cards": "Solde sur les cartes",
       "organization-card-spending-amounts": "Dépenses des cartes",
       "organization-expired-amounts": "Montants expirés",

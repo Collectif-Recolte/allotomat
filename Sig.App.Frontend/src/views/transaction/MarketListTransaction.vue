@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "title": "Transaction history",
+      "title": "Transaction History",
       "transaction-count": "{count} transaction / {money} | {count} transactions / {money}",
       "date-selector-from": "Interval from",
       "date-selector-to": "to",

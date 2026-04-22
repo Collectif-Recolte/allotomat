@@ -1,20 +1,20 @@
 <i18n>
 {
 	"en": {
-		"description": "Warning ! The withdrawal of <strong>{beneficiaryName}</strong> in subscription <strong>{subscriptionName}</strong> cannot be undone. If you continue, <strong>{beneficiaryName}</strong> will no longer receive a transfer for subscription <strong>{subscriptionName}</strong>.",
+		"description": "Warning! If you continue, <strong>{beneficiaryName}</strong> will no longer receive transfers for subscription <strong>{subscriptionName}</strong>.",
 		"remove-beneficiary-from-subscription-success-notification": "The participant has been successfully removed from subscription {subscriptionName}.",
 		"remove-text-error": "Text must match subscription name",
 		"remove-text-label": "Type the subscription name to confirm",
-		"title": "Unsubscribe {subscriptionName} - {beneficiaryName}",
-    "anonymous-beneficiary": "Beneficiary {beneficiaryId1}",
+		"title": "Remove Subscription: {subscriptionName}",
+    "anonymous-beneficiary": "Participant {beneficiaryId1}",
 	},
 	"fr": {
-		"description": "Avertissement ! Le retrait de <strong>{beneficiaryName}</strong> dans l'abonnement <strong>{subscriptionName}</strong> ne peut pas être annulé. Si vous continuez, <strong>{beneficiaryName}</strong> ne recevra plus de virement pour l'abonnement <strong>{subscriptionName}</strong>.",
-		"remove-beneficiary-from-subscription-success-notification": "Le participant a été retiré-e avec succès de l'abonnement {subscriptionName}.",
+		"description": "Avertissement ! Si vous continuez, <strong>{beneficiaryName}</strong> ne recevra plus de virement pour l'abonnement <strong>{subscriptionName}</strong>.",
+		"remove-beneficiary-from-subscription-success-notification": "Le·a participant·e a été retiré·e avec succès de l'abonnement {subscriptionName}.",
 		"remove-text-error": "Le texte doit correspondre au nom de l'abonnement",
 		"remove-text-label": "Taper le nom de l'abonnement",
 		"title": "Retirer l'abonnement {subscriptionName}",
-    "anonymous-beneficiary": "Bénéficiaire {beneficiaryId1}",
+    "anonymous-beneficiary": "Participant·e {beneficiaryId1}",
 	}
 }
 </i18n>

@@ -404,7 +404,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     InitiatedByProject = currentUser?.Type == UserType.ProjectManager,
                     InitiatedByOrganization = currentUser?.Type == UserType.OrganizationManager,
                     CashRegisterId = paymentTransaction.CashRegister != null ? paymentTransaction.CashRegister.Id : null,
-                    CashRegisterName = paymentTransaction.CashRegister != null ? paymentTransaction.CashRegister.Name : ""
+                    CashRegisterName = paymentTransaction.CashRegister != null ? paymentTransaction.CashRegister.Name : "",
+                    MarketGroupId = paymentTransaction.CashRegister?.MarketGroups?.FirstOrDefault(x => x.MarketGroup.ProjectId == card.ProjectId)?.MarketGroupId,
+                    MarketGroupName = paymentTransaction.CashRegister?.MarketGroups?.FirstOrDefault(x => x.MarketGroup.ProjectId == card.ProjectId)?.MarketGroup?.Name
                 };
                 transactionLogs.Add(transactionLog);
             }

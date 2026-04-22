@@ -264,6 +264,35 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         }
 
         [Fact]
+        public async Task CreateTransactionManuallyCreatesTransactionLogWithCorrectFields()
+        {
+            var input = new CreateManuallyAddingFundTransaction.Input()
+            {
+                Amount = 10,
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier(),
+                ProductGroupId = productGroup.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transaction = await DbContext.Transactions.FirstAsync();
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync(x => x.TransactionUniqueId == transaction.TransactionUniqueId);
+
+            transactionLog.Discriminator.Should().Be(TransactionLogDiscriminator.ManuallyAddingFundTransactionLog);
+            transactionLog.TotalAmount.Should().Be(10);
+            transactionLog.BeneficiaryId.Should().Be(beneficiary.Id);
+            transactionLog.BeneficiaryFirstname.Should().Be(beneficiary.Firstname);
+            transactionLog.BeneficiaryLastname.Should().Be(beneficiary.Lastname);
+            transactionLog.BeneficiaryIsOffPlatform.Should().Be(false);
+            transactionLog.OrganizationId.Should().Be(organization.Id);
+            transactionLog.OrganizationName.Should().Be(organization.Name);
+            transactionLog.SubscriptionId.Should().Be(subscription.Id);
+            transactionLog.SubscriptionName.Should().Be(subscription.Name);
+            transactionLog.ProjectId.Should().Be(project.Id);
+        }
+
+        [Fact]
         public async Task ThrowsIfBeneficiaryNotFound()
         {
             var input = new CreateManuallyAddingFundTransaction.Input()

@@ -927,6 +927,9 @@ namespace Sig.App.Backend.Migrations
                     b.Property<long?>("BudgetAllowanceId")
                         .HasColumnType("bigint");
 
+                    b.Property<int?>("MaxNumberOfPaymentsOverride")
+                        .HasColumnType("int");
+
                     b.HasKey("BeneficiaryId", "SubscriptionId");
 
                     b.HasIndex("BeneficiaryTypeId");
@@ -1033,6 +1036,12 @@ namespace Sig.App.Backend.Migrations
 
                     b.Property<bool>("InitiatedByProject")
                         .HasColumnType("bit");
+
+                    b.Property<long?>("MarketGroupId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("MarketGroupName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("MarketId")
                         .HasColumnType("bigint");
@@ -1396,6 +1405,13 @@ namespace Sig.App.Backend.Migrations
                     b.HasBaseType("Sig.App.Backend.DbModel.Entities.Transactions.AddingFundTransaction");
 
                     b.HasDiscriminator().HasValue("LoyaltyAddingFundTransaction");
+                });
+
+            modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.LoyaltyEditFundTransaction", b =>
+                {
+                    b.HasBaseType("Sig.App.Backend.DbModel.Entities.Transactions.AddingFundTransaction");
+
+                    b.HasDiscriminator().HasValue("LoyaltyEditFundTransaction");
                 });
 
             modelBuilder.Entity("Sig.App.Backend.DbModel.Entities.Transactions.ManuallyAddingFundTransaction", b =>

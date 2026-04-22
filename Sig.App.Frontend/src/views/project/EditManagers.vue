@@ -1,13 +1,13 @@
 <i18n>
 {
 	"en": {
-		"add-project-manager-success-notification": "The addition of the project manager was a success. The manager will receive an email for the creation of his account in the next few minutes.",
+		"add-project-manager-success-notification": "The program manager has been successfully added. The manager will receive an email to finish creating their account in the next few minutes.",
 		"remove-manager-success-notification": "The manager {email} has been successfully removed.",
 		"title": "Managers - {projectName}"
 	},
 	"fr": {
-		"add-project-manager-success-notification": "L’ajout du gestionnaire de programme a été un succès. Le gestionnaire va recevoir un courriel pour la création de son compte dans les prochaines minutes.",
-		"remove-manager-success-notification": "Le gestionnaire {email} a été enlevé avec succès.",
+		"add-project-manager-success-notification": "L’ajout du ou de la gestionnaire de programme a été un succès. Le·a gestionnaire va recevoir un courriel pour compléter la création de son compte dans les prochaines minutes.",
+		"remove-manager-success-notification": "La·e gestionnaire {email} a été enlevé-e avec succès.",
 		"title": "Gestionnaires - {projectName}"
 	}
 }

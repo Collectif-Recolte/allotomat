@@ -4,8 +4,8 @@
 		"card-description": "Program {programName}",
     "card-id": "Card #{cardId}",
 		"done": "Check another card",
-		"title": "Card balance",
-    "card-is-disabled": "The card is disabled."
+		"title": "Card Balance",
+    "card-is-disabled": "The card is deactivated."
 	},
 	"fr": {
 		"card-description": "Programme {programName}",

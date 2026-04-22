@@ -2,10 +2,10 @@
   {
     "en": {
       "project-name": "Program",
-      "market-group-name": "Market group",
-      "is-inactif-tag": "Disabled",
+      "market-group-name": "Merchant group",
+      "is-inactif-tag": "Deactivated",
       "is-active-tag": "Enabled",
-      "is-disabled-tooltip": "This cash register is no longer part of any market group."
+      "is-disabled-tooltip": "This cash register is no longer part of any merchant group."
     },
     "fr": {
       "project-name": "Programme",

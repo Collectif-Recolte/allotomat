@@ -8,7 +8,7 @@
 	},
 	"fr": {
 		"account-setting": "Réglages du compte",
-		"admin-users": "Gestion des utilisateurs",
+		"admin-users": "Gestion des comptes",
 		"edit-profile": "Profil",
 		"user-menu": "Options du compte utilisateur"
 	}

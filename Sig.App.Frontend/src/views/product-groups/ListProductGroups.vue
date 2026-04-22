@@ -2,7 +2,7 @@
   {
     "en": {
       "add-product-group": "Add a group",
-      "title": "Product group management",
+      "title": "Product Group Management",
       "empty-list": "This program does not contain any product groups.",
       "create-product-group": "Create a product group",
       "product-group-count": "{count} product group | {count} product groups"

@@ -3,13 +3,13 @@
     "en": {
       "add-user": "Add a group manager",
       "cant-remove-self-info": "It is impossible to remove yourself from the manager list of an group",
-      "title": "User management",
+      "title": "User Management",
       "manager-count": "{count} manager | {count} managers"
     },
     "fr": {
-      "add-user": "Ajouter un gestionnaire de groupe",
-      "cant-remove-self-info": "Il est impossible de se retirer soi-même de la liste de gestionnaire d'un groupe",
-      "title": "Gestion des utilisateurs",
+      "add-user": "Ajouter un·e gestionnaire de groupe",
+      "cant-remove-self-info": "Il est impossible de se retirer soi-même de la liste de gestionnaires d'un groupe",
+      "title": "Gestion des comptes",
       "manager-count": "{count} gestionnaire | {count} gestionnaires"
     }
   }

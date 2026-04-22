@@ -4,13 +4,13 @@
 		"submit": "Update",
 		"general-profile-success-notification": "The profile of {name} has been successfully updated.",
     "my-profile-success-notification": "Your profile has been successfully updated.",
-		"title": "User edition"
+		"title": "Edit Profile"
 	},
 	"fr": {
 		"submit": "Mettre à jour",
 		"general-profile-success-notification": "Le profil de {name} a bien été mis à jour.",
     "my-profile-success-notification": "Votre profil a bien été mis à jour.",
-		"title": "Édition d'utilisateur"
+		"title": "Édition de profil"
 	}
 }
 </i18n>

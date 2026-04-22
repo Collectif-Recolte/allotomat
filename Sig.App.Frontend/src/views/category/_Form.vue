@@ -3,22 +3,22 @@
 	"en": {
 		"add-keyword": "Add a key",
 		"cancel": "Cancel",
-		"empty-keyword-list-error": "The list «Association keys» must contain at least 1 element",
+		"empty-keyword-list-error": "At least one key is required",
 		"category-name": "Category name",
 		"category-placeholder": "Ex. Type couple",
 		"keyword-name": "Key",
 		"keyword-name-placeholder": "Ex. couple",
-		"keywords-section-title": "Association keys",
+		"keywords-section-title": "Keys",
 	},
 	"fr": {
 		"add-keyword": "Ajouter une clé",
 		"cancel": "Annuler",
-		"empty-keyword-list-error": "La liste «Clés d'association» doit contenir au moins 1 élément",
+		"empty-keyword-list-error": "Au moins une clé est requise",
 		"category-name": "Nom de la catégorie",
 		"category-placeholder": "Ex. Type couple",
 		"keyword-name": "Clé",
 		"keyword-name-placeholder": "Ex. couple",
-		"keywords-section-title": "Clés d'association",
+		"keywords-section-title": "Clés",
 	}
 }
 </i18n>

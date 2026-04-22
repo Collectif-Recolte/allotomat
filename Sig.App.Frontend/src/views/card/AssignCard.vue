@@ -1,7 +1,7 @@
 <i18n>
 {
 	"en": {
-		"title": "Assign card - {beneficiaryName}"
+		"title": "Assign Card - {beneficiaryName}"
 	},
 	"fr": {
 		"title": "Assigner une carte - {beneficiaryName}"

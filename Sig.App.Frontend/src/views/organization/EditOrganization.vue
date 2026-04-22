@@ -2,7 +2,7 @@
 {
 	"en": {
 		"edit-organization": "Edit",
-		"edit-organization-success-notification": "Editing group {organizationName} was successful.",
+		"edit-organization-success-notification": "The group {organizationName} has been successfully updated.",
 		"title": "Edit an group"
 	},
 	"fr": {
