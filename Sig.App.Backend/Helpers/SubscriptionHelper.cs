@@ -121,6 +121,34 @@ namespace Sig.App.Backend.Helpers
             return totalPayment;
         }
 
+        public static int GetPreviousPaymentCount(this Subscription subscription, IClock clock)
+        {
+            var previousPaymentCount = 0;
+            var today = clock.GetCurrentInstant().ToDateTimeUtc();
+            var startDate = subscription.StartDate;
+            var endDate = today;
+
+            if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth ||
+                subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth)
+            {
+                int monthsApart = 12 * (endDate.Year - startDate.Year) + endDate.Month - startDate.Month;
+                previousPaymentCount += monthsApart;
+                if (startDate.Day == 1) previousPaymentCount++;
+            }
+
+            if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth ||
+                subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth)
+            {
+                int monthsApart = 12 * (endDate.Year - startDate.Year) + endDate.Month - startDate.Month;
+                if (startDate.Day < 15 && endDate.Day >= 15) monthsApart++;
+                if (startDate.Day >= 15 && endDate.Day < 15) monthsApart--;
+                previousPaymentCount += monthsApart;
+                if (startDate.Day == 15) previousPaymentCount++;
+            }
+
+            return Math.Max(0, previousPaymentCount);
+        }
+
         public static DateTime GetFirstPaymentDateTime(this Subscription subscription, IClock clock)
         {
             var startDate = subscription.StartDate;
