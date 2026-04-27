@@ -84,13 +84,13 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             if (subscriptionBeneficiary.MaxNumberOfPaymentsOverride.HasValue || subscription.MaxNumberOfPayments.HasValue)
             {
                 return subscription.GetExpirationDate(clock) > now
-                    && subscription.GetFirstPaymentDateTime(clock) < now
+                    && subscription.GetFirstPaymentDateTime() < now
                     && transactionCount < effectiveMaxPayments
                     && previousPaymentCount > transactionCount;
             }
 
             return subscription.GetExpirationDate(clock) > now
-                && subscription.GetFirstPaymentDateTime(clock) < now
+                && subscription.GetFirstPaymentDateTime() < now
                 && previousPaymentCount > transactionCount;
         }
     }
