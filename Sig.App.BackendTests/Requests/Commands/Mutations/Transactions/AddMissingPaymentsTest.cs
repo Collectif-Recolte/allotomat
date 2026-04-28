@@ -419,7 +419,50 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 Subscriptions = new List<Id>() { subscription.GetIdentifier() }
             };
 
-            // override=2 > transactionCount=1, so no exception; AddMissingPayments always deducts budget
+            // override=2 > transactionCount=1, so no exception; budget already allocated
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBudgetAllowance = DbContext.BudgetAllowances.First();
+            localBudgetAllowance.AvailableFund.Should().Be(100);
+        }
+
+        [Fact]
+        public async Task DeductsBudgetWhenOverrideExceedsSubscriptionPaymentsRemaining()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.MaxNumberOfPayments = 1;
+            subscription.StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(-4);
+            subscription.EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(1);
+            subscription.FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(2);
+
+            var subscriptionBeneficiary = beneficiary.Subscriptions.First();
+            subscriptionBeneficiary.MaxNumberOfPaymentsOverride = 3;
+
+            card.Transactions.Add(new SubscriptionAddingFundTransaction()
+            {
+                Amount = 25,
+                AvailableFund = 25,
+                Beneficiary = beneficiary,
+                Card = card,
+                CreatedAtUtc = Clock.GetCurrentInstant().ToDateTimeUtc(),
+                ExpirationDate = subscription.GetExpirationDate(Clock),
+                Organization = organization,
+                ProductGroup = productGroup,
+                Status = FundTransactionStatus.Actived,
+                SubscriptionType = subscription.Types.First(),
+            });
+
+            DbContext.SaveChanges();
+
+            var input = new AddMissingPayments.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                Subscriptions = new List<Id>() { subscription.GetIdentifier() }
+            };
+
+            // override=3, transactions=1, subscriptionPaymentRemaining=1
+            // remaining payments (3-1=2) > subscriptionPaymentRemaining (1): budget not pre-allocated, must be deducted
             await handler.Handle(input, CancellationToken.None);
 
             var localBudgetAllowance = DbContext.BudgetAllowances.First();

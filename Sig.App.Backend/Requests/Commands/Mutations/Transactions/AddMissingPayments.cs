@@ -18,6 +18,7 @@ using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.BackgroundJobs;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using System.Collections.Generic;
+using System;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 {
@@ -106,9 +107,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 }
 
                 var transactions = await db.Transactions.OfType<SubscriptionAddingFundTransaction>()
+                    .Where(x => x.Status != DbModel.Enums.FundTransactionStatus.Unassigned)
                     .Include(x => x.SubscriptionType)
                     .Where(x => x.BeneficiaryId == beneficiary.Id && x.SubscriptionType.SubscriptionId == subscription.Id).ToListAsync();
 
+                var subscriptionPaymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock);
                 var previousPaymentCount = subscription.GetPreviousPaymentCount(clock);
 
                 if ((subscriptionBeneficiary.MaxNumberOfPaymentsOverride.HasValue || subscription.MaxNumberOfPayments.HasValue)
@@ -123,7 +126,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     throw new SubscriptionDontHaveMissedPaymentException();
                 }
 
-                subscriptionBeneficiary.BudgetAllowance.AvailableFund -= amount;
+                var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
+                var isBudgetAllowanceAlreadyAllocated = maxNumberOfPayments - transactions.Count <= Math.Min(maxNumberOfPayments - transactions.Count(), subscriptionPaymentRemaining);
+                if (!isBudgetAllowanceAlreadyAllocated)
+                {
+                    subscriptionBeneficiary.BudgetAllowance.AvailableFund -= amount;
+                }
 
                 var addingFundToCardJob = new AddingFundToCard(db, clock, addingFundLogger);
                 await addingFundToCardJob.AddFundToSpecificBeneficiary(beneficiary.GetIdentifier(), beneficiary.BeneficiaryType, subscription.GetIdentifier(), new AddingFundToCard.InitiatedBy()
