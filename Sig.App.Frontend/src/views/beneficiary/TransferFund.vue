@@ -60,7 +60,8 @@
           }" :label="t('manually-add-funds')" :is-disabled="!haveActiveSubscription" />
         </PfTooltip>
       </div>
-      <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
+      <div v-if="userType === USER_TYPE_PROJECTMANAGER"
+        class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
         <UiCallout class="min-w-0" :variant="CALLOUT_INFO">
           <p class="font-medium mb-1 m-0">{{ t("add-gift-card-funds-title") }}</p>
           <p class="m-0">{{ t("add-gift-card-funds-desc") }}</p>
@@ -80,6 +81,7 @@ import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult } from "@vue/apollo-composable";
 import gql from "graphql-tag";
+import { storeToRefs } from "pinia";
 
 import {
   URL_BENEFICIARY_ADMIN,
@@ -88,13 +90,17 @@ import {
   URL_BENEFICIARY_EDIT_GIFT_CARD
 } from "@/lib/consts/urls";
 import { CALLOUT_INFO } from "@/lib/consts/callout";
+import { USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
 
 import UiCallout from "@/components/ui/callout.vue";
 
+import { useAuthStore } from "@/lib/store/auth";
 import { dateUtc } from "@/lib/helpers/date";
 
 const { t } = useI18n();
 const route = useRoute();
+
+const { userType } = storeToRefs(useAuthStore());
 
 const returnRoute = computed(() => ({
   name: URL_BENEFICIARY_ADMIN,

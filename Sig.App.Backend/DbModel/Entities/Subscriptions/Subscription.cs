@@ -42,7 +42,7 @@ namespace Sig.App.Backend.DbModel.Entities.Subscriptions
             }
             else
             {
-                return this.GetLastExpirationDateTime(clock);
+                return this.GetLastExpirationDateTime();
             }
         }
 
