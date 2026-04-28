@@ -33,7 +33,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         {
             if (subscription.MaxNumberOfPayments.HasValue)
             {
-                return subscription.GetExpirationDate(clock) > clock.GetCurrentInstant().ToDateTimeUtc() && subscription.GetFirstPaymentDateTime(clock) < clock.GetCurrentInstant().ToDateTimeUtc();
+                return subscription.GetExpirationDate(clock) > clock.GetCurrentInstant().ToDateTimeUtc() && subscription.GetFirstPaymentDateTime() < clock.GetCurrentInstant().ToDateTimeUtc();
             }
             return subscription.GetExpirationDate(clock) > clock.GetCurrentInstant().ToDateTimeUtc() && subscription.GetPaymentRemaining(clock) < subscription.GetTotalPayment();
         }

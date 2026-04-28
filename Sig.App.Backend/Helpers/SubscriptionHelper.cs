@@ -44,27 +44,14 @@ namespace Sig.App.Backend.Helpers
             if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth ||
                 subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth)
             {
-                int monthsApart = 12 * (endDate.Year - startDate.Year) + endDate.Month - startDate.Month;
-
-                cardPaymentRemaining += monthsApart;
-
+                cardPaymentRemaining += MonthsBetween(startDate, endDate);
                 if (startDate > today && startDate.Day == 1) needExtraDay = true;
             }
 
             if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth ||
                 subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth)
             {
-                int monthsApart = 12 * (endDate.Year - startDate.Year) + endDate.Month - startDate.Month;
-                if (startDate.Day < 15 && endDate.Day >= 15)
-                {
-                    monthsApart++;
-                }
-                if (startDate.Day >= 15 && endDate.Day < 15)
-                {
-                    monthsApart--;
-                }
-
-                cardPaymentRemaining += monthsApart;
+                cardPaymentRemaining += AdjustedMonthsForFifteenth(startDate, endDate);
             }
 
             if (needExtraDay) cardPaymentRemaining++;
@@ -84,125 +71,68 @@ namespace Sig.App.Backend.Helpers
             return subscriptionBeneficiary.Subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments(), totalPayment) : totalPayment;
         }
 
+        public static int GetPreviousPaymentCount(this Subscription subscription, IClock clock)
+        {
+            var today = clock.GetCurrentInstant().ToDateTimeUtc();
+            return Math.Max(0, CountPaymentsSinceStart(subscription, today));
+        }
+
         private static int GetTotalPaymentBySubscription(Subscription subscription)
         {
-            var totalPayment = 0;
+            return CountPaymentsSinceStart(subscription, subscription.EndDate);
+        }
 
-            var startDate = subscription.StartDate;
-            var endDate = subscription.EndDate;
+        private static int CountPaymentsSinceStart(Subscription subscription, DateTime to)
+        {
+            var count = 0;
+            var from = subscription.StartDate;
 
             if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth ||
                 subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth)
             {
-                int monthsApart = 12 * (endDate.Year - startDate.Year) + endDate.Month - startDate.Month;
-
-                totalPayment += monthsApart;
-                if (startDate.Day == 1) totalPayment++;
+                count += MonthsBetween(from, to);
+                if (from.Day == 1) count++;
             }
 
             if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth ||
                 subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth)
             {
-                int monthsApart = 12 * (endDate.Year - startDate.Year) + endDate.Month - startDate.Month;
-                if (startDate.Day < 15 && endDate.Day >= 15)
-                {
-                    monthsApart++;
-                }
-                if (startDate.Day >= 15 && endDate.Day < 15)
-                {
-                    monthsApart--;
-                }
-
-                totalPayment += monthsApart;
-
-                if (startDate.Day == 15) totalPayment++;
+                count += AdjustedMonthsForFifteenth(from, to);
+                if (from.Day == 15) count++;
             }
 
-            return totalPayment;
+            return count;
         }
 
-        public static DateTime GetFirstPaymentDateTime(this Subscription subscription, IClock clock)
-        {
-            var startDate = subscription.StartDate;
+        private static int MonthsBetween(DateTime from, DateTime to) =>
+            12 * (to.Year - from.Year) + to.Month - from.Month;
 
-            if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth)
-            {
-                if (startDate.Day == 1)
-                {
-                    return startDate;
-                }
-                else
-                {
-                    return new DateTime(startDate.Year, startDate.Month, 1).AddMonths(1);
-                }
-            }
-            else if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth)
-            {
-                if (startDate.Day <= 15) {
-                    return new DateTime(startDate.Year, startDate.Month, 15);
-                }
-                else
-                {
-                    return new DateTime(startDate.Year, startDate.Month, 15).AddMonths(1);
-                }
-            }
-            else
-            {
-                if (startDate.Day == 1)
-                {
-                    return startDate;
-                }
-                else if (startDate.Day <= 15)
-                {
-                    return new DateTime(startDate.Year, startDate.Month, 15);
-                }
-                else {
-                    return new DateTime(startDate.Year, startDate.Month, 1).AddMonths(1);
-                }
-            }
+        private static int AdjustedMonthsForFifteenth(DateTime from, DateTime to)
+        {
+            var months = MonthsBetween(from, to);
+            if (from.Day < 15 && to.Day >= 15) months++;
+            if (from.Day >= 15 && to.Day < 15) months--;
+            return months;
         }
 
-        public static DateTime GetLastExpirationDateTime(this Subscription subscription, IClock clock)
-        {
-            var endDate = subscription.EndDate;
+        public static DateTime GetFirstPaymentDateTime(this Subscription subscription) =>
+            NextPaymentDateOnOrAfter(subscription.StartDate, subscription.MonthlyPaymentMoment);
 
-            if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth)
-            {
-                if (endDate.Day == 1)
-                {
-                    return endDate;
-                }
-                else
-                {
-                    return new DateTime(endDate.Year, endDate.Month, 1).AddMonths(1);
-                }
-            }
-            else if (subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth)
-            {
-                if (endDate.Day <= 15)
-                {
-                    return new DateTime(endDate.Year, endDate.Month, 15);
-                }
-                else
-                {
-                    return new DateTime(endDate.Year, endDate.Month, 15).AddMonths(1);
-                }
-            }
-            else
-            {
-                if (endDate.Day == 1)
-                {
-                    return endDate;
-                }
-                else if (endDate.Day <= 15)
-                {
-                    return new DateTime(endDate.Year, endDate.Month, 15);
-                }
-                else
-                {
-                    return new DateTime(endDate.Year, endDate.Month, 1).AddMonths(1);
-                }
-            }
+        public static DateTime GetLastExpirationDateTime(this Subscription subscription) =>
+            NextPaymentDateOnOrAfter(subscription.EndDate, subscription.MonthlyPaymentMoment);
+
+        private static DateTime NextPaymentDateOnOrAfter(DateTime date, SubscriptionMonthlyPaymentMoment moment)
+        {
+            if (moment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth)
+                return date.Day == 1 ? date : new DateTime(date.Year, date.Month, 1).AddMonths(1);
+
+            if (moment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth)
+                return date.Day <= 15 ? new DateTime(date.Year, date.Month, 15) : new DateTime(date.Year, date.Month, 15).AddMonths(1);
+
+            // FirstAndFifteenthDayOfTheMonth
+            if (date.Day == 1) return date;
+            if (date.Day <= 15) return new DateTime(date.Year, date.Month, 15);
+            return new DateTime(date.Year, date.Month, 1).AddMonths(1);
         }
 
         public static DateTime GetNextPaymentDateTime(IClock clock, SubscriptionMonthlyPaymentMoment moment)

@@ -4,7 +4,7 @@
     "create-transaction": "Create a transaction",
     "manage-beneficiaries": "Participants",
     "manage-cards": "Cards",
-    "manage-markets": "Markets",
+    "manage-markets": "Merchants",
     "manage-market-groups": "Merchant Groups",
     "manage-organizations": "Groups",
     "manage-programs": "Programs",
