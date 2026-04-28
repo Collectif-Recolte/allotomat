@@ -733,19 +733,29 @@ const selectedSubscriptionName = computed(() => {
 });
 
 const selectedSubscriptionHasMissedPayment = computed(() => {
-  if (selectedSubscription.value === null) return "-";
+  if (selectedSubscription.value === null) return false;
+  if (selectedBeneficiaries.value.length === 0) return false;
+  if (!resultForecastAddingFundTransactionForSubscriptionByBeneficiary.value) return false;
 
-  var beneficiaryTransactionCount =
-    resultForecastAddingFundTransactionForSubscriptionByBeneficiary.value.forecastAddingFundTransactionForSubscriptionByBeneficiary.beneficiaries.find(
-      (y) => y.beneficiaryId === selectedBeneficiaries.value[0].id
-    )?.count ?? 0;
+  const sub = subscriptions.value.find((x) => x.value === selectedSubscription.value);
+  if (!sub.hasMissedPayment) return false;
 
-  return (
-    subscriptions.value.find((x) => x.value === selectedSubscription.value).hasMissedPayment &&
-    subscriptions.value.find((x) => x.value === selectedSubscription.value).totalPayment -
-    subscriptions.value.find((x) => x.value === selectedSubscription.value).paymentRemaining >
-    beneficiaryTransactionCount
-  );
+  const forecastBeneficiaries =
+    resultForecastAddingFundTransactionForSubscriptionByBeneficiary.value
+      .forecastAddingFundTransactionForSubscriptionByBeneficiary.beneficiaries;
+
+  if (sub.isSubscriptionPaymentBasedCardUsage) {
+    return selectedBeneficiaries.value.some((b) => {
+      const count = forecastBeneficiaries.find((y) => y.beneficiaryId === b.id)?.count ?? 0;
+      return count < sub.maxNumberOfPayments;
+    });
+  }
+
+  const paymentsAlreadyProcessed = sub.totalPayment - sub.paymentRemaining;
+  return selectedBeneficiaries.value.some((b) => {
+    const count = forecastBeneficiaries.find((y) => y.beneficiaryId === b.id)?.count ?? 0;
+    return paymentsAlreadyProcessed > count;
+  });
 });
 
 const usageAmountDetail = computed(() => {
