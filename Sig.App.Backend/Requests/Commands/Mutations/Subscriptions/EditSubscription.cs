@@ -7,6 +7,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
+using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
@@ -14,6 +15,7 @@ using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Gql.Schema.Types;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -25,11 +27,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
     {
         private readonly ILogger<EditSubscription> logger;
         private readonly AppDbContext db;
+        private readonly IClock clock;
 
-        public EditSubscription(ILogger<EditSubscription> logger, AppDbContext db)
+        public EditSubscription(ILogger<EditSubscription> logger, AppDbContext db, IClock clock)
         {
             this.logger = logger;
             this.db = db;
+            this.clock = clock;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -56,16 +60,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 throw new BeneficiaryTypeCanOnlyBeAssignOnce();
             }
 
-            if (db.SubscriptionBeneficiaries.Where(x => x.SubscriptionId == subscriptionId).Any())
-            {
-                logger.LogWarning("[Mutation] EditSubscription - CantEditSubscriptionWithBeneficiaries");
-                throw new CantEditSubscriptionWithBeneficiaries();
-            }
-
             if (request.StartDate > request.EndDate)
             {
                 logger.LogWarning("[Mutation] EditSubscription - EndDateMustBeAfterStartDateException");
                 throw new EndDateMustBeAfterStartDateException();
+            }
+
+            if (request.FundsExpirationDate.IsSet() && request.FundsExpirationDate.Value < LocalDate.FromDateTime(clock.GetCurrentInstant().ToDateTimeUtc()))
+            {
+                logger.LogWarning("[Mutation] EditSubscription - ExpirationDateMustBeAfterTodayDateException");
+                throw new ExpirationDateMustBeAfterTodayDateException();
             }
 
             if (request.IsSubscriptionPaymentBasedCardUsage && (!request.MaxNumberOfPayments.IsSet() || request.MaxNumberOfPayments.Value <= 0))
@@ -81,33 +85,70 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             subscription.Name = request.Name.Trim();
-            subscription.MonthlyPaymentMoment = request.MonthlyPaymentMoment;
-            subscription.StartDate = request.StartDate.AtMidnight().InUtc().ToDateTimeUtc();
-            subscription.EndDate = request.EndDate.AtMidnight().InUtc().ToDateTimeUtc();
-            subscription.FundsExpirationDate = request.FundsExpirationDate.IfSet(x => subscription.FundsExpirationDate = x.AtMidnight().InUtc().ToDateTimeUtc());
-            subscription.IsFundsAccumulable = request.IsFundsAccumulable;
-            subscription.IsSubscriptionPaymentBasedCardUsage = request.IsSubscriptionPaymentBasedCardUsage;
-            subscription.TriggerFundExpiration = request.TriggerFundExpiration;
 
-            if (request.MaxNumberOfPayments.IsSet())
+            var hasBeneficiaries = await db.SubscriptionBeneficiaries.AnyAsync(x => x.SubscriptionId == subscriptionId, cancellationToken);
+            if (hasBeneficiaries)
             {
-                subscription.MaxNumberOfPayments = request.MaxNumberOfPayments.Value;
+                if (request.FundsExpirationDate.IsSet())
+                {
+                    if (!subscription.IsFundsAccumulable || subscription.TriggerFundExpiration != FundsExpirationTrigger.SpecificDate)
+                    {
+                        logger.LogWarning("[Mutation] EditSubscription - CantEditExpirationDateException");
+                        throw new CantEditExpirationDateException();
+                    }
+                    if (!subscription.FundsExpirationDate.HasValue || subscription.IsExpired(clock))
+                    {
+                        logger.LogWarning("[Mutation] EditSubscription - ExpirationDateAlreadyPassedException");
+                        throw new ExpirationDateAlreadyPassedException();
+                    }
+                    var newExpirationDate = request.FundsExpirationDate.Value.AtMidnight().InUtc().ToDateTimeUtc();
+                    subscription.FundsExpirationDate = newExpirationDate;
+
+                    var subscriptionTypeIds = subscription.Types.Select(x => x.Id).ToList();
+                    var activeTransactions = await db.Transactions
+                        .OfType<SubscriptionAddingFundTransaction>()
+                        .Where(x => subscriptionTypeIds.Contains(x.SubscriptionTypeId) && x.Status == FundTransactionStatus.Actived)
+                        .ToListAsync(cancellationToken);
+
+                    foreach (var transaction in activeTransactions)
+                    {
+                        transaction.ExpirationDate = newExpirationDate;
+                    }
+                }
             }
             else
             {
-                subscription.MaxNumberOfPayments = null;
-            }
+                subscription.FundsExpirationDate = request.FundsExpirationDate.IsSet()
+                    ? request.FundsExpirationDate.Value.AtMidnight().InUtc().ToDateTimeUtc()
+                    : (DateTime?)null;
+                subscription.MonthlyPaymentMoment = request.MonthlyPaymentMoment;
+                subscription.StartDate = request.StartDate.AtMidnight().InUtc().ToDateTimeUtc();
+                subscription.EndDate = request.EndDate.AtMidnight().InUtc().ToDateTimeUtc();
 
-            if (request.NumberDaysUntilFundsExpire.IsSet())
-            {
-                subscription.NumberDaysUntilFundsExpire = request.NumberDaysUntilFundsExpire.Value;
-            }
-            else
-            {
-                subscription.NumberDaysUntilFundsExpire = null;
-            }
+                subscription.IsFundsAccumulable = request.IsFundsAccumulable;
+                subscription.IsSubscriptionPaymentBasedCardUsage = request.IsSubscriptionPaymentBasedCardUsage;
+                subscription.TriggerFundExpiration = request.TriggerFundExpiration;
 
-            UpdateTypes(subscription, request.Types);
+                if (request.MaxNumberOfPayments.IsSet())
+                {
+                    subscription.MaxNumberOfPayments = request.MaxNumberOfPayments.Value;
+                }
+                else
+                {
+                    subscription.MaxNumberOfPayments = null;
+                }
+
+                if (request.NumberDaysUntilFundsExpire.IsSet())
+                {
+                    subscription.NumberDaysUntilFundsExpire = request.NumberDaysUntilFundsExpire.Value;
+                }
+                else
+                {
+                    subscription.NumberDaysUntilFundsExpire = null;
+                }
+
+                UpdateTypes(subscription, request.Types);
+            }
 
             await db.SaveChangesAsync(cancellationToken);
 
@@ -166,8 +207,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         public class SubscriptionTypesCantBeEmpty : RequestValidationException { }
         public class BeneficiaryTypeCanOnlyBeAssignOnce : RequestValidationException { }
         public class EndDateMustBeAfterStartDateException : RequestValidationException { }
-        public class CantEditSubscriptionWithBeneficiaries : RequestValidationException { }
+        public class ExpirationDateMustBeAfterTodayDateException : RequestValidationException { }
         public class MaxNumberOfPaymentsCantBeZeroException : RequestValidationException { }
         public class NumberDaysUntilFundsExpireCantBeZeroException : RequestValidationException { }
+        public class CantEditExpirationDateException : RequestValidationException { }
+        public class ExpirationDateAlreadyPassedException : RequestValidationException { }
     }
 }

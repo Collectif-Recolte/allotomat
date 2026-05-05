@@ -4,15 +4,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using NodaTime;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
+using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
+using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Requests.Commands.Mutations.Subscriptions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -98,7 +101,19 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
             DbContext.SaveChanges();
 
-            handler = new EditSubscription(NullLogger<EditSubscription>.Instance, DbContext);
+            handler = new EditSubscription(NullLogger<EditSubscription>.Instance, DbContext, Clock);
+        }
+
+        private Beneficiary AssignBeneficiaryToSubscription(BeneficiaryType beneficiaryType)
+        {
+            var beneficiary = new Beneficiary() { Firstname = "John", Lastname = "Doe", BeneficiaryType = beneficiaryType };
+            DbContext.Beneficiaries.Add(beneficiary);
+            subscription.Beneficiaries = new List<SubscriptionBeneficiary>()
+            {
+                new SubscriptionBeneficiary { Beneficiary = beneficiary, BeneficiaryType = beneficiaryType, Subscription = subscription }
+            };
+            DbContext.SaveChanges();
+            return beneficiary;
         }
 
         [Fact]
@@ -111,7 +126,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 Name = "Subscription 1 test",
                 StartDate = new LocalDate(2022, 2, 1),
                 EndDate = new LocalDate(2022, 4, 30),
-                FundsExpirationDate = new LocalDate(2022, 5, 1),
+                FundsExpirationDate = new LocalDate(DateTime.UtcNow.Year + 1, 1, 1),
                 MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
                 Types = new List<EditSubscriptionTypeInput>() { 
                     new EditSubscriptionTypeInput
@@ -131,7 +146,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             localSubscription.MonthlyPaymentMoment.Should().Be(SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth);
             localSubscription.StartDate.Should().Be(new DateTime(2022, 2, 1));
             localSubscription.EndDate.Should().Be(new DateTime(2022, 4, 30));
-            localSubscription.FundsExpirationDate.Should().Be(new DateTime(2022, 5, 1));
+            localSubscription.FundsExpirationDate.Should().Be(new LocalDate(DateTime.UtcNow.Year + 1, 1, 1).AtMidnight().InUtc().ToDateTimeUtc());
         }
 
         [Fact]
@@ -151,31 +166,89 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         }
 
         [Fact]
-        public async Task ThrowsIfSubscriptionCantEdit()
+        public async Task CanEditNameWithBeneficiaries()
         {
-            var localBeneficiaryType = await DbContext.BeneficiaryTypes.FirstAsync(); ;
-
-            var beneficiary = new Beneficiary()
-            {
-                Firstname = "John",
-                Lastname = "Doe",
-                Address = "123, example street",
-                Email = "john.doe@example.com",
-                Phone = "555-555-1234",
-                BeneficiaryType = localBeneficiaryType
-            };
-            DbContext.Beneficiaries.Add(beneficiary);
-
-            subscription.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary { Beneficiary = beneficiary, BeneficiaryType = localBeneficiaryType, Subscription = subscription } };
-            DbContext.SaveChanges();
+            var localBeneficiaryType = await DbContext.BeneficiaryTypes.FirstAsync();
+            AssignBeneficiaryToSubscription(localBeneficiaryType);
 
             var input = new Input()
             {
                 SubscriptionId = subscription.GetIdentifier(),
-                Name = "Subscription 1 test",
-                StartDate = new LocalDate(2022, 2, 1),
-                EndDate = new LocalDate(2022, 4, 30),
-                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
+                Name = "Subscription renamed",
+                StartDate = new LocalDate(2022, 1, 1),
+                EndDate = new LocalDate(2022, 3, 30),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
+                Types = new List<EditSubscriptionTypeInput>() {
+                    new EditSubscriptionTypeInput
+                    {
+                        BeneficiaryTypeId = localBeneficiaryType.GetIdentifier(),
+                        Amount = 50,
+                        ProductGroupId = productGroup.GetIdentifier()
+                    }
+                }
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localSubscription = await DbContext.Subscriptions.FirstAsync();
+            localSubscription.Name.Should().Be("Subscription renamed");
+            localSubscription.MonthlyPaymentMoment.Should().Be(SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth);
+        }
+
+        [Fact]
+        public async Task CanEditExpirationDateWithBeneficiaries()
+        {
+            var localBeneficiaryType = await DbContext.BeneficiaryTypes.FirstAsync();
+
+            var futureExpiration = DateTime.UtcNow.AddYears(2);
+            subscription.IsFundsAccumulable = true;
+            subscription.TriggerFundExpiration = FundsExpirationTrigger.SpecificDate;
+            subscription.FundsExpirationDate = futureExpiration;
+            AssignBeneficiaryToSubscription(localBeneficiaryType);
+
+            var newExpiration = new LocalDate(futureExpiration.Year + 1, 1, 1);
+            var input = new Input()
+            {
+                SubscriptionId = subscription.GetIdentifier(),
+                Name = "Subscription 1",
+                StartDate = new LocalDate(2022, 1, 1),
+                EndDate = new LocalDate(2022, 3, 30),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
+                FundsExpirationDate = newExpiration,
+                Types = new List<EditSubscriptionTypeInput>() {
+                    new EditSubscriptionTypeInput
+                    {
+                        BeneficiaryTypeId = localBeneficiaryType.GetIdentifier(),
+                        Amount = 50,
+                        ProductGroupId = productGroup.GetIdentifier()
+                    }
+                }
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localSubscription = await DbContext.Subscriptions.FirstAsync();
+            localSubscription.FundsExpirationDate.Should().Be(newExpiration.AtMidnight().InUtc().ToDateTimeUtc());
+        }
+
+        [Fact]
+        public async Task ThrowsIfExpirationDateEditedAfterExpiry()
+        {
+            var localBeneficiaryType = await DbContext.BeneficiaryTypes.FirstAsync();
+
+            subscription.IsFundsAccumulable = true;
+            subscription.TriggerFundExpiration = FundsExpirationTrigger.SpecificDate;
+            subscription.FundsExpirationDate = DateTime.UtcNow.AddYears(-1);
+            AssignBeneficiaryToSubscription(localBeneficiaryType);
+
+            var input = new Input()
+            {
+                SubscriptionId = subscription.GetIdentifier(),
+                Name = "Subscription 1",
+                StartDate = new LocalDate(2022, 1, 1),
+                EndDate = new LocalDate(2022, 3, 30),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
+                FundsExpirationDate = new LocalDate(DateTime.UtcNow.Year + 1, 1, 1),
                 Types = new List<EditSubscriptionTypeInput>() {
                     new EditSubscriptionTypeInput
                     {
@@ -187,7 +260,130 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<EditSubscription.CantEditSubscriptionWithBeneficiaries>();
+                .Should().ThrowAsync<EditSubscription.ExpirationDateAlreadyPassedException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfExpirationDateEditedWhenNumberOfDaysTrigger()
+        {
+            var localBeneficiaryType = await DbContext.BeneficiaryTypes.FirstAsync();
+
+            subscription.IsFundsAccumulable = true;
+            subscription.TriggerFundExpiration = FundsExpirationTrigger.NumberOfDays;
+            subscription.FundsExpirationDate = DateTime.UtcNow.AddYears(2);
+            AssignBeneficiaryToSubscription(localBeneficiaryType);
+
+            var input = new Input()
+            {
+                SubscriptionId = subscription.GetIdentifier(),
+                Name = "Subscription 1",
+                StartDate = new LocalDate(2022, 1, 1),
+                EndDate = new LocalDate(2022, 3, 30),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
+                FundsExpirationDate = new LocalDate(DateTime.UtcNow.Year + 1, 1, 1),
+                Types = new List<EditSubscriptionTypeInput>() {
+                    new EditSubscriptionTypeInput
+                    {
+                        BeneficiaryTypeId = localBeneficiaryType.GetIdentifier(),
+                        Amount = 50,
+                        ProductGroupId = productGroup.GetIdentifier()
+                    }
+                }
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<EditSubscription.CantEditExpirationDateException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfExpirationDateEditedWhenNotAccumulable()
+        {
+            var localBeneficiaryType = await DbContext.BeneficiaryTypes.FirstAsync();
+
+            subscription.IsFundsAccumulable = false;
+            subscription.TriggerFundExpiration = FundsExpirationTrigger.SpecificDate;
+            subscription.FundsExpirationDate = DateTime.UtcNow.AddYears(2);
+            AssignBeneficiaryToSubscription(localBeneficiaryType);
+
+            var input = new Input()
+            {
+                SubscriptionId = subscription.GetIdentifier(),
+                Name = "Subscription 1",
+                StartDate = new LocalDate(2022, 1, 1),
+                EndDate = new LocalDate(2022, 3, 30),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
+                FundsExpirationDate = new LocalDate(DateTime.UtcNow.Year + 1, 1, 1),
+                Types = new List<EditSubscriptionTypeInput>() {
+                    new EditSubscriptionTypeInput
+                    {
+                        BeneficiaryTypeId = localBeneficiaryType.GetIdentifier(),
+                        Amount = 50,
+                        ProductGroupId = productGroup.GetIdentifier()
+                    }
+                }
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<EditSubscription.CantEditExpirationDateException>();
+        }
+
+        [Fact]
+        public async Task CanEditExpirationDateAlsoUpdatesExistingTransactions()
+        {
+            var localBeneficiaryType = await DbContext.BeneficiaryTypes.FirstAsync();
+
+            var futureExpiration = DateTime.UtcNow.AddYears(2);
+            subscription.IsFundsAccumulable = true;
+            subscription.TriggerFundExpiration = FundsExpirationTrigger.SpecificDate;
+            subscription.FundsExpirationDate = futureExpiration;
+            var beneficiary = AssignBeneficiaryToSubscription(localBeneficiaryType);
+
+            var card = new Card()
+            {
+                Funds = new List<Fund>(),
+                Status = CardStatus.Assigned,
+                Project = project,
+                Beneficiary = beneficiary,
+                Transactions = new List<Transaction>()
+                {
+                    new SubscriptionAddingFundTransaction()
+                    {
+                        Amount = 25,
+                        AvailableFund = 25,
+                        Status = FundTransactionStatus.Actived,
+                        ExpirationDate = futureExpiration,
+                        ProductGroup = productGroup,
+                        Beneficiary = beneficiary,
+                        SubscriptionType = subscriptionType
+                    }
+                }
+            };
+            DbContext.Cards.Add(card);
+            DbContext.SaveChanges();
+
+            var newExpiration = new LocalDate(futureExpiration.Year + 1, 1, 1);
+            var input = new Input()
+            {
+                SubscriptionId = subscription.GetIdentifier(),
+                Name = "Subscription 1",
+                StartDate = new LocalDate(2022, 1, 1),
+                EndDate = new LocalDate(2022, 3, 30),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
+                FundsExpirationDate = newExpiration,
+                Types = new List<EditSubscriptionTypeInput>() {
+                    new EditSubscriptionTypeInput
+                    {
+                        BeneficiaryTypeId = localBeneficiaryType.GetIdentifier(),
+                        Amount = 50,
+                        ProductGroupId = productGroup.GetIdentifier()
+                    }
+                }
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var updatedTransaction = await DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().FirstAsync();
+            updatedTransaction.ExpirationDate.Should().Be(newExpiration.AtMidnight().InUtc().ToDateTimeUtc());
         }
 
         [Fact]
@@ -200,7 +396,6 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 Name = "Subscription 1 test",
                 StartDate = new LocalDate(2022, 2, 1),
                 EndDate = new LocalDate(2022, 4, 30),
-                FundsExpirationDate = new LocalDate(2022, 5, 1),
                 MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
                 Types = new List<EditSubscriptionTypeInput>() {
                     new EditSubscriptionTypeInput
@@ -228,7 +423,6 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 Name = "Subscription 1 test",
                 StartDate = new LocalDate(2022, 2, 1),
                 EndDate = new LocalDate(2022, 4, 30),
-                FundsExpirationDate = new LocalDate(2022, 5, 1),
                 MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
                 Types = new List<EditSubscriptionTypeInput>() {
                     new EditSubscriptionTypeInput
