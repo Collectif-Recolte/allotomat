@@ -18,21 +18,20 @@
         <Title :title="t('title')">
           <template #subpagesCta>
             <div class="text-right">
-              <ReportFilters v-model="searchInput" @resetFilters="onResetFilters" />
+              <ReportFilters v-model="searchInput" :available-market-groups="availableMarketGroups"
+                @resetFilters="onResetFilters" />
             </div>
           </template>
         </Title>
       </template>
       <div v-if="marketsAmountOwed">
         <div class="flex flex-col relative mb-6">
-          <MarketAmountOwedTable v-if="marketsAmountOwed.totalCount > 0" :markets="marketsAmountOwed.items" />
+          <MarketAmountOwedTable v-if="marketsAmountOwed.totalCount > 0" :markets="marketsAmountOwed.items"
+            :total="{ totalAmount: marketsAmountOwed.totalAmount }" />
           <UiEmptyPage v-else>
             <UiCta :img-src="require('@/assets/img/swan.jpg')" :description="t('no-results')"> </UiCta>
           </UiEmptyPage>
-          <UiPagination
-            v-if="marketsAmountOwed.totalPages > 1"
-            v-model:page="page"
-            class="mb-6"
+          <UiPagination v-if="marketsAmountOwed.totalPages > 1" v-model:page="page" class="mb-6"
             :total-pages="marketsAmountOwed.totalPages" />
         </div>
       </div>
@@ -69,7 +68,8 @@ previousMonth.setMonth(previousMonth.getMonth() - 1);
 
 const searchInput = ref({
   dateFrom: previousMonth,
-  dateTo: new Date(Date.now())
+  dateTo: new Date(Date.now()),
+  selectedMarketGroups: []
 });
 const page = ref(1);
 
@@ -78,6 +78,9 @@ if (route.query.dateFrom) {
 }
 if (route.query.dateTo) {
   searchInput.value.dateTo = new Date(route.query.dateTo);
+}
+if (route.query.marketGroups) {
+  searchInput.value.selectedMarketGroups = route.query.marketGroups.split(",");
 }
 
 const { t } = useI18n();
@@ -113,20 +116,28 @@ function marketsAmountOwedVariables() {
   return {
     page: page.value,
     dateFrom: dateFromStartOfDay.value,
-    dateTo: dateToEndOfDay.value
+    dateTo: dateToEndOfDay.value,
+    marketGroups: searchInput.value.selectedMarketGroups
   };
 }
 
 const { result: resultProjects, loading: loadingProjects } = useQuery(
   gql`
-    query Projects($page: Int!, $dateFrom: DateTime!, $dateTo: DateTime!) {
+    query Projects($page: Int!, $dateFrom: DateTime!, $dateTo: DateTime!, $marketGroups: [ID!]) {
       projects {
         id
         reconciliationReportDate
         name
-        marketsAmountOwed(page: $page, limit: 30, startDate: $dateFrom, endDate: $dateTo) {
+        marketsAmountOwed(
+          page: $page
+          limit: 30
+          startDate: $dateFrom
+          endDate: $dateTo
+          withSpecificMarketGroups: $marketGroups
+        ) {
           totalCount
           totalPages
+          totalAmount
           items {
             market {
               id
@@ -141,6 +152,10 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
               amount
             }
           }
+        }
+        marketGroups {
+          id
+          name
         }
       }
     }
@@ -161,17 +176,28 @@ const project = useResult(resultProjects, null, (data) => {
 
 const { result: resultMarketGroups, loading: loadingMarketGroups } = useQuery(
   gql`
-    query MarketGroups($page: Int!, $dateFrom: DateTime!, $dateTo: DateTime!) {
+    query MarketGroups($page: Int!, $dateFrom: DateTime!, $dateTo: DateTime!, $marketGroups: [ID!]) {
       marketGroups {
         id
         name
         project {
           id
           reconciliationReportDate
+          marketGroups {
+            id
+            name
+          }
         }
-        marketsAmountOwed(page: $page, limit: 30, startDate: $dateFrom, endDate: $dateTo) {
+        marketsAmountOwed(
+          page: $page
+          limit: 30
+          startDate: $dateFrom
+          endDate: $dateTo
+          withSpecificMarketGroups: $marketGroups
+        ) {
           totalCount
           totalPages
+          totalAmount
           items {
             market {
               id
@@ -229,13 +255,15 @@ const marketsAmountOwed = computed(() => {
   var marketsAmountOwed = project.value
     ? project.value.marketsAmountOwed
     : marketGroup.value
-    ? marketGroup.value.marketsAmountOwed
-    : null;
+      ? marketGroup.value.marketsAmountOwed
+      : null;
   let items = [];
   let totalCount = 0;
+  let totalAmount = 0;
 
   if (marketsAmountOwed) {
     totalCount = marketsAmountOwed.totalCount;
+    totalAmount = marketsAmountOwed.totalAmount;
     marketsAmountOwed.items.forEach((item) => {
       item.amountByCashRegister.forEach((cashRegisterItem) => {
         let marketData = {
@@ -248,7 +276,11 @@ const marketsAmountOwed = computed(() => {
     });
   }
 
-  return { items, totalCount };
+  return { items, totalCount, totalAmount };
+});
+
+const availableMarketGroups = computed(() => {
+  return project.value ? project.value.marketGroups : marketGroup.value ? marketGroup.value.project.marketGroups : [];
 });
 
 function updateUrl() {
@@ -256,7 +288,9 @@ function updateUrl() {
     name: URL_RECONCILIATION_REPORT,
     query: {
       dateFrom: formatDate(new Date(searchInput.value.dateFrom), serverFormat),
-      dateTo: formatDate(new Date(searchInput.value.dateTo), serverFormat)
+      dateTo: formatDate(new Date(searchInput.value.dateTo), serverFormat),
+      marketGroups:
+        searchInput.value.selectedMarketGroups.length > 0 ? searchInput.value.selectedMarketGroups.toString() : undefined
     }
   });
 }
@@ -273,6 +307,7 @@ function onResetFilters() {
   page.value = 1;
   searchInput.value.dateFrom = previousMonth;
   searchInput.value.dateTo = new Date(Date.now());
+  searchInput.value.selectedMarketGroups = [];
   updateUrl();
 }
 </script>
@@ -281,39 +316,24 @@ function onResetFilters() {
 .markets-list-vue {
   --pf-top-header-height: 170px;
   --pf-table-header-height: 67px;
-  --ui-table-height: calc(
-    100dvh -
-      (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem)
-  );
+  --ui-table-height: calc(100dvh - (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem));
 
   @media screen("xs") {
     --pf-top-header-height: 123px;
     --pf-table-header-height: 72px;
-    --ui-table-height: calc(
-      100dvh -
-        (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem)
-    );
+    --ui-table-height: calc(100dvh - (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem));
   }
 
   @media screen("sm") {
     --pf-top-header-height: 139px;
     --pf-table-header-height: 61px;
-    --ui-table-height: calc(
-      100dvh -
-        (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem)
-    );
+    --ui-table-height: calc(100dvh - (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem));
   }
 
   @media screen("lg") {
     --pf-top-header-height: 244px;
     --pf-table-header-height: 66px;
-    --ui-table-height: calc(
-      100dvh -
-        (
-          var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) +
-            2.2rem
-        )
-    );
+    --ui-table-height: calc(100dvh - (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2.2rem));
   }
 }
 </style>
