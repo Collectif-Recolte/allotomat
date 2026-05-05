@@ -1,6 +1,7 @@
 ﻿using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using MediatR;
+using NodaTime.Extensions;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
@@ -88,6 +89,22 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             {
                 return new MarketGraphType(x);
             });
+        }
+
+        [Description("The list of transactions for this market-group by date and cash-register.")]
+        public async Task<IEnumerable<ITransactionGraphType>> Transactions(DateTime startDate, DateTime endDate, Id[] cashRegisters, IAppUserContext ctx)
+        {
+            if (startDate > endDate)
+            {
+                return new List<ITransactionGraphType>();
+            }
+
+            var transactions = await ctx.DataLoader.LoadMarketGroupTransactions(Id.LongIdentifierForType<MarketGroup>()).GetResultAsync();
+
+            var startInstant = startDate.ToInstant();
+            var endInstant = endDate.ToInstant();
+
+            return transactions.Where(x => TransactionGraphTypeHelper.IsTransactionBetweenDate(x, startInstant, endInstant) && TransactionGraphTypeHelper.IsTransactionInCashRegister(x, cashRegisters));
         }
     }
 }

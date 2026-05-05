@@ -69,17 +69,24 @@
       :label="t('manage-cards')"
       :icon="CREDIT_CARD" />
     <MenuItem
-      v-if="canCreateTransaction && !isProjectManager"
+      v-if="canCreateTransaction && !isProjectManager && !isMarketGroupManager"
       :router-link="{ name: $consts.urls.URL_TRANSACTION }"
       :label="t('create-transaction')"
       :icon="QRCODE" />
+    <template v-if="canCreateTransaction && !isProjectManager">
+      <MenuItem
+        v-if="isMarketGroupManager"
+        :router-link="{ name: $consts.urls.URL_MARKETGROUP_TRANSACTION_LIST }"
+        :label="t('manage-transactions')"
+        :icon="CLOCK" />
+      <MenuItem
+        v-else
+        :router-link="{ name: $consts.urls.URL_TRANSACTION_LIST }"
+        :label="t('manage-transactions')"
+        :icon="CLOCK" />
+    </template>
     <MenuItem
-      v-if="canCreateTransaction && !isProjectManager"
-      :router-link="{ name: $consts.urls.URL_TRANSACTION_LIST }"
-      :label="t('manage-transactions')"
-      :icon="CLOCK" />
-    <MenuItem
-      v-if="route.meta.anonymous || (canCreateTransaction && !isProjectManager)"
+      v-if="route.meta.anonymous || (canCreateTransaction && !isProjectManager && !isMarketGroupManager)"
       :router-link="{ name: $consts.urls.URL_CARD_CHECK }"
       :label="t('check-balance')"
       :icon="HAND_CARD" />

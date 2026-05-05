@@ -86,7 +86,11 @@
               <p class="my-1">{{ t("available-card", { count: project.cardStats.cardsUnassigned }) }}</p>
             </div>
             <div class="flex flex-wrap gap-x-4 gap-y-3">
-              <PfButtonLink v-if="project" btn-style="outline" tag="routerLink" :label="t('create-gift-card')"
+              <PfButtonLink
+                v-if="project"
+                btn-style="outline"
+                tag="routerLink"
+                :label="t('create-gift-card')"
                 :to="showCreateGiftCardBtn" />
             </div>
           </div>
@@ -95,37 +99,68 @@
       <div v-if="giftCards && giftCardsPagination" class="px-section md:px-8 py-5">
         <UiTableHeader>
           <template #right>
-            <UiFilter v-model="searchInput" has-search has-filters has-sort :sort-order="sortOrderDirection"
-              :sort-label="sortLabel" :placeholder="t('search-placeholder')"
-              :has-active-filters="!!searchText || activeFiltersCount > 0" :active-filters-count="activeFiltersCount"
+            <UiFilter
+              v-model="searchInput"
+              has-search
+              has-filters
+              has-sort
+              :sort-order="sortOrderDirection"
+              :sort-label="sortLabel"
+              :placeholder="t('search-placeholder')"
+              :has-active-filters="!!searchText || activeFiltersCount > 0"
+              :active-filters-count="activeFiltersCount"
               :beneficiaries-are-anonymous="project.beneficiariesAreAnonymous && canManageOrganizations"
-              @resetFilters="resetSearch" @search="onSearch">
+              @resetFilters="resetSearch"
+              @search="onSearch">
               <template #sortOrder>
-                <PfFormInputRadioGroup id="sortOrder" :value="sortOrder" :label="t('sort-order')"
-                  :options="sortOrderOptions" @input="onSortOrderChanged" />
+                <PfFormInputRadioGroup
+                  id="sortOrder"
+                  :value="sortOrder"
+                  :label="t('sort-order')"
+                  :options="sortOrderOptions"
+                  @input="onSortOrderChanged" />
               </template>
-              <PfFormInputCheckboxGroup v-if="availableCardStatus.length > 0" id="card-status" is-filter
-                :value="selectedCardStatus" :label="t('card-status')" :options="availableCardStatus"
+              <PfFormInputCheckboxGroup
+                v-if="availableCardStatus.length > 0"
+                id="card-status"
+                is-filter
+                :value="selectedCardStatus"
+                :label="t('card-status')"
+                :options="availableCardStatus"
                 @input="onCardStatusChecked" />
-              <PfFormInputCheckboxGroup id="cardDisabled" class="mt-3" is-filter :value="selectedCardDisabled"
-                :label="t('card-disabled-status')" :options="cardDisabled" @input="onCardIsDisabledChecked" />
+              <PfFormInputCheckboxGroup
+                id="cardDisabled"
+                class="mt-3"
+                is-filter
+                :value="selectedCardDisabled"
+                :label="t('card-disabled-status')"
+                :options="cardDisabled"
+                @input="onCardIsDisabledChecked" />
             </UiFilter>
           </template>
         </UiTableHeader>
         <UiEmptyPage v-if="giftCardsPagination.totalCount === 0 && activeFiltersCount === 0 && searchText === ''">
-          <UiCta :img-src="require('@/assets/img/cards.jpg')" :description="t('empty-card-list')"
+          <UiCta
+            :img-src="require('@/assets/img/cards.jpg')"
+            :description="t('empty-card-list')"
             :primary-btn-label="t('create-gift-card')"
             :primary-btn-route="{ name: URL_CARDS_GIFT_CARD_ADD, query: { projectId: project.id } }"
             @onPrimaryBtnClick="resetSearch">
           </UiCta>
         </UiEmptyPage>
         <UiEmptyPage v-else-if="giftCardsPagination.totalCount === 0">
-          <UiCta :img-src="require('@/assets/img/cards.jpg')" :description="t('no-results')"
-            :primary-btn-label="t('reset-search')" primary-btn-is-action @onPrimaryBtnClick="resetSearch">
+          <UiCta
+            :img-src="require('@/assets/img/cards.jpg')"
+            :description="t('no-results')"
+            :primary-btn-label="t('reset-search')"
+            primary-btn-is-action
+            @onPrimaryBtnClick="resetSearch">
           </UiCta>
         </UiEmptyPage>
         <div v-else>
-          <CardSummaryTable :cards="giftCards" is-gift-card
+          <CardSummaryTable
+            :cards="giftCards"
+            is-gift-card
             :beneficiaries-are-anonymous="project.beneficiariesAreAnonymous && canManageOrganizations"
             :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform">
             <template #beforeActions="{ card }">
@@ -135,7 +170,9 @@
               <UiButtonGroup :items="getAfterBtnGroup(card)" tooltip-position="left" />
             </template>
           </CardSummaryTable>
-          <UiPagination v-if="giftCardsPagination && giftCardsPagination.totalPages > 1" v-model:page="page"
+          <UiPagination
+            v-if="giftCardsPagination && giftCardsPagination.totalPages > 1"
+            v-model:page="page"
             :total-pages="giftCardsPagination.totalPages">
           </UiPagination>
         </div>
@@ -472,24 +509,39 @@ onBeforeRouteUpdate((to) => {
 .card-list-vue {
   --pf-top-header-height: 170px;
   --pf-table-header-height: 67px;
-  --ui-table-height: calc(100dvh - (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2rem));
+  --ui-table-height: calc(
+    100dvh -
+      (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2rem)
+  );
 
   @media screen("xs") {
     --pf-top-header-height: 123px;
     --pf-table-header-height: 72px;
-    --ui-table-height: calc(100dvh - (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2rem));
+    --ui-table-height: calc(
+      100dvh -
+        (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2rem)
+    );
   }
 
   @media screen("sm") {
     --pf-top-header-height: 139px;
     --pf-table-header-height: 61px;
-    --ui-table-height: calc(100dvh - (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem));
+    --ui-table-height: calc(
+      100dvh -
+        (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem)
+    );
   }
 
   @media screen("lg") {
     --pf-top-header-height: 156px;
     --pf-table-header-height: 84px;
-    --ui-table-height: calc(100dvh - (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3.6rem));
+    --ui-table-height: calc(
+      100dvh -
+        (
+          var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) +
+            3.6rem
+        )
+    );
   }
 }
 </style>

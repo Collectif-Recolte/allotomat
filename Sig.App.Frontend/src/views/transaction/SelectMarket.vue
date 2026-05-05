@@ -7,6 +7,7 @@
       "cancel": "Cancel",
       "transaction-in-project-name": "Purchase on behalf of a merchant",
       "transaction-in-organization-name": "Purchase on behalf of an organization",
+      "transaction-in-market-group-name": "Purchase on behalf of a market group",
       "select-cash-register": "Cash Register",
       "choose-cash-register": "Select",
       "market-disabled-label": "{market} is deactivated"
@@ -18,6 +19,7 @@
       "cancel": "Annuler",
       "transaction-in-project-name": "Achat au nom d'un commerce",
       "transaction-in-organization-name": "Achat au nom d'un groupe de participant·e·s",
+      "transaction-in-market-group-name": "Achat au nom d'un groupe de marchés",
       "select-cash-register": "Caisse",
       "choose-cash-register": "Sélectionner",
       "market-disabled-label": "{market} est désactivé"
@@ -28,7 +30,7 @@
 <template>
   <div>
     <p class="text-p1">
-      {{ userType === USER_TYPE_ORGANIZATIONMANAGER ? t("transaction-in-organization-name") : t("transaction-in-project-name") }}
+      {{ descriptionText }}
     </p>
     <Form
       v-slot="{ errors: formErrors }"
@@ -46,7 +48,10 @@
         can-cancel
         @cancel="closeModal">
         <PfFormSection>
-          <Field v-slot="{ field: inputField, errors: fieldErrors }" name="marketId">
+          <Field
+            v-if="userType !== USER_TYPE_MARKETGROUPMANAGER"
+            v-slot="{ field: inputField, errors: fieldErrors }"
+            name="marketId">
             <PfFormInputSelect
               id="marketId"
               v-bind="inputField"
@@ -60,7 +65,7 @@
             <PfFormInputSelect
               id="cashRegisterId"
               v-bind="inputField"
-              :disabled="!selectedMarket"
+              :disabled="userType !== USER_TYPE_MARKETGROUPMANAGER && !selectedMarket"
               :placeholder="t('choose-cash-register')"
               :label="t('select-cash-register')"
               :options="cashRegisters"
@@ -74,7 +79,7 @@
 
 <script setup>
 import gql from "graphql-tag";
-import { computed, defineProps, defineEmits, ref, onMounted } from "vue";
+import { computed, defineProps, defineEmits, ref, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { string, object } from "yup";
 import { useQuery, useResult } from "@vue/apollo-composable";
@@ -82,7 +87,7 @@ import { storeToRefs } from "pinia";
 
 import { useAuthStore } from "@/lib/store/auth";
 
-import { TRANSACTION_STEPS_ADD, USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
+import { TRANSACTION_STEPS_ADD, USER_TYPE_ORGANIZATIONMANAGER, USER_TYPE_MARKETGROUPMANAGER } from "@/lib/consts/enums";
 
 const { t } = useI18n();
 const { userType } = storeToRefs(useAuthStore());
@@ -114,12 +119,23 @@ const initialTouched = computed(() => {
   return { marketId: props.marketId !== "", cashRegisterId: props.cashRegisterId !== "" };
 });
 
-const validationSchema = computed(() =>
-  object({
+const validationSchema = computed(() => {
+  if (userType.value === USER_TYPE_MARKETGROUPMANAGER) {
+    return object({
+      cashRegisterId: string().label(t("select-cash-register")).required()
+    });
+  }
+  return object({
     marketId: string().label(t("select-market")).required(),
     cashRegisterId: string().label(t("select-cash-register")).required()
-  })
-);
+  });
+});
+
+const descriptionText = computed(() => {
+  if (userType.value === USER_TYPE_MARKETGROUPMANAGER) return t("transaction-in-market-group-name");
+  if (userType.value === USER_TYPE_ORGANIZATIONMANAGER) return t("transaction-in-organization-name");
+  return t("transaction-in-project-name");
+});
 
 const { result: resultProjects } = useQuery(
   gql`
@@ -224,17 +240,52 @@ const organizationCashRegisters = useResult(resultOrganizations, null, (data) =>
     .sort((a, b) => a.label.localeCompare(b.label));
 });
 
-const markets = computed(() => {
-  if (userType.value === USER_TYPE_ORGANIZATIONMANAGER) {
-    return organizationMarkets.value;
+const { result: resultMarketGroups } = useQuery(
+  gql`
+    query MarketGroups {
+      marketGroups {
+        id
+        cashRegisters {
+          id
+          name
+          market {
+            id
+          }
+        }
+      }
+    }
+  `,
+  null,
+  { enabled: computed(() => userType.value === USER_TYPE_MARKETGROUPMANAGER) }
+);
+const marketGroupCashRegisters = useResult(resultMarketGroups, null, (data) => {
+  const allCashRegisters = data.marketGroups.flatMap((mg) => mg.cashRegisters);
+  return allCashRegisters.map((cr) => ({ label: cr.name, value: cr.id })).sort((a, b) => a.label.localeCompare(b.label));
+});
+
+const stopSingleCashRegisterWatch = watch(marketGroupCashRegisters, (list) => {
+  if (list && list.length === 1 && resultMarketGroups.value) {
+    const allCashRegisters = resultMarketGroups.value.marketGroups.flatMap((mg) => mg.cashRegisters);
+    emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
+      marketId: allCashRegisters[0].market.id,
+      cashRegisterId: allCashRegisters[0].id
+    });
+    stopSingleCashRegisterWatch();
   }
+});
+const cashRegisterMarketMap = useResult(resultMarketGroups, {}, (data) => {
+  return Object.fromEntries(data.marketGroups.flatMap((mg) => mg.cashRegisters.map((cr) => [cr.id, cr.market.id])));
+});
+
+const markets = computed(() => {
+  if (userType.value === USER_TYPE_MARKETGROUPMANAGER) return [];
+  if (userType.value === USER_TYPE_ORGANIZATIONMANAGER) return organizationMarkets.value;
   return projectMarkets.value;
 });
 
 const cashRegisters = computed(() => {
-  if (userType.value === USER_TYPE_ORGANIZATIONMANAGER) {
-    return organizationCashRegisters.value;
-  }
+  if (userType.value === USER_TYPE_MARKETGROUPMANAGER) return marketGroupCashRegisters.value;
+  if (userType.value === USER_TYPE_ORGANIZATIONMANAGER) return organizationCashRegisters.value;
   return projectCashRegisters.value;
 });
 
@@ -243,8 +294,11 @@ function onMarketSelected(e) {
 }
 
 async function nextStep(values) {
+  const marketId =
+    userType.value === USER_TYPE_MARKETGROUPMANAGER ? cashRegisterMarketMap.value[values.cashRegisterId] : values.marketId;
+
   emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
-    marketId: values.marketId,
+    marketId,
     cashRegisterId: values.cashRegisterId
   });
 }

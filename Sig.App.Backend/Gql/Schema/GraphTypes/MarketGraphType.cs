@@ -2,7 +2,6 @@
 using GraphQL.DataLoader;
 using MediatR;
 using NodaTime.Extensions;
-using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Interfaces;
@@ -59,7 +58,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
             var transactions = await ctx.DataLoader.LoadMarketTransactions(Id.LongIdentifierForType<Market>()).GetResultAsync();
 
-            return transactions.Where(x => IsTransactionBetweenDate(x, startDate, endDate) && IsTransactionInCashRegister(x, cashRegisters));
+            var startInstant = startDate.ToInstant();
+            var endInstant = endDate.ToInstant();
+            return transactions.Where(x => TransactionGraphTypeHelper.IsTransactionBetweenDate(x, startInstant, endInstant) && TransactionGraphTypeHelper.IsTransactionInCashRegister(x, cashRegisters));
         }
 
         [Description("The list of cash-register for this market.")]
@@ -74,35 +75,5 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return cashRegisters.Where(x => !x.IsArchived);
         }
 
-        private bool IsTransactionBetweenDate(ITransactionGraphType x, DateTime startDate, DateTime endDate)
-        {
-            var createdAtInstant = x.CreatedAt().ToInstant();
-
-            return startDate.ToInstant() <= createdAtInstant && createdAtInstant < endDate.ToInstant();
-        }
-
-        private bool IsTransactionInCashRegister(ITransactionGraphType x, Id[] cashRegisters)
-        {
-            if (cashRegisters.Length > 0)
-            {
-                var cashRegisterIds = cashRegisters.Select(x => x.LongIdentifierForType<CashRegister>());
-                if (x is RefundTransactionGraphType rtgt)
-                {
-                    if (cashRegisterIds.Where(x => x == rtgt.CashRegisterId).Any())
-                    {
-                        return true;
-                    }
-                }
-                if (x is PaymentTransactionGraphType ptgt)
-                {
-                    if (cashRegisterIds.Where(x => x == ptgt.CashRegisterId).Any())
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            }
-            return true;
-        }
     }
 }
