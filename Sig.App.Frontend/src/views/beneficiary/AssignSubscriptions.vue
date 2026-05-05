@@ -179,7 +179,13 @@
           @beneficiarySelectedUnchecked="onSelectedBeneficiaryUnchecked">
         </BeneficiaryTable>
         <div
-          class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
+          class="sticky bottom-4 relative flex justify-end w-full before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
+          <PfButtonAction v-if="displayLoadMoreBeneficiaries" tag="routerLink" btn-style="primary"
+            class="rounded-full absolute left-1/2 -translate-x-1/2" @click="onFetchMoreBeneficiaries">
+            <span class="inline-flex items-center">
+              {{ t("load-more-beneficiaries") }}
+            </span>
+          </PfButtonAction>
           <PfButtonAction tag="routerLink" btn-style="secondary" class="rounded-full"
             :disabled="isConfirmButtonDisabled" @click="onConfirmSubscription">
             <span class="inline-flex items-center">
@@ -187,14 +193,6 @@
               <span
                 class="bg-primary-700 w-6 h-6 flex items-center justify-center rounded-full text-p3 leading-none ml-2 -mr-2">{{
                 selectedBeneficiaries.length }}</span>
-            </span>
-          </PfButtonAction>
-        </div>
-        <div v-if="displayLoadMoreBeneficiaries"
-          class="sticky items-center justify-center py-4 px-4 text-center sm:block sm:p-0">
-          <PfButtonAction tag="routerLink" btn-style="primary" class="rounded-full" @click="onFetchMoreBeneficiaries">
-            <span class="inline-flex items-center">
-              {{ t("load-more-beneficiaries") }}
             </span>
           </PfButtonAction>
         </div>
