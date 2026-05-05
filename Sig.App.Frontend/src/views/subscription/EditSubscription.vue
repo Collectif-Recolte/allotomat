@@ -32,9 +32,11 @@
       :subscription-payment-based-card-usage="subscription.isSubscriptionPaymentBasedCardUsage"
       :trigger-fund-expiration="subscription.triggerFundExpiration"
       :max-number-of-payments="subscription.isSubscriptionPaymentBasedCardUsage ? subscription.maxNumberOfPayments : null"
+      :have-any-beneficiaries="subscription.haveAnyBeneficiaries"
       :number-days-until-funds-expire="
         subscription.triggerFundExpiration === NUMBER_OF_DAYS ? subscription.numberDaysUntilFundsExpire : null
       "
+      :can-edit-funds-expiration-date="canEditFundsExpirationDate"
       :submit-btn="t('edit-subscription')"
       @closeModal="closeModal"
       @submit="onSubmit" />
@@ -49,7 +51,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
 
 import { URL_SUBSCRIPTION_ADMIN } from "@/lib/consts/urls";
-import { NUMBER_OF_DAYS } from "@/lib/consts/funds-expiration-trigger";
+import { NUMBER_OF_DAYS, SPECIFIC_DATE } from "@/lib/consts/funds-expiration-trigger";
 import { subscriptionName } from "@/lib/helpers/subscription";
 
 import { formatDate, serverFormat, formattedDate } from "@/lib/helpers/date";
@@ -88,6 +90,7 @@ const { result, loading } = useQuery(
         fundsExpirationDate
         triggerFundExpiration
         numberDaysUntilFundsExpire
+        haveAnyBeneficiaries
         types {
           id
           productGroup {
@@ -128,6 +131,7 @@ const { mutate: editSubscription } = useMutation(
           fundsExpirationDate
           triggerFundExpiration
           numberDaysUntilFundsExpire
+          haveAnyBeneficiaries
           types {
             id
             productGroup {
@@ -147,6 +151,16 @@ const { mutate: editSubscription } = useMutation(
     }
   `
 );
+
+const canEditFundsExpirationDate = computed(() => {
+  if (!subscription.value?.haveAnyBeneficiaries) return true;
+  return (
+    subscription.value?.isFundsAccumulable &&
+    subscription.value?.triggerFundExpiration === SPECIFIC_DATE &&
+    subscription.value?.fundsExpirationDate &&
+    new Date(subscription.value.fundsExpirationDate) > new Date()
+  );
+});
 
 const productGroupSubscriptionTypes = computed(() => {
   let results = [];

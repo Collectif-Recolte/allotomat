@@ -12,13 +12,13 @@
     "first-and-fifteenth-day-of-the-month": "The first and 15th day of the month",
 		"monthly-payment-moment": "Automated payment schedule",
 		"subscription-end-date": "End of payment period",
-		"subscription-end-date-error": "The “End date” field must be greater than the “Start date” field",
+		"subscription-end-date-error": "The 'End date' field must be greater than the “Start date” field",
 		"subscription-name": "Name",
     "subscription-name-desc": "<p>These settings will determine the dates on which funds will be automatically added onto cards. (In later steps, you will define expiration dates and the amounts the cards will receive.) Note that subscriptions <b>cannot be modified</b> once they have been assigned to participants!</p>",
 		"subscription-name-placeholder": "Ex. Winter 2022",
 		"subscription-start-date": "Beginning of payment period",
     "subscription-funds-expiration-date": "Fund expiry date",
-    "subscription-funds-expiration-date-error": "The “Fund expiry date” field  must be later than the “End of payment period” field",
+    "subscription-funds-expiration-date-error": "The \”Fund expiry date\” field must be later than the \”End of payment period\” field and after today's date.",
     "subscription-type-amount": "Amount",
     "subscription-type-category": "Participant category",
     "subscription-funds-accumulable": "Cumulative funds",
@@ -65,7 +65,7 @@
 		"subscription-start-date": "Début période de versements",
 		"subscription-type-amount": "Montant",
     "subscription-funds-expiration-date": "Date maximale d’expiration des fonds",
-    "subscription-funds-expiration-date-error": "Le champ «Date maximale d’expiration des fonds» doit être ultérieur à la fin de la période de versements.",
+    "subscription-funds-expiration-date-error": "Le champ «Date maximale d’expiration des fonds» doit être ultérieur à la fin de la période de versements et à la date du jour (aujourd'hui).",
     "subscription-type-category": "Catégorie de participant·e",
     "subscription-funds-accumulable": "Fonds accumulables",
     "previous": "Précédent",
@@ -133,6 +133,7 @@
             id="startDate"
             v-bind="field"
             class="sm:col-span-6"
+            :disabled="haveAnyBeneficiaries"
             :label="t('subscription-start-date')"
             :errors="fieldErrors"
             is-inside-modal
@@ -143,6 +144,7 @@
             id="endDate"
             v-bind="field"
             class="sm:col-span-6"
+            :disabled="haveAnyBeneficiaries"
             :label="t('subscription-end-date')"
             :errors="fieldErrors"
             is-inside-modal
@@ -173,6 +175,7 @@
                 id="isSubscriptionPaymentBasedCardUsage"
                 v-model="subscriptionPaymentBasedCardUsageValue"
                 class="mx-auto mr-0"
+                :disabled="haveAnyBeneficiaries"
                 @update:modelValue="(e) => updateIsSubscriptionPaymentBasedCardUsage(setFieldValue, validateField, e)">
                 <template #left>
                   <span class="mr-2 text-p3 font-semibold">{{
@@ -205,6 +208,7 @@
             :label="t('monthly-payment-moment')"
             :options="monthlyPaymentMomentOptions"
             :errors="fieldErrors"
+            :disabled="haveAnyBeneficiaries"
             @input="(e) => updateMonthlyPaymentMoment(setFieldValue, validateField, e)" />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="maxNumberOfPayments">
@@ -239,6 +243,7 @@
               <UiSwitch
                 id="isFundsAccumulable"
                 v-model="isFundsAccumulableValue"
+                :disabled="haveAnyBeneficiaries"
                 class="mx-auto mr-0"
                 @update:modelValue="(e) => updateIsFundsAccumulable(setFieldValue, validateField)">
                 <template #left>
@@ -272,6 +277,7 @@
             :label="t('subscription-trigger-fund-expiration')"
             :options="triggerFundExpirationOptions"
             :description="t('subscription-trigger-fund-expiration-desc')"
+            :disabled="haveAnyBeneficiaries"
             @input="(e) => updateTriggerFundExpirationValue(setFieldValue, validateField, e)" />
         </Field>
         <div v-if="triggerFundExpirationValue === NUMBER_OF_DAYS" class="flex sm:col-span-12">
@@ -292,8 +298,8 @@
             class="sm:col-span-6"
             v-bind="inputField"
             :label="t('subscription-funds-expiration-date')"
-            :errors="isFundsAccumulableValue ? fieldErrors : []"
-            :disabled="!isFundsAccumulableValue"
+            :errors="isFundsAccumulableValue && canEditFundsExpirationDate ? fieldErrors : []"
+            :disabled="!isFundsAccumulableValue || !canEditFundsExpirationDate"
             is-inside-modal
             @update:modelValue="forceValidation(values, validateField)" />
         </Field>
@@ -306,7 +312,7 @@
             :errors="fieldErrors"
             input-type="number"
             min="0"
-            :disabled="triggerFundExpirationValue !== NUMBER_OF_DAYS"
+            :disabled="triggerFundExpirationValue !== NUMBER_OF_DAYS || haveAnyBeneficiaries"
             @input="(e) => updateNumberDaysUntilFundsExpireValue(setFieldValue, validateField, e)">
           </PfFormInputText>
         </Field>
@@ -331,6 +337,8 @@
             :delete-label="t('product-group-delete')"
             :empty-list-error="t('empty-product-group-subscription-types-list-error')"
             :errors="formErrors[`productGroupSubscriptionTypes`]"
+            :cant-delete="haveAnyBeneficiaries"
+            :cant-add="haveAnyBeneficiaries"
             @addField="() => createNewProductGroupSubscriptionTypes(push)"
             @removeField="(idx) => remove(idx)">
             <template #default="slotProps">
@@ -343,6 +351,7 @@
                     v-bind="field"
                     :label="t('product-group-select')"
                     :options="productGroups"
+                    :disabled="haveAnyBeneficiaries"
                     :errors="fieldErrors" />
                 </Field>
                 <FieldArray
@@ -356,6 +365,8 @@
                     :add-label="t('add-subscription-type')"
                     :empty-list-error="t('empty-product-group-subscription-types-list-error')"
                     :errors="formErrors[`productGroupSubscriptionTypes[${slotProps.idx}].types`]"
+                    :cant-delete="haveAnyBeneficiaries"
+                    :cant-add="haveAnyBeneficiaries"
                     @addField="() => pushChild({ amount: '', type: '' })"
                     @removeField="(idx) => removeChild(idx)">
                     <template #default="slotPropsType">
@@ -364,6 +375,7 @@
                         :name="`productGroupSubscriptionTypes[${slotProps.idx}].types[${slotPropsType.idx}].type`">
                         <PfFormInputSelect
                           :id="`productGroupSubscriptionTypes[${slotProps.idx}].types[${slotPropsType.idx}].type`"
+                          :disabled="haveAnyBeneficiaries"
                           class="grow"
                           v-bind="inputField"
                           :label="t('subscription-type-category')"
@@ -376,6 +388,7 @@
                         :name="`productGroupSubscriptionTypes[${slotProps.idx}].types[${slotPropsType.idx}].amount`">
                         <PfFormInputText
                           :id="`productGroupSubscriptionTypes[${slotProps.idx}].types[${slotPropsType.idx}].amount`"
+                          :disabled="haveAnyBeneficiaries"
                           v-bind="inputField"
                           :label="t('subscription-type-amount')"
                           :errors="fieldErrors"
@@ -480,6 +493,14 @@ const props = defineProps({
   projectId: {
     type: String,
     required: true
+  },
+  haveAnyBeneficiaries: {
+    type: Boolean,
+    default: false
+  },
+  canEditFundsExpirationDate: {
+    type: Boolean,
+    default: true
   }
 });
 
@@ -606,7 +627,7 @@ const validationSchemas = computed(() => {
               params: {},
               message: t("subscription-funds-expiration-date-error"),
               test: function (value, form) {
-                return new Date(value) > new Date(form.parent.endDate);
+                return new Date(value) > new Date(form.parent.endDate) && new Date(value) > new Date();
               }
             })
             .required();
