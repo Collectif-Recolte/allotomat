@@ -16,18 +16,36 @@
 </i18n>
 
 <template>
-  <Form v-slot="{ isSubmitting, errors: formErrors }" :validation-schema="validationSchema || baseValidationSchema"
-    :initial-values="initialValues" @submit="onSubmit">
-    <PfForm has-footer can-cancel :disable-submit="Object.keys(formErrors).length > 0" :submit-label="props.submitBtn"
-      :cancel-label="t('cancel')" :processing="isSubmitting" @cancel="closeModal">
+  <Form
+    v-slot="{ isSubmitting, errors: formErrors }"
+    :validation-schema="validationSchema || baseValidationSchema"
+    :initial-values="initialValues"
+    @submit="onSubmit">
+    <PfForm
+      has-footer
+      can-cancel
+      :disable-submit="Object.keys(formErrors).length > 0"
+      :submit-label="props.submitBtn"
+      :cancel-label="t('cancel')"
+      :processing="isSubmitting"
+      @cancel="closeModal">
       <PfFormSection>
         <Field v-slot="{ field, errors: fieldErrors }" name="marketName">
-          <PfFormInputText id="marketName" v-bind="field" :label="t('market-name')"
-            :placeholder="t('market-name-placeholder')" :errors="fieldErrors" />
+          <PfFormInputText
+            id="marketName"
+            v-bind="field"
+            :label="t('market-name')"
+            :placeholder="t('market-name-placeholder')"
+            :errors="fieldErrors" />
         </Field>
         <Field v-if="isInProject" v-slot="{ field, errors: fieldErrors }" name="marketGroup">
-          <PfFormInputSelect id="marketGroup" v-bind="field" :label="t('selected-market-group')"
-            :options="marketGroupOptions" :errors="fieldErrors" :disabled="isUserMarketGroupManager" />
+          <PfFormInputSelect
+            id="marketGroup"
+            v-bind="field"
+            :label="t('selected-market-group')"
+            :options="marketGroupOptions"
+            :errors="fieldErrors"
+            :disabled="isUserMarketGroupManager" />
         </Field>
       </PfFormSection>
       <slot></slot>

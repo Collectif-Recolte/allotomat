@@ -190,6 +190,9 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<IEnumerable<ITransactionGraphType>> LoadMarketTransactions(long marketId) =>
             LoadCollection<GetMarketTransactions.Query, ITransactionGraphType, long>(marketId);
 
+        public IDataLoaderResult<IEnumerable<ITransactionGraphType>> LoadMarketGroupTransactions(long marketGroupId) =>
+            LoadCollection<GetMarketGroupTransactions.Query, ITransactionGraphType, long>(marketGroupId);
+
         public IDataLoaderResult<IEnumerable<ProductGroupGraphType>> LoadProjectProductGroups(long projectId) =>
             LoadCollection<GetProductGroupsByProjectId.Query, ProductGroupGraphType, long>(projectId);
 

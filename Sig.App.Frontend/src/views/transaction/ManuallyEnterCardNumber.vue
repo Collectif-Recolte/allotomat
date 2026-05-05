@@ -54,7 +54,10 @@
       can-cancel
       @cancel="closeModal">
       <PfFormSection>
-        <Field v-slot="{ field: inputField, errors: fieldErrors }" name="marketId">
+        <Field
+          v-if="userType !== USER_TYPE_MARKETGROUPMANAGER"
+          v-slot="{ field: inputField, errors: fieldErrors }"
+          name="marketId">
           <PfFormInputSelect
             id="marketId"
             v-bind="inputField"
@@ -62,13 +65,17 @@
             :label="t('select-market')"
             :options="markets"
             :errors="fieldErrors"
-            @input="onMarketSelected" />
+            @input="(val) => onMarketSelected(val, setFieldValue)" />
         </Field>
         <Field v-slot="{ field: inputField, errors: fieldErrors }" name="cashRegisterId">
           <PfFormInputSelect
             id="cashRegisterId"
             v-bind="inputField"
-            :disabled="!selectedMarket"
+            :disabled="
+              (userType !== USER_TYPE_MARKETGROUPMANAGER && !selectedMarket) ||
+              !!singleMarketGroupCashRegister ||
+              !!singleCashRegisterForMarket
+            "
             :placeholder="t('choose-cash-register')"
             :label="t('select-cash-register')"
             :options="cashRegisters"
@@ -108,8 +115,10 @@ import { computed, defineEmits, ref, defineProps } from "vue";
 import { useI18n } from "vue-i18n";
 import { string, object } from "yup";
 import { useQuery, useResult, useApolloClient } from "@vue/apollo-composable";
+import { storeToRefs } from "pinia";
 
-import { TRANSACTION_STEPS_ADD } from "@/lib/consts/enums";
+import { useAuthStore } from "@/lib/store/auth";
+import { TRANSACTION_STEPS_ADD, USER_TYPE_MARKETGROUPMANAGER } from "@/lib/consts/enums";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 
@@ -122,9 +131,12 @@ const props = defineProps({
   }
 });
 
+const { userType } = storeToRefs(useAuthStore());
+
 const initialValues = computed(() => {
   return {
-    cardNumber: props.cardNumber
+    cardNumber: props.cardNumber,
+    cashRegisterId: singleMarketGroupCashRegister.value ?? ""
   };
 });
 
@@ -140,30 +152,39 @@ const { addError } = useNotificationsStore();
 
 const emit = defineEmits(["onUpdateStep", "onCloseModal"]);
 
-const validationSchema = computed(() =>
-  object({
+const validationSchema = computed(() => {
+  const cardNumberValidator = string()
+    .label(t("card-number"))
+    .test({
+      name: "tomatCardNumber",
+      exclusive: false,
+      params: {},
+      message: t("card-number-error"),
+      test: function (value) {
+        if (value === undefined) {
+          return false;
+        }
+        value = value.replaceAll("-", "");
+        value = value.replaceAll(" ", "");
+        var regex = /\b^\d{16}$\b/;
+        return regex.test(value);
+      }
+    })
+    .required();
+
+  if (userType.value === USER_TYPE_MARKETGROUPMANAGER) {
+    return object({
+      cashRegisterId: string().label(t("select-cash-register")).required(),
+      cardNumber: cardNumberValidator
+    });
+  }
+
+  return object({
     marketId: string().label(t("select-market")).required(),
     cashRegisterId: string().label(t("select-cash-register")).required(),
-    cardNumber: string()
-      .label(t("card-number"))
-      .test({
-        name: "tomatCardNumber",
-        exclusive: false,
-        params: {},
-        message: t("card-number-error"),
-        test: function (value) {
-          if (value === undefined) {
-            return false;
-          }
-          value = value.replaceAll("-", "");
-          value = value.replaceAll(" ", "");
-          var regex = /\b^\d{16}$\b/;
-          return regex.test(value);
-        }
-      })
-      .required()
-  })
-);
+    cardNumber: cardNumberValidator
+  });
+});
 
 const { result: resultProjects } = useQuery(
   gql`
@@ -198,7 +219,7 @@ const markets = useResult(resultProjects, null, (data) => {
 const project = useResult(resultProjects, null, (data) => {
   return data.projects[0];
 });
-const cashRegisters = useResult(resultProjects, null, (data) => {
+const projectCashRegisters = useResult(resultProjects, null, (data) => {
   return data.projects[0].markets
     .find((x) => x.id === selectedMarket.value)
     .cashRegisters.filter((x) => !x.isArchived)
@@ -209,6 +230,45 @@ const cashRegisters = useResult(resultProjects, null, (data) => {
       };
     })
     .sort((a, b) => a.label.localeCompare(b.label));
+});
+
+const { result: resultMarketGroups } = useQuery(
+  gql`
+    query MarketGroups {
+      marketGroups {
+        id
+        cashRegisters {
+          id
+          name
+          market {
+            id
+          }
+        }
+      }
+    }
+  `,
+  null,
+  { enabled: computed(() => userType.value === USER_TYPE_MARKETGROUPMANAGER) }
+);
+const marketGroupCashRegisters = useResult(resultMarketGroups, null, (data) => {
+  return data.marketGroups
+    .flatMap((mg) => mg.cashRegisters)
+    .map((cr) => ({ label: cr.name, value: cr.id }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+});
+
+const singleMarketGroupCashRegister = computed(() => {
+  if (userType.value !== USER_TYPE_MARKETGROUPMANAGER) return null;
+  const list = marketGroupCashRegisters.value;
+  return list && list.length === 1 ? list[0].value : null;
+});
+const cashRegisterMarketMap = useResult(resultMarketGroups, {}, (data) => {
+  return Object.fromEntries(data.marketGroups.flatMap((mg) => mg.cashRegisters.map((cr) => [cr.id, cr.market.id])));
+});
+
+const cashRegisters = computed(() => {
+  if (userType.value === USER_TYPE_MARKETGROUPMANAGER) return marketGroupCashRegisters.value;
+  return projectCashRegisters.value;
 });
 
 async function checkQRCode(cardId, callback) {
@@ -258,20 +318,40 @@ async function nextStep(values) {
 
   const card = result.data.cardByNumber;
 
-  if (card === null || card.project.id !== project.value.id) {
+  if (card === null) {
     addError(t("card-number-invalid"));
-  } else {
-    emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
-      marketId: values.marketId,
-      cashRegisterId: values.cashRegisterId,
-      cardNumber: values.cardNumber,
-      cardId: card.id
-    });
+    return;
   }
+
+  if (userType.value !== USER_TYPE_MARKETGROUPMANAGER && card.project.id !== project.value.id) {
+    addError(t("card-number-invalid"));
+    return;
+  }
+
+  const marketId =
+    userType.value === USER_TYPE_MARKETGROUPMANAGER ? cashRegisterMarketMap.value[values.cashRegisterId] : values.marketId;
+
+  emit("onUpdateStep", TRANSACTION_STEPS_ADD, {
+    marketId,
+    cashRegisterId: values.cashRegisterId,
+    cardNumber: values.cardNumber,
+    cardId: card.id
+  });
 }
 
-function onMarketSelected(e) {
+const singleCashRegisterForMarket = computed(() => {
+  if (!selectedMarket.value || !resultProjects.value) return null;
+  const crs =
+    resultProjects.value.projects[0].markets
+      .find((x) => x.id === selectedMarket.value)
+      ?.cashRegisters.filter((x) => !x.isArchived) ?? [];
+  return crs.length === 1 ? crs[0].id : null;
+});
+
+function onMarketSelected(e, setFieldValue) {
   selectedMarket.value = e;
+  const crs = resultProjects.value.projects[0].markets.find((x) => x.id === e)?.cashRegisters.filter((x) => !x.isArchived) ?? [];
+  setFieldValue("cashRegisterId", crs.length === 1 ? crs[0].id : "");
 }
 
 function closeModal() {

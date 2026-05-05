@@ -1,6 +1,8 @@
 ﻿using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using MediatR;
+using NodaTime.Extensions;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
@@ -86,6 +88,53 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             {
                 return new MarketGraphType(x);
             });
+        }
+
+        [Description("The list of transactions for this market-group by date and cash-register.")]
+        public async Task<IEnumerable<ITransactionGraphType>> Transactions(DateTime startDate, DateTime endDate, Id[] cashRegisters, IAppUserContext ctx)
+        {
+            if (startDate > endDate)
+            {
+                return new List<ITransactionGraphType>();
+            }
+
+            var transactions = await ctx.DataLoader.LoadMarketGroupTransactions(Id.LongIdentifierForType<MarketGroup>()).GetResultAsync();
+
+            var startInstant = startDate.ToInstant();
+            var endInstant = endDate.ToInstant();
+
+            return transactions.Where(x => IsTransactionBetweenDate(x, startInstant, endInstant) && IsTransactionInCashRegister(x, cashRegisters));
+        }
+
+        private bool IsTransactionBetweenDate(ITransactionGraphType x, NodaTime.Instant startInstant, NodaTime.Instant endInstant)
+        {
+            var createdAtInstant = x.CreatedAt().ToInstant();
+
+            return startInstant <= createdAtInstant && createdAtInstant < endInstant;
+        }
+
+        private bool IsTransactionInCashRegister(ITransactionGraphType x, Id[] cashRegisters)
+        {
+            if (cashRegisters.Length > 0)
+            {
+                var cashRegisterIds = cashRegisters.Select(x => x.LongIdentifierForType<CashRegister>());
+                if (x is RefundTransactionGraphType rtgt)
+                {
+                    if (cashRegisterIds.Any(id => id == rtgt.CashRegisterId))
+                    {
+                        return true;
+                    }
+                }
+                if (x is PaymentTransactionGraphType ptgt)
+                {
+                    if (cashRegisterIds.Any(id => id == ptgt.CashRegisterId))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return true;
         }
     }
 }

@@ -18,7 +18,8 @@ import {
   GLOBAL_REFUND_TRANSACTION,
   GLOBAL_MANAGE_MARKET_GROUPS,
   GLOBAL_MANAGE_SPECIFIC_MARKET,
-  GLOBAL_MANAGE_MARKETGROUP_MANAGERS
+  GLOBAL_MANAGE_MARKETGROUP_MANAGERS,
+  GLOBAL_MANAGE_SPECIFIC_MARKET_GROUP
 } from "@/lib/consts/permissions";
 
 import { useAuthStore } from "@/lib/store/auth";
@@ -1178,6 +1179,32 @@ export default [
         component: () => import("@/views/transaction/Refund.vue"),
         meta: {
           claim: GLOBAL_CREATE_TRANSACTION
+        }
+      }
+    ]
+  },
+  {
+    name: urls.URL_MARKETGROUP_TRANSACTION_LIST,
+    path: "/market-group-transactions",
+    component: () => import("@/views/transaction/MarketGroupListTransaction.vue"),
+    meta: {
+      claim: GLOBAL_MANAGE_SPECIFIC_MARKET_GROUP
+    },
+    children: [
+      {
+        name: urls.URL_TRANSACTION_REFUND,
+        path: ":transactionId/refund",
+        component: () => import("@/views/transaction/Refund.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SPECIFIC_MARKET_GROUP
+        }
+      },
+      {
+        name: urls.URL_MARKETGROUP_TRANSACTION_ADD,
+        path: "add",
+        component: () => import("@/views/transaction/AddTransaction.vue"),
+        meta: {
+          claim: GLOBAL_MANAGE_SPECIFIC_MARKET_GROUP
         }
       }
     ]

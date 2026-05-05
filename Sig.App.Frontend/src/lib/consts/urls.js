@@ -70,6 +70,8 @@ export const URL_MARKET_GROUP_MANAGE_MANAGERS = "market-group-manage-managers-ur
 export const URL_MARKET_GROUP_MANAGE_MERCHANTS = "market-group-manage-merchants-url";
 export const URL_REMOVE_MERCHANTS_FROM_MARKET_GROUP = "market-group-remove-market-url";
 export const URL_ADD_MERCHANTS_FROM_MARKET_GROUP = "market-group-add-market-url";
+export const URL_MARKETGROUP_TRANSACTION_LIST = "market-group-transaction-list-url";
+export const URL_MARKETGROUP_TRANSACTION_ADD = "market-group-transaction-add-url";
 
 export const URL_MARKETGROUP_MANAGER_ADMIN = "marketgroup-manager-list-url";
 
