@@ -180,21 +180,23 @@
         </BeneficiaryTable>
         <div
           class="sticky bottom-4 relative flex justify-end w-full before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-white/70 before:blur-lg before:rounded-full">
-          <PfButtonAction v-if="displayLoadMoreBeneficiaries" tag="routerLink" btn-style="primary"
-            class="rounded-full absolute left-1/2 -translate-x-1/2" @click="onFetchMoreBeneficiaries">
-            <span class="inline-flex items-center">
-              {{ t("load-more-beneficiaries") }}
-            </span>
-          </PfButtonAction>
-          <PfButtonAction tag="routerLink" btn-style="secondary" class="rounded-full"
-            :disabled="isConfirmButtonDisabled" @click="onConfirmSubscription">
-            <span class="inline-flex items-center">
-              {{ t("assign-subscription-btn") }}
-              <span
-                class="bg-primary-700 w-6 h-6 flex items-center justify-center rounded-full text-p3 leading-none ml-2 -mr-2">{{
-                selectedBeneficiaries.length }}</span>
-            </span>
-          </PfButtonAction>
+          <div class="flex flex-col w-full gap-3">
+            <PfButtonAction tag="routerLink" btn-style="secondary" class="rounded-full self-end"
+              :disabled="isConfirmButtonDisabled" @click="onConfirmSubscription">
+              <span class="inline-flex items-center">
+                {{ t("assign-subscription-btn") }}
+                <span
+                  class="bg-primary-700 w-6 h-6 flex items-center justify-center rounded-full text-p3 leading-none ml-2 -mr-2">{{
+                  selectedBeneficiaries.length }}</span>
+              </span>
+            </PfButtonAction>
+            <PfButtonAction v-if="displayLoadMoreBeneficiaries" tag="routerLink" btn-style="primary"
+              class="rounded-full self-center" @click="onFetchMoreBeneficiaries">
+              <span class="inline-flex items-center">
+                {{ t("load-more-beneficiaries") }}
+              </span>
+            </PfButtonAction>
+          </div>
         </div>
       </div>
 
@@ -501,7 +503,7 @@ const {
           withoutSubscription: $withoutSubscription
           withoutSpecificSubscriptions: $withoutSpecificSubscriptions
           status: $status
-          limit: 500
+          limit: 100
           searchText: $searchText
           withCard: $withCard
           withConflictPayment: $withConflictPayment
