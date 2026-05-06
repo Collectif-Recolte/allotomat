@@ -53,7 +53,7 @@
 
     <div
       v-if="slots.floatingActions"
-      class="absolute bottom-0 right-0 before:block before:absolute before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
+      class="absolute bottom-0 right-0 before:block before:absolute before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-white/70 before:blur-lg before:rounded-full">
       <slot name="floatingActions"></slot>
     </div>
   </div>
