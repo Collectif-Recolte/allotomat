@@ -84,7 +84,7 @@
           <UiCta :img-src="require('@/assets/img/cards.jpg')" :description="t('empty-list')" />
         </UiEmptyPage>
         <div
-          class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
+          class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-white/70 before:blur-lg before:rounded-full">
           <PfButtonLink
             tag="routerLink"
             :to="{ name: URL_MARKETGROUP_TRANSACTION_ADD }"

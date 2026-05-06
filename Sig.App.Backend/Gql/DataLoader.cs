@@ -1,6 +1,7 @@
 ﻿using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using MediatR;
+using NodaTime;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Transactions;
@@ -187,11 +188,19 @@ namespace Sig.App.Backend.Gql
         public IDataLoaderResult<IEnumerable<BudgetAllowanceGraphType>> LoadSubscriptionBudgetAllowance(long subscriptionId) =>
             LoadCollection<GetBudgetAllowanceBySubscriptionId.Query, BudgetAllowanceGraphType, long>(subscriptionId);
 
-        public IDataLoaderResult<IEnumerable<ITransactionGraphType>> LoadMarketTransactions(long marketId) =>
-            LoadCollection<GetMarketTransactions.Query, ITransactionGraphType, long>(marketId);
+        public IDataLoaderResult<IEnumerable<ITransactionGraphType>> LoadMarketTransactions(long marketId, Instant startInstant, Instant endInstant, long[] cashRegisterIds)
+        {
+            var filter = new TransactionFilter(startInstant, endInstant, cashRegisterIds);
+            return LoadCollection<GetMarketTransactions.Query, ITransactionGraphType, TransactionFilter, long>(
+                filter, marketId, f => $"{f.StartDate}:{f.EndDate}:{string.Join(",", f.CashRegisterIds.OrderBy(x => x))}");
+        }
 
-        public IDataLoaderResult<IEnumerable<ITransactionGraphType>> LoadMarketGroupTransactions(long marketGroupId) =>
-            LoadCollection<GetMarketGroupTransactions.Query, ITransactionGraphType, long>(marketGroupId);
+        public IDataLoaderResult<IEnumerable<ITransactionGraphType>> LoadMarketGroupTransactions(long marketGroupId, Instant startInstant, Instant endInstant, long[] cashRegisterIds)
+        {
+            var filter = new TransactionFilter(startInstant, endInstant, cashRegisterIds);
+            return LoadCollection<GetMarketGroupTransactions.Query, ITransactionGraphType, TransactionFilter, long>(
+                filter, marketGroupId, f => $"{f.StartDate}:{f.EndDate}:{string.Join(",", f.CashRegisterIds.OrderBy(x => x))}");
+        }
 
         public IDataLoaderResult<IEnumerable<ProductGroupGraphType>> LoadProjectProductGroups(long projectId) =>
             LoadCollection<GetProductGroupsByProjectId.Query, ProductGroupGraphType, long>(projectId);

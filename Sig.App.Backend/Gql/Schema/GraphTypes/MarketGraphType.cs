@@ -2,6 +2,7 @@
 using GraphQL.DataLoader;
 using MediatR;
 using NodaTime.Extensions;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Interfaces;
@@ -56,11 +57,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
                 return new List<ITransactionGraphType>();
             }
 
-            var transactions = await ctx.DataLoader.LoadMarketTransactions(Id.LongIdentifierForType<Market>()).GetResultAsync();
-
             var startInstant = startDate.ToInstant();
             var endInstant = endDate.ToInstant();
-            return transactions.Where(x => TransactionGraphTypeHelper.IsTransactionBetweenDate(x, startInstant, endInstant) && TransactionGraphTypeHelper.IsTransactionInCashRegister(x, cashRegisters));
+            var cashRegisterIds = cashRegisters.Select(cr => cr.LongIdentifierForType<CashRegister>()).ToArray();
+
+            return await ctx.DataLoader.LoadMarketTransactions(Id.LongIdentifierForType<Market>(), startInstant, endInstant, cashRegisterIds).GetResultAsync();
         }
 
         [Description("The list of cash-register for this market.")]

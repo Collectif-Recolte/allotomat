@@ -10,7 +10,10 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
 {
     public class GetMarketGroupTransactions : BatchCollectionQuery<GetMarketGroupTransactions.Query, long, ITransactionGraphType>
     {
-        public class Query : BaseQuery {}
+        public class Query : BaseQuery, IHaveGroup<TransactionFilter>
+        {
+            public TransactionFilter Group { get; set; }
+        }
 
         private readonly AppDbContext db;
 
@@ -21,22 +24,31 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
 
         public override async Task<ILookup<long, ITransactionGraphType>> Handle(Query request, CancellationToken cancellationToken)
         {
+            var startUtc = request.Group.StartDate.ToDateTimeUtc();
+            var endUtc = request.Group.EndDate.ToDateTimeUtc();
+
             var cashRegisterMarketGroups = await db.CashRegisterMarketGroups
                 .Where(x => request.Ids.Contains(x.MarketGroupId))
                 .ToListAsync(cancellationToken);
 
-            var cashRegisterIds = cashRegisterMarketGroups.Select(x => x.CashRegisterId).Distinct().ToList();
+            var allCashRegisterIds = cashRegisterMarketGroups.Select(x => x.CashRegisterId).Distinct().ToList();
+            var cashRegisterIds = request.Group.CashRegisterIds.Length > 0
+                ? allCashRegisterIds.Intersect(request.Group.CashRegisterIds).ToList()
+                : allCashRegisterIds;
 
             var paymentTransactions = await db.Transactions.OfType<PaymentTransaction>()
-                .Where(c => c.CashRegisterId.HasValue && cashRegisterIds.Contains(c.CashRegisterId.Value))
+                .Where(c => c.CashRegisterId.HasValue && cashRegisterIds.Contains(c.CashRegisterId.Value)
+                         && c.CreatedAtUtc >= startUtc && c.CreatedAtUtc < endUtc)
                 .ToListAsync(cancellationToken);
 
             var refundTransactions = await db.Transactions.OfType<RefundTransaction>()
                 .Include(x => x.InitialTransaction)
-                .Where(c => c.InitialTransaction.CashRegisterId.HasValue && cashRegisterIds.Contains(c.InitialTransaction.CashRegisterId.Value))
+                .Where(c => c.InitialTransaction.CashRegisterId.HasValue && cashRegisterIds.Contains(c.InitialTransaction.CashRegisterId.Value)
+                         && c.CreatedAtUtc >= startUtc && c.CreatedAtUtc < endUtc)
                 .ToListAsync(cancellationToken);
 
             var cashRegisterToGroupIds = cashRegisterMarketGroups
+                .Where(x => cashRegisterIds.Contains(x.CashRegisterId))
                 .GroupBy(x => x.CashRegisterId)
                 .ToDictionary(g => g.Key, g => g.Select(x => x.MarketGroupId).ToList());
 

@@ -535,9 +535,9 @@ async function nextStep(values) {
     const amount = values.funds[i].amount;
     if (amount !== undefined && amount !== null && amount !== "") {
       haveAtLeastOneProductGroup = true;
+      // Convert numbers with comma as decimal separator
+      funds.value[i].amount = amount.replace(/,/, ".");
     }
-    // Convert numbers with comma as decimal separator
-    funds.value[i].amount = amount.replace(/,/, ".");
   }
 
   if (!haveAtLeastOneProductGroup) {
