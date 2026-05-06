@@ -11,7 +11,8 @@
     "current-year": "Current year",
     "last-month": "Last month",
     "all-time": "All time",
-    "reset-filters": "Reset"
+    "reset-filters": "Reset",
+    "market-groups": "Merchant Groups"
 	},
 	"fr": {
     "date-selector-from": "Intervalle du",
@@ -24,7 +25,8 @@
     "current-year": "Année en cours",
     "last-month": "Mois dernier",
     "all-time": "Toutes les dates",
-    "reset-filters": "Réinitialiser"
+    "reset-filters": "Réinitialiser",
+    "market-groups": "Groupes de commerces"
 	}
 }
 </i18n>
@@ -93,6 +95,18 @@
             :options="availableSubscriptions"
             @input="onSubscriptionsChecked" />
         </UiFilterSelect>
+        <UiFilterSelect
+          v-if="availableMarketGroups.length > 0"
+          :label="t('market-groups')"
+          :active-filters-count="marketGroupActiveFiltersCount">
+          <PfFormInputCheckboxGroup
+            id="market-groups"
+            class="mt-3"
+            is-filter
+            :value="props.modelValue.selectedMarketGroups"
+            :options="availableMarketGroups"
+            @input="onMarketGroupsChecked" />
+        </UiFilterSelect>
       </div>
     </div>
   </div>
@@ -117,7 +131,8 @@ const props = defineProps({
         dateFrom: undefined,
         dateTo: undefined,
         selectedOrganizations: [],
-        selectedSubscriptions: []
+        selectedSubscriptions: [],
+        selectedMarketGroups: []
       };
     }
   },
@@ -132,7 +147,17 @@ const props = defineProps({
     default() {
       return [];
     }
+  },
+  availableMarketGroups: {
+    type: Array,
+    default() {
+      return [];
+    }
   }
+});
+
+const marketGroupActiveFiltersCount = computed(() => {
+  return props.modelValue.selectedMarketGroups?.length ?? 0;
 });
 
 const organizationActiveFiltersCount = computed(() => {
@@ -141,6 +166,11 @@ const organizationActiveFiltersCount = computed(() => {
 
 const subscriptionActiveFiltersCount = computed(() => {
   return props.modelValue.selectedSubscriptions?.length ?? 0;
+});
+
+const availableMarketGroups = computed(() => {
+  if (!props.availableMarketGroups || props.availableMarketGroups?.length <= 0) return [];
+  return props.availableMarketGroups.map((x) => ({ value: x.id, label: x.name }));
 });
 
 const availableOrganizations = computed(() => {
@@ -152,6 +182,16 @@ const availableSubscriptions = computed(() => {
   if (!props.availableSubscriptions || props.availableSubscriptions?.length <= 0) return [];
   return props.availableSubscriptions.map((x) => ({ value: x.id, label: subscriptionName(x) }));
 });
+
+function onMarketGroupsChecked(input) {
+  let newSelectedMarketGroups = [];
+  if (input.isChecked) {
+    newSelectedMarketGroups = [...props.modelValue.selectedMarketGroups, input.value];
+  } else {
+    newSelectedMarketGroups = props.modelValue.selectedMarketGroups.filter((x) => x !== input.value);
+  }
+  emit("update:modelValue", { ...props.modelValue, selectedMarketGroups: newSelectedMarketGroups });
+}
 
 function onOrganizationsChecked(input) {
   let newSelectedOrganizations = [];

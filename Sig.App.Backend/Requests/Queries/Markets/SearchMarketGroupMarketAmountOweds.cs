@@ -1,15 +1,16 @@
-﻿using System;
-using MediatR;
+﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Sig.App.Backend.DbModel;
+using Sig.App.Backend.DbModel.Entities.TransactionLogs;
+using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.Gql.Bases;
+using Sig.App.Backend.Gql.Schema.GraphTypes;
+using Sig.App.Backend.Utilities;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Sig.App.Backend.DbModel;
-using Sig.App.Backend.Utilities;
-using Sig.App.Backend.Gql.Bases;
-using Sig.App.Backend.Gql.Schema.GraphTypes;
-using Sig.App.Backend.DbModel.Entities.TransactionLogs;
-using Sig.App.Backend.DbModel.Enums;
-using Microsoft.EntityFrameworkCore;
 
 namespace Sig.App.Backend.Requests.Queries.Markets
 {
@@ -28,8 +29,13 @@ namespace Sig.App.Backend.Requests.Queries.Markets
             var cashRegistersInMarketGroup = marketGroup.CashRegisters.Select(x => x.CashRegisterId);
 
             IQueryable <TransactionLog> query = db.TransactionLogs.Where(x => x.MarketId != null && cashRegistersInMarketGroup.Contains(x.CashRegisterId.Value) && marketGroup.ProjectId == x.ProjectId && x.CreatedAtUtc >= request.StartDate && x.CreatedAtUtc <= request.EndDate);
-            var transactions = query.ToList().GroupBy(x => x.MarketId);
 
+            if (request.MarketGroups != null && request.MarketGroups.Any())
+            {
+                query = query.Where(x => request.MarketGroups.Contains(x.MarketGroupId.Value));
+            }
+
+            var transactions = query.ToList().GroupBy(x => x.MarketId);
             var markets = db.Markets.Where(x => transactions.Select(x => x.Key).Contains(x.Id)).ToList();
 
             return await MarketAmountOwedPagination.For(transactions.Select(x => {
@@ -55,6 +61,7 @@ namespace Sig.App.Backend.Requests.Queries.Markets
             public long MarketGroupId { get; set; }
             public DateTime StartDate { get; set; }
             public DateTime EndDate { get; set; }
+            public IEnumerable<long> MarketGroups { get; set; }
         }
     }
 }

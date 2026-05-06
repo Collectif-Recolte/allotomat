@@ -3,6 +3,7 @@ using GraphQL.DataLoader;
 using MediatR;
 using Sig.App.Backend.Authorization;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
+using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
@@ -244,14 +245,16 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             });
         }
 
-        public async Task<MarketAmountOwedPagination<MarketAmountOwedGraphType>> MarketsAmountOwed([Inject] IMediator mediator, int page, int limit, DateTime startDate, DateTime endDate)
+        public async Task<MarketAmountOwedPagination<MarketAmountOwedGraphType>> MarketsAmountOwed([Inject] IMediator mediator, int page, int limit, DateTime startDate, DateTime endDate,
+            [Description("If specified, only transactions with one of those market-groups are returned.")] Id[] withSpecificMarketGroups = null)
         {
             var results = await mediator.Send(new SearchProjectMarketAmountOweds.Query
             {
                 ProjectId = project.Id,
                 Page = new Page(page, limit),
                 StartDate = startDate,
-                EndDate = endDate
+                EndDate = endDate,
+                MarketGroups = withSpecificMarketGroups?.Select(y => y.LongIdentifierForType<MarketGroup>()),
             });
 
             return results;

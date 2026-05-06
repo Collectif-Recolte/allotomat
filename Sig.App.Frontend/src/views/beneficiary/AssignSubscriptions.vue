@@ -51,7 +51,7 @@
       "cancel-confirmation": "Annuler",
       "submit-confirmation": "Oui, attribuer les abonnements",
       "subscription-count": "{participantCount} participant·e·s se verront attribuer l'abonnement {subscriptionName}",
-      "usage-amount": "<b>{amount}</b> seront répartis de la façon suivante :</br> {detail}",	
+      "usage-amount": "<b>{amount}</b> seront répartis de la façon suivante :</br> {detail}",
       "remaining-amount": "L'enveloppe restante sera de : <b>{amount}</b>",
       "success-assign-beneficiaries-to-subscription": "L'abonnement « {subscriptionName} » a été assigné avec succès à {assignedBeneficiariesCount} participant·e·s.",
       "load-more-beneficiaries": "Charger plus de participant·e·s",
@@ -231,28 +231,33 @@
           @beneficiarySelectedUnchecked="onSelectedBeneficiaryUnchecked">
         </BeneficiaryTable>
         <div
-          class="sticky bottom-4 ml-auto before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
-          <PfButtonAction
-            tag="routerLink"
-            btn-style="secondary"
-            class="rounded-full"
-            :disabled="isConfirmButtonDisabled"
-            @click="onConfirmSubscription">
-            <span class="inline-flex items-center">
-              {{ t("assign-subscription-btn") }}
-              <span
-                class="bg-primary-700 w-6 h-6 flex items-center justify-center rounded-full text-p3 leading-none ml-2 -mr-2"
-                >{{ selectedBeneficiaries.length }}</span
-              >
-            </span>
-          </PfButtonAction>
-        </div>
-        <div v-if="displayLoadMoreBeneficiaries" class="sticky items-center justify-center py-4 px-4 text-center sm:block sm:p-0">
-          <PfButtonAction tag="routerLink" btn-style="primary" class="rounded-full" @click="onFetchMoreBeneficiaries">
-            <span class="inline-flex items-center">
-              {{ t("load-more-beneficiaries") }}
-            </span>
-          </PfButtonAction>
+          class="sticky bottom-4 flex justify-end w-full before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
+          <div class="flex flex-col w-full gap-3">
+            <PfButtonAction
+              tag="routerLink"
+              btn-style="secondary"
+              class="rounded-full self-end"
+              :disabled="isConfirmButtonDisabled"
+              @click="onConfirmSubscription">
+              <span class="inline-flex items-center">
+                {{ t("assign-subscription-btn") }}
+                <span
+                  class="bg-primary-700 w-6 h-6 flex items-center justify-center rounded-full text-p3 leading-none ml-2 -mr-2">
+                  {{ selectedBeneficiaries.length }}
+                </span>
+              </span>
+            </PfButtonAction>
+            <PfButtonAction
+              v-if="displayLoadMoreBeneficiaries"
+              tag="routerLink"
+              btn-style="primary"
+              class="rounded-full self-center"
+              @click="onFetchMoreBeneficiaries">
+              <span class="inline-flex items-center">
+                {{ t("load-more-beneficiaries") }}
+              </span>
+            </PfButtonAction>
+          </div>
         </div>
       </div>
 
