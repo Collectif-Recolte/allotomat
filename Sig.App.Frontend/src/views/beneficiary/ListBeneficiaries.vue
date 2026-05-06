@@ -748,7 +748,7 @@ const beneficiariesPagination = computed(() => {
   return organizationBeneficiariesPagination.value;
 });
 
-let beneficiariesAreAnonymous = computed(() => {
+const beneficiariesAreAnonymous = computed(() => {
   if (userType.value !== USER_TYPE_PROJECTMANAGER) return false;
   const org = isAllGroupSelected.value
     ? organizations.value?.find((x) => x.value !== ALL_GROUP)
