@@ -179,7 +179,7 @@
           @beneficiarySelectedUnchecked="onSelectedBeneficiaryUnchecked">
         </BeneficiaryTable>
         <div
-          class="sticky bottom-4 relative flex justify-end w-full before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-gradient-radial before:bg-white/70 before:blur-lg before:rounded-full">
+          class="sticky bottom-4 relative flex justify-end w-full before:block before:absolute before:pointer-events-none before:w-[calc(100%+50px)] before:h-[calc(100%+50px)] before:-translate-y-1/2 before:right-0 before:top-1/2 before:bg-white/70 before:blur-lg before:rounded-full">
           <PfButtonAction v-if="displayLoadMoreBeneficiaries" tag="routerLink" btn-style="primary"
             class="rounded-full absolute left-1/2 -translate-x-1/2" @click="onFetchMoreBeneficiaries">
             <span class="inline-flex items-center">
