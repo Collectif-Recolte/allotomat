@@ -66,13 +66,8 @@
           <div class="flex items-center gap-x-4">
             <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-organization") }}</span>
             <div class="flex flex-col gap-y-2">
-              <PfFormInputSelect
-                id="selectedOrganization"
-                has-hidden-label
-                :label="t('selected-organization')"
-                :value="selectedOrganization"
-                :options="organizations"
-                col-span-class="sm:col-span-3"
+              <PfFormInputSelect id="selectedOrganization" has-hidden-label :label="t('selected-organization')"
+                :value="selectedOrganization" :options="organizations" col-span-class="sm:col-span-3"
                 @input="onOrganizationSelected" />
               <p v-if="isAllGroupSelected" class="text-sm text-red-500">{{ t("selected-all-group-description") }}</p>
             </div>
@@ -80,45 +75,18 @@
         </template>
         <template v-if="organizations" #subpagesCta>
           <div class="flex flex-right gap-x-4 gap-y-3 justify-end">
-            <PfButtonLink
-              v-if="!beneficiariesAreAnonymous"
-              :label="t('add-beneficiary')"
-              tag="routerLink"
-              :to="{ name: URL_BENEFICIARY_ADD }"
-              :icon="ICON_PLUS"
-              :is-disabled="isAllGroupSelected"
-              has-icon-left />
-            <PfButtonLink
-              v-if="!beneficiariesAreAnonymous"
-              :label="t('import-beneficiaries-list')"
-              tag="routerLink"
-              :to="importBeneficiariesListRoute"
-              :icon="ICON_UPLOAD"
-              :is-disabled="isAllGroupSelected"
-              has-icon-left />
-            <PfButtonAction
-              btn-style="outline"
-              :label="t('export-beneficiaries-list')"
-              :icon="ICON_DOWNLOAD"
-              has-icon-left
-              @click="onExportReport" />
+            <PfButtonLink v-if="!beneficiariesAreAnonymous" :label="t('add-beneficiary')" tag="routerLink"
+              :to="{ name: URL_BENEFICIARY_ADD }" :icon="ICON_PLUS" :is-disabled="isAllGroupSelected" has-icon-left />
+            <PfButtonLink v-if="!beneficiariesAreAnonymous" :label="t('import-beneficiaries-list')" tag="routerLink"
+              :to="importBeneficiariesListRoute" :icon="ICON_UPLOAD" :is-disabled="isAllGroupSelected" has-icon-left />
+            <PfButtonAction btn-style="outline" :label="t('export-beneficiaries-list')" :icon="ICON_DOWNLOAD"
+              has-icon-left @click="onExportReport" />
             <template v-if="!beneficiariesAreAnonymous">
-              <PfButtonLink
-                v-if="!administrationSubscriptionsOffPlatform"
-                btn-style="outline"
-                :label="t('download-template-file')"
-                href="/files/Template_Upload.xlsx"
-                file-name="Template_Upload.xlsx"
-                is-downloadable
-                :icon="ICON_TABLE"
-                has-icon-left />
-              <PfButtonAction
-                v-else
-                btn-style="outline"
-                :label="t('download-template-file')"
-                :icon="ICON_TABLE"
-                has-icon-left
-                @click="onDownloadTemplateFile" />
+              <PfButtonLink v-if="!administrationSubscriptionsOffPlatform" btn-style="outline"
+                :label="t('download-template-file')" href="/files/Template_Upload.xlsx" file-name="Template_Upload.xlsx"
+                is-downloadable :icon="ICON_TABLE" has-icon-left />
+              <PfButtonAction v-else btn-style="outline" :label="t('download-template-file')" :icon="ICON_TABLE"
+                has-icon-left @click="onDownloadTemplateFile" />
             </template>
           </div>
         </template>
@@ -127,12 +95,8 @@
         <div class="flex flex-col gap-y-4 sm:flex-row sm:gap-x-4 sm:justify-between sm:items-center pb-5">
           <div class="flex flex-wrap gap-x-4">
             <h2 class="my-0">{{ t("participant-count", { count: beneficiariesPagination.totalCount }) }}</h2>
-            <PfButtonLink
-              v-if="beneficiariesPagination.conflictPaymentCount > 0"
-              class="ml-2 text-red-500"
-              btn-style="link"
-              tag="routerLink"
-              :to="{
+            <PfButtonLink v-if="beneficiariesPagination.conflictPaymentCount > 0" class="ml-2 text-red-500"
+              btn-style="link" tag="routerLink" :to="{
                 name: URL_BENEFICIARY_ADMIN,
                 query: { paymentConflict: BENEFICIARY_WITH_PAYMENT_CONFLICT }
               }">
@@ -143,102 +107,64 @@
             </PfButtonLink>
           </div>
           <div class="lg:flex lg:items-center">
-            <BeneficiaryFilters
-              v-if="selectedOrganization !== ''"
-              v-model="searchInput"
-              :selected-beneficiary-types="beneficiaryTypes"
-              :selected-subscriptions="subscriptions"
-              :selected-status="status"
-              :selected-card-status="cardStatus"
-              :selected-payment-conflict-status="conflictPaymentStatus"
-              :selected-card-disabled="cardDisabled"
+            <BeneficiaryFilters v-if="selectedOrganization !== ''" v-model="searchInput"
+              :selected-beneficiary-types="beneficiaryTypes" :selected-subscriptions="subscriptions"
+              :selected-status="status" :selected-card-status="cardStatus"
+              :selected-payment-conflict-status="conflictPaymentStatus" :selected-card-disabled="cardDisabled"
               :search-filter="searchText"
               :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
-              :without-subscription-id="WITHOUT_SUBSCRIPTION"
-              :beneficiary-status-inactive="BENEFICIARY_STATUS_INACTIVE"
-              :beneficiary-status-active="BENEFICIARY_STATUS_ACTIVE"
-              :card-status-with="BENEFICIARY_WITH_CARD"
+              :without-subscription-id="WITHOUT_SUBSCRIPTION" :beneficiary-status-inactive="BENEFICIARY_STATUS_INACTIVE"
+              :beneficiary-status-active="BENEFICIARY_STATUS_ACTIVE" :card-status-with="BENEFICIARY_WITH_CARD"
               :card-status-without="BENEFICIARY_WITHOUT_CARD"
               :payment-conflict-status-with="BENEFICIARY_WITH_PAYMENT_CONFLICT"
               :payment-conflict-status-without="BENEFICIARY_WITHOUT_PAYMENT_CONFLICT"
-              :card-is-disabled="CARD_IS_DISABLED"
-              :card-is-enabled="CARD_IS_ENABLED"
-              :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
-              :sort-order="sortOrder"
-              :available-beneficiary-types="availableBeneficiaryTypes"
-              :available-subscriptions="availableSubscriptions"
+              :card-is-disabled="CARD_IS_DISABLED" :card-is-enabled="CARD_IS_ENABLED"
+              :beneficiaries-are-anonymous="beneficiariesAreAnonymous" :sort-order="sortOrder"
+              :available-beneficiary-types="availableBeneficiaryTypes" :available-subscriptions="availableSubscriptions"
               @beneficiaryTypesUnchecked="onBeneficiaryTypesUnchecked"
-              @beneficiaryTypesChecked="onBeneficiaryTypesChecked"
-              @subscriptionsUnchecked="onSubscriptionsUnchecked"
-              @subscriptionsChecked="onSubscriptionsChecked"
-              @statusChecked="onStatusChecked"
-              @statusUnchecked="onStatusUnchecked"
-              @cardStatusChecked="onCardStatusChecked"
+              @beneficiaryTypesChecked="onBeneficiaryTypesChecked" @subscriptionsUnchecked="onSubscriptionsUnchecked"
+              @subscriptionsChecked="onSubscriptionsChecked" @statusChecked="onStatusChecked"
+              @statusUnchecked="onStatusUnchecked" @cardStatusChecked="onCardStatusChecked"
               @cardStatusUnchecked="onCardStatusUnchecked"
               @paymentConflictStatusChecked="onPaymentConflictStatusChecked"
               @paymentConflictStatusUnchecked="onPaymentConflictStatusUnchecked"
-              @cardIsDisabledChecked="onCardDisabledChecked"
-              @cardIsDisabledUnchecked="onCardDisabledUnchecked"
-              @sortOrderChanged="onSortOrderChanged"
-              @resetFilters="onResetFilters"
-              @search="onSearch" />
+              @cardIsDisabledChecked="onCardDisabledChecked" @cardIsDisabledUnchecked="onCardDisabledUnchecked"
+              @sortOrderChanged="onSortOrderChanged" @resetFilters="onResetFilters" @search="onSearch" />
           </div>
         </div>
 
         <template v-if="selectedOrganization !== '' && beneficiariesPagination.items.length > 0">
-          <ListBeneficiariesWithDetailed
-            :product-groups="productGroups"
+          <ListBeneficiariesWithDetailed :product-groups="productGroups"
             :administration-subscriptions-off-platform="administrationSubscriptionsOffPlatform"
-            :beneficiaries-pagination="beneficiariesPagination"
-            :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
-            :filtered-query="filteredQuery"
-            :is-all-group-selected="isAllGroupSelected"
-            :organization="organization" />
-          <UiPagination
-            v-if="beneficiariesPagination.totalPages > 1"
-            v-model:page="page"
+            :beneficiaries-pagination="beneficiariesPagination" :beneficiaries-are-anonymous="beneficiariesAreAnonymous"
+            :filtered-query="filteredQuery" :is-all-group-selected="isAllGroupSelected" :organization="organization" />
+          <UiPagination v-if="beneficiariesPagination.totalPages > 1" v-model:page="page"
             :total-pages="beneficiariesPagination.totalPages">
           </UiPagination>
         </template>
 
         <UiEmptyPage v-else>
-          <UiCta
-            v-if="searchText"
-            :img-src="require('@/assets/img/swan.jpg')"
-            :description="t('no-results')"
-            :primary-btn-label="t('reset-search')"
-            primary-btn-is-action
-            @onPrimaryBtnClick="onResetSearch">
+          <UiCta v-if="searchText" :img-src="require('@/assets/img/swan.jpg')" :description="t('no-results')"
+            :primary-btn-label="t('reset-search')" primary-btn-is-action @onPrimaryBtnClick="onResetSearch">
           </UiCta>
-          <UiCta
-            v-else-if="beneficiariesAreAnonymous"
-            :img-src="require('@/assets/img/participants.jpg')"
+          <UiCta v-else-if="beneficiariesAreAnonymous" :img-src="require('@/assets/img/participants.jpg')"
             :description="t('empty-list')" />
-          <UiCta
-            v-else
-            :img-src="require('@/assets/img/participants.jpg')"
-            :description="t('empty-list')"
-            :primary-btn-icon="ICON_UPLOAD"
-            :primary-btn-label="t('import-new-list')"
+          <UiCta v-else :img-src="require('@/assets/img/participants.jpg')" :description="t('empty-list')"
+            :primary-btn-icon="ICON_UPLOAD" :primary-btn-label="t('import-new-list')"
             :primary-btn-route="importBeneficiariesListRoute">
             <template #secondaryBtn>
-              <PfButtonLink
-                v-if="!administrationSubscriptionsOffPlatform"
-                btn-style="link"
-                :label="t('download-template-file')"
-                href="/files/Template_Upload.xlsx"
+              <PfButtonLink v-if="!administrationSubscriptionsOffPlatform" btn-style="link"
+                :label="t('download-template-file')" href="/files/Template_Upload.xlsx"
                 file-name="Template_Upload.xlsx" />
-              <PfButtonAction v-else btn-style="link" :label="t('download-template-file')" @click="onDownloadTemplateFile" />
+              <PfButtonAction v-else btn-style="link" :label="t('download-template-file')"
+                @click="onDownloadTemplateFile" />
             </template>
           </UiCta>
         </UiEmptyPage>
       </div>
       <UiEmptyPage v-else-if="!loading && !projectsLoading && !organizationsLoading">
-        <UiCta
-          :img-src="require('@/assets/img/organismes.jpg')"
-          :description="t('empty-organizations-list')"
-          :primary-btn-label="t('add-organization')"
-          :primary-btn-route="addOrganizationRoute">
+        <UiCta :img-src="require('@/assets/img/organismes.jpg')" :description="t('empty-organizations-list')"
+          :primary-btn-label="t('add-organization')" :primary-btn-route="addOrganizationRoute">
         </UiCta>
       </UiEmptyPage>
       <Component :is="Component" />
@@ -823,10 +749,11 @@ const beneficiariesPagination = computed(() => {
 });
 
 let beneficiariesAreAnonymous = computed(() => {
-  return (
-    userType.value === USER_TYPE_PROJECTMANAGER &&
-    organizations.value?.find((x) => x.value === selectedOrganization.value)?.beneficiariesAreAnonymous
-  );
+  if (userType.value !== USER_TYPE_PROJECTMANAGER) return false;
+  const org = isAllGroupSelected.value
+    ? organizations.value?.find((x) => x.value !== ALL_GROUP)
+    : organizations.value?.find((x) => x.value === selectedOrganization.value);
+  return org?.beneficiariesAreAnonymous ?? false;
 });
 
 const budgetAllowancesTotal = computed(() => {
