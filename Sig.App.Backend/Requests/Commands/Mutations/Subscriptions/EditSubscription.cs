@@ -66,7 +66,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 throw new EndDateMustBeAfterStartDateException();
             }
 
-            if (request.FundsExpirationDate.IsSet() && request.FundsExpirationDate.Value < LocalDate.FromDateTime(clock.GetCurrentInstant().ToDateTimeUtc()))
+            if (request.FundsExpirationDate.IsSet() && request.FundsExpirationDate.Value < clock.GetCurrentInstant().InUtc().Date)
             {
                 logger.LogWarning("[Mutation] EditSubscription - ExpirationDateMustBeAfterTodayDateException");
                 throw new ExpirationDateMustBeAfterTodayDateException();
