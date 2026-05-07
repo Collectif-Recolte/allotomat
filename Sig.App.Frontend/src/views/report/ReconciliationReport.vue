@@ -18,7 +18,9 @@
         <Title :title="t('title')">
           <template #subpagesCta>
             <div class="text-right">
-              <ReportFilters v-model="searchInput" :available-market-groups="availableMarketGroups"
+              <ReportFilters
+                v-model="searchInput"
+                :available-market-groups="availableMarketGroups"
                 @resetFilters="onResetFilters" />
             </div>
           </template>
@@ -26,12 +28,17 @@
       </template>
       <div v-if="marketsAmountOwed">
         <div class="flex flex-col relative mb-6">
-          <MarketAmountOwedTable v-if="marketsAmountOwed.totalCount > 0" :markets="marketsAmountOwed.items"
+          <MarketAmountOwedTable
+            v-if="marketsAmountOwed.totalCount > 0"
+            :markets="marketsAmountOwed.items"
             :total="{ totalAmount: marketsAmountOwed.totalAmount }" />
           <UiEmptyPage v-else>
             <UiCta :img-src="require('@/assets/img/swan.jpg')" :description="t('no-results')"> </UiCta>
           </UiEmptyPage>
-          <UiPagination v-if="marketsAmountOwed.totalPages > 1" v-model:page="page" class="mb-6"
+          <UiPagination
+            v-if="marketsAmountOwed.totalPages > 1"
+            v-model:page="page"
+            class="mb-6"
             :total-pages="marketsAmountOwed.totalPages" />
         </div>
       </div>
@@ -255,8 +262,8 @@ const marketsAmountOwed = computed(() => {
   var marketsAmountOwed = project.value
     ? project.value.marketsAmountOwed
     : marketGroup.value
-      ? marketGroup.value.marketsAmountOwed
-      : null;
+    ? marketGroup.value.marketsAmountOwed
+    : null;
   let items = [];
   let totalCount = 0;
   let totalAmount = 0;
@@ -316,24 +323,39 @@ function onResetFilters() {
 .markets-list-vue {
   --pf-top-header-height: 170px;
   --pf-table-header-height: 67px;
-  --ui-table-height: calc(100dvh - (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem));
+  --ui-table-height: calc(
+    100dvh -
+      (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem)
+  );
 
   @media screen("xs") {
     --pf-top-header-height: 123px;
     --pf-table-header-height: 72px;
-    --ui-table-height: calc(100dvh - (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem));
+    --ui-table-height: calc(
+      100dvh -
+        (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem)
+    );
   }
 
   @media screen("sm") {
     --pf-top-header-height: 139px;
     --pf-table-header-height: 61px;
-    --ui-table-height: calc(100dvh - (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem));
+    --ui-table-height: calc(
+      100dvh -
+        (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 3rem)
+    );
   }
 
   @media screen("lg") {
     --pf-top-header-height: 244px;
     --pf-table-header-height: 66px;
-    --ui-table-height: calc(100dvh - (var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) + 2.2rem));
+    --ui-table-height: calc(
+      100dvh -
+        (
+          var(--pf-top-bar-height) + var(--pf-top-header-height) + var(--pf-table-header-height) + var(--pf-footer-height) +
+            2.2rem
+        )
+    );
   }
 }
 </style>

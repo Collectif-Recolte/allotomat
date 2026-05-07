@@ -25,10 +25,16 @@
 
 <template>
   <div class="flex justify-center h-full w-full py-8 lg:py-16">
-    <UiCta v-if="selectedCashRegisterId !== null && market !== null" class="w-full max-w-sm"
-      :img-src="require('@/assets/img/scan-marchand.jpg')" :primary-btn-label="t('start-transaction')"
-      :secondary-btn-label="t('manually-enter-card-number')" :primary-btn-disabled="market.isDisabled"
-      :secondary-btn-disabled="market.isDisabled" primary-btn-is-action secondary-btn-is-action
+    <UiCta
+      v-if="selectedCashRegisterId !== null && market !== null"
+      class="w-full max-w-sm"
+      :img-src="require('@/assets/img/scan-marchand.jpg')"
+      :primary-btn-label="t('start-transaction')"
+      :secondary-btn-label="t('manually-enter-card-number')"
+      :primary-btn-disabled="market.isDisabled"
+      :secondary-btn-disabled="market.isDisabled"
+      primary-btn-is-action
+      secondary-btn-is-action
       @onPrimaryBtnClick="emit('onUpdateStep', TRANSACTION_STEPS_SCAN, {})"
       @onSecondaryBtnClick="emit('onUpdateStep', TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER, {})">
       <div v-if="!loading" class="mb-6 text-left relative border border-primary-300 rounded-lg p-4 w-full">
@@ -36,7 +42,11 @@
           <h3 class="text-h4 font-semibold text-primary-900 mt-2 mb-2">
             <span>{{ selectedCashRegister.name }}</span>
           </h3>
-          <PfButtonAction :disabled="cashRegisters.length === 1" is-icon-only btn-style="outline" :icon="ICON_PENCIL"
+          <PfButtonAction
+            :disabled="cashRegisters.length === 1"
+            is-icon-only
+            btn-style="outline"
+            :icon="ICON_PENCIL"
             @click="editCashRegister" />
         </div>
         <ul class="mb-0">
@@ -58,15 +68,18 @@
             <PfForm has-footer :disable-submit="Object.keys(formErrors).length > 0">
               <PfFormSection>
                 <Field v-slot="{ field, errors: fieldErrors }" name="selectedCashRegister">
-                  <PfFormInputSelect id="selectedCashRegister" v-bind="field" :label="t('cash-register-input')"
-                    :options="cashRegisterOptions" :errors="fieldErrors" />
+                  <PfFormInputSelect
+                    id="selectedCashRegister"
+                    v-bind="field"
+                    :label="t('cash-register-input')"
+                    :options="cashRegisterOptions"
+                    :errors="fieldErrors" />
                 </Field>
               </PfFormSection>
               <template #footer>
                 <div class="pt-5">
                   <div class="flex w-full justify-end">
-                    <PfButtonAction class="px-8" btn-style="secondary" :label="t('select-cash-register')"
-                      type="submit" />
+                    <PfButtonAction class="px-8" btn-style="secondary" :label="t('select-cash-register')" type="submit" />
                   </div>
                 </div>
               </template>

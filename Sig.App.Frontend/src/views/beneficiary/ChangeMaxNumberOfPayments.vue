@@ -30,22 +30,39 @@
 </i18n>
 
 <template>
-  <UiDialogModal v-if="!loading" v-slot="{ closeModal }" :title="t('title')" :has-footer="false"
+  <UiDialogModal
+    v-if="!loading"
+    v-slot="{ closeModal }"
+    :title="t('title')"
+    :has-footer="false"
     :return-route="{ name: URL_BENEFICIARY_ADMIN }">
-    <Form v-slot="{ isSubmitting, errors: formErrors, setFieldValue }" :validation-schema="validationSchema"
-      @submit="onSubmit">
-      <PfForm has-footer can-cancel
+    <Form v-slot="{ isSubmitting, errors: formErrors, setFieldValue }" :validation-schema="validationSchema" @submit="onSubmit">
+      <PfForm
+        has-footer
+        can-cancel
         :disable-submit="Object.keys(formErrors).length > 0 || budgetAllowanceAvailableAfterChange < 0"
-        :submit-label="t('submit')" :cancel-label="t('cancel')" :processing="isSubmitting" @cancel="closeModal">
+        :submit-label="t('submit')"
+        :cancel-label="t('cancel')"
+        :processing="isSubmitting"
+        @cancel="closeModal">
         <PfFormSection>
           <Field v-slot="{ field, errors: fieldErrors }" name="subscription">
-            <PfFormInputSelect id="subscription" v-bind="field" :label="t('select-subscription-label')"
-              :options="subscriptionOptions" :errors="fieldErrors"
+            <PfFormInputSelect
+              id="subscription"
+              v-bind="field"
+              :label="t('select-subscription-label')"
+              :options="subscriptionOptions"
+              :errors="fieldErrors"
               @input="(e) => onSubscriptionSelected(e, setFieldValue)" />
           </Field>
           <Field v-slot="{ field, errors: fieldErrors }" name="maxNumberOfPayments">
-            <PfFormInputText id="maxNumberOfPayments" v-bind="field" input-type="number"
-              :label="t('max-number-of-payments-label')" :disabled="selectedSubscription === ''" :errors="fieldErrors"
+            <PfFormInputText
+              id="maxNumberOfPayments"
+              v-bind="field"
+              input-type="number"
+              :label="t('max-number-of-payments-label')"
+              :disabled="selectedSubscription === ''"
+              :errors="fieldErrors"
               @input="onMaxPaymentsInput" />
           </Field>
           <div v-if="selectedSubscription !== ''">
@@ -149,10 +166,10 @@ const beneficiary = useResult(resultBeneficiary, null, (data) => data.beneficiar
 const subscriptionOptions = useResult(resultBeneficiary, [], (data) => {
   return data.beneficiary.beneficiarySubscriptions
     .filter((x) => {
-        const now = new Date();
-        const endDate = new Date(x.subscription.endDate);
-        return x.subscription.isSubscriptionPaymentBasedCardUsage && !x.subscription.isArchived && endDate >= now;
-      })
+      const now = new Date();
+      const endDate = new Date(x.subscription.endDate);
+      return x.subscription.isSubscriptionPaymentBasedCardUsage && !x.subscription.isArchived && endDate >= now;
+    })
     .map((x) => ({
       label: subscriptionName(x.subscription),
       value: x.subscription.id,

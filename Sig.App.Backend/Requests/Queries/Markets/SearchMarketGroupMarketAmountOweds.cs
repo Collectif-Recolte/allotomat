@@ -32,7 +32,7 @@ namespace Sig.App.Backend.Requests.Queries.Markets
 
             if (request.MarketGroups != null && request.MarketGroups.Any())
             {
-                query = query.Where(x => request.MarketGroups.Contains(x.MarketGroupId.Value));
+                query = query.Where(x => x.MarketGroupId.HasValue && request.MarketGroups.Contains(x.MarketGroupId.Value));
             }
 
             var transactions = query.ToList().GroupBy(x => x.MarketId);
