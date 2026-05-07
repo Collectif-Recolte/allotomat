@@ -12,13 +12,13 @@
     "first-and-fifteenth-day-of-the-month": "The first and 15th day of the month",
 		"monthly-payment-moment": "Automated payment schedule",
 		"subscription-end-date": "End of payment period",
-		"subscription-end-date-error": "The “End date” field must be greater than the “Start date” field",
+		"subscription-end-date-error": "The 'End date' field must be greater than the \"Start date\" field",
 		"subscription-name": "Name",
     "subscription-name-desc": "<p>These settings will determine the dates on which funds will be automatically added onto cards. (In later steps, you will define expiration dates and the amounts the cards will receive.) Note that subscriptions <b>cannot be modified</b> once they have been assigned to participants!</p>",
 		"subscription-name-placeholder": "Ex. Winter 2022",
 		"subscription-start-date": "Beginning of payment period",
     "subscription-funds-expiration-date": "Fund expiry date",
-    "subscription-funds-expiration-date-error": "The “Fund expiry date” field  must be later than the “End of payment period” field",
+    "subscription-funds-expiration-date-error": "The \"Fund expiry date\" field must be later than the \"End of payment period\" field and after today's date.",
     "subscription-type-amount": "Amount",
     "subscription-type-category": "Participant category",
     "subscription-funds-accumulable": "Cumulative funds",
@@ -64,13 +64,13 @@
 		"subscription-name-placeholder": "Ex. Hiver 2022",
 		"subscription-start-date": "Début période de versements",
 		"subscription-type-amount": "Montant",
-    "subscription-funds-expiration-date": "Date maximale d’expiration des fonds",
-    "subscription-funds-expiration-date-error": "Le champ «Date maximale d’expiration des fonds» doit être ultérieur à la fin de la période de versements.",
+    "subscription-funds-expiration-date": "Date maximale d'expiration des fonds",
+    "subscription-funds-expiration-date-error": "Le champ «Date maximale d'expiration des fonds» doit être ultérieur à la fin de la période de versements et à la date du jour (aujourd'hui).",
     "subscription-type-category": "Catégorie de participant·e",
     "subscription-funds-accumulable": "Fonds accumulables",
     "previous": "Précédent",
     "set-period": "Définir la période des versements",
-    "set-expiration": "Définir les dates d’expiration",
+    "set-expiration": "Définir les dates d'expiration",
     "set-amounts": "Définir les montants",
     "subscription-funds-accumulable-disabled": "Désactivé",
     "subscription-funds-accumulable-enabled": "Activé",
@@ -84,7 +84,7 @@
     "subscription-payment-based-card-usage-enabled": "Activé",
     "subscription-payment-based-card-usage-disabled": "Désactivé",
     "subscription-max-number-of-payments": "Nombre total maximum de versements",
-    "subscription-trigger-fund-expiration": "Déclencheur de l’expiration des fonds",
+    "subscription-trigger-fund-expiration": "Déclencheur de l'expiration des fonds",
     "subscription-trigger-fund-expiration-desc": "Les fonds de cet abonnement expireront au début de la date sélectionnée (00h01 heure de l'Est)",
     "subscription-trigger-fund-expiration-specific-date": "Une date spécifique",
     "subscription-trigger-fund-expiration-number-of-days": "Un nombre de jours après la première utilisation",
@@ -96,71 +96,37 @@
 </i18n>
 
 <template>
-  <Form
-    v-slot="{ isSubmitting, errors: formErrors, values, validateField, setFieldValue }"
-    :initial-values="initialValues"
-    :validation-schema="currentSchema"
-    keep-values
-    @submit="nextStep">
-    <UiStepper
-      class="mb-6"
+  <Form v-slot="{ isSubmitting, errors: formErrors, values, validateField, setFieldValue }"
+    :initial-values="initialValues" :validation-schema="currentSchema" keep-values @submit="nextStep">
+    <UiStepper class="mb-6"
       :step-label="currentStep === 0 ? t('set-period') : currentStep === 1 ? t('set-expiration') : t('set-amounts')"
-      :step-count="3"
-      :step-number="currentStep + 1" />
-    <PfForm
-      v-if="currentStep === 0"
-      has-footer
-      can-cancel
-      :disable-submit="Object.keys(formErrors).length > 0"
-      :submit-label="t('set-expiration')"
-      :cancel-label="t('cancel')"
-      :processing="isSubmitting"
-      @cancel="closeModal">
+      :step-count="3" :step-number="currentStep + 1" />
+    <PfForm v-if="currentStep === 0" has-footer can-cancel :disable-submit="Object.keys(formErrors).length > 0"
+      :submit-label="t('set-expiration')" :cancel-label="t('cancel')" :processing="isSubmitting" @cancel="closeModal">
       <PfFormSection is-grid>
         <Field v-slot="{ field, errors: fieldErrors }" name="subscriptionName">
-          <PfFormInputText
-            id="subscriptionName"
-            col-span-class="sm:col-span-12"
-            v-bind="field"
-            :label="t('subscription-name')"
-            :placeholder="t('subscription-name-placeholder')"
-            :errors="fieldErrors" />
+          <PfFormInputText id="subscriptionName" col-span-class="sm:col-span-12" v-bind="field"
+            :label="t('subscription-name')" :placeholder="t('subscription-name-placeholder')" :errors="fieldErrors" />
         </Field>
         <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
         <div class="flex sm:col-span-12" v-html="t('subscription-name-desc')"></div>
         <Field v-slot="{ field, errors: fieldErrors }" name="startDate">
-          <DatePicker
-            id="startDate"
-            v-bind="field"
-            class="sm:col-span-6"
-            :label="t('subscription-start-date')"
-            :errors="fieldErrors"
-            is-inside-modal
+          <DatePicker id="startDate" v-bind="field" class="sm:col-span-6" :disabled="haveAnyBeneficiaries"
+            :label="t('subscription-start-date')" :errors="fieldErrors" is-inside-modal
             @update:modelValue="forceValidation(values, validateField)" />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="endDate">
-          <DatePicker
-            id="endDate"
-            v-bind="field"
-            class="sm:col-span-6"
-            :label="t('subscription-end-date')"
-            :errors="fieldErrors"
-            is-inside-modal
+          <DatePicker id="endDate" v-bind="field" class="sm:col-span-6" :disabled="haveAnyBeneficiaries"
+            :label="t('subscription-end-date')" :errors="fieldErrors" is-inside-modal
             @update:modelValue="forceValidation(values, validateField)" />
         </Field>
         <div class="flex flex-col sm:col-span-12">
-          <span
-            v-if="getSubscriptionPaymentDates.length > 0"
-            class="text-sm text-grey-500 dark:text-grey-400"
-            v-html="
-              t('subscription-payment-dates-desc', {
-                count: getSubscriptionPaymentDates.length,
-                dates: getSubscriptionPaymentDates.join(', ')
-              })
+          <span v-if="getSubscriptionPaymentDates.length > 0" class="text-sm text-grey-500 dark:text-grey-400" v-html="t('subscription-payment-dates-desc', {
+            count: getSubscriptionPaymentDates.length,
+            dates: getSubscriptionPaymentDates.join(', ')
+          })
             "></span>
-          <span
-            v-else
-            class="text-sm text-grey-500 dark:text-grey-400"
+          <span v-else class="text-sm text-grey-500 dark:text-grey-400"
             v-html="t('subscription-payment-dates-desc', { count: '-', dates: '-' })"></span>
         </div>
         <Field name="isSubscriptionPaymentBasedCardUsage">
@@ -169,10 +135,8 @@
               <span class="text-sm font-medium text-grey-900 dark:text-grey-200">{{
                 t("subscription-payment-based-card-usage")
               }}</span>
-              <UiSwitch
-                id="isSubscriptionPaymentBasedCardUsage"
-                v-model="subscriptionPaymentBasedCardUsageValue"
-                class="mx-auto mr-0"
+              <UiSwitch id="isSubscriptionPaymentBasedCardUsage" v-model="subscriptionPaymentBasedCardUsageValue"
+                class="mx-auto mr-0" :disabled="haveAnyBeneficiaries"
                 @update:modelValue="(e) => updateIsSubscriptionPaymentBasedCardUsage(setFieldValue, validateField, e)">
                 <template #left>
                   <span class="mr-2 text-p3 font-semibold">{{
@@ -185,62 +149,39 @@
             </div>
             <div class="flex sm:col-span-12">
               <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
-              <span
-                v-if="!subscriptionPaymentBasedCardUsageValue"
-                class="text-sm text-grey-500 dark:text-grey-400"
+              <span v-if="!subscriptionPaymentBasedCardUsageValue" class="text-sm text-grey-500 dark:text-grey-400"
                 v-html="t('subscription-payment-based-card-usage-desc-deactivated')"></span>
-              <span
-                v-else
-                class="text-sm text-grey-500 dark:text-grey-400"
+              <span v-else class="text-sm text-grey-500 dark:text-grey-400"
                 v-html="t('subscription-payment-based-card-usage-desc-activated')"></span>
               <!-- eslint-enable vue/no-v-html @intlify/vue-i18n/no-v-html -->
             </div>
           </div>
         </Field>
         <Field v-slot="{ errors: fieldErrors }" name="monthlyPaymentMoment">
-          <PfFormInputSelect
-            id="monthlyPaymentMoment"
-            class="sm:col-span-6"
-            :value="monthlyPaymentMomentValue"
-            :label="t('monthly-payment-moment')"
-            :options="monthlyPaymentMomentOptions"
-            :errors="fieldErrors"
+          <PfFormInputSelect id="monthlyPaymentMoment" class="sm:col-span-6" :value="monthlyPaymentMomentValue"
+            :label="t('monthly-payment-moment')" :options="monthlyPaymentMomentOptions" :errors="fieldErrors"
+            :disabled="haveAnyBeneficiaries"
             @input="(e) => updateMonthlyPaymentMoment(setFieldValue, validateField, e)" />
         </Field>
         <Field v-slot="{ field, errors: fieldErrors }" name="maxNumberOfPayments">
-          <PfFormInputText
-            id="maxNumberOfPayments"
-            class="sm:col-span-6"
-            v-bind="field"
-            :label="t('subscription-max-number-of-payments')"
-            :errors="fieldErrors"
-            input-type="number"
-            min="0"
+          <PfFormInputText id="maxNumberOfPayments" class="sm:col-span-6" v-bind="field"
+            :label="t('subscription-max-number-of-payments')" :errors="fieldErrors" input-type="number" min="0"
             :disabled="!subscriptionPaymentBasedCardUsageValue">
           </PfFormInputText>
         </Field>
       </PfFormSection>
     </PfForm>
 
-    <PfForm
-      v-if="currentStep === 1"
-      has-footer
-      can-cancel
-      :disable-submit="Object.keys(formErrors).length > 0"
-      :submit-label="t('set-amounts')"
-      :cancel-label="t('previous')"
-      :processing="isSubmitting"
-      @cancel="prevStep">
+    <PfForm v-if="currentStep === 1" has-footer can-cancel :disable-submit="Object.keys(formErrors).length > 0"
+      :submit-label="t('set-amounts')" :cancel-label="t('previous')" :processing="isSubmitting" @cancel="prevStep">
       <PfFormSection is-grid>
         <Field name="isFundsAccumulable">
           <div class="flex flex-col sm:col-span-12 mb-0">
             <div class="flex flex-row">
-              <span class="text-sm font-medium text-grey-900 dark:text-grey-200">{{ t("subscription-funds-accumulable") }}</span>
-              <UiSwitch
-                id="isFundsAccumulable"
-                v-model="isFundsAccumulableValue"
-                class="mx-auto mr-0"
-                @update:modelValue="(e) => updateIsFundsAccumulable(setFieldValue, validateField)">
+              <span class="text-sm font-medium text-grey-900 dark:text-grey-200">{{ t("subscription-funds-accumulable")
+                }}</span>
+              <UiSwitch id="isFundsAccumulable" v-model="isFundsAccumulableValue" :disabled="haveAnyBeneficiaries"
+                class="mx-auto mr-0" @update:modelValue="(e) => updateIsFundsAccumulable(setFieldValue, validateField)">
                 <template #left>
                   <span class="mr-2 text-p3 font-semibold">{{
                     isFundsAccumulableValue
@@ -252,136 +193,88 @@
             </div>
             <div class="flex sm:col-span-12">
               <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
-              <span
-                v-if="!isFundsAccumulableValue"
-                class="text-sm text-grey-500 dark:text-grey-400"
+              <span v-if="!isFundsAccumulableValue" class="text-sm text-grey-500 dark:text-grey-400"
                 v-html="t('subscription-funds-accumulable-desc-deactivated')"></span>
-              <span
-                v-else
-                class="text-sm text-grey-500 dark:text-grey-400"
+              <span v-else class="text-sm text-grey-500 dark:text-grey-400"
                 v-html="t('subscription-funds-accumulable-desc-activated')"></span>
               <!-- eslint-enable vue/no-v-html @intlify/vue-i18n/no-v-html -->
             </div>
           </div>
         </Field>
         <Field name="triggerFundExpiration">
-          <PfFormInputSelect
-            id="triggerFundExpiration"
-            class="sm:col-span-12"
-            :value="triggerFundExpirationValue"
-            :label="t('subscription-trigger-fund-expiration')"
-            :options="triggerFundExpirationOptions"
-            :description="t('subscription-trigger-fund-expiration-desc')"
+          <PfFormInputSelect id="triggerFundExpiration" class="sm:col-span-12" :value="triggerFundExpirationValue"
+            :label="t('subscription-trigger-fund-expiration')" :options="triggerFundExpirationOptions"
+            :description="t('subscription-trigger-fund-expiration-desc')" :disabled="haveAnyBeneficiaries"
             @input="(e) => updateTriggerFundExpirationValue(setFieldValue, validateField, e)" />
         </Field>
         <div v-if="triggerFundExpirationValue === NUMBER_OF_DAYS" class="flex sm:col-span-12">
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <span
-            class="text-sm text-grey-500 dark:text-grey-400"
-            v-html="
-              t('subscription-trigger-fund-expiration-number-of-days-desc', {
-                numberOfDays:
-                  numberDaysUntilFundsExpire !== '' && numberDaysUntilFundsExpire !== null ? numberDaysUntilFundsExpire : '-'
-              })
+          <span class="text-sm text-grey-500 dark:text-grey-400" v-html="t('subscription-trigger-fund-expiration-number-of-days-desc', {
+            numberOfDays:
+              numberDaysUntilFundsExpire !== '' && numberDaysUntilFundsExpire !== null ? numberDaysUntilFundsExpire : '-'
+          })
             "></span>
           <!-- eslint-enable vue/no-v-html @intlify/vue-i18n/no-v-html -->
         </div>
-        <Field v-slot="{ field: inputField, errors: fieldErrors }" v-model="fundsExpirationDateValue" name="fundsExpirationDate">
-          <DatePicker
-            id="fundsExpirationDate"
-            class="sm:col-span-6"
-            v-bind="inputField"
+        <Field v-slot="{ field: inputField, errors: fieldErrors }" v-model="fundsExpirationDateValue"
+          name="fundsExpirationDate">
+          <DatePicker id="fundsExpirationDate" class="sm:col-span-6" v-bind="inputField"
             :label="t('subscription-funds-expiration-date')"
-            :errors="isFundsAccumulableValue ? fieldErrors : []"
-            :disabled="!isFundsAccumulableValue"
-            is-inside-modal
+            :errors="isFundsAccumulableValue && canEditFundsExpirationDate ? fieldErrors : []"
+            :disabled="!isFundsAccumulableValue || !canEditFundsExpirationDate" is-inside-modal
             @update:modelValue="forceValidation(values, validateField)" />
         </Field>
         <Field v-slot="{ errors: fieldErrors }" name="numberDaysUntilFundsExpire">
-          <PfFormInputText
-            id="numberDaysUntilFundsExpire"
-            class="sm:col-span-6"
-            :value="numberDaysUntilFundsExpire"
-            :label="t('subscription-days-until-funds-expire-after-first-use')"
-            :errors="fieldErrors"
-            input-type="number"
-            min="0"
-            :disabled="triggerFundExpirationValue !== NUMBER_OF_DAYS"
+          <PfFormInputText id="numberDaysUntilFundsExpire" class="sm:col-span-6" :value="numberDaysUntilFundsExpire"
+            :label="t('subscription-days-until-funds-expire-after-first-use')" :errors="fieldErrors" input-type="number"
+            min="0" :disabled="triggerFundExpirationValue !== NUMBER_OF_DAYS || haveAnyBeneficiaries"
             @input="(e) => updateNumberDaysUntilFundsExpireValue(setFieldValue, validateField, e)">
           </PfFormInputText>
         </Field>
       </PfFormSection>
     </PfForm>
 
-    <PfForm
-      v-if="currentStep === 2"
-      has-footer
-      can-cancel
-      :disable-submit="Object.keys(formErrors).length > 0"
-      :submit-label="props.submitBtn"
-      :cancel-label="t('previous')"
-      :processing="isSubmitting"
-      @cancel="prevStep">
+    <PfForm v-if="currentStep === 2" has-footer can-cancel :disable-submit="Object.keys(formErrors).length > 0"
+      :submit-label="props.submitBtn" :cancel-label="t('previous')" :processing="isSubmitting" @cancel="prevStep">
       <PfFormSection>
         <FieldArray v-slot="{ fields, remove, push }" key-path="id" name="productGroupSubscriptionTypes">
-          <UiFieldArray
-            :block-layout="true"
-            :fields="fields"
-            :add-label="t('add-product-group-subscription-type')"
+          <UiFieldArray :block-layout="true" :fields="fields" :add-label="t('add-product-group-subscription-type')"
             :delete-label="t('product-group-delete')"
             :empty-list-error="t('empty-product-group-subscription-types-list-error')"
-            :errors="formErrors[`productGroupSubscriptionTypes`]"
-            @addField="() => createNewProductGroupSubscriptionTypes(push)"
+            :errors="formErrors[`productGroupSubscriptionTypes`]" :cant-delete="haveAnyBeneficiaries"
+            :cant-add="haveAnyBeneficiaries" @addField="() => createNewProductGroupSubscriptionTypes(push)"
             @removeField="(idx) => remove(idx)">
             <template #default="slotProps">
               <div class="sm:col-span-12 space-y-6 divide-y divide-grey-100">
-                <Field
-                  v-slot="{ field, errors: fieldErrors }"
+                <Field v-slot="{ field, errors: fieldErrors }"
                   :name="`productGroupSubscriptionTypes[${slotProps.idx}].productGroupId`">
-                  <PfFormInputSelect
-                    :key="`productGroupSubscriptionTypes[${slotProps.idx}].productGroupId`"
-                    v-bind="field"
-                    :label="t('product-group-select')"
-                    :options="productGroups"
-                    :errors="fieldErrors" />
+                  <PfFormInputSelect :key="`productGroupSubscriptionTypes[${slotProps.idx}].productGroupId`"
+                    v-bind="field" :label="t('product-group-select')" :options="productGroups"
+                    :disabled="haveAnyBeneficiaries" :errors="fieldErrors" />
                 </Field>
-                <FieldArray
-                  v-slot="{ fields: fieldsChild, remove: removeChild, push: pushChild }"
-                  key-path="id"
+                <FieldArray v-slot="{ fields: fieldsChild, remove: removeChild, push: pushChild }" key-path="id"
                   :name="`productGroupSubscriptionTypes[${slotProps.idx}].types`">
-                  <UiFieldArray
-                    class="pt-3"
-                    :is-inside-block-layout="true"
-                    :fields="fieldsChild"
+                  <UiFieldArray class="pt-3" :is-inside-block-layout="true" :fields="fieldsChild"
                     :add-label="t('add-subscription-type')"
                     :empty-list-error="t('empty-product-group-subscription-types-list-error')"
                     :errors="formErrors[`productGroupSubscriptionTypes[${slotProps.idx}].types`]"
-                    @addField="() => pushChild({ amount: '', type: '' })"
-                    @removeField="(idx) => removeChild(idx)">
+                    :cant-delete="haveAnyBeneficiaries" :cant-add="haveAnyBeneficiaries"
+                    @addField="() => pushChild({ amount: '', type: '' })" @removeField="(idx) => removeChild(idx)">
                     <template #default="slotPropsType">
-                      <Field
-                        v-slot="{ field: inputField, errors: fieldErrors }"
+                      <Field v-slot="{ field: inputField, errors: fieldErrors }"
                         :name="`productGroupSubscriptionTypes[${slotProps.idx}].types[${slotPropsType.idx}].type`">
                         <PfFormInputSelect
                           :id="`productGroupSubscriptionTypes[${slotProps.idx}].types[${slotPropsType.idx}].type`"
-                          class="grow"
-                          v-bind="inputField"
-                          :label="t('subscription-type-category')"
-                          :options="beneficiaryTypes"
-                          :errors="fieldErrors"
+                          :disabled="haveAnyBeneficiaries" class="grow" v-bind="inputField"
+                          :label="t('subscription-type-category')" :options="beneficiaryTypes" :errors="fieldErrors"
                           col-span-class="sm:col-span-6" />
                       </Field>
-                      <Field
-                        v-slot="{ field: inputField, errors: fieldErrors }"
+                      <Field v-slot="{ field: inputField, errors: fieldErrors }"
                         :name="`productGroupSubscriptionTypes[${slotProps.idx}].types[${slotPropsType.idx}].amount`">
                         <PfFormInputText
                           :id="`productGroupSubscriptionTypes[${slotProps.idx}].types[${slotPropsType.idx}].amount`"
-                          v-bind="inputField"
-                          :label="t('subscription-type-amount')"
-                          :errors="fieldErrors"
-                          input-type="number"
-                          min="0"
-                          col-span-class="sm:col-span-6">
+                          :disabled="haveAnyBeneficiaries" v-bind="inputField" :label="t('subscription-type-amount')"
+                          :errors="fieldErrors" input-type="number" min="0" col-span-class="sm:col-span-6">
                           <template #trailingIcon>
                             <UiDollarSign :errors="fieldErrors" />
                           </template>
@@ -480,6 +373,14 @@ const props = defineProps({
   projectId: {
     type: String,
     required: true
+  },
+  haveAnyBeneficiaries: {
+    type: Boolean,
+    default: false
+  },
+  canEditFundsExpirationDate: {
+    type: Boolean,
+    default: true
   }
 });
 
@@ -606,7 +507,7 @@ const validationSchemas = computed(() => {
               params: {},
               message: t("subscription-funds-expiration-date-error"),
               test: function (value, form) {
-                return new Date(value) > new Date(form.parent.endDate);
+                return new Date(value) > new Date(form.parent.endDate) && new Date(value) > new Date();
               }
             })
             .required();
@@ -671,15 +572,15 @@ const getSubscriptionPaymentDates = computed(() => {
   if (startDateValue.value && endDateValue.value) {
     const startMonth =
       (monthlyPaymentMomentValue.value === FIRST_DAY_OF_THE_MONTH && startDateValue.value.getDate() === 1) ||
-      (monthlyPaymentMomentValue.value === FIRST_AND_FIFTEENTH_DAY_OF_THE_MONTH && startDateValue.value.getDate() <= 15) ||
-      (monthlyPaymentMomentValue.value === FIFTEENTH_DAY_OF_THE_MONTH && startDateValue.value.getDate() <= 15)
+        (monthlyPaymentMomentValue.value === FIRST_AND_FIFTEENTH_DAY_OF_THE_MONTH && startDateValue.value.getDate() <= 15) ||
+        (monthlyPaymentMomentValue.value === FIFTEENTH_DAY_OF_THE_MONTH && startDateValue.value.getDate() <= 15)
         ? startDateValue.value.getMonth()
         : startDateValue.value.getMonth() + 1;
     let currentDate = new Date(
       startDateValue.value.getFullYear(),
       startMonth,
       monthlyPaymentMomentValue.value === FIFTEENTH_DAY_OF_THE_MONTH ||
-      (monthlyPaymentMomentValue.value === FIRST_AND_FIFTEENTH_DAY_OF_THE_MONTH && startDateValue.value.getDate() <= 15)
+        (monthlyPaymentMomentValue.value === FIRST_AND_FIFTEENTH_DAY_OF_THE_MONTH && startDateValue.value.getDate() <= 15)
         ? 15
         : 1
     );
