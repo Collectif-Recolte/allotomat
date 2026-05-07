@@ -12,6 +12,4 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
     {
         TGroup Group { get; set; }
     }
-
-    public record TransactionFilter(Instant StartDate, Instant EndDate, long[] CashRegisterIds);
 }
