@@ -750,11 +750,12 @@ const beneficiariesPagination = computed(() => {
   return organizationBeneficiariesPagination.value;
 });
 
-let beneficiariesAreAnonymous = computed(() => {
-  return (
-    userType.value === USER_TYPE_PROJECTMANAGER &&
-    organizations.value?.find((x) => x.value === selectedOrganization.value)?.beneficiariesAreAnonymous
-  );
+const beneficiariesAreAnonymous = computed(() => {
+  if (userType.value !== USER_TYPE_PROJECTMANAGER) return false;
+  const org = isAllGroupSelected.value
+    ? organizations.value?.find((x) => x.value !== ALL_GROUP)
+    : organizations.value?.find((x) => x.value === selectedOrganization.value);
+  return org?.beneficiariesAreAnonymous ?? false;
 });
 
 const budgetAllowancesTotal = computed(() => {
