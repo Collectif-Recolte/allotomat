@@ -5,7 +5,7 @@
       "title": "Category Management",
       "empty-list": "This program does not contain any categories.",
       "create-category": "Create a category",
-      "category-count": "{count} categorie | {count} categories"
+      "category-count": "{count} category | {count} categories"
     },
     "fr": {
       "add-category": "Ajouter une catégorie",

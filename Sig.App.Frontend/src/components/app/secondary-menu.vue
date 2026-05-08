@@ -1,7 +1,7 @@
 <i18n>
 {
 	"en": {
-		"menu-title-program": "{name} program",
+		"menu-title-program": "Program: {name}",
     "program-settings": "Program Settings",
 		"manage-organization-managers": "User Management",
 		"manage-project-managers": "User Management",
@@ -11,11 +11,11 @@
     "subscription-end-report": "Subscription Report",
     "budget-allowance-report": "Budget Envelope Report",
     "cash-register": "Cash Registers",
-    "menu-title-market": "{name} merchant",
-    "menu-title-market-group": "{name} merchant group"
+    "menu-title-market": "Merchant: {name}",
+    "menu-title-market-group": "Merchant Group: {name}"
 	},
 	"fr": {
-		"menu-title-program": "Programme {name}",
+		"menu-title-program": "Programme : {name}",
     "program-settings": "Paramètres du programme",
 		"manage-organization-managers": "Gestion des comptes",
 		"manage-project-managers": "Gestion des comptes",
@@ -25,31 +25,31 @@
     "subscription-end-report": "Rapport d'abonnement",
     "budget-allowance-report": "Rapport d'enveloppe",
     "cash-register": "Caisses",
-    "menu-title-market": "Commerce {name}",
-    "menu-title-market-group": "Groupe de commerces {name}"
+    "menu-title-market": "Commerce : {name}",
+    "menu-title-market-group": "Groupe de commerces : {name}"
 	}
 }
 </i18n>
 
 <template>
-  <div v-if="showSecondaryMenu" class="shrink-0 flex flex-col items-start border-t border-primary-300 dark:border-grey-900 py-4">
-    <nav class="px-2 space-y-0.5 w-full" aria-labelledby="secondaryMenuTitle">
+  <div v-if="showSecondaryMenu" class="flex flex-col items-start py-4 border-primary-300 dark:border-grey-900 border-t shrink-0">
+    <nav class="space-y-0.5 px-2 w-full" aria-labelledby="secondaryMenuTitle">
       <span
         v-if="userType === USER_TYPE_PROJECTMANAGER && allProjects && allProjects.length > 0"
         id="secondaryMenuTitle"
-        class="text-p4 uppercase font-semibold inline-block px-2 mb-1"
+        class="inline-block mb-1 px-2 font-semibold text-p4 uppercase"
         >{{ t("menu-title-program", { name: allProjects[0].name }) }}</span
       >
       <span
         v-if="userType === USER_TYPE_MARKETGROUPMANAGER && marketGroups && marketGroups.length > 0"
         id="secondaryMenuTitle"
-        class="text-p4 uppercase font-semibold inline-block px-2 mb-1"
+        class="inline-block mb-1 px-2 font-semibold text-p4 uppercase"
         >{{ t("menu-title-market-group", { name: marketGroups[0].name }) }}</span
       >
       <span
         v-if="userType === USER_TYPE_MERCHANT && markets && markets.length > 0"
         id="secondaryMenuTitle"
-        class="text-p4 uppercase font-semibold inline-block px-2 mb-1"
+        class="inline-block mb-1 px-2 font-semibold text-p4 uppercase"
         >{{ t("menu-title-market", { name: markets[0].name }) }}</span
       >
       <SecondaryMenuItem
