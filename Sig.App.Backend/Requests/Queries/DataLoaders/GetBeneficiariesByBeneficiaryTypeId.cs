@@ -21,11 +21,12 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
         public override async Task<ILookup<long, BeneficiaryGraphType>> Handle(Query request, CancellationToken cancellationToken)
         {
             var results = await db.Beneficiaries
+                .Include(x => x.Organization).ThenInclude(x => x.Project)
                 .Where(x => request.Ids.Contains(x.BeneficiaryTypeId.Value))
                 .OrderBy(x => x.SortOrder)
                 .ToListAsync(cancellationToken);
 
-            return results.ToLookup(x => x.BeneficiaryTypeId.Value, x => new BeneficiaryGraphType(x));
+            return results.ToLookup(x => x.BeneficiaryTypeId.Value, x => new BeneficiaryGraphType(x, x.Organization?.Project?.BeneficiariesAreAnonymous ?? false));
         }
     }
 }

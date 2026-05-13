@@ -22,11 +22,16 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
 
         public override async Task<IDictionary<long, IBeneficiaryGraphType>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var cards = await db.Cards.Include(x => x.Beneficiary)
+            var cards = await db.Cards
+                .Include(x => x.Beneficiary).ThenInclude(x => x.Organization).ThenInclude(x => x.Project)
                 .Where(c => request.Ids.Contains(c.Id))
                 .ToListAsync(cancellationToken);
 
-            return cards.ToDictionary(x => x.Id, x => x.Beneficiary != null ? x.Beneficiary is OffPlatformBeneficiary ? new OffPlatformBeneficiaryGraphType(x.Beneficiary as OffPlatformBeneficiary) as IBeneficiaryGraphType : new BeneficiaryGraphType(x.Beneficiary) : null);
+            return cards.ToDictionary(x => x.Id, x => {
+                if (x.Beneficiary == null) return null;
+                var isBeneficiariesAnonymous = x.Beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? false;
+                return x.Beneficiary is OffPlatformBeneficiary opb ? new OffPlatformBeneficiaryGraphType(opb, isBeneficiariesAnonymous) as IBeneficiaryGraphType : new BeneficiaryGraphType(x.Beneficiary, isBeneficiariesAnonymous);
+            });
         }
     }
 }

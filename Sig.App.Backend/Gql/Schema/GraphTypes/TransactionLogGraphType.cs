@@ -12,16 +12,19 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 {
     public class TransactionLogGraphType
     {
+        private const string Anonymous = "*******";
+
         private readonly TransactionLog transactionLog;
+        private readonly bool beneficiariesAreAnonymous;
 
         public Id Id => transactionLog.GetIdentifier();
         public TransactionLogDiscriminator Discriminator => transactionLog.Discriminator;
         public decimal TotalAmount => transactionLog.TotalAmount;
         public long? BeneficiaryId => transactionLog.BeneficiaryId;
-        public string BeneficiaryFirstname => transactionLog.BeneficiaryFirstname;
-        public string BeneficiaryLastname => transactionLog.BeneficiaryLastname;
-        public string BeneficiaryEmail => transactionLog.BeneficiaryEmail;
-        public string BeneficiaryPhone => transactionLog.BeneficiaryPhone;
+        public string BeneficiaryFirstname => beneficiariesAreAnonymous ? Anonymous : transactionLog.BeneficiaryFirstname;
+        public string BeneficiaryLastname => beneficiariesAreAnonymous ? Anonymous : transactionLog.BeneficiaryLastname;
+        public string BeneficiaryEmail => beneficiariesAreAnonymous ? Anonymous : transactionLog.BeneficiaryEmail;
+        public string BeneficiaryPhone => beneficiariesAreAnonymous ? Anonymous : transactionLog.BeneficiaryPhone;
         public string BeneficiaryID1 => transactionLog.BeneficiaryID1;
         public string BeneficiaryID2 => transactionLog.BeneficiaryID2;
         public long? BeneficiaryTypeId => transactionLog.BeneficiaryTypeId;
@@ -54,9 +57,10 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public long? CashRegisterId => transactionLog.CashRegisterId;
         public string CashRegisterName => transactionLog.CashRegisterName;
 
-        public TransactionLogGraphType(TransactionLog transactionLog)
+        public TransactionLogGraphType(TransactionLog transactionLog, bool beneficiariesAreAnonymous = false)
         {
             this.transactionLog = transactionLog;
+            this.beneficiariesAreAnonymous = beneficiariesAreAnonymous;
         }
         
         public OffsetDateTime CreatedAt()

@@ -238,9 +238,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
                     case null:
                         return null as IBeneficiaryGraphType;
                     case OffPlatformBeneficiary opb:
-                        return new OffPlatformBeneficiaryGraphType(opb);
+                        return new OffPlatformBeneficiaryGraphType(opb, project.BeneficiariesAreAnonymous);
                     default:
-                        return new BeneficiaryGraphType(x);
+                        return new BeneficiaryGraphType(x, project.BeneficiariesAreAnonymous);
                 }
             });
         }

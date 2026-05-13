@@ -1,6 +1,8 @@
 ﻿using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
@@ -41,7 +43,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return ctx.DataLoader.LoadOrganizationMarkets(Id.LongIdentifierForType<Organization>());
         }
 
-        public async Task<PaymentConflictPagination<IBeneficiaryGraphType>> Beneficiaries([Inject] IMediator mediator, int page, int limit,
+        public async Task<PaymentConflictPagination<IBeneficiaryGraphType>> Beneficiaries([Inject] IMediator mediator, [Inject] AppDbContext db, int page, int limit,
             [Description("If specified, only beneficiaries without or with a subscription are returned.")] bool? withoutSubscription = null,
             [Description("If specified, only beneficiaries with one of those subscription are returned.")] Id[] subscriptions = null,
             [Description("If specified, only beneficiaries without one of those subscription are returned.")] Id[] withoutSpecificSubscriptions = null,
@@ -54,6 +56,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             [Description("If specified, only that match text is returned.")] string searchText = "",
             Sort<BeneficiarySort> sort = null)
         {
+            var isAnonymous = await db.Projects
+                .Where(p => p.Id == organization.ProjectId)
+                .Select(p => p.BeneficiariesAreAnonymous)
+                .FirstOrDefaultAsync();
+
             var results = await mediator.Send(new SearchBeneficiaries.Query
             {
                 OrganizationId = organization.Id,
@@ -78,9 +85,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
                     case null:
                         return null as IBeneficiaryGraphType;
                     case OffPlatformBeneficiary opb:
-                        return new OffPlatformBeneficiaryGraphType(opb);
+                        return new OffPlatformBeneficiaryGraphType(opb, isAnonymous);
                     default:
-                        return new BeneficiaryGraphType(x);
+                        return new BeneficiaryGraphType(x, isAnonymous);
                 }
             });
         }

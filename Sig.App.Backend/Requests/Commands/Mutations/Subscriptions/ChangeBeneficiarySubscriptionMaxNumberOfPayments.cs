@@ -40,7 +40,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             var subscriptionBeneficiary = await db.SubscriptionBeneficiaries
                 .Include(x => x.Subscription).ThenInclude(x => x.Types)
                 .Include(x => x.BudgetAllowance)
-                .Include(x => x.Beneficiary)
+                .Include(x => x.Beneficiary).ThenInclude(x => x.Organization).ThenInclude(x => x.Project)
                 .Where(x => x.BeneficiaryId == beneficiaryId && x.SubscriptionId == subscriptionId)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -93,7 +93,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             logger.LogInformation($"[Mutation] ChangeBeneficiarySubscriptionMaxNumberOfPayments - MaxNumberOfPaymentsOverride set to {request.MaxNumberOfPayments} for beneficiary {beneficiaryId} in subscription {subscriptionId}");
 
-            return new Payload { Beneficiary = new BeneficiaryGraphType(subscriptionBeneficiary.Beneficiary) };
+            return new Payload { Beneficiary = new BeneficiaryGraphType(subscriptionBeneficiary.Beneficiary, subscriptionBeneficiary.Beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? false) };
         }
 
         [MutationInput]

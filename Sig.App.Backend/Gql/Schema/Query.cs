@@ -512,9 +512,15 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(GlobalPermission.ManageTransactions)]
         [Description("All transactions")]
-        public static async Task<TransactionLogsPagination<TransactionLogGraphType>> TransactionLogs(this GqlQuery _, [Inject] IMediator mediator,
+        public static async Task<TransactionLogsPagination<TransactionLogGraphType>> TransactionLogs(this GqlQuery _, [Inject] IMediator mediator, [Inject] AppDbContext db,
             int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, Id[] markets, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string[] giftCardTransactionTypes, Id[] cashRegisters, string searchText, string timeZoneId)
         {
+            var longProjectId = projectId.LongIdentifierForType<Project>();
+            var isAnonymous = await db.Projects
+                .Where(p => p.Id == longProjectId)
+                .Select(p => p.BeneficiariesAreAnonymous)
+                .FirstOrDefaultAsync();
+
             var results = await mediator.Send(new SearchTransactionLogs.Query
             {
                 Page = new Page(page, limit),
@@ -533,7 +539,7 @@ namespace Sig.App.Backend.Gql.Schema
                 TimeZoneId = timeZoneId
             });
 
-            return results.Map(x => new TransactionLogGraphType(x));
+            return results.Map(x => new TransactionLogGraphType(x, isAnonymous));
         }
     }
 }

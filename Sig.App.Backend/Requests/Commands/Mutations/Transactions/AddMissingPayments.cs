@@ -147,7 +147,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             return new Payload()
             {
-                Beneficiary = new BeneficiaryGraphType(beneficiary)
+                Beneficiary = new BeneficiaryGraphType(beneficiary, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? false)
             };
         }
 
