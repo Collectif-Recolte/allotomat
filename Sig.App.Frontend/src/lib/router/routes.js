@@ -1174,7 +1174,7 @@ export default [
     },
     children: [
       {
-        name: urls.URL_TRANSACTION_REFUND,
+        name: urls.URL_MARKET_TRANSACTION_REFUND,
         path: ":transactionId/refund",
         component: () => import("@/views/transaction/Refund.vue"),
         meta: {
@@ -1192,7 +1192,7 @@ export default [
     },
     children: [
       {
-        name: urls.URL_TRANSACTION_REFUND,
+        name: urls.URL_MARKETGROUP_TRANSACTION_REFUND,
         path: ":transactionId/refund",
         component: () => import("@/views/transaction/Refund.vue"),
         meta: {
