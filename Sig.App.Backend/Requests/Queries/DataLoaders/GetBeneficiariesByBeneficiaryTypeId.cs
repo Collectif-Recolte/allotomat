@@ -26,7 +26,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
                 .OrderBy(x => x.SortOrder)
                 .ToListAsync(cancellationToken);
 
-            return results.ToLookup(x => x.BeneficiaryTypeId.Value, x => new BeneficiaryGraphType(x, x.Organization?.Project?.BeneficiariesAreAnonymous ?? false));
+            return results.ToLookup(x => x.BeneficiaryTypeId.Value, x => new BeneficiaryGraphType(x, x.Organization?.Project?.BeneficiariesAreAnonymous ?? true));
         }
     }
 }

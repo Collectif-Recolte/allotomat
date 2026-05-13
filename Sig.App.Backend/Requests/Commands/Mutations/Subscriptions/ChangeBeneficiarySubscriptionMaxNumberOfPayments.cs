@@ -93,7 +93,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             logger.LogInformation($"[Mutation] ChangeBeneficiarySubscriptionMaxNumberOfPayments - MaxNumberOfPaymentsOverride set to {request.MaxNumberOfPayments} for beneficiary {beneficiaryId} in subscription {subscriptionId}");
 
-            return new Payload { Beneficiary = new BeneficiaryGraphType(subscriptionBeneficiary.Beneficiary, subscriptionBeneficiary.Beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? false) };
+            return new Payload { Beneficiary = new BeneficiaryGraphType(subscriptionBeneficiary.Beneficiary, subscriptionBeneficiary.Beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true) };
         }
 
         [MutationInput]

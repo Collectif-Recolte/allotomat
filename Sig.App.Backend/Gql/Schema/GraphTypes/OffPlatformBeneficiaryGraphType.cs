@@ -30,7 +30,8 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public bool IsActive => beneficiary.IsActive;
         public bool IsUnsubscribeToReceipt => beneficiary.IsUnsubscribeToReceipt;
 
-        public OffPlatformBeneficiaryGraphType(OffPlatformBeneficiary beneficiary, bool beneficiariesAreAnonymous = false)
+        // beneficiariesAreAnonymous is set to true by default to avoid exposing beneficiary data in the off platform beneficiary
+        public OffPlatformBeneficiaryGraphType(OffPlatformBeneficiary beneficiary, bool beneficiariesAreAnonymous = true)
         {
             this.beneficiary = beneficiary;
             this.beneficiariesAreAnonymous = beneficiariesAreAnonymous;

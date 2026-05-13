@@ -86,7 +86,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             logger.LogInformation($"[Mutation] AssignCardToBeneficiary - Card ({card.Id}) assign  to {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
 
             return new Payload() {
-                Beneficiary = beneficiary is OffPlatformBeneficiary opb ? new OffPlatformBeneficiaryGraphType(opb, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? false) : new BeneficiaryGraphType(beneficiary, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? false)
+                Beneficiary = beneficiary is OffPlatformBeneficiary opb ? new OffPlatformBeneficiaryGraphType(opb, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true) : new BeneficiaryGraphType(beneficiary, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true)
             };
         }
 

@@ -28,7 +28,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
                 .ToListAsync(cancellationToken);
 
             return results.ToLookup(x => x.OrganizationId, x => {
-                var isBeneficiariesAnonymous = x.Organization?.Project?.BeneficiariesAreAnonymous ?? false;
+                var isBeneficiariesAnonymous = x.Organization?.Project?.BeneficiariesAreAnonymous ?? true;
                 return x is OffPlatformBeneficiary opb ? new OffPlatformBeneficiaryGraphType(opb, isBeneficiariesAnonymous) as IBeneficiaryGraphType : new BeneficiaryGraphType(x, isBeneficiariesAnonymous);
             });
         }

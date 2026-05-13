@@ -85,7 +85,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             await db.SaveChangesAsync(cancellationToken);
-            return new Payload() { Beneficiary = new BeneficiaryGraphType(beneficiary, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? false) };
+            return new Payload() { Beneficiary = new BeneficiaryGraphType(beneficiary, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true) };
         }
 
         private decimal GetAmountPayment(Subscription subscription, long beneficiaryTypeId) 

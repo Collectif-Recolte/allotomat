@@ -57,7 +57,8 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public long? CashRegisterId => transactionLog.CashRegisterId;
         public string CashRegisterName => transactionLog.CashRegisterName;
 
-        public TransactionLogGraphType(TransactionLog transactionLog, bool beneficiariesAreAnonymous = false)
+        // beneficiariesAreAnonymous is set to true by default to avoid exposing beneficiary data in the transaction log
+        public TransactionLogGraphType(TransactionLog transactionLog, bool beneficiariesAreAnonymous = true)
         {
             this.transactionLog = transactionLog;
             this.beneficiariesAreAnonymous = beneficiariesAreAnonymous;
