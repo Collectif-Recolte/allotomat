@@ -44,6 +44,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             var beneficiary = await db.Beneficiaries
                 .Include(x => x.Subscriptions).ThenInclude(x => x.Subscription).ThenInclude(x => x.Types)
                 .Include(x => x.Subscriptions).ThenInclude(x => x.BudgetAllowance)
+                .Include(x => x.Organization).ThenInclude(x => x.Project)
                 .FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
             if (beneficiary == null)
@@ -84,7 +85,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             await db.SaveChangesAsync(cancellationToken);
-            return new Payload() { Beneficiary = new BeneficiaryGraphType(beneficiary) };
+            return new Payload() { Beneficiary = new BeneficiaryGraphType(beneficiary, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true) };
         }
 
         private decimal GetAmountPayment(Subscription subscription, long beneficiaryTypeId) 

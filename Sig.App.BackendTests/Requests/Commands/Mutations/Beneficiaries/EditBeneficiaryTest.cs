@@ -50,7 +50,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
                 Lastname = "Doe",
                 Email = "john.doe@example.com",
                 Phone = "555-555-1234",
-                Address = "123, Example Street"
+                Address = "123, Example Street",
+                Organization = organization
             };
             DbContext.Beneficiaries.Add(beneficiary);
 
@@ -62,7 +63,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
                 Phone = "555-555-1234",
                 Address = "123, Example Street",
                 ID1 = "ID1",
-                ID2 = "ID2"
+                ID2 = "ID2",
+                Organization = organization
             };
             DbContext.Beneficiaries.Add(beneficiary2);
 

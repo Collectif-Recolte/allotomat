@@ -38,7 +38,9 @@
       <PfForm
         has-footer
         can-cancel
-        :disable-submit="Object.keys(formErrors).length > 0 || (selectedSubscription !== '' && budgetAllowanceAvailableAfterAllocation < 0)"
+        :disable-submit="
+          Object.keys(formErrors).length > 0 || (selectedSubscription !== '' && budgetAllowanceAvailableAfterAllocation < 0)
+        "
         :submit-label="t('add-payment')"
         :cancel-label="t('cancel')"
         :processing="isSubmitting"
@@ -150,7 +152,7 @@ const beneficiary = useResult(resultBeneficiary, null, (data) => data.beneficiar
 
 const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
   var localBeneficiary = data.beneficiary;
-return data.beneficiary.beneficiarySubscriptions
+  return data.beneficiary.beneficiarySubscriptions
     .filter(
       (x) =>
         (x.hasMissedPayment && dateUtc(x.subscription.fundsExpirationDate) > Date.now()) ||

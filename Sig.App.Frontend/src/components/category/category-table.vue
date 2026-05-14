@@ -5,7 +5,7 @@
           "category-delete": "Delete",
           "category-edit": "Edit configuration",
           "category-name": "Category name",
-          "category-keys": "Tags",
+          "category-keys": "Keys",
           "delete-category-error-notification": "The category {categoryName} cannot be deleted since it is currently being used."
       },
       "fr": {

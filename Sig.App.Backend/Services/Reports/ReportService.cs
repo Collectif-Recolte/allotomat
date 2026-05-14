@@ -89,6 +89,10 @@ namespace Sig.App.Backend.Services.Reports
             var currentUserCanSeeAllBeneficiaryInfo = await beneficiaryService.CurrentUserCanSeeAllBeneficiaryInfo();
             var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
             var longProjectId = request.ProjectId.LongIdentifierForType<Project>();
+            var beneficiariesAreAnonymous = await db.Projects
+                .Where(p => p.Id == longProjectId)
+                .Select(p => p.BeneficiariesAreAnonymous)
+                .FirstOrDefaultAsync();
             var startDate = request.StartDate.ToUniversalTime();
             var endDate = request.EndDate.ToUniversalTime();
 
@@ -205,7 +209,7 @@ namespace Sig.App.Backend.Services.Reports
             dataWorksheet.Column("Id 1 (participant)", x => x.BeneficiaryID1);
             dataWorksheet.Column("Id 2 (participant)", x => x.BeneficiaryID2);
 
-            if (currentUserCanSeeAllBeneficiaryInfo)
+            if (currentUserCanSeeAllBeneficiaryInfo && !beneficiariesAreAnonymous)
             {
                 dataWorksheet.Column("Participant-e/Participant", GetParticipantName);
                 dataWorksheet.Column("Courriel participant-e/Participant email", x => x.BeneficiaryEmail);

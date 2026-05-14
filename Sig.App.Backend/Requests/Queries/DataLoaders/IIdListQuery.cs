@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using NodaTime;
+using System.Collections.Generic;
 
 namespace Sig.App.Backend.Requests.Queries.DataLoaders
 {

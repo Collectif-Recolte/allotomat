@@ -50,6 +50,7 @@ export const URL_MARKET_EDIT = "market-edit-url";
 export const URL_MARKET_ARCHIVE = "market-archive-url";
 export const URL_MARKET_DISABLED = "market-disabled-url";
 export const URL_MARKET_ENABLED = "market-enabled-url";
+export const URL_MARKET_TRANSACTION_REFUND = "market-transaction-refund-url";
 
 export const URL_MARKET_OVERVIEW = "market-overview-url";
 export const URL_MARKET_OVERVIEW_SELECT = "market-overview-select-url";
@@ -70,7 +71,9 @@ export const URL_MARKET_GROUP_MANAGE_MANAGERS = "market-group-manage-managers-ur
 export const URL_MARKET_GROUP_MANAGE_MERCHANTS = "market-group-manage-merchants-url";
 export const URL_REMOVE_MERCHANTS_FROM_MARKET_GROUP = "market-group-remove-market-url";
 export const URL_ADD_MERCHANTS_FROM_MARKET_GROUP = "market-group-add-market-url";
-
+export const URL_MARKETGROUP_TRANSACTION_LIST = "market-group-transaction-list-url";
+export const URL_MARKETGROUP_TRANSACTION_ADD = "market-group-transaction-add-url";
+export const URL_MARKETGROUP_TRANSACTION_REFUND = "market-group-transaction-refund-url";
 export const URL_MARKETGROUP_MANAGER_ADMIN = "marketgroup-manager-list-url";
 
 export const URL_ORGANIZATION_ADMIN = "organization-list-url";
@@ -160,7 +163,6 @@ export const URL_UNSUBSCRIBE_TRANSACTION_RECEIPT = "unsubscribe-transaction-rece
 export const URL_TRANSACTION = "transaction-url";
 export const URL_TRANSACTION_ERROR = "transaction-error-url";
 export const URL_TRANSACTION_LIST = "market-transaction-list-url";
-export const URL_TRANSACTION_REFUND = "transaction-refund-url";
 export const URL_TRANSACTION_ADMIN = "transaction-list-url";
 export const URL_TRANSACTION_ADD = "transaction-add-url";
 export const URL_TRANSACTION_ADMIN_REFUND = "transaction-admin-refund-url";

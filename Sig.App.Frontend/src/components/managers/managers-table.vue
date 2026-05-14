@@ -10,6 +10,8 @@
           "confirmation-link-copied": "Confirmation link copied to clipboard.",
           "copy-reset-password-email": "Copy reset password link",
           "confirmation-reset-password-link-copied": "Reset password link copied to clipboard.",
+          "confirmed": "✔️ Confirmed",
+          "not-confirmed": "❌ Not confirmed",
       },
       "fr": {
           "options": "Options",
@@ -20,7 +22,9 @@
           "resend-complete": "Un message pour compléter la création de compte a été envoyé à {email}.",
           "confirmation-link-copied": "Lien de confirmation copié dans le presse-papiers.",
           "copy-reset-password-email": "Copier le lien de réinitialisation du mot de passe",
-          "confirmation-reset-password-link-copied": "Lien de réinitialisation du mot de passe copié dans le presse-papiers."
+          "confirmation-reset-password-link-copied": "Lien de réinitialisation du mot de passe copié dans le presse-papiers.",
+          "confirmed": "✔️ Confirmé",
+          "not-confirmed": "❌ Non confirmé",
       }
   }
 </i18n>
@@ -31,7 +35,11 @@
       <td>
         <p v-if="getUserName(slotProps.item)" class="mb-0">{{ getUserName(slotProps.item) }}</p>
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <p v-if="slotProps.item.email" class="mb-0 text-p4" v-html="getUserEmail(slotProps.item)"></p>
+        <p v-if="slotProps.item.email" class="mb-0 text-p4">
+          <span v-if="slotProps.item.isConfirmed">{{ t("confirmed") }}</span>
+          <span v-else>{{ t("not-confirmed") }}</span>
+          - <span v-html="getUserEmail(slotProps.item)"></span>
+        </p>
       </td>
       <td>
         <UiButtonGroup :items="getBtnGroup(slotProps.item)" tooltip-position="left" />
