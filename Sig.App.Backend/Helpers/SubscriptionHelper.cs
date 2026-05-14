@@ -52,6 +52,7 @@ namespace Sig.App.Backend.Helpers
                 subscription.MonthlyPaymentMoment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth)
             {
                 cardPaymentRemaining += AdjustedMonthsForFifteenth(startDate, endDate);
+                if (startDate > today && startDate.Day == 15) cardPaymentRemaining++;
             }
 
             if (needExtraDay) cardPaymentRemaining++;
