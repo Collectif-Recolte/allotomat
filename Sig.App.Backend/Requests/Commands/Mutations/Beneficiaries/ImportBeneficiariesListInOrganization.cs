@@ -102,7 +102,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
             return new Payload
             {
-                Beneficiaries = beneficiaries.Select(x => new BeneficiaryGraphType(x))
+                Beneficiaries = beneficiaries.Select(x => new BeneficiaryGraphType(x, organization.Project.BeneficiariesAreAnonymous))
             };
         }
 
