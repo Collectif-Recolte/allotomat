@@ -39,72 +39,36 @@
   <p class="text-p1">
     {{ t("transaction-in-program-name") }}
   </p>
-  <Form
-    v-slot="{ errors: formErrors, setFieldValue }"
-    :validation-schema="validationSchema"
-    :initial-values="initialValues"
-    keep-values
-    @submit="nextStep">
-    <PfForm
-      has-footer
-      :disable-submit="Object.keys(formErrors).length > 0"
-      :submit-label="t('next-step')"
-      :cancel-label="t('cancel')"
-      footer-alt-style
-      can-cancel
-      @cancel="closeModal">
+  <Form v-slot="{ errors: formErrors, setFieldValue }" :validation-schema="validationSchema"
+    :initial-values="initialValues" keep-values @submit="nextStep">
+    <PfForm has-footer :disable-submit="Object.keys(formErrors).length > 0" :submit-label="t('next-step')"
+      :cancel-label="t('cancel')" footer-alt-style can-cancel @cancel="closeModal">
       <PfFormSection>
-        <Field
-          v-if="userType !== USER_TYPE_MARKETGROUPMANAGER"
-          v-slot="{ field: inputField, errors: fieldErrors }"
+        <Field v-if="userType !== USER_TYPE_MARKETGROUPMANAGER" v-slot="{ field: inputField, errors: fieldErrors }"
           name="marketId">
-          <PfFormInputSelect
-            id="marketId"
-            v-bind="inputField"
-            :placeholder="t('choose-market')"
-            :label="t('select-market')"
-            :options="markets"
-            :errors="fieldErrors"
+          <PfFormInputSelect id="marketId" v-bind="inputField" :placeholder="t('choose-market')"
+            :label="t('select-market')" :options="markets" :errors="fieldErrors"
             @input="(val) => onMarketSelected(val, setFieldValue)" />
         </Field>
         <Field v-slot="{ field: inputField, errors: fieldErrors }" name="cashRegisterId">
-          <PfFormInputSelect
-            id="cashRegisterId"
-            v-bind="inputField"
-            :disabled="
-              (userType !== USER_TYPE_MARKETGROUPMANAGER && !selectedMarket) ||
-              !!singleMarketGroupCashRegister ||
-              !!singleCashRegisterForMarket
-            "
-            :placeholder="t('choose-cash-register')"
-            :label="t('select-cash-register')"
-            :options="cashRegisters"
+          <PfFormInputSelect id="cashRegisterId" v-bind="inputField" :disabled="(userType !== USER_TYPE_MARKETGROUPMANAGER && !selectedMarket) ||
+            !!singleMarketGroupCashRegister ||
+            !!singleCashRegisterForMarket
+            " :placeholder="t('choose-cash-register')" :label="t('select-cash-register')" :options="cashRegisters"
             :errors="fieldErrors" />
         </Field>
         <div>
           <Field v-slot="{ field: inputField, errors: fieldErrors }" name="cardNumber">
-            <PfFormInputText
-              v-if="enterCardNumber || props.cardNumber !== ''"
-              id="cardNumber"
-              v-bind="inputField"
-              :disabled="props.cardNumber !== ''"
-              :description="t('card-number-description')"
-              :label="t('card-number')"
+            <PfFormInputText v-if="enterCardNumber || props.cardNumber !== ''" id="cardNumber" v-bind="inputField"
+              :disabled="props.cardNumber !== ''" :description="t('card-number-description')" :label="t('card-number')"
               :errors="fieldErrors" />
-            <QRCodeScanner
-              v-else
-              @cancel="enterCardNumber = true"
-              @triggerError="checkQRCode('', setFieldValue)"
+            <QRCodeScanner v-else @cancel="enterCardNumber = true" @triggerError="checkQRCode('', setFieldValue)"
               @checkQRCode="(cardId) => checkQRCode(cardId, setFieldValue)" />
           </Field>
         </div>
       </PfFormSection>
-      <PfButtonAction
-        v-if="enterCardNumber && props.cardNumber === ''"
-        class="w-full"
-        btn-style="secondary"
-        :label="t('scan-card-btn')"
-        @click="enterCardNumber = !enterCardNumber" />
+      <PfButtonAction v-if="enterCardNumber && props.cardNumber === ''" class="w-full" btn-style="secondary"
+        :label="t('scan-card-btn')" @click="enterCardNumber = !enterCardNumber" />
     </PfForm>
   </Form>
 </template>
@@ -242,6 +206,7 @@ const { result: resultMarketGroups } = useQuery(
           name
           market {
             id
+            name
           }
         }
       }
@@ -253,7 +218,7 @@ const { result: resultMarketGroups } = useQuery(
 const marketGroupCashRegisters = useResult(resultMarketGroups, null, (data) => {
   return data.marketGroups
     .flatMap((mg) => mg.cashRegisters)
-    .map((cr) => ({ label: cr.name, value: cr.id }))
+    .map((cr) => ({ label: cr.market.name + " | " + cr.name, value: cr.id }))
     .sort((a, b) => a.label.localeCompare(b.label));
 });
 
