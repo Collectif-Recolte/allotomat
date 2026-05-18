@@ -42,9 +42,7 @@
 <template>
   <PfFormFieldset :id="props.id" :name="props.id" :has-error-state="props.hasErrorState" :errors="props.errors">
     <div v-for="(option, index) in props.options" :key="index">
-      <PfFormInputCheckbox
-        :value="isChecked(option.id)"
-        :label="subscriptionName(option)"
+      <PfFormInputCheckbox :value="isChecked(option.id)" :label="subscriptionName(option)"
         :checked="isChecked(option.id)"
         :disabled="option.dontHaveBudgetAllowance || option.dontHaveBeneficiaryType || !option.isBudgetAllowanceIsEnough"
         @input="(e) => updateCheckbox(option.id, e)">
@@ -52,9 +50,7 @@
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <p class="mb-2 text-p2 leading-none" v-html="getPaymentDates(option)"></p>
           <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <p
-            v-if="option.maxNumberOfPayments > 0"
-            class="mb-2 text-p2 leading-none"
+          <p v-if="option.maxNumberOfPayments > 0" class="mb-2 text-p2 leading-none"
             v-html="t('max-number-of-payments', { count: option.maxNumberOfPayments })"></p>
           <p v-if="option.isSubscriptionPaymentBasedCardUsage" class="mb-2 text-p2 leading-none">
             {{ t("subscription-payment-based-card-usage") }}
@@ -62,41 +58,26 @@
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
           <p class="mb-2 text-p2 leading-none" v-html="getExpirationDate(option)"></p>
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <p
-            v-if="!option.dontHaveBudgetAllowance"
-            class="mb-2 text-p2 leading-none"
+          <p v-if="!option.dontHaveBudgetAllowance" class="mb-2 text-p2 leading-none"
             v-html="getBudgetAllowanceNeeded(option)"></p>
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <p
-            v-if="option.dontHaveBudgetAllowance"
-            class="mb-2 text-p2 leading-none text-red-500"
+          <p v-if="option.dontHaveBudgetAllowance" class="mb-2 text-p2 leading-none text-red-500"
             v-html="t('dont-have-budget-allowance')"></p>
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <p
-            v-if="option.dontHaveBeneficiaryType"
-            class="mb-2 text-p2 leading-none text-red-500"
+          <p v-if="option.dontHaveBeneficiaryType" class="mb-2 text-p2 leading-none text-red-500"
             v-html="t('dont-have-beneficiary-type')"></p>
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <p
-            v-if="!option.dontHaveBudgetAllowance && !option.isBudgetAllowanceIsEnough"
-            class="mb-2 text-p2 leading-none text-red-500"
-            v-html="t('budget-allowance-not-enought')"></p>
+          <p v-if="!option.dontHaveBudgetAllowance && !option.isBudgetAllowanceIsEnough"
+            class="mb-2 text-p2 leading-none text-red-500" v-html="t('budget-allowance-not-enought')"></p>
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <p
-            v-if="!option.dontHaveBudgetAllowance"
-            class="mb-2 text-p2 leading-none"
+          <p v-if="!option.dontHaveBudgetAllowance" class="mb-2 text-p2 leading-none"
             :class="!option.isBudgetAllowanceIsEnough ? 'text-red-500' : ''"
             v-html="getBudgetAllowanceAvailable(option)"></p>
         </template>
       </PfFormInputCheckbox>
     </div>
-    <PfFormInputCheckbox
-      v-if="props.options.length > 1"
-      id="select-all"
-      :disabled="!anyOptionEnabled(props.options)"
-      :label="t('select-all')"
-      :checked="isAllChecked"
-      @input="updateCheckAll" />
+    <PfFormInputCheckbox v-if="props.options.length > 1" id="select-all" :disabled="!anyOptionEnabled(props.options)"
+      :label="t('select-all')" :checked="isAllChecked" @input="updateCheckAll" />
   </PfFormFieldset>
 </template>
 
@@ -106,7 +87,7 @@ import { useI18n } from "vue-i18n";
 
 import { subscriptionName } from "@/lib/helpers/subscription";
 import { getMoneyFormat } from "@/lib/helpers/money";
-import { formatDate, textualFormat } from "@/lib/helpers/date";
+import { formatDate, textualFormat, dateUtc } from "@/lib/helpers/date";
 
 import {
   FIRST_DAY_OF_THE_MONTH,
@@ -157,8 +138,8 @@ const getPaymentDates = (option) => {
 
   return t("payment-dates", {
     paymentMoment,
-    startDate: formatDate(new Date(option.startDate), textualFormat),
-    endDate: formatDate(new Date(option.endDate), textualFormat)
+    startDate: formatDate(dateUtc(option.startDate), textualFormat),
+    endDate: formatDate(dateUtc(option.endDate), textualFormat)
   });
 };
 
