@@ -37,11 +37,14 @@
 <script setup>
 import { defineProps, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { storeToRefs } from "pinia";
 
 import ICON_RESET from "@/lib/icons/reset.json";
 
-import { URL_TRANSACTION_REFUND } from "@/lib/consts/urls";
+import { URL_MARKET_TRANSACTION_REFUND, URL_MARKETGROUP_TRANSACTION_REFUND } from "@/lib/consts/urls";
+import { USER_TYPE_MARKETGROUPMANAGER } from "@/lib/consts/enums";
 
+import { useAuthStore } from "@/lib/store/auth";
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { formatDate, textualWithTimeFormat } from "@/lib/helpers/date";
 
@@ -63,6 +66,11 @@ const cols = computed(() => [
   },
   { label: "" }
 ]);
+
+const { userType } = storeToRefs(useAuthStore());
+const isMarketGroupManager = computed(() => {
+  return userType.value === USER_TYPE_MARKETGROUPMANAGER;
+});
 
 function getTransactionDate(transaction) {
   return formatDate(new Date(transaction.createdAt), textualWithTimeFormat);
@@ -89,7 +97,10 @@ function getBtnGroup(transaction) {
       isExtra: true,
       icon: ICON_RESET,
       label: t("transaction-refund"),
-      route: { name: URL_TRANSACTION_REFUND, params: { transactionId: transaction.id } }
+      route: {
+        name: isMarketGroupManager.value ? URL_MARKETGROUP_TRANSACTION_REFUND : URL_MARKET_TRANSACTION_REFUND,
+        params: { transactionId: transaction.id }
+      }
     }
   ];
 }

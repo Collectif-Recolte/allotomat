@@ -33,7 +33,7 @@ namespace Sig.App.Backend.Services.Beneficiaries
                 var existingClaims = await userManager.GetClaimsAsync(currentUser);
                 var existingProjectClaims = existingClaims.Where(x => x.Type == AppClaimTypes.ProjectManagerOf).Select(x => x.Value);
                 var results = await db.Projects.Where(x => existingProjectClaims.Contains(x.Id.ToString())).ToListAsync();
-                beneficiariesAreAnonymous = results.FirstOrDefault()?.BeneficiariesAreAnonymous ?? false;
+                beneficiariesAreAnonymous = results.FirstOrDefault()?.BeneficiariesAreAnonymous ?? true;
             }
 
             return !beneficiariesAreAnonymous;

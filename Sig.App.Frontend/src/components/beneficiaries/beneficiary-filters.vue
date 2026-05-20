@@ -271,28 +271,34 @@ const props = defineProps({
   }
 });
 
-const sortOrderOptions = [
-  {
-    id: "by-fund-available-on-card",
-    value: BY_FUND_AVAILABLE_ON_CARD,
-    label: t("sort-by-fund")
-  },
-  {
-    id: "id1",
-    value: ID1,
-    label: t("sort-by-id1")
-  },
-  {
-    id: "last-name",
-    value: LAST_NAME,
-    label: t("sort-by-lastname")
-  },
-  {
-    id: "beneficiary-sort-order",
-    value: SORT_ORDER,
-    label: t("sort-by-importorder")
+const sortOrderOptions = computed(() => {
+  const options = [
+    {
+      id: "by-fund-available-on-card",
+      value: BY_FUND_AVAILABLE_ON_CARD,
+      label: t("sort-by-fund")
+    },
+    {
+      id: "id1",
+      value: ID1,
+      label: t("sort-by-id1")
+    },
+    {
+      id: "last-name",
+      value: LAST_NAME,
+      label: t("sort-by-lastname")
+    },
+    {
+      id: "beneficiary-sort-order",
+      value: SORT_ORDER,
+      label: t("sort-by-importorder")
+    }
+  ];
+  if (props.beneficiariesAreAnonymous) {
+    return options.filter((o) => o.value !== LAST_NAME);
   }
-];
+  return options;
+});
 
 const hasActiveFilters = computed(() => {
   return (

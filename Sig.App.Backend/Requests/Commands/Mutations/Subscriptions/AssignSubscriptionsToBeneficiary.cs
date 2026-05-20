@@ -39,7 +39,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         {
             logger.LogInformation($"[Mutation] AssignSubscriptionsToBeneficiary({request.OrganizationId}, {request.Subscriptions}, {request.BeneficiaryId})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
-            var organization = await db.Organizations.Include(x => x.BudgetAllowances).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
+            var organization = await db.Organizations.Include(x => x.BudgetAllowances).Include(x => x.Project).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
             if (organization == null)
             {
@@ -146,7 +146,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             return new Payload()
             {
-                Beneficiary = new BeneficiaryGraphType(beneficiary)
+                Beneficiary = new BeneficiaryGraphType(beneficiary, organization.Project?.BeneficiariesAreAnonymous ?? true)
             };
         }
 

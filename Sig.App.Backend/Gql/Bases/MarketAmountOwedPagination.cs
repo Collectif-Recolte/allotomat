@@ -1,4 +1,3 @@
-﻿using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Utilities;
 using System;
@@ -10,34 +9,40 @@ namespace Sig.App.Backend.Gql.Bases
 {
     public static class MarketAmountOwedPagination
     {
-        public static async Task<MarketAmountOwedPagination<MarketAmountOwedGraphType>> For(IEnumerable<MarketAmountOwedGraphType> query, Page page)
+        public static Task<MarketAmountOwedPagination<MarketAmountOwedGraphType>> For(IEnumerable<MarketAmountOwedGraphType> query, Page page)
         {
-            var totalCount = query.Count();
+            var allItems = query.ToList();
+            var totalAmount = allItems.Sum(x => x.Amount);
+            var totalCount = allItems.Count;
             var itemPage = page.PageSize > 0
-                ? query.Skip(page.Skip)
-                : query.Where(x => false);
+                ? allItems.Skip(page.Skip)
+                : allItems.Where(x => false);
 
-            return new MarketAmountOwedPagination<MarketAmountOwedGraphType>(
+            return Task.FromResult(new MarketAmountOwedPagination<MarketAmountOwedGraphType>(
                 page: page,
                 totalCount: totalCount,
-                items: itemPage.Take(page.PageSize));
+                items: itemPage.Take(page.PageSize),
+                totalAmount: totalAmount));
         }
 
         public static MarketAmountOwedPagination<TResult> Map<TSource, TResult>(this MarketAmountOwedPagination<TSource> source, Func<TSource, TResult> map)
         {
-            return new MarketAmountOwedPagination<TResult>(source.PageNumber, source.PageSize, source.TotalCount, source.Items.Select(map));
+            return new MarketAmountOwedPagination<TResult>(source.PageNumber, source.PageSize, source.TotalCount, source.Items.Select(map), source.TotalAmount);
         }
     }
 
     public class MarketAmountOwedPagination<T> : Pagination<T>
     {
-        public MarketAmountOwedPagination(Page page, long totalCount, IEnumerable<T> items)
-            : this(page.PageNumber, page.PageSize, totalCount, items)
+        public decimal TotalAmount { get; }
+
+        public MarketAmountOwedPagination(Page page, long totalCount, IEnumerable<T> items, decimal totalAmount)
+            : this(page.PageNumber, page.PageSize, totalCount, items, totalAmount)
         {
         }
 
-        public MarketAmountOwedPagination(int pageNumber, int pageSize, long totalCount, IEnumerable<T> items) : base(pageNumber, pageSize, totalCount, items)
+        public MarketAmountOwedPagination(int pageNumber, int pageSize, long totalCount, IEnumerable<T> items, decimal totalAmount) : base(pageNumber, pageSize, totalCount, items)
         {
+            TotalAmount = totalAmount;
         }
     }
 }

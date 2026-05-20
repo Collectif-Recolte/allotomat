@@ -38,7 +38,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             {
                 beneficiaryId = request.BeneficiaryId.LongIdentifierForType<OffPlatformBeneficiary>();
             }
-            var beneficiary = await db.Beneficiaries.Include(x => x.Organization).FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
+            var beneficiary = await db.Beneficiaries.Include(x => x.Organization).ThenInclude(x => x.Project).FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
             if (beneficiary == null)
             {
@@ -60,7 +60,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             return new Payload()
             {
-                Beneficiary = beneficiary is OffPlatformBeneficiary ? new OffPlatformBeneficiaryGraphType(beneficiary as OffPlatformBeneficiary) : new BeneficiaryGraphType(beneficiary)
+                Beneficiary = beneficiary is OffPlatformBeneficiary opb ? new OffPlatformBeneficiaryGraphType(opb, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true) : new BeneficiaryGraphType(beneficiary, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true)
             };
         }
 

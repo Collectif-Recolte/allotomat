@@ -1,6 +1,8 @@
 ﻿using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using MediatR;
+using NodaTime.Extensions;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
@@ -56,14 +58,16 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return marketManagers.Select(x => new UserGraphType(x));
         }
 
-        public async Task<MarketAmountOwedPagination<MarketAmountOwedGraphType>> MarketsAmountOwed([Inject] IMediator mediator, int page, int limit, DateTime startDate, DateTime endDate)
+        public async Task<MarketAmountOwedPagination<MarketAmountOwedGraphType>> MarketsAmountOwed([Inject] IMediator mediator, int page, int limit, DateTime startDate, DateTime endDate,
+            [Description("If specified, only transactions with one of those market-groups are returned.")] Id[] withSpecificMarketGroups = null)
         {
             var results = await mediator.Send(new SearchMarketGroupMarketAmountOweds.Query
             {
                 MarketGroupId = marketGroup.Id,
                 Page = new Page(page, limit),
                 StartDate = startDate,
-                EndDate = endDate
+                EndDate = endDate,
+                MarketGroups = withSpecificMarketGroups?.Select(y => y.LongIdentifierForType<MarketGroup>()),
             });
 
             return results;
@@ -86,6 +90,21 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             {
                 return new MarketGraphType(x);
             });
+        }
+
+        [Description("The list of transactions for this market-group by date and cash-register.")]
+        public async Task<IEnumerable<ITransactionGraphType>> Transactions(DateTime startDate, DateTime endDate, Id[] cashRegisters, IAppUserContext ctx)
+        {
+            if (startDate > endDate)
+            {
+                return new List<ITransactionGraphType>();
+            }
+
+            var startInstant = startDate.ToInstant();
+            var endInstant = endDate.ToInstant();
+            var cashRegisterIds = cashRegisters.Select(cr => cr.LongIdentifierForType<CashRegister>()).ToArray();
+
+            return await ctx.DataLoader.LoadMarketGroupTransactions(Id.LongIdentifierForType<MarketGroup>(), startInstant, endInstant, cashRegisterIds).GetResultAsync();
         }
     }
 }

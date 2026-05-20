@@ -25,9 +25,15 @@
 
 <template>
   <UiDialogModal v-slot="{ closeModal }" :return-route="returnRoute()" :title="t('title')" :has-footer="false">
-    <MarketForm :submit-btn="t('add-market')" :initial-values="initialValues" :validation-schema="validationSchema"
-      :is-in-project="route.name === URL_MARKET_OVERVIEW_ADD" :market-group-options="marketGroups" is-new
-      @closeModal="closeModal" @submit="onSubmit">
+    <MarketForm
+      :submit-btn="t('add-market')"
+      :initial-values="initialValues"
+      :validation-schema="validationSchema"
+      :is-in-project="route.name === URL_MARKET_OVERVIEW_ADD"
+      :market-group-options="marketGroups"
+      is-new
+      @closeModal="closeModal"
+      @submit="onSubmit">
       <FormSectionManagers />
     </MarketForm>
   </UiDialogModal>
@@ -141,8 +147,8 @@ const initialValues = computed(() => {
       route.params.marketGroupId !== null && route.params.marketGroupId !== undefined
         ? route.params.marketGroupId
         : marketGroup != null && marketGroup.value !== undefined && marketGroup.value !== null
-          ? marketGroup.value.id
-          : undefined,
+        ? marketGroup.value.id
+        : undefined,
     managers: [{ email: "" }]
   };
 });
@@ -173,14 +179,14 @@ async function onSubmit(values) {
       userType.value === USER_TYPE_MARKETGROUPMANAGER
         ? { value: marketGroup.value?.project?.id }
         : route.name === URL_MARKET_OVERVIEW_ADD
-          ? { value: project.value.id }
-          : null,
+        ? { value: project.value.id }
+        : null,
     marketGroupId:
       userType.value === USER_TYPE_MARKETGROUPMANAGER
         ? { value: marketGroup.value?.id }
         : route.name === URL_MARKET_OVERVIEW_ADD
-          ? { value: values.marketGroup }
-          : null
+        ? { value: values.marketGroup }
+        : null
   };
 
   await createMarket({ input });

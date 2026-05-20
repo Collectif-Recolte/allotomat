@@ -11,25 +11,30 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 {
     public class OffPlatformBeneficiaryGraphType : IBeneficiaryGraphType
     {
+        private const string Anonymous = "*******";
+
         protected readonly OffPlatformBeneficiary beneficiary;
+        protected readonly bool beneficiariesAreAnonymous;
 
         public Id Id => beneficiary.GetIdentifier();
-        public NonNull<string> Firstname => beneficiary.Firstname;
-        public NonNull<string> Lastname => beneficiary.Lastname;
-        public string Email => beneficiary.Email;
-        public string Phone => beneficiary.Phone;
-        public string Address => beneficiary.Address;
-        public string Notes => beneficiary.Notes;
+        public NonNull<string> Firstname => beneficiariesAreAnonymous ? Anonymous : beneficiary.Firstname;
+        public NonNull<string> Lastname => beneficiariesAreAnonymous ? Anonymous : beneficiary.Lastname;
+        public string Email => beneficiariesAreAnonymous ? Anonymous : beneficiary.Email;
+        public string Phone => beneficiariesAreAnonymous ? Anonymous : beneficiary.Phone;
+        public string Address => beneficiariesAreAnonymous ? Anonymous : beneficiary.Address;
+        public string Notes => beneficiariesAreAnonymous ? Anonymous : beneficiary.Notes;
         public string Id1 => beneficiary.ID1;
         public string Id2 => beneficiary.ID2;
-        public string PostalCode => beneficiary.PostalCode;
+        public string PostalCode => beneficiariesAreAnonymous ? Anonymous : beneficiary.PostalCode;
         public SubscriptionMonthlyPaymentMoment? MonthlyPaymentMoment => beneficiary.MonthlyPaymentMoment;
         public bool IsActive => beneficiary.IsActive;
         public bool IsUnsubscribeToReceipt => beneficiary.IsUnsubscribeToReceipt;
 
-        public OffPlatformBeneficiaryGraphType(OffPlatformBeneficiary beneficiary)
+        // beneficiariesAreAnonymous is set to true by default to avoid exposing beneficiary data in the off platform beneficiary
+        public OffPlatformBeneficiaryGraphType(OffPlatformBeneficiary beneficiary, bool beneficiariesAreAnonymous = true)
         {
             this.beneficiary = beneficiary;
+            this.beneficiariesAreAnonymous = beneficiariesAreAnonymous;
         }
 
         public IDataLoaderResult<OrganizationGraphType> Organization(IAppUserContext ctx)

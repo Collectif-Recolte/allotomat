@@ -3,18 +3,20 @@
     "en": {
       "market-name": "Name",
       "market-amount-owed": "Amount owed",
-      "cash-register-name": "Cash register"
+      "cash-register-name": "Cash register",
+      "market-amount-owed-totals": "Total"
     },
     "fr": {
       "market-name": "Nom",
       "market-amount-owed": "Montant dû",
-      "cash-register-name": "Caisse"
+      "cash-register-name": "Caisse",
+      "market-amount-owed-totals": "Total"
     }
   }
   </i18n>
 
 <template>
-  <UiTable :items="props.markets" :cols="cols">
+  <UiTable :items="props.markets" :cols="cols" :footers="footers">
     <template #default="slotProps">
       <td>
         <div class="inline-flex items-center">
@@ -44,7 +46,8 @@ import { getMoneyFormat } from "@/lib/helpers/money";
 const { t } = useI18n();
 
 const props = defineProps({
-  markets: { type: Array, required: true }
+  markets: { type: Array, required: true },
+  total: { type: Object, required: true }
 });
 
 const cols = computed(() => [
@@ -67,4 +70,14 @@ function getCashRegisterName(item) {
 function getAmountOwed(item) {
   return getMoneyFormat(item.amount);
 }
+
+const footers = computed(() => {
+  const footers = [];
+
+  footers.push({ value: t("market-amount-owed-totals") });
+  footers.push({ value: "" }); // Empty cell for cash register column
+  footers.push({ value: getMoneyFormat(props.total.totalAmount), isRight: true });
+
+  return footers;
+});
 </script>

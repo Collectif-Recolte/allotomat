@@ -5,6 +5,8 @@
     "delete-text-card-number-error": "Text must match card number",
 		"delete-text-beneficiary-name-label": "Type the participant's full name to confirm",
     "delete-text-card-number-label": "Type the card number to confirm",
+    "delete-text-beneficiary-anonymous-label": "Type the participant's ID1 to confirm",
+    "delete-text-beneficiary-anonymous-error": "Text must match participant's ID1",
 		"description": "Warning! If you continue, the card will be deactivated and the participant will not be able to use the card until it is reactivated.",
 		"title": "Deactivate Card - {beneficiaryName}",
 		"disable-btn-label": "Deactivate",
@@ -14,6 +16,8 @@
 		"delete-text-beneficiary-name-error": "Le texte doit correspondre au prénom et au nom de famille du ou de la participant·e",
     "delete-text-card-number-error": "Le texte doit correspondre au numéro de la carte",
 		"delete-text-beneficiary-name-label": "Taper le nom complet du ou de la participant·e pour confirmer",
+    "delete-text-beneficiary-anonymous-label": "Taper le ID1 du participant·e pour confirmer",
+    "delete-text-beneficiary-anonymous-error": "Le texte doit correspondre au ID1 du participant·e",
     "delete-text-card-number-label": "Taper le numéro de la carte pour confirmer",
 		"description": "Avertissement ! Si vous continuez, la carte sera désactivée et le·a participant·e ne pourra plus utiliser la carte tant qu'elle n'est pas réactivée.",
 		"title": "Désactiver la carte - {beneficiaryName}",
@@ -24,15 +28,10 @@
 </i18n>
 
 <template>
-  <UiDialogDeleteModal
-    :return-route="returnRoute()"
-    :title="t('title', { beneficiaryName: getBeneficiaryName() })"
-    :description="t('description', { beneficiaryName: getBeneficiaryName() })"
-    :validation-text="getBeneficiaryName()"
-    :delete-text-label="deleteTextLabel"
-    :delete-text-error="deleteTextError"
-    :delete-button-label="t('disable-btn-label')"
-    @onDelete="onDisableCard" />
+  <UiDialogDeleteModal :return-route="returnRoute()" :title="t('title', { beneficiaryName: getBeneficiaryName() })"
+    :description="t('description', { beneficiaryName: getBeneficiaryName() })" :validation-text="getBeneficiaryName()"
+    :delete-text-label="deleteTextLabel" :delete-text-error="deleteTextError"
+    :delete-button-label="t('disable-btn-label')" @onDelete="onDisableCard" />
 </template>
 
 <script setup>
@@ -58,17 +57,21 @@ const { addSuccess } = useNotificationsStore();
 
 const deleteTextLabel = computed(() => {
   return card.value
-    ? card.value.beneficiary
-      ? t("delete-text-beneficiary-name-label")
-      : t("delete-text-card-number-label")
+    ? card.value.beneficiary?.organization?.project?.beneficiariesAreAnonymous
+      ? t("delete-text-beneficiary-anonymous-label")
+      : card.value.beneficiary
+        ? t("delete-text-beneficiary-name-label")
+        : t("delete-text-card-number-label")
     : "";
 });
 
 const deleteTextError = computed(() => {
   return card.value
-    ? card.value.beneficiary
-      ? t("delete-text-beneficiary-name-error")
-      : t("delete-text-card-number-error")
+    ? card.value.beneficiary?.organization?.project?.beneficiariesAreAnonymous
+      ? t("delete-text-beneficiary-anonymous-error")
+      : card.value.beneficiary
+        ? t("delete-text-beneficiary-name-error")
+        : t("delete-text-card-number-error")
     : "";
 });
 
@@ -82,6 +85,14 @@ const { result } = useQuery(
           id
           firstname
           lastname
+          id1
+          organization {
+            id
+            project {
+              id
+              beneficiariesAreAnonymous
+            }
+          }
         }
       }
     }
@@ -106,6 +117,10 @@ const { mutate: disableCard } = useMutation(
 );
 
 function getBeneficiaryName() {
+  if (!card.value) return "";
+  if (card.value.beneficiary?.organization?.project?.beneficiariesAreAnonymous) {
+    return card.value.beneficiary.id1;
+  }
   return card.value
     ? card.value.beneficiary
       ? `${card.value.beneficiary.firstname} ${card.value.beneficiary.lastname}`

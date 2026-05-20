@@ -285,6 +285,40 @@ namespace Sig.App.BackendTests.Helpers
         }
 
         [Fact]
+        public void GetPaymentRemaining_FirstAndFifteenth_StartingOnFifteenthBeforeStart()
+        {
+            Clock.Reset(Instant.FromUtc(2026, 5, 12, 0, 0));
+
+            var subscription = new Subscription
+            {
+                StartDate = new DateTime(2026, 6, 15),
+                EndDate = new DateTime(2026, 9, 20),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth,
+                IsSubscriptionPaymentBasedCardUsage = false
+            };
+
+            var result = subscription.GetPaymentRemaining(Clock);
+            result.Should().Be(7);
+        }
+
+        [Fact]
+        public void GetPaymentRemaining_FifteenthDay_StartingOnFifteenthBeforeStart()
+        {
+            Clock.Reset(Instant.FromUtc(2026, 5, 12, 0, 0));
+
+            var subscription = new Subscription
+            {
+                StartDate = new DateTime(2026, 6, 15),
+                EndDate = new DateTime(2026, 9, 20),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
+                IsSubscriptionPaymentBasedCardUsage = false
+            };
+
+            var result = subscription.GetPaymentRemaining(Clock);
+            result.Should().Be(4);
+        }
+
+        [Fact]
         public void GetPaymentRemaining_FirstAndFifteenthDayOfTheMonth_JustBeforeStartButAndOfPreviousMonth()
         {
             Clock.Reset(Instant.FromUtc(2025, 5, 31, 0, 0));

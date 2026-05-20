@@ -5,6 +5,7 @@
     </slot>
     <Switch
       :model-value="modelValue"
+      :disabled="disabled"
       class="relative inline-flex flex-shrink-0 h-4 w-8 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
       :class="bgColorClass"
       @update:model-value="(v) => emit('update:modelValue', v)">
@@ -60,7 +61,11 @@ const props = defineProps({
   },
   showIconOnly: Boolean,
   modelValue: Boolean,
-  changeColor: Boolean
+  changeColor: Boolean,
+  disabled: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const emit = defineEmits(["update:modelValue"]);

@@ -23,15 +23,17 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
         public override async Task<IDictionary<long, IBeneficiaryGraphType>> Handle(Query request, CancellationToken cancellationToken)
         {
             var markets = await db.Beneficiaries
+                .Include(x => x.Organization).ThenInclude(x => x.Project)
                 .Where(c => request.Ids.Contains(c.Id))
                 .ToListAsync(cancellationToken);
 
             return markets.ToDictionary(x => x.Id, x => {
-                if (x is OffPlatformBeneficiary)
+                var isBeneficiariesAnonymous = x.Organization?.Project?.BeneficiariesAreAnonymous ?? true;
+                if (x is OffPlatformBeneficiary opb)
                 {
-                    return new OffPlatformBeneficiaryGraphType(x as OffPlatformBeneficiary) as IBeneficiaryGraphType;
+                    return new OffPlatformBeneficiaryGraphType(opb, isBeneficiariesAnonymous) as IBeneficiaryGraphType;
                 }
-                return new BeneficiaryGraphType(x);
+                return new BeneficiaryGraphType(x, isBeneficiariesAnonymous);
             });
         }
     }

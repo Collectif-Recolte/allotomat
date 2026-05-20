@@ -15,11 +15,14 @@
     :title="t('title-new-transaction')"
     :has-title="hasTitle"
     :has-footer="false"
-    :return-route="{ name: route.params.beneficiaryId !== undefined ? URL_BENEFICIARY_ADMIN : URL_TRANSACTION_ADMIN }">
+    :return-route="returnRoute">
     <template v-if="activeStep === TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER">
       <SelectMarket v-if="beneficiary" :market-id="marketId" @onUpdateStep="updateStep" @onCloseModal="closeModal" />
       <ManuallyEnterCardNumber
-        v-else-if="userType === USER_TYPE_PROJECTMANAGER && route.params.beneficiaryId === undefined"
+        v-else-if="
+          (userType === USER_TYPE_PROJECTMANAGER || userType === USER_TYPE_MARKETGROUPMANAGER) &&
+          route.params.beneficiaryId === undefined
+        "
         @onUpdateStep="updateStep"
         @onCloseModal="closeModal" />
     </template>
@@ -55,8 +58,8 @@ import {
   TRANSACTION_STEPS_MANUALLY_ENTER_CARD_NUMBER,
   TRANSACTION_FINISH
 } from "@/lib/consts/enums";
-import { URL_TRANSACTION_ADMIN, URL_BENEFICIARY_ADMIN } from "@/lib/consts/urls";
-import { USER_TYPE_ORGANIZATIONMANAGER, USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
+import { URL_TRANSACTION_ADMIN, URL_BENEFICIARY_ADMIN, URL_MARKETGROUP_TRANSACTION_LIST } from "@/lib/consts/urls";
+import { USER_TYPE_ORGANIZATIONMANAGER, USER_TYPE_PROJECTMANAGER, USER_TYPE_MARKETGROUPMANAGER } from "@/lib/consts/enums";
 
 import SelectMarket from "@/views/transaction/SelectMarket";
 import ManuallyEnterCardNumber from "@/views/transaction/ManuallyEnterCardNumber";
@@ -116,6 +119,12 @@ const hasTitle = computed(() => {
   return activeStep.value !== TRANSACTION_STEPS_COMPLETE;
 });
 
+const returnRoute = computed(() => {
+  if (route.params.beneficiaryId !== undefined) return { name: URL_BENEFICIARY_ADMIN };
+  if (userType.value === USER_TYPE_MARKETGROUPMANAGER) return { name: URL_MARKETGROUP_TRANSACTION_LIST };
+  return { name: URL_TRANSACTION_ADMIN };
+});
+
 usePageTitle(t("title-new-transaction"));
 
 const updateStep = (currentStep, values) => {
@@ -143,6 +152,8 @@ const updateStep = (currentStep, values) => {
         name:
           userType.value === USER_TYPE_ORGANIZATIONMANAGER || userType.value === USER_TYPE_PROJECTMANAGER
             ? URL_BENEFICIARY_ADMIN
+            : userType.value === USER_TYPE_MARKETGROUPMANAGER
+            ? URL_MARKETGROUP_TRANSACTION_LIST
             : URL_TRANSACTION_ADMIN
       });
       break;

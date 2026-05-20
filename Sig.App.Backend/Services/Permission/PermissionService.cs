@@ -85,6 +85,7 @@ namespace Sig.App.Backend.Services.Permission
 
         private static GlobalPermission[] MarketGroupManagerGlobalPermissions = new[]
         {
+            GlobalPermission.CreateTransaction,
             GlobalPermission.ManageBeneficiaries,
             GlobalPermission.ManageTransactions,
             GlobalPermission.RefundTransaction,
@@ -163,6 +164,8 @@ namespace Sig.App.Backend.Services.Permission
 
         private static readonly MarketPermission[] MarketGroupManagerMarketPermission = new[]
         {
+            MarketPermission.CreateTransaction,
+            MarketPermission.RefundTransaction,
             MarketPermission.ManageMarket,
             MarketPermission.ArchiveMarket
         };

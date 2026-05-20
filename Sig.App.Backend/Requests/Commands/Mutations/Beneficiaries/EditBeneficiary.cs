@@ -32,7 +32,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
         {
             logger.LogInformation($"[Mutation] EditBeneficiary({request.BeneficiaryId}, {request.Firstname}, {request.Lastname}, {request.Id1}, {request.Id2}, {request.BeneficiaryTypeId})");
             var beneficiaryId = request.BeneficiaryId.LongIdentifierForType<Beneficiary>();
-            var beneficiary = await db.Beneficiaries.FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
+            var beneficiary = await db.Beneficiaries.Include(x => x.Organization).ThenInclude(x => x.Project).FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
             if (beneficiary == null)
             {
@@ -77,7 +77,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
             return new Payload
             {
-                Beneficiary = new BeneficiaryGraphType(beneficiary)
+                Beneficiary = new BeneficiaryGraphType(beneficiary, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true)
             };
         }
 
