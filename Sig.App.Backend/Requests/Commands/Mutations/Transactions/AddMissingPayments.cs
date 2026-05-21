@@ -17,6 +17,7 @@ using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.BackgroundJobs;
 using Sig.App.Backend.DbModel.Entities.Transactions;
+using Sig.App.Backend.Services.Beneficiaries;
 using System.Collections.Generic;
 using System;
 
@@ -29,14 +30,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         private readonly IClock clock;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly ILogger<AddingFundToCard> addingFundLogger;
+        private readonly IBeneficiaryService beneficiaryService;
 
-        public AddMissingPayments(ILogger<AddMissingPayments> logger, AppDbContext db, IClock clock, IHttpContextAccessor httpContextAccessor, ILogger<AddingFundToCard> addingFundLogger)
+        public AddMissingPayments(ILogger<AddMissingPayments> logger, AppDbContext db, IClock clock, IHttpContextAccessor httpContextAccessor, ILogger<AddingFundToCard> addingFundLogger, IBeneficiaryService beneficiaryService)
         {
             this.logger = logger;
             this.db = db;
             this.clock = clock;
             this.httpContextAccessor = httpContextAccessor;
             this.addingFundLogger = addingFundLogger;
+            this.beneficiaryService = beneficiaryService;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -145,9 +148,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             await db.SaveChangesAsync(cancellationToken);
 
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true);
             return new Payload()
             {
-                Beneficiary = new BeneficiaryGraphType(beneficiary, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true)
+                Beneficiary = new BeneficiaryGraphType(beneficiary, isAnonymous)
             };
         }
 

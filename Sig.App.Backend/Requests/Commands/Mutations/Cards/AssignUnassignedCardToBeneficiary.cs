@@ -10,6 +10,7 @@ using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
+using Sig.App.Backend.Services.Beneficiaries;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,11 +20,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
     {
         private readonly ILogger<AssignUnassignedCardToBeneficiary> logger;
         private readonly AppDbContext db;
+        private readonly IBeneficiaryService beneficiaryService;
 
-        public AssignUnassignedCardToBeneficiary(ILogger<AssignUnassignedCardToBeneficiary> logger, AppDbContext db)
+        public AssignUnassignedCardToBeneficiary(ILogger<AssignUnassignedCardToBeneficiary> logger, AppDbContext db, IBeneficiaryService beneficiaryService)
         {
             this.logger = logger;
             this.db = db;
+            this.beneficiaryService = beneficiaryService;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -58,9 +61,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             await db.SaveChangesAsync();
 
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true);
             return new Payload()
             {
-                Beneficiary = beneficiary is OffPlatformBeneficiary opb ? new OffPlatformBeneficiaryGraphType(opb, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true) : new BeneficiaryGraphType(beneficiary, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true)
+                Beneficiary = beneficiary is OffPlatformBeneficiary opb ? new OffPlatformBeneficiaryGraphType(opb, isAnonymous) : new BeneficiaryGraphType(beneficiary, isAnonymous)
             };
         }
 

@@ -26,7 +26,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public string PostalCode => beneficiariesAreAnonymous ? Anonymous : beneficiary.PostalCode;
         public bool IsUnsubscribeToReceipt => beneficiary.IsUnsubscribeToReceipt;
 
-        // beneficiariesAreAnonymous is set to true by default to avoid exposing beneficiary data in the beneficiary
+        // defaults to true as a safety measure; callers should use BeneficiaryService.ShouldAnonymizeBeneficiaries()
         public BeneficiaryGraphType(Beneficiary beneficiary, bool beneficiariesAreAnonymous = true)
         {
             this.beneficiary = beneficiary;
