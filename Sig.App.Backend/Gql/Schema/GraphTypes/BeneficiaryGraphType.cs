@@ -30,7 +30,8 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public BeneficiaryGraphType(Beneficiary beneficiary, bool beneficiariesAreAnonymous = true)
         {
             this.beneficiary = beneficiary;
-            this.beneficiariesAreAnonymous = beneficiariesAreAnonymous;
+            // temporary disabled the beneficiariesAreAnonymous since there's an issue
+            this.beneficiariesAreAnonymous = false;//beneficiariesAreAnonymous;
         }
 
         public IDataLoaderResult<OrganizationGraphType> Organization(IAppUserContext ctx)
