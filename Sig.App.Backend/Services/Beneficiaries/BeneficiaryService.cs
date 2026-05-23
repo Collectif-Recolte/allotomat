@@ -6,6 +6,7 @@ using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.Services.System;
 
 namespace Sig.App.Backend.Services.Beneficiaries
@@ -44,9 +45,10 @@ namespace Sig.App.Backend.Services.Beneficiaries
             return !beneficiariesAreAnonymous;
         }
 
-        public async Task<bool> ShouldAnonymizeBeneficiaries(bool projectBeneficiariesAreAnonymous)
+        public async Task<bool> ShouldAnonymizeBeneficiaries(Project? project)
         {
-            if (!projectBeneficiariesAreAnonymous) return false;
+            if (project == null) return true;
+            if (!project.BeneficiariesAreAnonymous) return false;
             return !await CurrentUserCanSeeAllBeneficiaryInfo();
         }
     }

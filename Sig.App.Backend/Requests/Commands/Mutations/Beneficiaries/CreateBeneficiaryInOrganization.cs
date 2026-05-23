@@ -89,7 +89,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
             logger.LogInformation($"[Mutation] CreateBeneficiaryInOrganization - New beneficiary created {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
 
-            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(organization.Project.BeneficiariesAreAnonymous);
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(organization.Project);
             return new Payload
             {
                 Beneficiary = new BeneficiaryGraphType(beneficiary, isAnonymous)

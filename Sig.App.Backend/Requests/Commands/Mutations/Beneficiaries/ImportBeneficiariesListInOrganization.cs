@@ -103,7 +103,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
             await db.SaveChangesAsync(cancellationToken);
 
-            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(organization.Project.BeneficiariesAreAnonymous);
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(organization.Project);
             return new Payload
             {
                 Beneficiaries = beneficiaries.Select(x => new BeneficiaryGraphType(x, isAnonymous))

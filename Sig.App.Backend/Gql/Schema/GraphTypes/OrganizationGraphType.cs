@@ -57,11 +57,10 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             [Description("If specified, only that match text is returned.")] string searchText = "",
             Sort<BeneficiarySort> sort = null)
         {
-            var projectIsAnonymous = await db.Projects
+            var project = await db.Projects
                 .Where(p => p.Id == organization.ProjectId)
-                .Select(p => p.BeneficiariesAreAnonymous)
                 .FirstOrDefaultAsync();
-            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(projectIsAnonymous);
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(project);
 
             var results = await mediator.Send(new SearchBeneficiaries.Query
             {

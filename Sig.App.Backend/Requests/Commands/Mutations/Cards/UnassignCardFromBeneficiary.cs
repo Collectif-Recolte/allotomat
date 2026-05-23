@@ -188,7 +188,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             logger.LogInformation($"[Mutation] UnassignCardFromBeneficiary - Card ({card.Id}) unassign from {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
 
-            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true);
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(beneficiary.Organization?.Project);
             return new Payload() {
                 Beneficiary = beneficiary is OffPlatformBeneficiary opb ? new OffPlatformBeneficiaryGraphType(opb, isAnonymous) : new BeneficiaryGraphType(beneficiary, isAnonymous)
             };

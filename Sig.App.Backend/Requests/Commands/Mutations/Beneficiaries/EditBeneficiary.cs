@@ -78,7 +78,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
             logger.LogInformation($"[Mutation] EditBeneficiary - Beneficiary edited {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
 
-            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true);
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(beneficiary.Organization?.Project);
             return new Payload
             {
                 Beneficiary = new BeneficiaryGraphType(beneficiary, isAnonymous)

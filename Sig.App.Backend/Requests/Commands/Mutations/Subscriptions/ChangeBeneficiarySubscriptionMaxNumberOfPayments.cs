@@ -96,7 +96,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             logger.LogInformation($"[Mutation] ChangeBeneficiarySubscriptionMaxNumberOfPayments - MaxNumberOfPaymentsOverride set to {request.MaxNumberOfPayments} for beneficiary {beneficiaryId} in subscription {subscriptionId}");
 
-            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(subscriptionBeneficiary.Beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true);
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(subscriptionBeneficiary.Beneficiary.Organization?.Project);
             return new Payload { Beneficiary = new BeneficiaryGraphType(subscriptionBeneficiary.Beneficiary, isAnonymous) };
         }
 

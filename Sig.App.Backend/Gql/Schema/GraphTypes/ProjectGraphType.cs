@@ -232,7 +232,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
                 WithCardDisabled = withCardDisabled
             });
 
-            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(project.BeneficiariesAreAnonymous);
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(project);
             return results.Map(x =>
             {
                 switch (x)

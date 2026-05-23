@@ -61,7 +61,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
 
             await db.SaveChangesAsync();
 
-            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true);
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(beneficiary.Organization?.Project);
             return new Payload()
             {
                 Beneficiary = beneficiary is OffPlatformBeneficiary opb ? new OffPlatformBeneficiaryGraphType(opb, isAnonymous) : new BeneficiaryGraphType(beneficiary, isAnonymous)
