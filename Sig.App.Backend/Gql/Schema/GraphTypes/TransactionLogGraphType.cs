@@ -61,7 +61,8 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public TransactionLogGraphType(TransactionLog transactionLog, bool beneficiariesAreAnonymous = true)
         {
             this.transactionLog = transactionLog;
-            this.beneficiariesAreAnonymous = beneficiariesAreAnonymous;
+            // temporary disabled the beneficiariesAreAnonymous since there's an issue
+            this.beneficiariesAreAnonymous = false;//beneficiariesAreAnonymous;
         }
         
         public OffsetDateTime CreatedAt()
