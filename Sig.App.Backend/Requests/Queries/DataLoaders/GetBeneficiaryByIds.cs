@@ -33,7 +33,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
                 .ToListAsync(cancellationToken);
 
             return markets.ToDictionary(x => x.Id, x => {
-                var isBeneficiariesAnonymous = !canSeeAll && (x.Organization?.Project?.BeneficiariesAreAnonymous ?? true);
+                var isBeneficiariesAnonymous = beneficiaryService.ShouldAnonymizeBeneficiaries(x.Organization?.Project, canSeeAll);
                 if (x is OffPlatformBeneficiary opb)
                 {
                     return new OffPlatformBeneficiaryGraphType(opb, isBeneficiariesAnonymous) as IBeneficiaryGraphType;

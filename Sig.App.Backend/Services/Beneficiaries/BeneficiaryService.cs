@@ -28,11 +28,6 @@ namespace Sig.App.Backend.Services.Beneficiaries
         {
             var beneficiariesAreAnonymous = false;
             var currentUser = await currentUserAccessor.GetCurrentUser();
-            
-            if (currentUser.Type == UserType.OrganizationManager)
-            {
-                return true;
-            }
 
             if (currentUser.Type == UserType.ProjectManager)
             {
@@ -45,11 +40,16 @@ namespace Sig.App.Backend.Services.Beneficiaries
             return !beneficiariesAreAnonymous;
         }
 
-        public async Task<bool> ShouldAnonymizeBeneficiaries(Project? project)
+        public bool ShouldAnonymizeBeneficiaries(Project? project, bool canSeeAll)
         {
             if (project == null) return true;
             if (!project.BeneficiariesAreAnonymous) return false;
-            return !await CurrentUserCanSeeAllBeneficiaryInfo();
+            return !canSeeAll;
+        }
+
+        public async Task<bool> ShouldAnonymizeBeneficiaries(Project? project)
+        {
+            return ShouldAnonymizeBeneficiaries(project, await CurrentUserCanSeeAllBeneficiaryInfo());
         }
     }
 }

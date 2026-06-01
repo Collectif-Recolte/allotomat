@@ -34,7 +34,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
 
             return cards.ToDictionary(x => x.Id, x => {
                 if (x.Beneficiary == null) return null;
-                var isBeneficiariesAnonymous = !canSeeAll && (x.Beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true);
+                var isBeneficiariesAnonymous = beneficiaryService.ShouldAnonymizeBeneficiaries(x.Beneficiary.Organization?.Project, canSeeAll);
                 return x.Beneficiary is OffPlatformBeneficiary opb ? new OffPlatformBeneficiaryGraphType(opb, isBeneficiariesAnonymous) as IBeneficiaryGraphType : new BeneficiaryGraphType(x.Beneficiary, isBeneficiariesAnonymous);
             });
         }

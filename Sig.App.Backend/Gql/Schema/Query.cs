@@ -1,48 +1,49 @@
 ﻿using GraphQL.Conventions;
+using GraphQL.DataLoader;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using System;
-using System.Threading.Tasks;
-using MediatR;
-using GraphQL.DataLoader;
 using Sig.App.Backend.Authorization;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities;
+using Sig.App.Backend.DbModel.Entities.Beneficiaries;
+using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
+using Sig.App.Backend.DbModel.Entities.Cards;
+using Sig.App.Backend.DbModel.Entities.CashRegisters;
+using Sig.App.Backend.DbModel.Entities.MarketGroups;
+using Sig.App.Backend.DbModel.Entities.Markets;
+using Sig.App.Backend.DbModel.Entities.Organizations;
+using Sig.App.Backend.DbModel.Entities.ProductGroups;
+using Sig.App.Backend.DbModel.Entities.Projects;
+using Sig.App.Backend.DbModel.Entities.Subscriptions;
+using Sig.App.Backend.DbModel.Entities.Transactions;
+using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Gql.Schema.Enums;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Gql.Schema.Types;
-using Sig.App.Backend.Requests.Queries.Users;
-using Sig.App.Backend.Services.Permission.Enums;
-using Sig.App.Backend.Utilities;
-using System.Collections.Generic;
-using System.Linq;
-using Sig.App.Backend.Extensions;
-using Sig.App.Backend.DbModel.Entities.Projects;
-using Sig.App.Backend.DbModel.Entities.Organizations;
-using Sig.App.Backend.DbModel.Entities.Markets;
-using Sig.App.Backend.DbModel.Entities.Beneficiaries;
-using Sig.App.Backend.Services.Permission;
-using Sig.App.Backend.DbModel.Entities.Cards;
-using Sig.App.Backend.Requests.Queries.Cards;
 using Sig.App.Backend.Plugins.GraphQL;
-using Sig.App.Backend.DbModel.Entities.Transactions;
-using Sig.App.Backend.DbModel.Entities.Subscriptions;
-using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
+using Sig.App.Backend.Requests.Commands.Queries.Beneficiaries;
 using Sig.App.Backend.Requests.Commands.Queries.Cards;
 using Sig.App.Backend.Requests.Commands.Queries.Transactions;
-using Sig.App.Backend.Requests.Queries.Transactions;
-using Sig.App.Backend.Requests.Commands.Queries.Beneficiaries;
-using Sig.App.Backend.DbModel.Entities.ProductGroups;
-using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Requests.Queries.Beneficiaries;
-using Sig.App.Backend.Gql.Bases;
-using Sig.App.Backend.Utilities.Sorting;
-using Sig.App.Backend.DbModel.Entities.MarketGroups;
+using Sig.App.Backend.Requests.Queries.Cards;
 using Sig.App.Backend.Requests.Queries.Markets;
-using Sig.App.Backend.DbModel.Entities.CashRegisters;
+using Sig.App.Backend.Requests.Queries.Transactions;
+using Sig.App.Backend.Requests.Queries.Users;
+using Sig.App.Backend.Services.Beneficiaries;
+using Sig.App.Backend.Services.Permission;
+using Sig.App.Backend.Services.Permission.Enums;
+using Sig.App.Backend.Utilities;
+using Sig.App.Backend.Utilities.Sorting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Sig.App.Backend.Gql.Schema
 {
@@ -512,14 +513,15 @@ namespace Sig.App.Backend.Gql.Schema
 
         [RequirePermission(GlobalPermission.ManageTransactions)]
         [Description("All transactions")]
-        public static async Task<TransactionLogsPagination<TransactionLogGraphType>> TransactionLogs(this GqlQuery _, [Inject] IMediator mediator, [Inject] AppDbContext db,
+        public static async Task<TransactionLogsPagination<TransactionLogGraphType>> TransactionLogs(this GqlQuery _, [Inject] IMediator mediator, [Inject] AppDbContext db, [Inject] IBeneficiaryService beneficiaryService,
             int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, Id[] markets, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string[] giftCardTransactionTypes, Id[] cashRegisters, string searchText, string timeZoneId)
         {
             var longProjectId = projectId.LongIdentifierForType<Project>();
-            var isAnonymous = await db.Projects
+
+            var project = await db.Projects
                 .Where(p => p.Id == longProjectId)
-                .Select(p => p.BeneficiariesAreAnonymous)
                 .FirstOrDefaultAsync();
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(project);
 
             var results = await mediator.Send(new SearchTransactionLogs.Query
             {
