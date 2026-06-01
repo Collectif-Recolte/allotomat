@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
+using Sig.App.Backend.Services.Beneficiaries;
 using NodaTime;
 using NodaTime.Testing;
 using System;
@@ -33,10 +34,12 @@ namespace Sig.App.BackendTests
         protected readonly FakeClock Clock;
         protected readonly IHttpContextAccessor HttpContextAccessor;
         protected readonly Mock<IMediator> MediatorMock;
+        protected readonly Mock<IBeneficiaryService> BeneficiaryServiceMock;
         private readonly string databaseName;
 
         protected ILogger<T> Logger<T>() => NullLogger<T>.Instance;
         protected IMediator Mediator => MediatorMock.Object;
+        protected IBeneficiaryService BeneficiaryService => BeneficiaryServiceMock.Object;
 
         protected TestBase()
         {
@@ -45,6 +48,7 @@ namespace Sig.App.BackendTests
             databaseName = Guid.NewGuid().ToString();
             Clock = new FakeClock(SystemClock.Instance.GetCurrentInstant());
             MediatorMock = new Mock<IMediator>();
+            BeneficiaryServiceMock = new Mock<IBeneficiaryService>();
             DbContext = CreateDbContext();
             UserManager = CreateUserManager();
             HttpContextAccessor = new HttpContextAccessor {

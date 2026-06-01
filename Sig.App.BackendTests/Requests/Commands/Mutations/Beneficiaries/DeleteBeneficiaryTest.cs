@@ -177,7 +177,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
                 BeneficiaryId = beneficiary.GetIdentifier(),
                 CardId = card.ProgramCardId
             };
-            await new AssignCardToBeneficiary(NullLogger<AssignCardToBeneficiary>.Instance, DbContext).Handle(inputAssign, CancellationToken.None);
+            await new AssignCardToBeneficiary(NullLogger<AssignCardToBeneficiary>.Instance, DbContext, BeneficiaryService).Handle(inputAssign, CancellationToken.None);
 
             var input = new DeleteBeneficiary.Input()
             {

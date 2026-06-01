@@ -45,7 +45,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
 
             DbContext.SaveChanges();
 
-            handler = new ImportBeneficiariesListInOrganization(NullLogger<ImportBeneficiariesListInOrganization>.Instance, DbContext);
+            handler = new ImportBeneficiariesListInOrganization(NullLogger<ImportBeneficiariesListInOrganization>.Instance, DbContext, BeneficiaryService);
         }
 
         [Fact]

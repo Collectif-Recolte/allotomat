@@ -249,7 +249,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
             DbContext.SaveChanges();
 
-            handler = new AdjustBeneficiarySubscription(NullLogger<AdjustBeneficiarySubscription>.Instance, Clock, DbContext);
+            handler = new AdjustBeneficiarySubscription(NullLogger<AdjustBeneficiarySubscription>.Instance, Clock, DbContext, BeneficiaryService);
         }
 
         [Fact]

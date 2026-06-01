@@ -44,7 +44,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
 
             DbContext.SaveChanges();
 
-            handler = new CreateBeneficiaryInOrganization(NullLogger<CreateBeneficiaryInOrganization>.Instance, DbContext);
+            handler = new CreateBeneficiaryInOrganization(NullLogger<CreateBeneficiaryInOrganization>.Instance, DbContext, BeneficiaryService);
         }
 
         [Fact]

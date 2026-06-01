@@ -70,7 +70,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
 
             DbContext.SaveChanges();
 
-            handler = new EditBeneficiary(NullLogger<EditBeneficiary>.Instance, DbContext);
+            handler = new EditBeneficiary(NullLogger<EditBeneficiary>.Instance, DbContext, BeneficiaryService);
         }
 
         [Fact]

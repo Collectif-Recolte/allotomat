@@ -117,7 +117,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             handler = new ChangeBeneficiarySubscriptionMaxNumberOfPayments(
                 NullLogger<ChangeBeneficiarySubscriptionMaxNumberOfPayments>.Instance,
                 DbContext,
-                Clock);
+                Clock,
+                BeneficiaryService);
         }
 
         [Fact]

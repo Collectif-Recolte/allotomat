@@ -55,7 +55,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Cards
 
             DbContext.SaveChanges();
 
-            handler = new AssignCardToBeneficiary(NullLogger<AssignCardToBeneficiary>.Instance, DbContext);
+            handler = new AssignCardToBeneficiary(NullLogger<AssignCardToBeneficiary>.Instance, DbContext, BeneficiaryService);
         }
 
         [Fact]

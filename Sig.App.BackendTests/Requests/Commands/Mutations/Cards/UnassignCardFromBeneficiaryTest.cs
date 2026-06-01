@@ -124,7 +124,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Cards
 
             DbContext.SaveChanges();
 
-            handler = new UnassignCardFromBeneficiary(NullLogger<UnassignCardFromBeneficiary>.Instance, DbContext, Clock, HttpContextAccessor);
+            handler = new UnassignCardFromBeneficiary(NullLogger<UnassignCardFromBeneficiary>.Instance, DbContext, Clock, HttpContextAccessor, BeneficiaryService);
         }
 
         [Fact]

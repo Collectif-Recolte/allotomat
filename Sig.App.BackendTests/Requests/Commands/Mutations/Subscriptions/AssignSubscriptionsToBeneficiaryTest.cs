@@ -205,7 +205,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
             DbContext.SaveChanges();
 
-            handler = new AssignSubscriptionsToBeneficiary(NullLogger<AssignSubscriptionsToBeneficiary>.Instance, Clock, DbContext);
+            handler = new AssignSubscriptionsToBeneficiary(NullLogger<AssignSubscriptionsToBeneficiary>.Instance, Clock, DbContext, BeneficiaryService);
 
             Clock.Reset(Instant.FromUtc(today.Year, today.Month, 4, 0, 0));
         }

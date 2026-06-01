@@ -150,7 +150,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             DbContext.SaveChanges();
 
-            handler = new AddMissingPayments(NullLogger<AddMissingPayments>.Instance, DbContext, Clock, HttpContextAccessor, NullLogger<AddingFundToCard>.Instance);
+            handler = new AddMissingPayments(NullLogger<AddMissingPayments>.Instance, DbContext, Clock, HttpContextAccessor, NullLogger<AddingFundToCard>.Instance, BeneficiaryService);
         }
 
         [Fact]
