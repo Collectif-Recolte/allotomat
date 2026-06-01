@@ -6,6 +6,7 @@ using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.Services.System;
 
 namespace Sig.App.Backend.Services.Beneficiaries
@@ -27,7 +28,7 @@ namespace Sig.App.Backend.Services.Beneficiaries
         {
             var beneficiariesAreAnonymous = false;
             var currentUser = await currentUserAccessor.GetCurrentUser();
-            
+
             if (currentUser.Type == UserType.ProjectManager)
             {
                 var existingClaims = await userManager.GetClaimsAsync(currentUser);
@@ -37,6 +38,18 @@ namespace Sig.App.Backend.Services.Beneficiaries
             }
 
             return !beneficiariesAreAnonymous;
+        }
+
+        public bool ShouldAnonymizeBeneficiaries(Project? project, bool canSeeAll)
+        {
+            if (project == null) return true;
+            if (!project.BeneficiariesAreAnonymous) return false;
+            return !canSeeAll;
+        }
+
+        public async Task<bool> ShouldAnonymizeBeneficiaries(Project? project)
+        {
+            return ShouldAnonymizeBeneficiaries(project, await CurrentUserCanSeeAllBeneficiaryInfo());
         }
     }
 }

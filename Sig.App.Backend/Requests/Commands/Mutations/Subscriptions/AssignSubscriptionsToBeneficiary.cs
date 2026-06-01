@@ -19,20 +19,23 @@ using System.Threading.Tasks;
 using Sig.App.Backend.Gql.Bases;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using Sig.App.Backend.Services.Beneficiaries;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 {
     public class AssignSubscriptionsToBeneficiary : IRequestHandler<AssignSubscriptionsToBeneficiary.Input, AssignSubscriptionsToBeneficiary.Payload>
     {
         private readonly ILogger<AssignSubscriptionsToBeneficiary> logger;
-        private IClock clock;
+        private readonly IClock clock;
         private readonly AppDbContext db;
+        private readonly IBeneficiaryService beneficiaryService;
 
-        public AssignSubscriptionsToBeneficiary(ILogger<AssignSubscriptionsToBeneficiary> logger, IClock clock, AppDbContext db)
+        public AssignSubscriptionsToBeneficiary(ILogger<AssignSubscriptionsToBeneficiary> logger, IClock clock, AppDbContext db, IBeneficiaryService beneficiaryService)
         {
             this.logger = logger;
             this.clock = clock;
             this.db = db;
+            this.beneficiaryService = beneficiaryService;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -144,9 +147,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             await db.SaveChangesAsync(cancellationToken);
 
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(organization.Project);
             return new Payload()
             {
-                Beneficiary = new BeneficiaryGraphType(beneficiary, organization.Project?.BeneficiariesAreAnonymous ?? true)
+                Beneficiary = new BeneficiaryGraphType(beneficiary, isAnonymous)
             };
         }
 

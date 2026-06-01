@@ -10,6 +10,7 @@ using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
+using Sig.App.Backend.Services.Beneficiaries;
 using System;
 using System.Linq;
 using System.Threading;
@@ -21,11 +22,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
     {
         private readonly ILogger<CreateBeneficiaryInOrganization> logger;
         private readonly AppDbContext db;
+        private readonly IBeneficiaryService beneficiaryService;
 
-        public CreateBeneficiaryInOrganization(ILogger<CreateBeneficiaryInOrganization> logger, AppDbContext db)
+        public CreateBeneficiaryInOrganization(ILogger<CreateBeneficiaryInOrganization> logger, AppDbContext db, IBeneficiaryService beneficiaryService)
         {
             this.logger = logger;
             this.db = db;
+            this.beneficiaryService = beneficiaryService;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -86,9 +89,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
             logger.LogInformation($"[Mutation] CreateBeneficiaryInOrganization - New beneficiary created {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
 
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(organization.Project);
             return new Payload
             {
-                Beneficiary = new BeneficiaryGraphType(beneficiary, organization.Project.BeneficiariesAreAnonymous)
+                Beneficiary = new BeneficiaryGraphType(beneficiary, isAnonymous)
             };
         }
 

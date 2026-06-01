@@ -12,6 +12,7 @@ using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Requests.Queries.Beneficiaries;
 using Sig.App.Backend.Requests.Queries.Organizations;
+using Sig.App.Backend.Services.Beneficiaries;
 using Sig.App.Backend.Utilities;
 using Sig.App.Backend.Utilities.Sorting;
 using System;
@@ -43,7 +44,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return ctx.DataLoader.LoadOrganizationMarkets(Id.LongIdentifierForType<Organization>());
         }
 
-        public async Task<PaymentConflictPagination<IBeneficiaryGraphType>> Beneficiaries([Inject] IMediator mediator, [Inject] AppDbContext db, int page, int limit,
+        public async Task<PaymentConflictPagination<IBeneficiaryGraphType>> Beneficiaries([Inject] IMediator mediator, [Inject] AppDbContext db, [Inject] IBeneficiaryService beneficiaryService, int page, int limit,
             [Description("If specified, only beneficiaries without or with a subscription are returned.")] bool? withoutSubscription = null,
             [Description("If specified, only beneficiaries with one of those subscription are returned.")] Id[] subscriptions = null,
             [Description("If specified, only beneficiaries without one of those subscription are returned.")] Id[] withoutSpecificSubscriptions = null,
@@ -56,10 +57,10 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             [Description("If specified, only that match text is returned.")] string searchText = "",
             Sort<BeneficiarySort> sort = null)
         {
-            var isAnonymous = await db.Projects
+            var project = await db.Projects
                 .Where(p => p.Id == organization.ProjectId)
-                .Select(p => p.BeneficiariesAreAnonymous)
                 .FirstOrDefaultAsync();
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(project);
 
             var results = await mediator.Send(new SearchBeneficiaries.Query
             {

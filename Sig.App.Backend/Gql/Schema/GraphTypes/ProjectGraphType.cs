@@ -17,6 +17,7 @@ using Sig.App.Backend.Requests.Queries.Cards;
 using Sig.App.Backend.Requests.Queries.Markets;
 using Sig.App.Backend.Requests.Queries.Organizations;
 using Sig.App.Backend.Requests.Queries.Projects;
+using Sig.App.Backend.Services.Beneficiaries;
 using Sig.App.Backend.Services.Permission.Enums;
 using Sig.App.Backend.Utilities;
 using Sig.App.Backend.Utilities.Sorting;
@@ -201,7 +202,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             });
         }
 
-        public async Task<PaymentConflictPagination<IBeneficiaryGraphType>> Beneficiaries([Inject] IMediator mediator, int page, int limit,
+        public async Task<PaymentConflictPagination<IBeneficiaryGraphType>> Beneficiaries([Inject] IMediator mediator, [Inject] IBeneficiaryService beneficiaryService, int page, int limit,
             [Description("If specified, only beneficiaries without or with a subscription are returned.")] bool? withoutSubscription = null,
             [Description("If specified, only beneficiaries with one of those subscription are returned.")] Id[] subscriptions = null,
             [Description("If specified, only beneficiaries without one of those subscription are returned.")] Id[] withoutSpecificSubscriptions = null,
@@ -231,6 +232,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
                 WithCardDisabled = withCardDisabled
             });
 
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(project);
             return results.Map(x =>
             {
                 switch (x)
@@ -238,9 +240,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
                     case null:
                         return null as IBeneficiaryGraphType;
                     case OffPlatformBeneficiary opb:
-                        return new OffPlatformBeneficiaryGraphType(opb, project.BeneficiariesAreAnonymous);
+                        return new OffPlatformBeneficiaryGraphType(opb, isAnonymous);
                     default:
-                        return new BeneficiaryGraphType(x, project.BeneficiariesAreAnonymous);
+                        return new BeneficiaryGraphType(x, isAnonymous);
                 }
             });
         }

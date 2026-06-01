@@ -11,6 +11,7 @@ using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
+using Sig.App.Backend.Services.Beneficiaries;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,12 +23,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         private readonly ILogger<ChangeBeneficiarySubscriptionMaxNumberOfPayments> logger;
         private readonly AppDbContext db;
         private readonly IClock clock;
+        private readonly IBeneficiaryService beneficiaryService;
 
-        public ChangeBeneficiarySubscriptionMaxNumberOfPayments(ILogger<ChangeBeneficiarySubscriptionMaxNumberOfPayments> logger, AppDbContext db, IClock clock)
+        public ChangeBeneficiarySubscriptionMaxNumberOfPayments(ILogger<ChangeBeneficiarySubscriptionMaxNumberOfPayments> logger, AppDbContext db, IClock clock, IBeneficiaryService beneficiaryService)
         {
             this.logger = logger;
             this.db = db;
             this.clock = clock;
+            this.beneficiaryService = beneficiaryService;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -93,7 +96,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             logger.LogInformation($"[Mutation] ChangeBeneficiarySubscriptionMaxNumberOfPayments - MaxNumberOfPaymentsOverride set to {request.MaxNumberOfPayments} for beneficiary {beneficiaryId} in subscription {subscriptionId}");
 
-            return new Payload { Beneficiary = new BeneficiaryGraphType(subscriptionBeneficiary.Beneficiary, subscriptionBeneficiary.Beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true) };
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(subscriptionBeneficiary.Beneficiary.Organization?.Project);
+            return new Payload { Beneficiary = new BeneficiaryGraphType(subscriptionBeneficiary.Beneficiary, isAnonymous) };
         }
 
         [MutationInput]

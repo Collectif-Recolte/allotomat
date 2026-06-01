@@ -12,6 +12,7 @@ using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
+using Sig.App.Backend.Services.Beneficiaries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,12 +26,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         private readonly ILogger<AdjustBeneficiarySubscription> logger;
         private readonly IClock clock;
         private readonly AppDbContext db;
+        private readonly IBeneficiaryService beneficiaryService;
 
-        public AdjustBeneficiarySubscription(ILogger<AdjustBeneficiarySubscription> logger, IClock clock, AppDbContext db)
+        public AdjustBeneficiarySubscription(ILogger<AdjustBeneficiarySubscription> logger, IClock clock, AppDbContext db, IBeneficiaryService beneficiaryService)
         {
             this.logger = logger;
             this.clock = clock;
             this.db = db;
+            this.beneficiaryService = beneficiaryService;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -85,7 +88,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             await db.SaveChangesAsync(cancellationToken);
-            return new Payload() { Beneficiary = new BeneficiaryGraphType(beneficiary, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true) };
+            var isAnonymous = await beneficiaryService.ShouldAnonymizeBeneficiaries(beneficiary.Organization?.Project);
+            return new Payload() { Beneficiary = new BeneficiaryGraphType(beneficiary, isAnonymous) };
         }
 
         private decimal GetAmountPayment(Subscription subscription, long beneficiaryTypeId) 
