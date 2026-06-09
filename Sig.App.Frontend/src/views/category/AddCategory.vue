@@ -4,13 +4,15 @@
 		"add-category": "Add category",
 		"add-category-success-notification": "Category {categoryName} has been successfully added.",
 		"title": "Add Category",
-    "beneficiary-type-key-already-in-use": "One of the keys you've entered is already associated with another category."
+    "beneficiary-type-key-already-in-use": "One of the keys you've entered is already associated with another category.",
+    "beneficiary-type-keys-cant-be-empty": "At least one valid key is required."
 	},
 	"fr": {
 		"add-category": "Ajouter la catégorie",
 		"add-category-success-notification": "L'ajout de la catégorie {categoryName} a été un succès.",
 		"title": "Ajouter une catégorie",
-    "beneficiary-type-key-already-in-use": "L'une des clés que vous avez saisies est déjà associée à une autre catégorie."
+    "beneficiary-type-key-already-in-use": "L'une des clés que vous avez saisies est déjà associée à une autre catégorie.",
+    "beneficiary-type-keys-cant-be-empty": "Au moins une clé valide est requise."
 	}
 }
 </i18n>
@@ -40,6 +42,9 @@ import CategoryForm from "@/views/category/_Form.vue";
 useGraphQLErrorMessages({
   BENEFICIARY_TYPE_KEY_ALREADY_IN_USE: () => {
     return t("beneficiary-type-key-already-in-use");
+  },
+  BENEFICIARY_TYPE_KEYS_CANT_BE_EMPTY: () => {
+    return t("beneficiary-type-keys-cant-be-empty");
   }
 });
 
