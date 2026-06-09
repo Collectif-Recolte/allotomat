@@ -38,6 +38,7 @@ import { URL_CATEGORY_ADMIN } from "@/lib/consts/urls";
 import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 
 import CategoryForm from "@/views/category/_Form.vue";
+import { CATEGORY_PROJECTS_QUERY } from "@/views/category/category-projects.query";
 
 useGraphQLErrorMessages({
   BENEFICIARY_TYPE_KEY_ALREADY_IN_USE: () => {
@@ -68,13 +69,18 @@ const { mutate: addBeneficiaryTypeInProject } = useMutation(
 );
 
 async function onSubmit({ categoryName, categoryKeys }) {
-  await addBeneficiaryTypeInProject({
-    input: {
-      projectId: route.query.projectId,
-      name: categoryName,
-      keys: categoryKeys.map((x) => x.name)
+  await addBeneficiaryTypeInProject(
+    {
+      input: {
+        projectId: route.query.projectId,
+        name: categoryName,
+        keys: categoryKeys.map((x) => x.name)
+      }
+    },
+    {
+      refetchQueries: [{ query: CATEGORY_PROJECTS_QUERY }]
     }
-  });
+  );
   router.push({ name: URL_CATEGORY_ADMIN });
   addSuccess(t("add-category-success-notification", { categoryName }));
 }
