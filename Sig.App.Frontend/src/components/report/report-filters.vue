@@ -10,6 +10,7 @@
     "last-year": "Last year",
     "current-year": "Current year",
     "last-month": "Last month",
+    "current-month": "Current month",
     "all-time": "All time",
     "reset-filters": "Reset",
     "market-groups": "Merchant Groups"
@@ -24,6 +25,7 @@
     "last-year": "Année dernière",
     "current-year": "Année en cours",
     "last-month": "Mois dernier",
+    "current-month": "Mois en cours",
     "all-time": "Toutes les dates",
     "reset-filters": "Réinitialiser",
     "market-groups": "Groupes de commerces"
@@ -71,6 +73,7 @@
         <PfButtonAction btn-style="outline" :label="t('last-year')" @click="setDates('last-year')" />
         <PfButtonAction btn-style="outline" :label="t('current-year')" @click="setDates('current-year')" />
         <PfButtonAction btn-style="outline" :label="t('last-month')" @click="setDates('last-month')" />
+        <PfButtonAction btn-style="outline" :label="t('current-month')" @click="setDates('current-month')" />
         <PfButtonAction btn-style="outline" :label="t('all-time')" @click="setDates('all-time')" />
         <UiFilterSelect
           v-if="availableOrganizations.length > 0"
@@ -238,6 +241,13 @@ function setDates(type) {
     case "last-month": {
       const newDateFrom = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1);
       const newDateTo = new Date(new Date().getFullYear(), new Date().getMonth(), 0);
+      emit("update:modelValue", { ...props.modelValue, dateFrom: newDateFrom, dateTo: newDateTo });
+      break;
+    }
+    case "current-month": {
+      const now = new Date();
+      const newDateFrom = new Date(now.getFullYear(), now.getMonth(), 1);
+      const newDateTo = new Date(now.getFullYear(), now.getMonth() + 1, 0);
       emit("update:modelValue", { ...props.modelValue, dateFrom: newDateFrom, dateTo: newDateTo });
       break;
     }
