@@ -21,7 +21,7 @@ using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.Services.Permission.Enums;
 using Sig.App.Backend.Gql.Schema.Enums;
 using Sig.App.Backend.DbModel.Entities.Markets;
-using Sig.App.Backend.DbModel.Entities.CashRegisters;
+using Sig.App.Backend.DbModel.Entities.MarketGroups;
 
 namespace Sig.App.Backend.Services.Reports
 {
@@ -138,10 +138,10 @@ namespace Sig.App.Backend.Services.Reports
                 query = query.Where(x => marketsLongIdentifiers.Contains(x.MarketId.GetValueOrDefault()));
             }
 
-            if (request.CashRegisters?.Any() ?? false)
+            if (request.MarketGroups?.Any() ?? false)
             {
-                var cashRegistersLongIdentifiers = request.CashRegisters.Select(x => x.LongIdentifierForType<CashRegister>());
-                query = query.Where(x => cashRegistersLongIdentifiers.Contains(x.CashRegisterId.GetValueOrDefault()));
+                var marketGroupsLongIdentifiers = request.MarketGroups.Select(x => x.LongIdentifierForType<MarketGroup>());
+                query = query.Where(x => marketGroupsLongIdentifiers.Contains(x.MarketGroupId.GetValueOrDefault()));
             }
 
             if (request.TransactionTypes?.Any() ?? false)

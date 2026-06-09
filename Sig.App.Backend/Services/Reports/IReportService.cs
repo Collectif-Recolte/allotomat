@@ -24,7 +24,7 @@ namespace Sig.App.Backend.Services.Reports
         public Maybe<bool> WithoutSubscription { get; set; }
         public IEnumerable<Id> Categories { get; set; }
         public IEnumerable<Id> Markets { get; set; }
-        public IEnumerable<Id> CashRegisters { get; set; }
+        public IEnumerable<Id> MarketGroups { get; set; }
         public IEnumerable<string> TransactionTypes { get; set; }
         public IEnumerable<string> GiftCardTransactionTypes { get; set; }
         public Maybe<string> SearchText { get; set; }

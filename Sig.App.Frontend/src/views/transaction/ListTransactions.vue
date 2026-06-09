@@ -28,12 +28,12 @@
                 :available-beneficiary-types="availableBeneficiaryTypes"
                 :available-subscriptions="availableSubscriptions"
                 :available-markets="availableMarkets"
-                :available-cash-register="availableCashRegisters"
+                :available-market-groups="availableMarketGroups"
                 :selected-organizations="organizations"
                 :selected-beneficiary-types="beneficiaryTypes"
                 :selected-subscriptions="subscriptions"
                 :selected-markets="markets"
-                :selected-cash-registers="cashRegisters"
+                :selected-market-groups="marketGroups"
                 :selected-transaction-types="transactionTypes"
                 :selected-gift-card-transaction-types="giftCardTransactionTypes"
                 :without-subscription-id="WITHOUT_SUBSCRIPTION"
@@ -51,8 +51,8 @@
                 @subscriptionsChecked="onSubscriptionsChecked"
                 @marketsUnchecked="onMarketsUnchecked"
                 @marketsChecked="onMarketsChecked"
-                @cashRegistersUnchecked="onCashRegistersUnchecked"
-                @cashRegistersChecked="onCashRegistersChecked"
+                @marketGroupsUnchecked="onMarketGroupsUnchecked"
+                @marketGroupsChecked="onMarketGroupsChecked"
                 @transactionTypesChecked="onTransactionTypesChecked"
                 @transactionTypesUnchecked="onTransactionTypesUnchecked"
                 @dateFromUpdated="onDateFromUpdated"
@@ -145,7 +145,7 @@ const organizations = ref([]);
 const beneficiaryTypes = ref([]);
 const subscriptions = ref([]);
 const markets = ref([]);
-const cashRegisters = ref([]);
+const marketGroups = ref([]);
 const transactionTypes = ref([]);
 const giftCardTransactionTypes = ref([]);
 const searchInput = ref("");
@@ -167,8 +167,8 @@ if (route.query.subscriptions) {
 if (route.query.markets) {
   markets.value = route.query.markets.split(",");
 }
-if (route.query.cashRegisters) {
-  cashRegisters.value = route.query.cashRegisters.split(",");
+if (route.query.marketGroups) {
+  marketGroups.value = route.query.marketGroups.split(",");
 }
 if (route.query.transactionTypes) {
   transactionTypes.value = route.query.transactionTypes.split(",");
@@ -211,10 +211,6 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
         marketGroups {
           id
           name
-          cashRegisters {
-            id
-            name
-          }
         }
         beneficiaryTypes {
           id
@@ -268,10 +264,6 @@ const { result: resultOrganizations } = useQuery(
           marketGroups {
             id
             name
-            cashRegisters {
-              id
-              name
-            }
           }
           administrationSubscriptionsOffPlatform
         }
@@ -317,7 +309,7 @@ const {
       $categories: [ID!]
       $subscriptions: [ID!]
       $markets: [ID!]
-      $cashRegisters: [ID!]
+      $marketGroups: [ID!]
       $withoutSubscription: Boolean
       $transactionTypes: [String]
       $giftCardTransactionTypes: [String]
@@ -333,7 +325,7 @@ const {
         categories: $categories
         subscriptions: $subscriptions
         markets: $markets
-        cashRegisters: $cashRegisters
+        marketGroups: $marketGroups
         withoutSubscription: $withoutSubscription
         transactionTypes: $transactionTypes
         giftCardTransactionTypes: $giftCardTransactionTypes
@@ -411,7 +403,7 @@ const {
       organizations: organizations.value,
       subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
       markets: markets.value,
-      cashRegisters: cashRegisters.value,
+      marketGroups: marketGroups.value,
       withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
       categories: beneficiaryTypes.value,
       transactionTypes: transactionTypes.value,
@@ -433,7 +425,7 @@ const filteredQuery = computed(() => {
     organizations: organizations.value.length > 0 ? organizations.value.toString() : undefined,
     subscriptions: subscriptions.value.length > 0 ? subscriptions.value.toString() : undefined,
     markets: markets.value.length > 0 ? markets.value.toString() : undefined,
-    cashRegisters: cashRegisters.value.length > 0 ? cashRegisters.value.toString() : undefined,
+    marketGroups: marketGroups.value.length > 0 ? marketGroups.value.toString() : undefined,
     beneficiaryTypes: beneficiaryTypes.value.length > 0 ? beneficiaryTypes.value.toString() : undefined,
     transactionTypes: transactionTypes.value.length > 0 ? transactionTypes.value.toString() : undefined,
     giftCardTransactionTypes: giftCardTransactionTypes.value.length > 0 ? giftCardTransactionTypes.value.toString() : undefined,
@@ -467,9 +459,8 @@ let availableMarkets = computed(() => {
   return project.value?.markets;
 });
 
-let availableCashRegisters = computed(() => {
-  var cashRegister = project.value?.marketGroups.flatMap((x) => x.cashRegisters) ?? [];
-  return cashRegister.filter((x, index) => cashRegister.findIndex((y) => y.id === x.id) === index);
+let availableMarketGroups = computed(() => {
+  return project.value?.marketGroups ?? [];
 });
 
 let administrationSubscriptionsOffPlatform = computed(() => {
@@ -516,14 +507,14 @@ function onMarketsUnchecked(value) {
   markets.value = markets.value.filter((x) => x !== value);
 }
 
-function onCashRegistersChecked(value) {
+function onMarketGroupsChecked(value) {
   page.value = 1;
-  cashRegisters.value.push(value);
+  marketGroups.value.push(value);
 }
 
-function onCashRegistersUnchecked(value) {
+function onMarketGroupsUnchecked(value) {
   page.value = 1;
-  cashRegisters.value = cashRegisters.value.filter((x) => x !== value);
+  marketGroups.value = marketGroups.value.filter((x) => x !== value);
 }
 
 function onTransactionTypesChecked(value) {
@@ -565,7 +556,7 @@ function onResetFilters() {
   organizations.value = [];
   subscriptions.value = [];
   markets.value = [];
-  cashRegisters.value = [];
+  marketGroups.value = [];
   beneficiaryTypes.value = [];
   transactionTypes.value = [];
   giftCardTransactionTypes.value = [];
@@ -601,7 +592,7 @@ async function onExportReport() {
     organizations: organizations.value,
     subscriptions: subscriptions.value.length > 0 ? subscriptions.value.filter((x) => x !== WITHOUT_SUBSCRIPTION) : null,
     markets: markets.value,
-    cashRegisters: cashRegisters.value,
+    marketGroups: marketGroups.value,
     withoutSubscription: subscriptions.value.indexOf(WITHOUT_SUBSCRIPTION) !== -1 ? true : null,
     categories: beneficiaryTypes.value,
     transactionTypes: transactionTypes.value,
@@ -621,7 +612,7 @@ async function onExportReport() {
         $categories: [ID!]
         $subscriptions: [ID!]
         $markets: [ID!]
-        $cashRegisters: [ID!]
+        $marketGroups: [ID!]
         $withoutSubscription: Boolean
         $transactionTypes: [String]
         $giftCardTransactionTypes: [String]
@@ -637,7 +628,7 @@ async function onExportReport() {
           categories: $categories
           subscriptions: $subscriptions
           markets: $markets
-          cashRegisters: $cashRegisters
+          marketGroups: $marketGroups
           withoutSubscription: $withoutSubscription
           transactionTypes: $transactionTypes
           giftCardTransactionTypes: $giftCardTransactionTypes
