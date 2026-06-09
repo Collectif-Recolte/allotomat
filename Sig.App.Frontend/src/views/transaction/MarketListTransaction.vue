@@ -107,6 +107,7 @@ import { useCashRegisterStore } from "@/lib/store/cash-register";
 
 import { LANG_EN } from "@/lib/consts/langs";
 import { LANGUAGE_FILTER_EN, LANGUAGE_FILTER_FR } from "@/lib/consts/enums";
+import ICON_DOWNLOAD from "@/lib/icons/download.json";
 
 const dateFrom = ref(new Date(Date.now()));
 const dateTo = ref(new Date(Date.now()));
