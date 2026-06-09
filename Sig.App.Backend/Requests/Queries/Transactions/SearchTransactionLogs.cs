@@ -7,14 +7,9 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.Utilities;
 using Sig.App.Backend.Utilities.Sorting;
 using GraphQL.Conventions;
-using Sig.App.Backend.Extensions;
-using Sig.App.Backend.DbModel.Entities.Projects;
 using System.Collections.Generic;
 using Sig.App.Backend.Gql.Schema.Types;
-using Sig.App.Backend.DbModel.Entities.Organizations;
-using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Microsoft.EntityFrameworkCore;
-using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.Services.Beneficiaries;
 using Sig.App.Backend.Services.Permission.Enums;
 using Sig.App.Backend.Services.Permission;
@@ -24,9 +19,7 @@ using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
-using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.Gql.Bases;
-using Sig.App.Backend.DbModel.Entities.MarketGroups;
 
 namespace Sig.App.Backend.Requests.Queries.Transactions
 {
@@ -51,118 +44,29 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
         {
             var currentUserCanSeeAllBeneficiaryInfo = await beneficiaryService.CurrentUserCanSeeAllBeneficiaryInfo();
             var globalPermissions = await permissionService.GetGlobalPermissions(ctx.CurrentUser);
-            var longProjectId = request.ProjectId.LongIdentifierForType<Project>();
-
-            var startDate = request.StartDate.ToUniversalTime();
-            var endDate = request.EndDate.ToUniversalTime();
-
-            IQueryable<TransactionLog> query = db.TransactionLogs.Include(x => x.TransactionLogProductGroups).Where(x =>
-                x.CreatedAtUtc > startDate && x.CreatedAtUtc < endDate && x.ProjectId == longProjectId)
+            var query = db.TransactionLogs
+                .Include(x => x.TransactionLogProductGroups)
                 .Where(x => x.Discriminator != TransactionLogDiscriminator.ExpireFundTransactionLog || (x.TotalAmount > 0));
 
-            if(!globalPermissions.Contains(GlobalPermission.ManageOrganizations))
+            var canManageOrganizations = globalPermissions.Contains(GlobalPermission.ManageOrganizations);
+            string organizationManagerClaimValue = null;
+
+            if (!canManageOrganizations)
             {
                 var user = await db.Users.Where(c => c.Id == ctx.CurrentUserId).FirstAsync(cancellationToken: cancellationToken);
-
                 var existingClaims = await userManager.GetClaimsAsync(user);
-                var existingOrganizationsClaims = existingClaims.Where(x => x.Type == AppClaimTypes.OrganizationManagerOf).Select(x => x.Value).FirstOrDefault();
-                query = query.Where(x => x.OrganizationId.ToString() == existingOrganizationsClaims);
-            }
-            else if (request.Organizations?.Any() ?? false)
-            {
-                var organizationsLongIdentifiers = request.Organizations.Select(x => x.LongIdentifierForType<Organization>());
-                query = query.Where(x => organizationsLongIdentifiers.Contains(x.OrganizationId ?? 0));
+                organizationManagerClaimValue = existingClaims.Where(x => x.Type == AppClaimTypes.OrganizationManagerOf).Select(x => x.Value).FirstOrDefault();
             }
 
-            if (request.Subscriptions?.Any() ?? false)
-            {
-                var withoutSubscription = request.WithoutSubscription?.Value ?? false;
-                var subscriptionLongIdentifiers = request.Subscriptions.Select(x => x.LongIdentifierForType<Subscription>());
-                query = query.Where(x => (withoutSubscription && !x.SubscriptionId.HasValue) || subscriptionLongIdentifiers.Contains(x.SubscriptionId.GetValueOrDefault()));
-            }
-            else if (request.WithoutSubscription.IsSet() && request.WithoutSubscription.Value)
-            {
-                query = query.Where(x => !x.SubscriptionId.HasValue);
-            }
-
-            if (request.Categories?.Any() ?? false)
-            {
-                var categoriesLongIdentifiers = request.Categories.Select(x => x.LongIdentifierForType<BeneficiaryType>());
-                query = query.Where(x => categoriesLongIdentifiers.Contains(x.BeneficiaryTypeId.GetValueOrDefault()));
-            }
-
-            if (request.Markets?.Any() ?? false)
-            {
-                var marketsLongIdentifiers = request.Markets.Select(x => x.LongIdentifierForType<Market>());
-                query = query.Where(x => marketsLongIdentifiers.Contains(x.MarketId.GetValueOrDefault()));
-            }
-
-            if (request.MarketGroups?.Any() ?? false)
-            {
-                var marketGroupsLongIdentifiers = request.MarketGroups.Select(x => x.LongIdentifierForType<MarketGroup>());
-                query = query.Where(x => marketGroupsLongIdentifiers.Contains(x.MarketGroupId.GetValueOrDefault()));
-            }
-
-            if (request.TransactionTypes?.Any() ?? false)
-            {
-                var transactionLogDiscriminators =
-                    request.TransactionTypes.Select(x => Enum.Parse(typeof(TransactionLogDiscriminator), x));
-                query = query.Where(x => transactionLogDiscriminators.Contains(x.Discriminator));
-            }
-
-            if (request.GiftCardTransactionTypes?.Any() ?? false)
-            {
-                var withGiftCard = request.GiftCardTransactionTypes.Where(x => x == "withGiftCard").Any();
-                var withoutGiftCard = request.GiftCardTransactionTypes.Where(x => x == "withoutGiftCard").Any();
-
-                if (withoutGiftCard && withGiftCard)
-                {
-                    // Nothing to do in the case it's with and without
-                }
-                else if (withGiftCard)
-                {
-                    // When the transaction is made without an subscriptionId, the transaction is for a gift-card
-                    query = query.Where(x => x.SubscriptionId == null);
-                }
-                else if (withoutGiftCard)
-                {
-                    // When the transaction is made with an subscriptionId, the transaction is not for a gift-card
-                    query = query.Where(x => x.SubscriptionId != null);
-                }
-            }
-
-            if (request.SearchText.IsSet() && !string.IsNullOrEmpty(request.SearchText.Value))
-            {
-                var searchText = request.SearchText.Value.Split(' ').AsEnumerable();
-                foreach (var text in searchText)
-                {
-                    if (currentUserCanSeeAllBeneficiaryInfo)
-                    {
-                        query = query.Where(x =>
-                            EF.Functions.Collate(x.BeneficiaryID1, SearchCollation.AccentInsensitive).Contains(text) ||
-                            EF.Functions.Collate(x.BeneficiaryID2, SearchCollation.AccentInsensitive).Contains(text) ||
-                            EF.Functions.Collate(x.BeneficiaryEmail, SearchCollation.AccentInsensitive).Contains(text) ||
-                            EF.Functions.Collate(x.BeneficiaryFirstname, SearchCollation.AccentInsensitive).Contains(text) ||
-                            EF.Functions.Collate(x.BeneficiaryLastname, SearchCollation.AccentInsensitive).Contains(text) ||
-                            EF.Functions.Collate(x.CardNumber, SearchCollation.AccentInsensitive).Contains(text)
-                        );
-                    }
-                    else
-                    {
-                        query = query.Where(x =>
-                            EF.Functions.Collate(x.BeneficiaryID1, SearchCollation.AccentInsensitive).Contains(text) ||
-                            EF.Functions.Collate(x.BeneficiaryID2, SearchCollation.AccentInsensitive).Contains(text) ||
-                            EF.Functions.Collate(x.CardNumber, SearchCollation.AccentInsensitive).Contains(text)
-                        );
-                    }
-                }
-            }
+            query = query
+                .FilterByOrganizationScope(canManageOrganizations, organizationManagerClaimValue, request.Organizations)
+                .FilterByCriteria(request, currentUserCanSeeAllBeneficiaryInfo);
 
             var sorted = Sort(query, TransactionLogSort.Default, SortOrder.Desc);
             return await TransactionLogsPagination.For(sorted, request.Page);
         }
 
-        public class Query : IRequest<TransactionLogsPagination<TransactionLog>>
+        public class Query : IRequest<TransactionLogsPagination<TransactionLog>>, ITransactionLogFilterCriteria
         {
             public Page Page { get; set; }
             public Id ProjectId { get; set; }
