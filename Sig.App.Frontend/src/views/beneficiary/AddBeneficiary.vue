@@ -5,7 +5,7 @@
 		"add-beneficiary": "Add participant",
     "set-subscription": "Assign subscriptions",
     "set-card": "Assign card",
-    "set-missed-payment": "Add missed payment", 
+    "set-subscription-payment": "Subscription payment per rules", 
     "next-step-btn-add-beneficiary": "Add participant and assign subscriptions",
     "next-step-btn-add-subscription": "Add subscription(s) and assign card",
 		"add-beneficiary-success-notification": "{firstname} {lastname} has been successfully added.",
@@ -19,7 +19,7 @@
 		"add-beneficiary": "Ajouter le·a participant·e",
     "set-subscription": "Assigner les abonnements",
     "set-card": "Attribuer une carte",
-    "set-missed-payment": "Ajouter un paiement manqué",    
+    "set-subscription-payment": "Versement selon les règles de l'abonnement",    
     "next-step-btn-add-beneficiary": "Ajouter le·a participant·e et assigner des abonnements",
     "next-step-btn-add-subscription": "Assigner les abonnements et assigner une carte",
 		"add-beneficiary-success-notification": "L’ajout de {firstname} {lastname} a été un succès.",
@@ -42,7 +42,7 @@
           ? t('set-subscription')
           : currentStep === 2
           ? t('set-card')
-          : t('set-missed-payment')
+          : t('set-subscription-payment')
       "
       :step-count="manageCards ? 4 : 2"
       :step-number="currentStep + 1" />
@@ -72,7 +72,7 @@
         @cardAssignSuccess="onCardAssignSuccess" />
     </template>
     <template v-else-if="currentStep === 3">
-      <AddMissedPayment :subscriptions="beneficiarySubscriptions" :beneficiary="createBeneficiary" @closeModal="closeModal" />
+      <AddSubscriptionPayment :subscriptions="beneficiarySubscriptions" :beneficiary="createBeneficiary" @closeModal="closeModal" />
     </template>
   </UiDialogModal>
 </template>
@@ -97,7 +97,7 @@ import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 import BeneficiaryForm from "@/views/beneficiary/_Form";
 import AssignSubscriptionForm from "@/views/beneficiary/_AssignSubscriptionForm";
 import AssignCardForm from "@/components/card/assign-card-form";
-import AddMissedPayment from "@/views/beneficiary/_AddMissedPayment";
+import AddSubscriptionPayment from "@/views/beneficiary/_AddSubscriptionPayment";
 
 useGraphQLErrorMessages({
   ID_1_ALREADY_EXIST: () => {
@@ -151,7 +151,7 @@ const { mutate: assignSubscriptionsToBeneficiary } = useMutation(
         beneficiary {
           id
           beneficiarySubscriptions {
-            hasMissedPayment
+            canAddSubscriptionPayment
             subscription {
               id
               name

@@ -1,4 +1,4 @@
-﻿using GraphQL.Conventions;
+using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using NodaTime;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
@@ -71,27 +71,15 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
         }
 
-        public async Task<bool> HasMissedPayment(IAppUserContext ctx, [Inject] IClock clock) {
+        public async Task<bool> CanAddSubscriptionPayment(IAppUserContext ctx, [Inject] IClock clock) {
             var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
-            var subscriptionTotalPayment = subscriptionBeneficiary.GetTotalPayment();
-            var subscriptionPaymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock);
 
             var now = clock.GetCurrentInstant().ToDateTimeUtc();
             var transactionCount = transactions.Count();
             var effectiveMaxPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
-            var previousPaymentCount = subscription.GetPreviousPaymentCount(clock);
-
-            if (subscriptionBeneficiary.MaxNumberOfPaymentsOverride.HasValue || subscription.MaxNumberOfPayments.HasValue)
-            {
-                return subscription.GetExpirationDate(clock) > now
-                    && subscription.GetFirstPaymentDateTime() < now
-                    && transactionCount < effectiveMaxPayments
-                    && previousPaymentCount > transactionCount;
-            }
 
             return subscription.GetExpirationDate(clock) > now
-                && subscription.GetFirstPaymentDateTime() < now
-                && previousPaymentCount > transactionCount;
+                && transactionCount < effectiveMaxPayments;
         }
     }
 }

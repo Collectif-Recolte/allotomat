@@ -2,30 +2,30 @@
 {
   "en": {
     "title": "Transfer Funds",
-    "add-missing-payment-title": "Add a missed subscription payment",
-    "add-missing-payment-desc": "Funds will be added to the participant's card according to the subscription settings.",
-    "add-missing-payment": "Add a missed payment",
+    "add-subscription-payment-title": "Subscription payment per rules",
+    "add-subscription-payment-desc": "Funds will be added to the participant's card according to the subscription settings.",
+    "add-subscription-payment": "Subscription payment per rules",
     "manually-add-funds-title": "Manually add funds",
     "manually-add-funds-desc": "Add a specific amount to the participant's card with a chosen expiration date.",
     "manually-add-funds": "Manually add funds",
     "add-gift-card-funds-title": "Add gift card funds to the card",
     "add-gift-card-funds-desc": "Add a gift card amount to the participant's card without an expiration date.",
     "add-gift-card-funds": "Add gift card funds to the card",
-    "add-missing-payment-tooltip": "No missed payment found",
+    "add-subscription-payment-tooltip": "No subscription payment available per rules",
     "manually-add-funds-tooltip": "No active subscription found"
   },
   "fr": {
     "title": "Transférer des fonds",
-    "add-missing-payment-title": "Versement d'un paiement manqué",
-    "add-missing-payment-desc": "Selon les paramètres de l'abonnement, les fonds seront ajoutés à la carte du ou de la participant·e.",
-    "add-missing-payment": "Ajouter un versement manqué",
+    "add-subscription-payment-title": "Versement selon les règles de l'abonnement",
+    "add-subscription-payment-desc": "Selon les paramètres de l'abonnement, les fonds seront ajoutés à la carte du ou de la participant·e.",
+    "add-subscription-payment": "Versement selon les règles de l'abonnement",
     "manually-add-funds-title": "Versement sur mesure",
     "manually-add-funds-desc": "Ajouter un montant sur la carte du ou de la participant·e avec une date d'expiration au choix.",
     "manually-add-funds": "Versement sur mesure",
     "add-gift-card-funds-title": "Ajouter des fonds carte-cadeau",
     "add-gift-card-funds-desc": "Ajouter un montant carte-cadeau à la carte du ou de la participant·e sans date d'expiration.",
     "add-gift-card-funds": "Ajouter des fonds carte-cadeau",
-    "add-missing-payment-tooltip": "Aucun paiement manqué trouvé",
+    "add-subscription-payment-tooltip": "Aucun versement possible selon les règles de l'abonnement",
     "manually-add-funds-tooltip": "Aucun abonnement actif trouvé"
   }
 }
@@ -36,19 +36,19 @@
     <div class="flex flex-col gap-6">
       <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
         <UiCallout class="min-w-0" :variant="CALLOUT_INFO">
-          <p class="font-medium mb-1 m-0">{{ t("add-missing-payment-title") }}</p>
-          <p class="m-0">{{ t("add-missing-payment-desc") }}</p>
+          <p class="font-medium mb-1 m-0">{{ t("add-subscription-payment-title") }}</p>
+          <p class="m-0">{{ t("add-subscription-payment-desc") }}</p>
         </UiCallout>
-        <PfTooltip :hide-tooltip="haveMissedPayment" :label="!haveMissedPayment ? t('add-missing-payment-tooltip') : undefined">
+        <PfTooltip :hide-tooltip="canAddSubscriptionPayment" :label="!canAddSubscriptionPayment ? t('add-subscription-payment-tooltip') : undefined">
           <PfButtonLink
             tag="routerLink"
             class="w-full sm:w-auto sm:min-w-[11rem] px-6 py-3 text-base shrink-0"
             :to="{
-              name: URL_BENEFICIARY_ADD_MISSED_PAYMENT,
+              name: URL_BENEFICIARY_ADD_SUBSCRIPTION_PAYMENT,
               params: { beneficiaryId: route.params.beneficiaryId }
             }"
-            :label="t('add-missing-payment')"
-            :is-disabled="!haveMissedPayment" />
+            :label="t('add-subscription-payment')"
+            :is-disabled="!canAddSubscriptionPayment" />
         </PfTooltip>
       </div>
       <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
@@ -101,7 +101,7 @@ import { storeToRefs } from "pinia";
 
 import {
   URL_BENEFICIARY_ADMIN,
-  URL_BENEFICIARY_ADD_MISSED_PAYMENT,
+  URL_BENEFICIARY_ADD_SUBSCRIPTION_PAYMENT,
   URL_BENEFICIARY_MANUALLY_ADD_FUND,
   URL_BENEFICIARY_EDIT_GIFT_CARD
 } from "@/lib/consts/urls";
@@ -133,7 +133,7 @@ const { result: resultBeneficiary, loading } = useQuery(
         }
         ... on BeneficiaryGraphType {
           beneficiarySubscriptions {
-            hasMissedPayment
+            canAddSubscriptionPayment
             subscription {
               id
               fundsExpirationDate
@@ -151,8 +151,8 @@ const { result: resultBeneficiary, loading } = useQuery(
 
 const beneficiary = useResult(resultBeneficiary, null, (data) => data.beneficiary);
 
-const haveMissedPayment = computed(() => {
-  return beneficiary.value?.beneficiarySubscriptions?.some((x) => x?.hasMissedPayment ?? false) ?? false;
+const canAddSubscriptionPayment = computed(() => {
+  return beneficiary.value?.beneficiarySubscriptions?.some((x) => x?.canAddSubscriptionPayment ?? false) ?? false;
 });
 
 const haveActiveSubscription = computed(() => {

@@ -1,4 +1,4 @@
-﻿using GraphQL.Conventions;
+using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using NodaTime;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
@@ -29,13 +29,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public bool IsExpired => subscription.ExpirationNotificationSentDate != null;
         public int TotalPayment => subscription.GetTotalPayment();
 
-        public bool HasMissedPayment([Inject] IClock clock)
+        public bool CanAddSubscriptionPayment([Inject] IClock clock)
         {
-            if (subscription.MaxNumberOfPayments.HasValue)
-            {
-                return subscription.GetExpirationDate(clock) > clock.GetCurrentInstant().ToDateTimeUtc() && subscription.GetFirstPaymentDateTime() < clock.GetCurrentInstant().ToDateTimeUtc();
-            }
-            return subscription.GetExpirationDate(clock) > clock.GetCurrentInstant().ToDateTimeUtc() && subscription.GetPaymentRemaining(clock) < subscription.GetTotalPayment();
+            return subscription.GetExpirationDate(clock) > clock.GetCurrentInstant().ToDateTimeUtc();
         }
 
         public SubscriptionGraphType(Subscription subscription)

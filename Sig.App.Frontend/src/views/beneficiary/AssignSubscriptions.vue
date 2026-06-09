@@ -309,7 +309,7 @@
           }"
           v-html="t('remaining-amount', { amount: budgetAllowanceAvailableAfterAllocationMoneyFormat })"></p>
         <PfFormInputCheckbox
-          v-if="selectedSubscriptionHasMissedPayment && selectedBeneficiariesWithCard.length > 0"
+          v-if="selectedSubscriptionCanAddSubscriptionPayment && selectedBeneficiariesWithCard.length > 0"
           :label="
             t('replicate-payment-on-attribution', {
               totalParticipantWithCard: selectedBeneficiariesWithCard.length,
@@ -472,7 +472,7 @@ const {
             paymentRemaining
             isSubscriptionPaymentBasedCardUsage
             maxNumberOfPayments
-            hasMissedPayment
+            canAddSubscriptionPayment
             types {
               id
               amount
@@ -542,7 +542,7 @@ const subscriptions = useResult(resultOrganizations, null, (data) => {
       isSubscriptionPaymentBasedCardUsage: x.isSubscriptionPaymentBasedCardUsage,
       maxNumberOfPayments: x.maxNumberOfPayments,
       types: x.types,
-      hasMissedPayment: x.hasMissedPayment
+      canAddSubscriptionPayment: x.canAddSubscriptionPayment
     }));
 });
 
@@ -805,7 +805,7 @@ const selectedSubscriptionName = computed(() => {
   return subscriptions.value.find((x) => x.value === selectedSubscription.value).label;
 });
 
-const selectedSubscriptionHasMissedPayment = computed(() => {
+const selectedSubscriptionCanAddSubscriptionPayment = computed(() => {
   if (selectedSubscription.value === null) return "-";
 
   var beneficiaryTransactionCount =
@@ -814,7 +814,7 @@ const selectedSubscriptionHasMissedPayment = computed(() => {
     )?.count ?? 0;
 
   return (
-    subscriptions.value.find((x) => x.value === selectedSubscription.value).hasMissedPayment &&
+    subscriptions.value.find((x) => x.value === selectedSubscription.value).canAddSubscriptionPayment &&
     subscriptions.value.find((x) => x.value === selectedSubscription.value).totalPayment -
       subscriptions.value.find((x) => x.value === selectedSubscription.value).paymentRemaining >
       beneficiaryTransactionCount

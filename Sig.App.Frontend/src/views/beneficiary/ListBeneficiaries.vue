@@ -539,7 +539,7 @@ const {
                   id
                   name
                 }
-                hasMissedPayment
+                canAddSubscriptionPayment
                 subscription {
                   id
                   isArchived
@@ -681,7 +681,7 @@ const {
                   id
                   name
                 }
-                hasMissedPayment
+                canAddSubscriptionPayment
                 subscription {
                   id
                   isArchived

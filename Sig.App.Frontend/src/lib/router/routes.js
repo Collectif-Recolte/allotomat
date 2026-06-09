@@ -901,9 +901,9 @@ export default [
             }
           },
           {
-            name: urls.URL_BENEFICIARY_ADD_MISSED_PAYMENT,
-            path: ":beneficiaryId/add-missed-payment",
-            component: () => import("@/views/beneficiary/AddMissedPayment.vue"),
+            name: urls.URL_BENEFICIARY_ADD_SUBSCRIPTION_PAYMENT,
+            path: ":beneficiaryId/add-subscription-payment",
+            component: () => import("@/views/beneficiary/AddSubscriptionPayment.vue"),
             meta: {
               claim: GLOBAL_MANAGE_BENEFICIARIES
             }
