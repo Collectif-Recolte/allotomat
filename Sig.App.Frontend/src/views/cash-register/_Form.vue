@@ -10,8 +10,8 @@
     "selected-project": "Program",
     "selected-market-group": "Location",
     "no-associated-market-groups": "All available merchant groups are associated with the cash register.",
-    "warning-add-cash-register": "Please contact your program coordinators before adding a new cash register on Tomat. This feature should only be used if you have multiple check-out lanes at one location.",
-    "warning-edit-cash-register": "Please contact your program coordinators before modifying the names of your cash registers on Tomat. Cash register names should usually correspond to the names of markets, location, or merchant group within the program."
+    "warning-add-cash-register": "Please contact your program managers before adding a new cash register on Tomat. This feature should only be used if you have multiple check-out lanes at one location.",
+    "warning-edit-cash-register": "Please contact your program managers before modifying the names of your cash registers on Tomat. Cash register names should usually correspond to the names of markets, location, or merchant group within the program."
 	},
 	"fr": {
     "project-name": "Programme",
