@@ -387,7 +387,7 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, Id[] markets, Id[] cashRegisters, string[] transactionTypes, string[] giftCardTransactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
+        public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, Id[] markets, Id[] marketGroups, string[] transactionTypes, string[] giftCardTransactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
         {
             return await mediator.Send(new GenerateTransactionsReport.Input()
             {
@@ -397,7 +397,7 @@ namespace Sig.App.Backend.Gql.Schema
                 Organizations = organizations,
                 Subscriptions = subscriptions,
                 Markets = markets,
-                CashRegisters = cashRegisters,
+                MarketGroups = marketGroups,
                 WithoutSubscription = withoutSubscription,
                 Categories = categories,
                 TransactionTypes = transactionTypes,
@@ -513,7 +513,7 @@ namespace Sig.App.Backend.Gql.Schema
         [RequirePermission(GlobalPermission.ManageTransactions)]
         [Description("All transactions")]
         public static async Task<TransactionLogsPagination<TransactionLogGraphType>> TransactionLogs(this GqlQuery _, [Inject] IMediator mediator, [Inject] AppDbContext db,
-            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, Id[] markets, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string[] giftCardTransactionTypes, Id[] cashRegisters, string searchText, string timeZoneId)
+            int page, int limit, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, Id[] markets, bool? withoutSubscription, Id[] categories, string[] transactionTypes, string[] giftCardTransactionTypes, Id[] marketGroups, string searchText, string timeZoneId)
         {
             var longProjectId = projectId.LongIdentifierForType<Project>();
             var isAnonymous = await db.Projects
@@ -530,7 +530,7 @@ namespace Sig.App.Backend.Gql.Schema
                 Organizations = organizations,
                 Subscriptions = subscriptions,
                 Markets = markets,
-                CashRegisters = cashRegisters,
+                MarketGroups = marketGroups,
                 WithoutSubscription = withoutSubscription,
                 Categories = categories,
                 TransactionTypes = transactionTypes,
