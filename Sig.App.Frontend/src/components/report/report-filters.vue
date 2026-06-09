@@ -62,7 +62,7 @@
           <UiDatePicker
             id="dateTo"
             :value="props.modelValue.dateTo"
-            :min-date="props.dateFrom"
+            :min-date="props.modelValue.dateFrom"
             class="sm:col-span-6"
             :label="t('date-end-label')"
             has-hidden-label
