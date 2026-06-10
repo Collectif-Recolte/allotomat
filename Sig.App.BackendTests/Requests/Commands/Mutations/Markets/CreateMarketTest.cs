@@ -2,9 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Requests.Commands.Mutations.Markets;
 using Sig.App.Backend.Services.Mailer;
+using Sig.App.Backend.Services.System;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -19,7 +21,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Markets
         public CreateMarketTest()
         {
             mailer = new Mock<IMailer>();
-            handler = new CreateMarket(NullLogger<CreateMarket>.Instance, DbContext, UserManager, mailer.Object, Mediator);
+            var currentUserAccessor = new CurrentUserAccessor(HttpContextAccessor, DbContext);
+            handler = new CreateMarket(NullLogger<CreateMarket>.Instance, DbContext, UserManager, mailer.Object, Mediator, currentUserAccessor);
+            SetLoggedInUser(AddUser("admin@example.com", UserType.PCAAdmin));
         }
 
         [Fact]

@@ -1,4 +1,9 @@
-﻿using GraphQL.Conventions;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
+using GraphQL.Conventions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -19,11 +24,7 @@ using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
 using Sig.App.Backend.Requests.Commands.Mutations.CashRegisters;
 using Sig.App.Backend.Services.Mailer;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
+using Sig.App.Backend.Services.System;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 {
@@ -34,38 +35,34 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
         private readonly UserManager<AppUser> userManager;
         private readonly IMailer mailer;
         private readonly IMediator mediator;
+        private readonly ICurrentUserAccessor currentUserAccessor;
 
-        public CreateMarket(ILogger<CreateMarket> logger, AppDbContext db, UserManager<AppUser> userManager, IMailer mailer, IMediator mediator)
+        public CreateMarket(ILogger<CreateMarket> logger, AppDbContext db, UserManager<AppUser> userManager, IMailer mailer, IMediator mediator, ICurrentUserAccessor currentUserAccessor)
         {
             this.logger = logger;
             this.db = db;
             this.userManager = userManager;
             this.mailer = mailer;
             this.mediator = mediator;
+            this.currentUserAccessor = currentUserAccessor;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
             logger.LogInformation($"[Mutation] CreateMarket({request.Name}, {request.ManagerEmails})");
+
+            var marketGroup = await ResolveMarketGroupForAssociationAsync(request, cancellationToken);
+            var managers = await PrepareManagersAsync(request.ManagerEmails);
+
             var market = new Market()
             {
                 Name = request.Name.Trim()
             };
 
-            var managers = new List<AppUser>();
-
             db.Markets.Add(market);
 
-            foreach (var email in request.ManagerEmails)
+            foreach (var (manager, isNew) in managers)
             {
-                var (manager, isNew) = await GetOrCreateMarketManager(email);
-                var existingClaims = await userManager.GetClaimsAsync(manager);
-                if (existingClaims.Any(c => c.Type == AppClaimTypes.MarketManagerOf))
-                {
-                    logger.LogWarning($"[Mutation] CreateMarket - MarketNotFoundException ({email})");
-                    throw new UserAlreadyManagerException();
-                }
-
                 await userManager.AddClaimAsync(manager, new Claim(AppClaimTypes.MarketManagerOf, market.Id.ToString()));
 
                 if (isNew)
@@ -81,23 +78,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                     await mailer.Send(new NewMarketAssignedEmail(manager.Email, market.GetIdentifier().ToString(), market.Name));
                 }
 
-                managers.Add(manager);
                 logger.LogInformation($"[Mutation] CreateMarket - Market manager {manager.Email} added to market {market.Name} ({market.Id})");
             }
 
             await db.SaveChangesAsync(cancellationToken);
 
-            if (request.ProjectId.IsSet())
+            if (marketGroup != null)
             {
-                var marketGroupId = request.MarketGroupId.Value.LongIdentifierForType<MarketGroup>();
-                var marketGroup = await db.MarketGroups.Include(x => x.Markets).FirstOrDefaultAsync(x => x.Id == marketGroupId, cancellationToken);
-
-                if (marketGroup == null)
-                {
-                    logger.LogWarning("[Mutation] CreateMarket - MarketGroupNotFoundException");
-                    throw new MarketGroupNotFoundException();
-                }
-
                 marketGroup.Markets.Add(new MarketGroupMarket()
                 {
                     Market = market,
@@ -113,9 +100,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
                     }
                 };
 
-                var projectId = request.ProjectId.Value.LongIdentifierForType<Project>();
-                var project = await db.Projects.Include(x => x.Markets).FirstOrDefaultAsync(x => x.Id == projectId, cancellationToken);
-
                 await mediator.Send(new CreateCashRegister.Input() { MarketGroupId = request.MarketGroupId.Value, MarketId = market.GetIdentifier(), Name = marketGroup.Name });
             }
 
@@ -126,8 +110,77 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             return new Payload
             {
                 Market = new MarketGraphType(market),
-                Managers = managers.Select(x => new UserGraphType(x))
+                Managers = managers.Select(x => new UserGraphType(x.manager))
             };
+        }
+
+        private static bool HasAssociationId(Maybe<Id> maybe) => maybe.IsSet() && maybe.Value != null;
+
+        private async Task<MarketGroup> ResolveMarketGroupForAssociationAsync(Input request, CancellationToken cancellationToken)
+        {
+            var hasProject = HasAssociationId(request.ProjectId);
+            var hasMarketGroup = HasAssociationId(request.MarketGroupId);
+
+            if (!hasProject && !hasMarketGroup)
+            {
+                if (!currentUserAccessor.IsUserType(UserType.PCAAdmin))
+                {
+                    logger.LogWarning("[Mutation] CreateMarket - IncompleteProgramAssociationException");
+                    throw new IncompleteProgramAssociationException();
+                }
+
+                return null;
+            }
+
+            if (hasProject != hasMarketGroup)
+            {
+                logger.LogWarning("[Mutation] CreateMarket - IncompleteProgramAssociationException");
+                throw new IncompleteProgramAssociationException();
+            }
+
+            var projectId = request.ProjectId.Value.LongIdentifierForType<Project>();
+            var projectExists = await db.Projects.AnyAsync(x => x.Id == projectId, cancellationToken);
+            if (!projectExists)
+            {
+                logger.LogWarning("[Mutation] CreateMarket - ProjectNotFoundException");
+                throw new ProjectNotFoundException();
+            }
+
+            var marketGroupId = request.MarketGroupId.Value.LongIdentifierForType<MarketGroup>();
+            var marketGroup = await db.MarketGroups.Include(x => x.Markets).FirstOrDefaultAsync(x => x.Id == marketGroupId, cancellationToken);
+            if (marketGroup == null)
+            {
+                logger.LogWarning("[Mutation] CreateMarket - MarketGroupNotFoundException");
+                throw new MarketGroupNotFoundException();
+            }
+
+            if (marketGroup.ProjectId != projectId)
+            {
+                logger.LogWarning("[Mutation] CreateMarket - MarketGroupNotInProjectException");
+                throw new MarketGroupNotInProjectException();
+            }
+
+            return marketGroup;
+        }
+
+        private async Task<List<(AppUser manager, bool isNew)>> PrepareManagersAsync(IEnumerable<string> managerEmails)
+        {
+            var managers = new List<(AppUser manager, bool isNew)>();
+
+            foreach (var email in managerEmails)
+            {
+                var (manager, isNew) = await GetOrCreateMarketManager(email);
+                var existingClaims = await userManager.GetClaimsAsync(manager);
+                if (existingClaims.Any(c => c.Type == AppClaimTypes.MarketManagerOf))
+                {
+                    logger.LogWarning($"[Mutation] CreateMarket - UserAlreadyManagerException ({email})");
+                    throw new UserAlreadyManagerException();
+                }
+
+                managers.Add((manager, isNew));
+            }
+
+            return managers;
         }
 
         private async Task<(AppUser user, bool isNew)> GetOrCreateMarketManager(string email)
@@ -180,6 +233,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 
         public class UserAlreadyManagerException : RequestValidationException { }
         public class ExistingUserNotMerchantException : RequestValidationException { }
+        public class ProjectNotFoundException : RequestValidationException { }
         public class MarketGroupNotFoundException : RequestValidationException { }
+        public class IncompleteProgramAssociationException : RequestValidationException { }
+        public class MarketGroupNotInProjectException : RequestValidationException { }
     }
 }
