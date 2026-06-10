@@ -7,9 +7,7 @@ import {
   URL_BENEFICIARY_ADMIN,
   URL_TRANSACTION,
   URL_RECONCILIATION_REPORT,
-  URL_ROOT,
-  URL_MARKET_ADMIN,
-  URL_MARKET_OVERVIEW
+  URL_ROOT
 } from "@/lib/consts/urls";
 import {
   USER_TYPE_MERCHANT,
@@ -89,26 +87,16 @@ router.beforeEach(async (to, from, next) => {
     });
   }
 
-  // Global merchant admin (/markets) is reserved for PCA admins
-  if (
-    to.matched.some((r) => r.name === URL_MARKET_ADMIN) &&
-    auth.userType !== USER_TYPE_PCAADMIN
-  ) {
-    return next({ name: URL_MARKET_OVERVIEW });
-  }
-
   // Enforce usertype constraints
   for (const match of to.matched) {
     if (match.meta.usertype) {
-      if (Array.isArray(match.meta.usertype)) {
-        if (!match.meta.usertype.includes(auth.userType)) {
-          return next({
-            name: URL_ROOT
-          });
-        }
-      } else if (auth.userType !== match.meta.usertype) {
+      const allowed = Array.isArray(match.meta.usertype)
+        ? match.meta.usertype.includes(auth.userType)
+        : auth.userType === match.meta.usertype;
+
+      if (!allowed) {
         return next({
-          name: URL_ROOT
+          name: match.meta.unauthorizedUserTypeRedirectTo ?? URL_ROOT
         });
       }
     }
