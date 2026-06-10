@@ -61,9 +61,11 @@
 
   <PfButtonAction
     class="w-full"
+    :class="{ 'text-h4 py-4': props.isKiosk }"
     btn-style="secondary"
+    :size="props.isKiosk ? 'lg' : undefined"
     :label="t('create-new-transaction-btn')"
-    @click="emit('onUpdateStep', TRANSACTION_FINISH, {})" />
+    @click="onFinish" />
 </template>
 
 <script setup>
@@ -85,10 +87,19 @@ const props = defineProps({
   transactionId: {
     type: String,
     required: true
-  }
+  },
+  isKiosk: Boolean
 });
 
-const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState"]);
+const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState", "finished"]);
+
+function onFinish() {
+  if (props.isKiosk) {
+    emit("finished");
+    return;
+  }
+  emit("onUpdateStep", TRANSACTION_FINISH, {});
+}
 
 const { result } = useQuery(
   gql`

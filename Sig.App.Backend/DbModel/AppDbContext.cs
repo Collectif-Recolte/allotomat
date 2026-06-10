@@ -414,6 +414,13 @@ namespace Sig.App.Backend.DbModel
                     .WithMany(x => x.CashRegisters)
                     .HasForeignKey(x => x.MarketId)
                     .OnDelete(DeleteBehavior.NoAction);
+
+                _.Property(x => x.KioskAccessToken)
+                    .HasMaxLength(64);
+
+                _.HasIndex(x => x.KioskAccessToken)
+                    .IsUnique()
+                    .HasFilter("[KioskAccessToken] IS NOT NULL");
             });
 
             Configure<CashRegisterMarketGroup>(_ => {

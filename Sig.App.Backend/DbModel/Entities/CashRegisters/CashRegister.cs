@@ -14,5 +14,7 @@ namespace Sig.App.Backend.DbModel.Entities.CashRegisters
         public IList<CashRegisterMarketGroup> MarketGroups { get; set; }
 
         public bool IsArchived { get; set; }
+
+        public string KioskAccessToken { get; set; }
     }
 }

@@ -932,6 +932,49 @@ namespace Sig.App.Backend.Gql.Schema
         }
 
         [RequirePermission(MarketPermission.ManageCashRegister)]
+        [AnnotateErrorCodes(typeof(EnableCashRegisterKiosk))]
+        public static Task<EnableCashRegisterKiosk.Payload> EnableCashRegisterKiosk(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<EnableCashRegisterKiosk.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(MarketPermission.ManageCashRegister)]
+        [AnnotateErrorCodes(typeof(RegenerateCashRegisterKioskToken))]
+        public static Task<RegenerateCashRegisterKioskToken.Payload> RegenerateCashRegisterKioskToken(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<RegenerateCashRegisterKioskToken.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(MarketPermission.ManageCashRegister)]
+        [AnnotateErrorCodes(typeof(DisableCashRegisterKiosk))]
+        public static Task<DisableCashRegisterKiosk.Payload> DisableCashRegisterKiosk(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<DisableCashRegisterKiosk.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [AnnotateErrorCodes(typeof(CreateKioskTransaction))]
+        public static Task<CreateKioskTransaction.Payload> CreateKioskTransaction(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            NonNull<CreateKioskTransaction.Input> input
+            )
+        {
+            return mediator.Send(input.Value);
+        }
+
+        [RequirePermission(MarketPermission.ManageCashRegister)]
         [AnnotateErrorCodes(typeof(AddCashRegisterToMarketGroup))]
         public static Task<AddCashRegisterToMarketGroup.Payload> AddCashRegisterToMarketGroup(
             this GqlMutation _,

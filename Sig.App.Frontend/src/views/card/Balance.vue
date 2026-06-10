@@ -32,10 +32,19 @@
       </p>
 
       <ProductGroupFundList display-expiration-date class="mb-6" :product-groups="getProductGroups(allFunds)" />
-      <TransactionList v-if="card" :transactions="card.transactions" :page="page" @update:page="updatePage" />
+      <TransactionList
+        v-if="card && !props.hideTransactionList"
+        :transactions="card.transactions"
+        :page="page"
+        @update:page="updatePage" />
 
       <div class="mt-4">
-        <PfButtonAction btn-style="link" size="sm" :label="t('done')" @click="emit('onUpdateStep', CHECK_CARD_STEPS_START)" />
+        <PfButtonAction
+          :btn-style="props.isKiosk ? 'secondary' : 'link'"
+          :size="props.isKiosk ? 'lg' : 'sm'"
+          :class="{ 'w-full': props.isKiosk }"
+          :label="t('done')"
+          @click="onDone" />
       </div>
     </div>
   </div>
@@ -62,10 +71,20 @@ const props = defineProps({
   cardId: {
     type: String,
     required: true
-  }
+  },
+  hideTransactionList: Boolean,
+  isKiosk: Boolean
 });
 
-const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState"]);
+const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState", "finished"]);
+
+function onDone() {
+  if (props.isKiosk) {
+    emit("finished");
+    return;
+  }
+  emit("onUpdateStep", CHECK_CARD_STEPS_START);
+}
 
 const { result, loading } = useQuery(
   gql`

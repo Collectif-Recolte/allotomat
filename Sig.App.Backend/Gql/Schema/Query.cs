@@ -43,6 +43,7 @@ using Sig.App.Backend.Utilities.Sorting;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.Requests.Queries.Markets;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
+using Sig.App.Backend.Requests.Queries.CashRegisters;
 
 namespace Sig.App.Backend.Gql.Schema
 {
@@ -342,6 +343,17 @@ namespace Sig.App.Backend.Gql.Schema
         public static async Task<bool> VerifyCardCanBeUsedInMarket(this GqlQuery _, Id cardId, Id marketId, Id cashRegisterId, [Inject] IMediator mediator)
         {
             return await mediator.Send(new VerifyCardCanBeUsedInMarket.Input() { CardId = cardId, MarketId = marketId, CashRegisterId = cashRegisterId });
+        }
+
+        public static async Task<KioskCashRegisterInfoGraphType> CashRegisterByKioskToken(this GqlQuery _, string token, [Inject] IMediator mediator)
+        {
+            return await mediator.Send(new GetCashRegisterByKioskToken.Input { Token = token });
+        }
+
+        [AnnotateErrorCodes(typeof(VerifyCardCanBeUsedInKiosk))]
+        public static async Task<bool> VerifyCardCanBeUsedInKiosk(this GqlQuery _, string kioskToken, Id cardId, [Inject] IMediator mediator)
+        {
+            return await mediator.Send(new VerifyCardCanBeUsedInKiosk.Input { KioskToken = kioskToken, CardId = cardId });
         }
 
         public static IDataLoaderResult<BeneficiaryTypeGraphType> BeneficiaryType(this GqlQuery _, IAppUserContext ctx, Id id)

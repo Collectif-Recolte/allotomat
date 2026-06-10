@@ -20,9 +20,10 @@
     </div>
     <div class="text-center relative mt-6">
       <PfButtonAction
-        class="mx-auto max-w-40 xs:max-w-none"
+        :class="props.kioskMode ? 'mx-auto w-full max-w-xs' : 'mx-auto max-w-40 xs:max-w-none'"
         :label="cancelLabel || t('cancel')"
-        btn-style="link"
+        :btn-style="props.kioskMode ? 'secondary' : 'link'"
+        :size="props.kioskMode ? 'lg' : undefined"
         @click="$emit('cancel')" />
       <div class="absolute -translate-y-1/2 top-1/2 right-0">
         <PfButtonAction
@@ -61,7 +62,8 @@ const props = defineProps({
   cancelLabel: {
     type: String,
     default: ""
-  }
+  },
+  kioskMode: Boolean
 });
 
 const emit = defineEmits(["triggerError", "checkQRCode", "cancel"]);
