@@ -114,12 +114,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             };
         }
 
-        private static bool HasAssociationId(Maybe<Id> maybe) => maybe.IsSet() && maybe.Value != null;
-
         private async Task<MarketGroup> ResolveMarketGroupForAssociationAsync(Input request, CancellationToken cancellationToken)
         {
-            var hasProject = HasAssociationId(request.ProjectId);
-            var hasMarketGroup = HasAssociationId(request.MarketGroupId);
+            var hasProject = request.ProjectId.HasValue();
+            var hasMarketGroup = request.MarketGroupId.HasValue();
 
             if (!hasProject && !hasMarketGroup)
             {
