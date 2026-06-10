@@ -2,12 +2,10 @@
 {
   "en": {
     "title": "Make a purchase",
-    "scan-card": "Scan a card",
     "invalid-link": "This link is invalid or has expired."
   },
   "fr": {
     "title": "Faire un achat",
-    "scan-card": "Scanner une carte",
     "invalid-link": "Ce lien est invalide ou a expiré."
   }
 }
@@ -19,20 +17,13 @@
       {{ t("invalid-link") }}
     </div>
     <template v-else-if="isValid">
-      <div v-if="activeStep === KIOSK_STEP_SCAN" class="flex justify-center py-8 lg:py-16 px-4">
-        <UiCta
-          class="w-full max-w-lg"
-          :img-src="require('@/assets/img/scan-marchand.jpg')"
-          :primary-btn-label="t('scan-card')"
-          primary-btn-is-action
-          @onPrimaryBtnClick="activeStep = KIOSK_STEP_SCANNING" />
-      </div>
       <KioskScan
-        v-else-if="activeStep === KIOSK_STEP_SCANNING"
+        v-if="activeStep === KIOSK_STEP_SCANNING"
         :kiosk-token="token"
+        :heading="t('title')"
         transaction-route-name="kiosk-transaction-url"
         @scanned="onScanned"
-        @cancel="activeStep = KIOSK_STEP_SCAN" />
+        @cancel="goHome" />
       <div v-else-if="activeStep === KIOSK_STEP_ADD" class="py-5 px-4 xs:px-8">
         <div class="bg-white rounded-2xl pt-6 pb-3 px-3 xs:p-6 max-w-lg mx-auto">
           <h1 class="font-semibold mb-4 text-h2">{{ t("title") }}</h1>
@@ -71,7 +62,6 @@ import KioskScan from "@/views/kiosk/KioskScan";
 import AddTransaction from "@/components/transaction/add-transaction";
 import CompleteTransaction from "@/components/transaction/complete-transaction";
 
-const KIOSK_STEP_SCAN = "scan";
 const KIOSK_STEP_SCANNING = "scanning";
 const KIOSK_STEP_ADD = "add";
 const KIOSK_STEP_COMPLETE = "complete";
@@ -82,7 +72,7 @@ usePageTitle(t("title"));
 
 const { token, loading: kioskLoading, isValid, kioskRoute } = useKioskToken();
 
-const activeStep = ref(KIOSK_STEP_SCAN);
+const activeStep = ref(KIOSK_STEP_SCANNING);
 const cardId = ref("");
 const transactionId = ref("");
 const loading = ref(false);

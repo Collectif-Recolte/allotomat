@@ -1,16 +1,6 @@
-<i18n>
-{
-  "en": {
-    "title": "Scan a card"
-  },
-  "fr": {
-    "title": "Scanner une carte"
-  }
-}
-</i18n>
-
 <template>
   <div class="text-center min-h-app p-8 flex flex-col justify-center items-center">
+    <h1 v-if="props.heading" class="font-semibold text-h2 text-primary-900 mb-6">{{ props.heading }}</h1>
     <QRCodeScanner
       kiosk-mode
       :error-url-const="URL_KIOSK_TRANSACTION_ERROR"
@@ -22,12 +12,10 @@
 <script setup>
 import gql from "graphql-tag";
 import { defineEmits, defineProps } from "vue";
-import { useI18n } from "vue-i18n";
 import { useApolloClient } from "@vue/apollo-composable";
 import { useRouter } from "vue-router";
 
 import QRCodeScanner from "@/components/transaction/qr-code-scanner.vue";
-import { usePageTitle } from "@/lib/helpers/page-title";
 import { URL_KIOSK_TRANSACTION_ERROR } from "@/lib/consts/urls";
 import {
   CARD_CANT_BE_USED_IN_MARKET,
@@ -37,16 +25,14 @@ import {
 } from "@/lib/consts/qr-code-error";
 
 const audio = new Audio(require("@/assets/audio/scan.mp3"));
-const { t } = useI18n();
 const router = useRouter();
 const { resolveClient } = useApolloClient();
 const client = resolveClient();
 
-usePageTitle(t("title"));
-
 const props = defineProps({
   kioskToken: { type: String, required: true },
-  transactionRouteName: { type: String, required: true }
+  transactionRouteName: { type: String, required: true },
+  heading: { type: String, default: "" }
 });
 
 const emit = defineEmits(["scanned", "cancel"]);

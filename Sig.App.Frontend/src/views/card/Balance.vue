@@ -4,6 +4,7 @@
 		"card-description": "Program {programName}",
     "card-id": "Card #{cardId}",
 		"done": "Check another card",
+		"back": "Back",
 		"title": "Card Balance",
     "card-is-disabled": "The card is deactivated."
 	},
@@ -11,6 +12,7 @@
 		"card-description": "Programme {programName}",
     "card-id": "Carte #{cardId}",
 		"done": "Vérifier une autre carte",
+		"back": "Retour",
 		"title": "Solde de la carte",
     "card-is-disabled": "La carte est désactivée."
 	}
@@ -43,7 +45,7 @@
           :btn-style="props.isKiosk ? 'secondary' : 'link'"
           :size="props.isKiosk ? 'lg' : 'sm'"
           :class="{ 'w-full': props.isKiosk }"
-          :label="t('done')"
+          :label="props.isKiosk ? t('back') : t('done')"
           @click="onDone" />
       </div>
     </div>

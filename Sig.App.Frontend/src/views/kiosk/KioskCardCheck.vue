@@ -1,15 +1,11 @@
 <i18n>
 {
   "en": {
-    "title": "Check card balance",
-    "restart-scan": "Scan a card",
-    "camera-access": "You must have access to a camera.",
+    "title": "Check my card balance",
     "invalid-link": "This link is invalid or has expired."
   },
   "fr": {
-    "title": "Vérifier le solde d'une carte",
-    "restart-scan": "Scanner une carte",
-    "camera-access": "Vous devez avoir accès à une caméra.",
+    "title": "Vérifier le solde de ma carte",
     "invalid-link": "Ce lien est invalide ou a expiré."
   }
 }
@@ -21,22 +17,14 @@
       {{ t("invalid-link") }}
     </div>
     <template v-else-if="isValid">
-      <div v-if="activeStep === CHECK_CARD_STEPS_START" class="flex justify-center py-8 lg:py-16 px-4">
-        <UiCta
-          class="w-full max-w-lg"
-          :img-src="require('@/assets/img/scan-marchand.jpg')"
-          :primary-btn-label="t('restart-scan')"
-          :description="t('camera-access')"
-          primary-btn-is-action
-          @onPrimaryBtnClick="activeStep = CHECK_CARD_STEPS_SCAN" />
-      </div>
-      <div v-else-if="activeStep === CHECK_CARD_STEPS_SCAN" class="text-center flex flex-col justify-center items-center p-8">
+      <div v-if="activeStep === CHECK_CARD_STEPS_SCAN" class="text-center flex flex-col justify-center items-center p-8">
+        <h1 class="font-semibold text-h2 text-primary-900 mb-6">{{ t("title") }}</h1>
         <QRCodeScanner
           kiosk-mode
           :error-url-const="URL_CARD_ERROR"
-          @triggerError="activeStep = CHECK_CARD_STEPS_START"
+          @triggerError="activeStep = CHECK_CARD_STEPS_SCAN"
           @checkQRCode="checkQRCode"
-          @cancel="activeStep = CHECK_CARD_STEPS_START" />
+          @cancel="goHome" />
       </div>
       <Balance
         v-else-if="activeStep === CHECK_CARD_STEPS_COMPLETE"
@@ -59,7 +47,7 @@ import { useApolloClient } from "@vue/apollo-composable";
 import { usePageTitle } from "@/lib/helpers/page-title";
 import { useKioskToken } from "@/lib/composables/use-kiosk-token";
 import { URL_KIOSK_HOME, URL_CARD_ERROR } from "@/lib/consts/urls";
-import { CHECK_CARD_STEPS_START, CHECK_CARD_STEPS_SCAN, CHECK_CARD_STEPS_COMPLETE } from "@/lib/consts/enums";
+import { CHECK_CARD_STEPS_SCAN, CHECK_CARD_STEPS_COMPLETE } from "@/lib/consts/enums";
 import { CARD_NOT_FOUND } from "@/lib/consts/qr-code-error";
 
 import KioskShell from "@/components/app/kiosk-shell";
@@ -75,7 +63,7 @@ usePageTitle(t("title"));
 
 const { loading: kioskLoading, isValid, kioskRoute } = useKioskToken();
 
-const activeStep = ref(CHECK_CARD_STEPS_START);
+const activeStep = ref(CHECK_CARD_STEPS_SCAN);
 const cardId = ref("");
 const loading = ref(false);
 
@@ -92,7 +80,7 @@ async function checkQRCode(id) {
   });
 
   if (!result.data.card) {
-    activeStep.value = CHECK_CARD_STEPS_START;
+    activeStep.value = CHECK_CARD_STEPS_SCAN;
     router.push({ name: URL_CARD_ERROR, query: { error: CARD_NOT_FOUND, returnRoute: URL_KIOSK_HOME } });
     return;
   }
