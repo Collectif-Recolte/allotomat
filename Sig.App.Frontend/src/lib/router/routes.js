@@ -21,6 +21,7 @@ import {
   GLOBAL_MANAGE_MARKETGROUP_MANAGERS,
   GLOBAL_MANAGE_SPECIFIC_MARKET_GROUP
 } from "@/lib/consts/permissions";
+import { USER_TYPE_PCAADMIN } from "@/lib/consts/enums";
 
 import { useAuthStore } from "@/lib/store/auth";
 
@@ -290,7 +291,9 @@ export default [
     path: "/markets",
     component: () => import("@/views/market/ListMarkets.vue"),
     meta: {
-      claim: GLOBAL_MANAGE_ALL_MARKETS
+      claim: GLOBAL_MANAGE_ALL_MARKETS,
+      usertype: USER_TYPE_PCAADMIN,
+      unauthorizedUserTypeRedirectTo: urls.URL_MARKET_OVERVIEW
     },
     children: [
       {
