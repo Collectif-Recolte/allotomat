@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using GraphQL.Conventions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -234,6 +234,28 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Markets
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<CreateMarket.UserAlreadyManagerException>();
 
+            (await DbContext.Markets.CountAsync()).Should().Be(marketCountBefore);
+        }
+
+        [Fact]
+        public async Task When_SecondManagerAlreadyManagesMarket_DoesNotCreateFirstNewUser()
+        {
+            var existingManager = AddUser("blocked-manager@example.com", UserType.Merchant);
+            await UserManager.AddClaimAsync(existingManager, new Claim(AppClaimTypes.MarketManagerOf, "999"));
+
+            var userCountBefore = await DbContext.Users.CountAsync();
+            var marketCountBefore = await DbContext.Markets.CountAsync();
+
+            var input = new CreateMarket.Input
+            {
+                Name = "Multi Manager Market",
+                ManagerEmails = new[] { "new-manager@example.com", existingManager.Email }
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<CreateMarket.UserAlreadyManagerException>();
+
+            (await DbContext.Users.CountAsync()).Should().Be(userCountBefore);
             (await DbContext.Markets.CountAsync()).Should().Be(marketCountBefore);
         }
     }

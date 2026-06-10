@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading;
@@ -163,54 +163,56 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
 
         private async Task<List<(AppUser manager, bool isNew)>> PrepareManagersAsync(IEnumerable<string> managerEmails)
         {
-            var managers = new List<(AppUser manager, bool isNew)>();
+            var pending = new List<(string email, AppUser existing)>();
 
             foreach (var email in managerEmails)
             {
-                var (manager, isNew) = await GetOrCreateMarketManager(email);
-                var existingClaims = await userManager.GetClaimsAsync(manager);
-                if (existingClaims.Any(c => c.Type == AppClaimTypes.MarketManagerOf))
+                var user = await db.Users.FirstOrDefaultAsync(x => x.Email == email);
+
+                if (user != null)
                 {
-                    logger.LogWarning($"[Mutation] CreateMarket - UserAlreadyManagerException ({email})");
-                    throw new UserAlreadyManagerException();
+                    if (user.Type != UserType.Merchant)
+                    {
+                        logger.LogWarning($"[Mutation] CreateMarket - ExistingUserNotMerchantException ({email})");
+                        throw new ExistingUserNotMerchantException();
+                    }
+
+                    var existingClaims = await userManager.GetClaimsAsync(user);
+                    if (existingClaims.Any(c => c.Type == AppClaimTypes.MarketManagerOf))
+                    {
+                        logger.LogWarning($"[Mutation] CreateMarket - UserAlreadyManagerException ({email})");
+                        throw new UserAlreadyManagerException();
+                    }
                 }
 
-                managers.Add((manager, isNew));
+                pending.Add((email, user));
+            }
+
+            var managers = new List<(AppUser manager, bool isNew)>();
+            foreach (var (email, existing) in pending)
+            {
+                managers.Add(existing != null
+                    ? (existing, false)
+                    : (await GetOrCreateMarketManager(email), true));
             }
 
             return managers;
         }
 
-        private async Task<(AppUser user, bool isNew)> GetOrCreateMarketManager(string email)
+        private async Task<AppUser> GetOrCreateMarketManager(string email)
         {
-            var user = await db.Users.FirstOrDefaultAsync(x => x.Email == email);
-
-            if (user != null)
+            var user = new AppUser(email)
             {
-                switch (user.Type)
-                {
-                    case UserType.Merchant:
-                        return (user, false);
-                    default:
-                        logger.LogWarning($"[Mutation] CreateMarket - ExistingUserNotMerchantException ({email})");
-                        throw new ExistingUserNotMerchantException();
-                }
-            }
-            else
-            {
-                user = new AppUser(email)
-                {
-                    Type = UserType.Merchant,
-                    Profile = new UserProfile()
-                };
+                Type = UserType.Merchant,
+                Profile = new UserProfile()
+            };
 
-                var result = await userManager.CreateAsync(user);
-                result.AssertSuccess();
+            var result = await userManager.CreateAsync(user);
+            result.AssertSuccess();
 
-                logger.LogInformation($"[Mutation] CreateMarket - New market manager created {user.Email} ({user.Id}). Sending email invitation.");
-            }
+            logger.LogInformation($"[Mutation] CreateMarket - New market manager created {user.Email} ({user.Id}). Sending email invitation.");
 
-            return (user, true);
+            return user;
         }
 
         [MutationInput]
