@@ -87,8 +87,7 @@
         :icon="MARKET" />
       <button
         v-if="manageProjectManagers && manageBeneficiaries"
-        class="secondary-menu-item secondary-menu-item--is-inactive"
-        style="width: 285px"
+        class="secondary-menu-item secondary-menu-item--is-inactive text-start w-full"
         @click="onExportReport">
         {{ t("manage-project-export-all-participants") }}
       </button>
