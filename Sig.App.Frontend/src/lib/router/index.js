@@ -7,7 +7,9 @@ import {
   URL_BENEFICIARY_ADMIN,
   URL_TRANSACTION,
   URL_RECONCILIATION_REPORT,
-  URL_ROOT
+  URL_ROOT,
+  URL_MARKET_ADMIN,
+  URL_MARKET_OVERVIEW
 } from "@/lib/consts/urls";
 import {
   USER_TYPE_MERCHANT,
@@ -85,6 +87,14 @@ router.beforeEach(async (to, from, next) => {
     return next({
       name
     });
+  }
+
+  // Global merchant admin (/markets) is reserved for PCA admins
+  if (
+    to.matched.some((r) => r.name === URL_MARKET_ADMIN) &&
+    auth.userType !== USER_TYPE_PCAADMIN
+  ) {
+    return next({ name: URL_MARKET_OVERVIEW });
   }
 
   // Enforce usertype constraints
