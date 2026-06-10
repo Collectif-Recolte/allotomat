@@ -171,22 +171,25 @@ const validationSchema = computed(() =>
   })
 );
 
+function marketGroupFromForm(marketGroupId) {
+  return resultMarketGroups.value?.marketGroups?.find((g) => g.id === marketGroupId);
+}
+
 async function onSubmit(values) {
+  const isOverviewAdd = route.name === URL_MARKET_OVERVIEW_ADD;
+  const isMarketGroupManager = userType.value === USER_TYPE_MARKETGROUPMANAGER;
+  const selectedMarketGroupId = values.marketGroup ?? marketGroup.value?.id;
+  const selectedMarketGroup = marketGroupFromForm(selectedMarketGroupId) ?? marketGroup.value;
+
   let input = {
     name: values.marketName,
     managerEmails: values.managers.map((x) => x.email),
-    projectId:
-      userType.value === USER_TYPE_MARKETGROUPMANAGER
-        ? { value: marketGroup.value?.project?.id }
-        : route.name === URL_MARKET_OVERVIEW_ADD
-        ? { value: project.value.id }
-        : null,
-    marketGroupId:
-      userType.value === USER_TYPE_MARKETGROUPMANAGER
-        ? { value: marketGroup.value?.id }
-        : route.name === URL_MARKET_OVERVIEW_ADD
-        ? { value: values.marketGroup }
-        : null
+    projectId: isOverviewAdd
+      ? {
+          value: isMarketGroupManager ? selectedMarketGroup?.project?.id : project.value.id
+        }
+      : null,
+    marketGroupId: isOverviewAdd ? { value: selectedMarketGroupId } : null
   };
 
   await createMarket({ input });
