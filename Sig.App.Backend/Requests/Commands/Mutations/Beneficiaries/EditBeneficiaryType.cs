@@ -1,4 +1,4 @@
-﻿using GraphQL.Conventions;
+using GraphQL.Conventions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -39,6 +39,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                 throw new BeneficiaryTypeNotFoundException();
             }
 
+            if (request.Keys == null || !request.Keys.Any() || request.Keys.Any(string.IsNullOrWhiteSpace))
+            {
+                logger.LogWarning("[Mutation] EditBeneficiaryType - BeneficiaryTypeKeysCantBeEmptyException");
+                throw new BeneficiaryTypeKeysCantBeEmptyException();
+            }
+
             var beneficiaryTypes = await db.BeneficiaryTypes.Where(x => x.ProjectId == beneficiaryType.ProjectId && x.Id != beneficiaryType.Id).ToListAsync();
             var beneficiaryTypesKeys = beneficiaryTypes.SelectMany(x => x.GetKeys());
 
@@ -76,5 +82,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
         public class BeneficiaryTypeNotFoundException : RequestValidationException { }
         public class BeneficiaryTypeKeyAlreadyInUseException: RequestValidationException { }
+        public class BeneficiaryTypeKeysCantBeEmptyException : RequestValidationException { }
     }
 }

@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using GraphQL.Conventions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -111,6 +111,48 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
 
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<EditBeneficiaryType.BeneficiaryTypeKeyAlreadyInUseException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfKeysIsEmpty()
+        {
+            var input = new EditBeneficiaryType.Input()
+            {
+                BeneficiaryTypeId = beneficiaryType.GetIdentifier(),
+                Name = new Maybe<NonNull<string>>("Type EFGH"),
+                Keys = []
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<EditBeneficiaryType.BeneficiaryTypeKeysCantBeEmptyException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfKeyIsWhitespaceOnly()
+        {
+            var input = new EditBeneficiaryType.Input()
+            {
+                BeneficiaryTypeId = beneficiaryType.GetIdentifier(),
+                Name = new Maybe<NonNull<string>>("Type EFGH"),
+                Keys = ["   "]
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<EditBeneficiaryType.BeneficiaryTypeKeysCantBeEmptyException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfOneKeyIsWhitespaceOnly()
+        {
+            var input = new EditBeneficiaryType.Input()
+            {
+                BeneficiaryTypeId = beneficiaryType.GetIdentifier(),
+                Name = new Maybe<NonNull<string>>("Type EFGH"),
+                Keys = ["couple", "   "]
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<EditBeneficiaryType.BeneficiaryTypeKeysCantBeEmptyException>();
         }
     }
 }

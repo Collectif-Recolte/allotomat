@@ -1,4 +1,4 @@
-﻿using Sig.App.Backend.DbModel.Entities.Projects;
+using Sig.App.Backend.DbModel.Entities.Projects;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -23,7 +23,11 @@ namespace Sig.App.Backend.DbModel.Entities.Beneficiaries
 
         public void SetKeys(string[] keys)
         {
-            Keys = string.Join(";", keys.Distinct().Select(x => x.Trim().ToLower()));
+            Keys = string.Join(";",
+                keys
+                    .Where(k => !string.IsNullOrWhiteSpace(k))
+                    .Select(x => x.Trim().ToLower())
+                    .Distinct());
         }
     }
 }

@@ -36,6 +36,7 @@ import { useRoute, useRouter } from "vue-router";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 import { URL_CATEGORY_ADMIN } from "@/lib/consts/urls";
+import { CATEGORY_PROJECTS_QUERY } from "@/views/category/category-projects.query";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -70,11 +71,16 @@ function getCategoryName() {
 }
 
 async function deleteCategory() {
-  await deleteBeneficiaryTypeMutation({
-    input: {
-      beneficiaryTypeId: route.params.categoryId
+  await deleteBeneficiaryTypeMutation(
+    {
+      input: {
+        beneficiaryTypeId: route.params.categoryId
+      }
+    },
+    {
+      refetchQueries: [{ query: CATEGORY_PROJECTS_QUERY }]
     }
-  });
+  );
 
   addSuccess(t("delete-category-success-notification", { categoryName: category.value.name }));
   router.push({ name: URL_CATEGORY_ADMIN });

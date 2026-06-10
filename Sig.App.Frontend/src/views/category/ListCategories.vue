@@ -35,7 +35,6 @@
 
 <script setup>
 import { computed, defineEmits, onBeforeMount } from "vue";
-import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
 import { useQuery, useResult } from "@vue/apollo-composable";
 
@@ -44,29 +43,14 @@ import { usePageTitle } from "@/lib/helpers/page-title";
 import { URL_CATEGORY_ADD } from "@/lib/consts/urls";
 
 import CategoryTable from "@/components/category/category-table";
+import { CATEGORY_PROJECTS_QUERY } from "@/views/category/category-projects.query";
 
 const { t } = useI18n();
 const emit = defineEmits(["isLoading", "loadingFinish"]);
 
 usePageTitle(t("title"));
 
-const { result, refetch } = useQuery(
-  gql`
-    query Projects {
-      projects {
-        id
-        beneficiaryTypes {
-          id
-          name
-          keys
-          beneficiaries {
-            id
-          }
-        }
-      }
-    }
-  `
-);
+const { result, refetch } = useQuery(CATEGORY_PROJECTS_QUERY);
 const projects = useResult(result, null, (data) => {
   if (data.projects !== null) {
     emit("loadingFinish");

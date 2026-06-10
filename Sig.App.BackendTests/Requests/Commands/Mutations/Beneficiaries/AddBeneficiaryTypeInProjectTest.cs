@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using GraphQL.Conventions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -103,6 +103,48 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Beneficiaries
 
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<AddBeneficiaryTypeInProject.BeneficiaryTypeKeyAlreadyInUseException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfKeysIsEmpty()
+        {
+            var input = new AddBeneficiaryTypeInProject.Input()
+            {
+                ProjectId = project.GetIdentifier(),
+                Keys = [],
+                Name = "Type ABCD"
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<AddBeneficiaryTypeInProject.BeneficiaryTypeKeysCantBeEmptyException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfKeyIsWhitespaceOnly()
+        {
+            var input = new AddBeneficiaryTypeInProject.Input()
+            {
+                ProjectId = project.GetIdentifier(),
+                Keys = ["   "],
+                Name = "Type ABCD"
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<AddBeneficiaryTypeInProject.BeneficiaryTypeKeysCantBeEmptyException>();
+        }
+
+        [Fact]
+        public async Task ThrowsIfOneKeyIsWhitespaceOnly()
+        {
+            var input = new AddBeneficiaryTypeInProject.Input()
+            {
+                ProjectId = project.GetIdentifier(),
+                Keys = ["couple", "   "],
+                Name = "Type ABCD"
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<AddBeneficiaryTypeInProject.BeneficiaryTypeKeysCantBeEmptyException>();
         }
     }
 }
