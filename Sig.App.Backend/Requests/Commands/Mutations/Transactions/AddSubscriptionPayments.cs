@@ -92,10 +92,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                 var subscription = subscriptionBeneficiary.Subscription;
 
-                if (subscription.GetExpirationDate(clock) < today)
+                if (subscription.IsExpired(clock))
                 {
                     logger.LogWarning("[Mutation] AddSubscriptionPayments - SubscriptionExpiredException");
                     throw new SubscriptionExpiredException();
+                }
+
+                if (!subscription.HasSubscriptionPaymentPeriodStarted(clock))
+                {
+                    logger.LogWarning("[Mutation] AddSubscriptionPayments - SubscriptionMaxPaymentsReachedException");
+                    throw new SubscriptionMaxPaymentsReachedException();
                 }
 
                 var amount = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId).Sum(x => x.Amount);

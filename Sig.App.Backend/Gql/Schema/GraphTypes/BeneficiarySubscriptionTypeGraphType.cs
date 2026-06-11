@@ -74,11 +74,10 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public async Task<bool> CanAddSubscriptionPayment(IAppUserContext ctx, [Inject] IClock clock) {
             var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
 
-            var now = clock.GetCurrentInstant().ToDateTimeUtc();
             var transactionCount = transactions.Count();
             var effectiveMaxPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
 
-            return subscription.GetExpirationDate(clock) > now
+            return subscription.IsWithinManualSubscriptionPaymentWindow(clock)
                 && transactionCount < effectiveMaxPayments;
         }
     }

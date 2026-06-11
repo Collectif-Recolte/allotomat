@@ -31,7 +31,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public bool CanAddSubscriptionPayment([Inject] IClock clock)
         {
-            return subscription.GetExpirationDate(clock) > clock.GetCurrentInstant().ToDateTimeUtc();
+            return subscription.IsWithinManualSubscriptionPaymentWindow(clock);
         }
 
         public SubscriptionGraphType(Subscription subscription)

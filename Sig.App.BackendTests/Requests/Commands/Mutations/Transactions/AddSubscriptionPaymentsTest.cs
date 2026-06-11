@@ -275,7 +275,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         }
 
         [Fact]
-        public async Task AllowsPaymentWhenSubscriptionNotYetStarted()
+        public async Task ThrowsIfSubscriptionNotYetStarted()
         {
             subscription.StartDate = Clock.GetCurrentInstant().ToDateTimeUtc().AddDays(1);
             DbContext.SaveChanges();
@@ -286,9 +286,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 Subscriptions = new List<Id>() { subscription.GetIdentifier() }
             };
 
-            await handler.Handle(input, CancellationToken.None);
-
-            DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().Count().Should().Be(1);
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<AddSubscriptionPayments.SubscriptionMaxPaymentsReachedException>();
         }
 
         [Fact]
