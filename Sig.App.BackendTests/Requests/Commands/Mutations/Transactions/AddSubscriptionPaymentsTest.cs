@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using GraphQL.Conventions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Sig.App.Backend.BackgroundJobs;
@@ -23,9 +23,9 @@ using Xunit;
 
 namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 {
-    public class AddMissingPaymentTest : TestBase
+    public class AddSubscriptionPaymentsTest : TestBase
     {
-        private readonly AddMissingPayment handler;
+        private readonly AddSubscriptionPayments handler;
 
         private readonly Market market;
         private readonly Project project;
@@ -37,7 +37,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         private readonly ProductGroup productGroup;
         private readonly BudgetAllowance budgetAllowance;
 
-        public AddMissingPaymentTest()
+        public AddSubscriptionPaymentsTest()
         {
             project = new Project()
             {
@@ -150,67 +150,15 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             DbContext.SaveChanges();
 
-            handler = new AddMissingPayment(NullLogger<AddMissingPayment>.Instance, DbContext, Clock, HttpContextAccessor, NullLogger<AddingFundToCard>.Instance);
+            handler = new AddSubscriptionPayments(NullLogger<AddSubscriptionPayments>.Instance, DbContext, Clock, HttpContextAccessor, NullLogger<AddingFundToCard>.Instance);
         }
 
         [Fact]
-        public async Task AddOneMissingPayment()
+        public async Task AddOneSubscriptionPayment()
         {
-            var input = new AddMissingPayment.Input()
+            var input = new AddSubscriptionPayments.Input()
             {
-                SubscriptionId = subscription.GetIdentifier(),
-                BeneficiaryId = beneficiary.GetIdentifier()
-            };
-
-            await handler.Handle(input, CancellationToken.None);
-
-            var localBudgetAllowance = DbContext.BudgetAllowances.First();
-
-            localBudgetAllowance.AvailableFund.Should().Be(75);
-        }
-
-        // This payment is already "calculated" in the Budget of this beneficiary
-        [Fact]
-        public async Task AddOneMissingPaymentForSubscriptionWithMaxPaymentFromBeneficiaryBudget()
-        {
-            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
-
-            subscription.MaxNumberOfPayments = 1;
-            subscription.StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(-4);
-            subscription.EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(6);
-            subscription.FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(7);
-
-            DbContext.SaveChanges();
-
-            var input = new AddMissingPayment.Input()
-            {
-                SubscriptionId = subscription.GetIdentifier(),
-                BeneficiaryId = beneficiary.GetIdentifier()
-            };
-
-            await handler.Handle(input, CancellationToken.None);
-
-            var localBudgetAllowance = DbContext.BudgetAllowances.First();
-
-            localBudgetAllowance.AvailableFund.Should().Be(100);
-        }
-
-        // This payment is not "calculated" in the budget of this beneficiary
-        [Fact]
-        public async Task AddOneMissingPaymentForSubscriptionWithMaxPaymentFromBudgetAllowance()
-        {
-            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
-
-            subscription.MaxNumberOfPayments = 1;
-            subscription.StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(-4);
-            subscription.EndDate = new DateTime(today.Year, today.Month, 1);
-            subscription.FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(1);
-
-            DbContext.SaveChanges();
-
-            var input = new AddMissingPayment.Input()
-            {
-                SubscriptionId = subscription.GetIdentifier(),
+                Subscriptions = new List<Id>() { subscription.GetIdentifier() },
                 BeneficiaryId = beneficiary.GetIdentifier()
             };
 
@@ -224,14 +172,14 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         [Fact]
         public async Task ThrowsIfBeneficiaryNotFound()
         {
-            var input = new AddMissingPayment.Input()
+            var input = new AddSubscriptionPayments.Input()
             {
                 BeneficiaryId = Id.New<Beneficiary>(123456),
-                SubscriptionId = subscription.GetIdentifier()
+                Subscriptions = new List<Id>() { subscription.GetIdentifier() },
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<AddMissingPayment.BeneficiaryNotFoundException>();
+                .Should().ThrowAsync<AddSubscriptionPayments.BeneficiaryNotFoundException>();
         }
 
         [Fact]
@@ -241,14 +189,14 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             DbContext.SaveChanges();
 
-            var input = new AddMissingPayment.Input()
+            var input = new AddSubscriptionPayments.Input()
             {
                 BeneficiaryId = beneficiary.GetIdentifier(),
-                SubscriptionId = subscription.GetIdentifier()
+                Subscriptions = new List<Id>() { subscription.GetIdentifier() },
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<AddMissingPayment.BeneficiaryDontHaveCardException>();
+                .Should().ThrowAsync<AddSubscriptionPayments.BeneficiaryDontHaveCardException>();
         }
 
         [Fact]
@@ -286,27 +234,27 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             DbContext.Subscriptions.Add(localSubscription);
             DbContext.SaveChanges();
 
-            var input = new AddMissingPayment.Input()
+            var input = new AddSubscriptionPayments.Input()
             {
                 BeneficiaryId = beneficiary.GetIdentifier(),
-                SubscriptionId = localSubscription.GetIdentifier()
+                Subscriptions = new List<Id>() { localSubscription.GetIdentifier() }
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<AddMissingPayment.BeneficiaryDontHaveThisSubscriptionException>();
+                .Should().ThrowAsync<AddSubscriptionPayments.BeneficiaryDontHaveThisSubscriptionException>();
         }
 
         [Fact]
         public async Task ThrowsIfSubscriptionNotFound()
         {
-            var input = new AddMissingPayment.Input()
+            var input = new AddSubscriptionPayments.Input()
             {
                 BeneficiaryId = beneficiary.GetIdentifier(),
-                SubscriptionId = Id.New<Subscription>(123456)
+                Subscriptions = new List<Id>() { Id.New<Subscription>(123456) }
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<AddMissingPayment.SubscriptionNotFoundException>();
+                .Should().ThrowAsync<AddSubscriptionPayments.SubscriptionNotFoundException>();
         }
 
         [Fact]
@@ -316,35 +264,78 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             subscription.EndDate = Clock.GetCurrentInstant().ToDateTimeUtc().AddDays(-2);
             DbContext.SaveChanges();
 
-            var input = new AddMissingPayment.Input()
+            var input = new AddSubscriptionPayments.Input()
             {
                 BeneficiaryId = beneficiary.GetIdentifier(),
-                SubscriptionId = subscription.GetIdentifier()
+                Subscriptions = new List<Id>() { subscription.GetIdentifier() }
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<AddMissingPayment.SubscriptionExpiredException>();
+                .Should().ThrowAsync<AddSubscriptionPayments.SubscriptionExpiredException>();
         }
 
         [Fact]
-        public async Task ThrowsIfSubscriptionDontHaveMissedPaymentNotYetStarted()
+        public async Task ThrowsIfSubscriptionNotYetStarted()
         {
             subscription.StartDate = Clock.GetCurrentInstant().ToDateTimeUtc().AddDays(1);
             DbContext.SaveChanges();
 
-            var input = new AddMissingPayment.Input()
+            var input = new AddSubscriptionPayments.Input()
             {
                 BeneficiaryId = beneficiary.GetIdentifier(),
-                SubscriptionId = subscription.GetIdentifier()
+                Subscriptions = new List<Id>() { subscription.GetIdentifier() }
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<AddMissingPayment.SubscriptionDontHaveMissedPaymentException>();
+                .Should().ThrowAsync<AddSubscriptionPayments.SubscriptionMaxPaymentsReachedException>();
         }
 
         [Fact]
-        public async Task ThrowsIfSubscriptionDontHaveMissedPaymentAllPaymentReceived()
+        public async Task AllowsPaymentWhenAllScheduledPaymentsReceivedButUnderMax()
         {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.MaxNumberOfPayments = 6;
+            subscription.StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(-4);
+            subscription.EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(6);
+            subscription.FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(7);
+
+            for (var i = 0; i < 5; i++)
+            {
+                card.Transactions.Add(new SubscriptionAddingFundTransaction()
+                {
+                    Amount = 25,
+                    AvailableFund = 25,
+                    Beneficiary = beneficiary,
+                    Card = card,
+                    CreatedAtUtc = Clock.GetCurrentInstant().ToDateTimeUtc(),
+                    ExpirationDate = subscription.GetExpirationDate(Clock),
+                    Organization = organization,
+                    ProductGroup = productGroup,
+                    Status = FundTransactionStatus.Actived,
+                    SubscriptionType = subscription.Types.First(),
+                });
+            }
+
+            DbContext.SaveChanges();
+
+            var input = new AddSubscriptionPayments.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                Subscriptions = new List<Id>() { subscription.GetIdentifier() }
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().Count().Should().Be(6);
+        }
+
+        [Fact]
+        public async Task ThrowsIfSubscriptionMaxPaymentsReachedWhenAllPaymentsReceived()
+        {
+            subscription.EndDate = subscription.StartDate;
+            DbContext.SaveChanges();
+
             card.Transactions.Add(new SubscriptionAddingFundTransaction()
             {
                 Amount = 25,
@@ -361,18 +352,18 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             DbContext.SaveChanges();
 
-            var input = new AddMissingPayment.Input()
+            var input = new AddSubscriptionPayments.Input()
             {
                 BeneficiaryId = beneficiary.GetIdentifier(),
-                SubscriptionId = subscription.GetIdentifier()
+                Subscriptions = new List<Id>() { subscription.GetIdentifier() }
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<AddMissingPayment.SubscriptionDontHaveMissedPaymentException>();
+                .Should().ThrowAsync<AddSubscriptionPayments.SubscriptionMaxPaymentsReachedException>();
         }
 
         [Fact]
-        public async Task ThrowsIfSubscriptionDontHaveMissedPaymentMaxPaymentReceived()
+        public async Task ThrowsIfSubscriptionMaxPaymentsReached()
         {
             subscription.MaxNumberOfPayments = 1;
             subscription.StartDate = Clock.GetCurrentInstant().ToDateTimeUtc().AddMonths(-4);
@@ -393,14 +384,14 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             DbContext.SaveChanges();
 
-            var input = new AddMissingPayment.Input()
+            var input = new AddSubscriptionPayments.Input()
             {
                 BeneficiaryId = beneficiary.GetIdentifier(),
-                SubscriptionId = subscription.GetIdentifier()
+                Subscriptions = new List<Id>() { subscription.GetIdentifier() }
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<AddMissingPayment.SubscriptionDontHaveMissedPaymentException>();
+                .Should().ThrowAsync<AddSubscriptionPayments.SubscriptionMaxPaymentsReachedException>();
         }
 
         [Fact]
@@ -426,14 +417,14 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             DbContext.SaveChanges();
 
-            var input = new AddMissingPayment.Input()
+            var input = new AddSubscriptionPayments.Input()
             {
                 BeneficiaryId = beneficiary.GetIdentifier(),
-                SubscriptionId = subscription.GetIdentifier()
+                Subscriptions = new List<Id>() { subscription.GetIdentifier() }
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<AddMissingPayment.SubscriptionDontHaveMissedPaymentException>();
+                .Should().ThrowAsync<AddSubscriptionPayments.SubscriptionMaxPaymentsReachedException>();
         }
 
         [Fact]
@@ -465,10 +456,10 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             DbContext.SaveChanges();
 
-            var input = new AddMissingPayment.Input()
+            var input = new AddSubscriptionPayments.Input()
             {
                 BeneficiaryId = beneficiary.GetIdentifier(),
-                SubscriptionId = subscription.GetIdentifier()
+                Subscriptions = new List<Id>() { subscription.GetIdentifier() }
             };
 
             // override=2 > transactionCount=1, so no exception; budget already allocated
@@ -479,19 +470,62 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         }
 
         [Fact]
+        public async Task DeductsBudgetWhenOverrideExceedsSubscriptionPaymentsRemaining()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.MaxNumberOfPayments = 1;
+            subscription.StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(-4);
+            subscription.EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(1);
+            subscription.FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(2);
+
+            var subscriptionBeneficiary = beneficiary.Subscriptions.First();
+            subscriptionBeneficiary.MaxNumberOfPaymentsOverride = 3;
+
+            card.Transactions.Add(new SubscriptionAddingFundTransaction()
+            {
+                Amount = 25,
+                AvailableFund = 25,
+                Beneficiary = beneficiary,
+                Card = card,
+                CreatedAtUtc = Clock.GetCurrentInstant().ToDateTimeUtc(),
+                ExpirationDate = subscription.GetExpirationDate(Clock),
+                Organization = organization,
+                ProductGroup = productGroup,
+                Status = FundTransactionStatus.Actived,
+                SubscriptionType = subscription.Types.First(),
+            });
+
+            DbContext.SaveChanges();
+
+            var input = new AddSubscriptionPayments.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                Subscriptions = new List<Id>() { subscription.GetIdentifier() }
+            };
+
+            // override=3, transactions=1, subscriptionPaymentRemaining=1
+            // remaining payments (3-1=2) > subscriptionPaymentRemaining (1): budget not pre-allocated, must be deducted
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBudgetAllowance = DbContext.BudgetAllowances.First();
+            localBudgetAllowance.AvailableFund.Should().Be(75);
+        }
+
+        [Fact]
         public async Task SubscriptionDontHaveEnoughtAvailableAmount()
         {
             budgetAllowance.AvailableFund = 0;
             DbContext.SaveChanges();
 
-            var input = new AddMissingPayment.Input()
+            var input = new AddSubscriptionPayments.Input()
             {
                 BeneficiaryId = beneficiary.GetIdentifier(),
-                SubscriptionId = subscription.GetIdentifier()
+                Subscriptions = new List<Id>() { subscription.GetIdentifier() }
             };
 
             await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<AddMissingPayment.SubscriptionDontHaveEnoughtAvailableAmountException>();
+                .Should().ThrowAsync<AddSubscriptionPayments.SubscriptionDontHaveEnoughtAvailableAmountException>();
         }
     }
 }

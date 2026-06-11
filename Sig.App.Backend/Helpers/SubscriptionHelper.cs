@@ -72,12 +72,6 @@ namespace Sig.App.Backend.Helpers
             return subscriptionBeneficiary.Subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments(), totalPayment) : totalPayment;
         }
 
-        public static int GetPreviousPaymentCount(this Subscription subscription, IClock clock)
-        {
-            var today = clock.GetCurrentInstant().ToDateTimeUtc();
-            return Math.Max(0, CountPaymentsSinceStart(subscription, today));
-        }
-
         private static int GetTotalPaymentBySubscription(Subscription subscription)
         {
             return CountPaymentsSinceStart(subscription, subscription.EndDate);

@@ -1,35 +1,35 @@
 <i18n>
   {
     "en": {
-      "add-missed-payment-description": "Select missed payments to add",
-      "no-missed-payment-description": "The subscriptions do not have any missed payments. It is possible to manually add funds to the cards if required.",
+      "add-subscription-payment-description": "Select subscription payments to add per rules",
+      "no-subscription-payment-description": "No subscription payments are available per rules. It is possible to manually add funds to the cards if required.",
       "budget-allowance-not-enought": "<b>The budget envelope is not sufficient to cover the additional payment</b>",
       "close":"Close",
       "budget-allowance-needed": "<b>{amountByPayment} $ required for assignment</b>",
-      "submit": "Add missed payments",
-      "add-missed-payment-success-notification": "The missed payments have been successfully added.",
+      "submit": "Add subscription payments",
+      "add-subscription-payment-success-notification": "The subscription payments have been successfully added.",
       "assign-card-description": "This card <b>has no funds on it</b>, and will remain empty until the next payment date."
     },
     "fr": {
-      "add-missed-payment-description": "Sélectionnez les paiements manqués à ajouter",
-      "no-missed-payment-description": "Les abonnements ne comportent aucun paiement manqué. Il est possible d'ajouter manuellement des fonds sur les cartes si nécessaire.",
+      "add-subscription-payment-description": "Sélectionnez les versements à ajouter selon les règles de l'abonnement",
+      "no-subscription-payment-description": "Aucun versement n'est possible selon les règles de l'abonnement. Il est possible d'ajouter manuellement des fonds sur les cartes si nécessaire.",
       "budget-allowance-not-enought": "<b>L'enveloppe budgétaire n'est pas suffisante pour couvrir le versement supplémentaire</b>",
       "close":"Fermer",
       "budget-allowance-needed": "<b>{amountByPayment} $ requis pour l'attribution</b>",
-      "submit": "Ajouter des paiements manqués",
-      "add-missed-payment-success-notification": "Les paiements manqués ont été ajoutés avec succès.",
+      "submit": "Ajouter les versements",
+      "add-subscription-payment-success-notification": "Les versements selon les règles de l'abonnement ont été ajoutés avec succès.",
       "assign-card-description": "Cette carte <b>n'a pas de fonds</b> et restera vide jusqu'à la prochaine date de paiement."
     }
   }
   </i18n>
 
 <template>
-  <p v-if="subscriptionsWithMissedPayment.length > 0">{{ t("add-missed-payment-description") }}</p>
-  <p v-else>{{ t("no-missed-payment-description") }}</p>
+  <p v-if="subscriptionsWithAvailablePayment.length > 0">{{ t("add-subscription-payment-description") }}</p>
+  <p v-else>{{ t("no-subscription-payment-description") }}</p>
   <Form v-slot="{ isSubmitting }" @submit="onSubmit">
     <PfForm :processing="isSubmitting" :disable-submit="subscriptionChecked.length === 0" @cancel="closeModal">
       <PfFormFieldset :id="props.id" :name="props.id" :has-error-state="props.hasErrorState" :errors="props.errors">
-        <div v-for="(option, index) in subscriptionsWithMissedPayment" :key="index">
+        <div v-for="(option, index) in subscriptionsWithAvailablePayment" :key="index">
           <PfFormInputCheckbox
             :value="isChecked(option.id)"
             :label="option.name"
@@ -55,7 +55,7 @@
           <div class="flex gap-x-6 items-center justify-end">
             <PfButtonAction btn-style="link" :label="t('close')" @click="closeModal" />
             <PfButtonAction
-              v-if="subscriptionsWithMissedPayment.length > 0"
+              v-if="subscriptionsWithAvailablePayment.length > 0"
               :is-disabled="subscriptionChecked.length === 0"
               :label="t('submit')"
               class="px-8"
@@ -101,17 +101,17 @@ const props = defineProps({
 
 const subscriptionChecked = ref([]);
 
-const { mutate: addMissingPayments } = useMutation(
+const { mutate: addSubscriptionPayments } = useMutation(
   gql`
-    mutation AddMissingPayments($input: AddMissingPaymentsInput!) {
-      addMissingPayments(input: $input) {
+    mutation AddSubscriptionPayments($input: AddSubscriptionPaymentsInput!) {
+      addSubscriptionPayments(input: $input) {
         beneficiary {
           id
           firstname
           lastname
           ... on BeneficiaryGraphType {
             beneficiarySubscriptions {
-              hasMissedPayment
+              canAddSubscriptionPayment
               paymentReceived
             }
           }
@@ -121,10 +121,10 @@ const { mutate: addMissingPayments } = useMutation(
   `
 );
 
-const subscriptionsWithMissedPayment = computed(() => {
+const subscriptionsWithAvailablePayment = computed(() => {
   return props.subscriptions
     .filter((x) => {
-      return x.hasMissedPayment;
+      return x.canAddSubscriptionPayment;
     })
     .map((x) => {
       return {
@@ -158,14 +158,14 @@ function closeModal() {
 }
 
 async function onSubmit() {
-  await addMissingPayments({
+  await addSubscriptionPayments({
     input: {
       beneficiaryId: props.beneficiary.id,
       subscriptions: subscriptionChecked.value
     }
   });
   router.push({ name: URL_BENEFICIARY_ADMIN });
-  addSuccess(t("add-missed-payment-success-notification"));
+  addSuccess(t("add-subscription-payment-success-notification"));
 }
 
 function updateCheckbox(value, isChecked) {
