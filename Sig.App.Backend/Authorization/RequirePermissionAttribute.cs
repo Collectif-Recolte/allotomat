@@ -52,7 +52,7 @@ namespace Sig.App.Backend.Authorization
 
             var currentUser = await userManager.FindByIdAsync(appUserContext.CurrentUser.GetUserId());
 
-            if (currentUser.Status == DbModel.Enums.UserStatus.Actived)
+            if (currentUser?.Status == DbModel.Enums.UserStatus.Actived)
             {
                 foreach (var permission in permissions)
                 {
