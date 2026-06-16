@@ -15,7 +15,10 @@
 
 <template>
   <div class="relative inline-block group pf-transition-visibility pf-transition-visibility--focus-only">
-    <button class="pf-button pf-button--outline px-3 min-h-11">
+    <button
+      class="pf-button pf-button--outline px-3 min-h-11"
+      @focus="focusSearchInput"
+      @mousedown="focusSearchInput">
       {{ props.label }}
       <span
         v-if="props.activeFiltersCount > 0"
@@ -25,6 +28,7 @@
       <PfIcon :icon="ICON_ARROW_BOTTOM" size="xxs" class="ml-2" />
     </button>
     <div
+      ref="contentRef"
       class="text-left absolute z-50 bottom-1 right-0 translate-y-full min-w-64 max-h-60 overflow-auto bg-white rounded-md border rounded-tr-none border-primary-700 px-4 py-3 transition ease-in-out duration-300 pf-transition-visibility__content h-remove-margin">
       <slot></slot>
     </div>
@@ -32,7 +36,7 @@
 </template>
 
 <script setup>
-import { defineProps } from "vue";
+import { defineProps, ref, nextTick } from "vue";
 
 import ICON_ARROW_BOTTOM from "@/lib/icons/arrow-bottom.json";
 
@@ -49,4 +53,12 @@ const props = defineProps({
     }
   }
 });
+
+const contentRef = ref(null);
+
+function focusSearchInput() {
+  nextTick(() => {
+    contentRef.value?.querySelector("[data-filter-search]")?.focus();
+  });
+}
 </script>

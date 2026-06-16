@@ -102,6 +102,7 @@
             v-if="availableOrganizations.length > 0"
             id="organizations"
             is-filter
+            searchable
             :value="selectedOrganizations"
             :options="availableOrganizations"
             @input="onOrganizationsChecked" />
@@ -112,6 +113,7 @@
             id="beneficiary-types"
             class="mt-3"
             is-filter
+            searchable
             :value="selectedBeneficiaryTypes"
             :options="availableBeneficiaryTypes"
             @input="onBeneficiaryTypesChecked" />
@@ -122,6 +124,7 @@
             id="subscriptions"
             class="mt-3"
             is-filter
+            searchable
             :value="selectedSubscriptions"
             :options="availableSubscriptions"
             @input="onSubscriptionsChecked" />
@@ -132,6 +135,7 @@
             id="markets"
             class="mt-3"
             is-filter
+            searchable
             :value="selectedMarkets"
             :options="availableMarkets"
             @input="onMarketsChecked" />
@@ -142,6 +146,7 @@
             id="marketGroups"
             class="mt-3"
             is-filter
+            searchable
             :value="selectedMarketGroups"
             :options="availableMarketGroups"
             @input="onMarketGroupsChecked" />
@@ -152,6 +157,7 @@
             id="transactionTypes"
             class="mt-3"
             is-filter
+            searchable
             :value="selectedTransactionTypes"
             :options="availableTransactionTypes"
             @input="onTransactionTypesChecked" />
