@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Sig.App.Backend.Helpers
+namespace Sig.App.Backend.Services.Kiosk
 {
     public class ResolvedKioskCashRegister
     {

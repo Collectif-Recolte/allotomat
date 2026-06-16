@@ -38,6 +38,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.CashRegisters
 
             var stored = await DbContext.CashRegisters.FirstAsync();
             stored.KioskAccessToken.Should().NotBeNullOrEmpty();
+            stored.KioskPassword.Should().NotBeNullOrEmpty();
+            stored.KioskPassword.Length.Should().Be(8);
         }
 
         [Fact]

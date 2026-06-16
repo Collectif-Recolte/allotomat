@@ -1,4 +1,4 @@
-﻿using GraphQL.Conventions;
+using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.DbModel.Entities.Markets;
@@ -24,6 +24,20 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public CashRegisterGraphType(CashRegister cashRegister)
         {
             this.cashRegister = cashRegister;
+        }
+
+        public async Task<string> KioskPassword(IAppUserContext ctx, [Inject] PermissionService permissionService)
+        {
+            var marketPermissions = await permissionService.GetMarketPermissions(
+                ctx.CurrentUser,
+                cashRegister.MarketId.ToString());
+
+            if (!marketPermissions.Contains(MarketPermission.ManageCashRegister))
+            {
+                return null;
+            }
+
+            return cashRegister.KioskPassword;
         }
 
         public async Task<string> KioskAccessToken(IAppUserContext ctx, [Inject] PermissionService permissionService)

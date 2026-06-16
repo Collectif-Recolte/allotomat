@@ -5,7 +5,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
-using Sig.App.Backend.Helpers;
+using Sig.App.Backend.Services.Kiosk;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
 using System.Collections.Generic;
@@ -20,12 +20,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         private readonly ILogger<CreateKioskTransaction> logger;
         private readonly AppDbContext db;
         private readonly IMediator mediator;
+        private readonly KioskJwtService kioskJwtService;
 
-        public CreateKioskTransaction(ILogger<CreateKioskTransaction> logger, AppDbContext db, IMediator mediator)
+        public CreateKioskTransaction(ILogger<CreateKioskTransaction> logger, AppDbContext db, IMediator mediator, KioskJwtService kioskJwtService)
         {
             this.logger = logger;
             this.db = db;
             this.mediator = mediator;
+            this.kioskJwtService = kioskJwtService;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -44,13 +46,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 throw new CardNotFoundException();
             }
 
-            var resolved = await KioskCashRegisterResolver.Resolve(db, request.KioskToken, cancellationToken);
-
-            if (!resolved.TokenFound || !resolved.IsOperational || resolved.MarketIsDisabled)
-            {
-                logger.LogWarning("[Mutation] CreateKioskTransaction - KioskAccessInvalidException");
-                throw new KioskAccessInvalidException();
-            }
+            var resolved = await kioskJwtService.ResolveFromAuthToken(db, request.KioskToken, cancellationToken);
 
             var createResult = await mediator.Send(new CreateTransaction.Input
             {
@@ -96,6 +92,5 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
         public class CardNotFoundException : RequestValidationException { }
         public class ManualCardNumberNotAllowedException : RequestValidationException { }
-        public class KioskAccessInvalidException : RequestValidationException { }
     }
 }

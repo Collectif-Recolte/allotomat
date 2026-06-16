@@ -5,7 +5,7 @@
 namespace Sig.App.Backend.Migrations
 {
     /// <inheritdoc />
-    public partial class AddCashRegisterKioskAccessToken : Migration
+    public partial class CashRegisterKiosk : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,6 +15,13 @@ namespace Sig.App.Backend.Migrations
                 table: "CashRegisters",
                 type: "nvarchar(64)",
                 maxLength: 64,
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "KioskPassword",
+                table: "CashRegisters",
+                type: "nvarchar(32)",
+                maxLength: 32,
                 nullable: true);
 
             migrationBuilder.CreateIndex(
@@ -34,6 +41,10 @@ namespace Sig.App.Backend.Migrations
 
             migrationBuilder.DropColumn(
                 name: "KioskAccessToken",
+                table: "CashRegisters");
+
+            migrationBuilder.DropColumn(
+                name: "KioskPassword",
                 table: "CashRegisters");
         }
     }

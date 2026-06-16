@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -417,6 +417,9 @@ namespace Sig.App.Backend.DbModel
 
                 _.Property(x => x.KioskAccessToken)
                     .HasMaxLength(64);
+
+                _.Property(x => x.KioskPassword)
+                    .HasMaxLength(32);
 
                 _.HasIndex(x => x.KioskAccessToken)
                     .IsUnique()

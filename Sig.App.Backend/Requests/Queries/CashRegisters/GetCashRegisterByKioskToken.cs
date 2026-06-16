@@ -1,7 +1,7 @@
 using MediatR;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
-using Sig.App.Backend.Helpers;
+using Sig.App.Backend.Services.Kiosk;
 using System.Threading;
 using System.Threading.Tasks;
 

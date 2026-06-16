@@ -633,6 +633,10 @@ namespace Sig.App.Backend.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
+                    b.Property<string>("KioskPassword")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
                     b.Property<long>("MarketId")
                         .HasColumnType("bigint");
 

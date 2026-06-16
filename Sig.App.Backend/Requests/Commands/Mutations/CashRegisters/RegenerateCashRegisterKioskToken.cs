@@ -7,7 +7,7 @@ using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
-using Sig.App.Backend.Helpers;
+using Sig.App.Backend.Services.Kiosk;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
 using System.Threading;
@@ -44,7 +44,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.CashRegisters
                 throw new KioskNotEnabledException();
             }
 
-            cashRegister.KioskAccessToken = KioskAccessTokenHelper.Generate();
+            cashRegister.KioskAccessToken = KioskHelper.GenerateAccessToken();
+            cashRegister.KioskPassword = KioskHelper.GeneratePassword();
             await db.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation("[Mutation] RegenerateCashRegisterKioskToken - Token regenerated for {CashRegisterName} ({CashRegisterId})", cashRegister.Name, cashRegister.Id);

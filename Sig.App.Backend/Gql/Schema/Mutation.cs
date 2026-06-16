@@ -1,4 +1,4 @@
-﻿using GraphQL.Conventions;
+using GraphQL.Conventions;
 using MediatR;
 using Sig.App.Backend.Authorization;
 using Sig.App.Backend.Constants;
@@ -962,6 +962,17 @@ namespace Sig.App.Backend.Gql.Schema
             )
         {
             return mediator.Send(input.Value);
+        }
+
+        [AnnotateErrorCodes(typeof(AuthenticateKiosk))]
+        public static Task<AuthenticateKiosk.Payload> AuthenticateKiosk(
+            this GqlMutation _,
+            [Inject] IMediator mediator,
+            string token,
+            string password
+            )
+        {
+            return mediator.Send(new AuthenticateKiosk.Input { Token = token, Password = password });
         }
 
         [AnnotateErrorCodes(typeof(CreateKioskTransaction))]

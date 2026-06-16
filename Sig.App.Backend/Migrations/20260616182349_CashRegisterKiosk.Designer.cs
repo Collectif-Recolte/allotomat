@@ -12,8 +12,8 @@ using Sig.App.Backend.DbModel;
 namespace Sig.App.Backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260610191853_AddCashRegisterKioskAccessToken")]
-    partial class AddCashRegisterKioskAccessToken
+    [Migration("20260616182349_CashRegisterKiosk")]
+    partial class CashRegisterKiosk
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -635,6 +635,10 @@ namespace Sig.App.Backend.Migrations
                     b.Property<string>("KioskAccessToken")
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("KioskPassword")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<long>("MarketId")
                         .HasColumnType("bigint");

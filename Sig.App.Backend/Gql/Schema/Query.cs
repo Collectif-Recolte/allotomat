@@ -1,4 +1,4 @@
-﻿using GraphQL.Conventions;
+using GraphQL.Conventions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -350,10 +350,22 @@ namespace Sig.App.Backend.Gql.Schema
             return await mediator.Send(new GetCashRegisterByKioskToken.Input { Token = token });
         }
 
+        [AnnotateErrorCodes(typeof(ValidateKioskSession))]
+        public static async Task<bool> ValidateKioskSession(this GqlQuery _, string kioskToken, [Inject] IMediator mediator)
+        {
+            return await mediator.Send(new ValidateKioskSession.Input { KioskToken = kioskToken });
+        }
+
         [AnnotateErrorCodes(typeof(VerifyCardCanBeUsedInKiosk))]
         public static async Task<bool> VerifyCardCanBeUsedInKiosk(this GqlQuery _, string kioskToken, Id cardId, [Inject] IMediator mediator)
         {
             return await mediator.Send(new VerifyCardCanBeUsedInKiosk.Input { KioskToken = kioskToken, CardId = cardId });
+        }
+
+        [AnnotateErrorCodes(typeof(GetKioskCard))]
+        public static async Task<CardGraphType> KioskCard(this GqlQuery _, string kioskToken, Id id, [Inject] IMediator mediator)
+        {
+            return await mediator.Send(new GetKioskCard.Input { KioskToken = kioskToken, CardId = id });
         }
 
         public static IDataLoaderResult<BeneficiaryTypeGraphType> BeneficiaryType(this GqlQuery _, IAppUserContext ctx, Id id)

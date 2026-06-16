@@ -4,7 +4,7 @@ using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.DbModel.Entities.Projects;
-using Sig.App.Backend.Helpers;
+using Sig.App.Backend.Services.Kiosk;
 using Sig.App.Backend.Requests.Queries.CashRegisters;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,7 +39,7 @@ namespace Sig.App.BackendTests.Requests.Queries.CashRegisters
             {
                 Name = "Caisse 1",
                 Market = market,
-                KioskAccessToken = KioskAccessTokenHelper.Generate()
+                KioskAccessToken = KioskHelper.GenerateAccessToken()
             };
 
             DbContext.Projects.Add(project);

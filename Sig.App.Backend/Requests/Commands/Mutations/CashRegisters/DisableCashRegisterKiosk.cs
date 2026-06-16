@@ -38,6 +38,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.CashRegisters
             }
 
             cashRegister.KioskAccessToken = null;
+            cashRegister.KioskPassword = null;
             await db.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation("[Mutation] DisableCashRegisterKiosk - Kiosk disabled for {CashRegisterName} ({CashRegisterId})", cashRegister.Name, cashRegister.Id);
