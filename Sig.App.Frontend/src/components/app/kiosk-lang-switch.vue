@@ -5,12 +5,7 @@
     size="lg"
     label="Français"
     @click="setLocale($consts.langs.LANG_FR)" />
-  <PfButtonAction
-    v-else
-    btn-style="secondary"
-    size="lg"
-    label="English"
-    @click="setLocale($consts.langs.LANG_EN)" />
+  <PfButtonAction v-else btn-style="secondary" size="lg" label="English" @click="setLocale($consts.langs.LANG_EN)" />
 </template>
 
 <script setup>
