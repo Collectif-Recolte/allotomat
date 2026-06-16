@@ -29,6 +29,13 @@ import ICON_USER_GROUP from "@/lib/icons/user-group.json";
 
 import { URL_CASH_REGISTER_EDIT, URL_CASH_REGISTER_ARCHIVE, URL_CASH_REGISTER_ADD_MARKET_GROUP } from "@/lib/consts/urls";
 
+const props = defineProps({
+  cashRegister: {
+    type: Object,
+    required: true
+  }
+});
+
 const { t } = useI18n();
 
 const items = ref([]);
@@ -68,13 +75,6 @@ function updateItems() {
     }
   ];
 }
-
-const props = defineProps({
-  cashRegister: {
-    type: Object,
-    required: true
-  }
-});
 </script>
 
 <style scoped>
