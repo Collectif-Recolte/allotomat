@@ -20,7 +20,9 @@
       "assign-subscriptions": "Assignments",
       "all-group": "All groups",
       "selected-all-group-description": "Some actions are not available when the \"All Groups\" option is selected",
-      "available-amount-for-allocation-details": "Show details"
+      "available-amount-for-allocation-details": "Show details",
+      "choose-group": "Search for a group...",
+      "no-groups-found": "No groups found"
     },
     "fr": {
       "add-beneficiary": "Ajouter un·e participant·e",
@@ -42,7 +44,9 @@
       "assign-subscriptions": "Attribution",
       "all-group": "Tous les Groupes",
       "selected-all-group-description": "Certaines actions ne sont pas disponibles lorsque l'option « Tous les groupes » est sélectionnée",
-      "available-amount-for-allocation-details": "Voir détails"
+      "available-amount-for-allocation-details": "Voir détails",
+      "choose-group": "Chercher un groupe...",
+      "no-groups-found": "Aucun groupe trouvé"
     }
   }
 </i18n>
@@ -68,8 +72,15 @@
           <div class="flex items-center gap-x-4">
             <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-organization") }}</span>
             <div class="flex flex-col gap-y-2">
-              <PfFormInputSelect id="selectedOrganization" has-hidden-label :label="t('selected-organization')"
-                :value="selectedOrganization" :options="organizations" col-span-class="sm:col-span-3"
+              <PfFormInputSelectSearchable
+                id="selectedOrganization"
+                has-hidden-label
+                :label="t('selected-organization')"
+                :value="selectedOrganization"
+                :options="organizations"
+                :placeholder="t('choose-group')"
+                :no-results-found="t('no-groups-found')"
+                col-span-class="sm:col-span-3"
                 @input="onOrganizationSelected" />
               <p v-if="isAllGroupSelected" class="text-sm text-red-500">{{ t("selected-all-group-description") }}</p>
             </div>
@@ -763,6 +774,7 @@ const budgetAllowancesTotal = computed(() => {
 });
 
 function onOrganizationSelected(e) {
+  if (!e) return;
   selectedOrganization.value = e;
   changeOrganization(e);
 }

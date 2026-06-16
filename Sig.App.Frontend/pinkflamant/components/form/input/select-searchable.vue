@@ -1,5 +1,18 @@
 <!-- IL NE FAUT IDÉALEMENT PAS UTILISER CE COMPONENT, IL N'EST PAS PARFAIT ET FONCTIONNE CORRECTEMENT POUR UN BESOIN PARTICULIER (SelectMarket.vue) -->
 
+<i18n>
+{
+  "en": {
+    "clear-search": "Clear search",
+    "toggle-options": "Show or hide options"
+  },
+  "fr": {
+    "clear-search": "Effacer la recherche",
+    "toggle-options": "Afficher ou masquer les choix"
+  }
+}
+</i18n>
+
 <template>
   <FormField
     :id="id"
@@ -41,19 +54,40 @@
         role="combobox"
         @input="onSearchInput"
         @focus="onFocus"
+        @click="openDropdown"
         @blur="onBlur"
         @keydown="onKeydown" />
 
-      <!-- Icône de dropdown -->
-      <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-        <svg
-          class="h-5 w-5 text-primary-700 transition-transform duration-200"
-          :class="{ 'rotate-180': isOpen }"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
+      <!-- Chevron ou effacer la recherche pour afficher tous les choix -->
+      <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+        <button
+          v-if="showClearSearchButton"
+          type="button"
+          class="text-grey-500 hover:text-primary-700 focus:text-primary-700"
+          :aria-label="t('clear-search')"
+          @mousedown.prevent
+          @click.stop="clearSearchAndShowAll">
+          <PfIcon :icon="clearIcon" size="xs" aria-hidden="true" />
+        </button>
+        <button
+          v-else
+          type="button"
+          class="text-primary-700 focus:outline-none disabled:opacity-50"
+          :aria-label="t('toggle-options')"
+          :aria-expanded="isOpen"
+          :disabled="disabled"
+          @mousedown.prevent
+          @click.stop="toggleDropdown">
+          <svg
+            class="h-5 w-5 transition-transform duration-200"
+            :class="{ 'rotate-180': isOpen }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
       </div>
 
       <!-- Liste déroulante -->
@@ -95,6 +129,8 @@
 <script>
 import FormField, { commonFieldProps } from "../field/index";
 import ICON_SEARCH from "../../../icons/search.json";
+import ICON_CLOSE from "../../../icons/close.json";
+import { useI18n } from "vue-i18n";
 
 export default {
   components: {
@@ -122,16 +158,34 @@ export default {
     }
   },
   emits: ["input"],
+  setup() {
+    const { t } = useI18n();
+    return { t };
+  },
   data() {
     return {
       searchValue: "",
       isOpen: false,
       highlightedIndex: -1,
       blurTimeout: null,
-      leadingIcon: ICON_SEARCH
+      leadingIcon: ICON_SEARCH,
+      clearIcon: ICON_CLOSE
     };
   },
   computed: {
+    enabledOptions() {
+      return this.options.filter((option) => !option.isDisabled);
+    },
+    showClearSearchButton() {
+      if (!this.value || this.disabled) {
+        return false;
+      }
+      if (this.enabledOptions.length === 1 && this.enabledOptions[0].value === this.value) {
+        return true;
+      }
+      const visibleOptions = this.filteredOptions.filter((option) => !option.isDisabled);
+      return visibleOptions.length === 1 && visibleOptions[0].value === this.value;
+    },
     filteredOptions() {
       if (!this.searchValue) {
         return this.options;
@@ -169,8 +223,32 @@ export default {
       this.highlightedIndex = 0;
     },
     onFocus() {
-      this.isOpen = true;
-      this.highlightedIndex = -1;
+      this.openDropdown();
+    },
+    openDropdown() {
+      if (this.blurTimeout) {
+        clearTimeout(this.blurTimeout);
+        this.blurTimeout = null;
+      }
+      if (!this.isOpen) {
+        this.isOpen = true;
+        this.highlightedIndex = -1;
+      }
+    },
+    toggleDropdown() {
+      if (this.blurTimeout) {
+        clearTimeout(this.blurTimeout);
+        this.blurTimeout = null;
+      }
+      if (this.isOpen) {
+        this.isOpen = false;
+        this.highlightedIndex = -1;
+        return;
+      }
+      this.openDropdown();
+      this.$nextTick(() => {
+        this.$refs.searchInput?.focus();
+      });
     },
     onBlur() {
       // Délai pour permettre la sélection d'une option avec la souris
@@ -226,6 +304,18 @@ export default {
       this.isOpen = false;
       this.highlightedIndex = -1;
       this.$emit("input", option.value);
+    },
+    clearSearchAndShowAll() {
+      if (this.blurTimeout) {
+        clearTimeout(this.blurTimeout);
+        this.blurTimeout = null;
+      }
+      this.searchValue = "";
+      this.isOpen = true;
+      this.highlightedIndex = -1;
+      this.$nextTick(() => {
+        this.$refs.searchInput?.focus();
+      });
     }
   }
 };
