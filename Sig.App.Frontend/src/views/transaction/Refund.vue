@@ -37,8 +37,7 @@
 
 <template>
   <div v-if="!loading">
-    <UiDialogModal v-if="refundTransactionId === null" :title="t('title')" hide-main-btn="false"
-      :return-route="returnRoute()">
+    <UiDialogModal v-if="refundTransactionId === null" :title="t('title')" hide-main-btn="false" :return-route="returnRoute()">
       <div>
         <p v-if="haveExpiredFunds">
           <b>{{ t("expired-funds") }}</b>
@@ -51,27 +50,47 @@
             })
           }}
         </p>
-        <Form v-if="productGroups" v-slot="{ isSubmitting, errors: formErrors }" :initial-values="initialValues"
-          keep-values :validation-schema="validationSchema" @submit="onSubmit">
+        <Form
+          v-if="productGroups"
+          v-slot="{ isSubmitting, errors: formErrors }"
+          :initial-values="initialValues"
+          keep-values
+          :validation-schema="validationSchema"
+          @submit="onSubmit">
           <div>
-            <PfForm has-footer footer-alt-style can-cancel
+            <PfForm
+              has-footer
+              footer-alt-style
+              can-cancel
               :disable-submit="!haveRefundAmount() || Object.keys(formErrors).length > 0"
-              :submit-label="t('refund-transaction')" :cancel-label="t('cancel')" :processing="isSubmitting"
+              :submit-label="t('refund-transaction')"
+              :cancel-label="t('cancel')"
+              :processing="isSubmitting"
               @cancel="goToTransactionList">
               <PfFormSection>
                 <FieldArray v-slot="{ fields }" key-path="id" name="productGroups">
-                  <div v-for="(field, idx) in fields" :key="field.key"
+                  <div
+                    v-for="(field, idx) in fields"
+                    :key="field.key"
                     :class="getIsGiftCard(productGroups[idx].productGroup.name) ? 'pt-6 border-t border-grey-100' : ''">
-                    <div class="p-4 pt-2.5 rounded-lg" :class="[
-                      getColorBgClass(productGroups[idx].productGroup.color),
-                      getIsGiftCard(productGroups[idx].productGroup.name) ? 'bg-diagonal-pattern' : 'dark'
-                    ]">
-                      <Field :id="`productGroups[${idx}].transactionProductGroupId`"
-                        v-slot="{ field: inputField, errors: fieldErrors }" :name="`productGroups[${idx}].amount`">
-                        <PfFormInputText :id="`productGroups[${idx}].amount`" class="grow" v-bind="inputField"
+                    <div
+                      class="p-4 pt-2.5 rounded-lg"
+                      :class="[
+                        getColorBgClass(productGroups[idx].productGroup.color),
+                        getIsGiftCard(productGroups[idx].productGroup.name) ? 'bg-diagonal-pattern' : 'dark'
+                      ]">
+                      <Field
+                        :id="`productGroups[${idx}].transactionProductGroupId`"
+                        v-slot="{ field: inputField, errors: fieldErrors }"
+                        :name="`productGroups[${idx}].amount`">
+                        <PfFormInputText
+                          :id="`productGroups[${idx}].amount`"
+                          class="grow"
+                          v-bind="inputField"
                           :label="productGroupLabel(productGroups[idx].productGroup)"
                           :after-label="availableAmountLabel(productGroups[idx], 'available-refund')"
-                          :errors="fieldErrors" input-mode="decimal"
+                          :errors="fieldErrors"
+                          input-mode="decimal"
                           @input="(value) => onProductGroupAmountInput(idx, value)">
                           <template #trailingIcon>
                             <UiDollarSign :errors="fieldErrors" />
@@ -82,8 +101,7 @@
                   </div>
                 </FieldArray>
                 <Field v-slot="{ field, errors }" name="password">
-                  <PfFormInputText id="password" v-bind="field" :label="t('password')" :errors="errors"
-                    input-type="password">
+                  <PfFormInputText id="password" v-bind="field" :label="t('password')" :errors="errors" input-type="password">
                   </PfFormInputText>
                 </Field>
               </PfFormSection>
@@ -94,8 +112,11 @@
     </UiDialogModal>
     <div v-else>
       <DialogOverlay class="transition-opacity fixed inset-0 bg-primary-700/80" />
-      <CompleteRefundTransaction class="fixed z-40 inset-0 overflow-y-auto" :transaction-id="refundTransactionId"
-        @onUpdateStep="updateStep" @onUpdateLoadingState="updateLoadingState" />
+      <CompleteRefundTransaction
+        class="fixed z-40 inset-0 overflow-y-auto"
+        :transaction-id="refundTransactionId"
+        @onUpdateStep="updateStep"
+        @onUpdateLoadingState="updateLoadingState" />
     </div>
   </div>
 </template>

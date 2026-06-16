@@ -28,10 +28,15 @@
 </i18n>
 
 <template>
-  <UiDialogDeleteModal :return-route="returnRoute()" :title="t('title', { beneficiaryName: getBeneficiaryName() })"
-    :description="t('description', { beneficiaryName: getBeneficiaryName() })" :validation-text="getBeneficiaryName()"
-    :delete-text-label="deleteTextLabel" :delete-text-error="deleteTextError"
-    :delete-button-label="t('disable-btn-label')" @onDelete="onDisableCard" />
+  <UiDialogDeleteModal
+    :return-route="returnRoute()"
+    :title="t('title', { beneficiaryName: getBeneficiaryName() })"
+    :description="t('description', { beneficiaryName: getBeneficiaryName() })"
+    :validation-text="getBeneficiaryName()"
+    :delete-text-label="deleteTextLabel"
+    :delete-text-error="deleteTextError"
+    :delete-button-label="t('disable-btn-label')"
+    @onDelete="onDisableCard" />
 </template>
 
 <script setup>
@@ -60,8 +65,8 @@ const deleteTextLabel = computed(() => {
     ? card.value.beneficiary?.organization?.project?.beneficiariesAreAnonymous
       ? t("delete-text-beneficiary-anonymous-label")
       : card.value.beneficiary
-        ? t("delete-text-beneficiary-name-label")
-        : t("delete-text-card-number-label")
+      ? t("delete-text-beneficiary-name-label")
+      : t("delete-text-card-number-label")
     : "";
 });
 
@@ -70,8 +75,8 @@ const deleteTextError = computed(() => {
     ? card.value.beneficiary?.organization?.project?.beneficiariesAreAnonymous
       ? t("delete-text-beneficiary-anonymous-error")
       : card.value.beneficiary
-        ? t("delete-text-beneficiary-name-error")
-        : t("delete-text-card-number-error")
+      ? t("delete-text-beneficiary-name-error")
+      : t("delete-text-card-number-error")
     : "";
 });
 
