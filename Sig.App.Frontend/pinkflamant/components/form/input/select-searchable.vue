@@ -130,6 +130,7 @@
 import FormField, { commonFieldProps } from "../field/index";
 import ICON_SEARCH from "../../../icons/search.json";
 import ICON_CLOSE from "../../../icons/close.json";
+import { normalizeForSearch } from "../../../lib/normalize-for-search";
 import { useI18n } from "vue-i18n";
 
 export default {
@@ -190,8 +191,10 @@ export default {
       if (!this.searchValue) {
         return this.options;
       }
-      const searchTerm = this.searchValue.toLowerCase();
-      return this.options.filter((option) => option.label.toLowerCase().includes(searchTerm) && !option.isDisabled);
+      const searchTerm = normalizeForSearch(this.searchValue);
+      return this.options.filter(
+        (option) => normalizeForSearch(option.label).includes(searchTerm) && !option.isDisabled
+      );
     },
     selectedOption() {
       return this.options.find((option) => option.value === this.value);
