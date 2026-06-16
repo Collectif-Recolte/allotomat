@@ -68,6 +68,7 @@ const {
           isArchived
           isKioskEnabled
           kioskAccessToken
+          kioskPassword
           marketGroups {
             id
             name
@@ -90,6 +91,7 @@ const cashRegisters = useResult(resultMarkets, [], (data) => {
       isArchived: cashRegister.isArchived,
       isKioskEnabled: cashRegister.isKioskEnabled,
       kioskAccessToken: cashRegister.kioskAccessToken,
+      kioskPassword: cashRegister.kioskPassword,
       marketGroups: cashRegister.marketGroups,
       cashRegisterCanBeDelete: data.markets[0].cashRegisters.filter((x) => !x.isArchived).length > 1
     }))

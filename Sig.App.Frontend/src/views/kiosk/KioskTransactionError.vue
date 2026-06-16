@@ -20,13 +20,11 @@
 </i18n>
 
 <template>
-  <KioskShell>
-    <div class="flex flex-col items-center justify-center flex-1 p-8 gap-6 max-w-lg mx-auto text-center">
-      <h1 class="text-h2 font-semibold">{{ t("title") }}</h1>
-      <p class="text-h4">{{ error }}</p>
-      <PfButtonAction btn-style="secondary" size="lg" :label="t('back')" @click="goHome" />
-    </div>
-  </KioskShell>
+  <div class="flex flex-col items-center justify-center flex-1 p-8 gap-6 max-w-lg mx-auto text-center">
+    <h1 class="text-h2 font-semibold">{{ t("title") }}</h1>
+    <p class="text-h4">{{ error }}</p>
+    <PfButtonAction btn-style="secondary" size="lg" :label="t('back')" @click="goHome" />
+  </div>
 </template>
 
 <script setup>
@@ -34,7 +32,6 @@ import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 
-import KioskShell from "@/components/app/kiosk-shell";
 import { useKioskToken } from "@/lib/composables/use-kiosk-token";
 import { URL_KIOSK_HOME } from "@/lib/consts/urls";
 import {

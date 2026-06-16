@@ -59,6 +59,7 @@ import { ref, computed, defineEmits, defineProps, watch } from "vue";
 import { useQuery, useResult } from "@vue/apollo-composable";
 
 import { CHECK_CARD_STEPS_START, PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
+import { KIOSK_ACCESS_INVALID } from "@/lib/consts/qr-code-error";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 
@@ -75,10 +76,14 @@ const props = defineProps({
     required: true
   },
   hideTransactionList: Boolean,
-  isKiosk: Boolean
+  isKiosk: Boolean,
+  kioskToken: {
+    type: String,
+    default: ""
+  }
 });
 
-const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState", "finished"]);
+const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState", "finished", "kioskAuthError"]);
 
 function onDone() {
   if (props.isKiosk) {
@@ -88,57 +93,83 @@ function onDone() {
   emit("onUpdateStep", CHECK_CARD_STEPS_START);
 }
 
-const { result, loading } = useQuery(
-  gql`
-    query Card($id: ID!, $page: Int!) {
-      card(id: $id) {
+const CARD_BALANCE_FIELDS = gql`
+  fragment CardBalanceFields on Card {
+    id
+    isDisabled
+    project {
+      id
+      name
+    }
+    totalFund
+    transactions(page: $page, limit: 8) {
+      totalCount
+      totalPages
+      items {
         id
-        isDisabled
-        project {
-          id
-          name
-        }
-        totalFund
-        transactions(page: $page, limit: 8) {
-          totalCount
-          totalPages
-          items {
-            id
-            amount
-            createdAt
-          }
-        }
-        addingFundTransactions {
-          expirationDate
-          availableFund
-          status
-          productGroup {
-            id
-            name
-            orderOfAppearance
-            color
-          }
-        }
-        loyaltyFund {
-          id
-          amount
-          productGroup {
-            id
-            name
-            orderOfAppearance
-            color
-          }
-        }
-        programCardId
+        amount
+        createdAt
       }
     }
-  `,
-  {
-    id: props.cardId,
-    page: page
+    addingFundTransactions {
+      expirationDate
+      availableFund
+      status
+      productGroup {
+        id
+        name
+        orderOfAppearance
+        color
+      }
+    }
+    loyaltyFund {
+      id
+      amount
+      productGroup {
+        id
+        name
+        orderOfAppearance
+        color
+      }
+    }
+    programCardId
   }
+`;
+
+const KIOSK_CARD_QUERY = gql`
+  query KioskCard($kioskToken: String!, $id: ID!, $page: Int!) {
+    kioskCard(kioskToken: $kioskToken, id: $id) {
+      ...CardBalanceFields
+    }
+  }
+  ${CARD_BALANCE_FIELDS}
+`;
+
+const CARD_QUERY = gql`
+  query Card($id: ID!, $page: Int!) {
+    card(id: $id) {
+      ...CardBalanceFields
+    }
+  }
+  ${CARD_BALANCE_FIELDS}
+`;
+
+const cardQuery = computed(() => (props.isKiosk ? KIOSK_CARD_QUERY : CARD_QUERY));
+
+const { result, loading, onError } = useQuery(
+  cardQuery,
+  () =>
+    props.isKiosk ? { kioskToken: props.kioskToken, id: props.cardId, page: page.value } : { id: props.cardId, page: page.value },
+  () => ({ enabled: !props.isKiosk || !!props.kioskToken })
 );
-const card = useResult(result, null, (data) => data.card);
+
+onError((error) => {
+  if (props.isKiosk && (error.message || "").indexOf(KIOSK_ACCESS_INVALID) !== -1) {
+    emit("kioskAuthError");
+  }
+});
+
+const card = useResult(result, null, (data) => (props.isKiosk ? data.kioskCard : data.card));
 
 watch(loading, (loading) => {
   emit("onUpdateLoadingState", loading);

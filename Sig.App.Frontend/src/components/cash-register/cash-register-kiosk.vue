@@ -2,31 +2,43 @@
 {
   "en": {
     "kiosk-title": "Self-service kiosk",
-    "kiosk-help": "Open this link on the kiosk browser. Do not share it publicly. Regenerate the link if it is compromised.",
+    "kiosk-help": "Open this link on the kiosk browser. Scan the QR code or copy the link. Enter the password on first use. Regenerate the link if it is compromised.",
     "enable-kiosk": "Enable kiosk",
     "copy-link": "Copy link",
     "regenerate-link": "Regenerate link",
     "disable-kiosk": "Disable kiosk",
+    "show-qr": "Show QR code",
+    "qr-title": "Kiosk access QR code",
+    "qr-help": "Scan this code to open the kiosk URL.",
+    "password-label": "Kiosk password",
+    "show-password": "Show",
+    "hide-password": "Hide",
     "copy-success": "Kiosk link copied to clipboard.",
     "enable-success": "Kiosk mode enabled.",
-    "regenerate-success": "Kiosk link regenerated.",
+    "regenerate-success": "Kiosk link and password regenerated.",
     "disable-success": "Kiosk mode disabled.",
-    "regenerate-confirm": "Regenerating the link will invalidate the previous kiosk URL. Continue?",
-    "disable-confirm": "Disabling the kiosk will invalidate the kiosk URL. Continue?"
+    "regenerate-confirm": "Regenerating the link will invalidate the previous kiosk URL, reset the password, and disconnect authorized devices. Continue?",
+    "disable-confirm": "Disabling the kiosk will invalidate the kiosk URL and disconnect authorized devices. Continue?"
   },
   "fr": {
     "kiosk-title": "Kiosque libre-service",
-    "kiosk-help": "Ouvrez ce lien dans le navigateur du kiosque. Ne le partagez pas publiquement. Régénérez le lien s'il est compromis.",
+    "kiosk-help": "Ouvrez ce lien dans le navigateur du kiosque. Scannez le code QR ou copiez le lien. Saisissez le mot de passe lors de la première utilisation. Régénérez le lien s'il est compromis.",
     "enable-kiosk": "Activer le kiosque",
     "copy-link": "Copier le lien",
     "regenerate-link": "Régénérer le lien",
     "disable-kiosk": "Désactiver le kiosque",
+    "show-qr": "Afficher le code QR",
+    "qr-title": "Code QR d'accès au kiosque",
+    "qr-help": "Scannez ce code pour ouvrir l'URL du kiosque.",
+    "password-label": "Mot de passe du kiosque",
+    "show-password": "Afficher",
+    "hide-password": "Masquer",
     "copy-success": "Lien du kiosque copié dans le presse-papiers.",
     "enable-success": "Mode kiosque activé.",
-    "regenerate-success": "Lien du kiosque régénéré.",
+    "regenerate-success": "Lien et mot de passe du kiosque régénérés.",
     "disable-success": "Mode kiosque désactivé.",
-    "regenerate-confirm": "La régénération invalidera l'ancien lien du kiosque. Continuer?",
-    "disable-confirm": "La désactivation invalidera le lien du kiosque. Continuer?"
+    "regenerate-confirm": "La régénération invalidera l'ancien lien, réinitialisera le mot de passe et déconnectera les appareils autorisés. Continuer?",
+    "disable-confirm": "La désactivation invalidera le lien du kiosque et déconnectera les appareils autorisés. Continuer?"
   }
 }
 </i18n>
@@ -50,12 +62,26 @@
         class="text-p2 text-primary-700 font-medium break-all hover:underline focus:underline">
         {{ kioskLink }}
       </a>
+      <div v-if="kioskPassword" class="flex flex-wrap items-center gap-2">
+        <span class="text-p3 font-semibold text-primary-900">{{ t("password-label") }}:</span>
+        <span class="text-p2 font-mono tracking-widest">{{ showPassword ? kioskPassword : "••••••••" }}</span>
+        <PfButtonAction
+          btn-style="link"
+          size="sm"
+          :label="showPassword ? t('hide-password') : t('show-password')"
+          @click="showPassword = !showPassword" />
+      </div>
       <div class="flex flex-wrap gap-2">
         <PfButtonAction btn-style="secondary" :label="t('copy-link')" :disabled="!kioskLink" @click="copyLink" />
+        <PfButtonAction btn-style="outline" :label="t('show-qr')" :disabled="!kioskLink" @click="openQrModal" />
         <PfButtonAction btn-style="outline" :label="t('regenerate-link')" :processing="processing" @click="regenerateLink" />
         <PfButtonAction btn-style="outline" :label="t('disable-kiosk')" :processing="processing" @click="disableKiosk" />
       </div>
     </template>
+    <UiDialogModal v-if="showQrModal" :title="t('qr-title')" :has-footer="true" @onClose="showQrModal = false">
+      <p class="text-p3 text-primary-900 mb-4">{{ t("qr-help") }}</p>
+      <QrCodePreview v-if="kioskLink" :qr-code="kioskLink" />
+    </UiDialogModal>
   </div>
 </template>
 
@@ -68,11 +94,14 @@ import { useMutation } from "@vue/apollo-composable";
 
 import { useNotificationsStore } from "@/lib/store/notifications";
 import { URL_KIOSK_HOME } from "@/lib/consts/urls";
+import QrCodePreview from "@/components/card/qr-code-preview.vue";
 
 const { t } = useI18n();
 const router = useRouter();
 const { addSuccess } = useNotificationsStore();
 const processing = ref(false);
+const showPassword = ref(false);
+const showQrModal = ref(false);
 
 const props = defineProps({
   cashRegister: { type: Object, required: true }
@@ -80,12 +109,14 @@ const props = defineProps({
 
 const isKioskEnabled = ref(!!props.cashRegister.isKioskEnabled);
 const kioskAccessToken = ref(props.cashRegister.kioskAccessToken || "");
+const kioskPassword = ref(props.cashRegister.kioskPassword || "");
 
 watch(
   () => props.cashRegister,
   (cashRegister) => {
     isKioskEnabled.value = !!cashRegister.isKioskEnabled;
     kioskAccessToken.value = cashRegister.kioskAccessToken || "";
+    kioskPassword.value = cashRegister.kioskPassword || "";
   },
   { deep: true }
 );
@@ -103,6 +134,8 @@ function applyMutationResult(cashRegister) {
   if (!cashRegister) return;
   isKioskEnabled.value = !!cashRegister.isKioskEnabled;
   kioskAccessToken.value = cashRegister.kioskAccessToken || "";
+  kioskPassword.value = cashRegister.kioskPassword || "";
+  showPassword.value = false;
 }
 
 const mutationOptions = {
@@ -118,6 +151,7 @@ const { mutate: enableCashRegisterKiosk } = useMutation(
           id
           isKioskEnabled
           kioskAccessToken
+          kioskPassword
         }
       }
     }
@@ -133,6 +167,7 @@ const { mutate: regenerateCashRegisterKioskToken } = useMutation(
           id
           isKioskEnabled
           kioskAccessToken
+          kioskPassword
         }
       }
     }
@@ -148,6 +183,7 @@ const { mutate: disableCashRegisterKiosk } = useMutation(
           id
           isKioskEnabled
           kioskAccessToken
+          kioskPassword
         }
       }
     }
@@ -194,5 +230,9 @@ async function copyLink() {
   if (!kioskLink.value) return;
   await navigator.clipboard.writeText(kioskLink.value);
   addSuccess(t("copy-success"));
+}
+
+function openQrModal() {
+  showQrModal.value = true;
 }
 </script>

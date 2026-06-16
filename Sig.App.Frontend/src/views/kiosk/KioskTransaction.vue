@@ -1,50 +1,43 @@
 <i18n>
 {
   "en": {
-    "title": "Make a purchase",
-    "invalid-link": "This link is invalid or has expired."
+    "title": "Make a purchase"
   },
   "fr": {
-    "title": "Faire un achat",
-    "invalid-link": "Ce lien est invalide ou a expiré."
+    "title": "Faire un achat"
   }
 }
 </i18n>
 
 <template>
-  <KioskShell :loading="loading || kioskLoading" :show-cancel="activeStep !== KIOSK_STEP_COMPLETE" @cancel="goHome">
-    <div v-if="!kioskLoading && !isValid" class="flex flex-1 items-center justify-center p-8 text-h3 text-center">
-      {{ t("invalid-link") }}
+  <KioskScan
+    v-if="activeStep === KIOSK_STEP_SCANNING"
+    :kiosk-token="authToken"
+    :heading="t('title')"
+    transaction-route-name="kiosk-transaction-url"
+    @scanned="onScanned"
+    @cancel="goHome"
+    @auth-error="handleKioskAuthError" />
+  <div v-else-if="activeStep === KIOSK_STEP_ADD" class="py-5 px-4 xs:px-8">
+    <div class="bg-white rounded-2xl pt-6 pb-3 px-3 xs:p-6 max-w-lg mx-auto">
+      <h1 class="font-semibold mb-4 text-h2">{{ t("title") }}</h1>
+      <AddTransaction
+        :card-id="cardId"
+        :kiosk-token="authToken"
+        is-kiosk
+        @onUpdateStep="onUpdateStep"
+        @onUpdateLoadingState="loading = $event"
+        @onCloseModal="goHome"
+        @kiosk-auth-error="handleKioskAuthError" />
     </div>
-    <template v-else-if="isValid">
-      <KioskScan
-        v-if="activeStep === KIOSK_STEP_SCANNING"
-        :kiosk-token="token"
-        :heading="t('title')"
-        transaction-route-name="kiosk-transaction-url"
-        @scanned="onScanned"
-        @cancel="goHome" />
-      <div v-else-if="activeStep === KIOSK_STEP_ADD" class="py-5 px-4 xs:px-8">
-        <div class="bg-white rounded-2xl pt-6 pb-3 px-3 xs:p-6 max-w-lg mx-auto">
-          <h1 class="font-semibold mb-4 text-h2">{{ t("title") }}</h1>
-          <AddTransaction
-            :card-id="cardId"
-            :kiosk-token="token"
-            is-kiosk
-            @onUpdateStep="onUpdateStep"
-            @onUpdateLoadingState="loading = $event"
-            @onCloseModal="goHome" />
-        </div>
-      </div>
-      <div v-else-if="activeStep === KIOSK_STEP_COMPLETE" class="min-h-app px-4 py-10 flex items-center justify-center">
-        <div class="bg-white rounded-2xl pt-6 pb-3 px-3 xs:p-6 w-full max-w-lg">
-          <UiIconComplete />
-          <CompleteTransaction :transaction-id="transactionId" is-kiosk @finished="goHome" />
-        </div>
-      </div>
-    </template>
-    <RouterView />
-  </KioskShell>
+  </div>
+  <div v-else-if="activeStep === KIOSK_STEP_COMPLETE" class="min-h-app px-4 py-10 flex items-center justify-center">
+    <div class="bg-white rounded-2xl pt-6 pb-3 px-3 xs:p-6 w-full max-w-lg">
+      <UiIconComplete />
+      <CompleteTransaction :transaction-id="transactionId" is-kiosk @finished="goHome" />
+    </div>
+  </div>
+  <RouterView />
 </template>
 
 <script setup>
@@ -53,11 +46,11 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 
 import { usePageTitle } from "@/lib/helpers/page-title";
+import { useKioskShellState } from "@/lib/composables/use-kiosk-shell";
 import { useKioskToken } from "@/lib/composables/use-kiosk-token";
 import { URL_KIOSK_HOME } from "@/lib/consts/urls";
 import { TRANSACTION_STEPS_COMPLETE } from "@/lib/consts/enums";
 
-import KioskShell from "@/components/app/kiosk-shell";
 import KioskScan from "@/views/kiosk/KioskScan";
 import AddTransaction from "@/components/transaction/add-transaction";
 import CompleteTransaction from "@/components/transaction/complete-transaction";
@@ -70,7 +63,7 @@ const { t } = useI18n();
 const router = useRouter();
 usePageTitle(t("title"));
 
-const { token, loading: kioskLoading, isValid, kioskRoute } = useKioskToken();
+const { authToken, kioskRoute, handleKioskAuthError } = useKioskToken();
 
 const activeStep = ref(KIOSK_STEP_SCANNING);
 const cardId = ref("");
@@ -93,4 +86,10 @@ function onUpdateStep(stepName, values) {
 function goHome() {
   router.push(kioskRoute(URL_KIOSK_HOME));
 }
+
+useKioskShellState({
+  loading: () => loading.value,
+  showCancel: () => activeStep.value !== KIOSK_STEP_COMPLETE,
+  onCancel: goHome
+});
 </script>
