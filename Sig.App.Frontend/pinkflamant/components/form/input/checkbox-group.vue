@@ -26,7 +26,7 @@
         <PfIcon
           class="absolute top-1/2 -translate-y-1/2 left-3 flex items-center text-grey-500 pointer-events-none"
           :icon="leadingIcon"
-          :size="24" />
+          size="lg" />
         <input
           :id="`${id}-search`"
           ref="searchInput"
