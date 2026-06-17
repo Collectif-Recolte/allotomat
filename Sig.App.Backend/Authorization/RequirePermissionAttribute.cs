@@ -101,53 +101,61 @@ namespace Sig.App.Backend.Authorization
 
         private async Task<bool> HasProjectPermission(ClaimsPrincipal claimsPrincipal, ProjectPermission permission, object input)
         {
-            var projectPermissions = await permissionService.GetProjectPermissions(claimsPrincipal, GetProjectIdFromInput(input));
+            var id = await GetProjectIdFromInput(input);
+            var projectPermissions = await permissionService.GetProjectPermissions(claimsPrincipal, id);
             return projectPermissions.Contains(permission);
         }
 
         private async Task<bool> HasMarketPermission(ClaimsPrincipal claimsPrincipal, MarketPermission permission, object input)
         {
-            var marketPermissions = await permissionService.GetMarketPermissions(claimsPrincipal, GetMarketIdFromInput(input));
+            var id = await GetMarketIdFromInput(input);
+            var marketPermissions = await permissionService.GetMarketPermissions(claimsPrincipal, id);
             return marketPermissions.Contains(permission);
         }
 
         private async Task<bool> HasOrganizationPermission(ClaimsPrincipal claimsPrincipal, OrganizationPermission permission, object input)
         {
-            var organizationPermissions = await permissionService.GetOrganizationPermissions(claimsPrincipal, GetOrganizationIdFromInput(input));
+            var id = await GetOrganizationIdFromInput(input);
+            var organizationPermissions = await permissionService.GetOrganizationPermissions(claimsPrincipal, id);
             return organizationPermissions.Contains(permission);
         }
 
         private async Task<bool> HasBeneficiaryPermissions(ClaimsPrincipal claimsPrincipal, BeneficiaryPermission permission, object input)
         {
-            var beneficiaryPermissions = await permissionService.GetBeneficiaryPermissions(claimsPrincipal, GetBeneficiaryIdFromInput(input));
+            var id = await GetBeneficiaryIdFromInput(input);
+            var beneficiaryPermissions = await permissionService.GetBeneficiaryPermissions(claimsPrincipal, id);
             return beneficiaryPermissions.Contains(permission);
         }
 
         private async Task<bool> HasSubscriptionPermissions(ClaimsPrincipal claimsPrincipal, SubscriptionPermission permission, object input)
         {
-            var subscriptionPermissions = await permissionService.GetSubscriptionPermissions(claimsPrincipal, GetSubscriptionIdFromInput(input));
+            var id = GetSubscriptionIdFromInput(input);
+            var subscriptionPermissions = await permissionService.GetSubscriptionPermissions(claimsPrincipal, id);
             return subscriptionPermissions.Contains(permission);
         }
 
         private async Task<bool> HasBeneficiaryTypePermissions(ClaimsPrincipal claimsPrincipal, BeneficiaryTypePermission permission, object input)
         {
-            var beneficiaryTypePermissions = await permissionService.GetBeneficiaryTypePermissions(claimsPrincipal, GetBeneficiaryTypeIdFromInput(input));
+            var id = GetBeneficiaryTypeIdFromInput(input);
+            var beneficiaryTypePermissions = await permissionService.GetBeneficiaryTypePermissions(claimsPrincipal, id);
             return beneficiaryTypePermissions.Contains(permission);
         }
 
         private async Task<bool> HasCardPermissions(ClaimsPrincipal claimsPrincipal, CardPermission permission, object input)
         {
-            var cardPermissions = await permissionService.GetCardPermissions(claimsPrincipal, GetCardIdFromInput(input));
+            var id = GetCardIdFromInput(input);
+            var cardPermissions = await permissionService.GetCardPermissions(claimsPrincipal, id);
             return cardPermissions.Contains(permission);
         }
 
         private async Task<bool> HasMarketGroupPermissions(ClaimsPrincipal claimsPrincipal, MarketGroupPermission permission, object input)
         {
-            var marketGroupPermissions = await permissionService.GetMarketGroupPermissions(claimsPrincipal, GetMarketGroupIdFromInput(input));
+            var id = GetMarketGroupIdFromInput(input);
+            var marketGroupPermissions = await permissionService.GetMarketGroupPermissions(claimsPrincipal, id);
             return marketGroupPermissions.Contains(permission);
         }
 
-        private string GetProjectIdFromInput(object input)
+        private async Task<string> GetProjectIdFromInput(object input)
         {
             if (input is HaveProjectId hpi)
             {
@@ -159,8 +167,11 @@ namespace Sig.App.Backend.Authorization
             }
             if (input is HaveOrganizationIdAndMarketId hoiami)
             {
-                var organization = db.Organizations.Include(x => x.Project).Where(x => x.Id == hoiami.OrganizationId.LongIdentifierForType<Organization>()).FirstOrDefault();
-                return organization.Project.GetIdentifier().IdentifierForType<Project>();
+                var organization = await db.Organizations
+                    .Include(x => x.Project)
+                    .Where(x => x.Id == hoiami.OrganizationId.LongIdentifierForType<Organization>())
+                    .FirstOrDefaultAsync();
+                return organization?.Project.GetIdentifier().IdentifierForType<Project>();
             }
             if (input is ProjectGraphType pgt)
             {
@@ -169,7 +180,7 @@ namespace Sig.App.Backend.Authorization
             if (input is HaveCardId hci)
             {
                 var cardId = hci.CardId.LongIdentifierForType<Card>();
-                var card = db.Cards.Find(cardId);
+                var card = await db.Cards.FindAsync(cardId);
                 if (card != null)
                 {
                     var projectId = Id.New<Project>(card.ProjectId);
@@ -184,17 +195,24 @@ namespace Sig.App.Backend.Authorization
             return null;
         }
 
-        private string GetMarketIdFromInput(object input)
+        private async Task<string> GetMarketIdFromInput(object input)
         {
             if (input is HaveInitialTransactionId hiti)
             {
-                var transaction = db.Transactions.OfType<PaymentTransaction>().Include(x => x.Market).Where(x => x.Id == hiti.InitialTransactionId.LongIdentifierForType<PaymentTransaction>()).FirstOrDefault();
-                return transaction.Market.GetIdentifier().IdentifierForType<Market>();
+                var transaction = await db.Transactions
+                    .OfType<PaymentTransaction>()
+                    .Include(x => x.Market)
+                    .Where(x => x.Id == hiti.InitialTransactionId.LongIdentifierForType<PaymentTransaction>())
+                    .FirstOrDefaultAsync();
+                return transaction?.Market.GetIdentifier().IdentifierForType<Market>();
             }
             if (input is HaveCashRegisterId hcri)
             {
-                var cashRegister = db.CashRegisters.Include(x => x.Market).Where(x => x.Id == hcri.CashRegisterId.LongIdentifierForType<CashRegister>()).FirstOrDefault();
-                return cashRegister.Market.GetIdentifier().IdentifierForType<Market>();
+                var cashRegister = await db.CashRegisters
+                    .Include(x => x.Market)
+                    .Where(x => x.Id == hcri.CashRegisterId.LongIdentifierForType<CashRegister>())
+                    .FirstOrDefaultAsync();
+                return cashRegister?.Market.GetIdentifier().IdentifierForType<Market>();
             }
             if (input is HaveMarketId hmi)
             {
@@ -224,7 +242,7 @@ namespace Sig.App.Backend.Authorization
             return null;
         }
 
-        private string GetOrganizationIdFromInput(object input)
+        private async Task<string> GetOrganizationIdFromInput(object input)
         {
             if (input is HaveOrganizationId hoi)
             {
@@ -244,8 +262,11 @@ namespace Sig.App.Backend.Authorization
             }
             if (input is HaveSubscriptionIdAndBeneficiaryId hsiabi)
             {
-                var beneficiary = db.Beneficiaries.Include(x => x.Organization).Where(x => x.Id == hsiabi.BeneficiaryId.LongIdentifierForType<Beneficiary>()).FirstOrDefault();
-                return beneficiary.Organization.GetIdentifier().IdentifierForType<Organization>();
+                var beneficiary = await db.Beneficiaries
+                    .Include(x => x.Organization)
+                    .Where(x => x.Id == hsiabi.BeneficiaryId.LongIdentifierForType<Beneficiary>())
+                    .FirstOrDefaultAsync();
+                return beneficiary?.Organization.GetIdentifier().IdentifierForType<Organization>();
             }
             if (input is Id id)
             {
@@ -255,7 +276,7 @@ namespace Sig.App.Backend.Authorization
             return null;
         }
 
-        private string GetBeneficiaryIdFromInput(object input)
+        private async Task<string> GetBeneficiaryIdFromInput(object input)
         {
             if (input is HaveBeneficiaryId hbi)
             {
@@ -292,7 +313,10 @@ namespace Sig.App.Backend.Authorization
             }
             if (input is HaveOriginalCardId hoci)
             {
-                var beneficiary = db.Cards.Include(x => x.Beneficiary).Where(x => x.Id == hoci.OriginalCardId.LongIdentifierForType<Card>()).FirstOrDefault().Beneficiary;
+                var beneficiary = (await db.Cards
+                    .Include(x => x.Beneficiary)
+                    .Where(x => x.Id == hoci.OriginalCardId.LongIdentifierForType<Card>())
+                    .FirstOrDefaultAsync())?.Beneficiary;
                 if (beneficiary is OffPlatformBeneficiary)
                 {
                     return beneficiary.GetIdentifier().IdentifierForType<OffPlatformBeneficiary>();
