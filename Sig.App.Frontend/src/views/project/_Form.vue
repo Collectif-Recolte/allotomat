@@ -91,11 +91,11 @@
             :checked="field.value"
             col-span-class="sm:col-span-4" />
         </Field>
-        <Field v-slot="{ field }" name="reconciliationReportDate">
+        <Field v-slot="{ field, errors: fieldErrors }" name="reconciliationReportDate">
           <PfFormInputSelect
             id="reconciliationReportDate"
             v-bind="field"
-            :errors="errors"
+            :errors="fieldErrors"
             :label="t('reconciliation-report-date')"
             :options="reconciliationReportDateOptions"
             col-span-class="sm:col-span-4" />
