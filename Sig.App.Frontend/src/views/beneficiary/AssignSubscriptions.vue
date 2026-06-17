@@ -861,6 +861,7 @@ const anyFiltersActive = computed(() => {
 });
 
 function onOrganizationSelected(e) {
+  if (!e) return;
   selectedOrganization.value = e;
   selectedSubscription.value = null;
   changeOrganization(e);
@@ -915,16 +916,18 @@ function onSelectedBeneficiaryUnchecked(beneficiary) {
 }
 
 function onSubscriptionSelected(e) {
+  if (!e) return;
   selectedSubscription.value = e;
 
-  var availableBeneficiaryType = subscriptions.value
-    .find((x) => x.value === selectedSubscription.value)
-    .types.map((x) => x.beneficiaryType);
+  const subscription = subscriptions.value.find((x) => x.value === selectedSubscription.value);
+  if (!subscription) return;
+
+  var availableBeneficiaryType = subscription.types.map((x) => x.beneficiaryType);
   beneficiaryTypesFilter.value = beneficiaryTypesFilter.value.filter((x) =>
     availableBeneficiaryType.map((y) => y.id).includes(x)
   );
   subscriptionsFilter.value = subscriptionsFilter.value.filter((x) => x !== e);
-  maxAllocation.value = subscriptions.value.find((x) => x.value === selectedSubscription.value).budgetAllowance;
+  maxAllocation.value = subscription.budgetAllowance;
 
   updateUrl();
 }
