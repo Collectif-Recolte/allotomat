@@ -237,57 +237,62 @@ namespace Sig.App.Backend.Services.Permission
         };
 
 
-
-        public Task<GlobalPermission[]> GetGlobalPermissions(ClaimsPrincipal claimsPrincipal)
+        private const string UserTypePCAAdmin = nameof(UserType.PCAAdmin);
+        private const string UserTypeProjectManager = nameof(UserType.ProjectManager);
+        private const string UserTypeOrganizationManager = nameof(UserType.OrganizationManager);
+        private const string UserTypeMerchant = nameof(UserType.Merchant);
+        private const string UserTypeMarketGroupManager = nameof(UserType.MarketGroupManager);
+        
+        public async Task<GlobalPermission[]> GetGlobalPermissions(ClaimsPrincipal claimsPrincipal)
         {
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.PCAAdmin.ToString()))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypePCAAdmin))
             {
-                return Task.FromResult(AdminGlobalPermissions);
+                return AdminGlobalPermissions;
             }
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager))
             {
                 var claim = claimsPrincipal.Claims.FirstOrDefault(x => x.Type == AppClaimTypes.ProjectManagerOf);
-                var projectId = (long)Convert.ToDouble(claim.Value);
-                var project = db.Projects.FirstOrDefault(x => x.Id == projectId);
-                if (project.AdministrationSubscriptionsOffPlatform)
+                var projectId = Convert.ToInt64(claim?.Value);
+                var project = await db.Projects.FirstOrDefaultAsync(x => x.Id == projectId);
+                if (project?.AdministrationSubscriptionsOffPlatform == true)
                 {
-                    return Task.FromResult(ProjectManagerSubscriptionsOffPlatformGlobalPermissions);
+                    return ProjectManagerSubscriptionsOffPlatformGlobalPermissions;
                 }
 
-                return Task.FromResult(ProjectManagerGlobalPermissions);
+                return ProjectManagerGlobalPermissions;
             }
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.OrganizationManager.ToString()))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeOrganizationManager))
             {
                 var claim = claimsPrincipal.Claims.FirstOrDefault(x => x.Type == AppClaimTypes.OrganizationManagerOf);
                 if (claim != null)
                 {
-                    var organizationId = (long)Convert.ToDouble(claim.Value);
-                    var project = db.Projects.FirstOrDefault(x => x.Organizations.Any(y => y.Id == organizationId));
+                    var organizationId = Convert.ToInt64(claim.Value);
+                    var project = await db.Projects.FirstOrDefaultAsync(x => x.Organizations.Any(y => y.Id == organizationId));
 
                     if (project != null && project.AllowOrganizationsAssignCards)
                     {
                         var result = new List<GlobalPermission>() { GlobalPermission.ManageCards };
                         result.AddRange(OrganizationManagerGlobalPermissions);
-                        return Task.FromResult(result.ToArray());
+                        return result.ToArray();
                     }
                 }
 
-                return Task.FromResult(OrganizationManagerGlobalPermissions);
+                return OrganizationManagerGlobalPermissions;
             }
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.Merchant.ToString()))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeMerchant))
             {
-                return Task.FromResult(MarketManagerGlobalPermissions);
+                return MarketManagerGlobalPermissions;
             }
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.MarketGroupManager.ToString()))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeMarketGroupManager))
             {
-                return Task.FromResult(MarketGroupManagerGlobalPermissions);
+                return MarketGroupManagerGlobalPermissions;
             }
 
-            return Task.FromResult(Array.Empty<GlobalPermission>());
+            return Array.Empty<GlobalPermission>();
         }
 
         public PermissionService(AppDbContext db)
@@ -295,26 +300,27 @@ namespace Sig.App.Backend.Services.Permission
             this.db = db;
         }
 
-        public Task<BeneficiaryTypePermission[]> GetBeneficiaryTypePermissions(ClaimsPrincipal claimsPrincipal, long beneficiaryTypeId)
+        public async Task<BeneficiaryTypePermission[]> GetBeneficiaryTypePermissions(ClaimsPrincipal claimsPrincipal, long beneficiaryTypeId)
         {
-            var beneficiaryType = db.BeneficiaryTypes.Include(x => x.Project).First(x => x.Id == beneficiaryTypeId);
+            var beneficiaryType = await db.BeneficiaryTypes.Include(x => x.Project).FirstAsync(x => x.Id == beneficiaryTypeId);
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, beneficiaryType.Project.GetIdentifier().IdentifierForType<Project>()))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager) && 
+                claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, beneficiaryType.Project.GetIdentifier().IdentifierForType<Project>()))
             {
-                return Task.FromResult(ProjectManagerBeneficiaryTypePermission);
+                return ProjectManagerBeneficiaryTypePermission;
             }
 
-            return Task.FromResult(Array.Empty<BeneficiaryTypePermission>());
+            return Array.Empty<BeneficiaryTypePermission>();
         }
 
         public Task<ProjectPermission[]> GetProjectPermissions(ClaimsPrincipal claimsPrincipal, string projectId)
         {
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.PCAAdmin.ToString()))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypePCAAdmin))
             {
                 return Task.FromResult(AdminProjectPermission);
             }
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectId))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectId))
             {
                 return Task.FromResult(ProjectManagerProjectPermission);
             }
@@ -322,94 +328,94 @@ namespace Sig.App.Backend.Services.Permission
             return Task.FromResult(Array.Empty<ProjectPermission>());
         }
 
-        public Task<MarketPermission[]> GetMarketPermissions(ClaimsPrincipal claimsPrincipal, string marketId)
+        public async Task<MarketPermission[]> GetMarketPermissions(ClaimsPrincipal claimsPrincipal, string marketId)
         {
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.PCAAdmin.ToString()))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypePCAAdmin))
             {
-                return Task.FromResult(AdminMarketPermissions);
+                return AdminMarketPermissions;
             }
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.Merchant.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.MarketManagerOf, marketId))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeMerchant) && claimsPrincipal.HasClaim(AppClaimTypes.MarketManagerOf, marketId))
             {
-                return Task.FromResult(MarketManagerMarketPermission);
+                return MarketManagerMarketPermission;
             }
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager))
             {
                 if (marketId != null)
                 {
                     var marketLongId = Id.New<Market>(marketId).LongIdentifierForType<Market>();
-                    var projectMarkets = db.ProjectMarkets.Where(x => x.MarketId == marketLongId).ToList();
+                    var projectMarkets = await db.ProjectMarkets.Where(x => x.MarketId == marketLongId).ToListAsync();
 
                     foreach (var projectMarket in projectMarkets)
                     {
                         if (claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectMarket.ProjectId.ToString()))
                         {
-                            return Task.FromResult(ProjectManagerMarketPermission);
+                            return ProjectManagerMarketPermission;
                         }
                     }
                 }
 
-                return Task.FromResult(ProjectManagerMarketPermissionGeneric);
+                return ProjectManagerMarketPermissionGeneric;
             }
             
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.OrganizationManager.ToString()))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeOrganizationManager))
             {
                 var marketLongId = Id.New<Market>(marketId).LongIdentifierForType<Market>();
-                var projectMarkets = db.ProjectMarkets.Where(x => x.MarketId == marketLongId).ToList();
-                var organizationForProjects = db.Organizations.Where(x => projectMarkets.Select(y => y.ProjectId).Contains(x.ProjectId)).ToList();
+                var projectMarkets = await db.ProjectMarkets.Where(x => x.MarketId == marketLongId).ToListAsync();
+                var organizationForProjects = await db.Organizations.Where(x => projectMarkets.Select(y => y.ProjectId).Contains(x.ProjectId)).ToListAsync();
 
                 foreach (var organization in organizationForProjects)
                 {
                     if (claimsPrincipal.HasClaim(AppClaimTypes.OrganizationManagerOf, organization.GetIdentifier().IdentifierForType<Organization>()))
                     {
-                        return Task.FromResult(OrganizationManagerMarketPermission);
+                        return OrganizationManagerMarketPermission;
                     }
                 }
             }
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.MarketGroupManager.ToString()))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeMarketGroupManager))
             {
                 if (!string.IsNullOrEmpty(marketId))
                 { 
                     var marketLongId = Id.New<Market>(marketId).LongIdentifierForType<Market>();
-                    var marketGroupMarkets = db.MarketGroupMarkets.Where(x => x.MarketId == marketLongId).ToList();
+                    var marketGroupMarkets = await db.MarketGroupMarkets.Where(x => x.MarketId == marketLongId).ToListAsync();
 
                     foreach (var marketGroupMarket in marketGroupMarkets)
                     {
                         if (claimsPrincipal.HasClaim(AppClaimTypes.MarketGroupManagerOf, marketGroupMarket.MarketGroupId.ToString()))
                         {
-                            return Task.FromResult(MarketGroupManagerMarketPermission);
+                            return MarketGroupManagerMarketPermission;
                         }
                     }
                 }
 
-                return Task.FromResult(MarketGroupManagerCreateMarketPermission);
+                return MarketGroupManagerCreateMarketPermission;
             }
 
-            return Task.FromResult(Array.Empty<MarketPermission>());
+            return Array.Empty<MarketPermission>();
         }
 
-        public Task<OrganizationPermission[]> GetOrganizationPermissions(ClaimsPrincipal claimsPrincipal, string organizationId)
+        public async Task<OrganizationPermission[]> GetOrganizationPermissions(ClaimsPrincipal claimsPrincipal, string organizationId)
         {
             var organizationLongId = Id.New<Organization>(organizationId).LongIdentifierForType<Organization>();
-            var organization = db.Organizations.FirstOrDefault(x => x.Id == organizationLongId);
+            var organization = await db.Organizations.FirstAsync(x => x.Id == organizationLongId);
             var projectId = organization.ProjectId.ToString();
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectId))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectId))
             {
-                return Task.FromResult(ProjectManagerOrganizationPermission);
+                return ProjectManagerOrganizationPermission;
             }
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.OrganizationManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.OrganizationManagerOf, organizationId))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeOrganizationManager) && claimsPrincipal.HasClaim(AppClaimTypes.OrganizationManagerOf, organizationId))
             {
-                return Task.FromResult(OrganizationManagerOrganizationPermission);
+                return OrganizationManagerOrganizationPermission;
             }
 
-            return Task.FromResult(Array.Empty<OrganizationPermission>());
+            return Array.Empty<OrganizationPermission>();
         }
 
-        public Task<BeneficiaryPermission[]> GetBeneficiaryPermissions(ClaimsPrincipal claimsPrincipal, string beneficiaryId)
+        public async Task<BeneficiaryPermission[]> GetBeneficiaryPermissions(ClaimsPrincipal claimsPrincipal, string beneficiaryId)
         {
             long beneficiaryLongId;
             try {
@@ -419,83 +425,84 @@ namespace Sig.App.Backend.Services.Permission
             {
                 beneficiaryLongId = Id.New<OffPlatformBeneficiary>(beneficiaryId).LongIdentifierForType<OffPlatformBeneficiary>();
             }
-            var beneficiary = db.Beneficiaries.FirstOrDefault(x => x.Id == beneficiaryLongId);
+            var beneficiary = await db.Beneficiaries.FirstAsync(x => x.Id == beneficiaryLongId);
             var organizationId = beneficiary.OrganizationId.ToString();
-            var projectId = db.Organizations.Where(x => x.Id == beneficiary.OrganizationId).FirstOrDefault().ProjectId;
-            var project = db.Projects.FirstOrDefault(x => x.Id == projectId);
+            var project = await db.Organizations.Where(x => x.Id == beneficiary.OrganizationId).Select(x => x.Project).FirstAsync();
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectId.ToString()))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, project.Id.ToString()))
             {
-                return Task.FromResult(ProjectManagerBeneficiaryPermissions);
+                return ProjectManagerBeneficiaryPermissions;
             }
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.OrganizationManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.OrganizationManagerOf, organizationId))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeOrganizationManager) && claimsPrincipal.HasClaim(AppClaimTypes.OrganizationManagerOf, organizationId))
             {
-                if (db.Projects.First(x => x.Organizations.Any(y => y.Id == (long)Convert.ToDouble(organizationId))).AllowOrganizationsAssignCards)
+                var p = await db.Projects.FirstAsync(x => x.Organizations.Any(y => y.Id == Convert.ToInt64(organizationId)));
+                if (p.AllowOrganizationsAssignCards)
                 {
-                    return Task.FromResult(OrganizationManagerBeneficiaryPermissionsWithAssignCard);
+                    return OrganizationManagerBeneficiaryPermissionsWithAssignCard;
                 }
 
-                return Task.FromResult(OrganizationManagerBeneficiaryPermissions);
+                return OrganizationManagerBeneficiaryPermissions;
             }
 
-            return Task.FromResult(Array.Empty<BeneficiaryPermission>());
+            return Array.Empty<BeneficiaryPermission>();
         }
 
-        public Task<CardPermission[]> GetCardPermissions(ClaimsPrincipal claimsPrincipal, string cardId)
+        public async Task<CardPermission[]> GetCardPermissions(ClaimsPrincipal claimsPrincipal, string cardId)
         {
             var cardLongId = Id.New<Card>(cardId).LongIdentifierForType<Card>();
 
-            var card = db.Cards
+            var card = await db.Cards
                 .Include(x => x.Beneficiary)
                 .Include(x => x.Project)
-                .FirstOrDefault(x => x.Id == cardLongId);
+                .FirstAsync(x => x.Id == cardLongId);
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, card.ProjectId.ToString()) && (!card.Project?.BeneficiariesAreAnonymous ?? true))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, card.ProjectId.ToString()) && (!card.Project?.BeneficiariesAreAnonymous ?? true))
             {
-                return Task.FromResult(ProjectManagerCardPermissions);
+                return ProjectManagerCardPermissions;
             }
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.OrganizationManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.OrganizationManagerOf, card.Beneficiary.OrganizationId.ToString()))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeOrganizationManager) && claimsPrincipal.HasClaim(AppClaimTypes.OrganizationManagerOf, card.Beneficiary.OrganizationId.ToString()))
             {
-                if (db.Projects.First(x => x.Organizations.Any(y => y.Id == (long)Convert.ToDouble(card.Beneficiary.OrganizationId))).AllowOrganizationsAssignCards)
+                var p = await db.Projects.FirstAsync(x => x.Organizations.Any(y => y.Id == Convert.ToInt64(card.Beneficiary.OrganizationId)));
+                if (p.AllowOrganizationsAssignCards)
                 {
-                    return Task.FromResult(OrganizationManagerCardPermissionsWithAssignCard);
+                    return OrganizationManagerCardPermissionsWithAssignCard;
                 }
             }
 
-            return Task.FromResult(Array.Empty<CardPermission>());
+            return Array.Empty<CardPermission>();
         }
 
-        public Task<SubscriptionPermission[]> GetSubscriptionPermissions(ClaimsPrincipal claimsPrincipal, string subscriptionId)
+        public async Task<SubscriptionPermission[]> GetSubscriptionPermissions(ClaimsPrincipal claimsPrincipal, string subscriptionId)
         {
             var subscriptionLongId = Id.New<Subscription>(subscriptionId).LongIdentifierForType<Subscription>();
-            var projectId = db.Subscriptions.Where(x => x.Id == subscriptionLongId).FirstOrDefault().ProjectId.ToString();
+            var projectId = await db.Subscriptions.Where(x => x.Id == subscriptionLongId).Select(x => x.ProjectId).FirstOrDefaultAsync();
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectId))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectId.ToString()))
             {
-                return Task.FromResult(ProjectManagerSubscriptionPermission);
+                return ProjectManagerSubscriptionPermission;
             }
 
-            return Task.FromResult(Array.Empty<SubscriptionPermission>());
+            return Array.Empty<SubscriptionPermission>();
         }
 
-        public Task<MarketGroupPermission[]> GetMarketGroupPermissions(ClaimsPrincipal claimsPrincipal, string marketGroupId)
+        public async Task<MarketGroupPermission[]> GetMarketGroupPermissions(ClaimsPrincipal claimsPrincipal, string marketGroupId)
         {
             var marketGroupLongId = Id.New<MarketGroup>(marketGroupId).LongIdentifierForType<MarketGroup>();
-            var projectId = db.MarketGroups.Where(x => x.Id == marketGroupLongId).FirstOrDefault().ProjectId.ToString();
+            var projectId = await db.MarketGroups.Where(x => x.Id == marketGroupLongId).Select(x => x.ProjectId).FirstOrDefaultAsync();
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.ProjectManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectId))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectId.ToString()))
             {
-                return Task.FromResult(ProjectManagerMarketGroupPermission);
+                return ProjectManagerMarketGroupPermission;
             }
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserType.MarketGroupManager.ToString()) && claimsPrincipal.HasClaim(AppClaimTypes.MarketGroupManagerOf, marketGroupLongId.ToString()))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeMarketGroupManager) && claimsPrincipal.HasClaim(AppClaimTypes.MarketGroupManagerOf, marketGroupLongId.ToString()))
             {
-                return Task.FromResult(MarketGroupManagerMarketGroupPermission);
+                return MarketGroupManagerMarketGroupPermission;
             }
 
-            return Task.FromResult(Array.Empty<MarketGroupPermission>());
+            return Array.Empty<MarketGroupPermission>();
         }
     }
 }
