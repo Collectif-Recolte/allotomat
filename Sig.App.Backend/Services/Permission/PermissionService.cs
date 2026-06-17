@@ -255,7 +255,7 @@ namespace Sig.App.Backend.Services.Permission
                 var claim = claimsPrincipal.Claims.FirstOrDefault(x => x.Type == AppClaimTypes.ProjectManagerOf);
                 var projectId = Convert.ToInt64(claim?.Value);
                 var project = await db.Projects.FirstOrDefaultAsync(x => x.Id == projectId);
-                if (project.AdministrationSubscriptionsOffPlatform)
+                if (project?.AdministrationSubscriptionsOffPlatform == true)
                 {
                     return ProjectManagerSubscriptionsOffPlatformGlobalPermissions;
                 }
@@ -399,7 +399,7 @@ namespace Sig.App.Backend.Services.Permission
         public async Task<OrganizationPermission[]> GetOrganizationPermissions(ClaimsPrincipal claimsPrincipal, string organizationId)
         {
             var organizationLongId = Id.New<Organization>(organizationId).LongIdentifierForType<Organization>();
-            var organization = await db.Organizations.FirstOrDefaultAsync(x => x.Id == organizationLongId);
+            var organization = await db.Organizations.FirstAsync(x => x.Id == organizationLongId);
             var projectId = organization.ProjectId.ToString();
 
             if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, projectId))
@@ -425,9 +425,9 @@ namespace Sig.App.Backend.Services.Permission
             {
                 beneficiaryLongId = Id.New<OffPlatformBeneficiary>(beneficiaryId).LongIdentifierForType<OffPlatformBeneficiary>();
             }
-            var beneficiary = await db.Beneficiaries.FirstOrDefaultAsync(x => x.Id == beneficiaryLongId);
+            var beneficiary = await db.Beneficiaries.FirstAsync(x => x.Id == beneficiaryLongId);
             var organizationId = beneficiary.OrganizationId.ToString();
-            var project = await db.Organizations.Where(x => x.Id == beneficiary.OrganizationId).Select(x => x.Project).FirstOrDefaultAsync();
+            var project = await db.Organizations.Where(x => x.Id == beneficiary.OrganizationId).Select(x => x.Project).FirstAsync();
 
             if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, project.Id.ToString()))
             {
@@ -455,7 +455,7 @@ namespace Sig.App.Backend.Services.Permission
             var card = await db.Cards
                 .Include(x => x.Beneficiary)
                 .Include(x => x.Project)
-                .FirstOrDefaultAsync(x => x.Id == cardLongId);
+                .FirstAsync(x => x.Id == cardLongId);
 
             if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, card.ProjectId.ToString()) && (!card.Project?.BeneficiariesAreAnonymous ?? true))
             {
@@ -464,7 +464,7 @@ namespace Sig.App.Backend.Services.Permission
 
             if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeOrganizationManager) && claimsPrincipal.HasClaim(AppClaimTypes.OrganizationManagerOf, card.Beneficiary.OrganizationId.ToString()))
             {
-                var p = db.Projects.First(x => x.Organizations.Any(y => y.Id == Convert.ToInt64(card.Beneficiary.OrganizationId)));
+                var p = await db.Projects.FirstAsync(x => x.Organizations.Any(y => y.Id == Convert.ToInt64(card.Beneficiary.OrganizationId)));
                 if (p.AllowOrganizationsAssignCards)
                 {
                     return OrganizationManagerCardPermissionsWithAssignCard;
