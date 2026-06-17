@@ -45,7 +45,7 @@
           type="button"
           class="absolute inset-y-0 right-0 pr-3 flex items-center text-grey-500 hover:text-primary-700 focus:text-primary-700"
           :aria-label="t('clear-search')"
-          @mousedown.prevent
+          @mousedown.stop
           @click.stop="clearSearch">
           <PfIcon :icon="clearIcon" size="sm" aria-hidden="true" />
         </button>
