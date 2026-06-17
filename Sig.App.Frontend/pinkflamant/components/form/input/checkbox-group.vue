@@ -20,7 +20,8 @@
     :description="description"
     :has-error-state="hasErrorState"
     :errors="errors"
-    :is-filter="isFilter">
+    :is-filter="isFilter"
+    :has-hidden-label="hasHiddenLabel">
     <div v-if="searchable" class="sticky top-0 z-10 bg-white pb-2">
       <div class="relative">
         <PfIcon
