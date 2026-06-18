@@ -29,7 +29,7 @@
       :disabled="disabled"
       :name="name"
       @update:model-value="onSelect">
-      <ComboboxOpenWatcher :open="isOpen" @close="resetQuery" />
+      <SlotPropWatcher :value="isOpen" :filter="(value, previousValue) => previousValue && !value" @change="resetQuery" />
       <div class="relative">
         <PfIcon
           class="absolute top-1/2 -translate-y-1/2 left-3 flex items-center text-grey-500 pointer-events-none z-10"
@@ -109,7 +109,7 @@ import { useI18n } from "vue-i18n";
 import { Combobox, ComboboxButton, ComboboxInput, ComboboxOption, ComboboxOptions } from "@headlessui/vue";
 
 import FormField, { commonFieldProps } from "../field/index";
-import ComboboxOpenWatcher from "./combobox-open-watcher.vue";
+import SlotPropWatcher from "../../slot-prop-watcher.vue";
 import ICON_SEARCH from "../../../icons/search.json";
 import ICON_CLOSE from "../../../icons/close.json";
 import { filterOptions } from "../../../lib/filter-options";
@@ -122,7 +122,7 @@ export default {
     ComboboxInput,
     ComboboxOption,
     ComboboxOptions,
-    ComboboxOpenWatcher
+    SlotPropWatcher
   },
   props: {
     ...commonFieldProps,
