@@ -84,6 +84,21 @@ describe("select-searchable.vue", () => {
     expect(wrapper.vm.query).toBe("");
   });
 
+  it("emits input when selecting with Enter key", async () => {
+    const wrapper = mountSelectSearchable();
+    const input = wrapper.find('input[role="combobox"]');
+
+    await input.trigger("focus");
+    await input.setValue("école");
+    await flushPromises();
+
+    await input.trigger("keydown", { key: "Enter" });
+    await flushPromises();
+
+    expect(wrapper.emitted("input")).toBeTruthy();
+    expect(wrapper.emitted("input")[0]).toEqual(["org-1"]);
+  });
+
   it("does not emit the first option on blur when a value is already selected", async () => {
     const allGroupsOptions = [
       { label: "Tous les groupes", value: "all-group" },
