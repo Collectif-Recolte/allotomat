@@ -49,7 +49,7 @@
           :aria-errormessage="hasErrorState ? `${id}-error` : null"
           :aria-describedby="description ? `${id}-description` : null"
           @change="onQueryChange"
-          @keydown="onInputKeydown" />
+          @keydown.capture="onInputKeydown" />
         <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
           <button
             v-if="query"
