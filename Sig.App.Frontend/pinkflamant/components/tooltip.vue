@@ -70,11 +70,21 @@ export default {
   },
   methods: {
     dismiss() {
-      this.$refs.tooltip.classList.add("hidden");
+      const tooltip = this.$refs.tooltip;
+      if (!tooltip) {
+        return;
+      }
+      tooltip.classList.add("hidden");
     },
     onEscape(e) {
-      let tooltip = this.$refs.tooltip;
-      if (e.key === "Escape" && window.getComputedStyle(tooltip).visibility !== "hidden") {
+      if (e.key !== "Escape") {
+        return;
+      }
+      const tooltip = this.$refs.tooltip;
+      if (!tooltip) {
+        return;
+      }
+      if (window.getComputedStyle(tooltip).visibility !== "hidden") {
         this.dismiss();
       }
     }

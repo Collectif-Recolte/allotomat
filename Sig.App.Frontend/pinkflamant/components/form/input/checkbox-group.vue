@@ -20,7 +20,8 @@
     :description="description"
     :has-error-state="hasErrorState"
     :errors="errors"
-    :is-filter="isFilter">
+    :is-filter="isFilter"
+    :has-hidden-label="hasHiddenLabel">
     <div v-if="searchable" class="sticky top-0 z-10 bg-white pb-2">
       <div class="relative">
         <PfIcon
@@ -36,7 +37,6 @@
           :placeholder="effectiveSearchPlaceholder"
           class="pf-select text-[18px] min-h-11 shadow-sm block w-full rounded-md transition-colors duration-200 ease-in-out text-primary-900 border-primary-500 focus:ring-secondary-500 focus:border-secondary-500 placeholder-grey-500 px-10"
           :aria-label="effectiveSearchPlaceholder"
-          data-filter-search
           @mousedown.stop
           @click.stop
           @keydown.stop />
@@ -70,10 +70,12 @@
 </template>
 
 <script>
+import { ref } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { commonFieldProps } from "../field/index";
 import FormFieldset from "../fieldset";
+import { useDropdownPanelFocus } from "../../../lib/dropdown-panel-focus";
 import { normalizeForSearch } from "../../../lib/normalize-for-search";
 import ICON_SEARCH from "../../../icons/search.json";
 import ICON_CLOSE from "../../../icons/close.json";
@@ -109,9 +111,15 @@ export default {
     }
   },
   emits: ["input"],
-  setup() {
+  setup(props) {
     const { t } = useI18n();
-    return { t };
+    const searchInput = ref(null);
+
+    if (props.searchable) {
+      useDropdownPanelFocus(() => searchInput.value?.focus());
+    }
+
+    return { t, searchInput };
   },
   data() {
     return {
@@ -161,7 +169,7 @@ export default {
     clearSearch() {
       this.searchValue = "";
       this.$nextTick(() => {
-        this.$refs.searchInput?.focus();
+        this.searchInput?.focus();
       });
     }
   },

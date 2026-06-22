@@ -102,7 +102,9 @@
             v-if="availableOrganizations.length > 0"
             id="organizations"
             is-filter
+            has-hidden-label
             searchable
+            :label="t('organizations')"
             :value="selectedOrganizations"
             :options="availableOrganizations"
             @input="onOrganizationsChecked" />
@@ -113,7 +115,9 @@
             id="beneficiary-types"
             class="mt-3"
             is-filter
+            has-hidden-label
             searchable
+            :label="t('beneficiary-type')"
             :value="selectedBeneficiaryTypes"
             :options="availableBeneficiaryTypes"
             @input="onBeneficiaryTypesChecked" />
@@ -124,7 +128,9 @@
             id="subscriptions"
             class="mt-3"
             is-filter
+            has-hidden-label
             searchable
+            :label="t('subscription')"
             :value="selectedSubscriptions"
             :options="availableSubscriptions"
             @input="onSubscriptionsChecked" />
@@ -135,7 +141,9 @@
             id="markets"
             class="mt-3"
             is-filter
+            has-hidden-label
             searchable
+            :label="t('market')"
             :value="selectedMarkets"
             :options="availableMarkets"
             @input="onMarketsChecked" />
@@ -146,7 +154,9 @@
             id="marketGroups"
             class="mt-3"
             is-filter
+            has-hidden-label
             searchable
+            :label="t('market-groups')"
             :value="selectedMarketGroups"
             :options="availableMarketGroups"
             @input="onMarketGroupsChecked" />
@@ -157,7 +167,9 @@
             id="transactionTypes"
             class="mt-3"
             is-filter
+            has-hidden-label
             searchable
+            :label="t('transaction-log-types')"
             :value="selectedTransactionTypes"
             :options="availableTransactionTypes"
             @input="onTransactionTypesChecked" />
@@ -170,6 +182,8 @@
             id="giftCardTransactionTypes"
             class="mt-3"
             is-filter
+            has-hidden-label
+            :label="t('gift-card-transaction-types')"
             :value="selectedGiftCardTransactionTypes"
             :options="availableGiftCardTransactionTypes"
             @input="onGiftCardTransactionTypesChecked" />
