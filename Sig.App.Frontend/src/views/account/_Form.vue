@@ -32,29 +32,15 @@
 </i18n>
 
 <template>
-  <Form
-    v-slot="{ isSubmitting, errors: formErrors }"
-    :validation-schema="validationSchema"
-    :initial-values="props.initialValues"
-    @submit="onSubmit">
-    <PfForm
-      has-footer
-      :disable-submit="Object.keys(formErrors).length > 0"
-      :submit-label="props.submitLabel"
-      :cancel-label="t('back')"
-      :processing="isSubmitting"
-      :loading-label="t('loading')"
+  <Form v-slot="{ isSubmitting, errors: formErrors }" :validation-schema="validationSchema"
+    :initial-values="props.initialValues" @submit="onSubmit">
+    <PfForm has-footer :disable-submit="Object.keys(formErrors).length > 0" :submit-label="props.submitLabel"
+      :cancel-label="t('back')" :processing="isSubmitting" :loading-label="t('loading')"
       :cancel-route="{ name: $consts.urls.URL_ACCOUNT_LOGIN }">
       <PfFormSection>
         <Field v-slot="{ field, errors }" name="email">
-          <PfFormInputText
-            id="email"
-            v-bind="field"
-            :label="t('email')"
-            :errors="errors"
-            input-type="email"
-            :description="!isInEdition ? t('email-desc') : null"
-            :disabled="isInEdition" />
+          <PfFormInputText id="email" v-bind="field" :label="t('email')" :errors="errors" input-type="email"
+            :description="!isInEdition ? t('email-desc') : null" :disabled="isInEdition" />
         </Field>
 
         <Field v-slot="{ field, errors }" name="firstName">
@@ -66,37 +52,23 @@
         </Field>
 
         <Field v-slot="{ field, errors }" name="password">
-          <PfFormInputText
-            id="password"
-            v-bind="field"
-            :label="t('password')"
-            :errors="errors"
-            input-type="password"
+          <PfFormInputText id="password" v-bind="field" :label="t('password')" :errors="errors" input-type="password"
             :description="t('password-rules')" />
         </Field>
 
         <Field v-slot="{ field, errors }" name="passwordConfirmation">
-          <PfFormInputText
-            id="passwordConfirmation"
-            v-bind="field"
-            :label="t('password-confirmation')"
-            :errors="errors"
+          <PfFormInputText id="passwordConfirmation" v-bind="field" :label="t('password-confirmation')" :errors="errors"
             input-type="password" />
         </Field>
       </PfFormSection>
 
       <PfFormSection>
         <Field v-slot="{ field, errors: fieldErrors }" name="tosAccepted">
-          <PfFormInputCheckbox
-            id="tosAccepted"
-            v-bind="field"
-            :label="
-              t('tos-accepted', {
-                url1: `/files/TermsOfUse-${locale}-20230505.pdf`,
-                url2: `/files/PrivacyPolicy-${locale}-20230505.pdf`
-              })
-            "
-            :errors="fieldErrors" />
+          <PfFormInputCheckbox id="tosAccepted" v-bind="field" :label="t('tos-accepted', {
+            url1: `/files/TermsOfUse-${locale}-20240408.pdf`,
+            url2: `/files/PrivacyPolicy-${locale}-20240416.pdf`
+          })
+            " :errors="fieldErrors" />
         </Field>
       </PfFormSection>
     </PfForm>

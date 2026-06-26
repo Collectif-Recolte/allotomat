@@ -28,51 +28,29 @@
         <UiTableHeader :title="t('market-count', { count: markets.length })">
           <template #right>
             <div class="flex items-center gap-x-4">
-              <UiFilter
-                v-model="searchInput"
-                has-search
-                :has-filters="userType === USER_TYPE_PROJECTMANAGER"
-                :has-active-filters="hasActiveFilters"
-                :active-filters-count="activeFiltersCount"
-                :placeholder="t('search-placeholder')"
-                @resetFilters="resetSearch"
-                @search="onSearch">
-                <PfFormInputCheckboxGroup
-                  v-if="availableMarketGroups.length > 0"
-                  id="market-groups"
-                  is-filter
-                  :value="marketGroups"
-                  :label="t('market-groups')"
-                  :options="availableMarketGroups"
+              <UiFilter v-model="searchInput" has-search :has-filters="userType === USER_TYPE_PROJECTMANAGER"
+                :has-active-filters="hasActiveFilters" :active-filters-count="activeFiltersCount"
+                :placeholder="t('search-placeholder')" @resetFilters="resetSearch" @search="onSearch">
+                <PfFormInputCheckboxGroup v-if="availableMarketGroups.length > 0" id="market-groups" is-filter
+                  :value="marketGroups" :label="t('market-groups')" :options="availableMarketGroups"
                   @input="onMarketGroupsChecked" />
               </UiFilter>
-              <PfButtonLink
-                v-if="userType === USER_TYPE_PROJECTMANAGER || userType === USER_TYPE_MARKETGROUPMANAGER"
-                tag="RouterLink"
-                :to="addMarketRoute"
-                :label="t('add-market')" />
+              <PfButtonLink v-if="userType === USER_TYPE_PROJECTMANAGER || userType === USER_TYPE_MARKETGROUPMANAGER"
+                tag="RouterLink" :to="addMarketRoute" :label="t('add-market')" />
             </div>
           </template>
         </UiTableHeader>
-        <MarketTable
-          v-if="markets.length > 0"
-          can-edit
-          :markets="markets"
-          :url-name-market-archive="URL_MARKET_OVERVIEW_ARCHIVE"
+        <MarketTable v-if="markets.length > 0" can-edit :can-archive="userType !== USER_TYPE_MARKETGROUPMANAGER"
+          :markets="markets" :url-name-market-archive="URL_MARKET_OVERVIEW_ARCHIVE"
           :url-name-market-edit="URL_MARKET_OVERVIEW_EDIT"
           :url-name-market-manage-managers="URL_MARKET_OVERVIEW_MANAGE_MANAGERS"
           :url-name-market-enabled="URL_MARKET_OVERVIEW_ENABLED"
           :url-name-market-disabled="URL_MARKET_OVERVIEW_DISABLED" />
         <UiEmptyPage v-else-if="!loading">
-          <UiCta
-            :description="t('empty-list')"
-            :primary-btn-label="t('reset-search')"
-            primary-btn-is-action
+          <UiCta :description="t('empty-list')" :primary-btn-label="t('reset-search')" primary-btn-is-action
             @onPrimaryBtnClick="resetSearch"></UiCta>
         </UiEmptyPage>
-        <UiPagination
-          v-if="marketsPagination && marketsPagination.totalPages > 1"
-          v-model:page="page"
+        <UiPagination v-if="marketsPagination && marketsPagination.totalPages > 1" v-model:page="page"
           :total-pages="marketsPagination.totalPages">
         </UiPagination>
       </div>
