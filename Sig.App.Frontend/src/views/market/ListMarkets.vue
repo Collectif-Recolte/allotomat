@@ -27,34 +27,24 @@
           <UiTableHeader :title="t('market-count', { count: marketsPagination.items.length })">
             <template #right>
               <div class="flex items-center gap-x-4">
-                <UiFilter
-                  v-model="searchInput"
-                  has-search
-                  :placeholder="t('search-placeholder')"
-                  @resetFilters="resetSearch"
-                  @search="onSearch">
+                <UiFilter v-model="searchInput" has-search :placeholder="t('search-placeholder')"
+                  @resetFilters="resetSearch" @search="onSearch">
                 </UiFilter>
                 <PfButtonLink tag="RouterLink" :to="addMarketRoute" :label="t('add-market')" />
               </div>
             </template>
           </UiTableHeader>
-          <MarketTable
-            can-edit
-            can-delete
-            :markets="marketsPagination.items"
-            :url-name-market-archive="URL_MARKET_ARCHIVE"
-            :url-name-market-delete="URL_MARKET_DELETE"
-            :url-name-market-edit="URL_MARKET_EDIT"
-            :url-name-market-manage-managers="URL_MARKET_MANAGE_MANAGERS" />
-          <UiPagination
-            v-if="marketsPagination && marketsPagination.totalPages > 1"
-            v-model:page="page"
+          <MarketTable can-edit can-archive can-delete :markets="marketsPagination.items"
+            :url-name-market-archive="URL_MARKET_ARCHIVE" :url-name-market-delete="URL_MARKET_DELETE"
+            :url-name-market-edit="URL_MARKET_EDIT" :url-name-market-manage-managers="URL_MARKET_MANAGE_MANAGERS" />
+          <UiPagination v-if="marketsPagination && marketsPagination.totalPages > 1" v-model:page="page"
             :total-pages="marketsPagination.totalPages">
           </UiPagination>
         </template>
 
         <UiEmptyPage v-else>
-          <UiCta :description="t('empty-list')" :primary-btn-label="t('create-market')" :primary-btn-route="addMarketRoute" />
+          <UiCta :description="t('empty-list')" :primary-btn-label="t('create-market')"
+            :primary-btn-route="addMarketRoute" />
         </UiEmptyPage>
       </div>
 
