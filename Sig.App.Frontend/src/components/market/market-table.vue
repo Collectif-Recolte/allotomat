@@ -31,7 +31,7 @@
       </td>
       <td>
         <div class="inline-flex items-center gap-x-2">
-          <template v-if="props.canEdit">
+          <template v-if="props.canEdit && props.canArchive">
             <PfButtonLink v-if="!slotProps.item.isDisabled" tag="routerLink" btn-style="outline" size="sm"
               :label="t('disabled-market')"
               :to="{ name: props.urlNameMarketDisabled, params: { marketId: slotProps.item.id } }" />
