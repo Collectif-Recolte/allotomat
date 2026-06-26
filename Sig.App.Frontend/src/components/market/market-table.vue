@@ -32,19 +32,10 @@
       <td>
         <div class="inline-flex items-center gap-x-2">
           <template v-if="props.canEdit">
-            <PfButtonLink
-              v-if="!slotProps.item.isDisabled"
-              tag="routerLink"
-              btn-style="outline"
-              size="sm"
+            <PfButtonLink v-if="!slotProps.item.isDisabled" tag="routerLink" btn-style="outline" size="sm"
               :label="t('disabled-market')"
               :to="{ name: props.urlNameMarketDisabled, params: { marketId: slotProps.item.id } }" />
-            <PfButtonLink
-              v-else
-              tag="routerLink"
-              btn-style="outline"
-              size="sm"
-              :label="t('enabled-market')"
+            <PfButtonLink v-else tag="routerLink" btn-style="outline" size="sm" :label="t('enabled-market')"
               :to="{ name: props.urlNameMarketEnabled, params: { marketId: slotProps.item.id } }" />
           </template>
           <UiButtonGroup :items="getBtnGroup(slotProps.item)" tooltip-position="left" />
@@ -76,18 +67,19 @@ const props = defineProps({
   urlNameMarketDisabled: { type: String, default: URL_MARKET_DISABLED },
   canEdit: Boolean,
   canDelete: Boolean,
+  canArchive: Boolean,
   orderByMarketName: { type: Boolean, default: false }
 });
 
 const cols = computed(() => {
   return props.canEdit || props.urlNameMarketDelete || props.urlNameMarketArchive
     ? [
-        { label: t("market-name") },
-        {
-          label: t("options"),
-          hasHiddenLabel: true
-        }
-      ]
+      { label: t("market-name") },
+      {
+        label: t("options"),
+        hasHiddenLabel: true
+      }
+    ]
     : [{ label: t("market-name") }];
 });
 
@@ -123,7 +115,7 @@ const getBtnGroup = (market) => [
     icon: ICON_FOLDER,
     label: t("market-archive"),
     route: { name: props.urlNameMarketArchive, params: { marketId: market.id } },
-    if: !market.isArchived && props.urlNameMarketArchive
+    if: !market.isArchived && props.urlNameMarketArchive && props.canArchive
   }
 ];
 
