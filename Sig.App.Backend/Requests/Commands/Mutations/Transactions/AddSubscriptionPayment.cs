@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Sig.App.Backend.Plugins.GraphQL;
 using System.Threading.Tasks;
 using System.Threading;
@@ -21,15 +21,15 @@ using System;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 {
-    public class AddMissingPayment : IRequestHandler<AddMissingPayment.Input, AddMissingPayment.Payload>
+    public class AddSubscriptionPayment : IRequestHandler<AddSubscriptionPayment.Input, AddSubscriptionPayment.Payload>
     {
-        private readonly ILogger<AddMissingPayment> logger;
+        private readonly ILogger<AddSubscriptionPayment> logger;
         private readonly AppDbContext db;
         private readonly IClock clock;
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly ILogger<AddingFundToCard> addingFundLogger;
 
-        public AddMissingPayment(ILogger<AddMissingPayment> logger, AppDbContext db, IClock clock, IHttpContextAccessor httpContextAccessor, ILogger<AddingFundToCard> addingFundLogger)
+        public AddSubscriptionPayment(ILogger<AddSubscriptionPayment> logger, AppDbContext db, IClock clock, IHttpContextAccessor httpContextAccessor, ILogger<AddingFundToCard> addingFundLogger)
         {
             this.logger = logger;
             this.db = db;
@@ -40,7 +40,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
         {
-            logger.LogInformation($"[Mutation] AddMissingPayment({request.SubscriptionId}, {request.BeneficiaryId})");
+            logger.LogInformation($"[Mutation] AddSubscriptionPayment({request.SubscriptionId}, {request.BeneficiaryId})");
             var today = clock
                 .GetCurrentInstant()
                 .InUtc()
@@ -61,13 +61,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             if (beneficiary == null)
             {
-                logger.LogWarning("[Mutation] AddMissingPayment - BeneficiaryNotFoundException");
+                logger.LogWarning("[Mutation] AddSubscriptionPayment - BeneficiaryNotFoundException");
                 throw new BeneficiaryNotFoundException();
             }
 
             if (beneficiary.Card == null)
             {
-                logger.LogWarning("[Mutation] AddMissingPayment - BeneficiaryDontHaveCardException");
+                logger.LogWarning("[Mutation] AddSubscriptionPayment - BeneficiaryDontHaveCardException");
                 throw new BeneficiaryDontHaveCardException();
             }
 
@@ -75,7 +75,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             if (!db.Subscriptions.Where(x => x.Id == subscriptionId).Any())
             {
-                logger.LogWarning("[Mutation] AddMissingPayment - SubscriptionNotFoundException");
+                logger.LogWarning("[Mutation] AddSubscriptionPayment - SubscriptionNotFoundException");
                 throw new SubscriptionNotFoundException();
             }
 
@@ -83,23 +83,29 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             if (subscriptionBeneficiary == null)
             {
-                logger.LogWarning("[Mutation] AddMissingPayment - BeneficiaryDontHaveThisSubscriptionException");
+                logger.LogWarning("[Mutation] AddSubscriptionPayment - BeneficiaryDontHaveThisSubscriptionException");
                 throw new BeneficiaryDontHaveThisSubscriptionException();
             }
 
             var subscription = subscriptionBeneficiary.Subscription;
 
-            if (subscription.GetExpirationDate(clock) < today)
+            if (subscription.IsExpired(clock))
             {
-                logger.LogWarning("[Mutation] AddMissingPayment - SubscriptionExpiredException");
+                logger.LogWarning("[Mutation] AddSubscriptionPayment - SubscriptionExpiredException");
                 throw new SubscriptionExpiredException();
+            }
+
+            if (!subscription.HasSubscriptionPaymentPeriodStarted(clock))
+            {
+                logger.LogWarning("[Mutation] AddSubscriptionPayment - SubscriptionMaxPaymentsReachedException");
+                throw new SubscriptionMaxPaymentsReachedException();
             }
 
             var amount = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId).Sum(x => x.Amount);
 
             if (subscriptionBeneficiary.BudgetAllowance.AvailableFund < amount)
             {
-                logger.LogWarning("[Mutation] AddMissingPayment - SubscriptionDontHaveEnoughtAvailableAmountException");
+                logger.LogWarning("[Mutation] AddSubscriptionPayment - SubscriptionDontHaveEnoughtAvailableAmountException");
                 throw new SubscriptionDontHaveEnoughtAvailableAmountException();
             }
 
@@ -109,18 +115,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 .Where(x => x.BeneficiaryId == beneficiary.Id && x.SubscriptionType.SubscriptionId == subscription.Id).ToListAsync();
 
             var subscriptionPaymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock);
-            var previousPaymentCount = subscription.GetPreviousPaymentCount(clock);
 
-            if ((subscriptionBeneficiary.MaxNumberOfPaymentsOverride.HasValue || subscription.MaxNumberOfPayments.HasValue)
-                && transactions.Count() >= subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments())
+            if (transactions.Count >= subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments())
             {
-                logger.LogWarning("[Mutation] AddMissingPayment - SubscriptionDontHaveMissedPaymentException");
-                throw new SubscriptionDontHaveMissedPaymentException();
-            }
-            else if (transactions.Count() >= previousPaymentCount)
-            {
-                logger.LogWarning("[Mutation] AddMissingPayment - SubscriptionDontHaveMissedPaymentException");
-                throw new SubscriptionDontHaveMissedPaymentException();
+                logger.LogWarning("[Mutation] AddSubscriptionPayment - SubscriptionMaxPaymentsReachedException");
+                throw new SubscriptionMaxPaymentsReachedException();
             }
 
             var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
@@ -166,6 +165,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         public class SubscriptionNotFoundException : RequestValidationException { }
         public class SubscriptionExpiredException : RequestValidationException { }
         public class SubscriptionDontHaveEnoughtAvailableAmountException : RequestValidationException { }
-        public class SubscriptionDontHaveMissedPaymentException : RequestValidationException { }
+        public class SubscriptionMaxPaymentsReachedException : RequestValidationException { }
     }
 }

@@ -81,6 +81,7 @@ const searchInput = ref({
 });
 
 const page = ref(1);
+const hasAppliedDefaultDates = ref(Boolean(route.query.dateFrom || route.query.dateTo));
 const availableSubscriptions = ref([]);
 const availableOrganizations = ref([]);
 
@@ -181,8 +182,11 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
 );
 
 const project = useResult(resultProjects, null, (data) => {
-  if (!route.query.dateFrom && !route.query.dateTo) {
-    setDateFrom(data.projects[0].reconciliationReportDate);
+  if (!hasAppliedDefaultDates.value) {
+    if (!route.query.dateFrom && !route.query.dateTo) {
+      setDateFrom(data.projects[0].reconciliationReportDate);
+    }
+    hasAppliedDefaultDates.value = true;
   }
 
   updateUrl();

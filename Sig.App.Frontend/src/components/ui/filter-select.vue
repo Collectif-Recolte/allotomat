@@ -15,7 +15,10 @@
 
 <template>
   <div class="relative inline-block group pf-transition-visibility pf-transition-visibility--focus-only">
-    <button class="pf-button pf-button--outline px-3 min-h-11">
+    <button
+      class="pf-button pf-button--outline px-3 min-h-11"
+      @focus="requestContentFocus"
+      @mousedown="requestContentFocus">
       {{ props.label }}
       <span
         v-if="props.activeFiltersCount > 0"
@@ -34,6 +37,7 @@
 <script setup>
 import { defineProps } from "vue";
 
+import { provideDropdownPanelFocus } from "@/../pinkflamant/lib/dropdown-panel-focus";
 import ICON_ARROW_BOTTOM from "@/lib/icons/arrow-bottom.json";
 
 const props = defineProps({
@@ -49,4 +53,6 @@ const props = defineProps({
     }
   }
 });
+
+const { requestContentFocus } = provideDropdownPanelFocus();
 </script>

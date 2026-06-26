@@ -36,6 +36,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
             var paymentTransactions = await paymentQuery.ToListAsync(cancellationToken);
 
             var refundQuery = db.Transactions.OfType<RefundTransaction>()
+                .Include(x => x.InitialTransaction)
                 .Where(c => request.Ids.Contains(c.InitialTransaction.MarketId) && c.CreatedAtUtc >= startUtc && c.CreatedAtUtc < endUtc);
             if (cashRegisterIds.Length > 0)
                 refundQuery = refundQuery.Where(c => c.InitialTransaction.CashRegisterId.HasValue && cashRegisterIds.Contains(c.InitialTransaction.CashRegisterId.Value));

@@ -79,6 +79,7 @@ const searchInput = ref({
   selectedMarketGroups: []
 });
 const page = ref(1);
+const hasAppliedDefaultDates = ref(Boolean(route.query.dateFrom || route.query.dateTo));
 
 if (route.query.dateFrom) {
   searchInput.value.dateFrom = new Date(route.query.dateFrom);
@@ -174,8 +175,11 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
 );
 
 const project = useResult(resultProjects, null, (data) => {
-  if (!route.query.dateFrom && !route.query.dateTo) {
-    setDateFrom(data.projects[0].reconciliationReportDate);
+  if (!hasAppliedDefaultDates.value) {
+    if (!route.query.dateFrom && !route.query.dateTo) {
+      setDateFrom(data.projects[0].reconciliationReportDate);
+    }
+    hasAppliedDefaultDates.value = true;
   }
 
   return data.projects[0];
@@ -230,8 +234,11 @@ const { result: resultMarketGroups, loading: loadingMarketGroups } = useQuery(
 );
 
 const marketGroup = useResult(resultMarketGroups, null, (data) => {
-  if (!route.query.dateFrom && !route.query.dateTo) {
-    setDateFrom(data.marketGroups[0].project.reconciliationReportDate);
+  if (!hasAppliedDefaultDates.value) {
+    if (!route.query.dateFrom && !route.query.dateTo) {
+      setDateFrom(data.marketGroups[0].project.reconciliationReportDate);
+    }
+    hasAppliedDefaultDates.value = true;
   }
 
   return data.marketGroups[0];

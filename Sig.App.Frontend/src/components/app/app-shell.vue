@@ -25,10 +25,10 @@
     <TransitionRoot as="template" :show="sidebarOpen">
       <Dialog as="div" class="fixed inset-0 flex z-40 md:hidden" @close="sidebarOpen = false">
         <TransitionChild as="template" v-bind="overlayTransition">
-          <DialogOverlay class="transition-opacity fixed inset-0 bg-primary-700/80" />
+          <div class="transition-opacity fixed inset-0 bg-primary-700/80" aria-hidden="true" />
         </TransitionChild>
         <TransitionChild as="template" v-bind="slidingPanelTransition">
-          <div class="relative flex-1 flex flex-col max-w-xs w-full bg-primary-100 dark:bg-grey-800">
+          <DialogPanel class="relative flex-1 flex flex-col max-w-xs w-full bg-primary-100 dark:bg-grey-800">
             <TransitionChild as="template" v-bind="closeBtnTransition">
               <div class="absolute top-0 right-0 -mr-12 pt-3">
                 <button
@@ -60,7 +60,7 @@
                 :label="t('support')"
                 target="_blank" />
             </div>
-          </div>
+          </DialogPanel>
         </TransitionChild>
         <div class="shrink-0 w-14">
           <!-- Force sidebar to shrink to fit close icon -->
@@ -126,7 +126,7 @@
 import { defineProps, ref, useSlots, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
-import { Dialog, DialogOverlay, TransitionChild, TransitionRoot } from "@headlessui/vue";
+import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from "@headlessui/vue";
 import Breadcrumb from "@/components/app/breadcrumb";
 import Loading from "@/components/app/loading";
 import LogoutBtn from "@/components/app/logout-btn";

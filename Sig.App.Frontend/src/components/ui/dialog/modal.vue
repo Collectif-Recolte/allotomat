@@ -14,14 +14,14 @@
     <Dialog as="div" class="fixed z-40 inset-0 overflow-y-auto" @close="closeModal">
       <div class="flex items-center justify-center min-h-screen py-4 px-4 text-center sm:block sm:p-0">
         <TransitionChild as="template" v-bind="overlayTransition">
-          <DialogOverlay class="transition-opacity fixed inset-0 bg-primary-700/80" />
+          <div class="transition-opacity fixed inset-0 bg-primary-700/80" aria-hidden="true" />
         </TransitionChild>
 
         <!-- This element is to trick the browser into centering the modal contents. -->
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <TransitionChild as="template" v-bind="modalTransition">
-          <div
+          <DialogPanel
             class="inline-block relative align-bottom bg-white dark:bg-grey-800 rounded-2xl px-4 pt-5 pb-4 shadow-xl transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full sm:p-6"
             :class="[{ 'text-left': !hasTextCenter }, { 'overflow-hidden': !isOverflowing }]">
             <div>
@@ -50,7 +50,7 @@
                 </div>
               </div>
             </slot>
-          </div>
+          </DialogPanel>
         </TransitionChild>
       </div>
     </Dialog>
@@ -60,7 +60,7 @@
 <script setup>
 import { useI18n } from "vue-i18n";
 import { ref, defineProps, defineExpose, defineEmits, onMounted } from "vue";
-import { Dialog, DialogOverlay, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
+import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from "@headlessui/vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();

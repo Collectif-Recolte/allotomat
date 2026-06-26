@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.Plugins.GraphQL;
@@ -36,6 +36,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
             {
                 logger.LogWarning("[Mutation] AddBeneficiaryTypeInProject - ProjectNotFoundException");
                 throw new ProjectNotFoundException();
+            }
+
+            if (request.Keys == null || !request.Keys.Any() || request.Keys.Any(string.IsNullOrWhiteSpace))
+            {
+                logger.LogWarning("[Mutation] AddBeneficiaryTypeInProject - BeneficiaryTypeKeysCantBeEmptyException");
+                throw new BeneficiaryTypeKeysCantBeEmptyException();
             }
 
             var beneficiaryTypes = await db.BeneficiaryTypes.Where(x => x.ProjectId == projectId).ToListAsync();
@@ -81,5 +87,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
 
         public class ProjectNotFoundException : RequestValidationException { }
         public class BeneficiaryTypeKeyAlreadyInUseException : RequestValidationException { }
+        public class BeneficiaryTypeKeysCantBeEmptyException : RequestValidationException { }
     }
 }

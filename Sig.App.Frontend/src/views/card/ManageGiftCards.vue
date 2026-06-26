@@ -212,6 +212,7 @@ import { CARD_STATUS_ASSIGNED, CARD_STATUS_LOST, CARD_STATUS_GIFT, CARD_IS_DISAB
 import { BY_ID, BY_BALANCE, ASC, DESC } from "@/lib/consts/card-sort-order";
 
 import Title from "@/components/app/title";
+import Loading from "@/components/app/loading";
 import CardSummaryTable from "@/components/card/card-summary-table.vue";
 
 import ICON_CARD_LOST from "@/lib/icons/card-lost.json";

@@ -4,7 +4,7 @@
 		"add-market": "Add",
 		"add-market-success-notification": "The merchant {marketName} has been successfully created. Managers will receive an email to finish creating their accounts in the next few minutes.",
 		"title": "Create a merchant",
-		"user-already-manager": "One of the managers is already the manager of a merchant.",
+		"user-already-manager": "One of the managers is already assigned to an existing merchant. To add that merchant to this program, go back to the merchant list and use « Add Merchant » to search for it.",
 		"user-not-market-manager": "One of the managers is not a merchant manager.",
     "manager-email": "Email",
     "market-name": "Merchant name",
@@ -14,7 +14,7 @@
 		"add-market": "Ajouter",
 		"add-market-success-notification": "L’ajout du commerce {marketName} a été un succès. Les gestionnaires vont recevoir un courriel pour compléter la création de leurs comptes dans les prochaines minutes.",
 		"title": "Créer un commerce",
-		"user-already-manager": "Un·e des gestionnaires est déjà gestionnaire d'un commerce.",
+		"user-already-manager": "Un·e des gestionnaires est déjà gestionnaire d'un commerce existant. Pour l'associer à ce programme, retournez à la liste des commerces et utilisez « Ajouter un commerce » pour le rechercher.",
 		"user-not-market-manager": "Un·e des gestionnaires n'est pas du type gestionnaire de commerce.",
     "manager-email": "Courriel",
     "market-name": "Nom du commerce",
@@ -171,22 +171,25 @@ const validationSchema = computed(() =>
   })
 );
 
+function marketGroupFromForm(marketGroupId) {
+  return resultMarketGroups.value?.marketGroups?.find((g) => g.id === marketGroupId);
+}
+
 async function onSubmit(values) {
+  const isOverviewAdd = route.name === URL_MARKET_OVERVIEW_ADD;
+  const isMarketGroupManager = userType.value === USER_TYPE_MARKETGROUPMANAGER;
+  const selectedMarketGroupId = values.marketGroup ?? marketGroup.value?.id;
+  const selectedMarketGroup = marketGroupFromForm(selectedMarketGroupId) ?? marketGroup.value;
+
   let input = {
     name: values.marketName,
     managerEmails: values.managers.map((x) => x.email),
-    projectId:
-      userType.value === USER_TYPE_MARKETGROUPMANAGER
-        ? { value: marketGroup.value?.project?.id }
-        : route.name === URL_MARKET_OVERVIEW_ADD
-        ? { value: project.value.id }
-        : null,
-    marketGroupId:
-      userType.value === USER_TYPE_MARKETGROUPMANAGER
-        ? { value: marketGroup.value?.id }
-        : route.name === URL_MARKET_OVERVIEW_ADD
-        ? { value: values.marketGroup }
-        : null
+    projectId: isOverviewAdd
+      ? {
+          value: isMarketGroupManager ? selectedMarketGroup?.project?.id : project.value.id
+        }
+      : null,
+    marketGroupId: isOverviewAdd ? { value: selectedMarketGroupId } : null
   };
 
   await createMarket({ input });
