@@ -30,7 +30,7 @@
       :name="name"
       @update:model-value="onSelect">
       <SlotPropWatcher :value="isOpen" :filter="(value, previousValue) => previousValue && !value" @change="resetQuery" />
-      <div class="relative">
+      <div class="relative" @input="stopNativeLeak" @change="stopNativeLeak">
         <PfIcon
           class="absolute top-1/2 -translate-y-1/2 left-3 flex items-center text-grey-500 pointer-events-none z-10"
           :icon="leadingIcon"
@@ -193,6 +193,12 @@ export default {
     },
     onQueryChange(event) {
       this.query = event.target.value;
+    },
+    stopNativeLeak(event) {
+      // L'input interne affiche le libellé de l'option, pas sa valeur. On empêche
+      // ses événements DOM bruts (input/change) de remonter : la valeur du
+      // composant est exposée uniquement via update:modelValue/input.
+      event.stopPropagation();
     },
     markUserSelection() {
       this.userInitiatedSelection = true;
