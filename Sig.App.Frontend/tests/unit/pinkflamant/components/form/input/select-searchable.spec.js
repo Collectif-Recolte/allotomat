@@ -99,6 +99,36 @@ describe("select-searchable.vue", () => {
     expect(wrapper.emitted("input")[0]).toEqual(["org-1"]);
   });
 
+  it("does not let the inner field raw DOM change event bubble out of the component", async () => {
+    const wrapper = mountSelectSearchable({ value: "org-1" });
+    const parentChangeListener = jest.fn();
+    wrapper.element.addEventListener("change", parentChangeListener);
+
+    const input = wrapper.find('input[role="combobox"]');
+    input.element.value = "École primaire";
+    input.element.dispatchEvent(new Event("change", { bubbles: true }));
+    await flushPromises();
+
+    expect(parentChangeListener).not.toHaveBeenCalled();
+
+    wrapper.element.removeEventListener("change", parentChangeListener);
+  });
+
+  it("does not let the inner field raw DOM input event bubble out of the component", async () => {
+    const wrapper = mountSelectSearchable({ value: "org-1" });
+    const parentInputListener = jest.fn();
+    wrapper.element.addEventListener("input", parentInputListener);
+
+    const input = wrapper.find('input[role="combobox"]');
+    input.element.value = "abc";
+    input.element.dispatchEvent(new Event("input", { bubbles: true }));
+    await flushPromises();
+
+    expect(parentInputListener).not.toHaveBeenCalled();
+
+    wrapper.element.removeEventListener("input", parentInputListener);
+  });
+
   it("does not emit the first option on blur when a value is already selected", async () => {
     const allGroupsOptions = [
       { label: "Tous les groupes", value: "all-group" },
