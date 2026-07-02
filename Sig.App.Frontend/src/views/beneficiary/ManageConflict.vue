@@ -215,7 +215,7 @@ const beneficiarySubscriptionsWithConflict = computed(() => {
       var description = "";
       if (
         previousPaymentAmount < newPaymentAmount &&
-        newPaymentAmount * numberOfPaymentToReceive > budgetAllowanceSubscription.availableFund
+        (newPaymentAmount - previousPaymentAmount) * numberOfPaymentToReceive > budgetAllowanceSubscription.availableFund
       ) {
         description = t("adjustement-amount-not-enought", {
           amount: getMoneyFormat((newPaymentAmount - previousPaymentAmount) * numberOfPaymentToReceive)
@@ -239,7 +239,7 @@ const beneficiarySubscriptionsWithConflict = computed(() => {
         numberOfPaymentToReceive,
         budgetAllowanceAvailableFund: budgetAllowanceSubscription.availableFund,
         disabled:
-          budgetAllowanceSubscription.availableFund + (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive <= 0,
+          budgetAllowanceSubscription.availableFund + (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive < 0,
         previousCategoryName: beneficiarySubscription.beneficiaryType.name,
         previousCategoryAmount: previousPaymentAmount,
         newCategoryName: beneficiary.value.beneficiaryType.name,
