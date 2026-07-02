@@ -402,6 +402,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         [Fact]
         public async Task ThrowsIfNotEnoughBudgetAllowance()
         {
+            beneficiary.BeneficiaryType = beneficiaryType2;
             budgetAllowance1.AvailableFund = 0;
             DbContext.SaveChanges();
 
@@ -416,6 +417,35 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<AdjustBeneficiarySubscription.NotEnoughBudgetAllowanceException>();
+        }
+
+        [Fact]
+        public async Task AdjustBeneficiarySubscriptionWithExactBudgetAllowance()
+        {
+            // budgetChange = (50-110)*2 = -120; the envelope holds exactly the required amount
+            beneficiary.BeneficiaryType = beneficiaryType2;
+            budgetAllowance1.AvailableFund = 120;
+            DbContext.SaveChanges();
+
+            var input = new AdjustBeneficiarySubscription.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionIds = new List<Id>()
+                {
+                    subscription1.GetIdentifier()
+                }
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBeneficiary = await DbContext.Beneficiaries
+                .Include(x => x.Subscriptions).ThenInclude(x => x.BudgetAllowance)
+                .Include(x => x.Subscriptions).ThenInclude(x => x.BeneficiaryType)
+                .FirstAsync();
+
+            var localSubscriptionBeneficiary = localBeneficiary.Subscriptions.First(x => x.SubscriptionId == subscription1.Id);
+            localSubscriptionBeneficiary.BudgetAllowance.AvailableFund.Should().Be(0);
+            localSubscriptionBeneficiary.BeneficiaryTypeId.Should().Be(beneficiaryType2.Id);
         }
     }
 }

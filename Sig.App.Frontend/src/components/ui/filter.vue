@@ -84,6 +84,7 @@ import { defineEmits, defineProps, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { ASC } from "@/lib/consts/card-sort-order";
+import { provideFilterReset } from "@/../pinkflamant/lib/filter-reset";
 
 import ICON_ARROW_BOTTOM from "@/lib/icons/arrow-bottom.json";
 import ICON_RESET from "@/lib/icons/reset.json";
@@ -130,6 +131,7 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
+const { resetFilters } = provideFilterReset();
 
 const sortLabel = computed(() => {
   return props.sortLabel !== "" ? props.sortLabel : t("sort");
@@ -140,6 +142,7 @@ const iconSortOrder = computed(() => {
 });
 
 function onResetFilters() {
+  resetFilters();
   emit("resetFilters");
 }
 

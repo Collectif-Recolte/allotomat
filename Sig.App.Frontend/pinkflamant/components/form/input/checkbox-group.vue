@@ -70,12 +70,13 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { commonFieldProps } from "../field/index";
 import FormFieldset from "../fieldset";
 import { useDropdownPanelFocus } from "../../../lib/dropdown-panel-focus";
+import { useFilterReset } from "../../../lib/filter-reset";
 import { normalizeForSearch } from "../../../lib/normalize-for-search";
 import ICON_SEARCH from "../../../icons/search.json";
 import ICON_CLOSE from "../../../icons/close.json";
@@ -114,16 +115,23 @@ export default {
   setup(props) {
     const { t } = useI18n();
     const searchInput = ref(null);
+    const searchValue = ref("");
 
     if (props.searchable) {
       useDropdownPanelFocus(() => searchInput.value?.focus());
+
+      const resetToken = useFilterReset();
+      if (resetToken) {
+        watch(resetToken, () => {
+          searchValue.value = "";
+        });
+      }
     }
 
-    return { t, searchInput };
+    return { t, searchInput, searchValue };
   },
   data() {
     return {
-      searchValue: "",
       leadingIcon: ICON_SEARCH,
       clearIcon: ICON_CLOSE
     };

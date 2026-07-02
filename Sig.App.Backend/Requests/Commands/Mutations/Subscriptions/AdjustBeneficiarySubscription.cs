@@ -73,7 +73,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                     : paymentRemaining;
                 var numberOfPaymentToReceive = Math.Min(cap, paymentRemaining);
 
-                if (subscriptionBeneficiary.BudgetAllowance.AvailableFund + (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive > 0)
+                if (subscriptionBeneficiary.BudgetAllowance.AvailableFund + (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive >= 0)
                 {
                     subscriptionBeneficiary.BudgetAllowance.AvailableFund += (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive;
                     subscriptionBeneficiary.BeneficiaryTypeId = beneficiary.BeneficiaryTypeId.Value;
