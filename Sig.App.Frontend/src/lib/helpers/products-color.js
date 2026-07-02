@@ -77,4 +77,39 @@ function getColorList() {
   return colorList;
 }
 
-export { getColorName, getColorBgClass, getColorList };
+function getKioskProductGroupCardClasses(color, isGiftCard = false) {
+  if (isGiftCard) {
+    return {
+      border: "border-products-10",
+      bg: "bg-diagonal-pattern",
+      text: "text-primary-900"
+    };
+  }
+
+  switch (color) {
+    case COLOR_1:
+      return { border: "border-products-50", bg: "bg-products-50/10", text: "text-products-50" };
+    case COLOR_2:
+      return { border: "border-products-100", bg: "bg-products-100/10", text: "text-products-100" };
+    case COLOR_3:
+      return { border: "border-products-200", bg: "bg-products-200/10", text: "text-primary-900" };
+    case COLOR_4:
+      return { border: "border-products-300", bg: "bg-products-300/10", text: "text-primary-900" };
+    case COLOR_5:
+      return { border: "border-products-400", bg: "bg-products-400/10", text: "text-primary-900" };
+    case COLOR_6:
+      return { border: "border-products-500", bg: "bg-products-500/10", text: "text-primary-900" };
+    case COLOR_7:
+      return { border: "border-products-600", bg: "bg-products-600/10", text: "text-primary-900" };
+    case COLOR_8:
+      return { border: "border-products-700", bg: "bg-products-700/10", text: "text-primary-900" };
+    case COLOR_9:
+      return { border: "border-products-800", bg: "bg-products-800/10", text: "text-primary-900" };
+    case COLOR_10:
+      return { border: "border-products-900", bg: "bg-products-900/10", text: "text-primary-900" };
+    default:
+      return { border: "border-primary-300", bg: "bg-primary-100", text: "text-primary-900" };
+  }
+}
+
+export { getColorName, getColorBgClass, getColorList, getKioskProductGroupCardClasses };

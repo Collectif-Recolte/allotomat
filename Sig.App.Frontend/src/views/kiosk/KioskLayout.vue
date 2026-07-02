@@ -1,14 +1,16 @@
 <i18n>
 {
   "en": {
-    "cancel": "Cancel",
+    "quit": "Quit",
     "logo": "Tomat logo",
+    "kiosk-mode-label": "Self-service kiosk",
     "invalid-link": "This link is invalid or has expired. Contact the merchant for a new kiosk link.",
     "market-disabled": "This merchant is temporarily unavailable."
   },
   "fr": {
-    "cancel": "Annuler",
+    "quit": "Quitter",
     "logo": "Logo de Tomat",
+    "kiosk-mode-label": "Kiosque libre-service",
     "invalid-link": "Ce lien est invalide ou a expiré. Communiquez avec le commerce pour obtenir un nouveau lien kiosque.",
     "market-disabled": "Ce commerce est temporairement indisponible."
   }
@@ -17,14 +19,28 @@
 
 <template>
   <div class="kiosk-mode min-h-[100dvh] flex flex-col bg-primary-100">
-    <header class="sticky top-0 z-30 bg-primary-700 px-4 py-3 flex items-center justify-between gap-4">
-      <img class="h-8" :src="require('@/assets/logo/logo-white.svg')" :alt="t('logo')" />
-      <div class="flex items-center gap-3">
-        <PfButtonAction v-if="showCancel" btn-style="secondary" size="lg" :label="t('cancel')" @click="handleCancel" />
+    <header class="sticky top-0 z-30 bg-primary-700 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 shrink-0">
+      <div class="flex items-center gap-3 min-w-0">
+        <img class="h-8 shrink-0" :src="require('@/assets/logo/logo-white.svg')" :alt="t('logo')" />
+        <span class="hidden sm:block w-px h-6 bg-white/30 shrink-0" aria-hidden="true" />
+        <div class="hidden sm:flex items-center gap-2 text-white min-w-0">
+          <PfIcon :icon="ICON_QRCODE" size="sm" class="shrink-0" aria-hidden="true" />
+          <span class="text-p2 font-medium truncate">{{ t("kiosk-mode-label") }}</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 shrink-0">
+        <PfButtonAction
+          v-if="showCancel"
+          btn-style="secondary"
+          size="lg"
+          has-icon-left
+          :icon="ICON_LOGOUT"
+          :label="t('quit')"
+          @click="handleCancel" />
         <KioskLangSwitch />
       </div>
     </header>
-    <main class="flex-1 flex flex-col">
+    <main class="flex-1 flex flex-col min-h-0">
       <Loading :loading="kioskLoading || shellLoading" is-full-height>
         <KioskAuthGate v-if="showAuthGate" :login="login" :login-loading="loginLoading" :auth-error="authError" />
         <p
@@ -56,6 +72,9 @@ import { useKioskSessionValidation } from "@/lib/composables/use-kiosk-session-v
 import { provideKioskShell } from "@/lib/composables/use-kiosk-shell";
 import { useKioskToken } from "@/lib/composables/use-kiosk-token";
 import { URL_KIOSK_HOME } from "@/lib/consts/urls";
+
+import ICON_LOGOUT from "@/lib/icons/logout.json";
+import ICON_QRCODE from "@/lib/icons/qrcode.json";
 
 const { t } = useI18n();
 const route = useRoute();

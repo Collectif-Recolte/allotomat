@@ -2,32 +2,58 @@
 {
 	"en": {
 		"validation-in-progress": "Validation in progress",
-    "camera-options": "Change camera",
+    "flip-camera": "Flip the camera",
+    "scan-instruction": "Bring your card close to the reader to scan the QR code in the center of the screen.",
     "cancel": "Cancel"
 	},
 	"fr": {
 		"validation-in-progress": "Validation en cours",
-    "camera-options": "Changer de caméra",
+    "flip-camera": "Retourner la caméra",
+    "scan-instruction": "Approchez votre carte du lecteur pour scanner le code QR au centre de l'écran.",
     "cancel": "Annuler"
 	}
 }
 </i18n>
 
 <template>
-  <div class="w-sm max-w-full mb-9 relative">
-    <div class="relative overflow-hidden rounded-2xl w-sm max-w-full shadow-2xl">
-      <video ref="qrCodeVideo"></video>
+  <div :class="props.kioskMode ? 'w-full max-w-2xl mx-auto mb-6' : 'w-sm max-w-full mb-9 relative'">
+    <div
+      class="relative overflow-hidden rounded-2xl shadow-2xl"
+      :class="props.kioskMode ? 'w-full aspect-[4/3] max-h-[50vh]' : 'w-sm max-w-full'">
+      <video ref="qrCodeVideo" class="w-full h-full object-cover"></video>
     </div>
-    <div class="text-center relative mt-6">
+    <p v-if="props.kioskMode" class="text-center text-p2 sm:text-p1 text-primary-900 mt-6 mb-6 max-w-xl mx-auto">
+      {{ t("scan-instruction") }}
+    </p>
+    <div
+      v-if="props.kioskMode"
+      class="flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center max-w-lg mx-auto">
       <PfButtonAction
-        :class="props.kioskMode ? 'mx-auto w-full max-w-xs' : 'mx-auto max-w-40 xs:max-w-none'"
+        class="sm:flex-1 bg-white"
+        :label="t('flip-camera')"
+        :icon="ICON_CAMERA_LENSE_SIDE"
+        has-icon-left
+        btn-style="outline"
+        size="lg"
+        @click="changeCamera()" />
+      <PfButtonAction
+        class="sm:flex-1 bg-white"
         :label="cancelLabel || t('cancel')"
-        :btn-style="props.kioskMode ? 'secondary' : 'link'"
-        :size="props.kioskMode ? 'lg' : undefined"
+        :icon="ICON_CLOSE"
+        has-icon-left
+        btn-style="outline"
+        size="lg"
+        @click="$emit('cancel')" />
+    </div>
+    <div v-else class="text-center relative mt-6">
+      <PfButtonAction
+        class="mx-auto max-w-40 xs:max-w-none"
+        :label="cancelLabel || t('cancel')"
+        btn-style="link"
         @click="$emit('cancel')" />
       <div class="absolute -translate-y-1/2 top-1/2 right-0">
         <PfButtonAction
-          :screen-reader-addon="t('camera-options')"
+          :screen-reader-addon="t('flip-camera')"
           :icon="ICON_CAMERA_LENSE_SIDE"
           is-icon-only
           icon-size="lg"
@@ -50,6 +76,7 @@ import QRCodeService from "@/lib/services/qr-code";
 
 import { CARD_NOT_FOUND } from "@/lib/consts/qr-code-error";
 import ICON_CAMERA_LENSE_SIDE from "@/lib/icons/camera-lense-side.json";
+import ICON_CLOSE from "@/lib/icons/close.json";
 
 const { t } = useI18n();
 const router = useRouter();

@@ -1,6 +1,6 @@
 <template>
-  <div class="text-center min-h-app p-8 flex flex-col justify-center items-center">
-    <h1 v-if="props.heading" class="font-semibold text-h2 text-primary-900 mb-6">{{ props.heading }}</h1>
+  <div class="flex flex-1 flex-col items-center justify-center min-h-0 p-4 sm:p-8 w-full">
+    <h1 v-if="props.heading" class="font-semibold text-h2 sm:text-h1 text-primary-900 mb-6 text-center">{{ props.heading }}</h1>
     <QRCodeScanner
       kiosk-mode
       :error-url-const="URL_KIOSK_TRANSACTION_ERROR"
@@ -33,11 +33,18 @@ const client = resolveClient();
 
 const props = defineProps({
   kioskToken: { type: String, required: true },
-  transactionRouteName: { type: String, required: true },
   heading: { type: String, default: "" }
 });
 
 const emit = defineEmits(["scanned", "cancel", "authError"]);
+
+function routeToKioskError(error) {
+  router.push({
+    name: URL_KIOSK_TRANSACTION_ERROR,
+    params: { token: route.params.token },
+    query: { error }
+  });
+}
 
 async function checkQRCode(cardId) {
   try {
@@ -64,27 +71,15 @@ async function checkQRCode(cardId) {
       return;
     }
     if (message.indexOf(CARD_CANT_BE_USED_WITH_CASH_REGISTER) !== -1) {
-      router.push({
-        name: URL_KIOSK_TRANSACTION_ERROR,
-        params: { token: route.params.token },
-        query: { error: CARD_CANT_BE_USED_WITH_CASH_REGISTER }
-      });
+      routeToKioskError(CARD_CANT_BE_USED_WITH_CASH_REGISTER);
     } else if (message.indexOf(CARD_CANT_BE_USED_IN_MARKET) !== -1) {
-      router.push({
-        name: URL_KIOSK_TRANSACTION_ERROR,
-        params: { token: route.params.token },
-        query: { error: CARD_CANT_BE_USED_IN_MARKET }
-      });
+      routeToKioskError(CARD_CANT_BE_USED_IN_MARKET);
     } else if (message.indexOf(CARD_NOT_FOUND) !== -1) {
-      router.push({ name: URL_KIOSK_TRANSACTION_ERROR, params: { token: route.params.token }, query: { error: CARD_NOT_FOUND } });
+      routeToKioskError(CARD_NOT_FOUND);
     } else if (message.indexOf(CARD_DEACTIVATED) !== -1) {
-      router.push({
-        name: URL_KIOSK_TRANSACTION_ERROR,
-        params: { token: route.params.token },
-        query: { error: CARD_DEACTIVATED }
-      });
+      routeToKioskError(CARD_DEACTIVATED);
     } else {
-      emit("cancel");
+      routeToKioskError(CARD_NOT_FOUND);
     }
   }
 }

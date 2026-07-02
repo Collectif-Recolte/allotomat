@@ -10,22 +10,23 @@
 </i18n>
 
 <template>
-  <div v-if="activeStep === CHECK_CARD_STEPS_SCAN" class="text-center flex flex-col justify-center items-center p-8">
-    <h1 class="font-semibold text-h2 text-primary-900 mb-6">{{ t("title") }}</h1>
+  <div
+    v-if="activeStep === CHECK_CARD_STEPS_SCAN"
+    class="flex flex-1 flex-col items-center justify-center min-h-0 p-4 sm:p-8 w-full">
+    <h1 class="font-semibold text-h2 sm:text-h1 text-primary-900 mb-6 text-center">{{ t("title") }}</h1>
     <QRCodeScanner
       kiosk-mode
-      :error-url-const="URL_CARD_ERROR"
+      :error-url-const="URL_KIOSK_TRANSACTION_ERROR"
       @triggerError="activeStep = CHECK_CARD_STEPS_SCAN"
       @checkQRCode="checkQRCode"
       @cancel="goHome" />
   </div>
-  <Balance
+  <KioskBalance
     v-else-if="activeStep === CHECK_CARD_STEPS_COMPLETE"
     :card-id="cardId"
     :kiosk-token="authToken"
-    hide-transaction-list
-    is-kiosk
     @finished="goHome"
+    @startPurchase="goToPurchase"
     @onUpdateLoadingState="loading = $event"
     @kiosk-auth-error="handleKioskAuthError" />
 </template>
@@ -40,7 +41,7 @@ import { useApolloClient } from "@vue/apollo-composable";
 import { usePageTitle } from "@/lib/helpers/page-title";
 import { useKioskShellState } from "@/lib/composables/use-kiosk-shell";
 import { useKioskToken } from "@/lib/composables/use-kiosk-token";
-import { URL_KIOSK_HOME, URL_CARD_ERROR, URL_KIOSK_TRANSACTION_ERROR } from "@/lib/consts/urls";
+import { URL_KIOSK_HOME, URL_KIOSK_TRANSACTION, URL_KIOSK_TRANSACTION_ERROR } from "@/lib/consts/urls";
 import { CHECK_CARD_STEPS_SCAN, CHECK_CARD_STEPS_COMPLETE } from "@/lib/consts/enums";
 import {
   CARD_CANT_BE_USED_IN_MARKET,
@@ -51,7 +52,7 @@ import {
 } from "@/lib/consts/qr-code-error";
 
 import QRCodeScanner from "@/components/transaction/qr-code-scanner.vue";
-import Balance from "@/views/card/Balance";
+import KioskBalance from "@/views/kiosk/KioskBalance";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -66,6 +67,14 @@ const { authToken, kioskRoute, handleKioskAuthError } = useKioskToken();
 const activeStep = ref(CHECK_CARD_STEPS_SCAN);
 const cardId = ref("");
 const loading = ref(false);
+
+function routeToKioskError(error) {
+  router.push({
+    name: URL_KIOSK_TRANSACTION_ERROR,
+    params: { token: route.params.token },
+    query: { error }
+  });
+}
 
 async function checkQRCode(id) {
   try {
@@ -92,31 +101,23 @@ async function checkQRCode(id) {
       return;
     }
     if (message.indexOf(CARD_CANT_BE_USED_WITH_CASH_REGISTER) !== -1) {
-      router.push({
-        name: URL_KIOSK_TRANSACTION_ERROR,
-        params: { token: route.params.token },
-        query: { error: CARD_CANT_BE_USED_WITH_CASH_REGISTER }
-      });
+      routeToKioskError(CARD_CANT_BE_USED_WITH_CASH_REGISTER);
     } else if (message.indexOf(CARD_CANT_BE_USED_IN_MARKET) !== -1) {
-      router.push({
-        name: URL_KIOSK_TRANSACTION_ERROR,
-        params: { token: route.params.token },
-        query: { error: CARD_CANT_BE_USED_IN_MARKET }
-      });
+      routeToKioskError(CARD_CANT_BE_USED_IN_MARKET);
     } else if (message.indexOf(CARD_NOT_FOUND) !== -1) {
-      router.push({ name: URL_CARD_ERROR, query: { error: CARD_NOT_FOUND, returnRoute: URL_KIOSK_HOME } });
+      routeToKioskError(CARD_NOT_FOUND);
     } else if (message.indexOf(CARD_DEACTIVATED) !== -1) {
-      router.push({
-        name: URL_KIOSK_TRANSACTION_ERROR,
-        params: { token: route.params.token },
-        query: { error: CARD_DEACTIVATED }
-      });
+      routeToKioskError(CARD_DEACTIVATED);
     }
   }
 }
 
 function goHome() {
   router.push(kioskRoute(URL_KIOSK_HOME));
+}
+
+function goToPurchase() {
+  router.push(kioskRoute(URL_KIOSK_TRANSACTION));
 }
 
 useKioskShellState({

@@ -1,0 +1,227 @@
+<i18n>
+{
+  "en": {
+    "back-to-menu": "Return to main menu",
+    "program-label": "Program {programName}",
+    "card-number": "Card #{cardProgramCardId}",
+    "card-is-disabled": "The card is deactivated.",
+    "expiration-date": "Expires on {date}",
+    "gift-card": "Gift card",
+    "make-purchase": "Make a purchase",
+    "never-expired": "Never expires",
+    "title": "Card balance"
+  },
+  "fr": {
+    "back-to-menu": "Retour au menu principal",
+    "program-label": "Programme {programName}",
+    "card-number": "Carte #{cardProgramCardId}",
+    "card-is-disabled": "La carte est désactivée.",
+    "expiration-date": "Expire le {date}",
+    "gift-card": "Carte-cadeau",
+    "make-purchase": "Faire un achat",
+    "never-expired": "N'expire jamais",
+    "title": "Solde de la carte"
+  }
+}
+</i18n>
+
+<template>
+  <div class="flex flex-1 flex-col items-center justify-center px-4 sm:px-8 pt-4 pb-8 w-full">
+    <div
+      class="bg-white rounded-2xl shadow-sm w-full max-w-2xl md:max-w-4xl lg:max-w-5xl px-6 sm:px-10 pt-3 sm:pt-4 pb-8 sm:pb-10 flex flex-col max-h-[calc(100dvh-8rem)] min-h-0">
+      <h1 class="font-semibold text-h2 sm:text-h1 text-primary-900 text-left my-2">{{ t("title") }}</h1>
+      <p v-if="card" class="text-left mb-4">
+        <span class="text-h4 sm:text-h3 text-grey-700">{{ t("program-label", { programName }) }}</span>
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+        <span class="text-h4 sm:text-h3 text-grey-500 font-normal"> | {{ t("card-number", { cardProgramCardId: cardIdDisplay }) }}</span>
+      </p>
+      <p v-if="card && card.isDisabled" class="text-red-500 font-bold text-center mb-4">{{ t("card-is-disabled") }}</p>
+
+      <p v-if="card" class="font-bold text-primary-900 text-d2 sm:text-d1 leading-none text-left mb-4">
+        {{ getMoneyFormat(fund) }}
+      </p>
+
+      <ul v-if="card && productGroups.length > 0" class="flex-1 min-h-0 overflow-y-auto mb-8 sm:mb-10 border-t border-grey-200">
+        <li
+          v-for="(product, index) in productGroups"
+          :key="index"
+          class="flex items-start justify-between gap-4 py-4 border-b border-grey-200 last:border-b-0">
+          <PfTag
+            class="max-w-[55%] shrink-0 [&_.block]:!text-p2 sm:[&_.block]:!text-p1 [&_.block]:!font-bold !px-3 !py-1.5"
+            :label="getProductGroupLabel(product.label)"
+            :bg-color-class="`${getColorBgClass(product.color)} ${getIsGiftCard(product.label) ? 'bg-diagonal-pattern' : ''}`"
+            :is-dark-theme="!getIsGiftCard(product.label)"
+            is-squared />
+          <div class="text-right shrink-0">
+            <div class="font-bold text-h3 sm:text-h2 text-primary-900 leading-none whitespace-nowrap">
+              {{ getMoneyFormat(product.fund) }}
+            </div>
+            <div class="text-p3 text-grey-600 leading-snug">
+              <template v-if="product.expirationDate">
+                {{ t("expiration-date", { date: formatDate(dateUtc(product.expirationDate), textualFormat) }) }}
+              </template>
+              <template v-else>
+                {{ t("never-expired") }}
+              </template>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <div class="flex flex-col sm:flex-row gap-4 mt-auto pt-4 border-t border-grey-200">
+        <PfButtonAction
+          class="sm:flex-1"
+          size="lg"
+          btn-style="secondary"
+          has-icon-left
+          :icon="ICON_HOME"
+          :label="t('back-to-menu')"
+          @click="emit('finished')" />
+        <PfButtonAction
+          class="sm:flex-1"
+          size="lg"
+          btn-style="primary"
+          has-icon-left
+          :icon="ICON_SHOPPING_CART"
+          :label="t('make-purchase')"
+          @click="emit('startPurchase')" />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import gql from "graphql-tag";
+import { useI18n } from "vue-i18n";
+import { computed, defineEmits, defineProps, watch } from "vue";
+import { useQuery, useResult } from "@vue/apollo-composable";
+
+import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
+import { KIOSK_ACCESS_INVALID } from "@/lib/consts/qr-code-error";
+import { formatDate, dateUtc, textualFormat } from "@/lib/helpers/date";
+import { getMoneyFormat } from "@/lib/helpers/money";
+import { getColorBgClass } from "@/lib/helpers/products-color";
+
+import ICON_HOME from "@/lib/icons/home.json";
+import ICON_SHOPPING_CART from "@/lib/icons/shopping-cart.json";
+
+const { t } = useI18n();
+
+const props = defineProps({
+  cardId: { type: String, required: true },
+  kioskToken: { type: String, required: true }
+});
+
+const emit = defineEmits(["onUpdateLoadingState", "finished", "startPurchase", "kioskAuthError"]);
+
+const { result, loading, onError } = useQuery(
+  gql`
+    query KioskCardBalance($kioskToken: String!, $id: ID!) {
+      kioskCard(kioskToken: $kioskToken, id: $id) {
+        id
+        isDisabled
+        programCardId
+        totalFund
+        project {
+          id
+          name
+        }
+        addingFundTransactions {
+          expirationDate
+          availableFund
+          status
+          productGroup {
+            id
+            name
+            orderOfAppearance
+            color
+          }
+        }
+        loyaltyFund {
+          id
+          amount
+          productGroup {
+            id
+            name
+            orderOfAppearance
+            color
+          }
+        }
+      }
+    }
+  `,
+  () => ({ kioskToken: props.kioskToken, id: props.cardId }),
+  () => ({ enabled: !!props.kioskToken && !!props.cardId })
+);
+
+onError((error) => {
+  if ((error.message || "").indexOf(KIOSK_ACCESS_INVALID) !== -1) {
+    emit("kioskAuthError");
+  }
+});
+
+const card = useResult(result, null, (data) => data.kioskCard);
+
+watch(loading, (value) => emit("onUpdateLoadingState", value));
+
+const fund = computed(() => {
+  if (!card.value) return 0;
+  let total = card.value.totalFund;
+  if (card.value.loyaltyFund) {
+    total += card.value.loyaltyFund.amount;
+  }
+  return total;
+});
+
+const cardIdDisplay = computed(() => card.value?.programCardId ?? "");
+
+const programName = computed(() => card.value?.project?.name ?? "");
+
+const allFunds = computed(() => {
+  if (!card.value) return [];
+  const funds = card.value.addingFundTransactions ? [...card.value.addingFundTransactions] : [];
+  if (card.value.loyaltyFund) {
+    funds.push(card.value.loyaltyFund);
+  }
+  return funds;
+});
+
+const productGroups = computed(() => buildProductGroups(allFunds.value));
+
+function buildProductGroups(funds) {
+  const groups = [];
+  for (const fundItem of funds) {
+    const fundAmount = fundItem.availableFund ?? fundItem.amount ?? 0;
+    if (
+      fundAmount > 0 &&
+      (fundItem.expirationDate > new Date().toISOString() || fundItem.productGroup.name === PRODUCT_GROUP_LOYALTY)
+    ) {
+      const existing = groups.find(
+        (pg) => pg.label === fundItem.productGroup.name && pg.expirationDate === fundItem.expirationDate
+      );
+      if (existing) {
+        existing.fund += fundItem.amount ?? fundItem.availableFund;
+      } else {
+        groups.push({
+          color: fundItem.productGroup.color,
+          label: fundItem.productGroup.name,
+          fund: fundItem.amount ?? fundItem.availableFund,
+          expirationDate: fundItem.expirationDate
+        });
+      }
+    }
+  }
+  return groups;
+}
+
+function getProductGroupLabel(label) {
+  if (label === PRODUCT_GROUP_LOYALTY) {
+    return t("gift-card");
+  }
+  return label;
+}
+
+function getIsGiftCard(productGroupName) {
+  return productGroupName === PRODUCT_GROUP_LOYALTY;
+}
+</script>
