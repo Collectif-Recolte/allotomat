@@ -49,16 +49,19 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public async Task<int> PaymentReceived(IAppUserContext ctx)
         {
             var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
-            return transactions.Count();
+            var types = await ctx.DataLoader.LoadSubscriptionTypeByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
+            return SubscriptionHelper.GetNumberOfPaymentsMade(transactions.Count(), types.Count());
         }
 
         public async Task<int> PaymentRemaining(IAppUserContext ctx, [Inject] IClock clock)
         {
             var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
+            var types = await ctx.DataLoader.LoadSubscriptionTypeByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
+            var paymentsMade = SubscriptionHelper.GetNumberOfPaymentsMade(transactions.Count(), types.Count());
             var subscriptionPaymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock);
             var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
 
-            return Math.Min(maxNumberOfPayments - transactions.Count(), subscriptionPaymentRemaining);
+            return Math.Min(maxNumberOfPayments - paymentsMade, subscriptionPaymentRemaining);
         }
 
         public async Task<int> AvailablePaymentRemaining(IAppUserContext ctx, [Inject] IClock clock)
@@ -73,12 +76,15 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public async Task<bool> CanAddSubscriptionPayment(IAppUserContext ctx, [Inject] IClock clock) {
             var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
+            var types = await ctx.DataLoader.LoadSubscriptionTypeByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
 
-            var transactionCount = transactions.Count();
-            var effectiveMaxPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
+            var paymentsMade = SubscriptionHelper.GetNumberOfPaymentsMade(transactions.Count(), types.Count());
+
+            // Aucune limite si aucun max explicite n'est défini ; sinon on bloque au max explicite.
+            var explicitMax = subscriptionBeneficiary.GetExplicitMaxNumberOfPayments();
 
             return subscription.IsWithinManualSubscriptionPaymentWindow(clock)
-                && transactionCount < effectiveMaxPayments;
+                && (!explicitMax.HasValue || paymentsMade < explicitMax.Value);
         }
     }
 }

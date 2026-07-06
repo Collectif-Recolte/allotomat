@@ -176,7 +176,8 @@ const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
         types: x.subscription.types,
         budgetAllowance: x.subscription.budgetAllowances.find((x) => x.organization.id === localBeneficiary.organization.id)
           .availableFund,
-        isBudgetAllowanceAlreadyAllocated: x.maxNumberOfPayments - x.paymentReceived <= x.paymentRemaining
+        isBudgetAllowanceAlreadyAllocated:
+          x.paymentReceived < x.maxNumberOfPayments && x.maxNumberOfPayments - x.paymentReceived <= x.paymentRemaining
       };
     })
     .reduce(function (a, b) {

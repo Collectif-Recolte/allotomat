@@ -330,8 +330,10 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().Count().Should().Be(6);
         }
 
+        // CRCL-2526 (Partie 2) : sans max explicite, un versement au-delà du total programmé est
+        // autorisé et débite l'enveloppe budgétaire.
         [Fact]
-        public async Task ThrowsIfSubscriptionMaxPaymentsReachedWhenAllPaymentsReceived()
+        public async Task AllowsPaymentWithoutExplicitMaxAndDebitsBudget()
         {
             subscription.EndDate = subscription.StartDate;
             DbContext.SaveChanges();
@@ -358,8 +360,11 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 Subscriptions = new List<Id>() { subscription.GetIdentifier() }
             };
 
-            await F(() => handler.Handle(input, CancellationToken.None))
-                .Should().ThrowAsync<AddSubscriptionPayments.SubscriptionMaxPaymentsReachedException>();
+            await handler.Handle(input, CancellationToken.None);
+
+            // 1 versement existant + 1 nouveau, et l'enveloppe est débitée du montant (25).
+            DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().Count().Should().Be(2);
+            DbContext.BudgetAllowances.First().AvailableFund.Should().Be(75);
         }
 
         [Fact]
