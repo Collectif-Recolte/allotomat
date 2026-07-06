@@ -2,6 +2,7 @@
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using System;
+using System.Linq;
 
 namespace Sig.App.Backend.Helpers
 {
@@ -13,6 +14,15 @@ namespace Sig.App.Backend.Helpers
                 ?? subscriptionBeneficiary.Subscription.MaxNumberOfPayments
                 ?? subscriptionBeneficiary.GetTotalPayment();
         }
+
+        // Nombre de transactions générées par cycle de versement pour un type de bénéficiaire
+        // (une SubscriptionAddingFundTransaction par SubscriptionType / ProductGroup).
+        public static int GetNumberOfPaymentTypes(this Subscription subscription, long? beneficiaryTypeId)
+            => subscription.Types.Count(x => x.BeneficiaryTypeId == beneficiaryTypeId);
+
+        // Convertit un compte brut de transactions en nombre de versements réels.
+        public static int GetNumberOfPaymentsMade(int subscriptionTransactionCount, int numberOfPaymentTypes)
+            => numberOfPaymentTypes <= 0 ? 0 : subscriptionTransactionCount / numberOfPaymentTypes;
 
         public static int GetPaymentRemaining(this SubscriptionBeneficiary subscriptionBeneficiary, IClock clock)
         {

@@ -289,13 +289,16 @@ namespace Sig.App.Backend.BackgroundJobs
                     var subscriptionAddedFundCount = beneficiary.Card.Transactions.OfType<SubscriptionAddingFundTransaction>().Count(x => subscriptionTypes.Any(y => y.Id == x.SubscriptionTypeId));
                     var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
 
+                    var numberOfPaymentTypes = subscriptionTypes.Count();
+                    var paymentsMade = SubscriptionHelper.GetNumberOfPaymentsMade(subscriptionAddedFundCount, numberOfPaymentTypes);
+
                     // The beneficiary already received all the funds
-                    if (maxNumberOfPayments == subscriptionAddedFundCount * subscriptionTypes.Count()) return;
+                    if (paymentsMade >= maxNumberOfPayments) return;
 
                     var previousPaymentDateTime = SubscriptionHelper.GetPreviousPaymentDateTime(clock, subscription.MonthlyPaymentMoment);
-                    if (subscriptionAddedFundCount != 0 && !beneficiary.Card.Transactions.Where(x => x is PaymentTransaction).Any(x => x.CreatedAtUtc >= previousPaymentDateTime))
+                    if (paymentsMade != 0 && !beneficiary.Card.Transactions.Where(x => x is PaymentTransaction).Any(x => x.CreatedAtUtc >= previousPaymentDateTime))
                     {
-                        if (maxNumberOfPayments - subscriptionAddedFundCount >= subscriptionBeneficiary.GetPaymentRemaining(clock))
+                        if (maxNumberOfPayments - paymentsMade >= subscriptionBeneficiary.GetPaymentRemaining(clock))
                         {
                             RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
                         }

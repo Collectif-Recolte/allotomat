@@ -119,14 +119,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                 var subscriptionPaymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock);
 
-                if (transactions.Count >= subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments())
+                var numberOfPaymentTypes = subscription.GetNumberOfPaymentTypes(beneficiary.BeneficiaryTypeId);
+                var paymentsMade = SubscriptionHelper.GetNumberOfPaymentsMade(transactions.Count, numberOfPaymentTypes);
+
+                if (paymentsMade >= subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments())
                 {
                     logger.LogWarning("[Mutation] AddSubscriptionPayment - SubscriptionMaxPaymentsReachedException");
                     throw new SubscriptionMaxPaymentsReachedException();
                 }
 
                 var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
-                var isBudgetAllowanceAlreadyAllocated = maxNumberOfPayments - transactions.Count <= Math.Min(maxNumberOfPayments - transactions.Count(), subscriptionPaymentRemaining);
+                var isBudgetAllowanceAlreadyAllocated = maxNumberOfPayments - paymentsMade <= Math.Min(maxNumberOfPayments - paymentsMade, subscriptionPaymentRemaining);
                 if (!isBudgetAllowanceAlreadyAllocated)
                 {
                     subscriptionBeneficiary.BudgetAllowance.AvailableFund -= amount;

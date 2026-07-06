@@ -4,6 +4,7 @@ using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Helpers;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Sig.App.BackendTests.Helpers
@@ -333,6 +334,41 @@ namespace Sig.App.BackendTests.Helpers
 
             var result = subscription.GetPaymentRemaining(Clock);
             result.Should().Be(8);
+        }
+
+        [Theory]
+        [InlineData(0, 2, 0)]
+        [InlineData(6, 2, 3)]
+        [InlineData(9, 3, 3)]
+        [InlineData(5, 1, 5)]
+        public void GetNumberOfPaymentsMade_DividesTransactionsByPaymentTypes(int transactionCount, int numberOfPaymentTypes, int expected)
+        {
+            SubscriptionHelper.GetNumberOfPaymentsMade(transactionCount, numberOfPaymentTypes).Should().Be(expected);
+        }
+
+        [Fact]
+        public void GetNumberOfPaymentsMade_ZeroPaymentTypes_ReturnsZero()
+        {
+            SubscriptionHelper.GetNumberOfPaymentsMade(6, 0).Should().Be(0);
+        }
+
+        [Fact]
+        public void GetNumberOfPaymentTypes_CountsTypesForBeneficiaryType()
+        {
+            var subscription = new Subscription
+            {
+                Types = new List<SubscriptionType>
+                {
+                    new SubscriptionType { Amount = 25, BeneficiaryTypeId = 1 },
+                    new SubscriptionType { Amount = 25, BeneficiaryTypeId = 1 },
+                    new SubscriptionType { Amount = 50, BeneficiaryTypeId = 2 },
+                    new SubscriptionType { Amount = 100, BeneficiaryTypeId = null }
+                }
+            };
+
+            subscription.GetNumberOfPaymentTypes(1).Should().Be(2);
+            subscription.GetNumberOfPaymentTypes(2).Should().Be(1);
+            subscription.GetNumberOfPaymentTypes(99).Should().Be(0);
         }
     }
 }

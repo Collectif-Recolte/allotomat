@@ -536,5 +536,113 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<AddSubscriptionPayment.SubscriptionDontHaveEnoughtAvailableAmountException>();
         }
+
+        // CRCL-2526 : quand un abonnement verse dans plusieurs ProductGroups, chaque versement crée
+        // une transaction par ProductGroup. On doit compter les versements réels, pas les transactions.
+        [Fact]
+        public async Task AllowsPaymentWithMultipleProductGroupsWhenRealPaymentsUnderMax()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            var secondProductGroup = AddSecondProductGroupToSubscription();
+
+            subscription.MaxNumberOfPayments = 6;
+            subscription.StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(-4);
+            subscription.EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(6);
+            subscription.FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(7);
+            budgetAllowance.AvailableFund = 1000;
+
+            // 3 versements réels x 2 ProductGroups = 6 transactions (mais 3 versements seulement).
+            AddSubscriptionTransactions(3, secondProductGroup);
+
+            DbContext.SaveChanges();
+
+            var input = new AddSubscriptionPayment.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier()
+            };
+
+            // Avant le correctif : 6 transactions >= max(6) -> exception prématurée.
+            // Après : 6 / 2 ProductGroups = 3 versements < 6 -> versement autorisé (2 nouvelles transactions).
+            await handler.Handle(input, CancellationToken.None);
+
+            DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().Count().Should().Be(8);
+        }
+
+        [Fact]
+        public async Task ThrowsIfMaxPaymentsReachedWithMultipleProductGroups()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            var secondProductGroup = AddSecondProductGroupToSubscription();
+
+            subscription.MaxNumberOfPayments = 3;
+            subscription.StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(-4);
+            subscription.EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(6);
+            subscription.FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(7);
+            budgetAllowance.AvailableFund = 1000;
+
+            // 3 versements réels x 2 ProductGroups = 6 transactions = max atteint.
+            AddSubscriptionTransactions(3, secondProductGroup);
+
+            DbContext.SaveChanges();
+
+            var input = new AddSubscriptionPayment.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier()
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<AddSubscriptionPayment.SubscriptionMaxPaymentsReachedException>();
+        }
+
+        private ProductGroup AddSecondProductGroupToSubscription()
+        {
+            var secondProductGroup = new ProductGroup()
+            {
+                Color = ProductGroupColor.Color_2,
+                Name = "Product group 2",
+                OrderOfAppearance = 2,
+                Project = project
+            };
+            DbContext.ProductGroups.Add(secondProductGroup);
+
+            subscription.Types.Add(new SubscriptionType()
+            {
+                Amount = 25,
+                ProductGroup = secondProductGroup,
+                BeneficiaryType = beneficiaryType
+            });
+
+            return secondProductGroup;
+        }
+
+        private void AddSubscriptionTransactions(int numberOfPayments, ProductGroup secondProductGroup)
+        {
+            var firstType = subscription.Types.First(x => x.BeneficiaryType == beneficiaryType && x.ProductGroup == productGroup);
+            var secondType = subscription.Types.First(x => x.ProductGroup == secondProductGroup);
+
+            for (var i = 0; i < numberOfPayments; i++)
+            {
+                foreach (var (type, group) in new[] { (firstType, productGroup), (secondType, secondProductGroup) })
+                {
+                    card.Transactions.Add(new SubscriptionAddingFundTransaction()
+                    {
+                        Amount = 25,
+                        AvailableFund = 25,
+                        Beneficiary = beneficiary,
+                        Card = card,
+                        CreatedAtUtc = Clock.GetCurrentInstant().ToDateTimeUtc(),
+                        ExpirationDate = subscription.GetExpirationDate(Clock),
+                        Organization = organization,
+                        ProductGroup = group,
+                        Status = FundTransactionStatus.Actived,
+                        SubscriptionType = type,
+                    });
+                }
+            }
+        }
     }
 }
