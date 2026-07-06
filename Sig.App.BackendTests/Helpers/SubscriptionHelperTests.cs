@@ -370,5 +370,41 @@ namespace Sig.App.BackendTests.Helpers
             subscription.GetNumberOfPaymentTypes(2).Should().Be(1);
             subscription.GetNumberOfPaymentTypes(99).Should().Be(0);
         }
+
+        [Fact]
+        public void GetExplicitMaxNumberOfPayments_NullWhenNoOverrideAndNoSubscriptionMax()
+        {
+            var subscriptionBeneficiary = new SubscriptionBeneficiary
+            {
+                MaxNumberOfPaymentsOverride = null,
+                Subscription = new Subscription { MaxNumberOfPayments = null }
+            };
+
+            subscriptionBeneficiary.GetExplicitMaxNumberOfPayments().Should().BeNull();
+        }
+
+        [Fact]
+        public void GetExplicitMaxNumberOfPayments_UsesSubscriptionMaxWhenNoOverride()
+        {
+            var subscriptionBeneficiary = new SubscriptionBeneficiary
+            {
+                MaxNumberOfPaymentsOverride = null,
+                Subscription = new Subscription { MaxNumberOfPayments = 5 }
+            };
+
+            subscriptionBeneficiary.GetExplicitMaxNumberOfPayments().Should().Be(5);
+        }
+
+        [Fact]
+        public void GetExplicitMaxNumberOfPayments_OverrideTakesPrecedence()
+        {
+            var subscriptionBeneficiary = new SubscriptionBeneficiary
+            {
+                MaxNumberOfPaymentsOverride = 8,
+                Subscription = new Subscription { MaxNumberOfPayments = 5 }
+            };
+
+            subscriptionBeneficiary.GetExplicitMaxNumberOfPayments().Should().Be(8);
+        }
     }
 }

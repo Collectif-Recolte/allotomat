@@ -24,6 +24,12 @@ namespace Sig.App.Backend.Helpers
         public static int GetNumberOfPaymentsMade(int subscriptionTransactionCount, int numberOfPaymentTypes)
             => numberOfPaymentTypes <= 0 ? 0 : subscriptionTransactionCount / numberOfPaymentTypes;
 
+        // Max de versements EXPLICITEMENT configuré (sans fallback sur le total programmé).
+        // null => aucune limite de versement manuel.
+        public static int? GetExplicitMaxNumberOfPayments(this SubscriptionBeneficiary subscriptionBeneficiary)
+            => subscriptionBeneficiary.MaxNumberOfPaymentsOverride
+                ?? subscriptionBeneficiary.Subscription.MaxNumberOfPayments;
+
         public static int GetPaymentRemaining(this SubscriptionBeneficiary subscriptionBeneficiary, IClock clock)
         {
             var cardPaymentRemaining = GetCardPaymentRemaining(subscriptionBeneficiary.Subscription, clock);

@@ -79,10 +79,12 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             var types = await ctx.DataLoader.LoadSubscriptionTypeByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
 
             var paymentsMade = SubscriptionHelper.GetNumberOfPaymentsMade(transactions.Count(), types.Count());
-            var effectiveMaxPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
+
+            // Aucune limite si aucun max explicite n'est défini ; sinon on bloque au max explicite.
+            var explicitMax = subscriptionBeneficiary.GetExplicitMaxNumberOfPayments();
 
             return subscription.IsWithinManualSubscriptionPaymentWindow(clock)
-                && paymentsMade < effectiveMaxPayments;
+                && (!explicitMax.HasValue || paymentsMade < explicitMax.Value);
         }
     }
 }
