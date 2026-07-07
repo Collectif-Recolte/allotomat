@@ -1217,12 +1217,14 @@ export default [
       {
         name: urls.URL_KIOSK_HOME,
         path: "",
-        component: () => import("@/views/kiosk/KioskHome.vue")
+        component: () => import("@/views/kiosk/KioskHome.vue"),
+        meta: { anonymous }
       },
       {
         name: urls.URL_KIOSK_TRANSACTION,
         path: "transaction",
         component: () => import("@/views/kiosk/KioskTransaction.vue"),
+        meta: { anonymous },
         children: [
           {
             name: urls.URL_KIOSK_TRANSACTION_ERROR,
@@ -1235,7 +1237,8 @@ export default [
       {
         name: urls.URL_KIOSK_CHECK,
         path: "check",
-        component: () => import("@/views/kiosk/KioskCardCheck.vue")
+        component: () => import("@/views/kiosk/KioskCardCheck.vue"),
+        meta: { anonymous }
       }
     ]
   },
