@@ -30,7 +30,11 @@
       "no-participants": "No participants in the selected group",
       "no-participants-in-subscription": "No participants found for this subscription",
       "replicate-payment-on-attribution": "Automatically transfer the latest payment to participants who have a card ({totalParticipantWithCard} of {totalParticipant} selected participants)",
-      "replicate-payment-on-attribution-desc": "Participants who do not yet have a card will not receive a payment immediately. It is possible to transfer funds manually once they have received a card, or to wait for the next automated payment date. If the subscription has a maximum number of payments, this will count towards that maximum."
+      "replicate-payment-on-attribution-desc": "Participants who do not yet have a card will not receive a payment immediately. It is possible to transfer funds manually once they have received a card, or to wait for the next automated payment date. If the subscription has a maximum number of payments, this will count towards that maximum.",
+      "choose-group": "Search for a group...",
+      "no-groups-found": "No groups found",
+      "choose-subscription": "Search for a subscription...",
+      "no-subscriptions-found": "No subscriptions found"
     },
     "fr": {
       "selected-organization": "Groupe",
@@ -62,7 +66,11 @@
       "no-participants": "Aucun·e participant·e dans le groupe sélectionné",
       "no-participants-in-subscription": "Aucun·e participant·e n'a été trouvé·e pour cet abonnement",
       "replicate-payment-on-attribution": "Verser automatiquement le dernier versement aux participant·e·s qui possèdent une carte ({totalParticipantWithCard} des {totalParticipant} participant·e·s sélectionné·e·s)",
-      "replicate-payment-on-attribution-desc": "Les participant·e·s n'ayant pas encore de carte ne recevront pas de versement immédiatement. Il est possible de transférer manuellement des fonds une fois qu'il·elle·s auront reçu une carte, ou d'attendre la prochaine date de versement automatisé. Si l'abonnement a un nombre maximum de paiements, celui-ci sera pris en compte dans le calcul de ce maximum."
+      "replicate-payment-on-attribution-desc": "Les participant·e·s n'ayant pas encore de carte ne recevront pas de versement immédiatement. Il est possible de transférer manuellement des fonds une fois qu'il·elle·s auront reçu une carte, ou d'attendre la prochaine date de versement automatisé. Si l'abonnement a un nombre maximum de paiements, celui-ci sera pris en compte dans le calcul de ce maximum.",
+      "choose-group": "Chercher un groupe...",
+      "no-groups-found": "Aucun groupe trouvé",
+      "choose-subscription": "Chercher un abonnement...",
+      "no-subscriptions-found": "Aucun abonnement trouvé"
     }
   }
 </i18n>
@@ -85,13 +93,15 @@
       <template v-if="organizations && manageOrganizations" #right>
         <div class="flex items-center gap-x-4">
           <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-organization") }}</span>
-          <PfFormInputSelect
+          <PfFormInputSelectSearchable
             id="selectedOrganization"
             has-hidden-label
             col-span-class="sm:col-span-3"
             :label="t('selected-organization')"
             :value="selectedOrganization"
             :options="organizations"
+            :placeholder="t('choose-group')"
+            :no-results-found="t('no-groups-found')"
             @input="onOrganizationSelected" />
         </div>
       </template>
@@ -99,13 +109,15 @@
         <div class="sm:ml-6 flex flex-right gap-x-4 gap-y-3 justify-end">
           <div class="flex items-center gap-x-4">
             <span class="text-sm text-primary-700" aria-hidden>{{ t("selected-subscription") }}</span>
-            <PfFormInputSelect
+            <PfFormInputSelectSearchable
               id="selectedSubscription"
               has-hidden-label
               col-span-class="sm:col-span-3"
               :label="t('selected-subscription')"
               :value="selectedSubscription"
               :options="subscriptions"
+              :placeholder="t('choose-subscription')"
+              :no-results-found="t('no-subscriptions-found')"
               @input="onSubscriptionSelected" />
           </div>
           <div class="flex items-center gap-x-4">
@@ -309,7 +321,7 @@
           }"
           v-html="t('remaining-amount', { amount: budgetAllowanceAvailableAfterAllocationMoneyFormat })"></p>
         <PfFormInputCheckbox
-          v-if="selectedSubscriptionHasMissedPayment && selectedBeneficiariesWithCard.length > 0"
+          v-if="selectedSubscriptionCanAddSubscriptionPayment && selectedBeneficiariesWithCard.length > 0"
           :label="
             t('replicate-payment-on-attribution', {
               totalParticipantWithCard: selectedBeneficiariesWithCard.length,
@@ -472,7 +484,7 @@ const {
             paymentRemaining
             isSubscriptionPaymentBasedCardUsage
             maxNumberOfPayments
-            hasMissedPayment
+            canAddSubscriptionPayment
             types {
               id
               amount
@@ -542,7 +554,7 @@ const subscriptions = useResult(resultOrganizations, null, (data) => {
       isSubscriptionPaymentBasedCardUsage: x.isSubscriptionPaymentBasedCardUsage,
       maxNumberOfPayments: x.maxNumberOfPayments,
       types: x.types,
-      hasMissedPayment: x.hasMissedPayment
+      canAddSubscriptionPayment: x.canAddSubscriptionPayment
     }));
 });
 
@@ -786,9 +798,10 @@ const availableBeneficiaryTypes = computed(() => {
   if (selectedSubscription.value === null) {
     return beneficiaryTypes != null ? beneficiaryTypes.value : [];
   }
-  return subscriptions.value
-    .find((x) => x.value === selectedSubscription.value)
-    .types.map((x) => x.beneficiaryType)
+  const selectedSubscriptionData = subscriptions.value.find((x) => x.value === selectedSubscription.value);
+  if (!selectedSubscriptionData?.types) return [];
+  return selectedSubscriptionData.types
+    .map((x) => x.beneficiaryType)
     .filter((value, index, array) => array.indexOf(value) === index);
 });
 
@@ -805,7 +818,7 @@ const selectedSubscriptionName = computed(() => {
   return subscriptions.value.find((x) => x.value === selectedSubscription.value).label;
 });
 
-const selectedSubscriptionHasMissedPayment = computed(() => {
+const selectedSubscriptionCanAddSubscriptionPayment = computed(() => {
   if (selectedSubscription.value === null) return "-";
 
   var beneficiaryTransactionCount =
@@ -814,7 +827,7 @@ const selectedSubscriptionHasMissedPayment = computed(() => {
     )?.count ?? 0;
 
   return (
-    subscriptions.value.find((x) => x.value === selectedSubscription.value).hasMissedPayment &&
+    subscriptions.value.find((x) => x.value === selectedSubscription.value).canAddSubscriptionPayment &&
     subscriptions.value.find((x) => x.value === selectedSubscription.value).totalPayment -
       subscriptions.value.find((x) => x.value === selectedSubscription.value).paymentRemaining >
       beneficiaryTransactionCount
@@ -848,6 +861,7 @@ const anyFiltersActive = computed(() => {
 });
 
 function onOrganizationSelected(e) {
+  if (!e) return;
   selectedOrganization.value = e;
   selectedSubscription.value = null;
   changeOrganization(e);
@@ -902,16 +916,18 @@ function onSelectedBeneficiaryUnchecked(beneficiary) {
 }
 
 function onSubscriptionSelected(e) {
+  if (!e) return;
   selectedSubscription.value = e;
 
-  var availableBeneficiaryType = subscriptions.value
-    .find((x) => x.value === selectedSubscription.value)
-    .types.map((x) => x.beneficiaryType);
+  const subscription = subscriptions.value.find((x) => x.value === selectedSubscription.value);
+  if (!subscription) return;
+
+  var availableBeneficiaryType = subscription.types.map((x) => x.beneficiaryType);
   beneficiaryTypesFilter.value = beneficiaryTypesFilter.value.filter((x) =>
     availableBeneficiaryType.map((y) => y.id).includes(x)
   );
   subscriptionsFilter.value = subscriptionsFilter.value.filter((x) => x !== e);
-  maxAllocation.value = subscriptions.value.find((x) => x.value === selectedSubscription.value).budgetAllowance;
+  maxAllocation.value = subscription.budgetAllowance;
 
   updateUrl();
 }

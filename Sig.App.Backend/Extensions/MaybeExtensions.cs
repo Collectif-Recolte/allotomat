@@ -10,6 +10,11 @@ namespace Sig.App.Backend.Extensions
 
         public static bool IsSet<T>(this Maybe<T> maybe) => maybe != null;
 
+        public static bool HasValue<T>(this Maybe<T> maybe) => maybe != null && maybe.Value != null;
+
+        public static bool HasValue(this Maybe<Id> maybe) =>
+            maybe != null && !string.IsNullOrWhiteSpace(maybe.Value.ToString());
+
         public static void IfSet<T>(this Maybe<T> maybe, Action<T> action)
         {
             if (maybe.IsSet())

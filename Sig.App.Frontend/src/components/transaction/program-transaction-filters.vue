@@ -23,7 +23,7 @@
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Budget envelope refund from participant removed from subscription",
     "transaction-log-type-refund-payment": "Purchase refund",
     "market": "Merchants",
-    "cash-register": "Cash Registers",
+    "market-groups": "Merchant Groups",
     "gift-card-transaction-types": "Gift Card Transaction Types",
     "with-gift-card": "With Gift Card",
     "without-gift-card": "Without Gift Card"
@@ -51,7 +51,7 @@
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppe remboursée après avoir retiré un·e participant·e d'un abonnement",
     "transaction-log-type-refund-payment": "Remboursement d'un achat",
     "market": "Commerces",
-    "cash-register": "Caisses",
+    "market-groups": "Groupes de commerces",
     "gift-card-transaction-types": "Carte-cadeaux",
     "with-gift-card": "Avec carte-cadeau",
     "without-gift-card": "Sans carte-cadeau"
@@ -102,6 +102,9 @@
             v-if="availableOrganizations.length > 0"
             id="organizations"
             is-filter
+            has-hidden-label
+            searchable
+            :label="t('organizations')"
             :value="selectedOrganizations"
             :options="availableOrganizations"
             @input="onOrganizationsChecked" />
@@ -112,6 +115,9 @@
             id="beneficiary-types"
             class="mt-3"
             is-filter
+            has-hidden-label
+            searchable
+            :label="t('beneficiary-type')"
             :value="selectedBeneficiaryTypes"
             :options="availableBeneficiaryTypes"
             @input="onBeneficiaryTypesChecked" />
@@ -122,6 +128,9 @@
             id="subscriptions"
             class="mt-3"
             is-filter
+            has-hidden-label
+            searchable
+            :label="t('subscription')"
             :value="selectedSubscriptions"
             :options="availableSubscriptions"
             @input="onSubscriptionsChecked" />
@@ -132,19 +141,25 @@
             id="markets"
             class="mt-3"
             is-filter
+            has-hidden-label
+            searchable
+            :label="t('market')"
             :value="selectedMarkets"
             :options="availableMarkets"
             @input="onMarketsChecked" />
         </UiFilterSelect>
-        <UiFilterSelect :label="t('cash-register')" :active-filters-count="cashRegisterActiveFiltersCount">
+        <UiFilterSelect :label="t('market-groups')" :active-filters-count="marketGroupActiveFiltersCount">
           <PfFormInputCheckboxGroup
-            v-if="availableCashRegister.length > 0"
-            id="cashRegisters"
+            v-if="availableMarketGroups.length > 0"
+            id="marketGroups"
             class="mt-3"
             is-filter
-            :value="selectedCashRegisters"
-            :options="availableCashRegister"
-            @input="onCashRegistersChecked" />
+            has-hidden-label
+            searchable
+            :label="t('market-groups')"
+            :value="selectedMarketGroups"
+            :options="availableMarketGroups"
+            @input="onMarketGroupsChecked" />
         </UiFilterSelect>
         <UiFilterSelect :label="t('transaction-log-types')" :active-filters-count="transactionTypeActiveFiltersCount">
           <PfFormInputCheckboxGroup
@@ -152,6 +167,9 @@
             id="transactionTypes"
             class="mt-3"
             is-filter
+            has-hidden-label
+            searchable
+            :label="t('transaction-log-types')"
             :value="selectedTransactionTypes"
             :options="availableTransactionTypes"
             @input="onTransactionTypesChecked" />
@@ -164,6 +182,8 @@
             id="giftCardTransactionTypes"
             class="mt-3"
             is-filter
+            has-hidden-label
+            :label="t('gift-card-transaction-types')"
             :value="selectedGiftCardTransactionTypes"
             :options="availableGiftCardTransactionTypes"
             @input="onGiftCardTransactionTypesChecked" />
@@ -196,8 +216,8 @@ const emit = defineEmits([
   "dateToUpdated",
   "marketsChecked",
   "marketsUnchecked",
-  "cashRegistersChecked",
-  "cashRegistersUnchecked",
+  "marketGroupsChecked",
+  "marketGroupsUnchecked",
   "giftCardTransactionTypesChecked",
   "giftCardTransactionTypesUnchecked"
 ]);
@@ -245,7 +265,7 @@ const props = defineProps({
       return [];
     }
   },
-  availableCashRegister: {
+  availableMarketGroups: {
     type: Array,
     default() {
       return [];
@@ -257,7 +277,7 @@ const props = defineProps({
       return [];
     }
   },
-  selectedCashRegisters: {
+  selectedMarketGroups: {
     type: Array,
     default() {
       return [];
@@ -276,10 +296,6 @@ const props = defineProps({
     }
   },
   withoutSubscriptionId: {
-    type: String,
-    default: ""
-  },
-  withCashRegisterId: {
     type: String,
     default: ""
   },
@@ -347,7 +363,7 @@ const hasActiveFilters = computed(() => {
     props.selectedBeneficiaryTypes?.length > 0 ||
     props.selectedSubscriptions?.length > 0 ||
     props.selectedTransactionTypes?.length > 0 ||
-    props.selectedCashRegisters?.length > 0 ||
+    props.selectedMarketGroups?.length > 0 ||
     props.selectedMarkets?.length > 0 ||
     !!props.searchFilter
   );
@@ -358,7 +374,7 @@ const activeFiltersCount = computed(() => {
   const selectedBeneficiariesCount = props.selectedBeneficiaryTypes?.length ?? 0;
   const selectedSubscritionsCount = props.selectedSubscriptions?.length ?? 0;
   const selectedTransactionTypesCount = props.selectedTransactionTypes?.length ?? 0;
-  const selectedCashRegistersCount = props.selectedCashRegisters?.length ?? 0;
+  const selectedMarketGroupsCount = props.selectedMarketGroups?.length ?? 0;
   const selectedMarketsCount = props.selectedMarkets?.length ?? 0;
 
   return (
@@ -366,7 +382,7 @@ const activeFiltersCount = computed(() => {
     selectedBeneficiariesCount +
     selectedSubscritionsCount +
     selectedTransactionTypesCount +
-    selectedCashRegistersCount +
+    selectedMarketGroupsCount +
     selectedMarketsCount
   );
 });
@@ -387,8 +403,8 @@ const marketActiveFiltersCount = computed(() => {
   return props.selectedMarkets?.length ?? 0;
 });
 
-const cashRegisterActiveFiltersCount = computed(() => {
-  return props.selectedCashRegisters?.length ?? 0;
+const marketGroupActiveFiltersCount = computed(() => {
+  return props.selectedMarketGroups?.length ?? 0;
 });
 
 const transactionTypeActiveFiltersCount = computed(() => {
@@ -430,9 +446,9 @@ const availableMarkets = computed(() => {
   return props.availableMarkets.map((x) => ({ value: x.id, label: x.name })).sort((a, b) => a.label.localeCompare(b.label));
 });
 
-const availableCashRegister = computed(() => {
-  if (!props.availableCashRegister || props.availableCashRegister?.length <= 0) return [];
-  return props.availableCashRegister.map((x) => ({ value: x.id, label: x.name }));
+const availableMarketGroups = computed(() => {
+  if (!props.availableMarketGroups || props.availableMarketGroups?.length <= 0) return [];
+  return props.availableMarketGroups.map((x) => ({ value: x.id, label: x.name })).sort((a, b) => a.label.localeCompare(b.label));
 });
 
 const availableTransactionTypes = computed(() => {
@@ -492,11 +508,11 @@ function onMarketsChecked(input) {
   }
 }
 
-function onCashRegistersChecked(input) {
+function onMarketGroupsChecked(input) {
   if (input.isChecked) {
-    emit("cashRegistersChecked", input.value);
+    emit("marketGroupsChecked", input.value);
   } else {
-    emit("cashRegistersUnchecked", input.value);
+    emit("marketGroupsUnchecked", input.value);
   }
 }
 

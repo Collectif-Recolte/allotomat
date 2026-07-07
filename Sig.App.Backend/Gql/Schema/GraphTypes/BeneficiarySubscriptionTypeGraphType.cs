@@ -1,4 +1,4 @@
-﻿using GraphQL.Conventions;
+using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using NodaTime;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
@@ -49,16 +49,19 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public async Task<int> PaymentReceived(IAppUserContext ctx)
         {
             var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
-            return transactions.Count();
+            var types = await ctx.DataLoader.LoadSubscriptionTypeByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
+            return SubscriptionHelper.GetNumberOfPaymentsMade(transactions.Count(), types.Count());
         }
 
         public async Task<int> PaymentRemaining(IAppUserContext ctx, [Inject] IClock clock)
         {
             var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
+            var types = await ctx.DataLoader.LoadSubscriptionTypeByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
+            var paymentsMade = SubscriptionHelper.GetNumberOfPaymentsMade(transactions.Count(), types.Count());
             var subscriptionPaymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock);
             var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
 
-            return Math.Min(maxNumberOfPayments - transactions.Count(), subscriptionPaymentRemaining);
+            return Math.Min(maxNumberOfPayments - paymentsMade, subscriptionPaymentRemaining);
         }
 
         public async Task<int> AvailablePaymentRemaining(IAppUserContext ctx, [Inject] IClock clock)
@@ -71,27 +74,17 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
         }
 
-        public async Task<bool> HasMissedPayment(IAppUserContext ctx, [Inject] IClock clock) {
+        public async Task<bool> CanAddSubscriptionPayment(IAppUserContext ctx, [Inject] IClock clock) {
             var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
-            var subscriptionTotalPayment = subscriptionBeneficiary.GetTotalPayment();
-            var subscriptionPaymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock);
+            var types = await ctx.DataLoader.LoadSubscriptionTypeByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
 
-            var now = clock.GetCurrentInstant().ToDateTimeUtc();
-            var transactionCount = transactions.Count();
-            var effectiveMaxPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
-            var previousPaymentCount = subscription.GetPreviousPaymentCount(clock);
+            var paymentsMade = SubscriptionHelper.GetNumberOfPaymentsMade(transactions.Count(), types.Count());
 
-            if (subscriptionBeneficiary.MaxNumberOfPaymentsOverride.HasValue || subscription.MaxNumberOfPayments.HasValue)
-            {
-                return subscription.GetExpirationDate(clock) > now
-                    && subscription.GetFirstPaymentDateTime() < now
-                    && transactionCount < effectiveMaxPayments
-                    && previousPaymentCount > transactionCount;
-            }
+            // Aucune limite si aucun max explicite n'est défini ; sinon on bloque au max explicite.
+            var explicitMax = subscriptionBeneficiary.GetExplicitMaxNumberOfPayments();
 
-            return subscription.GetExpirationDate(clock) > now
-                && subscription.GetFirstPaymentDateTime() < now
-                && previousPaymentCount > transactionCount;
+            return subscription.IsWithinManualSubscriptionPaymentWindow(clock)
+                && (!explicitMax.HasValue || paymentsMade < explicitMax.Value);
         }
     }
 }

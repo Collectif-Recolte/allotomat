@@ -157,6 +157,10 @@ const subscriptionChecked = ref([]);
 const isNextStepBtnClicked = ref(false);
 
 const isBudgetAllowanceIsEnough = (subscription) => {
+  if (!beneficiary.value?.organization || !beneficiary.value?.beneficiaryType) {
+    return false;
+  }
+
   if (subscription.budgetAllowances.filter((x) => x.organization.id === beneficiary.value.organization.id).length === 0)
     return false;
 
@@ -172,7 +176,7 @@ const isBudgetAllowanceIsEnough = (subscription) => {
   );
 };
 const subscriptionsOrderByDate = computed(() => {
-  if (organization.value === undefined || beneficiary.value === null) {
+  if (organization.value === undefined || !beneficiary.value) {
     return [];
   }
   let subscriptions = [...organization.value.project.subscriptions];

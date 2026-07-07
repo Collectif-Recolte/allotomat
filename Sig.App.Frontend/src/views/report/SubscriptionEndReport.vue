@@ -81,6 +81,7 @@ const searchInput = ref({
   selectedSubscriptions: []
 });
 const page = ref(1);
+const hasAppliedDefaultDates = ref(Boolean(route.query.dateFrom || route.query.dateTo));
 const availableSubscriptions = ref([]);
 const availableOrganizations = ref([]);
 
@@ -199,8 +200,11 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
 );
 
 const project = useResult(resultProjects, null, (data) => {
-  if (!route.query.dateFrom && !route.query.dateTo) {
-    setDateFrom(data.projects[0].reconciliationReportDate);
+  if (!hasAppliedDefaultDates.value) {
+    if (!route.query.dateFrom && !route.query.dateTo) {
+      setDateFrom(data.projects[0].reconciliationReportDate);
+    }
+    hasAppliedDefaultDates.value = true;
   }
 
   availableOrganizations.value = data.projects[0].organizations;
@@ -269,8 +273,11 @@ const { result: resultOrganizations, loading: loadingOrganizations } = useQuery(
 );
 
 const organization = useResult(resultOrganizations, null, (data) => {
-  if (!route.query.dateFrom && !route.query.dateTo) {
-    setDateFrom(data.organizations[0].subscriptionEndReportDate);
+  if (!hasAppliedDefaultDates.value) {
+    if (!route.query.dateFrom && !route.query.dateTo) {
+      setDateFrom(data.organizations[0].subscriptionEndReportDate);
+    }
+    hasAppliedDefaultDates.value = true;
   }
 
   availableSubscriptions.value = data.organizations[0].budgetAllowances.map((x) => x.subscription);

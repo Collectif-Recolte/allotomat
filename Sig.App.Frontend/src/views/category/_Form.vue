@@ -25,14 +25,14 @@
 
 <template>
   <Form
-    v-slot="{ isSubmitting, errors: formErrors }"
+    v-slot="{ isSubmitting, errors: formErrors, values }"
     :validation-schema="validationSchema"
     :initial-values="initialValues"
     @submit="onSubmit">
     <PfForm
       has-footer
       can-cancel
-      :disable-submit="Object.keys(formErrors).length > 0"
+      :disable-submit="!values.categoryKeys?.length || Object.keys(formErrors).length > 0"
       :submit-label="props.submitBtn"
       :cancel-label="t('cancel')"
       :processing="isSubmitting"
@@ -120,12 +120,15 @@ const initialValues = {
 
 const validationSchema = computed(() =>
   object({
-    categoryName: string().label(t("category-name")).required(),
-    categoryKeys: array().of(
-      object({
-        name: string().label(t("keyword-name")).required()
-      })
-    )
+    categoryName: string().label(t("category-name")).trim().required(),
+    categoryKeys: array()
+      .label(t("keywords-section-title"))
+      .min(1)
+      .of(
+        object({
+          name: string().label(t("keyword-name")).trim().required()
+        })
+      )
   })
 );
 

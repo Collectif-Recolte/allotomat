@@ -9,7 +9,9 @@
     "market-groups": "Program(s)",
     "selected-project": "Program",
     "selected-market-group": "Location",
-    "no-associated-market-groups": "All available merchant groups are associated with the cash register."
+    "no-associated-market-groups": "All available merchant groups are associated with the cash register.",
+    "warning-add-cash-register": "Please contact your program managers before adding a new cash register on Tomat. This feature should only be used if you have multiple check-out lanes at one location.",
+    "warning-edit-cash-register": "Please contact your program managers before modifying the names of your cash registers on Tomat. Cash register names should usually correspond to the names of markets, location, or merchant group within the program."
 	},
 	"fr": {
     "project-name": "Programme",
@@ -20,7 +22,9 @@
     "market-groups": "Programme(s)",
     "selected-project": "Programme",
     "selected-market-group": "Lieu",
-    "no-associated-market-groups": "Tous les groupes de commerces disponibles sont associés à la caisse."
+    "no-associated-market-groups": "Tous les groupes de commerces disponibles sont associés à la caisse.",
+    "warning-add-cash-register": "Veuillez contacter vos gestionnaires de programme avant d'ajouter une nouvelle caisse sur Tomat. Cette fonctionnalité ne doit être utilisée que si vous disposez de plusieurs caisses dans un même emplacement.",
+    "warning-edit-cash-register": "Veuillez contacter vos gestionnaires de programme avant de modifier les noms de vos caisses sur Tomat. Les noms des caisses devraient normalement correspondre au nom du marché, lieu, ou groupe de commerces du programme."
 	}
 }
 </i18n>
@@ -38,8 +42,13 @@
       :submit-label="submitBtn"
       :processing="isSubmitting"
       :cancel-label="t('cancel')"
-      :warning-message="warningMessage"
       @cancel="closeModal">
+      <UiCallout v-if="isNew" :variant="CALLOUT_ERROR" class="mb-4">
+        <p class="text-p2 mb-0">{{ t("warning-add-cash-register") }}</p>
+      </UiCallout>
+      <UiCallout v-else-if="!isAddProject" :variant="CALLOUT_ERROR" class="mb-4">
+        <p class="text-p2 mb-0">{{ t("warning-edit-cash-register") }}</p>
+      </UiCallout>
       <PfFormSection>
         <Field v-slot="{ field, errors: fieldErrors }" name="name">
           <PfFormInputText
@@ -102,6 +111,9 @@
 import { ref, defineEmits, defineProps, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { string, object, lazy, mixed } from "yup";
+
+import UiCallout from "@/components/ui/callout.vue";
+import { CALLOUT_ERROR } from "@/lib/consts/callout";
 
 const { t } = useI18n();
 const emit = defineEmits(["submit", "closeModal", "nextStep"]);
