@@ -1,13 +1,12 @@
 import { onUnmounted, ref, watch, toValue } from "vue";
-import type { MaybeRefOrGetter } from "vue";
+import type { MaybeRefOrGetter, Ref } from "vue";
 
 import {
   KIOSK_IDLE_TIMEOUT_MS,
   KIOSK_IDLE_WARNING_TIMEOUT_MS,
   KIOSK_PURCHASE_COMPLETE_TIMEOUT_MS
 } from "@/lib/consts/kiosk-timeout";
-
-export type KioskIdleTimeoutMode = "disabled" | "idle" | "purchase-complete";
+import type { KioskIdleTimeoutMode } from "@/lib/composables/use-kiosk-shell";
 
 const ACTIVITY_EVENTS = ["pointerdown", "touchstart", "keydown", "scroll"] as const;
 
@@ -15,15 +14,22 @@ type UseKioskIdleTimeoutOptions = {
   mode: MaybeRefOrGetter<KioskIdleTimeoutMode>;
   paused: MaybeRefOrGetter<boolean>;
   onReturnHome: () => void;
+  purchaseCompleteSecondsRemaining: Ref<number>;
 };
 
-export function useKioskIdleTimeout({ mode, paused, onReturnHome }: UseKioskIdleTimeoutOptions) {
+export function useKioskIdleTimeout({
+  mode,
+  paused,
+  onReturnHome,
+  purchaseCompleteSecondsRemaining
+}: UseKioskIdleTimeoutOptions) {
   const showIdlePrompt = ref(false);
   const warningSecondsRemaining = ref(0);
 
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
   let warningTimer: ReturnType<typeof setTimeout> | null = null;
   let purchaseCompleteTimer: ReturnType<typeof setTimeout> | null = null;
+  let purchaseCompleteCountdownInterval: ReturnType<typeof setInterval> | null = null;
   let warningCountdownInterval: ReturnType<typeof setInterval> | null = null;
 
   function clearIdleTimer() {
@@ -50,6 +56,11 @@ export function useKioskIdleTimeout({ mode, paused, onReturnHome }: UseKioskIdle
       clearTimeout(purchaseCompleteTimer);
       purchaseCompleteTimer = null;
     }
+    if (purchaseCompleteCountdownInterval !== null) {
+      clearInterval(purchaseCompleteCountdownInterval);
+      purchaseCompleteCountdownInterval = null;
+    }
+    purchaseCompleteSecondsRemaining.value = 0;
   }
 
   function clearAllTimers() {
@@ -85,6 +96,12 @@ export function useKioskIdleTimeout({ mode, paused, onReturnHome }: UseKioskIdle
 
   function startPurchaseCompleteTimer() {
     clearPurchaseCompleteTimer();
+    purchaseCompleteSecondsRemaining.value = Math.ceil(KIOSK_PURCHASE_COMPLETE_TIMEOUT_MS / 1000);
+
+    purchaseCompleteCountdownInterval = setInterval(() => {
+      purchaseCompleteSecondsRemaining.value = Math.max(0, purchaseCompleteSecondsRemaining.value - 1);
+    }, 1000);
+
     purchaseCompleteTimer = setTimeout(returnHome, KIOSK_PURCHASE_COMPLETE_TIMEOUT_MS);
   }
 

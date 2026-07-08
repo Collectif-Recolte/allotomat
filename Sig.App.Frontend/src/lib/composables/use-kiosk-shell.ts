@@ -8,6 +8,7 @@ export type KioskShellState = {
   showCancel: Ref<boolean>;
   onCancel: Ref<(() => void) | null>;
   idleTimeoutMode: Ref<KioskIdleTimeoutMode>;
+  purchaseCompleteSecondsRemaining: Ref<number>;
 };
 
 const kioskShellKey: InjectionKey<KioskShellState> = Symbol("kiosk-shell");
@@ -17,7 +18,8 @@ export function provideKioskShell(): KioskShellState {
     loading: ref(false),
     showCancel: ref(false),
     onCancel: ref(null),
-    idleTimeoutMode: ref("idle")
+    idleTimeoutMode: ref("idle"),
+    purchaseCompleteSecondsRemaining: ref(0)
   };
 
   provide(kioskShellKey, state);
@@ -49,5 +51,11 @@ export function useKioskShellState(
     shell.showCancel.value = false;
     shell.onCancel.value = null;
     shell.idleTimeoutMode.value = "idle";
+    shell.purchaseCompleteSecondsRemaining.value = 0;
   });
+}
+
+export function useKioskPurchaseCompleteCountdown(): Ref<number> {
+  const shell = inject(kioskShellKey);
+  return shell?.purchaseCompleteSecondsRemaining ?? ref(0);
 }

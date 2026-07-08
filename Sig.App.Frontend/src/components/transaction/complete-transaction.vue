@@ -90,19 +90,19 @@
     :size="props.isKiosk ? 'lg' : undefined"
     :label="t('create-new-transaction-btn')"
     @click="onFinish" />
-  <p v-if="props.isKiosk && returnSecondsRemaining > 0" class="text-p1 text-grey-600 mt-3 mb-0 text-center">
-    {{ t("returning-to-menu", { seconds: returnSecondsRemaining }) }}
+  <p v-if="props.isKiosk && purchaseCompleteSecondsRemaining > 0" class="text-p1 text-grey-600 mt-3 mb-0 text-center">
+    {{ t("returning-to-menu", { seconds: purchaseCompleteSecondsRemaining }) }}
   </p>
 </template>
 
 <script setup>
 import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
-import { computed, defineProps, defineEmits, onMounted, onUnmounted, ref } from "vue";
+import { computed, defineProps, defineEmits } from "vue";
 import { useQuery, useResult } from "@vue/apollo-composable";
 
 import { TRANSACTION_FINISH, PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
-import { KIOSK_PURCHASE_COMPLETE_TIMEOUT_MS } from "@/lib/consts/kiosk-timeout";
+import { useKioskPurchaseCompleteCountdown } from "@/lib/composables/use-kiosk-shell";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { getColorBgClass, getGiftCardBgClass, getKioskProductGroupCardClasses } from "@/lib/helpers/products-color";
@@ -121,25 +121,7 @@ const props = defineProps({
 
 const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState", "finished"]);
 
-const returnSecondsRemaining = ref(0);
-let returnCountdownInterval = null;
-
-onMounted(() => {
-  if (!props.isKiosk) {
-    return;
-  }
-  returnSecondsRemaining.value = Math.ceil(KIOSK_PURCHASE_COMPLETE_TIMEOUT_MS / 1000);
-  returnCountdownInterval = setInterval(() => {
-    returnSecondsRemaining.value = Math.max(0, returnSecondsRemaining.value - 1);
-  }, 1000);
-});
-
-onUnmounted(() => {
-  if (returnCountdownInterval !== null) {
-    clearInterval(returnCountdownInterval);
-    returnCountdownInterval = null;
-  }
-});
+const purchaseCompleteSecondsRemaining = useKioskPurchaseCompleteCountdown();
 
 function onFinish() {
   if (props.isKiosk) {

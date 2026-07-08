@@ -100,7 +100,7 @@ const {
   kioskRoute
 } = useKioskToken();
 
-const { loading: shellLoading, showCancel, onCancel, idleTimeoutMode } = provideKioskShell();
+const { loading: shellLoading, showCancel, onCancel, idleTimeoutMode, purchaseCompleteSecondsRemaining } = provideKioskShell();
 
 const showAuthGate = computed(() => !kioskLoading.value && tokenFound.value && isValid.value && !isAuthenticated.value);
 
@@ -128,7 +128,8 @@ function returnToKioskHome() {
 const { showIdlePrompt, warningSecondsRemaining, dismissIdlePrompt } = useKioskIdleTimeout({
   mode: effectiveIdleTimeoutMode,
   paused: idleTimeoutPaused,
-  onReturnHome: returnToKioskHome
+  onReturnHome: returnToKioskHome,
+  purchaseCompleteSecondsRemaining
 });
 
 function handleCancel() {
