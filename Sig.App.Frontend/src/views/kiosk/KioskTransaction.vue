@@ -25,19 +25,22 @@
     @auth-error="handleKioskAuthError" />
   <div
     v-else-if="activeStep === KIOSK_STEP_ADD"
-    class="flex flex-1 flex-col min-h-0 px-4 sm:px-8 py-6 w-full max-w-2xl md:max-w-4xl lg:max-w-5xl mx-auto">
-    <div v-if="!isConfirmStep" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
-      <h1 class="font-semibold text-h2 sm:text-h1 text-primary-900 shrink-0">
+    class="flex flex-col justify-center min-h-[var(--kiosk-content-min-height)] px-6 xs:px-8 sm:px-12 py-12 w-full max-w-5xl mx-auto">
+    <div v-if="!isConfirmStep" class="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-y-4 gap-x-8 mb-6 sm:mb-8">
+      <h1 class="font-bold text-d2 text-primary-700 shrink-0 my-0 flex flex-wrap items-baseline gap-4 leading-none">
         {{ t("purchase-title") }}
         <template v-if="cardProgramCardId !== ''">
-          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-          <span class="font-normal text-h2 sm:text-h1 text-grey-500"> | {{ t("card-number", { cardProgramCardId }) }}</span>
+          <span class="text-d7 text-grey-500 font-normal relative -top-1">
+            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+            <span class="mr-1">|</span> 
+            {{ t("card-number", { cardProgramCardId }) }}
+          </span>
         </template>
       </h1>
       <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
-      <p class="text-h4 sm:text-h3 text-primary-900 sm:text-right sm:max-w-lg leading-snug" v-html="t('instruction')" />
+      <p class="text-d6 text-primary-700 xs:text-right xs:max-w-md leading-snug mb-0" v-html="t('instruction')" />
     </div>
-    <div class="bg-white rounded-2xl shadow-sm p-4 xs:p-6 flex flex-col flex-1 min-h-0">
+    <div class="bg-white rounded-4xl shadow-lg">
       <KioskAddTransaction
         :card-id="cardId"
         :kiosk-token="authToken"
@@ -51,8 +54,8 @@
   </div>
   <div
     v-else-if="activeStep === KIOSK_STEP_COMPLETE"
-    class="flex flex-1 flex-col items-center justify-center px-4 sm:px-8 pt-12 sm:pt-16 pb-8 w-full">
-    <div class="bg-white rounded-2xl shadow-sm px-4 xs:px-6 pt-12 sm:pt-14 pb-4 xs:pb-6 w-full max-w-2xl md:max-w-4xl lg:max-w-5xl relative">
+    class="flex flex-1 flex-col items-center justify-center px-6 xs:px-8 sm:px-12 py-16 w-full">
+    <div class="bg-white rounded-4xl shadow-lg p-8 pt-0 xs:p-12 xs:pt-0 w-full max-w-2xl relative">
       <UiIconComplete />
       <CompleteTransaction :transaction-id="transactionId" is-kiosk @finished="goHome" />
     </div>

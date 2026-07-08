@@ -75,10 +75,11 @@
                     :class="getIsGiftCard(productGroups[idx].productGroup.name) ? 'pt-6 border-t border-grey-100' : ''">
                     <div
                       class="p-4 pt-2.5 rounded-lg"
-                      :class="[
-                        getColorBgClass(productGroups[idx].productGroup.color),
-                        getIsGiftCard(productGroups[idx].productGroup.name) ? 'bg-diagonal-pattern' : 'dark'
-                      ]">
+                      :class="
+                        getIsGiftCard(productGroups[idx].productGroup.name)
+                          ? getGiftCardBgClass()
+                          : [getColorBgClass(productGroups[idx].productGroup.color), 'dark']
+                      ">
                       <Field
                         :id="`productGroups[${idx}].transactionProductGroupId`"
                         v-slot="{ field: inputField, errors: fieldErrors }"
@@ -147,7 +148,7 @@ import { useGraphQLErrorMessages } from "@/lib/helpers/error-handler";
 import { formatDate, textualFormat } from "@/lib/helpers/date";
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { usePageTitle } from "@/lib/helpers/page-title";
-import { getColorBgClass } from "@/lib/helpers/products-color";
+import { getColorBgClass, getGiftCardBgClass } from "@/lib/helpers/products-color";
 
 import CompleteRefundTransaction from "@/views/transaction/CompleteRefund";
 

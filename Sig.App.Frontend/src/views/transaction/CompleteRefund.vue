@@ -41,10 +41,11 @@
           :class="getIsGiftCard(item.productGroup.name) ? 'mt-6 pt-4 border-t border-grey-100' : 'dark'">
           <div
             class="relative flex items-center w-full rounded-md py-1 px-2 text-primary-900 dark:text-white"
-            :class="[
-              getColorBgClass(item.productGroup.color),
-              getIsGiftCard(item.productGroup.name) ? 'bg-diagonal-pattern' : ''
-            ]">
+            :class="
+              getIsGiftCard(item.productGroup.name)
+                ? getGiftCardBgClass()
+                : getColorBgClass(item.productGroup.color)
+            ">
             <div class="absolute -translate-y-1/2 top-1/2 left-2 max-w-20 xs:max-w-24 truncate font-bold">
               {{ getProductGroupName(item) }}
             </div>
@@ -82,7 +83,7 @@ import { URL_TRANSACTION_LIST, URL_TRANSACTION_ADMIN } from "@/lib/consts/urls";
 import { useAuthStore } from "@/lib/store/auth";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
-import { getColorBgClass } from "@/lib/helpers/products-color";
+import { getColorBgClass, getGiftCardBgClass } from "@/lib/helpers/products-color";
 import { usePageTitle } from "@/lib/helpers/page-title";
 
 const { t } = useI18n();

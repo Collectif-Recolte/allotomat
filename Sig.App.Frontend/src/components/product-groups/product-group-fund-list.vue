@@ -22,7 +22,7 @@
             :class="{ 'mt-0.5': displayExpirationDate }"
             class="max-w-full"
             :label="getProductGroupName(product.label)"
-            :bg-color-class="`${getColorBgClass(product.color)} ${getIsGiftCard(product.label) ? 'bg-diagonal-pattnern' : ''}`"
+            :bg-color-class="getIsGiftCard(product.label) ? getGiftCardBgClass() : getColorBgClass(product.color)"
             :is-dark-theme="!getIsGiftCard(product.label)"
             is-squared />
           <div class="text-right">
@@ -47,7 +47,7 @@
 <script setup>
 import { useI18n } from "vue-i18n";
 import { defineProps } from "vue";
-import { getColorBgClass } from "@/lib/helpers/products-color";
+import { getColorBgClass, getGiftCardBgClass } from "@/lib/helpers/products-color";
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { formatDate, dateUtc, textualFormat } from "@/lib/helpers/date";
 

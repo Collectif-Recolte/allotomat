@@ -1,14 +1,14 @@
 <template>
   <PfButtonAction
     v-if="locale !== $consts.langs.LANG_FR"
-    class="!border !border-white !text-white !bg-transparent hover:!bg-white/10"
+    class="rounded-full"
     btn-style="outline"
     size="lg"
     label="Français"
     @click="setLocale($consts.langs.LANG_FR)" />
   <PfButtonAction
     v-else
-    class="!border !border-white !text-white !bg-transparent hover:!bg-white/10"
+    class="rounded-full"
     btn-style="outline"
     size="lg"
     label="English"

@@ -16,21 +16,21 @@
 </i18n>
 
 <template>
-  <div class="flex flex-col items-center justify-center flex-1 px-4 sm:px-8 py-10 sm:py-16 w-full max-w-5xl mx-auto">
-    <h1 class="text-h1 sm:text-d3 font-semibold text-primary-900 text-center mb-4">{{ t("welcome") }}</h1>
+  <div class="flex flex-col items-center justify-center min-h-[var(--kiosk-content-min-height)] px-8 py-12 sm:px-12 w-full max-w-5xl mx-auto">
+    <h1 class="text-h1 sm:text-d1 font-bold text-primary-700 text-center mb-4 mt-0">{{ t("welcome") }}</h1>
     <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
-    <p class="text-h4 sm:text-h3 text-primary-900 text-center mb-10 sm:mb-14 max-w-2xl" v-html="t('subtitle')" />
+    <p class="text-h4 sm:text-h3 text-primary-700 text-center mb-8 sm:mb-12 max-w-sm" v-html="t('subtitle')" />
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full max-w-3xl">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full max-w-lg">
       <KioskActionTile
         variant="purchase"
         :label="t('make-purchase')"
-        :icon="ICON_SHOPPING_CART"
+        :icon="ICON_KIOSK_SHOPPING_CART"
         @click="router.push(kioskRoute(URL_KIOSK_TRANSACTION))" />
       <KioskActionTile
         variant="balance"
         :label="t('check-balance')"
-        :icon="ICON_CREDIT_CARD"
+        :icon="ICON_PURCHASE_WALLET"
         @click="router.push(kioskRoute(URL_KIOSK_CHECK))" />
     </div>
   </div>
@@ -45,8 +45,8 @@ import { usePageTitle } from "@/lib/helpers/page-title";
 import { useKioskToken } from "@/lib/composables/use-kiosk-token";
 import { URL_KIOSK_TRANSACTION, URL_KIOSK_CHECK } from "@/lib/consts/urls";
 
-import ICON_CREDIT_CARD from "@/lib/icons/credit-card.json";
-import ICON_SHOPPING_CART from "@/lib/icons/shopping-cart.json";
+import ICON_KIOSK_SHOPPING_CART from "@/lib/icons/kiosk-shopping-cart.json";
+import ICON_PURCHASE_WALLET from "@/lib/icons/purchase-wallet.json";
 
 const { t } = useI18n();
 const router = useRouter();

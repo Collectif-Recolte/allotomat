@@ -19,19 +19,20 @@
 
 <template>
   <div class="kiosk-mode min-h-[100dvh] flex flex-col bg-primary-100">
-    <header class="sticky top-0 z-30 bg-primary-700 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 shrink-0">
-      <div class="flex items-center gap-3 min-w-0">
-        <img class="h-8 shrink-0" :src="require('@/assets/logo/logo-white.svg')" :alt="t('logo')" />
-        <span class="hidden sm:block w-px h-6 bg-white/30 shrink-0" aria-hidden="true" />
-        <div class="hidden sm:flex items-center gap-2 text-white min-w-0">
-          <PfIcon :icon="ICON_QRCODE" size="sm" class="shrink-0" aria-hidden="true" />
-          <span class="text-p2 font-medium truncate">{{ t("kiosk-mode-label") }}</span>
+    <header class="dark sticky top-0 z-30 bg-primary-900 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 shrink-0">
+      <div class="flex items-center gap-5 min-w-0">
+        <img class="h-10 shrink-0" :src="require('@/assets/logo/logo-white.svg')" :alt="t('logo')" />
+        <span class="hidden sm:block w-px h-8 bg-white/30 shrink-0" aria-hidden="true" />
+        <div class="hidden sm:flex items-center gap-1 text-white min-w-0">
+          <PfIcon :icon="ICON_QRCODE" size="lg" class="shrink-0" aria-hidden="true" />
+          <span class="text-h4 font-medium truncate">{{ t("kiosk-mode-label") }}</span>
         </div>
       </div>
       <div class="flex items-center gap-3 shrink-0">
         <PfButtonAction
           v-if="showCancel"
           btn-style="secondary"
+          class="rounded-full"
           size="lg"
           has-icon-left
           :icon="ICON_LOGOUT"
@@ -41,7 +42,7 @@
       </div>
     </header>
     <main class="flex-1 flex flex-col min-h-0">
-      <Loading :loading="kioskLoading || shellLoading" is-full-height>
+      <Loading :loading="kioskLoading || shellLoading" is-full-page>
         <KioskAuthGate v-if="showAuthGate" :login="login" :login-loading="loginLoading" :auth-error="authError" />
         <p
           v-else-if="!kioskLoading && tokenFound && marketIsDisabled"
@@ -109,3 +110,11 @@ function handleInvalidSession() {
 
 useKioskSessionValidation(authToken, handleInvalidSession);
 </script>
+
+<style>
+.kiosk-mode {
+  /* Header: py-3 (1.5rem) + lg button min-h-12 (3rem) */
+  --kiosk-top-bar-height: 4.5rem;
+  --kiosk-content-min-height: calc(100dvh - var(--kiosk-top-bar-height) * 2);
+}
+</style>

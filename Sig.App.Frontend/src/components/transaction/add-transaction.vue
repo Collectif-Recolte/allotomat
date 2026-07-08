@@ -142,10 +142,11 @@
               :class="getIsGiftCard(funds[idx].fund.productGroup.name) ? 'pt-6 border-t border-grey-100' : ''">
               <div
                 class="p-4 pt-2.5 rounded-lg"
-                :class="[
-                  getColorBgClass(funds[idx].fund.productGroup.color),
-                  getIsGiftCard(funds[idx].fund.productGroup.name) ? 'bg-diagonal-pattern' : 'dark'
-                ]">
+                :class="
+                  getIsGiftCard(funds[idx].fund.productGroup.name)
+                    ? getGiftCardBgClass()
+                    : [getColorBgClass(funds[idx].fund.productGroup.color), 'dark']
+                ">
                 <Field
                   :id="`funds[${idx}].amount`"
                   v-slot="{ field: inputField, errors: fieldErrors }"
@@ -194,10 +195,11 @@
                 :class="getIsGiftCard(item.fund.productGroup.name) ? 'mt-6 pt-4 border-t border-grey-100' : 'dark'">
                 <div
                   class="flex items-center w-full rounded-md py-1 px-2 text-primary-900 dark:text-white"
-                  :class="[
-                    getColorBgClass(item.fund.productGroup.color),
-                    getIsGiftCard(item.fund.productGroup.name) ? 'bg-diagonal-pattern' : ''
-                  ]">
+                  :class="
+                    getIsGiftCard(item.fund.productGroup.name)
+                      ? getGiftCardBgClass()
+                      : getColorBgClass(item.fund.productGroup.color)
+                  ">
                   <span class="w-1/2 font-bold text-lg">
                     {{ fundLabel(item.fund, "confirmation-amount-label") }}
                   </span>
@@ -246,7 +248,7 @@ import {
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { usePageTitle } from "@/lib/helpers/page-title";
-import { getColorBgClass } from "@/lib/helpers/products-color";
+import { getColorBgClass, getGiftCardBgClass } from "@/lib/helpers/products-color";
 import { formatDate, dateUtc, regularFormat, textualFormat } from "@/lib/helpers/date";
 
 import { useAuthStore } from "@/lib/store/auth";

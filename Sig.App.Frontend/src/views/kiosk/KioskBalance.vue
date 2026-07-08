@@ -26,14 +26,13 @@
 </i18n>
 
 <template>
-  <div class="flex flex-1 flex-col items-center justify-center px-4 sm:px-8 pt-4 pb-8 w-full">
-    <div
-      class="bg-white rounded-2xl shadow-sm w-full max-w-2xl md:max-w-4xl lg:max-w-5xl px-6 sm:px-10 pt-3 sm:pt-4 pb-8 sm:pb-10 flex flex-col max-h-[calc(100dvh-8rem)] min-h-0">
-      <h1 class="font-semibold text-h2 sm:text-h1 text-primary-900 text-left my-2">{{ t("title") }}</h1>
-      <p v-if="card" class="text-left mb-4">
-        <span class="text-h4 sm:text-h3 text-grey-700">{{ t("program-label", { programName }) }}</span>
+  <div class="flex flex-col items-center justify-center min-h-[var(--kiosk-content-min-height)] px-6 xs:px-8 sm:px-12 py-12 w-full">
+    <div class="bg-white rounded-4xl shadow-lg w-full max-w-2xl p-8 sm:p-10">
+      <h1 class="font-bold text-d2 text-primary-700 my-0">{{ t("title") }}</h1>
+      <p v-if="card" class="mt-2 text-grey-600 text-d6">
+        <span>{{ t("program-label", { programName }) }}</span>
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <span class="text-h4 sm:text-h3 text-grey-500 font-normal"> | {{ t("card-number", { cardProgramCardId: cardIdDisplay }) }}</span>
+        <span> | {{ t("card-number", { cardProgramCardId: cardIdDisplay }) }}</span>
       </p>
       <p v-if="card && card.isDisabled" class="text-red-500 font-bold text-center mb-4">{{ t("card-is-disabled") }}</p>
 
@@ -41,22 +40,19 @@
         {{ getMoneyFormat(fund) }}
       </p>
 
-      <ul v-if="card && productGroups.length > 0" class="flex-1 min-h-0 overflow-y-auto mb-8 sm:mb-10 border-t border-grey-200">
+      <ul v-if="card && productGroups.length > 0" class="flex-1 my-8 border-t border-grey-200">
         <li
           v-for="(product, index) in productGroups"
           :key="index"
-          class="flex items-start justify-between gap-4 py-4 border-b border-grey-200 last:border-b-0">
-          <PfTag
-            class="max-w-[55%] shrink-0 [&_.block]:!text-p2 sm:[&_.block]:!text-p1 [&_.block]:!font-bold !px-3 !py-1.5"
-            :label="getProductGroupLabel(product.label)"
-            :bg-color-class="`${getColorBgClass(product.color)} ${getIsGiftCard(product.label) ? 'bg-diagonal-pattern' : ''}`"
-            :is-dark-theme="!getIsGiftCard(product.label)"
-            is-squared />
+          class="flex items-center justify-between gap-4 py-3 border-b border-grey-200 last:border-b-0">
+          <div class="text-d7 font-bold px-3 py-1 rounded-lg" :class="getKioskCategoryClasses(product)">
+            {{ getProductGroupLabel(product.label) }}
+          </div>
           <div class="text-right shrink-0">
             <div class="font-bold text-h3 sm:text-h2 text-primary-900 leading-none whitespace-nowrap">
               {{ getMoneyFormat(product.fund) }}
             </div>
-            <div class="text-p3 text-grey-600 leading-snug">
+            <div class="text-p2 text-grey-600 leading-snug">
               <template v-if="product.expirationDate">
                 {{ t("expiration-date", { date: formatDate(dateUtc(product.expirationDate), textualFormat) }) }}
               </template>
@@ -68,9 +64,9 @@
         </li>
       </ul>
 
-      <div class="flex flex-col sm:flex-row gap-4 mt-auto pt-4 border-t border-grey-200">
+      <div class="flex flex-col xs:flex-row xs:justify-between gap-4 mt-auto">
         <PfButtonAction
-          class="sm:flex-1"
+          class="min-h-20 rounded-2xl text-d6"
           size="lg"
           btn-style="secondary"
           has-icon-left
@@ -78,7 +74,7 @@
           :label="t('back-to-menu')"
           @click="emit('finished')" />
         <PfButtonAction
-          class="sm:flex-1"
+          class="min-h-20 rounded-2xl text-d6"
           size="lg"
           btn-style="primary"
           has-icon-left
@@ -100,7 +96,7 @@ import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
 import { KIOSK_ACCESS_INVALID } from "@/lib/consts/qr-code-error";
 import { formatDate, dateUtc, textualFormat } from "@/lib/helpers/date";
 import { getMoneyFormat } from "@/lib/helpers/money";
-import { getColorBgClass } from "@/lib/helpers/products-color";
+import { getKioskProductGroupCardClasses } from "@/lib/helpers/products-color";
 
 import ICON_HOME from "@/lib/icons/home.json";
 import ICON_SHOPPING_CART from "@/lib/icons/shopping-cart.json";
@@ -223,5 +219,10 @@ function getProductGroupLabel(label) {
 
 function getIsGiftCard(productGroupName) {
   return productGroupName === PRODUCT_GROUP_LOYALTY;
+}
+
+function getKioskCategoryClasses(product) {
+  const styles = getKioskProductGroupCardClasses(product.color, getIsGiftCard(product.label), true);
+  return [styles.border, styles.bg, styles.text];
 }
 </script>

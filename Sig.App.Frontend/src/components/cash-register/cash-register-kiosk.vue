@@ -62,9 +62,11 @@
         class="text-p2 text-primary-700 font-medium break-all hover:underline focus:underline">
         {{ kioskLink }}
       </a>
-      <div v-if="kioskPassword" class="flex flex-wrap items-center gap-2">
-        <span class="text-p3 font-semibold text-primary-900">{{ t("password-label") }}:</span>
-        <span class="text-p2 font-mono tracking-widest">{{ showPassword ? kioskPassword : "••••••••" }}</span>
+      <div v-if="kioskPassword" class="flex flex-wrap items-center gap-6">
+        <span class="flex gap-2">
+          <span class="text-p3 font-semibold text-primary-900">{{ t("password-label") }}:</span>
+          <span class="text-p2 font-mono tracking-widest">{{ showPassword ? kioskPassword : "••••••••" }}</span>
+        </span>
         <PfButtonAction
           btn-style="link"
           size="sm"

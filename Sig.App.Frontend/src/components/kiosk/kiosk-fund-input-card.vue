@@ -1,24 +1,23 @@
 <template>
   <div
-    class="rounded-xl border-2 p-4 flex flex-row items-center gap-4 min-h-[100px] cursor-text"
-    :class="[cardStyles.border, cardStyles.bg]"
-    @click="focusInput">
-    <div class="w-[42%] shrink-0 min-w-0 flex flex-col gap-0.5">
-      <p class="font-bold truncate text-p1 sm:text-h4 mb-0" :class="cardStyles.text" :title="productGroupLabel">
+    class="rounded-2xl border-2 p-5 flex flex-row items-center gap-6 min-h-[104px]"
+    :class="[cardStyles.border, cardStyles.bg]">
+    <div class="flex-1 min-w-0">
+      <p class="font-bold truncate text-d6 mb-1" :class="cardStyles.text" :title="productGroupLabel">
         {{ productGroupLabel }}
       </p>
-      <p class="text-p2 sm:text-p1 text-grey-700 mt-0 leading-tight">
+      <p class="text-d7 text-primary-700 mb-0 leading-tight">
         {{ t("balance-label", { amount: getMoneyFormat(props.fund.amount) }) }}
       </p>
     </div>
-    <div ref="slotContainer" class="flex-1 min-w-0">
+    <div class="flex-1 min-w-0">
       <slot />
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, defineProps, ref } from "vue";
+import { computed, defineProps } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
@@ -40,12 +39,6 @@ const productGroupLabel = computed(() => {
 });
 
 const cardStyles = computed(() => getKioskProductGroupCardClasses(props.fund.productGroup.color, props.isGiftCard));
-
-const slotContainer = ref(null);
-
-function focusInput() {
-  slotContainer.value?.querySelector("input")?.focus();
-}
 </script>
 
 <i18n>

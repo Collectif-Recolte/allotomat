@@ -12,8 +12,8 @@
 <template>
   <div
     v-if="activeStep === CHECK_CARD_STEPS_SCAN"
-    class="flex flex-1 flex-col items-center justify-center min-h-0 p-4 sm:p-8 w-full">
-    <h1 class="font-semibold text-h2 sm:text-h1 text-primary-900 mb-6 text-center">{{ t("title") }}</h1>
+    class="flex flex-col items-center justify-center min-h-[var(--kiosk-content-min-height)] px-8 sm:px-12 py-12 w-full">
+    <h1 class="font-bold text-d2 text-primary-700 mb-6 mt-0 text-center">{{ t("title") }}</h1>
     <QRCodeScanner
       kiosk-mode
       :error-url-const="URL_KIOSK_TRANSACTION_ERROR"

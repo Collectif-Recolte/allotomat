@@ -16,33 +16,31 @@
 </i18n>
 
 <template>
-  <div :class="props.kioskMode ? 'w-full max-w-2xl mx-auto mb-6' : 'w-sm max-w-full mb-9 relative'">
+  <div :class="props.kioskMode ? 'w-full max-w-lg mx-auto mb-6' : 'w-sm max-w-full mb-9 relative'">
     <div
       class="relative overflow-hidden rounded-2xl shadow-2xl"
-      :class="props.kioskMode ? 'w-full aspect-[4/3] max-h-[50vh]' : 'w-sm max-w-full'">
+      :class="props.kioskMode ? 'w-full aspect-[16/10] max-w-md mx-auto' : 'w-sm max-w-full'">
       <video ref="qrCodeVideo" class="w-full h-full object-cover"></video>
     </div>
-    <p v-if="props.kioskMode" class="text-center text-p2 sm:text-p1 text-primary-900 mt-6 mb-6 max-w-xl mx-auto">
+    <p v-if="props.kioskMode" class="text-center text-h3 text-primary-700 my-8">
       {{ t("scan-instruction") }}
     </p>
     <div
       v-if="props.kioskMode"
       class="flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center max-w-lg mx-auto">
       <PfButtonAction
-        class="sm:flex-1 bg-white"
         :label="t('flip-camera')"
         :icon="ICON_CAMERA_LENSE_SIDE"
         has-icon-left
-        btn-style="outline"
         size="lg"
+        btn-style="white"
         @click="changeCamera()" />
       <PfButtonAction
-        class="sm:flex-1 bg-white"
         :label="cancelLabel || t('cancel')"
         :icon="ICON_CLOSE"
         has-icon-left
-        btn-style="outline"
         size="lg"
+        btn-style="white"
         @click="$emit('cancel')" />
     </div>
     <div v-else class="text-center relative mt-6">

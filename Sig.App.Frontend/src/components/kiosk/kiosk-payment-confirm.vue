@@ -1,60 +1,59 @@
 <template>
-  <div class="flex flex-col h-full min-h-0">
+  <div class="flex flex-col h-full">
     <div
-      class="bg-secondary-100 text-tertiary-500 text-center font-semibold text-p2 sm:text-p1 py-3 px-4 rounded-t-2xl -mx-3 xs:-mx-6 -mt-6 xs:-mt-6 mb-6">
+      class="bg-yellow-100 text-yellow-800 text-center font-bold text-d6 py-4 px-8 rounded-t-4xl">
       {{ t("verify-before-confirm") }}
     </div>
 
-    <p v-if="cardProgramCardId !== ''" class="text-center mb-4">
-      <span class="font-semibold text-h3 text-primary-900">{{ t("purchase-title") }}</span>
-      <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-      <span class="font-normal text-h4 sm:text-h3 text-grey-500"> | {{ t("card-number", { cardProgramCardId }) }}</span>
-    </p>
+    <div class="px-8 xs:px-12 pt-5 pb-4">
+      <p v-if="cardProgramCardId !== ''" class="text-center mb-2">
+        <span class="font-bold text-h3 text-primary-700">{{ t("purchase-title") }}</span>
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+        <span class="font-normal text-h3 text-grey-500"> | {{ t("card-number", { cardProgramCardId }) }}</span>
+      </p>
 
-    <p class="text-center text-h3 sm:text-h2 font-bold text-primary-900 mb-6">
-      {{ t("amount-charged") }}
-      <span class="text-tertiary-500 text-h2 sm:text-h1">{{ totalAmount }}</span>
-    </p>
+      <p class="text-center text-d2 font-bold text-primary-900 mb-10">
+        {{ t("amount-charged") }}
+        <span class="text-tertiary-500">{{ totalAmount }}</span>
+      </p>
 
-    <ul class="flex-1 min-h-0 overflow-y-auto mb-6 space-y-3">
-      <li
-        v-for="item in fundsWithAmount"
-        :key="item.id"
-        class="flex items-center justify-between gap-4 py-1"
-        :class="getIsGiftCard(item.fund.productGroup.name) ? 'pt-4 mt-2 border-t border-grey-200' : ''">
-        <PfTag
-          class="max-w-[55%] shrink-0 [&_.block]:!text-p2 sm:[&_.block]:!text-p1 [&_.block]:!font-bold !px-3 !py-1.5"
-          :label="fundLabel(item.fund)"
-          :bg-color-class="`${getColorBgClass(item.fund.productGroup.color)} ${
-            getIsGiftCard(item.fund.productGroup.name) ? 'bg-diagonal-pattern' : ''
-          }`"
-          :is-dark-theme="!getIsGiftCard(item.fund.productGroup.name)"
-          is-squared />
-        <span class="font-bold text-h3 sm:text-h2 text-primary-900 shrink-0">
-          {{ getMoneyFormat(-Math.abs(item.amount)) }}
-        </span>
-      </li>
-    </ul>
+      <ul class="flex-1 min-h-0 overflow-y-auto mb-10 space-y-3">
+        <li
+          v-for="item in fundsWithAmount"
+          :key="item.id"
+          class="flex items-center justify-between gap-8 mb-4 last:mb-0 first:border-t first:border-grey-200 first:pt-4"
+          :class="getIsGiftCard(item.fund.productGroup.name) ? 'pt-4 border-t border-grey-200' : ''">
+          <div class="shrink-0 text-d7 font-bold px-4 py-2 rounded-lg" :class="getKioskCategoryClasses(item.fund)">
+            {{ fundLabel(item.fund) }}
+          </div>
+          <span class="font-bold text-h1 text-primary-900 shrink-0">
+            {{ getMoneyFormat(-Math.abs(item.amount)) }}
+          </span>
+        </li>
+      </ul>
 
-    <div class="flex flex-row justify-between items-start gap-4 mt-auto pt-4 border-t border-grey-200">
-      <PfButtonAction
-        size="lg"
-        btn-style="secondary"
-        has-icon-left
-        :icon="ICON_CLOSE"
-        :label="t('cancel')"
-        :processing="processing"
-        @click="emit('cancel')" />
-      <div class="flex flex-col items-center">
+      <div class="flex flex-col xs:flex-row justify-between items-stretch xs:items-start gap-4 mt-auto">
         <PfButtonAction
           size="lg"
-          btn-style="primary"
+          class="min-h-20 rounded-2xl text-d6 w-full xs:w-auto"
+          btn-style="secondary"
           has-icon-left
-          :icon="ICON_SHOPPING_CART"
-          :label="t('confirm-payment')"
+          :icon="ICON_CLOSE"
+          :label="t('cancel')"
           :processing="processing"
-          @click="emit('confirm')" />
-        <p class="text-p3 sm:text-p2 text-grey-600 mt-2 text-center">{{ t("irreversible-warning") }}</p>
+          @click="emit('cancel')" />
+        <div class="flex flex-col items-center">
+          <PfButtonAction
+            size="lg"
+            class="min-h-20 rounded-2xl text-d6 w-full xs:w-auto"
+            btn-style="primary"
+            has-icon-left
+            :icon="ICON_SHOPPING_CART"
+            :label="t('confirm-payment')"
+            :processing="processing"
+            @click="emit('confirm')" />
+          <p class="text-p1 text-grey-600 mt-3 mb-0 text-center">{{ t("irreversible-warning") }}</p>
+        </div>
       </div>
     </div>
   </div>
@@ -65,7 +64,7 @@ import { computed, defineEmits, defineProps } from "vue";
 import { useI18n } from "vue-i18n";
 
 import { PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
-import { getColorBgClass } from "@/lib/helpers/products-color";
+import { getKioskProductGroupCardClasses } from "@/lib/helpers/products-color";
 import { getMoneyFormat } from "@/lib/helpers/money";
 
 import ICON_CLOSE from "@/lib/icons/close.json";
@@ -98,6 +97,11 @@ function fundLabel(fund) {
 
 function getIsGiftCard(productGroupName) {
   return productGroupName === PRODUCT_GROUP_LOYALTY;
+}
+
+function getKioskCategoryClasses(item) {
+  const styles = getKioskProductGroupCardClasses(item.productGroup.color, getIsGiftCard(item.productGroup.name), true);
+  return [styles.border, styles.bg, styles.text];
 }
 </script>
 

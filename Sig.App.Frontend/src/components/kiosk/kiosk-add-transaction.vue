@@ -27,13 +27,13 @@
 </i18n>
 
 <template>
-  <div v-if="card" class="flex flex-col flex-1 min-h-0">
+  <div v-if="card" class="flex flex-col flex-1">
     <p v-if="card.isDisabled" class="text-red-500 font-bold mb-4">{{ t("card-is-disabled") }}</p>
 
     <Form
       v-if="funds && funds.length > 0"
-      v-slot="{ isSubmitting, errors: formErrors }"
-      class="flex flex-col flex-1 min-h-0"
+      v-slot="{ isSubmitting, errors: formErrors, values }"
+      class="flex flex-col"
       :initial-values="initialValues"
       :validation-schema="validationSchema"
       keep-values
@@ -48,42 +48,37 @@
         @confirm="onConfirmSubmit" />
 
       <template v-else>
-        <div class="flex-1 min-h-0 overflow-y-auto max-h-[50vh] sm:max-h-[55vh] mb-6">
+        <div class="p-8 xs:px-12 xs:pt-12">
           <FieldArray v-slot="{ fields }" key-path="id" name="funds">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div v-for="(field, idx) in fields" :key="field.key">
-                <KioskFundInputCard :fund="funds[idx].fund" :is-gift-card="getIsGiftCard(funds[idx].fund.productGroup.name)">
-                  <Field
-                    :id="`funds[${idx}].amount`"
-                    v-slot="{ field: inputField, errors: fieldErrors }"
-                    :name="`funds[${idx}].amount`">
-                    <div class="relative bg-white rounded-lg border border-grey-300 flex items-center px-4 py-3 min-h-[48px]">
-                      <input
-                        :id="`funds[${idx}].amount`"
-                        v-bind="inputField"
-                        type="text"
-                        inputmode="decimal"
-                        class="w-full text-right text-h3 sm:text-h2 font-bold text-primary-900 placeholder:text-grey-400 placeholder:font-normal border-0 p-0 pr-8 focus:ring-0 bg-transparent"
-                        placeholder="0"
-                        @input="onAmountInput(idx, $event)" />
-                      <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-                      <span
-                        class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-h3 sm:text-h2 font-bold text-grey-400"
-                        aria-hidden="true">
-                        $
-                      </span>
-                    </div>
-                    <p v-if="fieldErrors.length" class="text-red-600 text-p4 mt-1 text-right">{{ fieldErrors[0] }}</p>
-                  </Field>
-                </KioskFundInputCard>
+            <div class="flex flex-col gap-7">
+              <div v-if="getFundFields(fields, false).length" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div v-for="{ field, idx } in getFundFields(fields, false)" :key="field.key">
+                  <KioskFundAmountField
+                    :idx="idx"
+                    :fund="funds[idx].fund"
+                    :is-gift-card="false" />
+                </div>
+              </div>
+              <div
+                v-if="getFundFields(fields, true).length"
+                :class="getFundFields(fields, false).length ? 'pt-7 border-t border-grey-100' : ''">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div v-for="{ field, idx } in getFundFields(fields, true)" :key="field.key">
+                    <KioskFundAmountField
+                      :idx="idx"
+                      :fund="funds[idx].fund"
+                      :is-gift-card="true" />
+                  </div>
+                </div>
               </div>
             </div>
           </FieldArray>
         </div>
 
-        <div class="flex flex-row justify-between items-center gap-4 pt-4 mt-auto border-t border-grey-200">
+        <div class="flex flex-col xs:flex-row justify-between items-center gap-4 mt-auto p-8 xs:pb-12 xs:px-12 pt-0">
           <PfButtonAction
             size="lg"
+            class="min-h-20 rounded-2xl text-d6 w-full xs:w-auto"
             btn-style="kiosk-btn-cancel"
             has-icon-left
             :icon="ICON_CLOSE"
@@ -91,12 +86,13 @@
             @click="emit('onCloseModal')" />
           <PfButtonAction
             size="lg"
+            class="min-h-20 rounded-2xl text-d6 w-full xs:w-auto"
             btn-style="primary"
             has-icon-left
             :icon="ICON_SHOPPING_CART"
             type="submit"
             :label="t('check-and-pay')"
-            :is-disabled="isPayDisabled(formErrors) || card.isDisabled"
+            :is-disabled="isPayDisabled(formErrors, values) || card.isDisabled"
             :processing="isSubmitting" />
         </div>
       </template>
@@ -122,7 +118,7 @@ import { useQuery, useResult, useMutation } from "@vue/apollo-composable";
 import { number, object, lazy, array, string } from "yup";
 import { FieldArray } from "vee-validate";
 
-import KioskFundInputCard from "@/components/kiosk/kiosk-fund-input-card";
+import KioskFundAmountField from "@/components/kiosk/kiosk-fund-amount-field";
 import KioskPaymentConfirm from "@/components/kiosk/kiosk-payment-confirm";
 import { PRODUCT_GROUP_LOYALTY, TRANSACTION_STEPS_COMPLETE } from "@/lib/consts/enums";
 import { KIOSK_ACCESS_INVALID } from "@/lib/consts/qr-code-error";
@@ -261,10 +257,13 @@ function getIsGiftCard(productGroupName) {
   return productGroupName === PRODUCT_GROUP_LOYALTY;
 }
 
-function onAmountInput(idx, event) {
-  if (funds.value) {
-    funds.value[idx].amount = event.target.value;
-  }
+function getFundFields(fields, giftCardOnly) {
+  return fields
+    .map((field, idx) => ({ field, idx }))
+    .filter(({ idx }) => {
+      const isGiftCard = getIsGiftCard(funds.value[idx].fund.productGroup.name);
+      return giftCardOnly ? isGiftCard : !isGiftCard;
+    });
 }
 
 function getTotalTransactionAmount() {
@@ -277,10 +276,10 @@ function getTotalTransactionAmount() {
   return getMoneyFormat(total);
 }
 
-function isPayDisabled(formErrors) {
+function isPayDisabled(formErrors, values) {
   if (Object.keys(formErrors).length > 0) return true;
-  if (!funds.value) return true;
-  const total = funds.value.reduce((sum, item) => {
+  if (!values?.funds) return true;
+  const total = values.funds.reduce((sum, item) => {
     const amount = item.amount;
     if (amount === undefined || amount === null || amount === "") return sum;
     return sum + parseFloat(String(amount).replace(/,/, "."));
