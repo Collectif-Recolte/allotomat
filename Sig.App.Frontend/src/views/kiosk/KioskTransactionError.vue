@@ -62,6 +62,6 @@ const error = computed(() => {
 });
 
 function goHome() {
-  router.push(kioskRoute(URL_KIOSK_HOME));
+  router.replace(kioskRoute(URL_KIOSK_HOME));
 }
 </script>
