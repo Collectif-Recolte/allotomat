@@ -6,7 +6,8 @@
       "payment-description": "Payment",
       "title": "Transaction completed",
       "gift-card": "Gift card",
-      "card-id": "card #"
+      "card-id": "card #",
+      "returning-to-menu": "Returning to the main menu in {seconds} s"
     },
     "fr": {
       "card-description": "Solde",
@@ -14,13 +15,16 @@
       "payment-description": "Paiement",
       "title": "Transaction complétée",
       "gift-card": "Carte-cadeau",
-      "card-id": "# de carte"
+      "card-id": "# de carte",
+      "returning-to-menu": "Retour au menu principal dans {seconds} s"
     }
   }
   </i18n>
 
 <template>
-  <h1 class="text-center" :class="props.isKiosk ? 'text-d2 font-bold text-primary-700' : 'mt-4 font-semibold'">{{ t("title") }}</h1>
+  <h1 class="text-center" :class="props.isKiosk ? 'text-d2 font-bold text-primary-700' : 'mt-4 font-semibold'">
+    {{ t("title") }}
+  </h1>
   <div v-if="transaction" class="flex mx-2 gap-x-2">
     <p class="w-1/3 leading-tight text-center">
       <span class="inline-block max-w-32 uppercase text-p3 font-bold leading-none">{{ t("card-id") }}</span>
@@ -64,11 +68,7 @@
       <div
         v-else
         class="relative flex items-center w-full rounded-md py-1 px-2 text-primary-900 dark:text-white"
-        :class="
-          getIsGiftCard(item.productGroup.name)
-            ? getGiftCardBgClass()
-            : getColorBgClass(item.productGroup.color)
-        ">
+        :class="getIsGiftCard(item.productGroup.name) ? getGiftCardBgClass() : getColorBgClass(item.productGroup.color)">
         <div class="absolute -translate-y-1/2 top-1/2 left-2 max-w-20 xs:max-w-24 truncate font-bold">
           {{ getProductGroupName(item) }}
         </div>
@@ -90,15 +90,19 @@
     :size="props.isKiosk ? 'lg' : undefined"
     :label="t('create-new-transaction-btn')"
     @click="onFinish" />
+  <p v-if="props.isKiosk && returnSecondsRemaining > 0" class="text-p1 text-grey-600 mt-3 mb-0 text-center">
+    {{ t("returning-to-menu", { seconds: returnSecondsRemaining }) }}
+  </p>
 </template>
 
 <script setup>
 import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
-import { computed, defineProps, defineEmits } from "vue";
+import { computed, defineProps, defineEmits, onMounted, onUnmounted, ref } from "vue";
 import { useQuery, useResult } from "@vue/apollo-composable";
 
 import { TRANSACTION_FINISH, PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
+import { KIOSK_PURCHASE_COMPLETE_TIMEOUT_MS } from "@/lib/consts/kiosk-timeout";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { getColorBgClass, getGiftCardBgClass, getKioskProductGroupCardClasses } from "@/lib/helpers/products-color";
@@ -116,6 +120,26 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState", "finished"]);
+
+const returnSecondsRemaining = ref(0);
+let returnCountdownInterval = null;
+
+onMounted(() => {
+  if (!props.isKiosk) {
+    return;
+  }
+  returnSecondsRemaining.value = Math.ceil(KIOSK_PURCHASE_COMPLETE_TIMEOUT_MS / 1000);
+  returnCountdownInterval = setInterval(() => {
+    returnSecondsRemaining.value = Math.max(0, returnSecondsRemaining.value - 1);
+  }, 1000);
+});
+
+onUnmounted(() => {
+  if (returnCountdownInterval !== null) {
+    clearInterval(returnCountdownInterval);
+    returnCountdownInterval = null;
+  }
+});
 
 function onFinish() {
   if (props.isKiosk) {

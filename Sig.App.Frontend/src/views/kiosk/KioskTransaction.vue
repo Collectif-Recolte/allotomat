@@ -32,7 +32,7 @@
         <template v-if="cardProgramCardId !== ''">
           <span class="text-d7 text-grey-500 font-normal relative -top-1">
             <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-            <span class="mr-1">|</span> 
+            <span class="mr-1">|</span>
             {{ t("card-number", { cardProgramCardId }) }}
           </span>
         </template>
@@ -117,6 +117,7 @@ function goHome() {
 useKioskShellState({
   loading: () => loading.value,
   showCancel: () => activeStep.value !== KIOSK_STEP_COMPLETE,
-  onCancel: goHome
+  onCancel: goHome,
+  idleTimeoutMode: () => (activeStep.value === KIOSK_STEP_COMPLETE ? "purchase-complete" : "idle")
 });
 </script>

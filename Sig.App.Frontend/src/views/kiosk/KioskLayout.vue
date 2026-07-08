@@ -41,6 +41,7 @@
         <KioskLangSwitch />
       </div>
     </header>
+    <KioskIdlePrompt v-if="showIdlePrompt" :warning-seconds-remaining="warningSecondsRemaining" @dismiss="dismissIdlePrompt" />
     <main class="flex-1 flex flex-col min-h-0">
       <Loading :loading="kioskLoading || shellLoading" is-full-page>
         <KioskAuthGate v-if="showAuthGate" :login="login" :login-loading="loginLoading" :auth-error="authError" />
@@ -70,9 +71,12 @@ import KioskAuthGate from "@/components/app/kiosk-auth-gate";
 import KioskLangSwitch from "@/components/app/kiosk-lang-switch";
 import { clearKioskSession, useKioskSession } from "@/lib/composables/use-kiosk-session";
 import { useKioskSessionValidation } from "@/lib/composables/use-kiosk-session-validation";
+import { useKioskIdleTimeout } from "@/lib/composables/use-kiosk-idle-timeout";
 import { provideKioskShell } from "@/lib/composables/use-kiosk-shell";
 import { useKioskToken } from "@/lib/composables/use-kiosk-token";
 import { URL_KIOSK_HOME } from "@/lib/consts/urls";
+
+import KioskIdlePrompt from "@/components/kiosk/kiosk-idle-prompt";
 
 import ICON_LOGOUT from "@/lib/icons/logout.json";
 import ICON_QRCODE from "@/lib/icons/qrcode.json";
@@ -92,12 +96,40 @@ const {
   isAuthenticated,
   login,
   loginLoading,
-  authError
+  authError,
+  kioskRoute
 } = useKioskToken();
 
-const { loading: shellLoading, showCancel, onCancel } = provideKioskShell();
+const { loading: shellLoading, showCancel, onCancel, idleTimeoutMode } = provideKioskShell();
 
 const showAuthGate = computed(() => !kioskLoading.value && tokenFound.value && isValid.value && !isAuthenticated.value);
+
+const idleTimeoutPaused = computed(
+  () =>
+    kioskLoading.value ||
+    shellLoading.value ||
+    showAuthGate.value ||
+    route.name === URL_KIOSK_HOME ||
+    (!kioskLoading.value && tokenFound.value && marketIsDisabled.value) ||
+    (!kioskLoading.value && (!tokenFound.value || !isValid.value))
+);
+
+const effectiveIdleTimeoutMode = computed(() => {
+  if (idleTimeoutPaused.value) {
+    return "disabled";
+  }
+  return idleTimeoutMode.value;
+});
+
+function returnToKioskHome() {
+  router.replace(kioskRoute(URL_KIOSK_HOME));
+}
+
+const { showIdlePrompt, warningSecondsRemaining, dismissIdlePrompt } = useKioskIdleTimeout({
+  mode: effectiveIdleTimeoutMode,
+  paused: idleTimeoutPaused,
+  onReturnHome: returnToKioskHome
+});
 
 function handleCancel() {
   onCancel.value?.();
