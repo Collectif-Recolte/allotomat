@@ -26,7 +26,8 @@
 </i18n>
 
 <template>
-  <div class="flex flex-col items-center justify-center min-h-[var(--kiosk-content-min-height)] px-6 xs:px-8 sm:px-12 py-12 w-full">
+  <div
+    class="flex flex-col items-center justify-center min-h-[var(--kiosk-content-min-height)] px-6 xs:px-8 sm:px-12 py-12 w-full">
     <div class="bg-white rounded-4xl shadow-lg w-full max-w-2xl p-8 sm:p-10">
       <h1 class="font-bold text-d2 text-primary-700 my-0">{{ t("title") }}</h1>
       <p v-if="card" class="mt-2 text-grey-600 text-d6">

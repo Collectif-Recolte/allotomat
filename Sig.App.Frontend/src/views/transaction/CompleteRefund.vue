@@ -41,11 +41,7 @@
           :class="getIsGiftCard(item.productGroup.name) ? 'mt-6 pt-4 border-t border-grey-100' : 'dark'">
           <div
             class="relative flex items-center w-full rounded-md py-1 px-2 text-primary-900 dark:text-white"
-            :class="
-              getIsGiftCard(item.productGroup.name)
-                ? getGiftCardBgClass()
-                : getColorBgClass(item.productGroup.color)
-            ">
+            :class="getIsGiftCard(item.productGroup.name) ? getGiftCardBgClass() : getColorBgClass(item.productGroup.color)">
             <div class="absolute -translate-y-1/2 top-1/2 left-2 max-w-20 xs:max-w-24 truncate font-bold">
               {{ getProductGroupName(item) }}
             </div>

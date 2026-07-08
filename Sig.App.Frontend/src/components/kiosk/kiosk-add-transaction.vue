@@ -53,10 +53,7 @@
             <div class="flex flex-col gap-7">
               <div v-if="getFundFields(fields, false).length" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div v-for="{ field, idx } in getFundFields(fields, false)" :key="field.key">
-                  <KioskFundAmountField
-                    :idx="idx"
-                    :fund="funds[idx].fund"
-                    :is-gift-card="false" />
+                  <KioskFundAmountField :idx="idx" :fund="funds[idx].fund" :is-gift-card="false" />
                 </div>
               </div>
               <div
@@ -64,10 +61,7 @@
                 :class="getFundFields(fields, false).length ? 'pt-7 border-t border-grey-100' : ''">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div v-for="{ field, idx } in getFundFields(fields, true)" :key="field.key">
-                    <KioskFundAmountField
-                      :idx="idx"
-                      :fund="funds[idx].fund"
-                      :is-gift-card="true" />
+                    <KioskFundAmountField :idx="idx" :fund="funds[idx].fund" :is-gift-card="true" />
                   </div>
                 </div>
               </div>

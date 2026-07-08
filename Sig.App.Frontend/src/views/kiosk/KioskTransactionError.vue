@@ -20,7 +20,8 @@
 </i18n>
 
 <template>
-  <div class="flex flex-1 flex-col min-h-[var(--kiosk-content-min-height)] px-6 xs:px-8 sm:px-12 py-8 sm:py-12 w-full max-w-5xl mx-auto">
+  <div
+    class="flex flex-1 flex-col min-h-[var(--kiosk-content-min-height)] px-6 xs:px-8 sm:px-12 py-8 sm:py-12 w-full max-w-5xl mx-auto">
     <h1 class="text-h2 font-semibold">{{ t("title") }}</h1>
     <p class="text-h4">{{ error }}</p>
     <PfButtonAction btn-style="secondary" size="lg" :label="t('back')" @click="goHome" />

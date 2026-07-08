@@ -1,7 +1,6 @@
 <template>
   <div class="flex flex-col h-full">
-    <div
-      class="bg-yellow-100 text-yellow-800 text-center font-bold text-d6 py-4 px-8 rounded-t-4xl">
+    <div class="bg-yellow-100 text-yellow-800 text-center font-bold text-d6 py-4 px-8 rounded-t-4xl">
       {{ t("verify-before-confirm") }}
     </div>
 
