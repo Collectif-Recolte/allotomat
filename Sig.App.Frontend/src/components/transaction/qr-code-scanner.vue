@@ -92,7 +92,7 @@ const resetKioskIdle = useKioskResetIdle();
 const props = defineProps({
   errorUrlConst: {
     type: String,
-    required: true
+    default: ""
   },
   cancelLabel: {
     type: String,

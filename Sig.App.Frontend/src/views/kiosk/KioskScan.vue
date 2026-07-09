@@ -4,7 +4,6 @@
     <QRCodeScanner
       ref="scannerRef"
       kiosk-mode
-      :error-url-const="URL_KIOSK_TRANSACTION_ERROR"
       @checkQRCode="checkQRCode"
       @cancel="emit('cancel')" />
   </div>
@@ -16,7 +15,6 @@ import { defineEmits, defineProps, ref } from "vue";
 import { useApolloClient } from "@vue/apollo-composable";
 
 import QRCodeScanner from "@/components/transaction/qr-code-scanner.vue";
-import { URL_KIOSK_TRANSACTION_ERROR } from "@/lib/consts/urls";
 import { KIOSK_ACCESS_INVALID } from "@/lib/consts/qr-code-error";
 
 const audio = new Audio(require("@/assets/audio/scan.mp3"));

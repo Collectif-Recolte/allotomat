@@ -17,7 +17,6 @@
     <QRCodeScanner
       ref="scannerRef"
       kiosk-mode
-      :error-url-const="URL_KIOSK_TRANSACTION_ERROR"
       @checkQRCode="checkQRCode"
       @cancel="goHome" />
   </div>
@@ -41,7 +40,7 @@ import { useApolloClient } from "@vue/apollo-composable";
 import { usePageTitle } from "@/lib/helpers/page-title";
 import { useKioskShellState } from "@/lib/composables/use-kiosk-shell";
 import { useKioskToken } from "@/lib/composables/use-kiosk-token";
-import { URL_KIOSK_HOME, URL_KIOSK_TRANSACTION, URL_KIOSK_TRANSACTION_ERROR } from "@/lib/consts/urls";
+import { URL_KIOSK_HOME, URL_KIOSK_TRANSACTION } from "@/lib/consts/urls";
 import { CHECK_CARD_STEPS_SCAN, CHECK_CARD_STEPS_COMPLETE } from "@/lib/consts/enums";
 import {
   KIOSK_ACCESS_INVALID

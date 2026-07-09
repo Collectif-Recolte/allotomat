@@ -60,7 +60,6 @@
       <CompleteTransaction :transaction-id="transactionId" is-kiosk @finished="goHome" />
     </div>
   </div>
-  <RouterView />
 </template>
 
 <script setup>
