@@ -10,7 +10,9 @@
     "no-funds-message": "There are no available funds on this card.",
     "no-product-group-transaction": "At least one product group must have an amount to create a transaction.",
     "product-group-amount-isnan": "The amount must be a number.",
-    "product-group-fund-not-enought": "There are not enough funds in this product group."
+    "product-group-fund-not-enought": "There are not enough funds in this product group.",
+    "transaction-submit-error": "The payment could not be completed. Please try again.",
+    "card-not-found": "The card could not be found."
   },
   "fr": {
     "amount-validation-label": "Solde",
@@ -21,7 +23,9 @@
     "no-funds-message": "Il n'y a pas de fonds disponibles sur cette carte.",
     "no-product-group-transaction": "Au minimum un groupe de produit doit avoir un montant pour créer une transaction.",
     "product-group-amount-isnan": "Le montant doit être un nombre.",
-    "product-group-fund-not-enought": "Il n'y a pas assez de fonds pour ce groupe de produits."
+    "product-group-fund-not-enought": "Il n'y a pas assez de fonds pour ce groupe de produits.",
+    "transaction-submit-error": "Le paiement n'a pas pu être effectué. Veuillez réessayer.",
+    "card-not-found": "La carte est introuvable."
   }
 }
 </i18n>
@@ -114,7 +118,7 @@ import { FieldArray } from "vee-validate";
 import KioskFundAmountField from "@/components/kiosk/kiosk-fund-amount-field";
 import KioskPaymentConfirm from "@/components/kiosk/kiosk-payment-confirm";
 import { PRODUCT_GROUP_LOYALTY, TRANSACTION_STEPS_COMPLETE } from "@/lib/consts/enums";
-import { KIOSK_ACCESS_INVALID } from "@/lib/consts/qr-code-error";
+import { KIOSK_ACCESS_INVALID, NOT_ENOUGHT_FUND, CARD_NOT_FOUND, CARD_DEACTIVATED } from "@/lib/consts/qr-code-error";
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { useNotificationsStore } from "@/lib/store/notifications";
 
@@ -306,6 +310,22 @@ function prevStep() {
   emit("stepChange", 0);
 }
 
+function getConfirmSubmitErrorMessage(exception) {
+  const message = exception.message || "";
+
+  if (message.indexOf(NOT_ENOUGHT_FUND) !== -1) {
+    return t("product-group-fund-not-enought");
+  }
+  if (message.indexOf(CARD_NOT_FOUND) !== -1) {
+    return t("card-not-found");
+  }
+  if (message.indexOf(CARD_DEACTIVATED) !== -1 || message.indexOf("CardIsDisabledException") !== -1) {
+    return t("card-is-disabled");
+  }
+
+  return t("transaction-submit-error");
+}
+
 async function onConfirmSubmit() {
   if (!funds.value) return;
   submitting.value = true;
@@ -330,6 +350,8 @@ async function onConfirmSubmit() {
   } catch (exception) {
     if ((exception.message || "").indexOf(KIOSK_ACCESS_INVALID) !== -1) {
       emit("kioskAuthError");
+    } else {
+      addError(getConfirmSubmitErrorMessage(exception));
     }
     emit("onUpdateLoadingState", false);
   } finally {
