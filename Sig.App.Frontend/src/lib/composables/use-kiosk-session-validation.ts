@@ -2,6 +2,7 @@ import gql from "graphql-tag";
 import { watchEffect } from "vue";
 import type { Ref } from "vue";
 import { apolloClient } from "@/lib/graphql/apollo-client";
+import { KIOSK_ACCESS_INVALID } from "@/lib/consts/qr-code-error";
 
 const VALIDATION_INTERVAL_MS = 10 * 60 * 1000;
 
@@ -19,8 +20,11 @@ async function isKioskSessionValid(kioskToken: string): Promise<boolean> {
       fetchPolicy: "network-only"
     });
     return data?.validateKioskSession === true;
-  } catch {
-    return false;
+  } catch (error) {
+    if ((error as Error).message?.indexOf(KIOSK_ACCESS_INVALID) !== -1) {
+      return false;
+    }
+    throw error;
   }
 }
 
@@ -32,8 +36,12 @@ export function useKioskSessionValidation(authToken: Ref<string>, onInvalid: () 
     }
 
     const validate = async () => {
-      if (!(await isKioskSessionValid(kioskToken))) {
-        onInvalid();
+      try {
+        if (!(await isKioskSessionValid(kioskToken))) {
+          onInvalid();
+        }
+      } catch {
+        // Transient errors are retried on the next interval instead of clearing the session.
       }
     };
 
