@@ -3,7 +3,9 @@ using GraphQL.Conventions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel.Entities.Projects;
+using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Requests.Commands.Mutations.Organizations;
@@ -79,6 +81,47 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Organizations
 
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<CreateOrganizationInProject.ProjectNotFoundException>();
+        }
+
+        [Fact]
+        public async Task AssignsManagerClaimWithRealOrganizationId()
+        {
+            var input = new CreateOrganizationInProject.Input()
+            {
+                Name = "Claim Value Organization",
+                ManagerEmails = new string[1] { "claim-value@example.com" },
+                ProjectId = project.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var organization = await DbContext.Organizations.FirstAsync();
+            organization.Id.Should().BeGreaterThan(0);
+
+            var manager = await UserManager.FindByEmailAsync("claim-value@example.com");
+            var claim = (await UserManager.GetClaimsAsync(manager)).Should().ContainSingle(c => c.Type == AppClaimTypes.OrganizationManagerOf).Which;
+            claim.Value.Should().Be(organization.Id.ToString());
+        }
+
+        [Fact]
+        public async Task When_ManagerAlreadyExists_AssignsClaimWithRealOrganizationId()
+        {
+            var existingManager = AddUser("existing-org-manager@example.com", UserType.OrganizationManager);
+
+            var input = new CreateOrganizationInProject.Input()
+            {
+                Name = "Existing Manager Organization",
+                ManagerEmails = new string[1] { existingManager.Email },
+                ProjectId = project.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var organization = await DbContext.Organizations.FirstAsync();
+            organization.Id.Should().BeGreaterThan(0);
+
+            var claim = (await UserManager.GetClaimsAsync(existingManager)).Should().ContainSingle(c => c.Type == AppClaimTypes.OrganizationManagerOf).Which;
+            claim.Value.Should().Be(organization.Id.ToString());
         }
     }
 }

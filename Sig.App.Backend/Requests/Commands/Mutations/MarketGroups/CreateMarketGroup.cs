@@ -16,7 +16,6 @@ using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
 using Sig.App.Backend.Services.Mailer;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -61,6 +60,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.MarketGroups
             var managers = new List<AppUser>();
 
             db.MarketGroups.Add(marketGroup);
+            await db.SaveChangesAsync(cancellationToken);
 
             foreach (var email in request.ManagerEmails)
             {
@@ -125,14 +125,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.MarketGroups
                     Profile = new UserProfile()
                 };
 
-                try {
-                    var result = await userManager.CreateAsync(user);
-                    result.AssertSuccess();
-                }
-                catch (Exception error)
-                {
-                    var test1 = 1;
-                }
+                var result = await userManager.CreateAsync(user);
+                result.AssertSuccess();
 
                 logger.LogInformation($"[Mutation] CreateMarketGroup - New market group manager created {user.Email} ({user.Id}). Sending email invitation.");
             }

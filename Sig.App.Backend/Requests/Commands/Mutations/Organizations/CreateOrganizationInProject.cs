@@ -62,6 +62,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Organizations
             var managers = new List<AppUser>();
             
             db.Organizations.Add(organization);
+            await db.SaveChangesAsync(cancellationToken);
 
             foreach (var email in request.ManagerEmails)
             {
