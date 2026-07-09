@@ -60,6 +60,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             };
 
             db.Markets.Add(market);
+            await db.SaveChangesAsync(cancellationToken);
 
             foreach (var (manager, isNew) in managers)
             {

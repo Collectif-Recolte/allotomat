@@ -106,6 +106,47 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Markets
         }
 
         [Fact]
+        public async Task AssignsManagerClaimWithRealMarketId()
+        {
+            var input = new CreateMarket.Input
+            {
+                Name = "Claim Value Market",
+                ManagerEmails = new[] { "claim-value@example.com" }
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var market = await DbContext.Markets.SingleAsync();
+            market.Id.Should().BeGreaterThan(0);
+
+            var manager = await UserManager.FindByEmailAsync("claim-value@example.com");
+            var claims = await UserManager.GetClaimsAsync(manager);
+            var marketManagerClaim = claims.Should().ContainSingle(c => c.Type == AppClaimTypes.MarketManagerOf).Which;
+            marketManagerClaim.Value.Should().Be(market.Id.ToString());
+        }
+
+        [Fact]
+        public async Task When_ManagerAlreadyExists_AssignsClaimWithRealMarketId()
+        {
+            var existingManager = AddUser("existing-market-manager@example.com", UserType.Merchant);
+
+            var input = new CreateMarket.Input
+            {
+                Name = "Existing Manager Market",
+                ManagerEmails = new[] { existingManager.Email }
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var market = await DbContext.Markets.SingleAsync();
+            market.Id.Should().BeGreaterThan(0);
+
+            var claims = await UserManager.GetClaimsAsync(existingManager);
+            var marketManagerClaim = claims.Should().ContainSingle(c => c.Type == AppClaimTypes.MarketManagerOf).Which;
+            marketManagerClaim.Value.Should().Be(market.Id.ToString());
+        }
+
+        [Fact]
         public async Task When_OnlyProjectIdProvided_ThrowsIncompleteProgramAssociation()
         {
             var marketCountBefore = await DbContext.Markets.CountAsync();
