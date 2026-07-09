@@ -30,7 +30,7 @@ namespace Sig.App.Backend.Services.Kiosk
 
             var cashRegister = await db.CashRegisters
                 .Include(x => x.Market)
-                .Include(x => x.MarketGroups)
+                .Include(x => x.MarketGroups).ThenInclude(x => x.MarketGroup)
                 .FirstOrDefaultAsync(x => x.KioskAccessToken == token, cancellationToken);
 
             if (cashRegister == null)
@@ -39,7 +39,7 @@ namespace Sig.App.Backend.Services.Kiosk
             }
 
             var tokenFound = !string.IsNullOrEmpty(cashRegister.KioskAccessToken);
-            var hasActiveMarketGroups = cashRegister.MarketGroups.Any();
+            var hasActiveMarketGroups = cashRegister.MarketGroups.Any(x => !x.MarketGroup.IsArchived);
             var isOperational = tokenFound
                 && !cashRegister.IsArchived
                 && !cashRegister.Market.IsArchived
