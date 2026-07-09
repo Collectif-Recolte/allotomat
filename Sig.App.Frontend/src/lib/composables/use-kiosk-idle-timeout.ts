@@ -97,7 +97,7 @@ export function useKioskIdleTimeout({ mode, paused, onReturnHome }: UseKioskIdle
   }
 
   function onActivity() {
-    if (toValue(mode) !== "idle" || toValue(paused)) {
+    if (toValue(mode) !== "idle" || toValue(paused) || showIdlePrompt.value) {
       return;
     }
     resetIdle();
@@ -147,6 +147,7 @@ export function useKioskIdleTimeout({ mode, paused, onReturnHome }: UseKioskIdle
     showIdlePrompt,
     warningSecondsRemaining,
     resetIdle,
-    dismissIdlePrompt: resetIdle
+    dismissIdlePrompt: resetIdle,
+    quitIdlePrompt: returnHome
   };
 }

@@ -71,6 +71,7 @@ import QrScanner from "qr-scanner";
 import { useRouter } from "vue-router";
 
 import QRCodeService from "@/lib/services/qr-code";
+import { useKioskResetIdle } from "@/lib/composables/use-kiosk-shell";
 
 import { CARD_NOT_FOUND } from "@/lib/consts/qr-code-error";
 import ICON_CAMERA_LENSE_SIDE from "@/lib/icons/camera-lense-side.json";
@@ -78,6 +79,7 @@ import ICON_CLOSE from "@/lib/icons/close.json";
 
 const { t } = useI18n();
 const router = useRouter();
+const resetKioskIdle = useKioskResetIdle();
 
 const props = defineProps({
   errorUrlConst: {
@@ -118,6 +120,9 @@ onUnmounted(() => {
 
 async function decryptQRCode(result) {
   if (!processing.value) {
+    if (props.kioskMode) {
+      resetKioskIdle();
+    }
     processing.value = true;
     const decryptResult = await QRCodeService.decrypt(result.data);
 

@@ -3,11 +3,13 @@
   "en": {
     "still-there-title": "Are you still there?",
     "still-there-action": "Yes, I'm still here",
+    "quit-now-action": "Quit now",
     "returning-soon": "Returning to the main menu in {seconds} s"
   },
   "fr": {
     "still-there-title": "Êtes-vous toujours là?",
     "still-there-action": "Oui, je suis là",
+    "quit-now-action": "Quitter maintenant",
     "returning-soon": "Retour au menu principal dans {seconds} s"
   }
 }
@@ -24,13 +26,19 @@
       </p>
     </template>
     <template #footer>
-      <div class="flex justify-center pt-6 pb-12">
+      <div class="flex flex-col sm:flex-row justify-center gap-4 pt-6 pb-12 px-6">
         <PfButtonAction
           size="lg"
           class="min-h-20 rounded-2xl text-d6"
           btn-style="primary"
           :label="t('still-there-action')"
           @click="emit('dismiss')" />
+        <PfButtonAction
+          size="lg"
+          class="min-h-20 rounded-2xl text-d6"
+          btn-style="secondary"
+          :label="t('quit-now-action')"
+          @click="emit('quit')" />
       </div>
     </template>
   </UiDialogModal>
@@ -45,6 +53,6 @@ defineProps({
   warningSecondsRemaining: { type: Number, required: true }
 });
 
-const emit = defineEmits(["dismiss"]);
+const emit = defineEmits(["dismiss", "quit"]);
 const { t } = useI18n();
 </script>

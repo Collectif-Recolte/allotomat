@@ -41,7 +41,11 @@
         <KioskLangSwitch />
       </div>
     </header>
-    <KioskIdlePrompt v-if="showIdlePrompt" :warning-seconds-remaining="warningSecondsRemaining" @dismiss="dismissIdlePrompt" />
+    <KioskIdlePrompt
+      v-if="showIdlePrompt"
+      :warning-seconds-remaining="warningSecondsRemaining"
+      @dismiss="dismissIdlePrompt"
+      @quit="quitIdlePrompt" />
     <main class="flex-1 flex flex-col min-h-0">
       <Loading :loading="kioskLoading || shellLoading" is-full-page>
         <KioskAuthGate v-if="showAuthGate" :login="login" :login-loading="loginLoading" :auth-error="authError" />
@@ -100,7 +104,9 @@ const {
   kioskRoute
 } = useKioskToken();
 
-const { loading: shellLoading, showCancel, onCancel, idleTimeoutMode } = provideKioskShell();
+const shell = provideKioskShell();
+
+const { loading: shellLoading, showCancel, onCancel, idleTimeoutMode } = shell;
 
 const showAuthGate = computed(() => !kioskLoading.value && tokenFound.value && isValid.value && !isAuthenticated.value);
 
@@ -125,11 +131,13 @@ function returnToKioskHome() {
   router.replace(kioskRoute(URL_KIOSK_HOME));
 }
 
-const { showIdlePrompt, warningSecondsRemaining, dismissIdlePrompt } = useKioskIdleTimeout({
+const { showIdlePrompt, warningSecondsRemaining, dismissIdlePrompt, quitIdlePrompt, resetIdle } = useKioskIdleTimeout({
   mode: effectiveIdleTimeoutMode,
   paused: idleTimeoutPaused,
   onReturnHome: returnToKioskHome
 });
+
+shell.resetIdle.value = resetIdle;
 
 function handleCancel() {
   onCancel.value?.();
