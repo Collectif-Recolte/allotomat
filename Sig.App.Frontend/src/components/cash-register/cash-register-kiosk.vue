@@ -14,6 +14,7 @@
     "show-password": "Show",
     "hide-password": "Hide",
     "copy-success": "Kiosk link copied to clipboard.",
+    "copy-error": "Unable to copy the kiosk link to the clipboard.",
     "enable-success": "Kiosk mode enabled.",
     "regenerate-success": "Kiosk link and password regenerated.",
     "disable-success": "Kiosk mode disabled.",
@@ -34,6 +35,7 @@
     "show-password": "Afficher",
     "hide-password": "Masquer",
     "copy-success": "Lien du kiosque copié dans le presse-papiers.",
+    "copy-error": "Impossible de copier le lien du kiosque dans le presse-papiers.",
     "enable-success": "Mode kiosque activé.",
     "regenerate-success": "Lien et mot de passe du kiosque régénérés.",
     "disable-success": "Mode kiosque désactivé.",
@@ -94,13 +96,14 @@ import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useMutation } from "@vue/apollo-composable";
 
+import { copyTextToClipboard } from "@/lib/helpers/clipboard";
 import { useNotificationsStore } from "@/lib/store/notifications";
 import { URL_KIOSK_HOME } from "@/lib/consts/urls";
 import QrCodePreview from "@/components/card/qr-code-preview.vue";
 
 const { t } = useI18n();
 const router = useRouter();
-const { addSuccess } = useNotificationsStore();
+const { addSuccess, addError } = useNotificationsStore();
 const processing = ref(false);
 const showPassword = ref(false);
 const showQrModal = ref(false);
@@ -230,8 +233,13 @@ async function disableKiosk() {
 
 async function copyLink() {
   if (!kioskLink.value) return;
-  await navigator.clipboard.writeText(kioskLink.value);
-  addSuccess(t("copy-success"));
+
+  const copied = await copyTextToClipboard(kioskLink.value);
+  if (copied) {
+    addSuccess(t("copy-success"));
+  } else {
+    addError(t("copy-error"));
+  }
 }
 
 function openQrModal() {
