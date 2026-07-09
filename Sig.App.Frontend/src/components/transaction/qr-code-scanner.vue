@@ -4,13 +4,17 @@
 		"validation-in-progress": "Validation in progress",
     "flip-camera": "Flip the camera",
     "scan-instruction": "Bring your card close to the reader to scan the QR code in the center of the screen.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "scan-error-title": "Scan error",
+    "scan-error-message": "The QR code was not recognized."
 	},
 	"fr": {
 		"validation-in-progress": "Validation en cours",
     "flip-camera": "Retourner la caméra",
     "scan-instruction": "Approchez votre carte du lecteur pour scanner le code QR au centre de l'écran.",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "scan-error-title": "Erreur de scan",
+    "scan-error-message": "Le code QR n'a pas été reconnu."
 	}
 }
 </i18n>
@@ -22,9 +26,13 @@
       :class="props.kioskMode ? 'w-full aspect-[16/10] max-w-md mx-auto' : 'w-sm max-w-full'">
       <video ref="qrCodeVideo" class="w-full h-full object-cover"></video>
     </div>
-    <p v-if="props.kioskMode" class="text-center text-h3 text-primary-700 my-8">
-      {{ t("scan-instruction") }}
-    </p>
+    <div v-if="props.kioskMode" class="text-center text-h3 my-8 px-4 mx-auto">
+      <template v-if="scanErrorVisible">
+        <p class="font-bold text-red-500 mb-1">{{ t("scan-error-title") }}</p>
+        <p class="text-red-500 mb-0">{{ t("scan-error-message") }}</p>
+      </template>
+      <p v-else class="text-primary-700 mb-0">{{ t("scan-instruction") }}</p>
+    </div>
     <div
       v-if="props.kioskMode"
       class="flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center max-w-lg mx-auto">
@@ -66,7 +74,7 @@
 
 <script setup>
 import { useI18n } from "vue-i18n";
-import { ref, onMounted, onUnmounted, defineEmits, defineProps } from "vue";
+import { ref, onMounted, onUnmounted, defineEmits, defineProps, defineExpose } from "vue";
 import QrScanner from "qr-scanner";
 import { useRouter } from "vue-router";
 
@@ -95,11 +103,15 @@ const props = defineProps({
 
 const emit = defineEmits(["triggerError", "checkQRCode", "cancel"]);
 
+const KIOSK_SCAN_ERROR_TIMEOUT_MS = 5_000;
+
 const listCameras = ref([]);
 const qrCodeVideo = ref(null);
 const currentCameraMode = ref("environment");
+const scanErrorVisible = ref(false);
 
 let qrScanner = null;
+let scanErrorTimeout = null;
 const processing = ref(false);
 
 onMounted(async () => {
@@ -113,31 +125,67 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  if (scanErrorTimeout !== null) {
+    clearTimeout(scanErrorTimeout);
+    scanErrorTimeout = null;
+  }
   qrScanner.stop();
   qrScanner.destroy();
   qrScanner = null;
 });
 
-async function decryptQRCode(result) {
-  if (!processing.value) {
-    if (props.kioskMode) {
-      resetKioskIdle();
-    }
-    processing.value = true;
-    const decryptResult = await QRCodeService.decrypt(result.data);
+function showKioskScanError() {
+  scanErrorVisible.value = true;
+  processing.value = false;
 
-    if (decryptResult === "" || decryptResult === null) {
-      emit("triggerError");
-      if (props.errorUrlConst) {
-        router.push({ name: props.errorUrlConst, query: { error: CARD_NOT_FOUND } });
-      }
-    } else {
-      emit("checkQRCode", decryptResult);
-    }
-
-    qrScanner.stop();
-    processing.value = false;
+  if (scanErrorTimeout !== null) {
+    clearTimeout(scanErrorTimeout);
   }
+
+  scanErrorTimeout = setTimeout(() => {
+    scanErrorVisible.value = false;
+    scanErrorTimeout = null;
+  }, KIOSK_SCAN_ERROR_TIMEOUT_MS);
+
+  qrScanner?.start();
+}
+
+defineExpose({ showScanError: showKioskScanError });
+
+async function decryptQRCode(result) {
+  if (processing.value) {
+    return;
+  }
+
+  if (props.kioskMode) {
+    resetKioskIdle();
+  }
+
+  processing.value = true;
+  const decryptResult = await QRCodeService.decrypt(result.data);
+
+  if (decryptResult === "" || decryptResult === null) {
+    emit("triggerError");
+    if (props.kioskMode) {
+      showKioskScanError();
+      return;
+    }
+    if (props.errorUrlConst) {
+      router.push({ name: props.errorUrlConst, query: { error: CARD_NOT_FOUND } });
+    }
+    qrScanner?.stop();
+    processing.value = false;
+    return;
+  }
+
+  emit("checkQRCode", decryptResult);
+
+  if (props.kioskMode) {
+    return;
+  }
+
+  qrScanner?.stop();
+  processing.value = false;
 }
 
 async function changeCamera() {

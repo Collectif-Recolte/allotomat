@@ -2,6 +2,7 @@
   <div class="flex flex-col items-center justify-center min-h-[var(--kiosk-content-min-height)] px-8 sm:px-12 py-12 w-full">
     <h1 v-if="props.heading" class="font-bold text-d2 text-primary-700 mb-6 text-center">{{ props.heading }}</h1>
     <QRCodeScanner
+      ref="scannerRef"
       kiosk-mode
       :error-url-const="URL_KIOSK_TRANSACTION_ERROR"
       @checkQRCode="checkQRCode"
@@ -11,23 +12,14 @@
 
 <script setup>
 import gql from "graphql-tag";
-import { defineEmits, defineProps } from "vue";
+import { defineEmits, defineProps, ref } from "vue";
 import { useApolloClient } from "@vue/apollo-composable";
-import { useRoute, useRouter } from "vue-router";
 
 import QRCodeScanner from "@/components/transaction/qr-code-scanner.vue";
 import { URL_KIOSK_TRANSACTION_ERROR } from "@/lib/consts/urls";
-import {
-  CARD_CANT_BE_USED_IN_MARKET,
-  CARD_NOT_FOUND,
-  CARD_DEACTIVATED,
-  CARD_CANT_BE_USED_WITH_CASH_REGISTER,
-  KIOSK_ACCESS_INVALID
-} from "@/lib/consts/qr-code-error";
+import { KIOSK_ACCESS_INVALID } from "@/lib/consts/qr-code-error";
 
 const audio = new Audio(require("@/assets/audio/scan.mp3"));
-const router = useRouter();
-const route = useRoute();
 const { resolveClient } = useApolloClient();
 const client = resolveClient();
 
@@ -38,13 +30,7 @@ const props = defineProps({
 
 const emit = defineEmits(["scanned", "cancel", "authError"]);
 
-function routeToKioskError(error) {
-  router.push({
-    name: URL_KIOSK_TRANSACTION_ERROR,
-    params: { token: route.params.token },
-    query: { error }
-  });
-}
+const scannerRef = ref(null);
 
 async function checkQRCode(cardId) {
   try {
@@ -63,24 +49,18 @@ async function checkQRCode(cardId) {
     if (result.data.verifyCardCanBeUsedInKiosk) {
       audio.play();
       setTimeout(() => emit("scanned", cardId), 200);
+      return;
     }
+
+    scannerRef.value?.showScanError();
   } catch (exception) {
     const message = exception.message || "";
     if (message.indexOf(KIOSK_ACCESS_INVALID) !== -1) {
       emit("authError");
       return;
     }
-    if (message.indexOf(CARD_CANT_BE_USED_WITH_CASH_REGISTER) !== -1) {
-      routeToKioskError(CARD_CANT_BE_USED_WITH_CASH_REGISTER);
-    } else if (message.indexOf(CARD_CANT_BE_USED_IN_MARKET) !== -1) {
-      routeToKioskError(CARD_CANT_BE_USED_IN_MARKET);
-    } else if (message.indexOf(CARD_NOT_FOUND) !== -1) {
-      routeToKioskError(CARD_NOT_FOUND);
-    } else if (message.indexOf(CARD_DEACTIVATED) !== -1) {
-      routeToKioskError(CARD_DEACTIVATED);
-    } else {
-      routeToKioskError(CARD_NOT_FOUND);
-    }
+
+    scannerRef.value?.showScanError();
   }
 }
 </script>
