@@ -159,7 +159,7 @@ onError((error) => {
 
 const card = useResult(result, null, (data) => data.kioskCard);
 
-watch(loading, (value) => emit("onUpdateLoadingState", value));
+watch(loading, (value) => emit("onUpdateLoadingState", value), { immediate: true });
 
 const fund = computed(() => {
   if (!card.value) return 0;
