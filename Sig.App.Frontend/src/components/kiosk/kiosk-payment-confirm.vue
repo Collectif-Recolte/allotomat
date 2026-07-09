@@ -39,7 +39,7 @@
           has-icon-left
           :icon="ICON_CLOSE"
           :label="t('cancel')"
-          :processing="processing"
+          :is-disabled="processing"
           @click="emit('cancel')" />
         <div class="flex flex-col items-center">
           <PfButtonAction
@@ -49,7 +49,7 @@
             has-icon-left
             :icon="ICON_SHOPPING_CART"
             :label="t('confirm-payment')"
-            :processing="processing"
+            :is-disabled="processing"
             @click="emit('confirm')" />
           <p class="text-p1 text-grey-600 mt-3 mb-0 text-center">{{ t("irreversible-warning") }}</p>
         </div>

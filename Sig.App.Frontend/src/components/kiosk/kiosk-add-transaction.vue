@@ -86,8 +86,7 @@
             :icon="ICON_SHOPPING_CART"
             type="submit"
             :label="t('check-and-pay')"
-            :is-disabled="isPayDisabled(formErrors, values) || card.isDisabled"
-            :processing="isSubmitting" />
+            :is-disabled="isPayDisabled(formErrors, values) || card.isDisabled || isSubmitting" />
         </div>
       </template>
     </Form>

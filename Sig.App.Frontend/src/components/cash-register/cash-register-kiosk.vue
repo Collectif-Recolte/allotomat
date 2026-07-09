@@ -51,7 +51,7 @@
       v-if="!isKioskEnabled"
       btn-style="outline"
       :label="t('enable-kiosk')"
-      :processing="processing"
+      :is-disabled="processing"
       @click="enableKiosk" />
     <template v-else>
       <a
@@ -76,8 +76,8 @@
       <div class="flex flex-wrap gap-2">
         <PfButtonAction btn-style="secondary" :label="t('copy-link')" :disabled="!kioskLink" @click="copyLink" />
         <PfButtonAction btn-style="outline" :label="t('show-qr')" :disabled="!kioskLink" @click="openQrModal" />
-        <PfButtonAction btn-style="outline" :label="t('regenerate-link')" :processing="processing" @click="regenerateLink" />
-        <PfButtonAction btn-style="outline" :label="t('disable-kiosk')" :processing="processing" @click="disableKiosk" />
+        <PfButtonAction btn-style="outline" :label="t('regenerate-link')" :is-disabled="processing" @click="regenerateLink" />
+        <PfButtonAction btn-style="outline" :label="t('disable-kiosk')" :is-disabled="processing" @click="disableKiosk" />
       </div>
     </template>
     <UiDialogModal v-if="showQrModal" :title="t('qr-title')" :has-footer="true" @onClose="showQrModal = false">
