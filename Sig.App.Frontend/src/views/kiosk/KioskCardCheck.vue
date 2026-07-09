@@ -75,7 +75,8 @@ async function checkQRCode(id) {
       variables: {
         kioskToken: authToken.value,
         cardId: id
-      }
+      },
+      fetchPolicy: "network-only"
     });
 
     if (result.data.verifyCardCanBeUsedInKiosk) {
