@@ -16,7 +16,7 @@
 </i18n>
 
 <template>
-  <UiDialogModal class="text-center" :title="t('still-there-title')" has-text-center hide-main-btn @onClose="emit('dismiss')">
+  <UiDialogModal class="text-center" has-text-center hide-main-btn @onClose="emit('dismiss')">
     <template #body>
       <DialogTitle as="h2" class="text-d2 font-bold text-primary-700 mt-12 mb-4">
         {{ t("still-there-title") }}
