@@ -11,7 +11,6 @@
     "product-groups": "Product groups",
 		"product-group-fund-not-enought": "There are not enough funds in this product group.",
 		"card-selected": "Card #{cardProgramCardId}",
-    "card-selected-kiosk": "Card #{cardProgramCardId}",
 		"create-transaction": "Pay",
 		"title": "Transaction",
     "title-confirm": "Confirmation",
@@ -46,7 +45,6 @@
     "product-groups": "Groupes de produits",
 		"product-group-fund-not-enought": "Il n'y a pas assez de fonds pour ce groupe de produits.",
 		"card-selected": "{marketName} - Carte #{cardProgramCardId}",
-    "card-selected-kiosk": "Carte #{cardProgramCardId}",
 		"create-transaction": "Payer",
 		"title": "Transaction",
     "title-confirm": "Confirmation",
@@ -105,14 +103,12 @@
       </ul>
     </template>
   </div>
-  <p v-else-if="card && (market || props.isKiosk)" class="text-1" :class="{ 'text-h3': props.isKiosk }">
+  <p v-else-if="card && market" class="text-1">
     {{
-      props.isKiosk
-        ? t("card-selected-kiosk", { cardProgramCardId: card.programCardId })
-        : t("card-selected", {
-            marketName: market.name,
-            cardProgramCardId: card.programCardId
-          })
+      t("card-selected", {
+        marketName: market.name,
+        cardProgramCardId: card.programCardId
+      })
     }}
   </p>
   <p v-if="card && card.isDisabled" class="text-red-500 font-bold">{{ t("card-is-disabled") }}</p>
@@ -237,9 +233,7 @@ import { number, object, lazy, array, string } from "yup";
 import { FieldArray } from "vee-validate";
 import { storeToRefs } from "pinia";
 
-import { PRODUCT_GROUP_LOYALTY, TRANSACTION_STEPS_COMPLETE } from "@/lib/consts/enums";
-import { KIOSK_ACCESS_INVALID } from "@/lib/consts/qr-code-error";
-import { USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
+import { PRODUCT_GROUP_LOYALTY, TRANSACTION_STEPS_COMPLETE, USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
 import {
   FIRST_DAY_OF_THE_MONTH,
   FIFTEENTH_DAY_OF_THE_MONTH,
@@ -278,15 +272,10 @@ const props = defineProps({
   cashRegisterId: {
     type: String,
     default: ""
-  },
-  kioskToken: {
-    type: String,
-    default: ""
-  },
-  isKiosk: Boolean
+  }
 });
 
-const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState", "onCloseModal", "kioskAuthError"]);
+const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState", "onCloseModal"]);
 
 const { result } = useQuery(
   gql`
@@ -392,7 +381,7 @@ const { result: resultMarket } = useQuery(
     }
   `,
   () => ({ id: props.marketId }),
-  () => ({ enabled: !props.isKiosk && !!props.marketId })
+  () => ({ enabled: !!props.marketId })
 );
 const market = useResult(resultMarket, null, (data) => {
   return data.market;
@@ -402,29 +391,6 @@ const { mutate: createTransaction } = useMutation(
   gql`
     mutation CreateTransaction($input: CreateTransactionInput!) {
       createTransaction(input: $input) {
-        transaction {
-          id
-          amount
-          transactionByProductGroups {
-            id
-            amount
-            productGroup {
-              id
-              name
-              color
-              orderOfAppearance
-            }
-          }
-        }
-      }
-    }
-  `
-);
-
-const { mutate: createKioskTransaction } = useMutation(
-  gql`
-    mutation CreateKioskTransaction($input: CreateKioskTransactionInput!) {
-      createKioskTransaction(input: $input) {
         transaction {
           id
           amount
@@ -604,29 +570,7 @@ async function onSubmit() {
     .filter((x) => parseFloat(x.amount) > 0)
     .map((x) => ({ amount: parseFloat(x.amount), productGroupId: x.fund.productGroup.id }));
 
-  if (props.isKiosk && props.kioskToken) {
-    try {
-      const result = await createKioskTransaction({
-        input: {
-          kioskToken: props.kioskToken,
-          cardId: props.cardId,
-          transactions
-        }
-      });
-      audio.play();
-      emit("onUpdateStep", TRANSACTION_STEPS_COMPLETE, {
-        transactionId: result.data.createKioskTransaction.transaction.id
-      });
-    } catch (exception) {
-      if ((exception.message || "").indexOf(KIOSK_ACCESS_INVALID) !== -1) {
-        emit("kioskAuthError");
-      }
-      emit("onUpdateLoadingState", false);
-    }
-    return;
-  }
-
-  var result = await createTransaction({
+  const result = await createTransaction({
     input: {
       transactions,
       cardId: props.cardId,
