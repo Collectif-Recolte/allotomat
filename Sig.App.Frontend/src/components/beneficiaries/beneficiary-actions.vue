@@ -15,7 +15,7 @@
       "beneficiary-delete-disabled": "You can't delete a participant with a card assigned",
       "beneficiary-delete-disabled-anonymous": "You can't delete an anonymous participant",
       "beneficiary-disable-card": "Deactivate card",
-      "beneficiary-enable-card": "Re-enable card",
+      "beneficiary-enable-card": "Reactivate card",
       "beneficiary-payment-conflict": "Fix conflicts",
       "beneficiary-payment-conflict-disabled": "The participant doesn't have a payment conflict",
       "beneficiary-payment-conflict-all-group-selected": "You can't fix a conflict if the \"All Groups\" option is selected",

@@ -19,7 +19,7 @@
       "card-unassigned": "Unassigned",
       "search-placeholder": "Search by ID or card number",
       "beneficiary-disable-card": "Deactivate card",
-      "beneficiary-enable-card": "Enable card",
+      "beneficiary-enable-card": "Reactivate card",
       "card-disabled-status": "Card status",
       "card-is-disabled": "Temporarily deactivated",
       "card-is-enabled": "Not deactivated",
