@@ -51,7 +51,6 @@ export function useKioskShellState(
     shell.showCancel.value = false;
     shell.onCancel.value = null;
     shell.idleTimeoutMode.value = "idle";
-    shell.resetIdle.value = null;
   });
 }
 
