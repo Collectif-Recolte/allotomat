@@ -87,6 +87,12 @@ namespace Sig.App.Backend.DbModel.Entities.Subscriptions
 
         public bool IsExpired(IClock clock) => FundsExpirationDate.HasValue && FundsExpirationDate.Value < clock.GetCurrentInstant().ToDateTimeUtc();
 
+        public bool HasSubscriptionPaymentPeriodStarted(IClock clock) =>
+            this.GetFirstPaymentDateTime() < clock.GetCurrentInstant().ToDateTimeUtc();
+
+        public bool IsWithinManualSubscriptionPaymentWindow(IClock clock) =>
+            HasSubscriptionPaymentPeriodStarted(clock) && !IsExpired(clock);
+
         public bool IsExpiringAndAccumulableFunds => IsFundsAccumulable && FundsExpirationDate.HasValue;
     }
 }

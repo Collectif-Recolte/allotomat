@@ -1013,18 +1013,18 @@ namespace Sig.App.Backend.Gql.Schema
             return mediator.Send(input.Value);
         }
 
-        public static Task<AddMissingPayment.Payload> AddMissingPayment(
+        public static Task<AddSubscriptionPayment.Payload> AddSubscriptionPayment(
             this GqlMutation _,
             [Inject] IMediator mediator,
-            NonNull<AddMissingPayment.Input> input)
+            NonNull<AddSubscriptionPayment.Input> input)
         {
             return mediator.Send(input.Value);
         }
 
-        public static Task<AddMissingPayments.Payload> AddMissingPayments(
+        public static Task<AddSubscriptionPayments.Payload> AddSubscriptionPayments(
             this GqlMutation _,
             [Inject] IMediator mediator,
-            NonNull<AddMissingPayments.Input> input)
+            NonNull<AddSubscriptionPayments.Input> input)
         {
             return mediator.Send(input.Value);
         }

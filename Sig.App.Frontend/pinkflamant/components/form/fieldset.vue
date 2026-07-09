@@ -3,7 +3,10 @@
     <legend
       v-if="legend || $slots.legend"
       class="text-xs uppercase font-bold tracking-wide transition-colors duration-200 ease-in-out"
-      :class="hasErrorState ? 'text-red-500' : 'text-primary-900'"
+      :class="[
+        hasErrorState ? 'text-red-500' : 'text-primary-900',
+        { 'sr-only': hasHiddenLabel }
+      ]"
       :aria-describedby="description ? `${id}-legend-description` : null">
       <slot name="legend">
         <span>{{ legend }}</span>
@@ -57,7 +60,8 @@ export default {
       }
     },
     hasErrorState: Boolean,
-    isFilter: Boolean
+    isFilter: Boolean,
+    hasHiddenLabel: Boolean
   }
 };
 </script>

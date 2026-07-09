@@ -1,28 +1,28 @@
 <i18n>
 {
 	"en": {
-		"title": "Add a Missed Payment",
+		"title": "Subscription payment per rules",
 		"select-subscription-label": "Subscription",
 		"cancel": "Cancel",
-		"add-missed-payment": "Add missed payment",
+		"add-subscription-payment": "Subscription payment per rules",
 		"subscription-label": "{name} - expires on {date}",
     "subscription-desc": "This will transfer the appropriate funds to the card according to the rules of the subscription. If the subscription has a maximum number of payments, this will count towards that maximum.",
     "amount-allocated": "{amount} will be allocated",
     "budget-allowance-available": "Remaining budget envelope after allocation: {amount}",
     "add-payment": "Add payment",
-    "manually-add-missed-payment-success-notification": "The missed payment has been successfully added for {name} with an amount of {amount}."
+    "add-subscription-payment-success-notification": "The subscription payment has been successfully added for {name} with an amount of {amount}."
 	},
 	"fr": {
-		"title": "Versement d’un paiement manqué",
+		"title": "Versement selon les règles de l'abonnement",
 		"select-subscription-label": "Période d'abonnement",
 		"cancel": "Annuler",
-		"add-missed-payment": "Ajouter un paiement manqué",
+		"add-subscription-payment": "Versement selon les règles de l'abonnement",
 		"subscription-label": "{name} - expire le {date}",
     "subscription-desc": "Cela transférera les fonds appropriés sur la carte conformément aux règles de l'abonnement. Si l'abonnement a un nombre maximum de paiements, celui-ci sera pris en compte dans le calcul de ce maximum.",
     "amount-allocated": "{amount} seront alloués",
     "budget-allowance-available": "Enveloppe restante après attribution: {amount}",
     "add-payment": "Ajouter le versement",
-    "manually-add-missed-payment-success-notification": "Le paiement manqué a été ajouté avec succès pour {name} pour un montant de {amount}."
+    "add-subscription-payment-success-notification": "Le versement selon les règles de l'abonnement a été ajouté avec succès pour {name} pour un montant de {amount}."
 	}
 }
 </i18n>
@@ -112,7 +112,7 @@ const { result: resultBeneficiary } = useQuery(
             id
           }
           beneficiarySubscriptions {
-            hasMissedPayment
+            canAddSubscriptionPayment
             paymentReceived
             paymentRemaining
             maxNumberOfPayments
@@ -155,7 +155,7 @@ const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
   return data.beneficiary.beneficiarySubscriptions
     .filter(
       (x) =>
-        (x.hasMissedPayment && dateUtc(x.subscription.fundsExpirationDate) > Date.now()) ||
+        (x.canAddSubscriptionPayment && dateUtc(x.subscription.fundsExpirationDate) > Date.now()) ||
         x.subscription.fundsExpirationDate === null
     )
     .map((x) => {
@@ -176,7 +176,8 @@ const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
         types: x.subscription.types,
         budgetAllowance: x.subscription.budgetAllowances.find((x) => x.organization.id === localBeneficiary.organization.id)
           .availableFund,
-        isBudgetAllowanceAlreadyAllocated: x.maxNumberOfPayments - x.paymentReceived <= x.paymentRemaining
+        isBudgetAllowanceAlreadyAllocated:
+          x.paymentReceived < x.maxNumberOfPayments && x.maxNumberOfPayments - x.paymentReceived <= x.paymentRemaining
       };
     })
     .reduce(function (a, b) {
@@ -184,17 +185,17 @@ const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
     }, []);
 });
 
-const { mutate: addMissingPayment } = useMutation(
+const { mutate: addSubscriptionPayment } = useMutation(
   gql`
-    mutation AddMissingPayment($input: AddMissingPaymentInput!) {
-      addMissingPayment(input: $input) {
+    mutation AddSubscriptionPayment($input: AddSubscriptionPaymentInput!) {
+      addSubscriptionPayment(input: $input) {
         beneficiary {
           id
           firstname
           lastname
           ... on BeneficiaryGraphType {
             beneficiarySubscriptions {
-              hasMissedPayment
+              canAddSubscriptionPayment
               paymentReceived
             }
           }
@@ -205,7 +206,7 @@ const { mutate: addMissingPayment } = useMutation(
 );
 
 async function onSubmit({ subscription }) {
-  var result = await addMissingPayment({
+  var result = await addSubscriptionPayment({
     input: {
       beneficiaryId: route.params.beneficiaryId,
       subscriptionId: subscription
@@ -213,8 +214,8 @@ async function onSubmit({ subscription }) {
   });
   router.push({ name: URL_BENEFICIARY_ADMIN });
   addSuccess(
-    t("manually-add-missed-payment-success-notification", {
-      name: `${result.data.addMissingPayment.beneficiary.firstname} ${result.data.addMissingPayment.beneficiary.lastname}`,
+    t("add-subscription-payment-success-notification", {
+      name: `${result.data.addSubscriptionPayment.beneficiary.firstname} ${result.data.addSubscriptionPayment.beneficiary.lastname}`,
       amount: amountThatWillBeAllocatedMoneyFormat.value
     })
   );

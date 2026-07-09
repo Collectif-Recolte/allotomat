@@ -82,6 +82,8 @@
           <PfFormInputCheckboxGroup
             id="organizations"
             is-filter
+            has-hidden-label
+            :label="t('organizations')"
             :value="props.modelValue.selectedOrganizations"
             :options="availableOrganizations"
             @input="onOrganizationsChecked" />
@@ -94,6 +96,8 @@
             id="subscriptions"
             class="mt-3"
             is-filter
+            has-hidden-label
+            :label="t('subscriptions')"
             :value="props.modelValue.selectedSubscriptions"
             :options="availableSubscriptions"
             @input="onSubscriptionsChecked" />
@@ -106,6 +110,8 @@
             id="market-groups"
             class="mt-3"
             is-filter
+            has-hidden-label
+            :label="t('market-groups')"
             :value="props.modelValue.selectedMarketGroups"
             :options="availableMarketGroups"
             @input="onMarketGroupsChecked" />

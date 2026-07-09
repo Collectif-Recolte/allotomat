@@ -37,7 +37,7 @@
 
 <template>
   <div v-if="!loading">
-    <UiDialogModal v-if="refundTransactionId === null" :title="t('title')" hide-main-btn="false" :return-route="returnRoute()">
+    <UiDialogModal v-if="refundTransactionId === null" :title="t('title')" :return-route="returnRoute()">
       <div>
         <p v-if="haveExpiredFunds">
           <b>{{ t("expired-funds") }}</b>
@@ -112,12 +112,8 @@
       </div>
     </UiDialogModal>
     <div v-else>
-      <DialogOverlay class="transition-opacity fixed inset-0 bg-primary-700/80" />
-      <CompleteRefundTransaction
-        class="fixed z-40 inset-0 overflow-y-auto"
-        :transaction-id="refundTransactionId"
-        @onUpdateStep="updateStep"
-        @onUpdateLoadingState="updateLoadingState" />
+      <div class="transition-opacity fixed inset-0 bg-primary-700/80" aria-hidden="true" />
+      <CompleteRefundTransaction class="fixed z-40 inset-0 overflow-y-auto" :transaction-id="refundTransactionId" />
     </div>
   </div>
 </template>

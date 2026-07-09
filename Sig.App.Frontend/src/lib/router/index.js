@@ -90,15 +90,13 @@ router.beforeEach(async (to, from, next) => {
   // Enforce usertype constraints
   for (const match of to.matched) {
     if (match.meta.usertype) {
-      if (Array.isArray(match.meta.usertype)) {
-        if (!match.meta.usertype.includes(auth.userType)) {
-          return next({
-            name: URL_ROOT
-          });
-        }
-      } else if (auth.userType !== match.meta.usertype) {
+      const allowed = Array.isArray(match.meta.usertype)
+        ? match.meta.usertype.includes(auth.userType)
+        : auth.userType === match.meta.usertype;
+
+      if (!allowed) {
         return next({
-          name: URL_ROOT
+          name: match.meta.unauthorizedUserTypeRedirectTo ?? URL_ROOT
         });
       }
     }

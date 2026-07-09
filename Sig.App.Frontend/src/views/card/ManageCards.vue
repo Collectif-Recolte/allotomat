@@ -212,6 +212,7 @@ import { BY_ID, BY_BALANCE, ASC, DESC } from "@/lib/consts/card-sort-order";
 import { URL_CARDS_MANAGE, URL_CARDS_MANAGE_GIFT_CARDS } from "@/lib/consts/urls";
 
 import Title from "@/components/app/title";
+import Loading from "@/components/app/loading";
 import CardSummaryTable from "@/components/card/card-summary-table.vue";
 
 import ICON_CARD_LOST from "@/lib/icons/card-lost.json";
@@ -219,6 +220,7 @@ import ICON_QR_CODE from "@/lib/icons/qrcode.json";
 import ICON_MINUS from "@/lib/icons/minus.json";
 import ICON_CLOSE from "@/lib/icons/close.json";
 import ICON_CARD_LINK from "@/lib/icons/card-link.json";
+import ICON_DOWNLOAD from "@/lib/icons/download.json";
 
 const { getGlobalPermissions } = storeToRefs(useAuthStore());
 const { t } = useI18n();
