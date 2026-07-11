@@ -26,7 +26,7 @@
 <template>
   <div class="flex justify-center h-full w-full py-8 lg:py-16">
     <UiCta
-      v-if="selectedCashRegisterId !== null && market !== null"
+      v-if="selectedCashRegister != null && market !== null"
       class="w-full max-w-sm"
       :img-src="require('@/assets/img/scan-marchand.jpg')"
       :primary-btn-label="t('start-transaction')"
@@ -51,7 +51,7 @@
         </div>
         <ul class="mb-0">
           <li v-for="marketGroup in selectedCashRegister.marketGroups" :key="marketGroup.id" class="text-p2">
-            <div>{{ marketGroup.project.name }}</div>
+            <div v-if="marketGroup.project">{{ marketGroup.project.name }}</div>
             <div v-if="marketGroup.name !== selectedCashRegister.name">{{ marketGroup.name }}</div>
           </li>
         </ul>
@@ -139,10 +139,22 @@ const { result, loading } = useQuery(
 );
 
 const cashRegisters = useResult(result, [], (data) => {
+  if (!data.markets || data.markets.length === 0) {
+    return [];
+  }
+
   if (data.markets[0].cashRegisters.length === 1) {
     const cashRegister = data.markets[0].cashRegisters[0];
     changeCashRegister(cashRegister.id);
     selectedCashRegisterId.value = cashRegister.id;
+  } else if (
+    selectedCashRegisterId.value !== null &&
+    !data.markets[0].cashRegisters.some((cashRegister) => cashRegister.id === selectedCashRegisterId.value)
+  ) {
+    // The previously selected cash register no longer exists (archived, removed, or belongs to another
+    // merchant who used this browser). Reset the stale selection so the user is sent back to the picker.
+    changeCashRegister(null);
+    selectedCashRegisterId.value = null;
   }
 
   return data.markets[0].cashRegisters.map((cashRegister) => ({
@@ -152,7 +164,7 @@ const cashRegisters = useResult(result, [], (data) => {
   }));
 });
 
-const market = useResult(result, null, (data) => data.markets[0]);
+const market = useResult(result, null, (data) => (data.markets && data.markets.length > 0 ? data.markets[0] : null));
 
 const cashRegisterOptions = computed(() =>
   cashRegisters.value.map((cashRegister) => ({ value: cashRegister.id, label: cashRegister.name }))

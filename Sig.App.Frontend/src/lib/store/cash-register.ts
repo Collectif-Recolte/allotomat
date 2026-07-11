@@ -10,8 +10,12 @@ export const useCashRegisterStore = defineStore("cashRegister", {
     currentCashRegister: getCurrentCashRegister()
   }),
   actions: {
-    changeCashRegister(newCashRegister: string) {
-      localStorage.setItem("currentCashRegister", newCashRegister);
+    changeCashRegister(newCashRegister: string | null) {
+      if (newCashRegister === null) {
+        localStorage.removeItem("currentCashRegister");
+      } else {
+        localStorage.setItem("currentCashRegister", newCashRegister);
+      }
       this.currentCashRegister = newCashRegister;
     }
   }
