@@ -51,7 +51,7 @@
         </div>
         <ul class="mb-0">
           <li v-for="marketGroup in selectedCashRegister.marketGroups" :key="marketGroup.id" class="text-p2">
-            <div>{{ marketGroup.project.name }}</div>
+            <div v-if="marketGroup.project">{{ marketGroup.project.name }}</div>
             <div v-if="marketGroup.name !== selectedCashRegister.name">{{ marketGroup.name }}</div>
           </li>
         </ul>
@@ -139,6 +139,10 @@ const { result, loading } = useQuery(
 );
 
 const cashRegisters = useResult(result, [], (data) => {
+  if (!data.markets || data.markets.length === 0) {
+    return [];
+  }
+
   if (data.markets[0].cashRegisters.length === 1) {
     const cashRegister = data.markets[0].cashRegisters[0];
     changeCashRegister(cashRegister.id);
@@ -160,7 +164,7 @@ const cashRegisters = useResult(result, [], (data) => {
   }));
 });
 
-const market = useResult(result, null, (data) => data.markets[0]);
+const market = useResult(result, null, (data) => (data.markets && data.markets.length > 0 ? data.markets[0] : null));
 
 const cashRegisterOptions = computed(() =>
   cashRegisters.value.map((cashRegister) => ({ value: cashRegister.id, label: cashRegister.name }))
