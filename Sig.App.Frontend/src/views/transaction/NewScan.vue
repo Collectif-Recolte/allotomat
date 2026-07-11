@@ -26,7 +26,7 @@
 <template>
   <div class="flex justify-center h-full w-full py-8 lg:py-16">
     <UiCta
-      v-if="selectedCashRegisterId !== null && market !== null"
+      v-if="selectedCashRegister != null && market !== null"
       class="w-full max-w-sm"
       :img-src="require('@/assets/img/scan-marchand.jpg')"
       :primary-btn-label="t('start-transaction')"
@@ -143,6 +143,14 @@ const cashRegisters = useResult(result, [], (data) => {
     const cashRegister = data.markets[0].cashRegisters[0];
     changeCashRegister(cashRegister.id);
     selectedCashRegisterId.value = cashRegister.id;
+  } else if (
+    selectedCashRegisterId.value !== null &&
+    !data.markets[0].cashRegisters.some((cashRegister) => cashRegister.id === selectedCashRegisterId.value)
+  ) {
+    // The previously selected cash register no longer exists (archived, removed, or belongs to another
+    // merchant who used this browser). Reset the stale selection so the user is sent back to the picker.
+    changeCashRegister(null);
+    selectedCashRegisterId.value = null;
   }
 
   return data.markets[0].cashRegisters.map((cashRegister) => ({
