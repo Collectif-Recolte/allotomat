@@ -60,6 +60,8 @@ export default {
           return "pf-button--dash";
         case "link":
           return "pf-button--link";
+        case "white":
+          return "pf-button--white";
         default:
           return this.btnStyle;
       }

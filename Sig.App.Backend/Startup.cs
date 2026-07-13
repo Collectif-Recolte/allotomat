@@ -1,4 +1,4 @@
-﻿using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Extensions;
 using GraphQL.Conventions;
 using Hangfire;
 using Hangfire.Dashboard;
@@ -28,6 +28,7 @@ using Sig.App.Backend.Authorization.Requirements;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DataSeeders;
 using Sig.App.Backend.DbModel;
+using Sig.App.Backend.Services.Kiosk;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Gql;
@@ -176,6 +177,9 @@ namespace Sig.App.Backend
             
             services.Configure<HmacSignatureOptions>(configuration.GetSection("hmac"));
             services.AddSingleton<ISignatureService, HmacSignatureService>();
+
+            services.Configure<KioskJwtOptions>(configuration.GetSection("kiosk:jwt"));
+            services.AddSingleton<KioskJwtService>();
             
             // File system
             

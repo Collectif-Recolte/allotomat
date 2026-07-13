@@ -77,4 +77,87 @@ function getColorList() {
   return colorList;
 }
 
-export { getColorName, getColorBgClass, getColorList };
+function getGiftCardBgClass(fullOpacity = false) {
+  return fullOpacity ? "bg-secondary-800 bg-diagonal-pattern" : "bg-secondary-800/10 bg-diagonal-pattern";
+}
+
+function getKioskProductGroupCardClasses(color, isGiftCard = false, dark = false) {
+  if (isGiftCard) {
+    return {
+      border: "border-secondary-800",
+      bg: getGiftCardBgClass(dark),
+      text: dark ? "text-white" : "text-secondary-800"
+    };
+  }
+
+  switch (color) {
+    case COLOR_1:
+      return {
+        border: "border-products-50",
+        bg: dark ? "bg-products-50" : "bg-products-50/10",
+        text: dark ? "text-white" : "text-products-50"
+      };
+    case COLOR_2:
+      return {
+        border: "border-products-100",
+        bg: dark ? "bg-products-100" : "bg-products-100/10",
+        text: dark ? "text-white" : "text-products-100"
+      };
+    case COLOR_3:
+      return {
+        border: "border-products-200",
+        bg: dark ? "bg-products-200" : "bg-products-200/10",
+        text: dark ? "text-white" : "text-primary-900"
+      };
+    case COLOR_4:
+      return {
+        border: "border-products-300",
+        bg: dark ? "bg-products-300" : "bg-products-300/10",
+        text: dark ? "text-white" : "text-primary-900"
+      };
+    case COLOR_5:
+      return {
+        border: "border-products-400",
+        bg: dark ? "bg-products-400" : "bg-products-400/10",
+        text: dark ? "text-white" : "text-primary-900"
+      };
+    case COLOR_6:
+      return {
+        border: "border-products-500",
+        bg: dark ? "bg-products-500" : "bg-products-500/10",
+        text: dark ? "text-white" : "text-primary-900"
+      };
+    case COLOR_7:
+      return {
+        border: "border-products-600",
+        bg: dark ? "bg-products-600" : "bg-products-600/10",
+        text: dark ? "text-white" : "text-primary-900"
+      };
+    case COLOR_8:
+      return {
+        border: "border-products-700",
+        bg: dark ? "bg-products-700" : "bg-products-700/10",
+        text: dark ? "text-white" : "text-primary-900"
+      };
+    case COLOR_9:
+      return {
+        border: "border-products-800",
+        bg: dark ? "bg-products-800" : "bg-products-800/10",
+        text: dark ? "text-white" : "text-primary-900"
+      };
+    case COLOR_10:
+      return {
+        border: "border-products-900",
+        bg: dark ? "bg-products-900" : "bg-products-900/10",
+        text: dark ? "text-white" : "text-primary-900"
+      };
+    default:
+      return {
+        border: "border-primary-300",
+        bg: dark ? "bg-primary-700" : "bg-primary-100",
+        text: dark ? "text-white" : "text-primary-900"
+      };
+  }
+}
+
+export { getColorName, getColorBgClass, getColorList, getGiftCardBgClass, getKioskProductGroupCardClasses };

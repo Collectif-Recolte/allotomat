@@ -48,6 +48,7 @@
         </div>
       </div>
     </dl>
+    <CashRegisterKiosk v-if="cashRegister.marketGroups.length > 0 && !cashRegister.isArchived" :cash-register="cashRegister" />
   </div>
 </template>
 
@@ -56,6 +57,7 @@ import { defineProps } from "vue";
 import { useI18n } from "vue-i18n";
 
 import CashRegisterActions from "@/components/cash-register/cash-register-actions";
+import CashRegisterKiosk from "@/components/cash-register/cash-register-kiosk";
 
 const dtClasses = "text-primary-700 text-p2";
 const ddClasses = "text-primary-900 text-h4 leading-normal";

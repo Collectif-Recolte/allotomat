@@ -156,6 +156,10 @@ export const URL_CARDS_GIFT_CARD_DISABLE = "cards-gift-card-disable-url";
 export const URL_CARDS_GIFT_CARD_ENABLE = "cards-gift-card-enable-url";
 export const URL_CARDS_GIFT_CARD_QRCODE_PREVIEW = "cards-gift-card-qrcode-preview-url";
 
+export const URL_KIOSK_HOME = "kiosk-home-url";
+export const URL_KIOSK_TRANSACTION = "kiosk-transaction-url";
+export const URL_KIOSK_CHECK = "kiosk-check-url";
+
 export const URL_CARD_CHECK = "card-check-url";
 export const URL_CARD_ERROR = "card-error-url";
 export const URL_UNSUBSCRIBE_TRANSACTION_RECEIPT = "unsubscribe-transaction-receipt-url";

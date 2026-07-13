@@ -82,13 +82,19 @@
       </div>
       <h3 class="mb-2 mt-4">{{ t("subscriptions-title") }}</h3>
       <ul class="inline-flex flex-col justify-start items-start gap-y-1 mb-4 max-w-full">
-        <li v-for="beneficiarySubscription in beneficiary.beneficiarySubscriptions"
-          :key="beneficiarySubscription.subscription.id" class="mb-4">
+        <li
+          v-for="beneficiarySubscription in beneficiary.beneficiarySubscriptions"
+          :key="beneficiarySubscription.subscription.id"
+          class="mb-4">
           <b>{{ subscriptionName(beneficiarySubscription.subscription) }}</b>
           <!-- eslint-disable vue/no-v-html @intlify/vue-i18n/no-v-html -->
-          <div v-html="t('amount-received-each-payment', { amountByPayment: amountByPayment(beneficiarySubscription.subscription) })
+          <div
+            v-html="
+              t('amount-received-each-payment', { amountByPayment: amountByPayment(beneficiarySubscription.subscription) })
             " />
-          <div v-html="t('remaining-payment-on-card', { remainingPayment: beneficiarySubscription.subscription.paymentRemaining })
+          <div
+            v-html="
+              t('remaining-payment-on-card', { remainingPayment: beneficiarySubscription.subscription.paymentRemaining })
             " />
           <div v-html="getPaymentDates(beneficiarySubscription.subscription)" />
           <div v-html="getExpirationDate(beneficiarySubscription.subscription)" />
@@ -106,25 +112,49 @@
     }}
   </p>
   <p v-if="card && card.isDisabled" class="text-red-500 font-bold">{{ t("card-is-disabled") }}</p>
-  <Form v-if="funds" v-slot="{ isSubmitting, errors: formErrors }" :initial-values="initialValues"
-    :validation-schema="currentSchema" keep-values @submit="nextStep">
+  <Form
+    v-if="funds"
+    v-slot="{ isSubmitting, errors: formErrors }"
+    :initial-values="initialValues"
+    :validation-schema="currentSchema"
+    keep-values
+    @submit="nextStep">
     <div v-if="funds.length > 0">
-      <PfForm v-if="currentStep === 0" has-footer footer-alt-style can-cancel
-        :disable-submit="Object.keys(formErrors).length > 0 || card.isDisabled" :submit-label="t('create-transaction')"
-        :cancel-label="t('cancel')" :processing="isSubmitting" @cancel="goToAdminTransaction">
+      <PfForm
+        v-if="currentStep === 0"
+        has-footer
+        footer-alt-style
+        can-cancel
+        :disable-submit="Object.keys(formErrors).length > 0 || card.isDisabled"
+        :submit-label="t('create-transaction')"
+        :cancel-label="t('cancel')"
+        :processing="isSubmitting"
+        @cancel="goToAdminTransaction">
         <PfFormSection>
           <FieldArray v-slot="{ fields }" key-path="id" name="funds">
-            <div v-for="(field, idx) in fields" :key="field.key"
+            <div
+              v-for="(field, idx) in fields"
+              :key="field.key"
               :class="getIsGiftCard(funds[idx].fund.productGroup.name) ? 'pt-6 border-t border-grey-100' : ''">
-              <div class="p-4 pt-2.5 rounded-lg" :class="[
-                getColorBgClass(funds[idx].fund.productGroup.color),
-                getIsGiftCard(funds[idx].fund.productGroup.name) ? 'bg-diagonal-pattern' : 'dark'
-              ]">
-                <Field :id="`funds[${idx}].amount`" v-slot="{ field: inputField, errors: fieldErrors }"
+              <div
+                class="p-4 pt-2.5 rounded-lg"
+                :class="
+                  getIsGiftCard(funds[idx].fund.productGroup.name)
+                    ? getGiftCardBgClass()
+                    : [getColorBgClass(funds[idx].fund.productGroup.color), 'dark']
+                ">
+                <Field
+                  :id="`funds[${idx}].amount`"
+                  v-slot="{ field: inputField, errors: fieldErrors }"
                   :name="`funds[${idx}].amount`">
-                  <PfFormInputText :id="`funds[${idx}].amount`" class="grow" v-bind="inputField"
+                  <PfFormInputText
+                    :id="`funds[${idx}].amount`"
+                    class="grow"
+                    v-bind="inputField"
                     :label="fundLabel(funds[idx].fund, 'amount-label')"
-                    :after-label="fundAfterLabel(funds[idx].fund, 'amount-after-label')" :errors="fieldErrors" is-large
+                    :after-label="fundAfterLabel(funds[idx].fund, 'amount-after-label')"
+                    :errors="fieldErrors"
+                    is-large
                     input-mode="decimal">
                     <template #trailingIcon>
                       <UiDollarSign :errors="fieldErrors" />
@@ -136,8 +166,15 @@
           </FieldArray>
         </PfFormSection>
       </PfForm>
-      <PfForm v-else has-footer footer-alt-style :submit-label="t('confirm')" :cancel-label="t('edit')" can-cancel
-        :processing="isSubmitting" @cancel="prevStep">
+      <PfForm
+        v-else
+        has-footer
+        footer-alt-style
+        :submit-label="t('confirm')"
+        :cancel-label="t('edit')"
+        can-cancel
+        :processing="isSubmitting"
+        @cancel="prevStep">
         <PfFormSection>
           <p class="text-h1 font-bold text-primary-700 mb-0">
             {{ t("amount-charged") }}
@@ -147,12 +184,18 @@
           <div>
             <p class="mb-2 text-p3">{{ t("product-groups") }}</p>
             <ul class="mb-0 w-full">
-              <li v-for="item in funds" :key="item.id" class="mb-2 last:mb-0 text-p2"
+              <li
+                v-for="item in funds"
+                :key="item.id"
+                class="mb-2 last:mb-0 text-p2"
                 :class="getIsGiftCard(item.fund.productGroup.name) ? 'mt-6 pt-4 border-t border-grey-100' : 'dark'">
-                <div class="flex items-center w-full rounded-md py-1 px-2 text-primary-900 dark:text-white" :class="[
-                  getColorBgClass(item.fund.productGroup.color),
-                  getIsGiftCard(item.fund.productGroup.name) ? 'bg-diagonal-pattern' : ''
-                ]">
+                <div
+                  class="flex items-center w-full rounded-md py-1 px-2 text-primary-900 dark:text-white"
+                  :class="
+                    getIsGiftCard(item.fund.productGroup.name)
+                      ? getGiftCardBgClass()
+                      : getColorBgClass(item.fund.productGroup.color)
+                  ">
                   <span class="w-1/2 font-bold text-lg">
                     {{ fundLabel(item.fund, "confirmation-amount-label") }}
                   </span>
@@ -167,8 +210,14 @@
       </PfForm>
     </div>
     <div v-else>
-      <PfForm can-cancel :disable-submit="true" has-footer footer-alt-style :submit-label="t('create-transaction')"
-        :cancel-label="t('cancel')" @cancel="goToAdminTransaction">
+      <PfForm
+        can-cancel
+        :disable-submit="true"
+        has-footer
+        footer-alt-style
+        :submit-label="t('create-transaction')"
+        :cancel-label="t('cancel')"
+        @cancel="goToAdminTransaction">
         <div>{{ t("no-funds-message") }}</div>
       </PfForm>
     </div>
@@ -184,8 +233,7 @@ import { number, object, lazy, array, string } from "yup";
 import { FieldArray } from "vee-validate";
 import { storeToRefs } from "pinia";
 
-import { PRODUCT_GROUP_LOYALTY, TRANSACTION_STEPS_COMPLETE } from "@/lib/consts/enums";
-import { USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
+import { PRODUCT_GROUP_LOYALTY, TRANSACTION_STEPS_COMPLETE, USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
 import {
   FIRST_DAY_OF_THE_MONTH,
   FIFTEENTH_DAY_OF_THE_MONTH,
@@ -194,7 +242,7 @@ import {
 
 import { getMoneyFormat } from "@/lib/helpers/money";
 import { usePageTitle } from "@/lib/helpers/page-title";
-import { getColorBgClass } from "@/lib/helpers/products-color";
+import { getColorBgClass, getGiftCardBgClass } from "@/lib/helpers/products-color";
 import { formatDate, dateUtc, regularFormat, textualFormat } from "@/lib/helpers/date";
 
 import { useAuthStore } from "@/lib/store/auth";
@@ -219,11 +267,11 @@ const props = defineProps({
   },
   marketId: {
     type: String,
-    required: true
+    default: ""
   },
   cashRegisterId: {
     type: String,
-    required: true
+    default: ""
   }
 });
 
@@ -332,9 +380,8 @@ const { result: resultMarket } = useQuery(
       }
     }
   `,
-  {
-    id: props.marketId
-  }
+  () => ({ id: props.marketId }),
+  () => ({ enabled: !!props.marketId })
 );
 const market = useResult(resultMarket, null, (data) => {
   return data.market;
@@ -519,11 +566,13 @@ function amountByPayment(subscription) {
 
 async function onSubmit() {
   emit("onUpdateLoadingState", true);
-  var result = await createTransaction({
+  const transactions = funds.value
+    .filter((x) => parseFloat(x.amount) > 0)
+    .map((x) => ({ amount: parseFloat(x.amount), productGroupId: x.fund.productGroup.id }));
+
+  const result = await createTransaction({
     input: {
-      transactions: funds.value
-        .filter((x) => parseFloat(x.amount) > 0)
-        .map((x) => ({ amount: parseFloat(x.amount), productGroupId: x.fund.productGroup.id })),
+      transactions,
       cardId: props.cardId,
       marketId: props.marketId,
       cashRegisterId: currentCashRegister || props.cashRegisterId

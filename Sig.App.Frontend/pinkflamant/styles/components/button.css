@@ -81,12 +81,31 @@
       }
     }
 
+    &--white {
+      @apply text-primary-700
+            bg-white
+            hover:bg-primary-200
+            ring-primary-700;
+
+      &[disabled],
+      &[readonly] {
+        @apply text-grey-400
+        bg-grey-100
+        hover:bg-grey-100
+        ring-grey-600;
+      }
+    }
+
     &--outline {
       @apply border
             text-primary-700
             border-primary-700
             hover:bg-primary-100
-            ring-primary-700;
+            ring-primary-700
+            dark:text-white
+            dark:border-white
+            dark:hover:bg-primary-800
+            dark:ring-white;
 
       &[disabled],
       &[readonly] {

@@ -157,6 +157,25 @@ import { formatDate, dateUtc, regularFormat } from "@/lib/helpers/date";
 const { t } = useI18n();
 const router = useRouter();
 
+const props = defineProps({
+  beneficiary: {
+    type: Object,
+    required: true
+  },
+  beneficiariesAreAnonymous: {
+    type: Boolean,
+    default: false
+  },
+  organization: {
+    type: Object,
+    default: null
+  },
+  isAllGroupSelected: {
+    type: Boolean,
+    default: false
+  }
+});
+
 const beneficiary = ref(null);
 
 const dlGroupClasses = "flex items-start gap-x-3";
@@ -185,25 +204,6 @@ watch(
     };
   }
 );
-
-const props = defineProps({
-  beneficiary: {
-    type: Object,
-    required: true
-  },
-  beneficiariesAreAnonymous: {
-    type: Boolean,
-    default: false
-  },
-  organization: {
-    type: Object,
-    default: null
-  },
-  isAllGroupSelected: {
-    type: Boolean,
-    default: false
-  }
-});
 
 function isBeneficiaryPaymentConflict() {
   for (var i = 0; i < beneficiary.value.beneficiarySubscriptions.length; i++) {
