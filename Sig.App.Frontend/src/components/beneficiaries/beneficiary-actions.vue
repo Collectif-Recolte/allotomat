@@ -22,7 +22,7 @@
       "beneficiary-assign-subscription": "Assign subscription",
       "beneficiary-assign-subscription-disabled": "You can't assign a subscription if the \"All Groups\" option is selected",
       "beneficiary-create-transaction": "Create transaction",
-      "beneficiary-create-transaction-no-market": "You can't create a transaction if the group doesn't have a market",
+      "beneficiary-create-transaction-no-market": "You can't create a transaction if the group doesn't have a merchant",
       "beneficiary-create-transaction-no-card": "You can't create a transaction if the participant doesn't have a card",
       "beneficiary-create-transaction-card-disabled": "You can't create a transaction if the participant's card is deactivated",
       "beneficiary-create-transaction-all-group": "You can't create a transaction if the \"All Groups\" option is selected",
