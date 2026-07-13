@@ -1,3 +1,28 @@
+<i18n>
+{
+  "en": {
+    "verify-before-confirm": "Please verify before confirming",
+    "purchase-title": "Make a purchase",
+    "card-number": "Card #{cardProgramCardId}",
+    "amount-charged": "The card will be charged ",
+    "cancel": "Cancel",
+    "confirm-payment": "Confirm payment",
+    "irreversible-warning": "This action is irreversible.",
+    "gift-card": "Gift card"
+  },
+  "fr": {
+    "verify-before-confirm": "Veuillez vérifier avant de confirmer",
+    "purchase-title": "Faire un achat",
+    "card-number": "Carte #{cardProgramCardId}",
+    "amount-charged": "La carte sera débitée de ",
+    "cancel": "Annuler",
+    "confirm-payment": "Confirmer le paiement",
+    "irreversible-warning": "Cette action est irréversible.",
+    "gift-card": "Carte-cadeau"
+  }
+}
+</i18n>
+
 <template>
   <div class="flex flex-col h-full">
     <div class="bg-yellow-100 text-yellow-800 text-center font-bold text-d6 py-4 px-8 rounded-t-4xl">
@@ -103,28 +128,3 @@ function getKioskCategoryClasses(item) {
   return [styles.border, styles.bg, styles.text];
 }
 </script>
-
-<i18n>
-{
-  "en": {
-    "verify-before-confirm": "Please verify before confirming",
-    "purchase-title": "Make a purchase",
-    "card-number": "Card #{cardProgramCardId}",
-    "amount-charged": "The card will be charged ",
-    "cancel": "Cancel",
-    "confirm-payment": "Confirm payment",
-    "irreversible-warning": "This action is irreversible.",
-    "gift-card": "Gift card"
-  },
-  "fr": {
-    "verify-before-confirm": "Veuillez vérifier avant de confirmer",
-    "purchase-title": "Faire un achat",
-    "card-number": "Carte #{cardProgramCardId}",
-    "amount-charged": "La carte sera débitée de ",
-    "cancel": "Annuler",
-    "confirm-payment": "Confirmer le paiement",
-    "irreversible-warning": "Cette action est irréversible.",
-    "gift-card": "Carte-cadeau"
-  }
-}
-</i18n>

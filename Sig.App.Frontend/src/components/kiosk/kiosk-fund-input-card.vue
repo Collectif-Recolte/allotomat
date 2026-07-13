@@ -1,3 +1,16 @@
+<i18n>
+{
+  "en": {
+    "balance-label": "Balance: {amount}",
+    "gift-card": "Gift card"
+  },
+  "fr": {
+    "balance-label": "Solde: {amount}",
+    "gift-card": "Carte-cadeau"
+  }
+}
+</i18n>
+
 <template>
   <div
     class="rounded-2xl border-2 p-5 flex flex-row items-center gap-6 min-h-[104px]"
@@ -40,16 +53,3 @@ const productGroupLabel = computed(() => {
 
 const cardStyles = computed(() => getKioskProductGroupCardClasses(props.fund.productGroup.color, props.isGiftCard));
 </script>
-
-<i18n>
-{
-  "en": {
-    "balance-label": "Balance: {amount}",
-    "gift-card": "Gift card"
-  },
-  "fr": {
-    "balance-label": "Solde: {amount}",
-    "gift-card": "Carte-cadeau"
-  }
-}
-</i18n>
