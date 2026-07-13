@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
@@ -15,6 +16,17 @@ namespace Sig.App.Backend.Services.Kiosk
         public bool TokenFound { get; set; }
         public bool IsOperational { get; set; }
         public bool MarketIsDisabled { get; set; }
+
+        public bool CanBeUsed([NotNullWhen(false)] out string reason)
+        {
+            reason = null;
+            
+            if (!TokenFound) reason = "Token not found"; 
+            else if (!IsOperational) reason = "Cash register is not operational";
+            else if (MarketIsDisabled) reason = "Market is disabled";
+            
+            return reason == null;
+        }
     }
 
     public static class KioskCashRegisterResolver

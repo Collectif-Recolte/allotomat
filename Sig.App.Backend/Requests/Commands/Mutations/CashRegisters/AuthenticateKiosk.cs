@@ -28,9 +28,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.CashRegisters
 
             var resolved = await KioskCashRegisterResolver.Resolve(db, request.Token, cancellationToken);
 
-            if (!resolved.TokenFound || !resolved.IsOperational || resolved.MarketIsDisabled)
+            if (!resolved.CanBeUsed(out var reason))
             {
-                logger.LogWarning("[Mutation] AuthenticateKiosk - KioskAccessInvalidException");
+                logger.LogWarning("[Mutation] AuthenticateKiosk - KioskAccessInvalidException - {Reason}", reason);
                 throw new KioskAccessInvalidException();
             }
 

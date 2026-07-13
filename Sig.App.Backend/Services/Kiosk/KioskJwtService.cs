@@ -8,19 +8,22 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Sig.App.Backend.Services.Kiosk
 {
     public class KioskJwtService
     {
+        private readonly ILogger<KioskJwtService> logger;
         public const string KioskSlugClaim = "kiosk_slug";
         private static readonly TimeSpan TokenLifetime = TimeSpan.FromDays(365 * 3);
 
         private readonly KioskJwtOptions options;
         private readonly JwtSecurityTokenHandler tokenHandler = new();
 
-        public KioskJwtService(IOptions<KioskJwtOptions> options)
+        public KioskJwtService(IOptions<KioskJwtOptions> options, ILogger<KioskJwtService> logger)
         {
+            this.logger = logger;
             this.options = options.Value;
         }
 
@@ -52,8 +55,9 @@ namespace Sig.App.Backend.Services.Kiosk
             var kioskSlug = ValidateAndGetSlug(authToken);
             var resolved = await KioskCashRegisterResolver.Resolve(db, kioskSlug, cancellationToken);
 
-            if (!resolved.TokenFound || !resolved.IsOperational || resolved.MarketIsDisabled)
+            if (!resolved.CanBeUsed(out var reason))
             {
+                logger.LogWarning("KioskJwtService.ResolveFromAuthToken - KioskAccessInvalidException - {Reason}", reason);
                 throw new KioskAccessInvalidException();
             }
 
