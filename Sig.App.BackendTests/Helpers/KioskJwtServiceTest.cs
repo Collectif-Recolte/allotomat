@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
@@ -22,7 +23,7 @@ namespace Sig.App.BackendTests.Helpers
             service = new KioskJwtService(Options.Create(new KioskJwtOptions
             {
                 SigningKey = SigningKey
-            }));
+            }), NullLogger<KioskJwtService>.Instance);
         }
 
         [Fact]

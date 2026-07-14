@@ -1,6 +1,7 @@
 using FluentAssertions;
 using GraphQL.Conventions;
 using MediatR;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
@@ -25,7 +26,7 @@ namespace Sig.App.BackendTests.Requests.Queries.Cards
 
         public VerifyCardCanBeUsedInKioskTest()
         {
-            var jwtService = new KioskJwtService(Options.Create(new KioskJwtOptions { SigningKey = SigningKey }));
+            var jwtService = new KioskJwtService(Options.Create(new KioskJwtOptions { SigningKey = SigningKey }), NullLogger<KioskJwtService>.Instance);
             handler = new VerifyCardCanBeUsedInKiosk(DbContext, Mediator, jwtService);
             cashRegister = CreateOperationalKiosk("kiosk-slug", "ABCD1234").GetAwaiter().GetResult();
             jwt = jwtService.IssueToken(cashRegister.KioskAccessToken).AccessToken;

@@ -1,5 +1,6 @@
 using FluentAssertions;
 using MediatR;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
@@ -23,14 +24,14 @@ namespace Sig.App.BackendTests.Requests.Queries.CashRegisters
         {
             handler = new ValidateKioskSession(
                 DbContext,
-                new KioskJwtService(Options.Create(new KioskJwtOptions { SigningKey = SigningKey })));
+                new KioskJwtService(Options.Create(new KioskJwtOptions { SigningKey = SigningKey }), NullLogger<KioskJwtService>.Instance));
         }
 
         [Fact]
         public async Task ReturnsTrueForValidJwt()
         {
             var cashRegister = await CreateOperationalKiosk("kiosk-slug-123", "ABCD1234");
-            var jwtService = new KioskJwtService(Options.Create(new KioskJwtOptions { SigningKey = SigningKey }));
+            var jwtService = new KioskJwtService(Options.Create(new KioskJwtOptions { SigningKey = SigningKey }), NullLogger<KioskJwtService>.Instance);
             var (jwt, _) = jwtService.IssueToken(cashRegister.KioskAccessToken);
 
             var result = await handler.Handle(new ValidateKioskSession.Input { KioskToken = jwt }, CancellationToken.None);
@@ -49,7 +50,7 @@ namespace Sig.App.BackendTests.Requests.Queries.CashRegisters
         public async Task ThrowsAfterTokenRegeneration()
         {
             var cashRegister = await CreateOperationalKiosk("old-slug", "ABCD1234");
-            var jwtService = new KioskJwtService(Options.Create(new KioskJwtOptions { SigningKey = SigningKey }));
+            var jwtService = new KioskJwtService(Options.Create(new KioskJwtOptions { SigningKey = SigningKey }), NullLogger<KioskJwtService>.Instance);
             var (jwt, _) = jwtService.IssueToken(cashRegister.KioskAccessToken);
 
             cashRegister.KioskAccessToken = KioskHelper.GenerateAccessToken();

@@ -26,7 +26,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.CashRegisters
             handler = new AuthenticateKiosk(
                 NullLogger<AuthenticateKiosk>.Instance,
                 DbContext,
-                new KioskJwtService(Options.Create(new KioskJwtOptions { SigningKey = SigningKey })));
+                new KioskJwtService(Options.Create(new KioskJwtOptions { SigningKey = SigningKey }), NullLogger<KioskJwtService>.Instance));
 
             cashRegister = CreateOperationalKiosk("kiosk-slug", "ABCD1234").GetAwaiter().GetResult();
         }
