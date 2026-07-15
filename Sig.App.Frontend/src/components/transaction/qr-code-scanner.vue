@@ -4,6 +4,7 @@
 		"validation-in-progress": "Validation in progress",
     "flip-camera": "Flip the camera",
     "scan-instruction": "Bring your card close to the reader to scan the QR code in the center of the screen.",
+    "scan-privacy": "These images are only used to identify your card. They are not transmitted or shared with anyone.",
     "cancel": "Cancel",
     "scan-error-title": "Scan error",
     "scan-error-message": "The QR code was not recognized."
@@ -12,6 +13,7 @@
 		"validation-in-progress": "Validation en cours",
     "flip-camera": "Retourner la caméra",
     "scan-instruction": "Approchez votre carte du lecteur pour scanner le code QR au centre de l'écran.",
+    "scan-privacy": "Ces images servent uniquement à identifier votre carte. Elles ne sont ni transmises ni partagées avec personne.",
     "cancel": "Annuler",
     "scan-error-title": "Erreur de scan",
     "scan-error-message": "Le code QR n'a pas été reconnu."
@@ -31,7 +33,10 @@
         <p class="font-bold text-red-500 mb-1">{{ t("scan-error-title") }}</p>
         <p class="text-red-500 mb-0">{{ t("scan-error-message") }}</p>
       </template>
-      <p v-else class="text-primary-700 mb-0">{{ t("scan-instruction") }}</p>
+      <template v-else>
+        <p class="text-primary-700 mb-2">{{ t("scan-instruction") }}</p>
+        <p class="text-d7 text-grey-600 mb-0">{{ t("scan-privacy") }}</p>
+      </template>
     </div>
     <div
       v-if="props.kioskMode"
