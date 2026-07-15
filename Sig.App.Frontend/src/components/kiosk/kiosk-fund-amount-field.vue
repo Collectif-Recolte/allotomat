@@ -22,7 +22,7 @@
           class="w-full text-right text-h1 font-bold placeholder:text-grey-400 placeholder:font-normal border-0 p-0 pr-8 focus:ring-0 bg-transparent"
           :class="fieldErrors.length ? 'text-red-600' : 'text-primary-900'"
           placeholder="0"
-          @blur="handleBlur"
+          @blur="(e) => onAmountBlur(e, handleChange, handleBlur)"
           @input="handleChange" />
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         <span
@@ -32,7 +32,7 @@
           $
         </span>
       </label>
-      <p v-if="fieldErrors.length" class="text-red-600 text-p4 mt-1 text-right">{{ fieldErrors[0] }}</p>
+      <p v-if="fieldErrors.length" class="text-red-600 text-p4 mt-1 mb-0 text-right">{{ fieldErrors[0] }}</p>
     </Field>
   </KioskFundInputCard>
 </template>
@@ -49,4 +49,22 @@ const props = defineProps({
 });
 
 const inputId = computed(() => `funds[${props.idx}].amount`);
+
+/** Keep at most two digits after the decimal separator (. or ,). */
+function limitToTwoDecimals(value) {
+  return String(value ?? "").replace(/([.,]\d{2})\d+/g, "$1");
+}
+
+function onAmountBlur(event, handleChange, handleBlur) {
+  let value = limitToTwoDecimals(event.target.value);
+  const normalized = String(value).replace(/,/, ".").trim();
+  if (normalized !== "" && !Number.isNaN(Number(normalized)) && Number(normalized) === 0) {
+    value = "";
+  }
+  if (value !== event.target.value) {
+    event.target.value = value;
+    handleChange(event);
+  }
+  handleBlur(event);
+}
 </script>
