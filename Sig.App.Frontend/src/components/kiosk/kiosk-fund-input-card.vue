@@ -13,10 +13,10 @@
 
 <template>
   <div
-    class="rounded-2xl border-2 p-5 flex flex-row items-center gap-6 min-h-[104px]"
+    class="rounded-2xl border-2 p-5 flex flex-row items-center gap-6 min-h-[104px] h-full"
     :class="[cardStyles.border, cardStyles.bg]">
     <div class="flex-1 min-w-0">
-      <p class="font-bold truncate text-d6 mb-1" :class="cardStyles.text" :title="productGroupLabel">
+      <p class="font-bold line-clamp-2 text-d6 mb-1" :class="cardStyles.text" :title="productGroupLabel">
         {{ productGroupLabel }}
       </p>
       <p class="text-d7 text-primary-700 mb-0 leading-tight">

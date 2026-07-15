@@ -32,7 +32,7 @@
           $
         </span>
       </label>
-      <p v-if="fieldErrors.length" class="text-red-600 text-p4 mt-1 text-right">{{ fieldErrors[0] }}</p>
+      <p v-if="fieldErrors.length" class="text-red-600 text-p4 mt-1 mb-0 text-right">{{ fieldErrors[0] }}</p>
     </Field>
   </KioskFundInputCard>
 </template>
@@ -56,9 +56,13 @@ function limitToTwoDecimals(value) {
 }
 
 function onAmountBlur(event, handleChange, handleBlur) {
-  const limited = limitToTwoDecimals(event.target.value);
-  if (limited !== event.target.value) {
-    event.target.value = limited;
+  let value = limitToTwoDecimals(event.target.value);
+  const normalized = String(value).replace(/,/, ".").trim();
+  if (normalized !== "" && !Number.isNaN(Number(normalized)) && Number(normalized) === 0) {
+    value = "";
+  }
+  if (value !== event.target.value) {
+    event.target.value = value;
     handleChange(event);
   }
   handleBlur(event);
