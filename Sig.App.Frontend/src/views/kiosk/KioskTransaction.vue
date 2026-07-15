@@ -3,14 +3,16 @@
   "en": {
     "title": "Make a purchase",
     "purchase-title": "Make a purchase",
+    "program-label": "Program {programName}",
     "card-number": "Card #{cardProgramCardId}",
-    "instruction": "☝️ Enter the amount to debit from your <strong>Proximity Card</strong> for each product category."
+    "instruction": "☝️ Enter the amount to debit from your <strong>card</strong> for each type of funds."
   },
   "fr": {
     "title": "Faire un achat",
     "purchase-title": "Faire un achat",
+    "program-label": "Programme {programName}",
     "card-number": "Carte #{cardProgramCardId}",
-    "instruction": "☝️ Entrez le montant à débiter de votre <strong>Carte Proximité</strong> pour chaque catégorie de produits."
+    "instruction": "☝️ Entrez le montant à débiter de votre <strong>carte</strong> pour chaque type de fonds."
   }
 }
 </i18n>
@@ -27,16 +29,21 @@
     v-else-if="activeStep === KIOSK_STEP_ADD"
     class="flex flex-col justify-center min-h-[var(--kiosk-content-min-height)] px-6 xs:px-8 sm:px-12 py-12 w-full max-w-5xl mx-auto">
     <div v-if="!isConfirmStep" class="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-y-4 gap-x-8 mb-6 sm:mb-8">
-      <h1 class="font-bold text-d2 text-primary-700 shrink-0 my-0 flex flex-wrap items-baseline gap-4 leading-none">
-        {{ t("purchase-title") }}
-        <template v-if="cardProgramCardId !== ''">
-          <span class="text-d7 text-grey-500 font-normal relative -top-1">
-            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-            <span class="mr-1">|</span>
-            {{ t("card-number", { cardProgramCardId }) }}
-          </span>
-        </template>
-      </h1>
+      <div class="shrink-0">
+        <h1 class="font-bold text-d2 text-primary-700 my-0 flex flex-wrap items-baseline gap-4 leading-none">
+          {{ t("purchase-title") }}
+          <template v-if="cardProgramCardId !== ''">
+            <span class="text-d7 text-grey-500 font-normal relative -top-1">
+              <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+              <span class="mr-1">|</span>
+              {{ t("card-number", { cardProgramCardId }) }}
+            </span>
+          </template>
+        </h1>
+        <p v-if="programName" class="mt-2 text-grey-600 text-d6 mb-0">
+          {{ t("program-label", { programName }) }}
+        </p>
+      </div>
       <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
       <p class="text-d6 text-primary-700 xs:text-right xs:max-w-md leading-snug mb-0" v-html="t('instruction')" />
     </div>
@@ -48,7 +55,7 @@
         @onUpdateLoadingState="loading = $event"
         @onCloseModal="goHome"
         @kiosk-auth-error="handleKioskAuthError"
-        @card-loaded="cardProgramCardId = $event"
+        @card-loaded="onCardLoaded"
         @step-change="isConfirmStep = $event === 1" />
     </div>
   </div>
@@ -90,6 +97,7 @@ const { authToken, kioskRoute, handleKioskAuthError } = useKioskToken();
 const activeStep = ref(KIOSK_STEP_SCANNING);
 const cardId = ref("");
 const cardProgramCardId = ref("");
+const programName = ref("");
 const isConfirmStep = ref(false);
 const transactionId = ref("");
 const loading = ref(false);
@@ -97,8 +105,14 @@ const loading = ref(false);
 function onScanned(id) {
   cardId.value = id;
   cardProgramCardId.value = "";
+  programName.value = "";
   isConfirmStep.value = false;
   activeStep.value = KIOSK_STEP_ADD;
+}
+
+function onCardLoaded({ programCardId, programName: name }) {
+  cardProgramCardId.value = programCardId ?? "";
+  programName.value = name ?? "";
 }
 
 function onUpdateStep(stepName, values) {

@@ -2,13 +2,13 @@
 {
   "en": {
     "welcome": "Welcome!",
-    "subtitle": "Use your <strong>Proximity Card</strong> to make a purchase or check your balance.",
+    "subtitle": "Use your <strong>card</strong> to make a purchase or check your balance.",
     "make-purchase": "Make a purchase",
     "check-balance": "Check my card balance"
   },
   "fr": {
     "welcome": "Bienvenue!",
-    "subtitle": "Utilisez votre <strong>Carte Proximité</strong> pour faire un achat ou vérifier votre solde.",
+    "subtitle": "Utilisez votre <strong>carte</strong> pour faire un achat ou vérifier votre solde.",
     "make-purchase": "Faire un achat",
     "check-balance": "Vérifier le solde de ma carte"
   }

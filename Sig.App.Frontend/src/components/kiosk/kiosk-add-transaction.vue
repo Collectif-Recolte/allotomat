@@ -147,6 +147,10 @@ const { result, loading } = useQuery(
         id
         isDisabled
         programCardId
+        project {
+          id
+          name
+        }
         funds {
           id
           amount
@@ -199,7 +203,10 @@ watch(loading, (value) => emit("onUpdateLoadingState", value));
 
 watch(card, (value) => {
   if (value) {
-    emit("cardLoaded", value.programCardId ?? "");
+    emit("cardLoaded", {
+      programCardId: value.programCardId ?? "",
+      programName: value.project?.name ?? ""
+    });
   }
 });
 
