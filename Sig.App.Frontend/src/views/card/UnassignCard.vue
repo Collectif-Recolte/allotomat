@@ -24,10 +24,15 @@
 </i18n>
 
 <template>
-  <UiDialogDeleteModal :return-route="returnRoute()" :title="t('title', { beneficiaryName: getBeneficiaryName() })"
-    :description="t('description', { beneficiaryName: getBeneficiaryName() })" :validation-text="getBeneficiaryName()"
-    :delete-text-label="deleteTextLabel" :delete-text-error="deleteTextError"
-    :delete-button-label="t('unassign-btn-label')" @onDelete="unassignCard" />
+  <UiDialogDeleteModal
+    :return-route="returnRoute()"
+    :title="t('title', { beneficiaryName: getBeneficiaryName() })"
+    :description="t('description', { beneficiaryName: getBeneficiaryName() })"
+    :validation-text="getBeneficiaryName()"
+    :delete-text-label="deleteTextLabel"
+    :delete-text-error="deleteTextError"
+    :delete-button-label="t('unassign-btn-label')"
+    @onDelete="unassignCard" />
 </template>
 
 <script setup>

@@ -629,6 +629,14 @@ namespace Sig.App.Backend.Migrations
                     b.Property<bool>("IsArchived")
                         .HasColumnType("bit");
 
+                    b.Property<string>("KioskAccessToken")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("KioskPassword")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
                     b.Property<long>("MarketId")
                         .HasColumnType("bigint");
 
@@ -636,6 +644,10 @@ namespace Sig.App.Backend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("KioskAccessToken")
+                        .IsUnique()
+                        .HasFilter("[KioskAccessToken] IS NOT NULL");
 
                     b.HasIndex("MarketId");
 

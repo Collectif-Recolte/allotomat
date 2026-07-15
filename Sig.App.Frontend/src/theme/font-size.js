@@ -11,6 +11,8 @@ module.exports = {
   h2: ["1.563rem", "1.3"], // 25px if 1rem=16px
   h1: ["1.75rem", "1.25"], // 28px if 1rem=16px
   d7: ["1.125rem", "1.3"], // Display 18px if 1rem = 16px
+  d6: ["1.25rem", "1.3"], // Display 20px if 1rem = 16px
+  d3: ["2rem", "1.3"], // Display 32px if 1rem = 16px
   d2: ["2.5rem", "1"], // Display 40px if 1rem = 16px
   d1: ["3rem", "1"] // Display 1 48px if 1rem = 16px
 };

@@ -23,7 +23,7 @@ module.exports = {
     // Yellow
     500: "#F4C669", // Style guide
     // Ocre
-    800: "#C19335" // Style guide
+    800: "#C29355" // Style guide
   },
   // Coral
   tertiary: {
@@ -67,8 +67,11 @@ module.exports = {
     800: "#166534",
     900: "#14532d"
   },
+  // Jaune-orange, utilisé côté marchand
   yellow: {
-    500: "#F4C669"
+    100: "#FFF3E0",
+    500: "#F4C669",
+    800: "#FF9800"
   },
   products: {
     10: "#F7DEB0", // Beige

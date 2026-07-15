@@ -113,6 +113,34 @@ import {
 } from "@/lib/consts/urls";
 
 import { GLOBAL_MANAGE_CARDS } from "@/lib/consts/permissions";
+
+const props = defineProps({
+  beneficiary: {
+    type: Object,
+    required: true
+  },
+
+  beneficiariesAreAnonymous: {
+    type: Boolean,
+    default: false
+  },
+
+  haveSubscriptionConflict: {
+    type: Boolean,
+    default: false
+  },
+
+  organization: {
+    type: Object,
+    required: true
+  },
+
+  isAllGroupSelected: {
+    type: Boolean,
+    default: false
+  }
+});
+
 const { t } = useI18n();
 const { getGlobalPermissions } = storeToRefs(useAuthStore());
 const items = ref([]);
@@ -297,33 +325,6 @@ function updateItems() {
     ];
   }
 }
-
-const props = defineProps({
-  beneficiary: {
-    type: Object,
-    required: true
-  },
-
-  beneficiariesAreAnonymous: {
-    type: Boolean,
-    default: false
-  },
-
-  haveSubscriptionConflict: {
-    type: Boolean,
-    default: false
-  },
-
-  organization: {
-    type: Object,
-    required: true
-  },
-
-  isAllGroupSelected: {
-    type: Boolean,
-    default: false
-  }
-});
 
 function haveCard() {
   return props.beneficiary.card !== null;

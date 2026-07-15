@@ -156,18 +156,6 @@ useGraphQLErrorMessages({
 
 const emit = defineEmits(["cardAssignSuccess"]);
 
-const { getGlobalPermissions } = storeToRefs(useAuthStore());
-const { t } = useI18n();
-const { resolveClient } = useApolloClient();
-const client = resolveClient();
-
-const cardAssignSuccess = ref(false);
-const cardAssignId = ref(0);
-const project = ref(undefined);
-const isScanning = ref(props.showNumber);
-const showError = ref(false);
-const existingCardId = ref("");
-
 const props = defineProps({
   closeModal: {
     type: Function,
@@ -182,6 +170,18 @@ const props = defineProps({
     default: false
   }
 });
+
+const { getGlobalPermissions } = storeToRefs(useAuthStore());
+const { t } = useI18n();
+const { resolveClient } = useApolloClient();
+const client = resolveClient();
+
+const cardAssignSuccess = ref(false);
+const cardAssignId = ref(0);
+const project = ref(undefined);
+const isScanning = ref(props.showNumber);
+const showError = ref(false);
+const existingCardId = ref("");
 
 const { mutate: assignCardToBeneficiary } = useMutation(
   gql`
