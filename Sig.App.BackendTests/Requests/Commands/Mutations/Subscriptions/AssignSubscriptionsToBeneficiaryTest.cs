@@ -241,7 +241,12 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 .Where(x => x.Discriminator == TransactionLogDiscriminator.AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog)
                 .ToListAsync();
             allocationLogs.Should().HaveCount(3);
-            allocationLogs.Sum(x => x.TotalAmount).Should().Be(50 + 50 + 100);
+            allocationLogs.Select(x => (x.SubscriptionId, x.TotalAmount)).Should().BeEquivalentTo(new[]
+            {
+                ((long?)subscription1.Id, 50m),
+                ((long?)subscription2.Id, 50m),
+                ((long?)subscription3.Id, 100m),
+            });
         }
 
         [Fact]
