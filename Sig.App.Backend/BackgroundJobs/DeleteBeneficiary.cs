@@ -11,6 +11,7 @@ using System.Linq;
 using Sig.App.Backend.DbModel.Entities.BackgroundJobs;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Microsoft.EntityFrameworkCore;
+using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
@@ -85,11 +86,7 @@ namespace Sig.App.Backend.BackgroundJobs
 
         private DateTime ExpirationDate(Beneficiary beneficiary, IReadOnlyList<AddingFundToCardRun> todaysFundRuns)
         {
-            if (beneficiary.Subscriptions.Where(x =>
-            {
-                var todaysFundJobCompleted = SubscriptionHelper.IsTodaysFundJobCompleted(x.Subscription, clock, todaysFundRuns);
-                return x.GetPaymentRemaining(clock, todaysFundJobCompleted) > 0 && x.Subscription.GetExpirationDate(clock) > DateTime.UtcNow;
-            }).Any())
+            if (beneficiary.Subscriptions.Where(HasRemainingPayment).Any())
             {
                 return DateTime.MaxValue;
             }
@@ -103,6 +100,13 @@ namespace Sig.App.Backend.BackgroundJobs
             }
 
             return beneficiary.CreatedAtUtc.AddYears(5);
+
+            bool HasRemainingPayment(SubscriptionBeneficiary subscription)
+            {
+                var todaysFundJobCompleted = SubscriptionHelper.IsTodaysFundJobCompleted(subscription.Subscription, clock, todaysFundRuns);
+                return subscription.GetPaymentRemaining(clock, todaysFundJobCompleted) > 0 && 
+                       subscription.Subscription.GetExpirationDate(clock) > DateTime.UtcNow;
+            }
         }
     }
 }
