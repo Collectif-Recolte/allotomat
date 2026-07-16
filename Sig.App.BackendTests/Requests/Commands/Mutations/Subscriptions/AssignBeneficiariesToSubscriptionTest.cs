@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using GraphQL.Conventions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using NodaTime;
 using Sig.App.Backend.BackgroundJobs;
@@ -332,6 +333,12 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             localBudgetAllowance.AvailableFund.Should().Be(60);
             localSubscription.Beneficiaries.Count.Should().Be(8);
             subscriptionBeneficiaries.Count().Should().Be(8);
+
+            var allocationLogs = await DbContext.TransactionLogs
+                .Where(x => x.Discriminator == TransactionLogDiscriminator.AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog)
+                .ToListAsync();
+            allocationLogs.Should().HaveCount(8);
+            allocationLogs.Sum(x => x.TotalAmount).Should().Be(700 - 60);
         }
 
         [Fact]
