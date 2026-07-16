@@ -4,17 +4,30 @@
 @{ Layout = "_EmailLayout.cshtml"; }
 
 <p>
-    Reçu de remboursement
+    <i><b>English text below</b></i>
 </p>
 <p>
-    <b>Un remboursement de @MoneyHelper.GetMoneyFormat(Model.Amount, MoneyHelper.FR) a été complété entre vous et le commerce @Model.MarketName.</b><br />
-    <b>Votre solde est maintenant @MoneyHelper.GetMoneyFormat(Model.TotalFund, MoneyHelper.FR), réparti dans les groupes de produits suivants:</b>
+    Ceci est un message automatique. Merci de ne pas y répondre.<br />
+    Pour des informations concernant votre carte, veuillez contacter l'organisme qui vous l'a fournie.<br />
+    Pour toute question concernant votre achat, veuillez contacter directement le vendeur.
+</p>
+<p>
+    This is an automated message. Please do not respond.<br />
+    For questions about your card, please contact the organization the provided it.<br />
+    For inquiries about your purchase, please contact the seller directly.
+</p>
+<p>
+    <b>Reçu de remboursement</b>
+</p>
+<p>
+    Un remboursement de <b>@MoneyHelper.GetMoneyFormat(Model.Amount, MoneyHelper.FR)</b> a été complété entre vous et le commerce <b>@Model.MarketName.<br />
+    Votre solde est maintenant @MoneyHelper.GetMoneyFormat(Model.TotalFund, MoneyHelper.FR)</b>, réparti dans les groupes de produits suivants :
 </p>
 <p>
     @{
         foreach (var item in Model.ProductGroupAvailableFunds)
         {
-            <b>@item.Name - @MoneyHelper.GetMoneyFormat(item.Fund, MoneyHelper.FR)</b><br />
+            @item.Name - @MoneyHelper.GetMoneyFormat(item.Fund, MoneyHelper.FR)<br />
         }
     }
 </p>
@@ -22,27 +35,27 @@
     if (Model.ProjectUrl != "" && Model.ProjectUrl != null)
     {
         <p>
-            En savoir plus sur le programme:<br />
+            En savoir plus sur le programme :
             <a clicktracking="off" href="@Model.ProjectUrl">@Model.ProjectName</a>
         </p>
     }
 }
 <p>
-    Vous recevez ce courriel parce que vous êtes inscrit à notre plateforme. Si vous ne souhaitez plus recevoir de courriels, vous pouvez vous désabonner en cliquant ici : <a href="@Model.BaseUrl/@UrlHelper.UnsubscribeFromTransactionReceipt(Model.BeneficiaryId)">Se désabonner</a>
+    Vous recevez ce courriel parce que vous êtes inscrit·e à une carte qui utilise la plateforme de paiement Tomat. Si vous ne souhaitez plus recevoir ces courriels, vous pouvez vous désabonner en cliquant ici : <a href="@Model.BaseUrl/@UrlHelper.UnsubscribeFromTransactionReceipt(Model.BeneficiaryId)">Se désabonner</a>
 </p>
 <br />
 <p>
-    Transaction receipt
+    <b>Transaction receipt</b>
 </p>
 <p>
-    <b>A refund of @MoneyHelper.GetMoneyFormat(Model.Amount, MoneyHelper.EN) has been completed between you and @Model.MarketName.</b><br />
-    <b>Your balance is now @MoneyHelper.GetMoneyFormat(Model.TotalFund, MoneyHelper.EN), divided into the following product groups:</b>
+    A refund of <b>@MoneyHelper.GetMoneyFormat(Model.Amount, MoneyHelper.EN)</b> has been completed between you and @Model.MarketName.<br />
+    Your balance is now <b>@MoneyHelper.GetMoneyFormat(Model.TotalFund, MoneyHelper.EN)</b>, divided into the following product groups:
 </p>
 <p>
     @{
         foreach (var item in Model.ProductGroupAvailableFunds)
         {
-            <b>@item.Name - @MoneyHelper.GetMoneyFormat(item.Fund, MoneyHelper.EN)</b><br />
+            @item.Name - @MoneyHelper.GetMoneyFormat(item.Fund, MoneyHelper.EN)<br />
         }
     }
 </p>
@@ -50,11 +63,11 @@
     if (Model.ProjectUrl != "" && Model.ProjectUrl != null)
     {
         <p>
-            Learn more about the program:<br />
+            Learn more about the program:
             <a clicktracking="off" href="@Model.ProjectUrl">@Model.ProjectName</a>
         </p>
     }
 }
 <p>
-    You are receiving this email because you are registered on our platform. If you no longer wish to receive emails, you can unsubscribe by clicking here : <a href="@Model.BaseUrl/@UrlHelper.UnsubscribeFromTransactionReceipt(Model.BeneficiaryId)">Unsubscribe</a>
+    You are receiving this email because you are registered to a card that uses the Tomat payment platform. If you no longer wish to receive these emails, you can unsubscribe by clicking here: <a href="@Model.BaseUrl/@UrlHelper.UnsubscribeFromTransactionReceipt(Model.BeneficiaryId)">Unsubscribe</a>
 </p>
