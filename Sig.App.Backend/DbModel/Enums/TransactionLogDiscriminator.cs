@@ -2,17 +2,17 @@
 
 public enum TransactionLogDiscriminator
 {
-    SubscriptionAddingFundTransactionLog,
-    ManuallyAddingFundTransactionLog,
-    LoyaltyAddingFundTransactionLog,
-    OffPlatformAddingFundTransactionLog,
-    ExpireFundTransactionLog,
-    PaymentTransactionLog,
-    TransferFundTransactionLog,
-    RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog,
-    RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog,
-    RefundBudgetAllowanceFromUnassignedCardTransactionLog,
-    AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog,
-    RefundPaymentTransactionLog,
-    LoyaltyEditFundTransactionLog
+    SubscriptionAddingFundTransactionLog = 0,
+    ManuallyAddingFundTransactionLog = 1,
+    LoyaltyAddingFundTransactionLog = 2,
+    OffPlatformAddingFundTransactionLog = 3,
+    ExpireFundTransactionLog = 4,
+    PaymentTransactionLog = 5,
+    TransferFundTransactionLog = 6,
+    RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog = 7,
+    RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog = 8,
+    RefundBudgetAllowanceFromUnassignedCardTransactionLog = 9,
+    RefundPaymentTransactionLog = 10,
+    LoyaltyEditFundTransactionLog = 11,
+    AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog = 12
 }
