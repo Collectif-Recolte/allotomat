@@ -21,6 +21,7 @@
     "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Budget envelope refund from unassigned card",
     "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Budget envelope refund from participant having no card",
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Budget envelope refund from participant removed from subscription",
+    "transaction-log-type-allocate-budget-allowance-from-subscription-assignment": "Budget envelope allocation from subscription assignment",
     "transaction-log-type-refund-payment": "Purchase refund",
     "market": "Merchants",
     "cash-register": "Cash Registers",
@@ -49,6 +50,7 @@
     "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Enveloppe remboursées après la désassignation d'une carte",
     "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Enveloppe remboursée en raison d'un·e participant·e sans carte",
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppe remboursée après avoir retiré un·e participant·e d'un abonnement",
+    "transaction-log-type-allocate-budget-allowance-from-subscription-assignment": "Enveloppe allouée lors de l'attribution d'un abonnement",
     "transaction-log-type-refund-payment": "Remboursement d'un paiement",
     "market": "Commerces",
     "cash-register": "Caisses",
@@ -415,6 +417,10 @@ const availableTransactionTypes = computed(() => {
     {
       value: "RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog",
       label: t("transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription")
+    },
+    {
+      value: "AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog",
+      label: t("transaction-log-type-allocate-budget-allowance-from-subscription-assignment")
     },
     { value: "RefundPaymentTransactionLog", label: t("transaction-log-type-refund-payment") }
   ];

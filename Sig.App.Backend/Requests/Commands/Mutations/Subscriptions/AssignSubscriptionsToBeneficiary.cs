@@ -1,24 +1,27 @@
 ﻿using GraphQL.Conventions;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NodaTime;
 using Sig.App.Backend.DbModel;
+using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
+using Sig.App.Backend.DbModel.Entities.TransactionLogs;
+using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Plugins.GraphQL;
 using Sig.App.Backend.Plugins.MediatR;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Sig.App.Backend.Gql.Bases;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
 
 namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 {
@@ -27,12 +30,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         private readonly ILogger<AssignSubscriptionsToBeneficiary> logger;
         private IClock clock;
         private readonly AppDbContext db;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
-        public AssignSubscriptionsToBeneficiary(ILogger<AssignSubscriptionsToBeneficiary> logger, IClock clock, AppDbContext db)
+        public AssignSubscriptionsToBeneficiary(ILogger<AssignSubscriptionsToBeneficiary> logger, IClock clock, AppDbContext db, IHttpContextAccessor httpContextAccessor)
         {
             this.logger = logger;
             this.clock = clock;
             this.db = db;
+            this.httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
@@ -48,7 +53,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             var beneficiaryId = request.BeneficiaryId.LongIdentifierForType<Beneficiary>();
-            var beneficiary = await db.Beneficiaries.Include(x => x.Subscriptions).Include(x => x.BeneficiaryType).FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
+            var beneficiary = await db.Beneficiaries.Include(x => x.Subscriptions).Include(x => x.BeneficiaryType).Include(x => x.Card).FirstOrDefaultAsync(x => x.Id == beneficiaryId, cancellationToken);
 
             if (beneficiary == null)
             {
@@ -67,7 +72,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 .GetCurrentInstant()
                 .ToDateTimeUtc();
 
-            IQueryable<Subscription> query = db.Subscriptions.Include(x => x.Beneficiaries).Include(x => x.Types).Where(x => subscriptionsLongIdentifiers.Contains(x.Id));
+            IQueryable<Subscription> query = db.Subscriptions
+                .Include(x => x.Beneficiaries)
+                .Include(x => x.Types).ThenInclude(x => x.ProductGroup)
+                .Where(x => subscriptionsLongIdentifiers.Contains(x.Id));
             Subscription[] subscriptions = query.ToArray();
 
             if (subscriptions.Length != subscriptionsLongIdentifiers.Count())
@@ -75,6 +83,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 logger.LogWarning("[Mutation] AssignSubscriptionsToBeneficiary - SubscriptionNotFoundException");
                 throw new SubscriptionNotFoundException();
             }
+
+            var currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
+            var currentUser = currentUserId != null
+                ? db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId)
+                : null;
 
             foreach (var subscription in query) {
                 if (subscription.GetLastDateToAssignBeneficiary() < today)
@@ -118,7 +131,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 }
                 else
                 {
-                    var amount = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId).Sum(x => x.Amount) * paymentRemaining;
+                    var subscriptionTypes = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId).ToList();
+                    var amount = subscriptionTypes.Sum(x => x.Amount) * paymentRemaining;
 
                     if (budgetAllowance.AvailableFund >= amount)
                     {
@@ -131,6 +145,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         });
 
                         budgetAllowance.AvailableFund -= amount;
+
+                        if (amount > 0)
+                        {
+                            AddAllocationTransactionLog(beneficiary, organization, subscription, subscriptionTypes, paymentRemaining, amount, today, currentUserId, currentUser);
+                        }
 
                         logger.LogInformation($"[Mutation] AssignSubscriptionsToBeneficiary - Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} added to subscription {subscription.Name}");
                     }
@@ -148,6 +167,59 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             {
                 Beneficiary = new BeneficiaryGraphType(beneficiary, organization.Project?.BeneficiariesAreAnonymous ?? true)
             };
+        }
+
+        private void AddAllocationTransactionLog(
+            Beneficiary beneficiary,
+            Organization organization,
+            Subscription subscription,
+            List<SubscriptionType> subscriptionTypes,
+            int paymentRemaining,
+            decimal amount,
+            DateTime today,
+            string currentUserId,
+            AppUser currentUser)
+        {
+            var transactionLogProductGroups = new List<TransactionLogProductGroup>();
+            foreach (var productGroup in subscriptionTypes.GroupBy(x => x.ProductGroupId))
+            {
+                var firstType = productGroup.First();
+                transactionLogProductGroups.Add(new TransactionLogProductGroup()
+                {
+                    Amount = paymentRemaining * productGroup.Sum(x => x.Amount),
+                    ProductGroupId = firstType.ProductGroupId,
+                    ProductGroupName = firstType.ProductGroup?.Name
+                });
+            }
+
+            db.TransactionLogs.Add(new TransactionLog()
+            {
+                Discriminator = TransactionLogDiscriminator.AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog,
+                CreatedAtUtc = today,
+                TotalAmount = amount,
+                CardProgramCardId = beneficiary.Card?.ProgramCardId,
+                CardNumber = beneficiary.Card?.CardNumber,
+                BeneficiaryId = beneficiary.Id,
+                BeneficiaryID1 = beneficiary.ID1,
+                BeneficiaryID2 = beneficiary.ID2,
+                BeneficiaryFirstname = beneficiary.Firstname,
+                BeneficiaryLastname = beneficiary.Lastname,
+                BeneficiaryEmail = beneficiary.Email,
+                BeneficiaryPhone = beneficiary.Phone,
+                BeneficiaryIsOffPlatform = beneficiary is OffPlatformBeneficiary,
+                BeneficiaryTypeId = beneficiary.BeneficiaryTypeId,
+                OrganizationId = organization.Id,
+                OrganizationName = organization.Name,
+                SubscriptionId = subscription.Id,
+                SubscriptionName = subscription.Name,
+                ProjectId = organization.ProjectId,
+                ProjectName = organization.Project?.Name,
+                TransactionLogProductGroups = transactionLogProductGroups,
+                TransactionInitiatorId = currentUserId,
+                TransactionInitiatorFirstname = currentUser?.Profile.FirstName,
+                TransactionInitiatorLastname = currentUser?.Profile.LastName,
+                TransactionInitiatorEmail = currentUser?.Email
+            });
         }
 
         [MutationInput]
