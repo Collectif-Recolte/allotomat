@@ -298,7 +298,7 @@ namespace Sig.App.Backend.BackgroundJobs
                     var previousPaymentDateTime = SubscriptionHelper.GetPreviousPaymentDateTime(clock, subscription.MonthlyPaymentMoment);
                     if (paymentsMade != 0 && !beneficiary.Card.Transactions.Where(x => x is PaymentTransaction).Any(x => x.CreatedAtUtc >= previousPaymentDateTime))
                     {
-                        if (maxNumberOfPayments - paymentsMade >= subscriptionBeneficiary.GetPaymentRemaining(clock))
+                        if (maxNumberOfPayments - paymentsMade >= subscriptionBeneficiary.GetPaymentRemaining(clock, todaysFundJobCompleted: true))
                         {
                             RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
                         }
@@ -388,7 +388,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 if (subscription.IsSubscriptionPaymentBasedCardUsage)
                 {
                     var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
-                    if (maxNumberOfPayments >= subscriptionBeneficiary.GetPaymentRemaining(clock))
+                    if (maxNumberOfPayments >= subscriptionBeneficiary.GetPaymentRemaining(clock, todaysFundJobCompleted: true))
                     {
                         RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
                     }

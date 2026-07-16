@@ -336,6 +336,118 @@ namespace Sig.App.BackendTests.Helpers
             result.Should().Be(8);
         }
 
+        [Fact]
+        public void GetPaymentRemaining_FirstDay_PaymentDayBeforeFundJob_IncludesToday()
+        {
+            Clock.Reset(Instant.FromUtc(2025, 6, 1, 6, 0));
+
+            var subscription = new Subscription
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
+                IsSubscriptionPaymentBasedCardUsage = false
+            };
+
+            subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: false).Should().Be(7);
+            subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true).Should().Be(6);
+        }
+
+        [Fact]
+        public void GetPaymentRemaining_FifteenthDay_PaymentDayBeforeFundJob_IncludesToday()
+        {
+            Clock.Reset(Instant.FromUtc(2025, 6, 15, 6, 0));
+
+            var subscription = new Subscription
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
+                IsSubscriptionPaymentBasedCardUsage = false
+            };
+
+            subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: false).Should().Be(7);
+            subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true).Should().Be(6);
+        }
+
+        [Fact]
+        public void GetPaymentRemaining_FirstAndFifteenth_PaymentDayBeforeFundJob_IncludesToday()
+        {
+            Clock.Reset(Instant.FromUtc(2025, 6, 15, 6, 0));
+
+            var subscription = new Subscription
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth,
+                IsSubscriptionPaymentBasedCardUsage = false
+            };
+
+            subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: false).Should().Be(13);
+            subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true).Should().Be(12);
+        }
+
+        [Fact]
+        public void GetPaymentRemaining_NonPaymentDay_FundJobFlagDoesNotChangeResult()
+        {
+            Clock.Reset(Instant.FromUtc(2025, 6, 10, 6, 0));
+
+            var subscription = new Subscription
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth,
+                IsSubscriptionPaymentBasedCardUsage = false
+            };
+
+            var before = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: false);
+            var after = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
+            before.Should().Be(after);
+            before.Should().Be(13);
+        }
+
+        [Fact]
+        public void IsTodaysFundJobCompleted_ReturnsFalseWhenRunMissingOnPaymentDay()
+        {
+            var today = new DateTime(2025, 6, 15, 6, 0, 0, DateTimeKind.Utc);
+            var runs = Array.Empty<Sig.App.Backend.DbModel.Entities.BackgroundJobs.AddingFundToCardRun>();
+
+            SubscriptionHelper.IsTodaysFundJobCompleted(
+                SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
+                today,
+                runs).Should().BeFalse();
+        }
+
+        [Fact]
+        public void IsTodaysFundJobCompleted_ReturnsTrueWhenRunExistsOnPaymentDay()
+        {
+            var today = new DateTime(2025, 6, 15, 8, 0, 0, DateTimeKind.Utc);
+            var runs = new[]
+            {
+                new Sig.App.Backend.DbModel.Entities.BackgroundJobs.AddingFundToCardRun
+                {
+                    Name = SubscriptionHelper.AddingFundToCardFifteenthDayOfTheMonthJobName,
+                    Date = today
+                }
+            };
+
+            SubscriptionHelper.IsTodaysFundJobCompleted(
+                SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
+                today,
+                runs).Should().BeTrue();
+        }
+
+        [Fact]
+        public void IsTodaysFundJobCompleted_ReturnsTrueOnNonPaymentDay()
+        {
+            var today = new DateTime(2025, 6, 10, 6, 0, 0, DateTimeKind.Utc);
+
+            SubscriptionHelper.IsTodaysFundJobCompleted(
+                SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
+                today,
+                Array.Empty<Sig.App.Backend.DbModel.Entities.BackgroundJobs.AddingFundToCardRun>()).Should().BeTrue();
+        }
+
         [Theory]
         [InlineData(0, 2, 0)]
         [InlineData(6, 2, 3)]

@@ -59,7 +59,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 throw new SubscriptionExpiredException();
             }
 
-            var paymentRemaining = subscription.GetCardPaymentRemaining(clock);
+            var todaysFundRuns = await SubscriptionHelper.GetTodaysAddingFundToCardRunsAsync(db, clock, cancellationToken);
+            var todaysFundJobCompleted = SubscriptionHelper.IsTodaysFundJobCompleted(subscription, clock, todaysFundRuns);
+            var paymentRemaining = subscription.GetCardPaymentRemaining(clock, todaysFundJobCompleted);
             var currentMax = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
 
             if (paymentRemaining < request.MaxNumberOfPayments)
