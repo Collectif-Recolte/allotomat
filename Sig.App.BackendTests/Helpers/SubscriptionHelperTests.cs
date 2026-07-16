@@ -471,6 +471,8 @@ namespace Sig.App.BackendTests.Helpers
             });
             await DbContext.SaveChangesAsync();
 
+            Clock.Reset(Instant.FromUtc(2025, 6, 15, 8, 0));
+
             (await subscription.GetPaymentRemainingAsync(DbContext, Clock)).Should().Be(6);
         }
 
