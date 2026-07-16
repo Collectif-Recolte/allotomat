@@ -1,6 +1,7 @@
 using GraphQL.Conventions;
 using GraphQL.DataLoader;
 using NodaTime;
+using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
@@ -44,9 +45,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return ctx.DataLoader.LoadProject(subscription.ProjectId);
         }
 
-        public int PaymentRemaining([Inject] IClock clock)
+        public async Task<int> PaymentRemaining([Inject] IClock clock, [Inject] AppDbContext db)
         {
-            return subscription.GetPaymentRemaining(clock);
+            return await subscription.GetPaymentRemainingAsync(db, clock);
         }
 
         public OffsetDateTime StartDate()

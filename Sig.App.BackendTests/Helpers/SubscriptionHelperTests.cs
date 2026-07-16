@@ -1,10 +1,11 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using NodaTime;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Sig.App.BackendTests.Helpers
@@ -24,7 +25,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(12);
         }
 
@@ -41,7 +42,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(6);
         }
 
@@ -58,7 +59,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(7);
         }
 
@@ -75,7 +76,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(11);
         }
 
@@ -92,7 +93,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(23);
         }
 
@@ -110,7 +111,7 @@ namespace Sig.App.BackendTests.Helpers
                 MaxNumberOfPayments = 20
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(20);
         }
 
@@ -127,7 +128,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(0);
         }
 
@@ -144,7 +145,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(0);
         }
 
@@ -161,7 +162,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(1);
         }
 
@@ -178,7 +179,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(6);
         }
 
@@ -195,7 +196,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(7);
         }
 
@@ -212,7 +213,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(13);
         }
 
@@ -229,7 +230,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(6);
         }
 
@@ -246,7 +247,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(0);
         }
 
@@ -263,7 +264,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(0);
         }
 
@@ -281,7 +282,7 @@ namespace Sig.App.BackendTests.Helpers
                 MaxNumberOfPayments = 0
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(0);
         }
 
@@ -298,7 +299,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(7);
         }
 
@@ -315,7 +316,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(4);
         }
 
@@ -332,8 +333,147 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(8);
+        }
+
+        [Fact]
+        public void GetPaymentRemaining_FirstDay_PaymentDayBeforeFundJob_IncludesToday()
+        {
+            Clock.Reset(Instant.FromUtc(2025, 6, 1, 6, 0));
+
+            var subscription = new Subscription
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
+                IsSubscriptionPaymentBasedCardUsage = false
+            };
+
+            subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: false).Should().Be(7);
+            subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true).Should().Be(6);
+        }
+
+        [Fact]
+        public void GetPaymentRemaining_FifteenthDay_PaymentDayBeforeFundJob_IncludesToday()
+        {
+            Clock.Reset(Instant.FromUtc(2025, 6, 15, 6, 0));
+
+            var subscription = new Subscription
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
+                IsSubscriptionPaymentBasedCardUsage = false
+            };
+
+            subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: false).Should().Be(7);
+            subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true).Should().Be(6);
+        }
+
+        [Fact]
+        public void GetPaymentRemaining_FirstAndFifteenth_PaymentDayBeforeFundJob_IncludesToday()
+        {
+            Clock.Reset(Instant.FromUtc(2025, 6, 15, 6, 0));
+
+            var subscription = new Subscription
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth,
+                IsSubscriptionPaymentBasedCardUsage = false
+            };
+
+            subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: false).Should().Be(13);
+            subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true).Should().Be(12);
+        }
+
+        [Fact]
+        public void GetPaymentRemaining_NonPaymentDay_FundJobFlagDoesNotChangeResult()
+        {
+            Clock.Reset(Instant.FromUtc(2025, 6, 10, 6, 0));
+
+            var subscription = new Subscription
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth,
+                IsSubscriptionPaymentBasedCardUsage = false
+            };
+
+            var before = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: false);
+            var after = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
+            before.Should().Be(after);
+            before.Should().Be(13);
+        }
+
+        [Fact]
+        public void IsTodaysFundJobCompleted_ReturnsFalseWhenRunMissingOnPaymentDay()
+        {
+            var today = new DateTime(2025, 6, 15, 6, 0, 0, DateTimeKind.Utc);
+            var runs = Array.Empty<Sig.App.Backend.DbModel.Entities.BackgroundJobs.AddingFundToCardRun>();
+
+            SubscriptionHelper.IsTodaysFundJobCompleted(
+                SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
+                today,
+                runs).Should().BeFalse();
+        }
+
+        [Fact]
+        public void IsTodaysFundJobCompleted_ReturnsTrueWhenRunExistsOnPaymentDay()
+        {
+            var today = new DateTime(2025, 6, 15, 8, 0, 0, DateTimeKind.Utc);
+            var runs = new[]
+            {
+                new Sig.App.Backend.DbModel.Entities.BackgroundJobs.AddingFundToCardRun
+                {
+                    Name = SubscriptionHelper.AddingFundToCardFifteenthDayOfTheMonthJobName,
+                    Date = today
+                }
+            };
+
+            SubscriptionHelper.IsTodaysFundJobCompleted(
+                SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
+                today,
+                runs).Should().BeTrue();
+        }
+
+        [Fact]
+        public void IsTodaysFundJobCompleted_ReturnsTrueOnNonPaymentDay()
+        {
+            var today = new DateTime(2025, 6, 10, 6, 0, 0, DateTimeKind.Utc);
+
+            SubscriptionHelper.IsTodaysFundJobCompleted(
+                SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
+                today,
+                Array.Empty<Sig.App.Backend.DbModel.Entities.BackgroundJobs.AddingFundToCardRun>()).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task GetPaymentRemainingAsync_ResolvesFundJobStatusFromDb()
+        {
+            Clock.Reset(Instant.FromUtc(2025, 6, 15, 6, 0));
+
+            var subscription = new Subscription
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
+                IsSubscriptionPaymentBasedCardUsage = false
+            };
+
+            (await subscription.GetPaymentRemainingAsync(DbContext, Clock)).Should().Be(7);
+
+            DbContext.AddingFundToCardRuns.Add(new Sig.App.Backend.DbModel.Entities.BackgroundJobs.AddingFundToCardRun
+            {
+                Name = SubscriptionHelper.AddingFundToCardFifteenthDayOfTheMonthJobName,
+                Date = new DateTime(2025, 6, 15, 8, 0, 0, DateTimeKind.Utc)
+            });
+            await DbContext.SaveChangesAsync();
+
+            Clock.Reset(Instant.FromUtc(2025, 6, 15, 8, 0));
+
+            (await subscription.GetPaymentRemainingAsync(DbContext, Clock)).Should().Be(6);
         }
 
         [Theory]

@@ -4,15 +4,17 @@ using Microsoft.Extensions.Logging;
 using NodaTime;
 using Sig.App.Backend.DbModel;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Sig.App.Backend.Services.Mailer;
 using System.Linq;
+using Sig.App.Backend.DbModel.Entities.BackgroundJobs;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Microsoft.EntityFrameworkCore;
+using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.Helpers;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.EmailTemplates.Models;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace Sig.App.Backend.BackgroundJobs
 {
@@ -43,6 +45,7 @@ namespace Sig.App.Backend.BackgroundJobs
         {
             var today = clock.GetCurrentInstant().ToDateTimeUtc();
             var fy = today.AddYears(-5);
+            var todaysFundRuns = await SubscriptionHelper.GetTodaysAddingFundToCardRunsAsync(db, clock);
             
             var beneficiaries = await db.Beneficiaries
                 .Include(x => x.Subscriptions).ThenInclude(x => x.Subscription)
@@ -50,7 +53,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 .Where(x => x.CreatedAtUtc < fy).ToListAsync();
             foreach (var beneficiary in beneficiaries)
             {
-                if (ExpirationDate(beneficiary) < DateTime.UtcNow)
+                if (ExpirationDate(beneficiary, todaysFundRuns, today) < today)
                 {
                     var transactionLogsToAnonymized = await db.TransactionLogs.Where(x => x.BeneficiaryId == beneficiary.Id).ToListAsync();
                     foreach (var transactionLog in transactionLogsToAnonymized)
@@ -81,9 +84,9 @@ namespace Sig.App.Backend.BackgroundJobs
             }
         }
 
-        private DateTime ExpirationDate(Beneficiary beneficiary)
+        private DateTime ExpirationDate(Beneficiary beneficiary, IReadOnlyList<AddingFundToCardRun> todaysFundRuns, DateTime today)
         {
-            if (beneficiary.Subscriptions.Where(x => x.GetPaymentRemaining(clock) > 0 && x.Subscription.GetExpirationDate(clock) > DateTime.UtcNow).Any())
+            if (beneficiary.Subscriptions.Where(HasRemainingPayment).Any())
             {
                 return DateTime.MaxValue;
             }
@@ -97,6 +100,13 @@ namespace Sig.App.Backend.BackgroundJobs
             }
 
             return beneficiary.CreatedAtUtc.AddYears(5);
+
+            bool HasRemainingPayment(SubscriptionBeneficiary subscription)
+            {
+                var todaysFundJobCompleted = SubscriptionHelper.IsTodaysFundJobCompleted(subscription.Subscription, clock, todaysFundRuns);
+                return subscription.GetPaymentRemaining(clock, todaysFundJobCompleted) > 0 &&
+                       subscription.Subscription.GetExpirationDate(clock) > today;
+            }
         }
     }
 }

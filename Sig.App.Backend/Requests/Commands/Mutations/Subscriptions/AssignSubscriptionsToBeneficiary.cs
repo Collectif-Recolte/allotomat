@@ -97,7 +97,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                     throw new BeneficiaryTypeNotInSubscriptionException();
                 }
 
-                var paymentRemaining = subscription.GetPaymentRemaining(clock);
+                var paymentRemaining = await subscription.GetPaymentRemainingAsync(db, clock, cancellationToken);
 
                 if (subscription.IsSubscriptionPaymentBasedCardUsage)
                 {
