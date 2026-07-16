@@ -53,7 +53,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 .Where(x => x.CreatedAtUtc < fy).ToListAsync();
             foreach (var beneficiary in beneficiaries)
             {
-                if (ExpirationDate(beneficiary, todaysFundRuns) < DateTime.UtcNow)
+                if (ExpirationDate(beneficiary, todaysFundRuns, today) < today)
                 {
                     var transactionLogsToAnonymized = await db.TransactionLogs.Where(x => x.BeneficiaryId == beneficiary.Id).ToListAsync();
                     foreach (var transactionLog in transactionLogsToAnonymized)
@@ -84,7 +84,7 @@ namespace Sig.App.Backend.BackgroundJobs
             }
         }
 
-        private DateTime ExpirationDate(Beneficiary beneficiary, IReadOnlyList<AddingFundToCardRun> todaysFundRuns)
+        private DateTime ExpirationDate(Beneficiary beneficiary, IReadOnlyList<AddingFundToCardRun> todaysFundRuns, DateTime today)
         {
             if (beneficiary.Subscriptions.Where(HasRemainingPayment).Any())
             {
@@ -104,8 +104,8 @@ namespace Sig.App.Backend.BackgroundJobs
             bool HasRemainingPayment(SubscriptionBeneficiary subscription)
             {
                 var todaysFundJobCompleted = SubscriptionHelper.IsTodaysFundJobCompleted(subscription.Subscription, clock, todaysFundRuns);
-                return subscription.GetPaymentRemaining(clock, todaysFundJobCompleted) > 0 && 
-                       subscription.Subscription.GetExpirationDate(clock) > DateTime.UtcNow;
+                return subscription.GetPaymentRemaining(clock, todaysFundJobCompleted) > 0 &&
+                       subscription.Subscription.GetExpirationDate(clock) > today;
             }
         }
     }
