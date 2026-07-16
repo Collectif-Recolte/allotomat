@@ -454,7 +454,6 @@ namespace Sig.App.Backend.Services.Permission
 
             var card = await db.Cards
                 .Include(x => x.Beneficiary)
-                .Include(x => x.Project)
                 .FirstAsync(x => x.Id == cardLongId);
 
             if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, card.ProjectId.ToString()))
