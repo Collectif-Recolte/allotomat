@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.MarketGroups;
 using Sig.App.Backend.DbModel.Entities.Markets;
+using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
@@ -61,6 +62,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.MarketGroups
                 MarketId = marketId,
                 MarketGroupId = marketGroupId
             });
+
+            var alreadyLinkedToProject = await db.ProjectMarkets.AnyAsync(x => x.MarketId == marketId && x.ProjectId == marketGroup.ProjectId, cancellationToken);
+            if (!alreadyLinkedToProject)
+            {
+                db.ProjectMarkets.Add(new ProjectMarket()
+                {
+                    MarketId = marketId,
+                    ProjectId = marketGroup.ProjectId
+                });
+            }
 
             await db.SaveChangesAsync(cancellationToken);
 

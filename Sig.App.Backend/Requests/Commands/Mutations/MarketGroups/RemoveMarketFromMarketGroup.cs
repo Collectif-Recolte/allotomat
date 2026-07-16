@@ -69,6 +69,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.MarketGroups
                 }
             }
 
+            var stillInAnotherGroupOfProject = await db.MarketGroupMarkets.AnyAsync(x => x.MarketId == marketId && x.MarketGroupId != marketGroupId && x.MarketGroup.ProjectId == marketGroup.ProjectId, cancellationToken);
+            if (!stillInAnotherGroupOfProject)
+            {
+                var projectMarket = await db.ProjectMarkets.FirstOrDefaultAsync(x => x.MarketId == marketId && x.ProjectId == marketGroup.ProjectId, cancellationToken);
+                if (projectMarket != null)
+                {
+                    db.ProjectMarkets.Remove(projectMarket);
+                }
+            }
+
             await db.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation($"[Mutation] RemoveMarketFromMarketGroup - Market {market.Name} remove from market group {marketGroup.Name}");
