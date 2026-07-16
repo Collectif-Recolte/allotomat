@@ -59,9 +59,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
             var types = await ctx.DataLoader.LoadSubscriptionTypeByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
             var paymentsMade = SubscriptionHelper.GetNumberOfPaymentsMade(transactions.Count(), types.Count());
-            var todaysFundRuns = await SubscriptionHelper.GetTodaysAddingFundToCardRunsAsync(db, clock);
-            var todaysFundJobCompleted = SubscriptionHelper.IsTodaysFundJobCompleted(subscription, clock, todaysFundRuns);
-            var subscriptionPaymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock, todaysFundJobCompleted);
+            var subscriptionPaymentRemaining = await subscriptionBeneficiary.GetPaymentRemainingAsync(db, clock);
             var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
 
             return Math.Min(maxNumberOfPayments - paymentsMade, subscriptionPaymentRemaining);
@@ -69,9 +67,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public async Task<int> AvailablePaymentRemaining(IAppUserContext ctx, [Inject] IClock clock, [Inject] AppDbContext db)
         {
-            var todaysFundRuns = await SubscriptionHelper.GetTodaysAddingFundToCardRunsAsync(db, clock);
-            var todaysFundJobCompleted = SubscriptionHelper.IsTodaysFundJobCompleted(subscription, clock, todaysFundRuns);
-            return subscription.GetCardPaymentRemaining(clock, todaysFundJobCompleted);
+            return await subscription.GetCardPaymentRemainingAsync(db, clock);
         }
 
         public int MaxNumberOfPayments()

@@ -50,10 +50,32 @@ namespace Sig.App.Backend.Helpers
             return Math.Max(0, cardPaymentRemaining);
         }
 
+        public static async Task<int> GetPaymentRemainingAsync(
+            this SubscriptionBeneficiary subscriptionBeneficiary,
+            AppDbContext db,
+            IClock clock,
+            CancellationToken cancellationToken = default)
+        {
+            var todaysFundRuns = await GetTodaysAddingFundToCardRunsAsync(db, clock, cancellationToken);
+            var todaysFundJobCompleted = IsTodaysFundJobCompleted(subscriptionBeneficiary.Subscription, clock, todaysFundRuns);
+            return subscriptionBeneficiary.GetPaymentRemaining(clock, todaysFundJobCompleted);
+        }
+
         public static int GetPaymentRemaining(this Subscription subscription, IClock clock, bool todaysFundJobCompleted)
         {
             var cardPaymentRemaining = GetCardPaymentRemaining(subscription, clock, todaysFundJobCompleted);
             return Math.Max(0, subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(cardPaymentRemaining, subscription.MaxNumberOfPayments.Value) : cardPaymentRemaining);
+        }
+
+        public static async Task<int> GetPaymentRemainingAsync(
+            this Subscription subscription,
+            AppDbContext db,
+            IClock clock,
+            CancellationToken cancellationToken = default)
+        {
+            var todaysFundRuns = await GetTodaysAddingFundToCardRunsAsync(db, clock, cancellationToken);
+            var todaysFundJobCompleted = IsTodaysFundJobCompleted(subscription, clock, todaysFundRuns);
+            return subscription.GetPaymentRemaining(clock, todaysFundJobCompleted);
         }
 
         public static int GetCardPaymentRemaining(this Subscription subscription, IClock clock, bool todaysFundJobCompleted)
@@ -94,6 +116,17 @@ namespace Sig.App.Backend.Helpers
             }
 
             return cardPaymentRemaining;
+        }
+
+        public static async Task<int> GetCardPaymentRemainingAsync(
+            this Subscription subscription,
+            AppDbContext db,
+            IClock clock,
+            CancellationToken cancellationToken = default)
+        {
+            var todaysFundRuns = await GetTodaysAddingFundToCardRunsAsync(db, clock, cancellationToken);
+            var todaysFundJobCompleted = IsTodaysFundJobCompleted(subscription, clock, todaysFundRuns);
+            return subscription.GetCardPaymentRemaining(clock, todaysFundJobCompleted);
         }
 
         public static async Task<IReadOnlyList<AddingFundToCardRun>> GetTodaysAddingFundToCardRunsAsync(

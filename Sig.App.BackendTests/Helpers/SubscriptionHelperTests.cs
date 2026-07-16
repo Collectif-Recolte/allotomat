@@ -5,6 +5,7 @@ using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Sig.App.BackendTests.Helpers
@@ -446,6 +447,31 @@ namespace Sig.App.BackendTests.Helpers
                 SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
                 today,
                 Array.Empty<Sig.App.Backend.DbModel.Entities.BackgroundJobs.AddingFundToCardRun>()).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task GetPaymentRemainingAsync_ResolvesFundJobStatusFromDb()
+        {
+            Clock.Reset(Instant.FromUtc(2025, 6, 15, 6, 0));
+
+            var subscription = new Subscription
+            {
+                StartDate = new DateTime(2025, 1, 1),
+                EndDate = new DateTime(2025, 12, 31),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
+                IsSubscriptionPaymentBasedCardUsage = false
+            };
+
+            (await subscription.GetPaymentRemainingAsync(DbContext, Clock)).Should().Be(7);
+
+            DbContext.AddingFundToCardRuns.Add(new Sig.App.Backend.DbModel.Entities.BackgroundJobs.AddingFundToCardRun
+            {
+                Name = SubscriptionHelper.AddingFundToCardFifteenthDayOfTheMonthJobName,
+                Date = new DateTime(2025, 6, 15, 8, 0, 0, DateTimeKind.Utc)
+            });
+            await DbContext.SaveChangesAsync();
+
+            (await subscription.GetPaymentRemainingAsync(DbContext, Clock)).Should().Be(6);
         }
 
         [Theory]

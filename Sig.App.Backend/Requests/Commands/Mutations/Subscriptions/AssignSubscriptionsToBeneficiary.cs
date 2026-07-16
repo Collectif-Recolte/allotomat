@@ -76,8 +76,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 throw new SubscriptionNotFoundException();
             }
 
-            var todaysFundRuns = await SubscriptionHelper.GetTodaysAddingFundToCardRunsAsync(db, clock, cancellationToken);
-
             foreach (var subscription in query) {
                 if (subscription.GetLastDateToAssignBeneficiary() < today)
                 {
@@ -99,8 +97,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                     throw new BeneficiaryTypeNotInSubscriptionException();
                 }
 
-                var todaysFundJobCompleted = SubscriptionHelper.IsTodaysFundJobCompleted(subscription, clock, todaysFundRuns);
-                var paymentRemaining = subscription.GetPaymentRemaining(clock, todaysFundJobCompleted);
+                var paymentRemaining = await subscription.GetPaymentRemainingAsync(db, clock, cancellationToken);
 
                 if (subscription.IsSubscriptionPaymentBasedCardUsage)
                 {

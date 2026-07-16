@@ -80,8 +80,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 throw new SubscriptionNotFoundException();
             }
 
-            var todaysFundRuns = await SubscriptionHelper.GetTodaysAddingFundToCardRunsAsync(db, clock, cancellationToken);
-
             foreach (var subscriptionId in subscriptions)
             {
                 var subscriptionBeneficiary = beneficiary.Subscriptions.FirstOrDefault(x => x.SubscriptionId == subscriptionId);
@@ -119,8 +117,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     .Include(x => x.SubscriptionType)
                     .Where(x => x.BeneficiaryId == beneficiary.Id && x.SubscriptionType.SubscriptionId == subscription.Id).ToListAsync();
 
-                var todaysFundJobCompleted = SubscriptionHelper.IsTodaysFundJobCompleted(subscription, clock, todaysFundRuns);
-                var subscriptionPaymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock, todaysFundJobCompleted);
+                var subscriptionPaymentRemaining = await subscriptionBeneficiary.GetPaymentRemainingAsync(db, clock, cancellationToken);
 
                 var numberOfPaymentTypes = subscription.GetNumberOfPaymentTypes(beneficiary.BeneficiaryTypeId);
                 var paymentsMade = SubscriptionHelper.GetNumberOfPaymentsMade(transactions.Count, numberOfPaymentTypes);

@@ -53,8 +53,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 throw new BeneficiaryNotFoundException();
             }
 
-            var todaysFundRuns = await SubscriptionHelper.GetTodaysAddingFundToCardRunsAsync(db, clock, cancellationToken);
-
             foreach (var subscriptionId in subscriptionIds)
             {
                 var subscriptionBeneficiary = beneficiary.Subscriptions.FirstOrDefault(x => x.SubscriptionId == subscriptionId);
@@ -69,8 +67,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 var newPaymentAmount = GetAmountPayment(subscriptionBeneficiary.Subscription, beneficiary.BeneficiaryTypeId.Value);
 
                 var paymentReceived = beneficiaryTransactions.Where(x => x.SubscriptionType.SubscriptionId == subscriptionBeneficiary.SubscriptionId).Count();
-                var todaysFundJobCompleted = SubscriptionHelper.IsTodaysFundJobCompleted(subscriptionBeneficiary.Subscription, clock, todaysFundRuns);
-                var paymentRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock, todaysFundJobCompleted);
+                var paymentRemaining = await subscriptionBeneficiary.GetPaymentRemainingAsync(db, clock, cancellationToken);
                 var cap = subscriptionBeneficiary.MaxNumberOfPaymentsOverride.HasValue || subscriptionBeneficiary.Subscription.MaxNumberOfPayments.HasValue
                     ? subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments() - paymentReceived
                     : paymentRemaining;

@@ -47,9 +47,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         public async Task<int> PaymentRemaining([Inject] IClock clock, [Inject] AppDbContext db)
         {
-            var todaysFundRuns = await SubscriptionHelper.GetTodaysAddingFundToCardRunsAsync(db, clock);
-            var todaysFundJobCompleted = SubscriptionHelper.IsTodaysFundJobCompleted(subscription, clock, todaysFundRuns);
-            return subscription.GetPaymentRemaining(clock, todaysFundJobCompleted);
+            return await subscription.GetPaymentRemainingAsync(db, clock);
         }
 
         public OffsetDateTime StartDate()
