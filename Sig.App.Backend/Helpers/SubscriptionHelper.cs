@@ -40,7 +40,7 @@ namespace Sig.App.Backend.Helpers
             => subscriptionBeneficiary.MaxNumberOfPaymentsOverride
                 ?? subscriptionBeneficiary.Subscription.MaxNumberOfPayments;
 
-        public static int GetPaymentRemaining(this SubscriptionBeneficiary subscriptionBeneficiary, IClock clock, bool todaysFundJobCompleted = true)
+        public static int GetPaymentRemaining(this SubscriptionBeneficiary subscriptionBeneficiary, IClock clock, bool todaysFundJobCompleted)
         {
             var cardPaymentRemaining = GetCardPaymentRemaining(subscriptionBeneficiary.Subscription, clock, todaysFundJobCompleted);
             if (subscriptionBeneficiary.Subscription.IsSubscriptionPaymentBasedCardUsage)
@@ -50,13 +50,13 @@ namespace Sig.App.Backend.Helpers
             return Math.Max(0, cardPaymentRemaining);
         }
 
-        public static int GetPaymentRemaining(this Subscription subscription, IClock clock, bool todaysFundJobCompleted = true)
+        public static int GetPaymentRemaining(this Subscription subscription, IClock clock, bool todaysFundJobCompleted)
         {
             var cardPaymentRemaining = GetCardPaymentRemaining(subscription, clock, todaysFundJobCompleted);
             return Math.Max(0, subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(cardPaymentRemaining, subscription.MaxNumberOfPayments.Value) : cardPaymentRemaining);
         }
 
-        public static int GetCardPaymentRemaining(this Subscription subscription, IClock clock, bool todaysFundJobCompleted = true)
+        public static int GetCardPaymentRemaining(this Subscription subscription, IClock clock, bool todaysFundJobCompleted)
         {
             var cardPaymentRemaining = 0;
             var today = clock

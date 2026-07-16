@@ -411,7 +411,9 @@ public class DevDataSeeder : IDataSeeder
 
         beneficiary1 = beneficiaryResult.Entity;
 
-        var paymentRemaining = subscription.GetPaymentRemaining(clock);
+        var todaysFundRuns = await SubscriptionHelper.GetTodaysAddingFundToCardRunsAsync(db, clock);
+        var todaysFundJobCompleted = SubscriptionHelper.IsTodaysFundJobCompleted(subscription, clock, todaysFundRuns);
+        var paymentRemaining = subscription.GetPaymentRemaining(clock, todaysFundJobCompleted);
         var subscriptionType = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary1.BeneficiaryTypeId).FirstOrDefault();
         var budgetAllowance = await db.BudgetAllowances.FirstAsync(x => x.OrganizationId == organization.Id && x.SubscriptionId == subscription.Id);
         budgetAllowance.AvailableFund -= paymentRemaining * subscriptionType.Amount;

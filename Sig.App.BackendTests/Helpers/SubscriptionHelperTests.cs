@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using NodaTime;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
@@ -24,7 +24,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(12);
         }
 
@@ -41,7 +41,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(6);
         }
 
@@ -58,7 +58,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(7);
         }
 
@@ -75,7 +75,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(11);
         }
 
@@ -92,7 +92,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(23);
         }
 
@@ -110,7 +110,7 @@ namespace Sig.App.BackendTests.Helpers
                 MaxNumberOfPayments = 20
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(20);
         }
 
@@ -127,7 +127,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(0);
         }
 
@@ -144,7 +144,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(0);
         }
 
@@ -161,7 +161,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(1);
         }
 
@@ -178,7 +178,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(6);
         }
 
@@ -195,7 +195,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(7);
         }
 
@@ -212,7 +212,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(13);
         }
 
@@ -229,7 +229,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(6);
         }
 
@@ -246,7 +246,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(0);
         }
 
@@ -263,7 +263,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(0);
         }
 
@@ -281,7 +281,7 @@ namespace Sig.App.BackendTests.Helpers
                 MaxNumberOfPayments = 0
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(0);
         }
 
@@ -298,7 +298,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(7);
         }
 
@@ -315,7 +315,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(4);
         }
 
@@ -332,7 +332,7 @@ namespace Sig.App.BackendTests.Helpers
                 IsSubscriptionPaymentBasedCardUsage = false
             };
 
-            var result = subscription.GetPaymentRemaining(Clock);
+            var result = subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true);
             result.Should().Be(8);
         }
 
