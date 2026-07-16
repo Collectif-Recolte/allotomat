@@ -74,6 +74,32 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.MarketGroups
 
             localMarketGroup.Markets.Should().HaveCount(1);
             localMarket.MarketGroups.Should().HaveCount(1);
+
+            var projectMarketCount = await DbContext.ProjectMarkets.CountAsync();
+            projectMarketCount.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task CreatesProjectMarketIfMarketNotAlreadyInProject()
+        {
+            var market2 = new Market()
+            {
+                Name = "Market 2",
+                Projects = new List<ProjectMarket>()
+            };
+            DbContext.Markets.Add(market2);
+            DbContext.SaveChanges();
+
+            var input = new AddMarketToMarketGroup.Input()
+            {
+                MarketId = market2.GetIdentifier(),
+                MarketGroupId = MarketGroup.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var projectMarket = await DbContext.ProjectMarkets.FirstOrDefaultAsync(x => x.MarketId == market2.Id && x.ProjectId == project.Id);
+            projectMarket.Should().NotBeNull();
         }
 
         [Fact]
