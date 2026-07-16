@@ -94,7 +94,7 @@ function onDone() {
 }
 
 const CARD_BALANCE_FIELDS = gql`
-  fragment CardBalanceFields on Card {
+  fragment CardBalanceFields on CardGraphType {
     id
     isDisabled
     project {
