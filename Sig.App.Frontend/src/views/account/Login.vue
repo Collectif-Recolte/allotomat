@@ -18,7 +18,7 @@
     "about": "About Tomat",
     "about-link": "https://info.allotomat.com/about/",
     "form-title": "Welcome to Tomat",
-    "form-subtitle": "Tomat accounts are only for program operators and merchants. If you have a card, you may click the "Check my card balance button" without logging in."
+    "form-subtitle": "Tomat accounts are only for program operators and merchants. If you have a card, you may click the \"Check my card balance\" button without logging in."
 	},
 	"fr": {
 		"forgot-password": "Mot de passe oublié ?",
@@ -45,40 +45,23 @@
 
 <template>
   <div class="flex flex-col bg-primary-100 min-h-[100dvh]">
-    <div class="absolute after:absolute sm:relative after:inset-0 after:bg-primary-900/50 w-full h-[45dvh] min-h-[240px] dark">
+    <div
+      class="absolute after:absolute sm:relative after:inset-0 after:bg-primary-900/50 w-full h-[45dvh] min-h-[240px] dark">
       <img class="absolute inset-0 w-full h-full object-cover" :src="require('@/assets/img/bg-login.jpg')" alt="" />
       <LangSwitch class="sm:hidden top-6 right-section z-10 absolute" />
       <nav class="hidden sm:block z-10 relative px-section py-6">
         <ul class="flex items-center gap-x-4 md:gap-x-8 leading-none">
           <li>
-            <PfButtonLink
-              class="no-underline"
-              btn-style="link"
-              has-icon-left
-              :icon="ICON_INFO"
-              :href="t('about-link')"
-              :label="t('about')"
-              target="_blank" />
+            <PfButtonLink class="no-underline" btn-style="link" has-icon-left :icon="ICON_INFO" :href="t('about-link')"
+              :label="t('about')" target="_blank" />
           </li>
           <li>
-            <PfButtonLink
-              class="no-underline"
-              btn-style="link"
-              has-icon-left
-              :icon="ICON_SUPPORT"
-              :href="t('support-link')"
-              :label="t('support')"
-              target="_blank" />
+            <PfButtonLink class="no-underline" btn-style="link" has-icon-left :icon="ICON_SUPPORT"
+              :href="t('support-link')" :label="t('support')" target="_blank" />
           </li>
           <li class="ml-auto">
-            <PfButtonLink
-              class="rounded-full"
-              tag="RouterLink"
-              btn-style="secondary"
-              has-icon-left
-              :icon="ICON_HAND_CARD"
-              :to="{ name: URL_CARD_CHECK }"
-              :label="t('check-my-balance')" />
+            <PfButtonLink class="rounded-full" tag="RouterLink" btn-style="secondary" has-icon-left
+              :icon="ICON_HAND_CARD" :to="{ name: URL_CARD_CHECK }" :label="t('check-my-balance')" />
           </li>
           <li>
             <LangSwitch />
@@ -92,18 +75,13 @@
       <div>
         <h1 class="mt-0 sm:mt-14">
           <span class="sr-only">{{ t("title") }}</span>
-          <img
-            class="sm:-left-[6.5rem] md:-left-32 relative mx-auto sm:mx-0 h-16 sm:h-20 md:h-24"
-            :src="require('@/assets/logo/logo-white.svg')"
-            :alt="t('logo')" />
+          <img class="sm:-left-[6.5rem] md:-left-32 relative mx-auto sm:mx-0 h-16 sm:h-20 md:h-24"
+            :src="require('@/assets/logo/logo-white.svg')" :alt="t('logo')" />
         </h1>
         <p class="hidden sm:block mt-14 font-semibold text-h2">{{ t("subtitle") }}</p>
       </div>
       <div class="bg-white sm:mt-5 p-8 md:p-12 pb-5 md:pb-5 rounded-2xl sm:w-5/12 sm:min-w-96">
-        <Form
-          v-slot="{ isSubmitting }"
-          :validation-schema="validationSchema"
-          :initial-values="initialFormValues"
+        <Form v-slot="{ isSubmitting }" :validation-schema="validationSchema" :initial-values="initialFormValues"
           @submit="onSubmit">
           <PfFormSection>
             <div class="sm:mb-4">
@@ -113,34 +91,26 @@
               <p id="connexionFormDesc" class="mt-1 mb-0 text-p2 text-primary-700">{{ t("form-subtitle") }}</p>
             </div>
             <Field v-slot="{ field, errors }" name="email">
-              <PfFormInputText
-                id="email"
-                v-bind="field"
-                :label="t('username')"
-                :errors="errors"
-                input-type="email"></PfFormInputText>
+              <PfFormInputText id="email" v-bind="field" :label="t('username')" :errors="errors" input-type="email">
+              </PfFormInputText>
             </Field>
 
             <Field v-slot="{ field, errors }" name="password">
-              <PfFormInputText
-                id="password"
-                v-bind="field"
-                :label="t('password')"
-                :errors="errors"
+              <PfFormInputText id="password" v-bind="field" :label="t('password')" :errors="errors"
                 input-type="password"></PfFormInputText>
             </Field>
           </PfFormSection>
 
           <div class="flex justify-between items-center mt-8 pt-5 border-grey-300 border-t">
-            <RouterLink
-              class="relative text-p3 h-extend-cursor-area pf-button pf-button--link"
+            <RouterLink class="relative text-p3 h-extend-cursor-area pf-button pf-button--link"
               :to="{ name: URL_ACCOUNT_FORGOT_PASSWORD }">
               {{ t("forgot-password") }}
             </RouterLink>
 
             <div>
               <div class="inline-block relative">
-                <PfButtonAction btn-style="primary" class="px-8" type="submit" :label="t('login')" :is-disabled="isSubmitting" />
+                <PfButtonAction btn-style="primary" class="px-8" type="submit" :label="t('login')"
+                  :is-disabled="isSubmitting" />
                 <div class="top-1/2 right-1 absolute -translate-y-1/2">
                   <PfSpinner v-if="isSubmitting" text-color-class="text-white" :loading-label="t('loading')" is-small />
                 </div>
@@ -154,34 +124,16 @@
     <nav class="sm:hidden mb-6 px-section">
       <ul class="mb-0 text-center">
         <li class="mb-5">
-          <PfButtonLink
-            class="rounded-full"
-            tag="RouterLink"
-            btn-style="secondary"
-            has-icon-left
-            :icon="ICON_HAND_CARD"
-            :to="{ name: URL_CARD_CHECK }"
-            :label="t('check-my-balance')" />
+          <PfButtonLink class="rounded-full" tag="RouterLink" btn-style="secondary" has-icon-left :icon="ICON_HAND_CARD"
+            :to="{ name: URL_CARD_CHECK }" :label="t('check-my-balance')" />
         </li>
         <li class="mb-4">
-          <PfButtonLink
-            class="no-underline"
-            btn-style="link"
-            has-icon-left
-            :icon="ICON_INFO"
-            :href="t('about-link')"
-            :label="t('about')"
-            target="_blank" />
+          <PfButtonLink class="no-underline" btn-style="link" has-icon-left :icon="ICON_INFO" :href="t('about-link')"
+            :label="t('about')" target="_blank" />
         </li>
         <li>
-          <PfButtonLink
-            class="no-underline"
-            btn-style="link"
-            has-icon-left
-            :icon="ICON_SUPPORT"
-            :href="t('support-link')"
-            :label="t('support')"
-            target="_blank" />
+          <PfButtonLink class="no-underline" btn-style="link" has-icon-left :icon="ICON_SUPPORT"
+            :href="t('support-link')" :label="t('support')" target="_blank" />
         </li>
       </ul>
     </nav>

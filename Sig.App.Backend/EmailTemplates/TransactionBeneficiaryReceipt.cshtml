@@ -27,7 +27,7 @@
     @{
         foreach (var item in Model.ProductGroupAvailableFunds)
         {
-            @item.Name - @MoneyHelper.GetMoneyFormat(item.Fund, MoneyHelper.FR)<br />
+            <span>@item.Name - @MoneyHelper.GetMoneyFormat(item.Fund, MoneyHelper.FR)</span><br />
         }
     }
 </p>
@@ -55,7 +55,7 @@
     @{
         foreach (var item in Model.ProductGroupAvailableFunds)
         {
-            @item.Name - @MoneyHelper.GetMoneyFormat(item.Fund, MoneyHelper.EN)<br />
+            <span>@item.Name - @MoneyHelper.GetMoneyFormat(item.Fund, MoneyHelper.EN)</span><br />
         }
     }
 </p>
