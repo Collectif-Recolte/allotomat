@@ -89,7 +89,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 ? db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId)
                 : null;
 
-            foreach (var subscription in query) {
+            foreach (var subscription in subscriptions) {
                 if (subscription.GetLastDateToAssignBeneficiary() < today)
                 {
                     logger.LogWarning("[Mutation] AssignSubscriptionsToBeneficiary - SubscriptionAlreadyExpiredException");
