@@ -1,13 +1,23 @@
-﻿using NodaTime;
+﻿using Microsoft.EntityFrameworkCore;
+using NodaTime;
+using Sig.App.Backend.DbModel;
+using Sig.App.Backend.DbModel.Entities.BackgroundJobs;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Sig.App.Backend.Helpers
 {
     public static class SubscriptionHelper
     {
+        public const string AddingFundToCardFirstDayOfTheMonthJobName = "AddingFundToCard:FirstDayOfTheMonth";
+        public const string AddingFundToCardFifteenthDayOfTheMonthJobName = "AddingFundToCard:FifteenthDayOfTheMonth";
+        public const string AddingFundToCardFirstDayOfTheWeekJobName = "AddingFundToCard:FirstDayOfTheWeek";
+
         public static int GetEffectiveMaxNumberOfPayments(this SubscriptionBeneficiary subscriptionBeneficiary)
         {
             return subscriptionBeneficiary.MaxNumberOfPaymentsOverride
@@ -30,9 +40,9 @@ namespace Sig.App.Backend.Helpers
             => subscriptionBeneficiary.MaxNumberOfPaymentsOverride
                 ?? subscriptionBeneficiary.Subscription.MaxNumberOfPayments;
 
-        public static int GetPaymentRemaining(this SubscriptionBeneficiary subscriptionBeneficiary, IClock clock)
+        public static int GetPaymentRemaining(this SubscriptionBeneficiary subscriptionBeneficiary, IClock clock, bool todaysFundJobCompleted)
         {
-            var cardPaymentRemaining = GetCardPaymentRemaining(subscriptionBeneficiary.Subscription, clock);
+            var cardPaymentRemaining = GetCardPaymentRemaining(subscriptionBeneficiary.Subscription, clock, todaysFundJobCompleted);
             if (subscriptionBeneficiary.Subscription.IsSubscriptionPaymentBasedCardUsage)
             {
                 cardPaymentRemaining = Math.Min(cardPaymentRemaining, subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments());
@@ -40,13 +50,35 @@ namespace Sig.App.Backend.Helpers
             return Math.Max(0, cardPaymentRemaining);
         }
 
-        public static int GetPaymentRemaining(this Subscription subscription, IClock clock)
+        public static async Task<int> GetPaymentRemainingAsync(
+            this SubscriptionBeneficiary subscriptionBeneficiary,
+            AppDbContext db,
+            IClock clock,
+            CancellationToken cancellationToken = default)
         {
-            var cardPaymentRemaining = GetCardPaymentRemaining(subscription, clock);
+            var todaysFundRuns = await GetTodaysAddingFundToCardRunsAsync(db, clock, cancellationToken);
+            var todaysFundJobCompleted = IsTodaysFundJobCompleted(subscriptionBeneficiary.Subscription, clock, todaysFundRuns);
+            return subscriptionBeneficiary.GetPaymentRemaining(clock, todaysFundJobCompleted);
+        }
+
+        public static int GetPaymentRemaining(this Subscription subscription, IClock clock, bool todaysFundJobCompleted)
+        {
+            var cardPaymentRemaining = GetCardPaymentRemaining(subscription, clock, todaysFundJobCompleted);
             return Math.Max(0, subscription.IsSubscriptionPaymentBasedCardUsage ? Math.Min(cardPaymentRemaining, subscription.MaxNumberOfPayments.Value) : cardPaymentRemaining);
         }
 
-        public static int GetCardPaymentRemaining(this Subscription subscription, IClock clock)
+        public static async Task<int> GetPaymentRemainingAsync(
+            this Subscription subscription,
+            AppDbContext db,
+            IClock clock,
+            CancellationToken cancellationToken = default)
+        {
+            var todaysFundRuns = await GetTodaysAddingFundToCardRunsAsync(db, clock, cancellationToken);
+            var todaysFundJobCompleted = IsTodaysFundJobCompleted(subscription, clock, todaysFundRuns);
+            return subscription.GetPaymentRemaining(clock, todaysFundJobCompleted);
+        }
+
+        public static int GetCardPaymentRemaining(this Subscription subscription, IClock clock, bool todaysFundJobCompleted)
         {
             var cardPaymentRemaining = 0;
             var today = clock
@@ -73,7 +105,98 @@ namespace Sig.App.Backend.Helpers
 
             if (needExtraDay) cardPaymentRemaining++;
 
+            // CRCL-2577: between 00:00 UTC and the AddingFundToCard run on a payment day,
+            // the calendar already excludes today's payment, but the job has not delivered it yet.
+            if (!todaysFundJobCompleted
+                && IsMonthlyPaymentDay(subscription.MonthlyPaymentMoment, today)
+                && today >= subscription.StartDate
+                && today <= subscription.EndDate)
+            {
+                cardPaymentRemaining++;
+            }
+
             return cardPaymentRemaining;
+        }
+
+        public static async Task<int> GetCardPaymentRemainingAsync(
+            this Subscription subscription,
+            AppDbContext db,
+            IClock clock,
+            CancellationToken cancellationToken = default)
+        {
+            var todaysFundRuns = await GetTodaysAddingFundToCardRunsAsync(db, clock, cancellationToken);
+            var todaysFundJobCompleted = IsTodaysFundJobCompleted(subscription, clock, todaysFundRuns);
+            return subscription.GetCardPaymentRemaining(clock, todaysFundJobCompleted);
+        }
+
+        public static async Task<IReadOnlyList<AddingFundToCardRun>> GetTodaysAddingFundToCardRunsAsync(
+            AppDbContext db,
+            IClock clock,
+            CancellationToken cancellationToken = default)
+        {
+            var today = clock.GetCurrentInstant().ToDateTimeUtc();
+            return await db.AddingFundToCardRuns
+                .Where(x => x.Date.Year == today.Year && x.Date.Month == today.Month && x.Date.Day == today.Day)
+                .ToListAsync(cancellationToken);
+        }
+
+        public static bool IsTodaysFundJobCompleted(
+            SubscriptionMonthlyPaymentMoment moment,
+            DateTime utcToday,
+            IEnumerable<AddingFundToCardRun> todaysRuns)
+        {
+            if (!IsMonthlyPaymentDay(moment, utcToday) && moment != SubscriptionMonthlyPaymentMoment.FirstDayOfTheWeek)
+            {
+                return true;
+            }
+
+            if (moment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheWeek)
+            {
+                if (utcToday.DayOfWeek != DayOfWeek.Monday) return true;
+                return todaysRuns.Any(x => x.Name == AddingFundToCardFirstDayOfTheWeekJobName);
+            }
+
+            var jobName = GetAddingFundToCardJobNameForPaymentDay(moment, utcToday);
+            return todaysRuns.Any(x => x.Name == jobName);
+        }
+
+        public static bool IsTodaysFundJobCompleted(Subscription subscription, IClock clock, IEnumerable<AddingFundToCardRun> todaysRuns)
+        {
+            var today = clock.GetCurrentInstant().ToDateTimeUtc();
+            return IsTodaysFundJobCompleted(subscription.MonthlyPaymentMoment, today, todaysRuns);
+        }
+
+        public static string GetAddingFundToCardJobNameForPaymentDay(SubscriptionMonthlyPaymentMoment moment, DateTime utcToday)
+        {
+            if (moment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth
+                || (moment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth && utcToday.Day == 1))
+            {
+                return AddingFundToCardFirstDayOfTheMonthJobName;
+            }
+
+            if (moment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth
+                || (moment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth && utcToday.Day == 15))
+            {
+                return AddingFundToCardFifteenthDayOfTheMonthJobName;
+            }
+
+            if (moment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheWeek)
+            {
+                return AddingFundToCardFirstDayOfTheWeekJobName;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(moment), moment, "Not a payment day for this moment.");
+        }
+
+        public static bool IsMonthlyPaymentDay(SubscriptionMonthlyPaymentMoment moment, DateTime utcToday)
+        {
+            if (moment == SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth)
+                return utcToday.Day == 1;
+            if (moment == SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth)
+                return utcToday.Day == 15;
+            if (moment == SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth)
+                return utcToday.Day == 1 || utcToday.Day == 15;
+            return false;
         }
 
         public static int GetTotalPayment(this Subscription subscription)

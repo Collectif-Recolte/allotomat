@@ -44,9 +44,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return ctx.DataLoader.LoadProject(subscription.ProjectId);
         }
 
-        public int PaymentRemaining([Inject] IClock clock)
+        public async Task<int> PaymentRemaining(IAppUserContext ctx, [Inject] IClock clock)
         {
-            return subscription.GetPaymentRemaining(clock);
+            var todaysRuns = await ctx.DataLoader.LoadTodaysAddingFundToCardRuns().GetResultAsync();
+            var todaysFundJobCompleted = SubscriptionHelper.IsTodaysFundJobCompleted(subscription, clock, todaysRuns);
+            return subscription.GetPaymentRemaining(clock, todaysFundJobCompleted);
         }
 
         public OffsetDateTime StartDate()

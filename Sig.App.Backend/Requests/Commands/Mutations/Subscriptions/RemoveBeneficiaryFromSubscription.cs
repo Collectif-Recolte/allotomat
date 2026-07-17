@@ -82,7 +82,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             beneficiary.Subscriptions.Remove(subscriptionBeneficiary);
 
-            var paymentsRemaining = subscriptionBeneficiary.GetPaymentRemaining(clock);
+            var paymentsRemaining = await subscriptionBeneficiary.GetPaymentRemainingAsync(db, clock, cancellationToken);
             var subscriptionTypes = subscription.Types.Where(x => x.BeneficiaryTypeId == subscriptionBeneficiary.BeneficiaryTypeId).ToList();
             var totalRefund = paymentsRemaining * subscriptionTypes.Sum(x => x.Amount);
             

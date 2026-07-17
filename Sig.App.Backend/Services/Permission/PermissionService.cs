@@ -211,7 +211,8 @@ namespace Sig.App.Backend.Services.Permission
 
         private static readonly CardPermission[] OrganizationManagerCardPermissionsWithAssignCard = new[]
         {
-            CardPermission.EnableDisableCard
+            CardPermission.EnableDisableCard,
+            CardPermission.TransfertCard
         };
 
         private static readonly SubscriptionPermission[] ProjectManagerSubscriptionPermission = new []
@@ -453,10 +454,9 @@ namespace Sig.App.Backend.Services.Permission
 
             var card = await db.Cards
                 .Include(x => x.Beneficiary)
-                .Include(x => x.Project)
                 .FirstAsync(x => x.Id == cardLongId);
 
-            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, card.ProjectId.ToString()) && (!card.Project?.BeneficiariesAreAnonymous ?? true))
+            if (claimsPrincipal.HasClaim(AppClaimTypes.UserType, UserTypeProjectManager) && claimsPrincipal.HasClaim(AppClaimTypes.ProjectManagerOf, card.ProjectId.ToString()))
             {
                 return ProjectManagerCardPermissions;
             }

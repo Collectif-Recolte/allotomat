@@ -192,6 +192,8 @@ namespace Sig.App.Backend.Services.Reports
                     return $"Remboursement d'enveloppe, carte désassignée au participant/Budget allowance refund, card unassigned from participant";
                 case TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog:
                     return $"Remboursement d'enveloppe, participant retiré de l'abonnement/Budget allowance refund, participant removed from subscription";
+                case TransactionLogDiscriminator.AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog:
+                    return $"Allocation d'enveloppe, attribution d'abonnement/Budget allowance allocation, subscription assignment";
                 case TransactionLogDiscriminator.RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog:
                     return $"Remboursement d'enveloppe, participant sans carte lors de l'ajout de fond automatique/Budget allowance refund, participant had no cards when automatically adding fund";
                 case TransactionLogDiscriminator.RefundPaymentTransactionLog:
