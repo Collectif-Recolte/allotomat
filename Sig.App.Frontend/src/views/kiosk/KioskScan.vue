@@ -1,6 +1,9 @@
 <template>
   <div class="flex flex-col items-center justify-center min-h-[var(--kiosk-content-min-height)] px-8 sm:px-12 py-12 w-full">
-    <h1 v-if="props.heading" class="font-bold text-d2 text-primary-700 mb-6 text-center">{{ props.heading }}</h1>
+    <div class="mb-6 text-center">
+      <h1 v-if="props.heading" class="font-bold text-d2 text-primary-700 mb-4 mt-0">{{ props.heading }}</h1>
+      <KioskProgramNames size="sm" />
+    </div>
     <QRCodeScanner
       ref="scannerRef"
       kiosk-mode
@@ -15,6 +18,7 @@ import { defineEmits, defineProps, ref } from "vue";
 import { useApolloClient } from "@vue/apollo-composable";
 
 import QRCodeScanner from "@/components/transaction/qr-code-scanner.vue";
+import KioskProgramNames from "@/components/kiosk/kiosk-program-names";
 import { KIOSK_ACCESS_INVALID } from "@/lib/consts/qr-code-error";
 
 const audio = new Audio(require("@/assets/audio/scan.mp3"));

@@ -13,7 +13,10 @@
   <div
     v-if="activeStep === CHECK_CARD_STEPS_SCAN"
     class="flex flex-col items-center justify-center min-h-[var(--kiosk-content-min-height)] px-8 sm:px-12 py-12 w-full">
-    <h1 class="font-bold text-d2 text-primary-700 mb-6 mt-0 text-center">{{ t("title") }}</h1>
+    <div class="mb-6 text-center">
+      <h1 class="font-bold text-d2 text-primary-700 mb-4 mt-0">{{ t("title") }}</h1>
+      <KioskProgramNames size="sm" />
+    </div>
     <QRCodeScanner
       ref="scannerRef"
       kiosk-mode
@@ -47,6 +50,7 @@ import {
 } from "@/lib/consts/qr-code-error";
 
 import QRCodeScanner from "@/components/transaction/qr-code-scanner.vue";
+import KioskProgramNames from "@/components/kiosk/kiosk-program-names";
 import KioskBalance from "@/views/kiosk/KioskBalance";
 
 const { t } = useI18n();
