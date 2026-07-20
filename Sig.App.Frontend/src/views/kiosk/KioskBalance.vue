@@ -2,7 +2,6 @@
 {
   "en": {
     "back-to-menu": "Return to main menu",
-    "program-label": "Program {programName}",
     "card-number": "Card #{cardProgramCardId}",
     "card-is-disabled": "The card is deactivated.",
     "expiration-date": "Expires on {date}",
@@ -13,7 +12,6 @@
   },
   "fr": {
     "back-to-menu": "Retour au menu principal",
-    "program-label": "Programme {programName}",
     "card-number": "Carte #{cardProgramCardId}",
     "card-is-disabled": "La carte est désactivée.",
     "expiration-date": "Expire le {date}",
@@ -31,7 +29,7 @@
     <div class="bg-white rounded-4xl shadow-lg w-full max-w-2xl p-8 sm:p-10">
       <h1 class="font-bold text-d2 text-primary-700 my-0">{{ t("title") }}</h1>
       <p v-if="card" class="mt-2 text-grey-600 text-d6">
-        <span>{{ t("program-label", { programName }) }}</span>
+        <span>{{ programName }}</span>
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         <span> | {{ t("card-number", { cardProgramCardId: cardIdDisplay }) }}</span>
       </p>
