@@ -23,6 +23,7 @@ export function useKioskToken() {
           isValid
           cashRegisterName
           marketIsDisabled
+          programNames
         }
       }
     `,
@@ -34,6 +35,7 @@ export function useKioskToken() {
   const isValid = computed(() => kioskInfo.value?.isValid === true);
   const marketIsDisabled = computed(() => kioskInfo.value?.marketIsDisabled === true);
   const tokenFound = computed(() => !!kioskInfo.value?.cashRegisterName);
+  const programNames = computed(() => kioskInfo.value?.programNames ?? []);
 
   const { mutate: authenticateKiosk, loading: loginLoading } = useMutation(gql`
     mutation AuthenticateKiosk($token: String!, $password: String!) {
@@ -86,6 +88,7 @@ export function useKioskToken() {
     isValid,
     marketIsDisabled,
     tokenFound,
+    programNames,
     isAuthenticated,
     authError,
     refetch,

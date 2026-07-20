@@ -42,7 +42,7 @@ namespace Sig.App.Backend.Services.Kiosk
 
             var cashRegister = await db.CashRegisters
                 .Include(x => x.Market)
-                .Include(x => x.MarketGroups).ThenInclude(x => x.MarketGroup)
+                .Include(x => x.MarketGroups).ThenInclude(x => x.MarketGroup).ThenInclude(x => x.Project)
                 .FirstOrDefaultAsync(x => x.KioskAccessToken == token, cancellationToken);
 
             if (cashRegister == null)
