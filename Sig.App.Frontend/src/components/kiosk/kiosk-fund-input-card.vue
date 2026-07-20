@@ -1,11 +1,11 @@
 <i18n>
 {
   "en": {
-    "balance-label": "Balance: {amount}",
+    "balance-label": "Balance:",
     "gift-card": "Gift card"
   },
   "fr": {
-    "balance-label": "Solde: {amount}",
+    "balance-label": "Solde:",
     "gift-card": "Carte-cadeau"
   }
 }
@@ -20,7 +20,8 @@
         {{ productGroupLabel }}
       </p>
       <p class="text-d7 text-primary-700 mb-0 leading-tight">
-        {{ t("balance-label", { amount: getMoneyFormat(props.fund.amount) }) }}
+        {{ t("balance-label") }}
+        <span class="font-medium text-d5 tabular-nums ml-1.5">{{ getMoneyFormat(props.fund.amount) }}</span>
       </p>
     </div>
     <div class="flex-1 min-w-0">
