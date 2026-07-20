@@ -3,16 +3,14 @@
   "en": {
     "title": "Make a purchase",
     "purchase-title": "Make a purchase",
-    "program-label": "Program {programName}",
     "card-number": "Card #{cardProgramCardId}",
-    "instruction": "☝️ Enter the amount to debit from your <strong>card</strong> for each type of funds."
+    "instruction": "☝️ Enter the <strong>amount</strong> to debit from your card for each type of funds."
   },
   "fr": {
     "title": "Faire un achat",
     "purchase-title": "Faire un achat",
-    "program-label": "Programme {programName}",
     "card-number": "Carte #{cardProgramCardId}",
-    "instruction": "☝️ Entrez le montant à débiter de votre <strong>carte</strong> pour chaque type de fonds."
+    "instruction": "☝️ Entrez le <strong>montant</strong> à débiter de votre carte pour chaque type de fonds."
   }
 }
 </i18n>
@@ -41,7 +39,7 @@
           </template>
         </h1>
         <p v-if="programName" class="mt-2 text-grey-600 text-d6 mb-0">
-          {{ t("program-label", { programName }) }}
+          {{ programName }}
         </p>
       </div>
       <!-- eslint-disable-next-line vue/no-v-html @intlify/vue-i18n/no-v-html -->
