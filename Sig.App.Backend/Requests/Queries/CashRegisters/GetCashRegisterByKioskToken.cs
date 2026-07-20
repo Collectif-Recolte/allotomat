@@ -34,6 +34,7 @@ namespace Sig.App.Backend.Requests.Queries.CashRegisters
                 .GroupBy(x => x.MarketGroup.ProjectId)
                 .Select(g => g.First().MarketGroup.Project.Name)
                 .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Distinct()
                 .OrderBy(name => name)
                 .ToList();
 
