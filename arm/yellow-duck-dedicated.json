@@ -82,6 +82,15 @@
             "defaultValue": ""
         },
 
+        "axiom-dataset-name": {
+            "type": "string",
+            "defaultValue": "tomat"
+        },
+        "axiom-api-token": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+
         "environments": {
             "type": "array",
             "defaultValue": [
@@ -370,8 +379,11 @@
                     "properties": "[union(
                         createObject(
                             'ConnectionStrings__AppDbContext', concat('server=', parameters('sql-server-name'), '.database.windows.net;database=', concat(parameters('sql-db-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name), ';user id=', parameters('sql-admin-username'), ';password=', parameters('sql-admin-password')),
-                            'Stackify__Enabled', 'true',
-                            'Stackify__Environment', parameters('environments')[copyIndex('environment')].name,
+                            'Axiom__Enabled', 'true',
+                            'Axiom__Environment', parameters('environments')[copyIndex('environment')].name,
+                            'Axiom__DatasetName', parameters('axiom-dataset-name'),
+                            'Axiom__ApiToken', parameters('axiom-api-token'),
+                            'Axiom__Domain', 'us-east-1.aws.edge.axiom.co',
                             'hmac__secret', guid('hmac', parameters('secret-seed'),  resourceGroup().id, parameters('environments')[copyIndex('environment')].name),
                             'qrcode__secret', guid('qrcode', parameters('secret-seed'),  resourceGroup().id, parameters('environments')[copyIndex('environment')].name),
                             'Mailer__BaseUrl', parameters('environments')[copyIndex('environment')].url,
@@ -443,8 +455,11 @@
                             ],
                             "properties": {
                                 "ConnectionStrings__AppDbContext": "[concat('server=', parameters('sql-server-name'), '.database.windows.net;database=', concat(parameters('sql-db-name-prefix'), '-', parameters('environments')[copyIndex('environment')].name), ';user id=', parameters('sql-admin-username'), ';password=', parameters('sql-admin-password'))]",
-                                "Stackify__Enabled": "true",
-                                "Stackify__Environment": "[parameters('environments')[copyIndex('environment')].name]",
+                                "Axiom__Enabled": "true",
+                                "Axiom__Environment": "[parameters('environments')[copyIndex('environment')].name]",
+                                "Axiom__DatasetName": "[parameters('axiom-dataset-name')]",
+                                "Axiom__ApiToken": "[parameters('axiom-api-token')]",
+                                "Axiom__Domain": "us-east-1.aws.edge.axiom.co",
                                 "hmac__secret": "[guid('hmac', resourceGroup().id, parameters('environments')[copyIndex('environment')].name)]",
                                 "qrcode__secret": "[guid('qrcode', resourceGroup().id, parameters('environments')[copyIndex('environment')].name)]",
                                 "Mailer__BaseUrl": "[parameters('environments')[copyIndex('environment')].url]",
