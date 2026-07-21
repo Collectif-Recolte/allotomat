@@ -15,7 +15,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NodaTime;
-using StackifyLib;
 using System;
 using System.Net;
 using System.Net.Mail;
@@ -222,11 +221,6 @@ namespace Sig.App.Backend
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IDataSeeder dataSeeder, AppDbContext db, ILoggerFactory loggerFactory)
         {
-            if (configuration.GetValue<bool>("Stackify:Enabled"))
-            {
-                app.ConfigureStackifyLogging((IConfigurationRoot)configuration);
-            }
-
             db.Database.SetCommandTimeout(TimeSpan.FromMinutes(5));
             db.Database.Migrate();
 

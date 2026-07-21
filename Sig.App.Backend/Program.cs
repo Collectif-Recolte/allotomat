@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.ApplicationInsights;
-using StackifyLib.CoreLogger;
+using Serilog;
+using Sig.App.Backend.Logging;
 
 namespace Sig.App.Backend
 {
@@ -10,16 +11,24 @@ namespace Sig.App.Backend
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .ConfigureLogging(config =>
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureLogging((context, loggingBuilder) =>
                 {
-                    config.AddFilter<ApplicationInsightsLoggerProvider>("", LogLevel.Debug);
-                    config.AddProvider(new StackifyLoggerProvider());
+                    var serilogLogger = SerilogLoggingExtensions
+                        .ConfigureAllotomatSerilog(context.Configuration)
+                        .CreateLogger();
+
+                    loggingBuilder.ClearProviders();
+                    loggingBuilder.AddSerilog(serilogLogger, dispose: true);
+                    loggingBuilder.AddFilter<ApplicationInsightsLoggerProvider>("", LogLevel.Debug);
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
                 });
     }
 }
