@@ -7,6 +7,7 @@ module.exports = {
   spacing: require("./spacing"),
   extend: {
     backgroundImage: require("./background-image"),
+    borderRadius: require("./border-radius"),
     borderWidth: require("./border-width"),
     fontFamily: require("./font-family"),
     fontSize: require("./font-size"),

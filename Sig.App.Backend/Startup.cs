@@ -1,4 +1,4 @@
-﻿using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Extensions;
 using GraphQL.Conventions;
 using Hangfire;
 using Hangfire.Dashboard;
@@ -15,7 +15,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NodaTime;
-using StackifyLib;
 using System;
 using System.Net;
 using System.Net.Mail;
@@ -28,6 +27,7 @@ using Sig.App.Backend.Authorization.Requirements;
 using Sig.App.Backend.Constants;
 using Sig.App.Backend.DataSeeders;
 using Sig.App.Backend.DbModel;
+using Sig.App.Backend.Services.Kiosk;
 using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Gql;
@@ -176,6 +176,9 @@ namespace Sig.App.Backend
             
             services.Configure<HmacSignatureOptions>(configuration.GetSection("hmac"));
             services.AddSingleton<ISignatureService, HmacSignatureService>();
+
+            services.Configure<KioskJwtOptions>(configuration.GetSection("kiosk:jwt"));
+            services.AddSingleton<KioskJwtService>();
             
             // File system
             
@@ -230,11 +233,6 @@ namespace Sig.App.Backend
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IDataSeeder dataSeeder, AppDbContext db, ILoggerFactory loggerFactory)
         {
-            if (configuration.GetValue<bool>("Stackify:Enabled"))
-            {
-                app.ConfigureStackifyLogging((IConfigurationRoot)configuration);
-            }
-
             db.Database.SetCommandTimeout(TimeSpan.FromMinutes(5));
             db.Database.Migrate();
 

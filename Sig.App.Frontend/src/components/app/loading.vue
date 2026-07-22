@@ -1,12 +1,12 @@
 <template>
-  <div>
+  <div :class="{ 'relative flex flex-1 flex-col min-h-0': isFullPage }">
     <slot></slot>
     <!-- Le conteneur doit posséder les class "min-h-[valeur] relative overflow-hidden" -->
     <Transition v-bind="loadingTransition">
       <div
         v-if="props.loading"
-        class="absolute left-0 md:left-64 right-0 top-16 bottom-0 overflow-hidden"
-        :class="{ dark: isDark }">
+        class="absolute overflow-hidden"
+        :class="[isFullPage ? 'inset-0' : 'left-0 md:left-64 right-0 top-16 bottom-0', { dark: isDark }]">
         <div class="absolute z-10 inset-0 h-full w-full bg-white/80 dark:bg-primary-700/80 flex justify-center items-center">
           <span class="pf-animation-loader"></span>
         </div>
@@ -21,6 +21,7 @@ import { defineProps } from "vue";
 const props = defineProps({
   loading: Boolean,
   isFullHeight: Boolean,
+  isFullPage: Boolean,
   isDark: Boolean
 });
 

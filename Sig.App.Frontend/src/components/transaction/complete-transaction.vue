@@ -6,7 +6,8 @@
       "payment-description": "Payment",
       "title": "Transaction completed",
       "gift-card": "Gift card",
-      "card-id": "card #"
+      "card-id": "card #",
+      "returning-to-menu": "Returning to the main menu in {seconds} s"
     },
     "fr": {
       "card-description": "Solde",
@@ -14,37 +15,60 @@
       "payment-description": "Paiement",
       "title": "Transaction complétée",
       "gift-card": "Carte-cadeau",
-      "card-id": "# de carte"
+      "card-id": "# de carte",
+      "returning-to-menu": "Retour au menu principal dans {seconds} s"
     }
   }
   </i18n>
 
 <template>
-  <h1 class="font-semibold text-center mt-4">{{ t("title") }}</h1>
+  <h1 class="text-center" :class="props.isKiosk ? 'text-d2 font-bold text-primary-700' : 'mt-4 font-semibold'">
+    {{ t("title") }}
+  </h1>
   <div v-if="transaction" class="flex mx-2 gap-x-2">
     <p class="w-1/3 leading-tight text-center">
       <span class="inline-block max-w-32 uppercase text-p3 font-bold leading-none">{{ t("card-id") }}</span>
-      <span class="block font-bold text-primary-700 text-h3 xs:text-h2">{{ transaction.card?.programCardId }}</span>
+      <span class="block font-bold text-primary-700 text-d7 xs:text-d3">{{ transaction.card?.programCardId }}</span>
     </p>
     <p class="w-1/3 leading-tight text-center">
       <span class="inline-block max-w-32 uppercase text-p3 font-bold leading-none">{{ t("payment-description") }}</span>
-      <span class="block font-bold text-primary-700 text-h3 xs:text-h2">{{ getMoneyFormat(amount) }}</span>
+      <span class="block font-bold text-primary-700 text-d7 xs:text-d3">{{ getMoneyFormat(amount) }}</span>
     </p>
     <p class="w-1/3 leading-tight text-center">
       <span class="inline-block max-w-24 uppercase text-p3 font-bold leading-none">{{ t("card-description") }}</span>
-      <span class="block font-bold text-primary-700 text-h3 xs:text-h2">{{ getMoneyFormat(fund) }}</span>
+      <span class="block font-bold text-primary-700 text-d7 xs:text-d3">{{ getMoneyFormat(fund) }}</span>
     </p>
   </div>
 
-  <ul class="mb-6 w-full">
+  <ul class="mb-6 w-full" :class="{ 'max-h-[40vh] overflow-y-auto': props.isKiosk }">
     <li
       v-for="item in transactionByProductGroups"
       :key="item.id"
-      class="mb-2 last:mb-0 text-p2"
-      :class="getIsGiftCard(item.productGroup.name) ? 'mt-6 pt-4 border-t border-grey-100' : 'dark'">
+      class="mb-4 last:mb-0 text-p2 first:pt-5 first:border-t-2 first:border-grey-100 last:border-b-2 last:border-grey-100 last:pb-5"
+      :class="getIsGiftCard(item.productGroup.name) ? 'mt-6 pt-5 border-t border-grey-100' : 'dark'">
+      <div v-if="props.isKiosk" class="flex mx-2 gap-x-2">
+        <div class="w-1/3 flex justify-center min-w-0">
+          <span
+            class="rounded-md border-2 px-3 py-1 font-bold truncate max-w-full text-p2 text-center"
+            :class="getKioskCategoryClasses(item)">
+            {{ getProductGroupName(item) }}
+          </span>
+        </div>
+        <div class="w-1/3 text-center min-w-0">
+          <span class="font-bold text-d6 text-primary-900">
+            {{ getMoneyFormat(item.amount) }}
+          </span>
+        </div>
+        <div class="w-1/3 text-center min-w-0">
+          <span class="font-bold text-d6 text-grey-600">
+            {{ getMoneyFormat(getAvailableFundByProductGroupId(item.productGroup.id)) }}
+          </span>
+        </div>
+      </div>
       <div
+        v-else
         class="relative flex items-center w-full rounded-md py-1 px-2 text-primary-900 dark:text-white"
-        :class="[getColorBgClass(item.productGroup.color), getIsGiftCard(item.productGroup.name) ? 'bg-diagonal-pattern' : '']">
+        :class="getIsGiftCard(item.productGroup.name) ? getGiftCardBgClass() : getColorBgClass(item.productGroup.color)">
         <div class="absolute -translate-y-1/2 top-1/2 left-2 max-w-20 xs:max-w-24 truncate font-bold">
           {{ getProductGroupName(item) }}
         </div>
@@ -61,21 +85,27 @@
 
   <PfButtonAction
     class="w-full"
-    btn-style="secondary"
+    :class="{ 'min-h-20 rounded-2xl text-d6': props.isKiosk }"
+    :btn-style="props.isKiosk ? 'primary' : 'secondary'"
+    :size="props.isKiosk ? 'lg' : undefined"
     :label="t('create-new-transaction-btn')"
-    @click="emit('onUpdateStep', TRANSACTION_FINISH, {})" />
+    @click="onFinish" />
+  <p v-if="props.isKiosk && returnSecondsRemaining > 0" class="text-p1 text-grey-600 mt-3 mb-0 text-center">
+    {{ t("returning-to-menu", { seconds: returnSecondsRemaining }) }}
+  </p>
 </template>
 
 <script setup>
 import gql from "graphql-tag";
 import { useI18n } from "vue-i18n";
-import { computed, defineProps, defineEmits } from "vue";
+import { computed, defineProps, defineEmits, onMounted, onUnmounted, ref } from "vue";
 import { useQuery, useResult } from "@vue/apollo-composable";
 
 import { TRANSACTION_FINISH, PRODUCT_GROUP_LOYALTY } from "@/lib/consts/enums";
+import { KIOSK_PURCHASE_COMPLETE_TIMEOUT_MS } from "@/lib/consts/kiosk-timeout";
 
 import { getMoneyFormat } from "@/lib/helpers/money";
-import { getColorBgClass } from "@/lib/helpers/products-color";
+import { getColorBgClass, getGiftCardBgClass, getKioskProductGroupCardClasses } from "@/lib/helpers/products-color";
 import { usePageTitle } from "@/lib/helpers/page-title";
 
 const { t } = useI18n();
@@ -85,10 +115,39 @@ const props = defineProps({
   transactionId: {
     type: String,
     required: true
+  },
+  isKiosk: Boolean
+});
+
+const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState", "finished"]);
+
+const returnSecondsRemaining = ref(0);
+let returnCountdownInterval = null;
+
+onMounted(() => {
+  if (!props.isKiosk) {
+    return;
+  }
+  returnSecondsRemaining.value = Math.ceil(KIOSK_PURCHASE_COMPLETE_TIMEOUT_MS / 1000);
+  returnCountdownInterval = setInterval(() => {
+    returnSecondsRemaining.value = Math.max(0, returnSecondsRemaining.value - 1);
+  }, 1000);
+});
+
+onUnmounted(() => {
+  if (returnCountdownInterval !== null) {
+    clearInterval(returnCountdownInterval);
+    returnCountdownInterval = null;
   }
 });
 
-const emit = defineEmits(["onUpdateStep", "onUpdateLoadingState"]);
+function onFinish() {
+  if (props.isKiosk) {
+    emit("finished");
+    return;
+  }
+  emit("onUpdateStep", TRANSACTION_FINISH, {});
+}
 
 const { result } = useQuery(
   gql`
@@ -207,5 +266,10 @@ function getAvailableFundByProductGroupId(productGroupId) {
 function getIsGiftCard(productGroupName) {
   if (productGroupName === PRODUCT_GROUP_LOYALTY) return true;
   else return false;
+}
+
+function getKioskCategoryClasses(item) {
+  const styles = getKioskProductGroupCardClasses(item.productGroup.color, getIsGiftCard(item.productGroup.name), true);
+  return [styles.border, styles.bg, styles.text];
 }
 </script>

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -414,6 +414,16 @@ namespace Sig.App.Backend.DbModel
                     .WithMany(x => x.CashRegisters)
                     .HasForeignKey(x => x.MarketId)
                     .OnDelete(DeleteBehavior.NoAction);
+
+                _.Property(x => x.KioskAccessToken)
+                    .HasMaxLength(64);
+
+                _.Property(x => x.KioskPassword)
+                    .HasMaxLength(32);
+
+                _.HasIndex(x => x.KioskAccessToken)
+                    .IsUnique()
+                    .HasFilter("[KioskAccessToken] IS NOT NULL");
             });
 
             Configure<CashRegisterMarketGroup>(_ => {

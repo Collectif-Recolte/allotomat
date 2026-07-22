@@ -4,14 +4,12 @@
       "project-name": "Program",
       "market-group-name": "Merchant group",
       "is-inactif-tag": "Deactivated",
-      "is-active-tag": "Enabled",
       "is-disabled-tooltip": "This cash register is no longer part of any merchant group."
     },
     "fr": {
       "project-name": "Programme",
       "market-group-name": "Groupe de commerce",
       "is-inactif-tag": "Désactivé",
-      "is-active-tag": "Activé",
       "is-disabled-tooltip": "Cette caisse ne fait plus partie d'aucun groupe de commerce."
     }
   }
@@ -25,13 +23,11 @@
       </h3>
       <div class="flex">
         <PfTooltip
+          v-if="cashRegister.marketGroups.length === 0"
           class="group-pfone"
-          :hide-tooltip="cashRegister.marketGroups.length !== 0"
           :label="t('is-disabled-tooltip')"
           position="left">
-          <PfTag
-            :label="cashRegister.marketGroups.length === 0 ? t('is-inactif-tag') : t('is-active-tag')"
-            :bg-color-class="cashRegister.marketGroups.length === 0 ? 'bg-red-300' : 'bg-primary-300'" />
+          <PfTag :label="t('is-inactif-tag')" bg-color-class="bg-red-300" />
         </PfTooltip>
         <CashRegisterActions v-if="!cashRegister.isArchived" class="ml-2" :cash-register="cashRegister" />
       </div>
@@ -48,6 +44,7 @@
         </div>
       </div>
     </dl>
+    <CashRegisterKiosk v-if="cashRegister.marketGroups.length > 0 && !cashRegister.isArchived" :cash-register="cashRegister" />
   </div>
 </template>
 
@@ -56,6 +53,7 @@ import { defineProps } from "vue";
 import { useI18n } from "vue-i18n";
 
 import CashRegisterActions from "@/components/cash-register/cash-register-actions";
+import CashRegisterKiosk from "@/components/cash-register/cash-register-kiosk";
 
 const dtClasses = "text-primary-700 text-p2";
 const ddClasses = "text-primary-900 text-h4 leading-normal";

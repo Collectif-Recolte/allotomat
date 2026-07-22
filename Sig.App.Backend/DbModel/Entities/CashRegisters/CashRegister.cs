@@ -1,4 +1,4 @@
-﻿using Sig.App.Backend.DbModel.Entities.Markets;
+using Sig.App.Backend.DbModel.Entities.Markets;
 using System.Collections.Generic;
 
 namespace Sig.App.Backend.DbModel.Entities.CashRegisters
@@ -14,5 +14,9 @@ namespace Sig.App.Backend.DbModel.Entities.CashRegisters
         public IList<CashRegisterMarketGroup> MarketGroups { get; set; }
 
         public bool IsArchived { get; set; }
+
+        public string KioskAccessToken { get; set; }
+
+        public string KioskPassword { get; set; }
     }
 }
