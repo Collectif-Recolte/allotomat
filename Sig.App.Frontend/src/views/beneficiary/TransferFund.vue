@@ -2,12 +2,12 @@
 {
   "en": {
     "title": "Transfer Funds",
-    "add-subscription-payment-title": "Subscription payment per rules",
-    "add-subscription-payment-desc": "Funds will be added to the participant's card according to the subscription settings.",
-    "add-subscription-payment": "Subscription payment per rules",
-    "manually-add-funds-title": "Manually add funds",
-    "manually-add-funds-desc": "Add a specific amount to the participant's card with a chosen expiration date.",
-    "manually-add-funds": "Manually add funds",
+    "add-subscription-payment-title": "Replicate a scheduled payment",
+    "add-subscription-payment-desc": "Add the proper funds to the participant's card according to the subscription settings.",
+    "add-subscription-payment": "Replicate a scheduled payment",
+    "manually-add-funds-title": "Transfer a custom amount",
+    "manually-add-funds-desc": "Add a custom amount to the participant's card with a chosen expiration date.",
+    "manually-add-funds": "Transfer a custom amount",
     "add-gift-card-funds-title": "Add gift card funds to the card",
     "add-gift-card-funds-desc": "Add a gift card amount to the participant's card without an expiration date.",
     "add-gift-card-funds": "Add gift card funds to the card",
@@ -16,14 +16,14 @@
   },
   "fr": {
     "title": "Transférer des fonds",
-    "add-subscription-payment-title": "Versement selon les règles de l'abonnement",
-    "add-subscription-payment-desc": "Selon les paramètres de l'abonnement, les fonds seront ajoutés à la carte du ou de la participant·e.",
-    "add-subscription-payment": "Versement selon les règles de l'abonnement",
+    "add-subscription-payment-title": "Reproduire un versement automatisé",
+    "add-subscription-payment-desc": "Ajoutez les fonds appropriés sur la carte, conformément aux paramètres de l'abonnement.",
+    "add-subscription-payment": "Reproduire un versement automatisé",
     "manually-add-funds-title": "Versement sur mesure",
-    "manually-add-funds-desc": "Ajouter un montant sur la carte du ou de la participant·e avec une date d'expiration au choix.",
+    "manually-add-funds-desc": "Ajouter un montant customisé sur la carte avec une date d'expiration au choix.",
     "manually-add-funds": "Versement sur mesure",
     "add-gift-card-funds-title": "Ajouter des fonds carte-cadeau",
-    "add-gift-card-funds-desc": "Ajouter un montant carte-cadeau à la carte du ou de la participant·e sans date d'expiration.",
+    "add-gift-card-funds-desc": "Ajouter un montant carte-cadeau à la carte sans date d'expiration.",
     "add-gift-card-funds": "Ajouter des fonds carte-cadeau",
     "add-subscription-payment-tooltip": "Aucun versement possible selon les règles de l'abonnement",
     "manually-add-funds-tooltip": "Aucun abonnement actif trouvé"
@@ -36,7 +36,7 @@
     <div class="flex flex-col gap-6">
       <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
         <UiCallout class="min-w-0" :variant="CALLOUT_INFO">
-          <p class="font-medium mb-1 m-0">{{ t("add-subscription-payment-title") }}</p>
+          <!-- <p class="font-medium mb-1 m-0">{{ t("add-subscription-payment-title") }}</p> -->
           <p class="m-0">{{ t("add-subscription-payment-desc") }}</p>
         </UiCallout>
         <PfTooltip :hide-tooltip="canAddSubscriptionPayment" :label="!canAddSubscriptionPayment ? t('add-subscription-payment-tooltip') : undefined">
@@ -53,7 +53,7 @@
       </div>
       <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
         <UiCallout class="min-w-0" :variant="CALLOUT_INFO">
-          <p class="font-medium mb-1 m-0">{{ t("manually-add-funds-title") }}</p>
+          <!-- <p class="font-medium mb-1 m-0">{{ t("manually-add-funds-title") }}</p> -->
           <p class="m-0">{{ t("manually-add-funds-desc") }}</p>
         </UiCallout>
         <PfTooltip
@@ -74,7 +74,7 @@
         v-if="userType === USER_TYPE_PROJECTMANAGER"
         class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
         <UiCallout class="min-w-0" :variant="CALLOUT_INFO">
-          <p class="font-medium mb-1 m-0">{{ t("add-gift-card-funds-title") }}</p>
+          <!-- <p class="font-medium mb-1 m-0">{{ t("add-gift-card-funds-title") }}</p> -->
           <p class="m-0">{{ t("add-gift-card-funds-desc") }}</p>
         </UiCallout>
         <PfButtonLink
