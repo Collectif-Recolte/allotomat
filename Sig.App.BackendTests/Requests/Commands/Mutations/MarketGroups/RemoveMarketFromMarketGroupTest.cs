@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Sig.App.Backend.Requests.Commands.Mutations.MarketGroups;
+using Sig.App.Backend.DbModel.Entities.Projects;
 
 namespace Sig.App.BackendTests.Requests.Commands.Mutations.MarketGroups
 {
@@ -55,6 +56,59 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.MarketGroups
             var localMarketGroupMarket = await DbContext.MarketGroupMarkets.CountAsync();
 
             localMarketGroupMarket.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task RemovesProjectMarketWhenMarketLeavesItsLastMarketGroupOfProject()
+        {
+            var project = new Project() { Name = "Project 1" };
+            DbContext.Projects.Add(project);
+            MarketGroup.Project = project;
+            DbContext.ProjectMarkets.Add(new ProjectMarket() { Market = market, Project = project });
+            DbContext.SaveChanges();
+
+            var input = new RemoveMarketFromMarketGroup.Input()
+            {
+                MarketId = market.GetIdentifier(),
+                MarketGroupId = MarketGroup.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localProjectMarket = await DbContext.ProjectMarkets.CountAsync();
+
+            localProjectMarket.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task KeepsProjectMarketWhenMarketStillInAnotherMarketGroupOfProject()
+        {
+            var project = new Project() { Name = "Project 1" };
+            DbContext.Projects.Add(project);
+            MarketGroup.Project = project;
+
+            var otherMarketGroup = new MarketGroup()
+            {
+                Name = "MarketGroup 2",
+                Project = project
+            };
+            otherMarketGroup.Markets = new List<MarketGroupMarket>() { new MarketGroupMarket() { Market = market, MarketGroup = otherMarketGroup } };
+            DbContext.MarketGroups.Add(otherMarketGroup);
+
+            DbContext.ProjectMarkets.Add(new ProjectMarket() { Market = market, Project = project });
+            DbContext.SaveChanges();
+
+            var input = new RemoveMarketFromMarketGroup.Input()
+            {
+                MarketId = market.GetIdentifier(),
+                MarketGroupId = MarketGroup.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localProjectMarket = await DbContext.ProjectMarkets.CountAsync();
+
+            localProjectMarket.Should().Be(1);
         }
 
         [Fact]

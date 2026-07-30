@@ -10,23 +10,24 @@
     "subscription": "Subscriptions",
     "without-subscription-option": "None",
     "transaction-log-types": "Transaction types",
-    "transaction-log-type-expired": "Funds expired",
-    "transaction-log-type-loyalty": "Gift card",
-    "transaction-log-type-loyalty-editing": "Gift card balance adjustment",
-    "transaction-log-type-manually": "Fund added manually",
-    "transaction-log-type-off-platform": "Fund added (off-platform participant)",
-    "transaction-log-type-subscription": "Subscription",
     "transaction-log-type-payment": "Purchase",
-    "transaction-log-type-transfer": "Fund transferred",
-    "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Budget envelope refund from unassigned card",
-    "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Budget envelope refund from participant having no card",
-    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Budget envelope refund from participant removed from subscription",
     "transaction-log-type-refund-payment": "Purchase refund",
+    "transaction-log-type-manually": "Transfer: Manual",
+    "transaction-log-type-subscription": "Transfer: Subscription",
+    "transaction-log-type-loyalty": "Transfer: Gift card created",
+    "transaction-log-type-loyalty-editing": "Transfer: Gift funds adjusted",
+    "transaction-log-type-off-platform": "Transfer: Off-platform",
+    "transaction-log-type-expired": "Expiry",
+    "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Envelope refund: Participant without a card",
+    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Envelope refund: Subscription unassigned",
+    "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Envelope refund: Card unassigned",
+    "transaction-log-type-allocate-budget-allowance-from-subscription-assignment": "Envelope withdrawal: Subscription assigned",
+    "transaction-log-type-transfer": "Card replacement",
     "market": "Merchants",
     "cash-register": "Cash Registers",
-    "gift-card-transaction-types": "Gift Card Transaction Types",
-    "with-gift-card": "With Gift Card",
-    "without-gift-card": "Without Gift Card"
+    "gift-card-transaction-types": "Card Types",
+    "with-gift-card": "Gift Card",
+    "without-gift-card": "Standard Card"
 	},
 	"fr": {
     "date-selector-from": "Intervalle du",
@@ -38,18 +39,19 @@
     "subscription": "Abonnements",
     "without-subscription-option": "Aucun",
     "transaction-log-types": "Types de transactions",
-    "transaction-log-type-expired": "Expiration des fonds",
-    "transaction-log-type-loyalty": "Carte-cadeau",
-    "transaction-log-type-loyalty-editing": "Modification des fonds d'une carte-cadeau",
-    "transaction-log-type-manually": "Fond ajouté manuellement",
-    "transaction-log-type-off-platform": "Ajout de fond (participant hors plateforme)",
-    "transaction-log-type-subscription": "Abonnement",
-    "transaction-log-type-payment": "Paiement",
-    "transaction-log-type-transfer": "Fond transféré",
-    "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Enveloppe remboursées après la désassignation d'une carte",
-    "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Enveloppe remboursée en raison d'un·e participant·e sans carte",
-    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Enveloppe remboursée après avoir retiré un·e participant·e d'un abonnement",
-    "transaction-log-type-refund-payment": "Remboursement d'un paiement",
+    "transaction-log-type-payment": "Achat",
+    "transaction-log-type-refund-payment": "Remboursement d'achat",
+    "transaction-log-type-manually": "Versement : Sur mesure",
+    "transaction-log-type-subscription": "Versement : Abonnement",
+    "transaction-log-type-loyalty": "Versement : Création de carte-cadeau",
+    "transaction-log-type-loyalty-editing": "Versement : Ajustement de fonds cadeaux",
+    "transaction-log-type-off-platform": "Versement : Hors plateforme",
+    "transaction-log-type-expired": "Expiration",
+    "transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund": "Remboursement d'enveloppe : Participant·e sans carte",
+    "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Remboursement d'enveloppe : Désattribution d'abonnement",
+    "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Remboursement d'enveloppe : Désassignation de carte",
+    "transaction-log-type-allocate-budget-allowance-from-subscription-assignment": "Retrait d'enveloppe : attribution d'abonnement",
+    "transaction-log-type-transfer": "Remplacement de carte",
     "market": "Commerces",
     "cash-register": "Caisses",
     "gift-card-transaction-types": "Carte-cadeaux",
@@ -396,18 +398,14 @@ const availableCashRegister = computed(() => {
 
 const availableTransactionTypes = computed(() => {
   return [
-    { value: "ExpireFundTransactionLog", label: t("transaction-log-type-expired") },
+    { value: "PaymentTransactionLog", label: t("transaction-log-type-payment") },
+    { value: "RefundPaymentTransactionLog", label: t("transaction-log-type-refund-payment") },
+    { value: "ManuallyAddingFundTransactionLog", label: t("transaction-log-type-manually") },
+    { value: "SubscriptionAddingFundTransactionLog", label: t("transaction-log-type-subscription") },
     { value: "LoyaltyAddingFundTransactionLog", label: t("transaction-log-type-loyalty") },
     { value: "LoyaltyEditingFundTransactionLog", label: t("transaction-log-type-loyalty-editing") },
-    { value: "ManuallyAddingFundTransactionLog", label: t("transaction-log-type-manually") },
     { value: "OffPlatformAddingFundTransactionLog", label: t("transaction-log-type-off-platform") },
-    { value: "SubscriptionAddingFundTransactionLog", label: t("transaction-log-type-subscription") },
-    { value: "PaymentTransactionLog", label: t("transaction-log-type-payment") },
-    { value: "TransferFundTransactionLog", label: t("transaction-log-type-transfer") },
-    {
-      value: "RefundBudgetAllowanceFromUnassignedCardTransactionLog",
-      label: t("transaction-log-type-refund-budget-allowance-from-unassigned-card")
-    },
+    { value: "ExpireFundTransactionLog", label: t("transaction-log-type-expired") },
     {
       value: "RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog",
       label: t("transaction-log-type-refund-budget-allowance-from-no-card-when-adding-fund")
@@ -416,7 +414,15 @@ const availableTransactionTypes = computed(() => {
       value: "RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog",
       label: t("transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription")
     },
-    { value: "RefundPaymentTransactionLog", label: t("transaction-log-type-refund-payment") }
+    {
+      value: "RefundBudgetAllowanceFromUnassignedCardTransactionLog",
+      label: t("transaction-log-type-refund-budget-allowance-from-unassigned-card")
+    },
+    {
+      value: "AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog",
+      label: t("transaction-log-type-allocate-budget-allowance-from-subscription-assignment")
+    },
+    { value: "TransferFundTransactionLog", label: t("transaction-log-type-transfer") },
   ];
 });
 

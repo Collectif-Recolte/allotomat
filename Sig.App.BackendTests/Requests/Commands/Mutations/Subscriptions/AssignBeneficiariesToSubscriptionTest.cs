@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using GraphQL.Conventions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using NodaTime;
 using Sig.App.Backend.BackgroundJobs;
@@ -332,6 +333,42 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             localBudgetAllowance.AvailableFund.Should().Be(60);
             localSubscription.Beneficiaries.Count.Should().Be(8);
             subscriptionBeneficiaries.Count().Should().Be(8);
+
+            var allocationLogs = await DbContext.TransactionLogs
+                .Where(x => x.Discriminator == TransactionLogDiscriminator.AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog)
+                .ToListAsync();
+            allocationLogs.Should().HaveCount(8);
+            allocationLogs.Sum(x => x.TotalAmount).Should().Be(700 - 60);
+            allocationLogs.Select(x => (x.BeneficiaryId, x.TotalAmount)).Should().BeEquivalentTo(new[]
+            {
+                ((long?)beneficiary1.Id, 50m),
+                ((long?)beneficiary2.Id, 50m),
+                ((long?)beneficiary3.Id, 50m),
+                ((long?)beneficiary4.Id, 50m),
+                ((long?)beneficiary5.Id, 110m),
+                ((long?)beneficiary6.Id, 110m),
+                ((long?)beneficiary7.Id, 110m),
+                ((long?)beneficiary8.Id, 110m),
+            });
+
+            var allocationLogIds = allocationLogs.Select(x => x.Id).ToList();
+            var productGroups = await DbContext.TransactionLogProductGroups
+                .Where(x => allocationLogIds.Contains(x.TransactionLogId))
+                .ToListAsync();
+
+            var type2BeneficiaryIds = new[] { beneficiary5.Id, beneficiary6.Id, beneficiary7.Id, beneficiary8.Id };
+            var type2LogIds = allocationLogs
+                .Where(x => x.BeneficiaryId.HasValue && type2BeneficiaryIds.Contains(x.BeneficiaryId.Value))
+                .Select(x => x.Id)
+                .ToHashSet();
+
+            foreach (var logId in type2LogIds)
+            {
+                productGroups
+                    .Where(x => x.TransactionLogId == logId)
+                    .Select(x => x.Amount)
+                    .Should().BeEquivalentTo(new[] { 100m, 10m });
+            }
         }
 
         [Fact]

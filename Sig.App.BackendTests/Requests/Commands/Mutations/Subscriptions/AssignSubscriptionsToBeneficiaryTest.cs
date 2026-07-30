@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using GraphQL.Conventions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using NodaTime;
 using Sig.App.Backend.BackgroundJobs;
@@ -205,7 +206,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
             DbContext.SaveChanges();
 
-            handler = new AssignSubscriptionsToBeneficiary(NullLogger<AssignSubscriptionsToBeneficiary>.Instance, Clock, DbContext);
+            handler = new AssignSubscriptionsToBeneficiary(NullLogger<AssignSubscriptionsToBeneficiary>.Instance, Clock, DbContext, HttpContextAccessor);
 
             Clock.Reset(Instant.FromUtc(today.Year, today.Month, 4, 0, 0));
         }
@@ -235,6 +236,17 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             localSubscription1.Beneficiaries.Count.Should().Be(1);
             localSubscription2.Beneficiaries.Count.Should().Be(1);
             localSubscription3.Beneficiaries.Count.Should().Be(1);
+
+            var allocationLogs = await DbContext.TransactionLogs
+                .Where(x => x.Discriminator == TransactionLogDiscriminator.AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog)
+                .ToListAsync();
+            allocationLogs.Should().HaveCount(3);
+            allocationLogs.Select(x => (x.SubscriptionId, x.TotalAmount)).Should().BeEquivalentTo(new[]
+            {
+                ((long?)subscription1.Id, 50m),
+                ((long?)subscription2.Id, 50m),
+                ((long?)subscription3.Id, 100m),
+            });
         }
 
         [Fact]

@@ -2,6 +2,7 @@
 using GraphQL.DataLoader;
 using MediatR;
 using NodaTime;
+using Sig.App.Backend.DbModel.Entities.BackgroundJobs;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Transactions;
@@ -85,6 +86,9 @@ namespace Sig.App.Backend.Gql
 
         public IDataLoaderResult<bool> LoadSubscriptionHaveAnyBeneficiaries(long subscriptionId) =>
             LoadOne<GetSubscriptionHaveAnyBeneficiaries.Query, bool, long>(subscriptionId);
+
+        public IDataLoaderResult<IReadOnlyList<AddingFundToCardRun>> LoadTodaysAddingFundToCardRuns() =>
+            LoadOne<GetTodaysAddingFundToCardRuns.Query, IReadOnlyList<AddingFundToCardRun>, int>(GetTodaysAddingFundToCardRuns.Key);
 
         public IDataLoaderResult<BudgetAllowanceGraphType> LoadBudgetAllowance(long budgetAllowanceId) =>
             LoadOne<GetBudgetAllowance.Query, BudgetAllowanceGraphType, long>(budgetAllowanceId);

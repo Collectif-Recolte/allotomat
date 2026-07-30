@@ -13,7 +13,7 @@ namespace Sig.App.Backend.EmailTemplates.Models
         public decimal TotalFund { get; set; }
         public IEnumerable<RefundProductGroupAvailableFund> ProductGroupAvailableFunds { get; set; }
 
-        public override string Subject => $"Reçu de rembourssement chez {MarketName} / Reimbursement receipt from {MarketName}";
+        public override string Subject => $"Reçu de remboursement chez {MarketName} / Reimbursement receipt from {MarketName}";
 
         public TransactionRefundBeneficiaryReceiptEmail(string to, string marketName, string projectName, string projectUrl, decimal amount, decimal totalFund, IEnumerable<RefundProductGroupAvailableFund> productGroupAvailableFunds, string beneficiaryId) : base(to)
         {

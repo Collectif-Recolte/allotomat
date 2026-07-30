@@ -10,6 +10,7 @@ using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
+using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
@@ -47,7 +48,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
         {
             logger.LogInformation($"[Mutation] AssignBeneficiariesToSubscription({request.OrganizationId}, {request.SubscriptionId}, {request.Beneficiaries})");
             var organizationId = request.OrganizationId.LongIdentifierForType<Organization>();
-            var organization = await db.Organizations.Include(x => x.BudgetAllowances).FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
+            var organization = await db.Organizations
+                .Include(x => x.BudgetAllowances)
+                .Include(x => x.Project)
+                .FirstOrDefaultAsync(x => x.Id == organizationId, cancellationToken);
 
             if (organization == null)
             {
@@ -91,11 +95,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             IQueryable<Beneficiary> query = db.Beneficiaries
                 .Include(x => x.BeneficiaryType)
+                .Include(x => x.Card)
                 .Where(x => beneficiariesLongIdentifiers.Contains(x.Id));
 
             AddingFundToCard addingFundToCardJob = null;
             string currentUserId = null;
             AppUser currentUser = null;
+            currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
+            currentUser = currentUserId != null
+                ? db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId)
+                : null;
             if (request.ReplicatePaymentOnAttribution)
             {
                 query = query
@@ -103,8 +112,6 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                     .Include(x => x.Card).ThenInclude(x => x.Funds)
                     .Include(x => x.Organization).ThenInclude(x => x.Project);
                 addingFundToCardJob = new AddingFundToCard(db, clock, addingFundLogger);
-                currentUserId = httpContextAccessor.HttpContext?.User.GetUserId();
-                currentUser = db.Users.Include(x => x.Profile).FirstOrDefault(x => x.Id == currentUserId);
             }
 
             Beneficiary[] beneficiaries = query.ToArray();
@@ -122,7 +129,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 throw new BeneficiaryTypeNotInSubscriptionException();
             }
 
-            var paymentRemaining = subscription.GetPaymentRemaining(clock);
+            var paymentRemaining = await subscription.GetPaymentRemainingAsync(db, clock, cancellationToken);
 
             if (subscription.IsSubscriptionPaymentBasedCardUsage)
             {
@@ -163,6 +170,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         if (budgetAllowance.AvailableFund >= amount)
                         {
                             budgetAllowance.AvailableFund -= amount;
+                            if (amount > 0)
+                            {
+                                AddAllocationTransactionLog(beneficiary, organization, subscription, beneficiaryPaymentRemaining, amount, today, currentUserId, currentUser);
+                            }
                             await addingFundToCardJob.AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, new AddingFundToCard.InitiatedBy()
                             {
                                 TransactionInitiatorId = currentUserId,
@@ -221,6 +232,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         budgetAllowance.AvailableFund -= amount;
                         beneficiariesWhoGetSubscriptions++;
 
+                        if (amount > 0)
+                        {
+                            AddAllocationTransactionLog(beneficiary, organization, subscription, numberOfPayments, amount, today, currentUserId, currentUser);
+                        }
+
                         if (replicatePaymentOnAttribution)
                         {
                             await addingFundToCardJob.AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, new AddingFundToCard.InitiatedBy()
@@ -254,6 +270,59 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 TotalBeneficiaries = beneficiaries.Length,
                 AvailableBudgetAfter = budgetAllowance.AvailableFund
             };
+        }
+
+        private void AddAllocationTransactionLog(
+            Beneficiary beneficiary,
+            Organization organization,
+            Subscription subscription,
+            int numberOfPayments,
+            decimal amount,
+            DateTime today,
+            string currentUserId,
+            AppUser currentUser)
+        {
+            var subscriptionTypes = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId).ToList();
+            var transactionLogProductGroups = new List<TransactionLogProductGroup>();
+            foreach (var productGroup in subscriptionTypes.GroupBy(x => x.ProductGroupId))
+            {
+                var firstType = productGroup.First();
+                transactionLogProductGroups.Add(new TransactionLogProductGroup()
+                {
+                    Amount = numberOfPayments * productGroup.Sum(x => x.Amount),
+                    ProductGroupId = firstType.ProductGroupId,
+                    ProductGroupName = firstType.ProductGroup?.Name
+                });
+            }
+
+            db.TransactionLogs.Add(new TransactionLog()
+            {
+                Discriminator = TransactionLogDiscriminator.AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog,
+                CreatedAtUtc = today,
+                TotalAmount = amount,
+                CardProgramCardId = beneficiary.Card?.ProgramCardId,
+                CardNumber = beneficiary.Card?.CardNumber,
+                BeneficiaryId = beneficiary.Id,
+                BeneficiaryID1 = beneficiary.ID1,
+                BeneficiaryID2 = beneficiary.ID2,
+                BeneficiaryFirstname = beneficiary.Firstname,
+                BeneficiaryLastname = beneficiary.Lastname,
+                BeneficiaryEmail = beneficiary.Email,
+                BeneficiaryPhone = beneficiary.Phone,
+                BeneficiaryIsOffPlatform = beneficiary is OffPlatformBeneficiary,
+                BeneficiaryTypeId = beneficiary.BeneficiaryTypeId,
+                OrganizationId = organization.Id,
+                OrganizationName = organization.Name,
+                SubscriptionId = subscription.Id,
+                SubscriptionName = subscription.Name,
+                ProjectId = organization.ProjectId,
+                ProjectName = organization.Project?.Name,
+                TransactionLogProductGroups = transactionLogProductGroups,
+                TransactionInitiatorId = currentUserId,
+                TransactionInitiatorFirstname = currentUser?.Profile.FirstName,
+                TransactionInitiatorLastname = currentUser?.Profile.LastName,
+                TransactionInitiatorEmail = currentUser?.Email
+            });
         }
 
         [MutationInput]

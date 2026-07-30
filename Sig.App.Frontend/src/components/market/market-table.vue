@@ -7,8 +7,8 @@
           "market-edit-managers": "Edit managers",
           "market-name": "Name",
           "options": "Options",
-          "disabled-market": "Disable",
-          "enabled-market": "Enable"
+          "disabled-market": "Deactivate",
+          "enabled-market": "Reactivate"
       },
       "fr": {
           "edit-market": "Modifier",

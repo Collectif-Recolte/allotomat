@@ -36,8 +36,8 @@ namespace Sig.App.Backend.BackgroundJobs
         public static void RegisterJob(IConfiguration config)
         {
             var cronFirstDayOfMonth = Cron.Monthly(1, 4);
-            RecurringJob.AddOrUpdate<AddingFundToCard>("AddingFundToCard:FirstDayOfTheMonth",
-                x => x.Run("AddingFundToCard:FirstDayOfTheMonth", new SubscriptionMonthlyPaymentMoment[2] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth, SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth }),
+            RecurringJob.AddOrUpdate<AddingFundToCard>(SubscriptionHelper.AddingFundToCardFirstDayOfTheMonthJobName,
+                x => x.Run(SubscriptionHelper.AddingFundToCardFirstDayOfTheMonthJobName, new SubscriptionMonthlyPaymentMoment[2] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth, SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth }),
                 cronFirstDayOfMonth,
                 new RecurringJobOptions
                 {
@@ -45,8 +45,8 @@ namespace Sig.App.Backend.BackgroundJobs
                 });
 
             var cronFifteenDayOfMonth = Cron.Monthly(15, 4);
-            RecurringJob.AddOrUpdate<AddingFundToCard>("AddingFundToCard:FifteenthDayOfTheMonth",
-                x => x.Run("AddingFundToCard:FifteenthDayOfTheMonth", new SubscriptionMonthlyPaymentMoment[2] { SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth, SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth }),
+            RecurringJob.AddOrUpdate<AddingFundToCard>(SubscriptionHelper.AddingFundToCardFifteenthDayOfTheMonthJobName,
+                x => x.Run(SubscriptionHelper.AddingFundToCardFifteenthDayOfTheMonthJobName, new SubscriptionMonthlyPaymentMoment[2] { SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth, SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth }),
                 cronFifteenDayOfMonth,
                 new RecurringJobOptions
                 {
@@ -54,8 +54,8 @@ namespace Sig.App.Backend.BackgroundJobs
                 });
 
             var cronWeekly = Cron.Weekly(DayOfWeek.Monday, 4);
-            RecurringJob.AddOrUpdate<AddingFundToCard>("AddingFundToCard:FirstDayOfTheWeek",
-                x => x.Run("AddingFundToCard:FirstDayOfTheWeek", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheWeek }),
+            RecurringJob.AddOrUpdate<AddingFundToCard>(SubscriptionHelper.AddingFundToCardFirstDayOfTheWeekJobName,
+                x => x.Run(SubscriptionHelper.AddingFundToCardFirstDayOfTheWeekJobName, new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheWeek }),
                 cronWeekly,
                 new RecurringJobOptions
                 {
@@ -298,7 +298,7 @@ namespace Sig.App.Backend.BackgroundJobs
                     var previousPaymentDateTime = SubscriptionHelper.GetPreviousPaymentDateTime(clock, subscription.MonthlyPaymentMoment);
                     if (paymentsMade != 0 && !beneficiary.Card.Transactions.Where(x => x is PaymentTransaction).Any(x => x.CreatedAtUtc >= previousPaymentDateTime))
                     {
-                        if (maxNumberOfPayments - paymentsMade >= subscriptionBeneficiary.GetPaymentRemaining(clock))
+                        if (maxNumberOfPayments - paymentsMade >= subscriptionBeneficiary.GetPaymentRemaining(clock, todaysFundJobCompleted: true))
                         {
                             RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
                         }
@@ -388,7 +388,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 if (subscription.IsSubscriptionPaymentBasedCardUsage)
                 {
                     var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
-                    if (maxNumberOfPayments >= subscriptionBeneficiary.GetPaymentRemaining(clock))
+                    if (maxNumberOfPayments >= subscriptionBeneficiary.GetPaymentRemaining(clock, todaysFundJobCompleted: true))
                     {
                         RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
                     }

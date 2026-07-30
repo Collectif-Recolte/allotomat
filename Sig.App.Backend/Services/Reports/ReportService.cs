@@ -174,32 +174,34 @@ namespace Sig.App.Backend.Services.Reports
         {
             switch (transactionLog.Discriminator)
             {
-                case TransactionLogDiscriminator.ExpireFundTransactionLog:
-                    return "Expiration des fonds/Expiry of funds";
-                case TransactionLogDiscriminator.LoyaltyAddingFundTransactionLog:
-                    return "Carte-cadeau/Gift card";
-                case TransactionLogDiscriminator.ManuallyAddingFundTransactionLog:
-                    return "Fond ajouté manuellement/Manually added fund";
-                case TransactionLogDiscriminator.OffPlatformAddingFundTransactionLog:
-                    return "Ajout de fond (participant hors plateforme)/Adding fund (off-platform participant)";
-                case TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog:
-                    return "Abonnement/Subscription";
                 case TransactionLogDiscriminator.PaymentTransactionLog:
-                    return "Paiement/Payment";
-                case TransactionLogDiscriminator.TransferFundTransactionLog:
-                    return "Transfert de fond/Fund transfer";
-                case TransactionLogDiscriminator.RefundBudgetAllowanceFromUnassignedCardTransactionLog:
-                    return $"Remboursement d'enveloppe, carte désassignée au participant/Budget allowance refund, card unassigned from participant";
-                case TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog:
-                    return $"Remboursement d'enveloppe, participant retiré de l'abonnement/Budget allowance refund, participant removed from subscription";
-                case TransactionLogDiscriminator.RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog:
-                    return $"Remboursement d'enveloppe, participant sans carte lors de l'ajout de fond automatique/Budget allowance refund, participant had no cards when automatically adding fund";
+                    return "Achat / Purchase";
                 case TransactionLogDiscriminator.RefundPaymentTransactionLog:
-                    return $"Remboursement d'un paiement/Refund of a payment";
+                    return $"Remboursement d'achat / Purchase refund";
+                case TransactionLogDiscriminator.ManuallyAddingFundTransactionLog:
+                    return "Versement : Sur mesure / Transfer: Manual";
+                case TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog:
+                    return "Versement : Abonnement / Transfer: Subscription";
+                case TransactionLogDiscriminator.LoyaltyAddingFundTransactionLog:
+                    return "Versement : Création de carte-cadeau / Transfer: Gift card created";
                 case TransactionLogDiscriminator.LoyaltyEditFundTransactionLog:
-                    return "Modification Carte-cadeau/Edit Gift card";
+                    return "Versement : Ajustement de fonds cadeaux / Transfer: Gift funds adjusted";
+                case TransactionLogDiscriminator.OffPlatformAddingFundTransactionLog:
+                    return "Versement : Hors plateforme / Transfer: Off-platform";
+                case TransactionLogDiscriminator.ExpireFundTransactionLog:
+                    return "Expiration / Expiry";
+                case TransactionLogDiscriminator.RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog:
+                    return $"Remboursement d'enveloppe : Participant·e sans carte / Envelope refund: Participant without a card";
+                case TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog:
+                    return $"Remboursement d'enveloppe : Désattribution d'abonnement / Envelope refund: Subscription unassigned";
+                case TransactionLogDiscriminator.RefundBudgetAllowanceFromUnassignedCardTransactionLog:
+                    return $"Remboursement d'enveloppe : Désassignation de carte / Envelope refund: Card unassigned";
+                case TransactionLogDiscriminator.AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog:
+                    return $"Retrait d'enveloppe : Attribution d'abonnement / Envelope withdrawal: Subscription assigned";
+                case TransactionLogDiscriminator.TransferFundTransactionLog:
+                    return "Remplacement de carte / Card replacement";
                 default:
-                    return "Type inconnu/Unknown type";
+                    return "Type inconnu / Unknown type";
             }
         }
 
