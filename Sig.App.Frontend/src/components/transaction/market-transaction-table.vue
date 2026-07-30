@@ -1,7 +1,7 @@
 <i18n>
   {
     "en": {
-      "transaction-date-hour": "Date and hour",
+      "transaction-date-hour": "Date and time",
       "transaction-card-no": "Card number",
       "transaction-amount": "Amount",
       "transaction-refund": "Refund"
