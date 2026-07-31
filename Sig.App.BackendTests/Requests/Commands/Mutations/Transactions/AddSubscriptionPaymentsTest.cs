@@ -169,6 +169,36 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             localBudgetAllowance.AvailableFund.Should().Be(75);
         }
 
+        // CRCL-2603 : pour un abonnement NON usage-based, un versement manqué est toujours additionnel
+        // (le job livre tous les versements programmés) et doit donc toujours débiter l'enveloppe,
+        // même quand la carte est à jour dans son calendrier.
+        [Fact]
+        public async Task AddSubscriptionPaymentAlwaysDebitsBudgetForNonUsageBasedSubscription()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.IsSubscriptionPaymentBasedCardUsage = false;
+            subscription.MaxNumberOfPayments = 1;
+            subscription.StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(-4);
+            subscription.EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(6);
+            subscription.FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(7);
+
+            DbContext.SaveChanges();
+
+            var input = new AddSubscriptionPayments.Input()
+            {
+                Subscriptions = new List<Id>() { subscription.GetIdentifier() },
+                BeneficiaryId = beneficiary.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBudgetAllowance = DbContext.BudgetAllowances.First();
+
+            // Le versement manqué débite l'enveloppe (100 - 25) même si la carte est à jour.
+            localBudgetAllowance.AvailableFund.Should().Be(75);
+        }
+
         [Fact]
         public async Task ThrowsIfBeneficiaryNotFound()
         {
@@ -437,6 +467,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         {
             var today = Clock.GetCurrentInstant().ToDateTimeUtc();
 
+            // CRCL-2603 : le saut de débit (enveloppe déjà allouée) n'est valable que pour les abonnements usage-based.
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
             subscription.MaxNumberOfPayments = 1;
             subscription.StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(-4);
             subscription.EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(6);
