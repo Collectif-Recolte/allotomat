@@ -43,7 +43,8 @@ namespace Sig.App.BackendTests
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             
             databaseName = Guid.NewGuid().ToString();
-            Clock = new FakeClock(SystemClock.Instance.GetCurrentInstant());
+            // Use a fixed fake clock to make tests deterministic and avoid failures on 1st/15th of month
+            Clock = new FakeClock(Instant.FromUtc(2025, 7, 2, 0, 0));
             MediatorMock = new Mock<IMediator>();
             DbContext = CreateDbContext();
             UserManager = CreateUserManager();
