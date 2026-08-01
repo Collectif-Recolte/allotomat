@@ -126,7 +126,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 Name = "Subscription 1 test",
                 StartDate = new LocalDate(2022, 2, 1),
                 EndDate = new LocalDate(2022, 4, 30),
-                FundsExpirationDate = new LocalDate(DateTime.UtcNow.Year + 1, 1, 1),
+                FundsExpirationDate = new LocalDate(Clock.GetCurrentInstant().ToDateTimeUtc().Year + 1, 1, 1),
                 MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth,
                 Types = new List<EditSubscriptionTypeInput>() { 
                     new EditSubscriptionTypeInput
@@ -146,7 +146,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             localSubscription.MonthlyPaymentMoment.Should().Be(SubscriptionMonthlyPaymentMoment.FifteenthDayOfTheMonth);
             localSubscription.StartDate.Should().Be(new DateTime(2022, 2, 1));
             localSubscription.EndDate.Should().Be(new DateTime(2022, 4, 30));
-            localSubscription.FundsExpirationDate.Should().Be(new LocalDate(DateTime.UtcNow.Year + 1, 1, 1).AtMidnight().InUtc().ToDateTimeUtc());
+            localSubscription.FundsExpirationDate.Should().Be(new LocalDate(Clock.GetCurrentInstant().ToDateTimeUtc().Year + 1, 1, 1).AtMidnight().InUtc().ToDateTimeUtc());
         }
 
         [Fact]
@@ -200,7 +200,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         {
             var localBeneficiaryType = await DbContext.BeneficiaryTypes.FirstAsync();
 
-            var futureExpiration = DateTime.UtcNow.AddYears(2);
+            var futureExpiration = Clock.GetCurrentInstant().ToDateTimeUtc().AddYears(2);
             subscription.IsFundsAccumulable = true;
             subscription.TriggerFundExpiration = FundsExpirationTrigger.SpecificDate;
             subscription.FundsExpirationDate = futureExpiration;
@@ -238,7 +238,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
             subscription.IsFundsAccumulable = true;
             subscription.TriggerFundExpiration = FundsExpirationTrigger.SpecificDate;
-            subscription.FundsExpirationDate = DateTime.UtcNow.AddYears(-1);
+            subscription.FundsExpirationDate = Clock.GetCurrentInstant().ToDateTimeUtc().AddYears(-1);
             AssignBeneficiaryToSubscription(localBeneficiaryType);
 
             var input = new Input()
@@ -332,7 +332,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         {
             var localBeneficiaryType = await DbContext.BeneficiaryTypes.FirstAsync();
 
-            var futureExpiration = DateTime.UtcNow.AddYears(2);
+            var futureExpiration = Clock.GetCurrentInstant().ToDateTimeUtc().AddYears(2);
             subscription.IsFundsAccumulable = true;
             subscription.TriggerFundExpiration = FundsExpirationTrigger.SpecificDate;
             subscription.FundsExpirationDate = futureExpiration;
