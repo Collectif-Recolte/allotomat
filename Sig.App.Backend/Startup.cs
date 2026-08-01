@@ -233,7 +233,6 @@ namespace Sig.App.Backend
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IDataSeeder dataSeeder, AppDbContext db, ILoggerFactory loggerFactory)
         {
-            db.Database.SetCommandTimeout(TimeSpan.FromMinutes(5));
             db.Database.Migrate();
 
             dataSeeder.Seed().GetAwaiter().GetResult();
@@ -314,7 +313,13 @@ namespace Sig.App.Backend
         {
             options.UseSqlServer(
                 configuration.GetConnectionString("AppDbContext"),
-                sqlOptions => { sqlOptions.EnableRetryOnFailure(); });
+                sqlOptions => {
+                    sqlOptions.EnableRetryOnFailure();
+
+                    // Applied here rather than on a single resolved context so that every scope
+                    // gets it, background jobs included.
+                    sqlOptions.CommandTimeout((int)TimeSpan.FromMinutes(5).TotalSeconds);
+                });
         }
 
         private void ConfigureAuthentication(AuthenticationOptions options)
