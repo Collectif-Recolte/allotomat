@@ -22,6 +22,8 @@ namespace Sig.App.Backend.BackgroundJobs
 {
     public class AddingFundToCard
     {
+        private const int CardStatsBatchSize = 1000;
+
         private readonly AppDbContext db;
         private readonly IClock clock;
         private readonly ILogger<AddingFundToCard> logger;
@@ -111,7 +113,6 @@ namespace Sig.App.Backend.BackgroundJobs
             }
 
             var activeSubscriptions = await db.Subscriptions
-                .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary).ThenInclude(x => x.Card).ThenInclude(x => x.Transactions)
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary).ThenInclude(x => x.Card).ThenInclude(x => x.Funds)
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary).ThenInclude(x => x.Organization).ThenInclude(x => x.Project)
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.BeneficiaryType)
@@ -120,11 +121,13 @@ namespace Sig.App.Backend.BackgroundJobs
                 .Include(x => x.Types).ThenInclude(x => x.ProductGroup)
                 .Where(x => x.StartDate <= today && x.EndDate >= today && monthlyPaymentMoment.Contains(x.MonthlyPaymentMoment)).ToListAsync();
 
+            var cardUsageStats = await LoadCardUsageStats(activeSubscriptions);
+
             foreach (var subscription in activeSubscriptions)
             {
                 foreach (var subscriptionBeneficiary in subscription.Beneficiaries)
                 {
-                    await CreateTransaction(subscriptionBeneficiary);
+                    await CreateTransaction(subscriptionBeneficiary, preloadedCardUsageStats: cardUsageStats);
                 }
             }
 
@@ -232,7 +235,6 @@ namespace Sig.App.Backend.BackgroundJobs
             var subscriptionBeneficiary = await db.SubscriptionBeneficiaries
                 .Include(x => x.Subscription).ThenInclude(x => x.BudgetAllowances)
                 .AsSplitQuery().Include(x => x.Subscription.Types).ThenInclude(x => x.ProductGroup)
-                .Include(x => x.Beneficiary).ThenInclude(x => x.Card).ThenInclude(x => x.Transactions)
                 .Include(x => x.Beneficiary).ThenInclude(x => x.Card).ThenInclude(x => x.Funds)
                 .Include(x => x.Beneficiary).ThenInclude(x => x.Organization).ThenInclude(x => x.Project)
                 .Where(x => x.SubscriptionId == subscriptionIdLong && x.BeneficiaryId == beneficiaryIdLong && x.BeneficiaryTypeId == beneficiaryType.Id)
@@ -249,7 +251,7 @@ namespace Sig.App.Backend.BackgroundJobs
             await CreateTransaction(subscriptionBeneficiary, initiatedBy);
         }
 
-        private async Task CreateTransaction(SubscriptionBeneficiary subscriptionBeneficiary, InitiatedBy initiatedBy = null)
+        private async Task CreateTransaction(SubscriptionBeneficiary subscriptionBeneficiary, InitiatedBy initiatedBy = null, CardUsageStatsCollection preloadedCardUsageStats = null)
         {
             if (subscriptionBeneficiary.Subscription == null)
             {
@@ -262,7 +264,6 @@ namespace Sig.App.Backend.BackgroundJobs
             if (subscriptionBeneficiary.Beneficiary == null)
             {
                 subscriptionBeneficiary.Beneficiary = await db.Beneficiaries
-                    .Include(x => x.Card).ThenInclude(x => x.Transactions)
                     .Include(x => x.Card).ThenInclude(x => x.Funds)
                     .Include(x => x.Organization).ThenInclude(x => x.Project)
                     .AsSplitQuery()
@@ -286,7 +287,12 @@ namespace Sig.App.Backend.BackgroundJobs
                 var card = beneficiary.Card;
                 if (subscription.IsSubscriptionPaymentBasedCardUsage && initiatedBy == null)
                 {
-                    var subscriptionAddedFundCount = beneficiary.Card.Transactions.OfType<SubscriptionAddingFundTransaction>().Count(x => subscriptionTypes.Any(y => y.Id == x.SubscriptionTypeId));
+                    var previousPaymentDateTime = SubscriptionHelper.GetPreviousPaymentDateTime(clock, subscription.MonthlyPaymentMoment);
+                    var cardStats = preloadedCardUsageStats != null
+                        ? preloadedCardUsageStats.For(card.Id)
+                        : (await LoadCardUsageStats(new[] { card.Id }, subscriptionTypes.Select(x => x.Id).ToList(), previousPaymentDateTime)).For(card.Id);
+
+                    var subscriptionAddedFundCount = cardStats.CountSubscriptionAddingFund(subscriptionTypes);
                     var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
 
                     var numberOfPaymentTypes = subscriptionTypes.Count();
@@ -295,8 +301,8 @@ namespace Sig.App.Backend.BackgroundJobs
                     // The beneficiary already received all the funds
                     if (paymentsMade >= maxNumberOfPayments) return;
 
-                    var previousPaymentDateTime = SubscriptionHelper.GetPreviousPaymentDateTime(clock, subscription.MonthlyPaymentMoment);
-                    if (paymentsMade != 0 && !beneficiary.Card.Transactions.Where(x => x is PaymentTransaction).Any(x => x.CreatedAtUtc >= previousPaymentDateTime))
+                    var usedCardSinceLastPayment = cardStats.LastPaymentTransactionDate >= previousPaymentDateTime;
+                    if (paymentsMade != 0 && !usedCardSinceLastPayment)
                     {
                         if (maxNumberOfPayments - paymentsMade >= subscriptionBeneficiary.GetPaymentRemaining(clock, todaysFundJobCompleted: true))
                         {
@@ -311,7 +317,7 @@ namespace Sig.App.Backend.BackgroundJobs
                     var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
 
                     var now = clock.GetCurrentInstant().ToDateTimeUtc();
-                    card.Transactions.Add(new SubscriptionAddingFundTransaction()
+                    db.Transactions.Add(new SubscriptionAddingFundTransaction()
                     {
                         TransactionUniqueId = transactionUniqueId,
                         Card = card,
@@ -400,6 +406,78 @@ namespace Sig.App.Backend.BackgroundJobs
             }
         }
 
+        private Task<CardUsageStatsCollection> LoadCardUsageStats(IReadOnlyCollection<Subscription> subscriptions)
+        {
+            // Only payment based subscriptions look at the card history, so there is nothing
+            // to load for the others.
+            var paymentBasedSubscriptions = subscriptions.Where(x => x.IsSubscriptionPaymentBasedCardUsage).ToList();
+
+            var cardIds = paymentBasedSubscriptions
+                .SelectMany(x => x.Beneficiaries)
+                .Where(x => x.Beneficiary?.Card != null)
+                .Select(x => x.Beneficiary.Card.Id)
+                .Distinct()
+                .ToList();
+
+            var subscriptionTypeIds = paymentBasedSubscriptions
+                .SelectMany(x => x.Types)
+                .Select(x => x.Id)
+                .Distinct()
+                .ToList();
+
+            // The per subscription cutoff is applied in memory afterwards, so the earliest one
+            // of the batch is used to fetch every payment that could possibly be relevant.
+            var paymentTransactionsSince = paymentBasedSubscriptions.Count > 0
+                ? paymentBasedSubscriptions.Min(x => SubscriptionHelper.GetPreviousPaymentDateTime(clock, x.MonthlyPaymentMoment))
+                : DateTime.MaxValue;
+
+            return LoadCardUsageStats(cardIds, subscriptionTypeIds, paymentTransactionsSince);
+        }
+
+        /// <summary>
+        /// Aggregates the parts of the card history the job needs, instead of materializing every
+        /// transaction of every card. The history grows forever while these aggregates do not, so
+        /// hydrating it made the job slower every month until it hit the command timeout.
+        /// </summary>
+        private async Task<CardUsageStatsCollection> LoadCardUsageStats(IReadOnlyCollection<long> cardIds, IReadOnlyCollection<long> subscriptionTypeIds, DateTime paymentTransactionsSince)
+        {
+            var stats = new CardUsageStatsCollection();
+            if (cardIds.Count == 0) return stats;
+
+            foreach (var cardIdBatch in cardIds.Chunk(CardStatsBatchSize))
+            {
+                if (subscriptionTypeIds.Count > 0)
+                {
+                    var subscriptionAddedFundCounts = await db.Transactions.OfType<SubscriptionAddingFundTransaction>()
+                        .Where(x => x.CardId != null && cardIdBatch.Contains(x.CardId.Value))
+                        .Where(x => subscriptionTypeIds.Contains(x.SubscriptionTypeId))
+                        .GroupBy(x => new { x.CardId, x.SubscriptionTypeId })
+                        .Select(x => new { x.Key.CardId, x.Key.SubscriptionTypeId, Count = x.Count() })
+                        .ToListAsync();
+
+                    foreach (var subscriptionAddedFundCount in subscriptionAddedFundCounts)
+                    {
+                        stats.For(subscriptionAddedFundCount.CardId.Value)
+                            .SetSubscriptionAddingFundCount(subscriptionAddedFundCount.SubscriptionTypeId, subscriptionAddedFundCount.Count);
+                    }
+                }
+
+                var lastPaymentTransactions = await db.Transactions.OfType<PaymentTransaction>()
+                    .Where(x => x.CardId != null && cardIdBatch.Contains(x.CardId.Value))
+                    .Where(x => x.CreatedAtUtc >= paymentTransactionsSince)
+                    .GroupBy(x => x.CardId)
+                    .Select(x => new { CardId = x.Key, LastCreatedAtUtc = x.Max(y => y.CreatedAtUtc) })
+                    .ToListAsync();
+
+                foreach (var lastPaymentTransaction in lastPaymentTransactions)
+                {
+                    stats.For(lastPaymentTransaction.CardId.Value).LastPaymentTransactionDate = lastPaymentTransaction.LastCreatedAtUtc;
+                }
+            }
+
+            return stats;
+        }
+
         private void RefundBudgetAllowance(Subscription subscription, Beneficiary beneficiary, IEnumerable<SubscriptionType> subscriptionTypes)
         {
             var budgetAllowance = subscription.BudgetAllowances.First(x => x.OrganizationId == beneficiary.OrganizationId);
@@ -442,6 +520,35 @@ namespace Sig.App.Backend.BackgroundJobs
                 ProjectName = beneficiary.Organization.Project.Name,
                 TransactionLogProductGroups = transactionLogProductGroups
             });
+        }
+
+        private class CardUsageStatsCollection
+        {
+            private readonly Dictionary<long, CardUsageStats> statsByCardId = new();
+
+            public CardUsageStats For(long cardId)
+            {
+                if (!statsByCardId.TryGetValue(cardId, out var stats))
+                {
+                    stats = new CardUsageStats();
+                    statsByCardId.Add(cardId, stats);
+                }
+
+                return stats;
+            }
+        }
+
+        private class CardUsageStats
+        {
+            private readonly Dictionary<long, int> subscriptionAddingFundCountBySubscriptionType = new();
+
+            public DateTime? LastPaymentTransactionDate { get; set; }
+
+            public void SetSubscriptionAddingFundCount(long subscriptionTypeId, int count) =>
+                subscriptionAddingFundCountBySubscriptionType[subscriptionTypeId] = count;
+
+            public int CountSubscriptionAddingFund(IEnumerable<SubscriptionType> subscriptionTypes) =>
+                subscriptionTypes.Sum(x => subscriptionAddingFundCountBySubscriptionType.GetValueOrDefault(x.Id));
         }
 
         public class InitiatedBy()

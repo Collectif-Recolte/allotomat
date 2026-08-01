@@ -14,6 +14,7 @@ using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
+using Sig.App.Backend.Helpers;
 using Sig.App.Backend.Requests.Commands.Mutations.Subscriptions;
 using System;
 using System.Collections.Generic;
@@ -128,6 +129,13 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             subscription.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary { Beneficiary = beneficiary, BeneficiaryType = beneficiaryType, Subscription = subscription, BudgetAllowance = budgetAllowance } };
 
             DbContext.Subscriptions.Add(subscription);
+
+            // Record today's AddingFundToCard run so payment-day logic is deterministic for these tests
+            DbContext.AddingFundToCardRuns.Add(new Sig.App.Backend.DbModel.Entities.BackgroundJobs.AddingFundToCardRun
+            {
+                Date = Clock.GetCurrentInstant().ToDateTimeUtc(),
+                Name = SubscriptionHelper.AddingFundToCardFirstDayOfTheMonthJobName
+            });
 
             DbContext.SaveChanges();
 

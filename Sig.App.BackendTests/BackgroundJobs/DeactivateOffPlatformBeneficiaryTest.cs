@@ -58,8 +58,8 @@ namespace Sig.App.BackendTests.BackgroundJobs
                 OrganizationId = organization.Id,
                 SortOrder = 0,
                 IsActive = true,
-                StartDate = DateTime.Today.AddDays(-20),
-                EndDate = DateTime.Today.AddDays(-1),
+                StartDate = Clock.GetCurrentInstant().ToDateTimeUtc().Date.AddDays(-20),
+                EndDate = Clock.GetCurrentInstant().ToDateTimeUtc().Date.AddDays(-1),
                 PaymentFunds = new List<PaymentFund>() {
                     new PaymentFund()
                     {
@@ -121,7 +121,7 @@ namespace Sig.App.BackendTests.BackgroundJobs
         [Fact]
         public async Task DontDeactivateActiveOffPlatformBeneficiary()
         {
-            beneficiary.EndDate = DateTime.Today.AddDays(3);
+            beneficiary.EndDate = Clock.GetCurrentInstant().ToDateTimeUtc().Date.AddDays(3);
             DbContext.SaveChanges();
 
             await job.Run();
