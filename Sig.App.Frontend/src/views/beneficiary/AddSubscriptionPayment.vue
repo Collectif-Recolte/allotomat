@@ -122,6 +122,7 @@ const { result: resultBeneficiary } = useQuery(
               isArchived
               fundsExpirationDate
               isFundsAccumulable
+              isSubscriptionPaymentBasedCardUsage
               maxNumberOfPayments
               types {
                 id
@@ -176,8 +177,12 @@ const subscriptionOptions = useResult(resultBeneficiary, null, (data) => {
         types: x.subscription.types,
         budgetAllowance: x.subscription.budgetAllowances.find((x) => x.organization.id === localBeneficiary.organization.id)
           .availableFund,
+        // CRCL-2603 : le saut de débit n'est valable que pour les abonnements usage-based. Pour un abonnement
+        // non usage-based, le versement est toujours additionnel et débite l'enveloppe (miroir du backend).
         isBudgetAllowanceAlreadyAllocated:
-          x.paymentReceived < x.maxNumberOfPayments && x.maxNumberOfPayments - x.paymentReceived <= x.paymentRemaining
+          x.subscription.isSubscriptionPaymentBasedCardUsage &&
+          x.paymentReceived < x.maxNumberOfPayments &&
+          x.maxNumberOfPayments - x.paymentReceived <= x.paymentRemaining
       };
     })
     .reduce(function (a, b) {

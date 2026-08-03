@@ -129,7 +129,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
             // Un versement au-delà du calendrier réservé (paymentsMade >= max effectif) débite l'enveloppe.
-            var isBudgetAllowanceAlreadyAllocated = paymentsMade < maxNumberOfPayments
+            // CRCL-2603 : le saut de débit n'est valable que pour les abonnements usage-based (un versement peut
+            // être réservé sans être livré). Pour un abonnement non usage-based, le job livre chaque versement
+            // programmé quoi qu'il arrive : un versement manqué est toujours additionnel et doit toujours débiter.
+            var isBudgetAllowanceAlreadyAllocated = subscription.IsSubscriptionPaymentBasedCardUsage
+                && paymentsMade < maxNumberOfPayments
                 && maxNumberOfPayments - paymentsMade <= Math.Min(maxNumberOfPayments - paymentsMade, subscriptionPaymentRemaining);
             if (!isBudgetAllowanceAlreadyAllocated)
             {

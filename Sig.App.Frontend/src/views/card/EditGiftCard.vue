@@ -3,26 +3,26 @@
 	"en": {
 		"edit-funds-gift-card": "Adjust balance",
 		"cancel": "Cancel",
-		"title": "Adjust Gift Card Balance",
+		"title": "Adjust Gift Fund Balance",
     "desc": "Gift funds do not expire and are not connected to a budget envelope.",
-		"funds-label": "Gift card funds",
+		"funds-label": "New total gift fund balance",
 		"funds-placeholder": "Ex. 100",
-		"gift-card-fund-successfully-edited": "Gift card balance successfully udpated.",
+		"gift-card-fund-successfully-edited": "Gift fund balance successfully udpated.",
 		"card-not-found": "Card ID does not exist.",
 		"card-lost": "The card you are trying to use is lost.",
-    "desc-gift-removed-funds": "Caution: This will remove \"gift\" money from this card. In most cases, gift card money that has been purchased by someone cannot expire or be removed. Double-check that this money can be removed before proceeding."
+    "desc-gift-removed-funds": "Caution: This will remove \"gift\" funds from this card. In most cases, gift card money that has been purchased by someone cannot expire or be removed. Double-check that these funds can be removed before proceeding."
 	},
 	"fr": {
 		"edit-funds-gift-card": "Modifier le solde",
 		"cancel": "Annuler",
-		"title": "Modifier le solde d'une carte-cadeau",
+		"title": "Modifier le solde de fonds cadeaux",
     "desc": "Les fonds cadeaux n'expirent jamais et ne sont pas associés avec une enveloppe budgétaire.",
-		"funds-label": "Fonds carte-cadeau",
+		"funds-label": "Nouveau solde total de fonds cadeaux",
 		"funds-placeholder": "Ex. 100",
-		"gift-card-fund-successfully-edited": "Le solde de la carte-cadeau a été modifié avec succès.",
+		"gift-card-fund-successfully-edited": "Le solde de fonds cadeaux a été modifié avec succès.",
 		"card-not-found": "L'ID de la carte n'existe pas.",
 		"card-lost": "La carte que vous tentez d'utiliser est perdue.",
-    "desc-gift-removed-funds": "Attention : Cette action enlevera des fonds « cadeaux » de cette carte. Dans la plupart des cas, les fonds « cadeaux » achetés par quelqu'un ne peuvent pas expirer ou être enlevés. Veuillez vérifier que ces fonds peuvent être retirés avant de continuer."
+    "desc-gift-removed-funds": "Attention : Cette action enlevera des fonds « cadeaux » de cette carte. Dans la plupart des cas, les fonds « cadeaux » achetés par quelqu'un ne peuvent pas expirer ou être retirés. Veuillez vérifier que ces fonds peuvent être retirés avant de continuer."
 	},
 }
 </i18n>
