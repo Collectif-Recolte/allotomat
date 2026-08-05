@@ -416,7 +416,7 @@ public class DevDataSeeder : IDataSeeder
         var budgetAllowance = await db.BudgetAllowances.FirstAsync(x => x.OrganizationId == organization.Id && x.SubscriptionId == subscription.Id);
         budgetAllowance.AvailableFund -= paymentRemaining * subscriptionType.Amount;
 
-        var subscriptionBeneficiary = new SubscriptionBeneficiary() { Subscription = subscription, Beneficiary = beneficiary1, BeneficiaryType = beneficiary1.BeneficiaryType, BudgetAllowance = budgetAllowance };
+        var subscriptionBeneficiary = new SubscriptionBeneficiary() { Subscription = subscription, Beneficiary = beneficiary1, BeneficiaryType = beneficiary1.BeneficiaryType, BudgetAllowance = budgetAllowance, RemainingAllocatedAmount = paymentRemaining * subscriptionType.Amount };
 
         beneficiary1.Subscriptions.Add(subscriptionBeneficiary);
         organization.Beneficiaries.Add(beneficiary1);

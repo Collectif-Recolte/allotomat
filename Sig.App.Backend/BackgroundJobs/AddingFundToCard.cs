@@ -280,7 +280,8 @@ namespace Sig.App.Backend.BackgroundJobs
             var beneficiary = subscriptionBeneficiary.Beneficiary;
             var beneficiaryType = subscriptionBeneficiary.BeneficiaryType;
 
-            var subscriptionTypes = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiaryType.Id);
+            var subscriptionTypes = subscription.Types.Where(x => x.BeneficiaryTypeId == beneficiaryType.Id).ToList();
+            var amountPerPayment = subscriptionTypes.Sum(x => x.Amount);
 
             if (beneficiary.Card != null)
             {
@@ -306,7 +307,7 @@ namespace Sig.App.Backend.BackgroundJobs
                     {
                         if (maxNumberOfPayments - paymentsMade >= subscriptionBeneficiary.GetPaymentRemaining(clock, todaysFundJobCompleted: true))
                         {
-                            RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
+                            RefundBudgetAllowance(subscriptionBeneficiary, subscriptionTypes);
                         }
                         return;
                     }
@@ -388,6 +389,8 @@ namespace Sig.App.Backend.BackgroundJobs
 
                     logger.LogInformation($"Adding fund {subscriptionType.Amount} for product group {subscriptionType.ProductGroupId} to ({beneficiary.Id}) card");
                 }
+
+                ConsumeAllocation(subscriptionBeneficiary, amountPerPayment);
             }
             else
             {
@@ -396,13 +399,25 @@ namespace Sig.App.Backend.BackgroundJobs
                     var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
                     if (maxNumberOfPayments >= subscriptionBeneficiary.GetPaymentRemaining(clock, todaysFundJobCompleted: true))
                     {
-                        RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
+                        RefundBudgetAllowance(subscriptionBeneficiary, subscriptionTypes);
                     }
                 }
                 else
                 {
-                    RefundBudgetAllowance(subscription, beneficiary, subscriptionTypes);
+                    RefundBudgetAllowance(subscriptionBeneficiary, subscriptionTypes);
                 }
+            }
+        }
+
+        private void ConsumeAllocation(SubscriptionBeneficiary subscriptionBeneficiary, decimal amount)
+        {
+            if (amount == 0) return;
+
+            subscriptionBeneficiary.RemainingAllocatedAmount -= amount;
+
+            if (subscriptionBeneficiary.RemainingAllocatedAmount < 0)
+            {
+                logger.LogWarning($"[CRCL-2606] RemainingAllocatedAmount négatif ({subscriptionBeneficiary.RemainingAllocatedAmount}) pour bénéficiaire {subscriptionBeneficiary.BeneficiaryId} / abonnement {subscriptionBeneficiary.SubscriptionId} - livraison supérieure à la réservation.");
             }
         }
 
@@ -478,8 +493,10 @@ namespace Sig.App.Backend.BackgroundJobs
             return stats;
         }
 
-        private void RefundBudgetAllowance(Subscription subscription, Beneficiary beneficiary, IEnumerable<SubscriptionType> subscriptionTypes)
+        private void RefundBudgetAllowance(SubscriptionBeneficiary subscriptionBeneficiary, IReadOnlyCollection<SubscriptionType> subscriptionTypes)
         {
+            var subscription = subscriptionBeneficiary.Subscription;
+            var beneficiary = subscriptionBeneficiary.Beneficiary;
             var budgetAllowance = subscription.BudgetAllowances.First(x => x.OrganizationId == beneficiary.OrganizationId);
 
             // We refund the budget allowance
@@ -497,6 +514,8 @@ namespace Sig.App.Backend.BackgroundJobs
                     ProductGroupName = subscriptionType.ProductGroup.Name
                 });
             }
+
+            ConsumeAllocation(subscriptionBeneficiary, subscriptionTypes.Sum(x => x.Amount));
 
             db.TransactionLogs.Add(new TransactionLog()
             {

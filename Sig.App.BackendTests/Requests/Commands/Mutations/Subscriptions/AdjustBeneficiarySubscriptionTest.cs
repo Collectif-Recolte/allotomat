@@ -277,6 +277,10 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             var localSubscriptionBeneficiary = localBeneficiary.Subscriptions.First(x => x.SubscriptionId == subscription1.Id);
             localSubscriptionBeneficiary.BudgetAllowance.AvailableFund.Should().Be(480);
             localSubscriptionBeneficiary.BeneficiaryTypeId.Should().Be(beneficiaryType2.Id);
+            // CRCL-2606 : négation exacte du mouvement d'enveloppe. Le nouveau type coûte 60 de plus par
+            // versement (110 au lieu de 50) sur 2 versements, donc l'enveloppe passe de 600 à 480 et la
+            // réservation monte de 120 (elle partait de 0).
+            localSubscriptionBeneficiary.RemainingAllocatedAmount.Should().Be(120);
         }
 
         [Fact]

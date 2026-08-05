@@ -237,6 +237,15 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             localSubscription2.Beneficiaries.Count.Should().Be(1);
             localSubscription3.Beneficiaries.Count.Should().Be(1);
 
+            // CRCL-2606 : chaque paire mémorise la réservation débitée de son enveloppe.
+            var subscriptionBeneficiaries = DbContext.SubscriptionBeneficiaries.ToList();
+            subscriptionBeneficiaries.Select(x => (x.SubscriptionId, x.RemainingAllocatedAmount)).Should().BeEquivalentTo(new[]
+            {
+                (subscription1.Id, (decimal?)50m),
+                (subscription2.Id, (decimal?)50m),
+                (subscription3.Id, (decimal?)100m),
+            });
+
             var allocationLogs = await DbContext.TransactionLogs
                 .Where(x => x.Discriminator == TransactionLogDiscriminator.AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog)
                 .ToListAsync();

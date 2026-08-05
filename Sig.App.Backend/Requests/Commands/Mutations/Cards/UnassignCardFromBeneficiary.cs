@@ -131,7 +131,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
                     {
                         var refundAmount = group.Sum(x => x.AvailableFund);
                         budgetAllowance.AvailableFund += refundAmount;
-                        
+
                         var transactionLogProductGroups = new List<TransactionLogProductGroup>();
                         foreach (var productGroup in group.ToList().GroupBy(x => x.ProductGroupId))
                         {

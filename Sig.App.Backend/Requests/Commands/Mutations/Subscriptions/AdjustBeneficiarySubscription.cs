@@ -66,7 +66,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 var previousPaymentAmount = GetAmountPayment(subscriptionBeneficiary.Subscription, subscriptionBeneficiary.BeneficiaryTypeId.Value);
                 var newPaymentAmount = GetAmountPayment(subscriptionBeneficiary.Subscription, beneficiary.BeneficiaryTypeId.Value);
 
-                var paymentReceived = beneficiaryTransactions.Where(x => x.SubscriptionType.SubscriptionId == subscriptionBeneficiary.SubscriptionId).Count();
+                var rawTransactionCount = beneficiaryTransactions.Count(x => x.SubscriptionType.SubscriptionId == subscriptionBeneficiary.SubscriptionId);
+                var numberOfPaymentTypes = subscriptionBeneficiary.Subscription.GetNumberOfPaymentTypes(subscriptionBeneficiary.BeneficiaryTypeId);
+                var paymentReceived = SubscriptionHelper.GetNumberOfPaymentsMade(rawTransactionCount, numberOfPaymentTypes);
+
                 var paymentRemaining = await subscriptionBeneficiary.GetPaymentRemainingAsync(db, clock, cancellationToken);
                 var cap = subscriptionBeneficiary.MaxNumberOfPaymentsOverride.HasValue || subscriptionBeneficiary.Subscription.MaxNumberOfPayments.HasValue
                     ? subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments() - paymentReceived
@@ -76,6 +79,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 if (subscriptionBeneficiary.BudgetAllowance.AvailableFund + (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive >= 0)
                 {
                     subscriptionBeneficiary.BudgetAllowance.AvailableFund += (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive;
+                    subscriptionBeneficiary.RemainingAllocatedAmount -= (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive;
                     subscriptionBeneficiary.BeneficiaryTypeId = beneficiary.BeneficiaryTypeId.Value;
                 }
                 else

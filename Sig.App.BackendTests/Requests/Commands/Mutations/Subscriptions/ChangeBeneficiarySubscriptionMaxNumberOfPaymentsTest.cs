@@ -139,6 +139,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             // 5 - 3 = 2 additional payments * 50 = 100 deducted
             localSubscriptionBeneficiary.MaxNumberOfPaymentsOverride.Should().Be(5);
             localSubscriptionBeneficiary.BudgetAllowance.AvailableFund.Should().Be(400);
+            // CRCL-2606 : les versements additionnels sont réellement réservés, la réservation monte
+            // exactement du montant débité.
+            localSubscriptionBeneficiary.RemainingAllocatedAmount.Should().Be(100);
         }
 
         [Fact]

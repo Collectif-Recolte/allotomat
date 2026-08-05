@@ -77,6 +77,11 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         {
             return subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
         }
+        
+        public decimal? RemainingAllocatedAmount()
+        {
+            return subscriptionBeneficiary.RemainingAllocatedAmount;
+        }
 
         public async Task<bool> CanAddSubscriptionPayment(IAppUserContext ctx, [Inject] IClock clock) {
             var transactions = await ctx.DataLoader.LoadSubscriptionTransactionsByBeneficiaryAndSubscriptionId(beneficiary.Id, subscription.Id).GetResultAsync();
