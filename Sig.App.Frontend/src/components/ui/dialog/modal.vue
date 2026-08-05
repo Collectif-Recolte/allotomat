@@ -11,47 +11,47 @@
 
 <template>
   <TransitionRoot as="template" :show="isOpen">
-    <Dialog as="div" class="fixed z-40 inset-0 overflow-y-auto" @close="closeModal">
-      <div class="flex items-center justify-center min-h-screen py-4 px-4 text-center sm:block sm:p-0">
-        <TransitionChild as="template" v-bind="overlayTransition">
-          <div class="transition-opacity fixed inset-0 bg-primary-700/80" aria-hidden="true" />
-        </TransitionChild>
+    <Dialog as="div" class="relative z-40" @close="closeModal">
+      <!-- Backdrop sits behind the scroll container so it does not cover the scrollbar -->
+      <TransitionChild as="template" v-bind="overlayTransition">
+        <div class="fixed inset-0 bg-primary-700/80 transition-opacity" aria-hidden="true" />
+      </TransitionChild>
 
-        <!-- This element is to trick the browser into centering the modal contents. -->
-        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-        <TransitionChild as="template" v-bind="modalTransition">
-          <DialogPanel
-            class="inline-block relative align-bottom bg-white dark:bg-grey-800 rounded-2xl px-4 pt-5 pb-4 shadow-xl transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full sm:p-6"
-            :class="[{ 'text-left': !hasTextCenter }, { 'overflow-hidden': !isOverflowing }]">
-            <div>
-              <slot name="body">
-                <div v-if="props.icon" class="mx-auto flex items-center justify-center text-grey-500 mb-3 sm:mb-5">
-                  <PfIcon size="2xl" fill-class="" stroke-class="stroke-current" :icon="props.icon" aria-hidden="true" />
-                </div>
-                <DialogTitle :has-title="hasTitle" as="h2" class="text-2xl leading-6 font-semibold text-gray-900 mt-0 mb-6">
-                  <slot name="title" :closeModal="closeModal">
-                    {{ props.title }}
-                  </slot>
-                </DialogTitle>
-                <div class="mt-2">
-                  <slot :closeModal="closeModal">
-                    <p class="text-sm text-gray-500">{{ props.description }}</p>
-                  </slot>
+      <div class="fixed inset-0 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center py-4 px-4 text-center">
+          <TransitionChild as="template" v-bind="modalTransition">
+            <DialogPanel
+              class="inline-block relative w-full bg-white dark:bg-grey-800 rounded-2xl px-4 pt-5 pb-4 shadow-xl transition-all sm:my-8 sm:max-w-2xl sm:p-6"
+              :class="[{ 'text-left': !hasTextCenter }, { 'overflow-hidden': !isOverflowing }]">
+              <div>
+                <slot name="body">
+                  <div v-if="props.icon" class="mx-auto flex items-center justify-center text-grey-500 mb-3 sm:mb-5">
+                    <PfIcon size="2xl" fill-class="" stroke-class="stroke-current" :icon="props.icon" aria-hidden="true" />
+                  </div>
+                  <DialogTitle :has-title="hasTitle" as="h2" class="text-2xl leading-6 font-semibold text-gray-900 mt-0 mb-6">
+                    <slot name="title" :closeModal="closeModal">
+                      {{ props.title }}
+                    </slot>
+                  </DialogTitle>
+                  <div class="mt-2">
+                    <slot :closeModal="closeModal">
+                      <p class="text-sm text-gray-500">{{ props.description }}</p>
+                    </slot>
+                  </div>
+                </slot>
+              </div>
+              <slot name="footer" :closeModal="closeModal">
+                <div v-if="hasFooter" class="pt-5 flex gap-x-6 gap-y-3 flex-wrap xs:flex-nowrap">
+                  <PfInfo v-if="warningMessage" :message="warningMessage" />
+                  <div class="flex items-center gap-x-6 flex-shrink-0 justify-end ml-auto mr-0">
+                    <slot name="actions" :closeModal="closeModal"></slot>
+                    <PfButtonAction v-if="!hideMainBtn" class="px-8" :label="closeLabel || t('close')" @click="closeModal" />
+                  </div>
                 </div>
               </slot>
-            </div>
-            <slot name="footer" :closeModal="closeModal">
-              <div v-if="hasFooter" class="pt-5 flex gap-x-6 gap-y-3 flex-wrap xs:flex-nowrap">
-                <PfInfo v-if="warningMessage" :message="warningMessage" />
-                <div class="flex items-center gap-x-6 flex-shrink-0 justify-end ml-auto mr-0">
-                  <slot name="actions" :closeModal="closeModal"></slot>
-                  <PfButtonAction v-if="!hideMainBtn" class="px-8" :label="closeLabel || t('close')" @click="closeModal" />
-                </div>
-              </div>
-            </slot>
-          </DialogPanel>
-        </TransitionChild>
+            </DialogPanel>
+          </TransitionChild>
+        </div>
       </div>
     </Dialog>
   </TransitionRoot>

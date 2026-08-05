@@ -29,7 +29,7 @@
         {{ t("card-id", { cardId }) }}
       </p>
       <p v-if="card && card.isDisabled" class="text-red-500 font-bold">{{ t("card-is-disabled") }}</p>
-      <p v-if="card" class="font-bold text-primary-700 text-h1 leading-none xs:text-d2 mt-6 mb-8">
+      <p v-if="card" class="font-bold text-primary-700 text-d2 leading-none mt-6 mb-8">
         {{ getMoneyFormat(fund) }}
       </p>
 

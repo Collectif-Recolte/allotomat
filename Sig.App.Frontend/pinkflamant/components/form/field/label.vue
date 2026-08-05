@@ -21,7 +21,7 @@
         'text-primary-900 dark:text-white': !props.hasErrorState && !props.disabled && !props.isFilter,
         'text-primary-700': !props.hasErrorState && !props.disabled && props.isFilter
       },
-      afterLabel ? 'flex justify-between pb-2' : 'block'
+      afterLabel ? 'flex justify-between gap-2 pb-2' : 'block'
     ]">
     <!-- eslint-disable-next-line vue/no-v-html -->
     <slot><span v-html="props.label" /></slot>
@@ -29,7 +29,8 @@
       <span class="font-normal text-red-500 pl-1">{{ t("mandatory-label") }}</span>
     </slot>
     <slot name="afterLabel">
-      <span class="font-normal" :class="[isLarge ? 'text-lg' : 'text-sm']">{{ props.afterLabel }}</span>
+      <!-- eslint-disable-next-line vue/no-v-html -->
+      <span class="font-normal" :class="[isLarge ? 'text-lg' : 'text-sm']" v-html="props.afterLabel" />
     </slot>
   </label>
 </template>

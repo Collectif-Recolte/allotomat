@@ -3,7 +3,7 @@
 {
 	"en": {
 		"amount-label": "{productGroupName}",
-    "amount-after-label": "Balance: {amountAvailable}",
+    "amount-after-label": "Balance: <span class='text-xl'>{amountAvailable}</span>",
     "confirmation-amount-label": "{productGroupName}",
     "amount-validation-label": "Amount",
 		"amount-placeholder": "Ex. {amount}",
@@ -37,7 +37,7 @@
 	},
 	"fr": {
 		"amount-label": "{productGroupName}",
-    "amount-after-label": "Solde: {amountAvailable}",
+    "amount-after-label": "<span class='align-top mr-1'>Solde: </span><span class='text-3xl'>{amountAvailable}</span>",
     "confirmation-amount-label": "{productGroupName}",
     "amount-validation-label": "Solde",
 		"amount-placeholder": "Ex. {amount}",
