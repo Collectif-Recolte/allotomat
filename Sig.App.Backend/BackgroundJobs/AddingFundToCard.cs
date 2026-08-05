@@ -411,14 +411,7 @@ namespace Sig.App.Backend.BackgroundJobs
 
         private void ConsumeAllocation(SubscriptionBeneficiary subscriptionBeneficiary, decimal amount)
         {
-            if (amount == 0) return;
-
-            subscriptionBeneficiary.RemainingAllocatedAmount -= amount;
-
-            if (subscriptionBeneficiary.RemainingAllocatedAmount < 0)
-            {
-                logger.LogWarning($"[CRCL-2606] RemainingAllocatedAmount négatif ({subscriptionBeneficiary.RemainingAllocatedAmount}) pour bénéficiaire {subscriptionBeneficiary.BeneficiaryId} / abonnement {subscriptionBeneficiary.SubscriptionId} - livraison supérieure à la réservation.");
-            }
+            subscriptionBeneficiary.AdjustAllocation(-amount, logger);
         }
 
         private Task<CardUsageStatsCollection> LoadCardUsageStats(IReadOnlyCollection<Subscription> subscriptions)

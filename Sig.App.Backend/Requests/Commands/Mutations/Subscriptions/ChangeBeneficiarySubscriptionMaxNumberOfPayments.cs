@@ -87,7 +87,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             subscriptionBeneficiary.BudgetAllowance.AvailableFund -= totalCost;
-            subscriptionBeneficiary.RemainingAllocatedAmount += totalCost;
+            subscriptionBeneficiary.AdjustAllocation(totalCost, logger);
             subscriptionBeneficiary.MaxNumberOfPaymentsOverride = request.MaxNumberOfPayments;
 
             await db.SaveChangesAsync(cancellationToken);

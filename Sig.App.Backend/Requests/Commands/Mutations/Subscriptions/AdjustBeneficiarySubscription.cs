@@ -78,8 +78,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
                 if (subscriptionBeneficiary.BudgetAllowance.AvailableFund + (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive >= 0)
                 {
-                    subscriptionBeneficiary.BudgetAllowance.AvailableFund += (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive;
-                    subscriptionBeneficiary.RemainingAllocatedAmount -= (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive;
+                    var envelopeDelta = (previousPaymentAmount - newPaymentAmount) * numberOfPaymentToReceive;
+
+                    subscriptionBeneficiary.BudgetAllowance.AvailableFund += envelopeDelta;
+                    // Négation exacte du mouvement d'enveloppe : un type plus cher la débite et fait donc
+                    // monter la réservation, et inversement.
+                    subscriptionBeneficiary.AdjustAllocation(-envelopeDelta, logger);
                     subscriptionBeneficiary.BeneficiaryTypeId = beneficiary.BeneficiaryTypeId.Value;
                 }
                 else

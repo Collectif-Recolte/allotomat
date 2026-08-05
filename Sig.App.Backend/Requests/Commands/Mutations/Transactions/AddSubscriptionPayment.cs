@@ -138,7 +138,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             if (!isBudgetAllowanceAlreadyAllocated)
             {
                 subscriptionBeneficiary.BudgetAllowance.AvailableFund -= amount;
-                subscriptionBeneficiary.RemainingAllocatedAmount += amount;
+                subscriptionBeneficiary.AdjustAllocation(amount, logger);
             }
 
             var addingFundToCardJob = new AddingFundToCard(db, clock, addingFundLogger);

@@ -169,6 +169,27 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             localBudgetAllowance.AvailableFund.Should().Be(75);
         }
 
+        [Fact]
+        public async Task AddOneSubscriptionPaymentKeepsTheReservationUnknownOnAPreMigrationRow()
+        {
+            // CRCL-2606 — Ligne antérieure à la migration : l'enveloppe est débitée, mais le solde reste
+            // null. Fabriquer 0 + amount le rendrait faussement fiable et ferait sous-rembourser au
+            // retrait. Seul le job de backfill a de quoi résoudre un null.
+            beneficiary.Subscriptions.First().RemainingAllocatedAmount = null;
+            DbContext.SaveChanges();
+
+            var input = new AddSubscriptionPayment.Input()
+            {
+                SubscriptionId = subscription.GetIdentifier(),
+                BeneficiaryId = beneficiary.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            DbContext.BudgetAllowances.First().AvailableFund.Should().Be(75);
+            DbContext.SubscriptionBeneficiaries.First().RemainingAllocatedAmount.Should().BeNull();
+        }
+
         // This payment is already "calculated" in the Budget of this beneficiary
         [Fact]
         public async Task AddOneSubscriptionPaymentForSubscriptionWithMaxPaymentFromBeneficiaryBudget()

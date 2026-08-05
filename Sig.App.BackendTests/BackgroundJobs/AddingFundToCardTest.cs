@@ -309,6 +309,26 @@ namespace Sig.App.BackendTests.BackgroundJobs
         }
 
         [Fact]
+        public async Task DeliveringOnAPreMigrationRowKeepsTheReservationUnknown()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
+
+            // CRCL-2606 — Ligne antérieure à la migration : le versement est livré normalement, mais le
+            // solde reste null. On ne décrémente pas depuis 0 : ça produirait une réservation négative
+            // fictive, et pire, ça rendrait la ligne non-null donc faussement fiable au retrait.
+            subscriptionBeneficiary.RemainingAllocatedAmount = null;
+            DbContext.SaveChanges();
+
+            await job.Run("DeliveringOnAPreMigrationRow", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            var card = DbContext.Cards.Include(x => x.Funds).First();
+            card.Funds.First().Amount.Should().Be(45);
+
+            DbContext.SubscriptionBeneficiaries.First().RemainingAllocatedAmount.Should().BeNull();
+        }
+
+        [Fact]
         public async Task DeliveringOneVersementConsumesTheReservationOnceNotOncePerProductGroup()
         {
             var today = Clock.GetCurrentInstant().ToDateTimeUtc();

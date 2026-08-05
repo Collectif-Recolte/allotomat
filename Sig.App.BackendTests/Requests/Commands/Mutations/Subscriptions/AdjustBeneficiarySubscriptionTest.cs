@@ -284,6 +284,32 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         }
 
         [Fact]
+        public async Task AdjustBeneficiarySubscriptionKeepsTheReservationUnknownOnAPreMigrationRow()
+        {
+            // CRCL-2606 — Ligne antérieure à la migration : l'enveloppe est ajustée normalement, mais le
+            // solde reste null plutôt que de devenir 0 + delta, ce qui serait une affirmation fausse.
+            beneficiary.BeneficiaryType = beneficiaryType2;
+            beneficiary.Subscriptions.First(x => x.SubscriptionId == subscription1.Id).RemainingAllocatedAmount = null;
+            DbContext.SaveChanges();
+
+            var input = new AdjustBeneficiarySubscription.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionIds = new List<Id>() { subscription1.GetIdentifier() }
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBeneficiary = await DbContext.Beneficiaries
+                .Include(x => x.Subscriptions).ThenInclude(x => x.BudgetAllowance)
+                .FirstAsync();
+
+            var localSubscriptionBeneficiary = localBeneficiary.Subscriptions.First(x => x.SubscriptionId == subscription1.Id);
+            localSubscriptionBeneficiary.BudgetAllowance.AvailableFund.Should().Be(480);
+            localSubscriptionBeneficiary.RemainingAllocatedAmount.Should().BeNull();
+        }
+
+        [Fact]
         public async Task AdjustBeneficiarySubscription2()
         {
             beneficiary.BeneficiaryType = beneficiaryType2;
