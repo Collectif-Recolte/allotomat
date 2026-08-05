@@ -29,11 +29,10 @@ namespace Sig.App.Backend.BackgroundJobs
     ///      par CRCL-2577) et aucun mouvement d'enveloppe non journalisé. La valeur est alors exacte :
     ///      alloué - livré - relâché.
     ///
-    ///   2. Tout le reste — on écrit le nombre calculé par le code actuel (calendrier restant x montant
-    ///      par versement), via les vrais helpers pour que la valeur écrite et celle calculée à l'exécution
-    ///      concordent par construction. Ça gèle l'écart historique sans en créer de nouveau : chaque
-    ///      livraison future consomme légitimement un des cycles restants. C'est exact pour toute paire
-    ///      dont chaque cycle programmé a bien été livré, soit la grande majorité.
+    ///   2. Tout le reste — on écrit ce qu'il reste à livrer d'après le calendrier, borné par le quota
+    ///      de versements encore disponible, via les vrais helpers pour que la valeur écrite et celle
+    ///      calculée à l'exécution concordent par construction. Ça gèle l'écart historique sans en créer
+    ///      de nouveau : chaque livraison future consomme légitimement un des cycles restants.
     /// </summary>
     public class BackfillSubscriptionBeneficiaryAllocation
     {
@@ -123,8 +122,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 }
                 else
                 {
-                    var paymentRemaining = await pair.GetPaymentRemainingAsync(db, clock);
-                    value = paymentRemaining * amountPerPayment;
+                    value = await EstimateFromCalendarAsync(pair, entry, amountPerPayment);
                     population = "estimation calendaire";
                     calendarEstimateCount++;
                 }
@@ -161,6 +159,23 @@ namespace Sig.App.Backend.BackgroundJobs
 
             await db.SaveChangesAsync();
             logger.LogInformation($"BackfillSubscriptionBeneficiaryAllocation :: {pairs.Count} ligne(s) écrite(s).");
+        }
+
+        private async Task<decimal> EstimateFromCalendarAsync(
+            SubscriptionBeneficiary pair, LedgerEntry entry, decimal amountPerPayment)
+        {
+            var calendarRemaining = await pair.Subscription.GetCardPaymentRemainingAsync(db, clock);
+            var explicitMax = pair.GetExplicitMaxNumberOfPayments();
+
+            if (!explicitMax.HasValue) return calendarRemaining * amountPerPayment;
+
+            var paymentsMade = SubscriptionHelper.GetNumberOfPaymentsMade(
+                entry.DeliveredCount,
+                pair.Subscription.GetNumberOfPaymentTypes(pair.BeneficiaryTypeId));
+
+            var paymentsStillToDeliver = Math.Max(0, Math.Min(calendarRemaining, explicitMax.Value - paymentsMade));
+
+            return paymentsStillToDeliver * amountPerPayment;
         }
 
         private static bool IsLedgerComplete(SubscriptionBeneficiary pair, LedgerEntry entry)
@@ -235,7 +250,9 @@ namespace Sig.App.Backend.BackgroundJobs
 
             foreach (var transaction in delivered)
             {
-                EntryFor(transaction.BeneficiaryId.Value, transaction.SubscriptionId).Delivered += transaction.Amount;
+                var entry = EntryFor(transaction.BeneficiaryId.Value, transaction.SubscriptionId);
+                entry.Delivered += transaction.Amount;
+                entry.DeliveredCount++;
             }
 
             return ledger;
@@ -247,6 +264,7 @@ namespace Sig.App.Backend.BackgroundJobs
             public decimal Allocated { get; set; }
             public long? AllocationBeneficiaryTypeId { get; set; }
             public decimal Delivered { get; set; }
+            public int DeliveredCount { get; set; }
             public decimal NoCardReleased { get; set; }
             public int RemovalReleasedCount { get; set; }
             public bool HasManualPayment { get; set; }

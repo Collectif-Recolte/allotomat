@@ -10,6 +10,7 @@ using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.ProductGroups;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
+using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Requests.Commands.Mutations.Subscriptions;
@@ -256,6 +257,37 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 ((long?)subscription2.Id, 50m),
                 ((long?)subscription3.Id, 100m),
             });
+        }
+
+        [Fact]
+        public async Task DoesNotReserveVersementsAlreadyDeliveredWhenReassigning()
+        {
+            // Le max de versements est un quota sur la vie de l'abonnement : un participant qui en a
+            // déjà reçu un et qu'on réattribue ne doit se voir réserver que le reste du quota.
+            var subscriptionType = subscription3.Types.First(x => x.BeneficiaryType == beneficiaryType1);
+            DbContext.Transactions.Add(new SubscriptionAddingFundTransaction()
+            {
+                Amount = subscriptionType.Amount,
+                AvailableFund = subscriptionType.Amount,
+                Beneficiary = beneficiary1,
+                OrganizationId = organization.Id,
+                SubscriptionType = subscriptionType,
+                CreatedAtUtc = Clock.GetCurrentInstant().ToDateTimeUtc()
+            });
+            DbContext.SaveChanges();
+
+            var input = new AssignSubscriptionsToBeneficiary.Input()
+            {
+                OrganizationId = organization.GetIdentifier(),
+                BeneficiaryId = beneficiary1.GetIdentifier(),
+                Subscriptions = [subscription3.GetIdentifier()]
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            // Quota de 4 versements, 1 déjà livré : on réserve 3 x 25, surtout pas 4 x 25.
+            DbContext.BudgetAllowances.First(x => x.SubscriptionId == subscription3.Id).AvailableFund.Should().Be(625);
+            DbContext.SubscriptionBeneficiaries.Single().RemainingAllocatedAmount.Should().Be(75m);
         }
 
         [Fact]

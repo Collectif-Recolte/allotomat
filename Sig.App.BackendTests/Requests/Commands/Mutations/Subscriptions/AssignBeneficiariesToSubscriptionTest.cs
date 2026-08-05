@@ -560,6 +560,50 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         }
 
         [Fact]
+        public async Task ReservesTheRemainingCalendarWhenItIsShorterThanTheQuota()
+        {
+            // Le quota est borné par le calendrier, pas l'inverse. Ici il reste une seule date de
+            // versement (le 15) pour un quota de 4 dont 1 déjà livré : la réservation vaut ce qu'il
+            // reste au calendrier, soit 1 versement. Soustraire les livrés d'un calendrier déjà
+            // plafonné au quota donnait 0 et immobilisait le versement à venir dans l'enveloppe.
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            subscription3.EndDate = new DateTime(today.Year, today.Month, 20);
+
+            var subscriptionType = subscription3.Types.First(x => x.BeneficiaryType == beneficiaryType1);
+            DbContext.Transactions.Add(new SubscriptionAddingFundTransaction()
+            {
+                Amount = subscriptionType.Amount,
+                AvailableFund = subscriptionType.Amount,
+                Beneficiary = beneficiary1,
+                OrganizationId = organization.Id,
+                SubscriptionType = subscriptionType,
+                CreatedAtUtc = today
+            });
+
+            DbContext.SaveChanges();
+
+            var input = new AssignBeneficiariesToSubscription.Input()
+            {
+                OrganizationId = organization.GetIdentifier(),
+                SubscriptionId = subscription3.GetIdentifier(),
+                Beneficiaries = [beneficiary1.GetIdentifier(), beneficiary2.GetIdentifier()]
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var subscriptionBeneficiaries = DbContext.SubscriptionBeneficiaries
+                .Where(x => x.SubscriptionId == subscription3.Id).ToList();
+
+            subscriptionBeneficiaries.Single(x => x.BeneficiaryId == beneficiary1.Id)
+                .RemainingAllocatedAmount.Should().Be(25m);
+            subscriptionBeneficiaries.Single(x => x.BeneficiaryId == beneficiary2.Id)
+                .RemainingAllocatedAmount.Should().Be(25m);
+
+            DbContext.BudgetAllowances.First(x => x.SubscriptionId == subscription3.Id)
+                .AvailableFund.Should().Be(650);
+        }
+
+        [Fact]
         public async Task ThrowsIfOrganizationNotFound()
         {
             var input = new AssignBeneficiariesToSubscription.Input()
