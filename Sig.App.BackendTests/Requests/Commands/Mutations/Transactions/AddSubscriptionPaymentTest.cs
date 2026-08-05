@@ -169,6 +169,27 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             localBudgetAllowance.AvailableFund.Should().Be(75);
         }
 
+        [Fact]
+        public async Task AddOneSubscriptionPaymentKeepsTheReservationUnknownOnAPreMigrationRow()
+        {
+            // CRCL-2606 — Ligne antérieure à la migration : l'enveloppe est débitée, mais le solde reste
+            // null. Fabriquer 0 + amount le rendrait faussement fiable et ferait sous-rembourser au
+            // retrait. Seul le job de backfill a de quoi résoudre un null.
+            beneficiary.Subscriptions.First().RemainingAllocatedAmount = null;
+            DbContext.SaveChanges();
+
+            var input = new AddSubscriptionPayment.Input()
+            {
+                SubscriptionId = subscription.GetIdentifier(),
+                BeneficiaryId = beneficiary.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            DbContext.BudgetAllowances.First().AvailableFund.Should().Be(75);
+            DbContext.SubscriptionBeneficiaries.First().RemainingAllocatedAmount.Should().BeNull();
+        }
+
         // This payment is already "calculated" in the Budget of this beneficiary
         [Fact]
         public async Task AddOneSubscriptionPaymentForSubscriptionWithMaxPaymentFromBeneficiaryBudget()
@@ -181,6 +202,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             subscription.StartDate = new DateTime(today.Year, today.Month, 1).AddMonths(-4);
             subscription.EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(6);
             subscription.FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(7);
+            // CRCL-2606 : ce versement consomme une réservation déjà en place.
+            beneficiary.Subscriptions.First().RemainingAllocatedAmount = 25m;
 
             DbContext.SaveChanges();
 
@@ -195,6 +218,11 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             var localBudgetAllowance = DbContext.BudgetAllowances.First();
 
             localBudgetAllowance.AvailableFund.Should().Be(100);
+
+            // CRCL-2606 : l'enveloppe n'est pas débitée parce que la réservation existait déjà. La
+            // livraison la consomme, donc elle retombe à 0.
+            var localSubscriptionBeneficiary = DbContext.SubscriptionBeneficiaries.First();
+            localSubscriptionBeneficiary.RemainingAllocatedAmount.Should().Be(0m);
         }
 
         // CRCL-2603 : pour un abonnement NON usage-based, un versement manqué est toujours additionnel
@@ -225,6 +253,12 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             // Le versement manqué débite l'enveloppe (100 - 25) même si la carte est à jour.
             localBudgetAllowance.AvailableFund.Should().Be(75);
+
+            // CRCL-2606 : on réserve puis on livre immédiatement, donc l'effet net sur la réservation
+            // est nul. Les deux écritures sont explicites : si la livraison échouait, le montant
+            // resterait réservé au lieu de disparaître.
+            var localSubscriptionBeneficiary = DbContext.SubscriptionBeneficiaries.First();
+            localSubscriptionBeneficiary.RemainingAllocatedAmount.Should().Be(0m);
         }
 
         // This payment is not "calculated" in the budget of this beneficiary

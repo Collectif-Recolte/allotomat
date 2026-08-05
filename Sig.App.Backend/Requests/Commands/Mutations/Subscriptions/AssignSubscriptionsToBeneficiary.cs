@@ -124,7 +124,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         BeneficiaryId = beneficiary.Id,
                         SubscriptionId = subscription.Id,
                         BudgetAllowanceId = budgetAllowance.Id,
-                        BeneficiaryType = beneficiary.BeneficiaryType
+                        BeneficiaryType = beneficiary.BeneficiaryType,
+                        RemainingAllocatedAmount = 0m
                     });
 
                     logger.LogInformation($"[Mutation] AssignSubscriptionsToBeneficiary - Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} added to subscription {subscription.Name}");
@@ -141,7 +142,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                             BeneficiaryId = beneficiary.Id,
                             SubscriptionId = subscription.Id,
                             BudgetAllowanceId = budgetAllowance.Id,
-                            BeneficiaryType = beneficiary.BeneficiaryType
+                            BeneficiaryType = beneficiary.BeneficiaryType,
+                            RemainingAllocatedAmount = amount
                         });
 
                         budgetAllowance.AvailableFund -= amount;

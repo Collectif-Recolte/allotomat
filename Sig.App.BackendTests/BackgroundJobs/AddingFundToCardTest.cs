@@ -273,6 +273,7 @@ namespace Sig.App.BackendTests.BackgroundJobs
 
             subscription.IsSubscriptionPaymentBasedCardUsage = true;
             subscription.MaxNumberOfPayments = 2;
+            subscriptionBeneficiary.RemainingAllocatedAmount = 25m;
 
             beneficiary.Card.Transactions.Add(new SubscriptionAddingFundTransaction()
             {
@@ -300,6 +301,69 @@ namespace Sig.App.BackendTests.BackgroundJobs
             budgetAllowance = DbContext.BudgetAllowances.First();
             var addedFunds = budgetAllowance.AvailableFund - availableFundsInitially;
             addedFunds.Should().Be(25);
+
+            // CRCL-2606 : réservation relâchée dans l'enveloppe sans avoir été livrée. Le crédit de 25
+            // et le décrément de la réservation doivent être exactement opposés.
+            var localSubscriptionBeneficiary = DbContext.SubscriptionBeneficiaries.First();
+            localSubscriptionBeneficiary.RemainingAllocatedAmount.Should().Be(0m);
+        }
+
+        [Fact]
+        public async Task DeliveringOnAPreMigrationRowKeepsTheReservationUnknown()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
+
+            // CRCL-2606 — Ligne antérieure à la migration : le versement est livré normalement, mais le
+            // solde reste null. On ne décrémente pas depuis 0 : ça produirait une réservation négative
+            // fictive, et pire, ça rendrait la ligne non-null donc faussement fiable au retrait.
+            subscriptionBeneficiary.RemainingAllocatedAmount = null;
+            DbContext.SaveChanges();
+
+            await job.Run("DeliveringOnAPreMigrationRow", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            var card = DbContext.Cards.Include(x => x.Funds).First();
+            card.Funds.First().Amount.Should().Be(45);
+
+            DbContext.SubscriptionBeneficiaries.First().RemainingAllocatedAmount.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task DeliveringOneVersementConsumesTheReservationOnceNotOncePerProductGroup()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
+
+            // CRCL-2606 — Un versement génère une transaction par SubscriptionType. Il ne doit consommer
+            // la réservation qu'UNE fois. Deuxième groupe de produits pour le même type de bénéficiaire :
+            // 30 par versement (25 + 5), 3 versements réservés (90).
+            var productGroup2 = new ProductGroup()
+            {
+                Project = project,
+                Color = ProductGroupColor.Color_2,
+                Name = "Product group 2",
+                OrderOfAppearance = 2
+            };
+            DbContext.ProductGroups.Add(productGroup2);
+            subscription.Types.Add(new SubscriptionType()
+            {
+                BeneficiaryType = beneficiaryType,
+                Amount = 5,
+                ProductGroup = productGroup2
+            });
+            subscriptionBeneficiary.RemainingAllocatedAmount = 90m;
+
+            DbContext.SaveChanges();
+
+            await job.Run("DeliveringOneVersement", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            // Les deux groupes ont bien été livrés : 2 transactions pour un seul versement.
+            var deliveredTransactions = DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().ToList();
+            deliveredTransactions.Should().HaveCount(2);
+
+            // 90 - 30 = 60. Un décrément par transaction donnerait 30.
+            var localSubscriptionBeneficiary = DbContext.SubscriptionBeneficiaries.First();
+            localSubscriptionBeneficiary.RemainingAllocatedAmount.Should().Be(60m);
         }
 
         [Fact]

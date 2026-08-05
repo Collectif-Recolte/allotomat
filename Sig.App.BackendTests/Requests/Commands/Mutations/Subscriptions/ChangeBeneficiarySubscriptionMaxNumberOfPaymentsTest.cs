@@ -139,6 +139,38 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             // 5 - 3 = 2 additional payments * 50 = 100 deducted
             localSubscriptionBeneficiary.MaxNumberOfPaymentsOverride.Should().Be(5);
             localSubscriptionBeneficiary.BudgetAllowance.AvailableFund.Should().Be(400);
+            // CRCL-2606 : les versements additionnels sont réellement réservés, la réservation monte
+            // exactement du montant débité.
+            localSubscriptionBeneficiary.RemainingAllocatedAmount.Should().Be(100);
+        }
+
+        [Fact]
+        public async Task IncreaseMaxNumberOfPaymentsKeepsTheReservationUnknownOnAPreMigrationRow()
+        {
+            // CRCL-2606 — Ligne antérieure à la migration : on ne sait pas combien était réservé.
+            // L'enveloppe est débitée normalement, mais le solde DOIT rester null. Le remplacer par
+            // 0 + totalCost affirmerait que seuls 100 sont réservés alors que la vraie réservation est
+            // inconnue et probablement bien plus grande : le retrait rendrait trop peu et immobiliserait
+            // la différence, sans aucun signal. Tant que c'est null, le retrait utilise l'estimation
+            // calendaire, bien plus proche de la réalité.
+            subscriptionBeneficiary.RemainingAllocatedAmount = null;
+            DbContext.SaveChanges();
+
+            var input = new ChangeBeneficiarySubscriptionMaxNumberOfPayments.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier(),
+                MaxNumberOfPayments = 5
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localSubscriptionBeneficiary = await DbContext.SubscriptionBeneficiaries
+                .Include(x => x.BudgetAllowance)
+                .FirstAsync(x => x.BeneficiaryId == beneficiary.Id && x.SubscriptionId == subscription.Id);
+
+            localSubscriptionBeneficiary.BudgetAllowance.AvailableFund.Should().Be(400);
+            localSubscriptionBeneficiary.RemainingAllocatedAmount.Should().BeNull();
         }
 
         [Fact]

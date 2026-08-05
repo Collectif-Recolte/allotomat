@@ -152,7 +152,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         BudgetAllowanceId = budgetAllowance.Id,
                         BeneficiaryType = beneficiary.BeneficiaryType,
                         Beneficiary = beneficiary,
-                        Subscription = subscription
+                        Subscription = subscription,
+                        RemainingAllocatedAmount = 0m
                     };
                     subscription.Beneficiaries.Add(subscriptionBeneficiary);
 
@@ -170,6 +171,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         if (budgetAllowance.AvailableFund >= amount)
                         {
                             budgetAllowance.AvailableFund -= amount;
+                            subscriptionBeneficiary.RemainingAllocatedAmount += amount;
+
                             if (amount > 0)
                             {
                                 AddAllocationTransactionLog(beneficiary, organization, subscription, beneficiaryPaymentRemaining, amount, today, currentUserId, currentUser);
@@ -192,27 +195,32 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             {
                 foreach (var beneficiary in beneficiaries)
                 {
-                    var beneficiaryTransactionCountForThisSubscription = 0;
+                    var beneficiaryPaymentsMade = 0;
+                    var beneficiaryPaymentRemaining = paymentRemaining;
+
                     if (subscription.IsSubscriptionPaymentBasedCardUsage)
                     {
-                        beneficiaryTransactionCountForThisSubscription = await db.Transactions
+                        var rawTransactionCount = await db.Transactions
                             .Include(x => (x as SubscriptionAddingFundTransaction).SubscriptionType)
                             .OfType<SubscriptionAddingFundTransaction>()
                             .Where(x => x.BeneficiaryId == beneficiary.Id && x.SubscriptionType.SubscriptionId == subscription.Id)
                             .CountAsync(cancellationToken);
 
-                        paymentRemaining = Math.Max(0, paymentRemaining - beneficiaryTransactionCountForThisSubscription);
+                        var numberOfPaymentTypes = subscription.GetNumberOfPaymentTypes(beneficiary.BeneficiaryTypeId);
+                        beneficiaryPaymentsMade = SubscriptionHelper.GetNumberOfPaymentsMade(rawTransactionCount, numberOfPaymentTypes);
+
+                        beneficiaryPaymentRemaining = Math.Max(0, paymentRemaining - beneficiaryPaymentsMade);
                     }
 
                     var amountPerPayment = subscription.Types
                         .Where(x => x.BeneficiaryTypeId == beneficiary.BeneficiaryTypeId)
                         .Sum(x => x.Amount);
 
-                    var replicatePaymentOnAttribution = request.ReplicatePaymentOnAttribution && beneficiary.Card != null && subscription.GetTotalPayment() - beneficiaryTransactionCountForThisSubscription > 0;
+                    var replicatePaymentOnAttribution = request.ReplicatePaymentOnAttribution && beneficiary.Card != null && subscription.GetTotalPayment() - beneficiaryPaymentsMade > 0;
 
                     var numberOfPayments = replicatePaymentOnAttribution
-                        ? Math.Min(subscription.GetTotalPayment() - beneficiaryTransactionCountForThisSubscription, paymentRemaining + 1)
-                        : paymentRemaining;
+                        ? Math.Min(subscription.GetTotalPayment() - beneficiaryPaymentsMade, beneficiaryPaymentRemaining + 1)
+                        : beneficiaryPaymentRemaining;
 
                     var amount = amountPerPayment * numberOfPayments;
 
@@ -225,7 +233,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                             BudgetAllowanceId = budgetAllowance.Id,
                             BeneficiaryType = beneficiary.BeneficiaryType,
                             Beneficiary = beneficiary,
-                            Subscription = subscription
+                            Subscription = subscription,
+                            RemainingAllocatedAmount = amount
                         };
                         subscription.Beneficiaries.Add(subscriptionBeneficiary);
 

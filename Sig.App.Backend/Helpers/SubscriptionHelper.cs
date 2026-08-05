@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NodaTime;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.BackgroundJobs;
@@ -17,6 +18,39 @@ namespace Sig.App.Backend.Helpers
         public const string AddingFundToCardFirstDayOfTheMonthJobName = "AddingFundToCard:FirstDayOfTheMonth";
         public const string AddingFundToCardFifteenthDayOfTheMonthJobName = "AddingFundToCard:FifteenthDayOfTheMonth";
         public const string AddingFundToCardFirstDayOfTheWeekJobName = "AddingFundToCard:FirstDayOfTheWeek";
+
+        /// <summary>
+        /// Applique un delta au solde de réservation d'une paire : positif quand on réserve, négatif
+        /// quand on livre ou qu'on relâche. Toujours passer le montant exact du mouvement d'enveloppe
+        /// correspondant, jamais un recalcul.
+        ///
+        /// Si le solde est encore null (ligne antérieure à la migration, pas reconstruite par
+        /// BackfillSubscriptionBeneficiaryAllocation), le delta est DÉLIBÉRÉMENT ignoré et journalisé.
+        /// null veut dire « on ne sait pas combien était réservé », et
+        /// <c>inconnu + 100</c> n'est pas <c>100</c>. Fabriquer une valeur à partir de zéro produirait
+        /// un solde systématiquement trop bas, que le retrait considérerait ensuite comme fiable : on
+        /// immobiliserait la différence dans l'enveloppe, sans aucun signal. Tant que le solde est null,
+        /// le retrait retombe sur l'estimation calendaire, qui est bien plus proche de la réalité.
+        ///
+        /// Seul le job de backfill résout un null, parce que lui seul a le grand livre et le calendrier.
+        /// </summary>
+        public static void AdjustAllocation(this SubscriptionBeneficiary subscriptionBeneficiary, decimal delta, ILogger logger)
+        {
+            if (delta == 0) return;
+
+            if (subscriptionBeneficiary.RemainingAllocatedAmount == null)
+            {
+                logger.LogInformation($"[CRCL-2606] Delta de réservation {delta} ignoré pour bénéficiaire {subscriptionBeneficiary.BeneficiaryId} / abonnement {subscriptionBeneficiary.SubscriptionId} : solde encore inconnu (backfill pas passé). L'enveloppe bouge quand même et le retrait utilisera l'estimation calendaire.");
+                return;
+            }
+
+            subscriptionBeneficiary.RemainingAllocatedAmount += delta;
+
+            if (subscriptionBeneficiary.RemainingAllocatedAmount < 0)
+            {
+                logger.LogWarning($"[CRCL-2606] RemainingAllocatedAmount négatif ({subscriptionBeneficiary.RemainingAllocatedAmount}) pour bénéficiaire {subscriptionBeneficiary.BeneficiaryId} / abonnement {subscriptionBeneficiary.SubscriptionId} - livraison supérieure à la réservation.");
+            }
+        }
 
         public static int GetEffectiveMaxNumberOfPayments(this SubscriptionBeneficiary subscriptionBeneficiary)
         {

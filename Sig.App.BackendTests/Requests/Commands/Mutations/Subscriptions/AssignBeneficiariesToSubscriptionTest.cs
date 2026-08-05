@@ -334,6 +334,21 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             localSubscription.Beneficiaries.Count.Should().Be(8);
             subscriptionBeneficiaries.Count().Should().Be(8);
 
+            // CRCL-2606 : chaque paire mémorise sa réservation, et la somme des réservations égale
+            // exactement ce qui a quitté l'enveloppe.
+            subscriptionBeneficiaries.Sum(x => x.RemainingAllocatedAmount).Should().Be(700 - 60);
+            subscriptionBeneficiaries.Select(x => (x.BeneficiaryId, x.RemainingAllocatedAmount)).Should().BeEquivalentTo(new[]
+            {
+                (beneficiary1.Id, (decimal?)50m),
+                (beneficiary2.Id, (decimal?)50m),
+                (beneficiary3.Id, (decimal?)50m),
+                (beneficiary4.Id, (decimal?)50m),
+                (beneficiary5.Id, (decimal?)110m),
+                (beneficiary6.Id, (decimal?)110m),
+                (beneficiary7.Id, (decimal?)110m),
+                (beneficiary8.Id, (decimal?)110m),
+            });
+
             var allocationLogs = await DbContext.TransactionLogs
                 .Where(x => x.Discriminator == TransactionLogDiscriminator.AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog)
                 .ToListAsync();
@@ -475,6 +490,73 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             localBudgetAllowance.AvailableFund.Should().Be(500);
             localSubscription.Beneficiaries.Count.Should().Be(2);
             subscriptionBeneficiaries.Count().Should().Be(2);
+
+            // CRCL-2606 : réservation = min(max, calendrier) x montant, ici 4 x 25 chacun.
+            subscriptionBeneficiaries.Should().OnlyContain(x => x.RemainingAllocatedAmount == 100m);
+        }
+
+        [Fact]
+        public async Task BulkAssignSizesEachBeneficiaryReservationIndependently()
+        {
+            // CRCL-2606 — Deux défauts en un seul test, tous deux dans le dimensionnement de la
+            // réservation d'un abonnement usage-based :
+            //
+            //   1. le nombre de versements livrés était compté en LIGNES de transaction, alors qu'un
+            //      versement en génère une par groupe de produits (ici 2) ;
+            //   2. paymentRemaining, invariant du lot, était réassigné dans la boucle, donc
+            //      l'historique de beneficiary1 rognait aussi la réservation de beneficiary2.
+            //
+            // Avant correction les deux personnes réservaient 0. Après : 2 versements restants pour
+            // beneficiary1 (4 max - 2 livrés) et 4 pour beneficiary2 (rien de livré).
+            var productGroup2 = DbContext.ProductGroups.First(x => x.Name == "Product group 2");
+            subscription3.Types.Add(new SubscriptionType()
+            {
+                Amount = 5,
+                BeneficiaryType = beneficiaryType1,
+                ProductGroup = productGroup2
+            });
+
+            // 2 versements déjà livrés à beneficiary1 = 4 lignes de transaction.
+            foreach (var subscriptionType in subscription3.Types.Where(x => x.BeneficiaryType == beneficiaryType1).ToList())
+            {
+                for (var i = 0; i < 2; i++)
+                {
+                    DbContext.Transactions.Add(new SubscriptionAddingFundTransaction()
+                    {
+                        Amount = subscriptionType.Amount,
+                        AvailableFund = subscriptionType.Amount,
+                        Beneficiary = beneficiary1,
+                        OrganizationId = organization.Id,
+                        SubscriptionType = subscriptionType,
+                        CreatedAtUtc = Clock.GetCurrentInstant().ToDateTimeUtc()
+                    });
+                }
+            }
+
+            DbContext.SaveChanges();
+
+            var input = new AssignBeneficiariesToSubscription.Input()
+            {
+                OrganizationId = organization.GetIdentifier(),
+                SubscriptionId = subscription3.GetIdentifier(),
+                Beneficiaries = [beneficiary1.GetIdentifier(), beneficiary2.GetIdentifier()]
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBudgetAllowance = DbContext.BudgetAllowances.First(x => x.SubscriptionId == subscription3.Id);
+            var subscriptionBeneficiaries = DbContext.SubscriptionBeneficiaries
+                .Where(x => x.SubscriptionId == subscription3.Id).ToList();
+
+            // 30 par versement (25 + 5)
+            subscriptionBeneficiaries.Single(x => x.BeneficiaryId == beneficiary1.Id)
+                .RemainingAllocatedAmount.Should().Be(60m);
+            subscriptionBeneficiaries.Single(x => x.BeneficiaryId == beneficiary2.Id)
+                .RemainingAllocatedAmount.Should().Be(120m);
+
+            // L'enveloppe et les réservations bougent du même montant.
+            localBudgetAllowance.AvailableFund.Should().Be(700 - 180);
+            subscriptionBeneficiaries.Sum(x => x.RemainingAllocatedAmount).Should().Be(180m);
         }
 
         [Fact]

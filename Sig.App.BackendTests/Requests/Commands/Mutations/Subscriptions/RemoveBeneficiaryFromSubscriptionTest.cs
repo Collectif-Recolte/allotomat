@@ -32,6 +32,10 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         private readonly Beneficiary beneficiary;
         private readonly Organization organization;
         private readonly Project project;
+        private readonly SubscriptionBeneficiary subscriptionBeneficiary;
+        private readonly ProductGroup productGroup1;
+        private readonly ProductGroup productGroup2;
+        private readonly BeneficiaryType beneficiaryType;
 
         public RemoveBeneficiaryFromSubscriptionTest()
         {
@@ -48,7 +52,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             };
             DbContext.Organizations.Add(organization);
 
-            var beneficiaryType = new BeneficiaryType()
+            beneficiaryType = new BeneficiaryType()
             {
                 Project = project,
                 Keys = "Beneficiary type 1",
@@ -68,7 +72,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             };
             DbContext.Beneficiaries.Add(beneficiary);
 
-            var productGroup1 = new ProductGroup()
+            productGroup1 = new ProductGroup()
             {
                 Project = project,
                 Color = ProductGroupColor.Color_1,
@@ -77,7 +81,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             };
             DbContext.ProductGroups.Add(productGroup1);
 
-            var productGroup2 = new ProductGroup()
+            productGroup2 = new ProductGroup()
             {
                 Project = project,
                 Color = ProductGroupColor.Color_2,
@@ -126,7 +130,18 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             };
             DbContext.BudgetAllowances.Add(budgetAllowance);
 
-            subscription.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary { Beneficiary = beneficiary, BeneficiaryType = beneficiaryType, Subscription = subscription, BudgetAllowance = budgetAllowance } };
+            // CRCL-2606 : l'enveloppe est passée de 75 à 25, donc 50 $ (2 versements de 25) ont été
+            // réservés pour cette paire à l'assignation. C'est cette réservation qu'un retrait rend,
+            // pas le calendrier restant.
+            subscriptionBeneficiary = new SubscriptionBeneficiary
+            {
+                Beneficiary = beneficiary,
+                BeneficiaryType = beneficiaryType,
+                Subscription = subscription,
+                BudgetAllowance = budgetAllowance,
+                RemainingAllocatedAmount = 50m
+            };
+            subscription.Beneficiaries = new List<SubscriptionBeneficiary>() { subscriptionBeneficiary };
 
             DbContext.Subscriptions.Add(subscription);
 
@@ -160,7 +175,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
 
             localBeneficiary.Subscriptions.Should().HaveCount(0);
             localSubscription.Beneficiaries.Should().HaveCount(0);
-            localBudgetAllowance.AvailableFund.Should().Be(50);
+            // CRCL-2606 : 25 (disponible) + 50 (réservation non livrée) = 75
+            localBudgetAllowance.AvailableFund.Should().Be(75);
             transactionLogCreated.Should().Be(true);
         }
 
@@ -169,6 +185,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         {
             subscription.IsSubscriptionPaymentBasedCardUsage = true;
             subscription.MaxNumberOfPayments = 1;
+            // Max 1 versement, 1 déjà livré ci-dessous : il ne reste rien de réservé.
+            subscriptionBeneficiary.RemainingAllocatedAmount = 0m;
             beneficiary.Card = new Card()
             {
                 Transactions = new List<Transaction>() {
@@ -215,6 +233,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             subscription.IsSubscriptionPaymentBasedCardUsage = true;
             subscription.MaxNumberOfPayments = 2;
             subscription.EndDate = new DateTime(today.Year, today.Month, 2).AddMonths(4);
+            // Max 2 versements réservés (50), 1 livré ci-dessous : il reste 25 de réservé.
+            subscriptionBeneficiary.RemainingAllocatedAmount = 25m;
             beneficiary.Card = new Card()
             {
                 Transactions = new List<Transaction>() {
@@ -261,8 +281,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             subscription.IsSubscriptionPaymentBasedCardUsage = true;
             subscription.MaxNumberOfPayments = 1;
             subscription.EndDate = new DateTime(today.Year, today.Month, 2).AddMonths(4);
-            var subscriptionBeneficiary = subscription.Beneficiaries.First();
             subscriptionBeneficiary.MaxNumberOfPaymentsOverride = 3;
+            // Max effectif 3 versements (75 réservés), 1 livré ci-dessous : il reste 50 de réservé.
+            subscriptionBeneficiary.RemainingAllocatedAmount = 50m;
 
             beneficiary.Card = new Card()
             {
@@ -294,9 +315,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             var localBudgetAllowance = await DbContext.BudgetAllowances.FirstAsync();
             var transactionLogCreated = await DbContext.TransactionLogs.AnyAsync(x => x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog);
 
-            // maxNumberOfPayments = override=3, transactionCount=1
-            // paymentsRemaining = max(0, min(calendarRemaining>=3, 3-1)) = 2
-            // totalRefund = 2 * 25 = 50
+            // CRCL-2606 : le calendrier n'est plus consulté. On rend la réservation non livrée (50),
+            // soit 25 (disponible) + 50 = 75.
             localBudgetAllowance.AvailableFund.Should().Be(75);
             transactionLogCreated.Should().Be(true);
         }
@@ -315,7 +335,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             var transactionLog = await DbContext.TransactionLogs.FirstAsync(x =>
                 x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog);
 
-            transactionLog.TotalAmount.Should().Be(25);
+            transactionLog.TotalAmount.Should().Be(50);
             transactionLog.BeneficiaryId.Should().Be(beneficiary.Id);
             transactionLog.BeneficiaryFirstname.Should().Be(beneficiary.Firstname);
             transactionLog.BeneficiaryLastname.Should().Be(beneficiary.Lastname);
@@ -324,6 +344,158 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             transactionLog.SubscriptionId.Should().Be(subscription.Id);
             transactionLog.SubscriptionName.Should().Be(subscription.Name);
             transactionLog.ProjectId.Should().Be(project.Id);
+        }
+
+        [Fact]
+        public async Task NonUsageBasedUnderDeliveredRefundsOnlyTheUnusedReservation()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            // CRCL-2606 (AC 1) — Abonnement non usage-based, personne sous-livrée : elle a reçu moins
+            // de versements que le calendrier écoulé. On étend la saison pour que le calendrier restant
+            // (5) diverge nettement de la réservation réelle (2 versements = 50).
+            subscription.IsSubscriptionPaymentBasedCardUsage = false;
+            subscription.EndDate = new DateTime(today.Year, today.Month, 2).AddMonths(5);
+            subscriptionBeneficiary.RemainingAllocatedAmount = 50m;
+
+            DbContext.SaveChanges();
+
+            var input = new RemoveBeneficiaryFromSubscription.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBudgetAllowance = await DbContext.BudgetAllowances.FirstAsync();
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync(x =>
+                x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog);
+
+            // 25 (disponible) + 50 (réservation non livrée) = 75
+            localBudgetAllowance.AvailableFund.Should().Be(75);
+            transactionLog.TotalAmount.Should().Be(50);
+
+            // C'est ce test qui aurait attrapé le déficit de -1216 $ : l'ancienne formule remboursait
+            // le calendrier restant (5 x 25 = 125), donc l'enveloppe montait à 150.
+            localBudgetAllowance.AvailableFund.Should().NotBe(150);
+        }
+
+        [Fact]
+        public async Task NonUsageBasedOverDeliveredRefundsZero()
+        {
+            // CRCL-2606 (AC 2) — Personne en avance sur sa réservation : le solde est négatif. Un
+            // retrait ne débite jamais l'enveloppe, le remboursement est plafonné à 0.
+            subscription.IsSubscriptionPaymentBasedCardUsage = false;
+            subscriptionBeneficiary.RemainingAllocatedAmount = -25m;
+
+            DbContext.SaveChanges();
+
+            var input = new RemoveBeneficiaryFromSubscription.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBudgetAllowance = await DbContext.BudgetAllowances.FirstAsync();
+            var transactionLog = await DbContext.TransactionLogs
+                .Include(x => x.TransactionLogProductGroups)
+                .FirstAsync(x => x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog);
+
+            localBudgetAllowance.AvailableFund.Should().Be(25);
+            transactionLog.TotalAmount.Should().Be(0);
+            transactionLog.TransactionLogProductGroups.Should().OnlyContain(x => x.Amount == 0);
+        }
+
+        [Fact]
+        public async Task UsageBasedIgnoresCalendarAndRefundsTheReservation()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            // CRCL-2606 (AC 3) — Usage-based : comportement inchangé, mais la preuve que le calendrier
+            // n'est plus consulté du tout. EndDate volontairement lointain (calendrier restant = 5)
+            // alors que la réservation non livrée ne vaut qu'un versement.
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 2;
+            subscription.EndDate = new DateTime(today.Year, today.Month, 2).AddMonths(5);
+            subscriptionBeneficiary.RemainingAllocatedAmount = 25m;
+
+            DbContext.SaveChanges();
+
+            var input = new RemoveBeneficiaryFromSubscription.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBudgetAllowance = await DbContext.BudgetAllowances.FirstAsync();
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync(x =>
+                x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog);
+
+            localBudgetAllowance.AvailableFund.Should().Be(50);
+            transactionLog.TotalAmount.Should().Be(25);
+        }
+
+        [Fact]
+        public async Task LegacyNullAllocatedAmountFallsBackToCalendarEstimate()
+        {
+            // CRCL-2606 — Ligne que le job de backfill n'a pas encore reconstruite. Elle doit garder
+            // l'ancien comportement calendaire (1 versement restant x 25 = 25) plutôt que rembourser 0
+            // et immobiliser l'argent. Cette branche sert de vrais retraits jusqu'à ce que le backfill
+            // ait tourné partout : elle doit rester couverte.
+            subscriptionBeneficiary.RemainingAllocatedAmount = null;
+
+            DbContext.SaveChanges();
+
+            var input = new RemoveBeneficiaryFromSubscription.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBudgetAllowance = await DbContext.BudgetAllowances.FirstAsync();
+
+            localBudgetAllowance.AvailableFund.Should().Be(50);
+        }
+
+        [Fact]
+        public async Task RefundProductGroupBreakdownAlwaysSumsToTotalAmount()
+        {
+            // CRCL-2606 — Le remboursement n'est plus forcément un multiple entier du versement, donc
+            // la ventilation par groupe de produits est au prorata. La somme des parts doit rester
+            // exactement égale à TotalAmount, résidu d'arrondi inclus.
+            subscription.Types.Add(new SubscriptionType()
+            {
+                Amount = 5,
+                BeneficiaryType = beneficiaryType,
+                ProductGroup = productGroup2
+            });
+            // 30 par versement (25 + 5) et une réservation qui n'en est pas un multiple.
+            subscriptionBeneficiary.RemainingAllocatedAmount = 17m;
+
+            DbContext.SaveChanges();
+
+            var input = new RemoveBeneficiaryFromSubscription.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transactionLog = await DbContext.TransactionLogs
+                .Include(x => x.TransactionLogProductGroups)
+                .FirstAsync(x => x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog);
+
+            transactionLog.TotalAmount.Should().Be(17);
+            transactionLog.TransactionLogProductGroups.Should().HaveCount(2);
+            transactionLog.TransactionLogProductGroups.Sum(x => x.Amount).Should().Be(17);
         }
 
         [Fact]
