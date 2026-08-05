@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Transactions;
+using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Gql.Schema.GraphTypes;
 using System.Linq;
 using System.Threading;
@@ -27,45 +28,56 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
             var startUtc = request.Group.StartDate.ToDateTimeUtc();
             var endUtc = request.Group.EndDate.ToDateTimeUtc();
 
-            var cashRegisterMarketGroups = await db.CashRegisterMarketGroups
-                .Where(x => request.Ids.Contains(x.MarketGroupId))
-                .ToListAsync(cancellationToken);
+            var logsQuery = db.TransactionLogs.Where(x =>
+                x.MarketGroupId.HasValue
+                && request.Ids.Contains(x.MarketGroupId.Value)
+                && x.CreatedAtUtc >= startUtc
+                && x.CreatedAtUtc < endUtc
+                && (x.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog
+                    || x.Discriminator == TransactionLogDiscriminator.RefundPaymentTransactionLog));
 
-            var allCashRegisterIds = cashRegisterMarketGroups.Select(x => x.CashRegisterId).Distinct().ToList();
-            var cashRegisterIds = request.Group.CashRegisterIds.Length > 0
-                ? allCashRegisterIds.Intersect(request.Group.CashRegisterIds).ToList()
-                : allCashRegisterIds;
+            if (request.Group.CashRegisterIds.Length > 0)
+            {
+                logsQuery = logsQuery.Where(x =>
+                    x.CashRegisterId.HasValue && request.Group.CashRegisterIds.Contains(x.CashRegisterId.Value));
+            }
+
+            var logs = await logsQuery.ToListAsync(cancellationToken);
+            var uniqueIds = logs.Select(x => x.TransactionUniqueId).Distinct().ToList();
 
             var paymentTransactions = await db.Transactions.OfType<PaymentTransaction>()
-                .Where(c => c.CashRegisterId.HasValue && cashRegisterIds.Contains(c.CashRegisterId.Value)
-                         && c.CreatedAtUtc >= startUtc && c.CreatedAtUtc < endUtc)
+                .Where(c => uniqueIds.Contains(c.TransactionUniqueId))
                 .ToListAsync(cancellationToken);
 
             var refundTransactions = await db.Transactions.OfType<RefundTransaction>()
                 .Include(x => x.InitialTransaction)
-                .Where(c => c.InitialTransaction.CashRegisterId.HasValue && cashRegisterIds.Contains(c.InitialTransaction.CashRegisterId.Value)
-                         && c.CreatedAtUtc >= startUtc && c.CreatedAtUtc < endUtc)
+                .Where(c => uniqueIds.Contains(c.TransactionUniqueId))
                 .ToListAsync(cancellationToken);
 
-            var cashRegisterToGroupIds = cashRegisterMarketGroups
-                .Where(x => cashRegisterIds.Contains(x.CashRegisterId))
-                .GroupBy(x => x.CashRegisterId)
-                .ToDictionary(g => g.Key, g => g.Select(x => x.MarketGroupId).ToList());
+            var paymentsByUniqueId = paymentTransactions.ToDictionary(x => x.TransactionUniqueId);
+            var refundsByUniqueId = refundTransactions.ToDictionary(x => x.TransactionUniqueId);
 
-            var allTransactions = paymentTransactions.Cast<Transaction>()
-                .Concat(refundTransactions.Cast<Transaction>())
-                .OrderByDescending(x => x.CreatedAtUtc);
+            var results = logs
+                .OrderByDescending(x => x.CreatedAtUtc)
+                .Select(log =>
+                {
+                    ITransactionGraphType graphType = null;
+                    if (log.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog
+                        && paymentsByUniqueId.TryGetValue(log.TransactionUniqueId, out var payment))
+                    {
+                        graphType = new PaymentTransactionGraphType(payment);
+                    }
+                    else if (log.Discriminator == TransactionLogDiscriminator.RefundPaymentTransactionLog
+                        && refundsByUniqueId.TryGetValue(log.TransactionUniqueId, out var refund))
+                    {
+                        graphType = new RefundTransactionGraphType(refund);
+                    }
 
-            var results = allTransactions.SelectMany(t =>
-            {
-                var cashRegisterId = t is PaymentTransaction pt ? pt.CashRegisterId!.Value : ((RefundTransaction)t).InitialTransaction.CashRegisterId!.Value;
-                ITransactionGraphType graphType = t is PaymentTransaction pt2
-                    ? new PaymentTransactionGraphType(pt2)
-                    : new RefundTransactionGraphType((RefundTransaction)t);
-                return cashRegisterToGroupIds[cashRegisterId].Select(mgId => (mgId, graphType));
-            });
+                    return (MarketGroupId: log.MarketGroupId!.Value, GraphType: graphType);
+                })
+                .Where(x => x.GraphType != null);
 
-            return results.ToLookup(x => x.mgId, x => x.graphType);
+            return results.ToLookup(x => x.MarketGroupId, x => x.GraphType);
         }
     }
 }
