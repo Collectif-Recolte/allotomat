@@ -3,7 +3,7 @@
 {
 	"en": {
 		"amount-label": "{productGroupName}",
-    "amount-after-label": "Balance: <span class='text-xl'>{amountAvailable}</span>",
+    "amount-after-label": "<span class='align-top mr-1'>Balance: </span><span class='text-3xl'>{amountAvailable}</span>",
     "confirmation-amount-label": "{productGroupName}",
     "amount-validation-label": "Amount",
 		"amount-placeholder": "Ex. {amount}",
