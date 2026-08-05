@@ -239,6 +239,46 @@ namespace Sig.App.BackendTests.BackgroundJobs
             local.RemainingAllocatedAmount.Should().BeNull();
         }
 
+        [Fact]
+        public async Task SubtractsDeliveredVersementsFromTheQuotaInTheCalendarEstimate()
+        {
+            // Le cas du retour client : max 2 versements, 1 déjà livré, 4 dates encore au calendrier.
+            // Le max est un quota sur la vie de l'abonnement, donc il ne reste qu'un versement à
+            // livrer - surtout pas 2, qui re-réserverait celui de juillet.
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 2;
+            subscription.EndDate = new DateTime(today.Year, today.Month, 2).AddMonths(4);
+            AddDeliveredVersement();
+
+            DbContext.SaveChanges();
+
+            await job.Run(dryRun: false);
+
+            var local = await DbContext.SubscriptionBeneficiaries.FirstAsync();
+            local.RemainingAllocatedAmount.Should().Be(25m);
+        }
+
+        [Fact]
+        public async Task ReservesNothingWhenTheQuotaIsAlreadyExhausted()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 2;
+            subscription.EndDate = new DateTime(today.Year, today.Month, 2).AddMonths(4);
+            AddDeliveredVersement();
+            AddDeliveredVersement();
+
+            DbContext.SaveChanges();
+
+            await job.Run(dryRun: false);
+
+            var local = await DbContext.SubscriptionBeneficiaries.FirstAsync();
+            local.RemainingAllocatedAmount.Should().Be(0m);
+        }
+
         private void AddAllocationLog(decimal amount)
         {
             DbContext.TransactionLogs.Add(BuildLog(

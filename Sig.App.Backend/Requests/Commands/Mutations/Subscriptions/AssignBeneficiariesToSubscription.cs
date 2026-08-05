@@ -130,6 +130,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             }
 
             var paymentRemaining = await subscription.GetPaymentRemainingAsync(db, clock, cancellationToken);
+            var calendarRemaining = await subscription.GetCardPaymentRemainingAsync(db, clock, cancellationToken);
 
             if (subscription.IsSubscriptionPaymentBasedCardUsage)
             {
@@ -209,7 +210,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         var numberOfPaymentTypes = subscription.GetNumberOfPaymentTypes(beneficiary.BeneficiaryTypeId);
                         beneficiaryPaymentsMade = SubscriptionHelper.GetNumberOfPaymentsMade(rawTransactionCount, numberOfPaymentTypes);
 
-                        beneficiaryPaymentRemaining = Math.Max(0, paymentRemaining - beneficiaryPaymentsMade);
+                        // Le quota est borné par le calendrier, pas l'inverse. Soustraire les versements
+                        // livrés d'un calendrier déjà plafonné au quota en retirerait un de trop en fin
+                        // d'abonnement, quand il reste moins de dates de versement que de quota.
+                        beneficiaryPaymentRemaining = Math.Max(0,
+                            Math.Min(calendarRemaining, subscription.MaxNumberOfPayments.Value - beneficiaryPaymentsMade));
                     }
 
                     var amountPerPayment = subscription.Types
