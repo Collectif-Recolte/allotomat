@@ -130,7 +130,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             beneficiary.Organization = organization;
             beneficiary.Card = card;
-            beneficiary.Subscriptions = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription, BeneficiaryType = beneficiary.BeneficiaryType, BudgetAllowance = budgetAllowance } };
+            beneficiary.Subscriptions = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription, BeneficiaryType = beneficiary.BeneficiaryType, BudgetAllowance = budgetAllowance, RemainingAllocatedAmount = 0m } };
 
             project.Subscriptions = new List<Subscription>() { subscription };
             project.Organizations = new List<Organization>() { organization };

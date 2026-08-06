@@ -279,6 +279,23 @@ namespace Sig.App.BackendTests.BackgroundJobs
             local.RemainingAllocatedAmount.Should().Be(0m);
         }
 
+        [Fact]
+        public async Task ReservesNothingOnAnEndedSubscription()
+        {
+            // GetCardPaymentRemaining compte les mois écoulés depuis la fin et renvoie donc un négatif
+            // sur un abonnement terminé. La réservation doit valoir 0, pas un montant négatif qu'un
+            // garde en aval viendrait rattraper.
+            subscription.StartDate = new DateTime(2024, 1, 1);
+            subscription.EndDate = new DateTime(2024, 8, 3);
+
+            DbContext.SaveChanges();
+
+            await job.Run(dryRun: false);
+
+            var local = await DbContext.SubscriptionBeneficiaries.FirstAsync();
+            local.RemainingAllocatedAmount.Should().Be(0m);
+        }
+
         private void AddAllocationLog(decimal amount)
         {
             DbContext.TransactionLogs.Add(BuildLog(

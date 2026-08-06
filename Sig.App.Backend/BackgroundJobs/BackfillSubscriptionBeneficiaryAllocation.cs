@@ -164,7 +164,10 @@ namespace Sig.App.Backend.BackgroundJobs
         private async Task<decimal> EstimateFromCalendarAsync(
             SubscriptionBeneficiary pair, LedgerEntry entry, decimal amountPerPayment)
         {
-            var calendarRemaining = await pair.Subscription.GetCardPaymentRemainingAsync(db, clock);
+            // GetCardPaymentRemaining ne borne pas son résultat : sur un abonnement terminé il compte
+            // les mois écoulés depuis la fin et renvoie un négatif. On le ramène à zéro ici plutôt que
+            // de laisser un montant négatif remonter jusqu'au garde de Run.
+            var calendarRemaining = Math.Max(0, await pair.Subscription.GetCardPaymentRemainingAsync(db, clock));
             var explicitMax = pair.GetExplicitMaxNumberOfPayments();
 
             if (!explicitMax.HasValue) return calendarRemaining * amountPerPayment;

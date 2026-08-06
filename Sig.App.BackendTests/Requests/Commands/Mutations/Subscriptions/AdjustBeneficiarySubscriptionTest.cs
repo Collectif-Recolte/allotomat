@@ -221,9 +221,11 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             DbContext.BudgetAllowances.Add(budgetAllowance2);
             DbContext.BudgetAllowances.Add(budgetAllowance3);
 
-            subscription1.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription1, BeneficiaryType = beneficiaryType1, BudgetAllowance = budgetAllowance1 } };
-            subscription2.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription2, BeneficiaryType = beneficiaryType1, BudgetAllowance = budgetAllowance2 } };
-            subscription3.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription3, BeneficiaryType = beneficiaryType1, BudgetAllowance = budgetAllowance3 } };
+            // Réservation connue et à zéro : c'est le cas « la paire est suivie », par opposition au
+            // null d'une ligne antérieure à la migration, couvert par un test dédié plus bas.
+            subscription1.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription1, BeneficiaryType = beneficiaryType1, BudgetAllowance = budgetAllowance1, RemainingAllocatedAmount = 0m } };
+            subscription2.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription2, BeneficiaryType = beneficiaryType1, BudgetAllowance = budgetAllowance2, RemainingAllocatedAmount = 0m } };
+            subscription3.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription3, BeneficiaryType = beneficiaryType1, BudgetAllowance = budgetAllowance3, RemainingAllocatedAmount = 0m } };
 
             card = new Card()
             {

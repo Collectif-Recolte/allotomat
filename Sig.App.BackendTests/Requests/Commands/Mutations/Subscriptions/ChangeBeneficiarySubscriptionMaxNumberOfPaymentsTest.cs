@@ -108,7 +108,10 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
                 Beneficiary = beneficiary,
                 Subscription = subscription,
                 BeneficiaryType = beneficiaryType,
-                BudgetAllowance = budgetAllowance
+                BudgetAllowance = budgetAllowance,
+                // Réservation connue : sans ça, AdjustAllocation jette les deltas et le test ne
+                // vérifierait plus rien du suivi de réservation.
+                RemainingAllocatedAmount = 0m
             };
             subscription.Beneficiaries = new List<SubscriptionBeneficiary>() { subscriptionBeneficiary };
 

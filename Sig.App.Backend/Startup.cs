@@ -308,6 +308,7 @@ namespace Sig.App.Backend
             ExpireSubscription.RegisterJob(configuration);
             SendMonthlyCardBalanceReport.RegisterJob(configuration);
             BackfillSubscriptionBeneficiaryAllocation.RegisterJob(configuration);
+            VerifyBudgetAllowanceReservations.RegisterJob(configuration);
         }
 
         private void ConfigureDbContext(DbContextOptionsBuilder options)
