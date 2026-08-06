@@ -184,13 +184,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                 if (initialTransaction.PaymentTransactionAddingFundTransactions.Any())
                 {
-                    var subscriptionAddingFundTransaction = initialTransaction.PaymentTransactionAddingFundTransactions.Select(x => x.AddingFundTransaction).OfType<SubscriptionAddingFundTransaction>().FirstOrDefault();
-                    if (subscriptionAddingFundTransaction != null)
-                    {
-                        var subscriptionType = await db.SubscriptionTypes.Include(x => x.Subscription).FirstOrDefaultAsync(x => x.Id == subscriptionAddingFundTransaction.SubscriptionTypeId);
-                        baseTransactionLog.SubscriptionId = subscriptionType.SubscriptionId;
-                        baseTransactionLog.SubscriptionName = subscriptionType.Subscription.Name;
-                    }
+                    await AssignSubscriptionFromFundSources(
+                        baseTransactionLog,
+                        initialTransaction.PaymentTransactionAddingFundTransactions.Select(x => x.AddingFundTransaction),
+                        cancellationToken);
 
                     var paymentTransactionAddingFundTransactions = initialTransaction.PaymentTransactionAddingFundTransactions.Where(x => x.AddingFundTransaction.ProductGroupId == productGroupId).ToList();
                     var amountToRefund = refund.Amount;
@@ -216,6 +213,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 }
                 else
                 {
+                    await AssignSubscriptionFromFundSources(
+                        baseTransactionLog,
+                        initialTransaction.Transactions,
+                        cancellationToken);
+
                     var addingFundTransaction = initialTransaction.Transactions.Where(x => x.ProductGroupId == productGroupId).FirstOrDefault();
                     if (addingFundTransaction.Status == FundTransactionStatus.Actived)
                     {
@@ -266,6 +268,43 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             {
                 Transaction = new RefundTransactionGraphType(refundTransaction)
             };
+        }
+
+        private async Task AssignSubscriptionFromFundSources(
+            TransactionLog transactionLog,
+            IEnumerable<AddingFundTransaction> fundSources,
+            CancellationToken cancellationToken)
+        {
+            if (transactionLog.SubscriptionId.HasValue)
+            {
+                return;
+            }
+
+            var addingFundTransactions = fundSources
+                .Where(x => x is ManuallyAddingFundTransaction || x is SubscriptionAddingFundTransaction)
+                .ToList();
+
+            if (!addingFundTransactions.Any())
+            {
+                return;
+            }
+
+            var groupedBySubscription = await TransactionHelper.GroupAddingFundTransactionsBySubscriptionId(
+                db, addingFundTransactions, cancellationToken);
+            var subscriptionGroup = groupedBySubscription.FirstOrDefault(x => x.Key != -1);
+            if (subscriptionGroup == null)
+            {
+                return;
+            }
+
+            var subscription = await db.Subscriptions.FirstOrDefaultAsync(x => x.Id == subscriptionGroup.Key, cancellationToken);
+            if (subscription == null)
+            {
+                return;
+            }
+
+            transactionLog.SubscriptionId = subscription.Id;
+            transactionLog.SubscriptionName = subscription.Name;
         }
 
         [MutationInput]
