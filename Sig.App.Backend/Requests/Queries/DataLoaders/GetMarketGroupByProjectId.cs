@@ -22,6 +22,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
         {
             var results = await db.MarketGroups
                 .Where(x => request.Ids.Contains(x.ProjectId))
+                .OrderBy(x => x.Name)
                 .ToListAsync(cancellationToken);
 
             return results.ToLookup(x => x.ProjectId, x => new MarketGroupGraphType(x));
