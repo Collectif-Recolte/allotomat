@@ -47,10 +47,27 @@ namespace Sig.App.Backend.Requests.Queries.Markets
             {
                 var searchText = request.SearchText.Value.Split(' ').AsEnumerable();
 
+                var searchTextQuery = query
+                    .Join(db.UserClaims.Where(c => c.ClaimType == AppClaimTypes.MarketManagerOf),
+                        market => market.Id.ToString(),
+                        claim => claim.ClaimValue,
+                        (market, claim) => new { market, claim })
+                    .Join(db.Users,
+                        marketClaim => marketClaim.claim.UserId,
+                        user => user.Id,
+                        (marketClaim, user) => new { marketClaim.market, user });
+                
                 foreach (var text in searchText)
                 {
-                    query = query.Where(x => EF.Functions.Collate(x.Name.ToString(), SearchCollation.AccentInsensitive).Contains(text));
+                    searchTextQuery = searchTextQuery.Where(x => 
+                        EF.Functions.Collate(x.market.Name.ToString(), SearchCollation.AccentInsensitive).Contains(text) ||
+                        EF.Functions.Collate(x.user.Email, SearchCollation.AccentInsensitive).Contains(text) ||
+                        EF.Functions.Collate(x.user.Profile.FirstName, SearchCollation.AccentInsensitive).Contains(text) ||
+                        EF.Functions.Collate(x.user.Profile.LastName, SearchCollation.AccentInsensitive).Contains(text)
+                    );
                 }
+                    
+                query = searchTextQuery.Select(x => x.market).Distinct();
             }
 
             if (request.MarketGroups?.Any() ?? false)
