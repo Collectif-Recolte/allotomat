@@ -45,18 +45,42 @@ namespace Sig.App.Backend.Requests.Queries.Markets
 
             if (request.SearchText.IsSet() && !string.IsNullOrEmpty(request.SearchText.Value))
             {
-                var searchText = request.SearchText.Value.Split(' ').AsEnumerable();
+                var managersQuery = db.UserClaims
+                    .Where(c => c.ClaimType == AppClaimTypes.MarketManagerOf)
+                    .Join(db.Users,
+                        claim => claim.UserId,
+                        user => user.Id,
+                        (claim, user) => new { MarketId = claim.ClaimValue, user });
 
+                var searchTextQuery = query
+                    .GroupJoin(managersQuery,
+                        market => market.Id.ToString(),
+                        manager => manager.MarketId,
+                        (market, marketManagers) => new { market, marketManagers })
+                    .SelectMany(
+                        x => x.marketManagers.DefaultIfEmpty(),
+                        (x, manager) => new { x.market, user = manager != null ? manager.user : null });
+
+                var searchText = request.SearchText.Value.Split(' ').AsEnumerable();
                 foreach (var text in searchText)
                 {
-                    query = query.Where(x => EF.Functions.Collate(x.Name.ToString(), SearchCollation.AccentInsensitive).Contains(text));
+                    searchTextQuery = searchTextQuery.Where(x =>
+                        EF.Functions.Collate(x.market.Name.ToString(), SearchCollation.AccentInsensitive).Contains(text) ||
+                        (x.user != null && (
+                            EF.Functions.Collate(x.user.Email, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.user.Profile.FirstName, SearchCollation.AccentInsensitive).Contains(text) ||
+                            EF.Functions.Collate(x.user.Profile.LastName, SearchCollation.AccentInsensitive).Contains(text)
+                        ))
+                    );
                 }
+
+                query = searchTextQuery.Select(x => x.market).Distinct();
             }
 
             if (request.MarketGroups?.Any() ?? false)
             {
                 var marketGroupsLongIdentifiers = request.MarketGroups.Select(x => x.LongIdentifierForType<MarketGroup>());
-                query = query.Where(x => x.MarketGroups.Select(x => x.MarketGroupId).Any(y => marketGroupsLongIdentifiers.Contains(y)));
+                query = query.Where(x => x.MarketGroups.Any(y => marketGroupsLongIdentifiers.Contains(y.MarketGroupId)));
             }
 
             var sorted = Sort(query, request.Sort?.Field ?? MarketSort.Default, SortOrder.Asc);
