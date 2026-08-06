@@ -11,6 +11,7 @@ namespace Sig.App.Backend.DbModel.Entities.Subscriptions
         public long? BudgetAllowanceId { get; set; }
 
         public int? MaxNumberOfPaymentsOverride { get; set; }
+        public decimal? RemainingAllocatedAmount { get; set; }
 
         public Subscription Subscription { get; set; }
         public Beneficiary Beneficiary { get; set; }

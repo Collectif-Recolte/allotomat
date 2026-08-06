@@ -82,37 +82,32 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             beneficiary.Subscriptions.Remove(subscriptionBeneficiary);
 
-            var paymentsRemaining = await subscriptionBeneficiary.GetPaymentRemainingAsync(db, clock, cancellationToken);
             var subscriptionTypes = subscription.Types.Where(x => x.BeneficiaryTypeId == subscriptionBeneficiary.BeneficiaryTypeId).ToList();
-            var totalRefund = paymentsRemaining * subscriptionTypes.Sum(x => x.Amount);
-            
-            if (subscription.IsSubscriptionPaymentBasedCardUsage)
+            var amountPerPayment = subscriptionTypes.Sum(x => x.Amount);
+
+            decimal totalRefund;
+            if (subscriptionBeneficiary.RemainingAllocatedAmount.HasValue)
             {
-                var subscriptionAddingFundTransactionCount = 0;
-                if (beneficiaryTransactions.Count > 0)
+                var remainingAllocated = subscriptionBeneficiary.RemainingAllocatedAmount.Value;
+
+                if (remainingAllocated < 0)
                 {
-                    subscriptionAddingFundTransactionCount = beneficiaryTransactions.OfType<SubscriptionAddingFundTransaction>().Where(x => x.SubscriptionType.SubscriptionId == subscription.Id).Count();
+                    // Sur-livraison par rapport à la réservation : un retrait ne débite jamais l'enveloppe.
+                    logger.LogWarning($"[Mutation] RemoveBeneficiaryFromSubscription - RemainingAllocatedAmount négatif ({remainingAllocated}) pour bénéficiaire {beneficiaryId} / abonnement {subscription.Id}; remboursement plafonné à 0.");
                 }
 
-                var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
-                paymentsRemaining = Math.Max(0, Math.Min(paymentsRemaining, maxNumberOfPayments - subscriptionAddingFundTransactionCount));
-                totalRefund = paymentsRemaining * subscriptionTypes.Sum(x => x.Amount);
+                totalRefund = Math.Max(0m, remainingAllocated);
+            }
+            else
+            {
+                totalRefund = await ComputeLegacyCalendarRefundAsync(
+                    subscription, subscriptionBeneficiary, beneficiaryTransactions, amountPerPayment, cancellationToken);
             }
 
             subscriptionBeneficiary.BudgetAllowance.AvailableFund += totalRefund;
 
-            var transactionLogProductGroups = new List<TransactionLogProductGroup>();
-            foreach (var productGroup in subscriptionTypes.GroupBy(x => x.ProductGroupId))
-            {
-                var currentProductGroup = productGroup.First().ProductGroup;
-                transactionLogProductGroups.Add(new TransactionLogProductGroup()
-                {
-                    Amount = paymentsRemaining * productGroup.Sum(x => x.Amount),
-                    ProductGroupId = currentProductGroup.Id,
-                    ProductGroupName = currentProductGroup.Name
-                });
-            }
-            
+            var transactionLogProductGroups = BuildRefundProductGroupBreakdown(subscriptionTypes, amountPerPayment, totalRefund);
+
             db.TransactionLogs.Add(new TransactionLog()
             {
                 Discriminator = TransactionLogDiscriminator
@@ -146,6 +141,59 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             await db.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation($"[Mutation] RemoveBeneficiaryFromSubscription - Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} remove from subscription {subscription.Name}");
+        }
+
+        private async Task<decimal> ComputeLegacyCalendarRefundAsync(
+            Subscription subscription,
+            SubscriptionBeneficiary subscriptionBeneficiary,
+            List<Transaction> beneficiaryTransactions,
+            decimal amountPerPayment,
+            CancellationToken cancellationToken)
+        {
+            var paymentsRemaining = await subscriptionBeneficiary.GetPaymentRemainingAsync(db, clock, cancellationToken);
+
+            if (subscription.IsSubscriptionPaymentBasedCardUsage)
+            {
+                var rawTransactionCount = beneficiaryTransactions
+                    .OfType<SubscriptionAddingFundTransaction>()
+                    .Count(x => x.SubscriptionType.SubscriptionId == subscription.Id);
+
+                var numberOfPaymentTypes = subscription.GetNumberOfPaymentTypes(subscriptionBeneficiary.BeneficiaryTypeId);
+                var paymentsMade = SubscriptionHelper.GetNumberOfPaymentsMade(rawTransactionCount, numberOfPaymentTypes);
+
+                var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
+                paymentsRemaining = Math.Max(0, Math.Min(paymentsRemaining, maxNumberOfPayments - paymentsMade));
+            }
+
+            return paymentsRemaining * amountPerPayment;
+        }
+
+        private static List<TransactionLogProductGroup> BuildRefundProductGroupBreakdown(
+            List<SubscriptionType> subscriptionTypes, decimal amountPerPayment, decimal totalRefund)
+        {
+            var transactionLogProductGroups = new List<TransactionLogProductGroup>();
+            var productGroups = subscriptionTypes.GroupBy(x => x.ProductGroupId).ToList();
+            var allocated = 0m;
+
+            for (var i = 0; i < productGroups.Count; i++)
+            {
+                var currentProductGroup = productGroups[i].First().ProductGroup;
+                var groupAmount = i == productGroups.Count - 1
+                    ? totalRefund - allocated
+                    : amountPerPayment > 0
+                        ? Math.Round(totalRefund * productGroups[i].Sum(x => x.Amount) / amountPerPayment, 2)
+                        : 0m;
+                allocated += groupAmount;
+
+                transactionLogProductGroups.Add(new TransactionLogProductGroup()
+                {
+                    Amount = groupAmount,
+                    ProductGroupId = currentProductGroup.Id,
+                    ProductGroupName = currentProductGroup.Name
+                });
+            }
+
+            return transactionLogProductGroups;
         }
 
         public class SubscriptionNotFoundException : RequestValidationException { }

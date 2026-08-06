@@ -128,7 +128,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             beneficiary.Organization = organization;
             beneficiary.Card = card;
-            beneficiary.Subscriptions = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription, BeneficiaryType = beneficiary.BeneficiaryType, BudgetAllowance = budgetAllowance } };
+            beneficiary.Subscriptions = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription, BeneficiaryType = beneficiary.BeneficiaryType, BudgetAllowance = budgetAllowance, RemainingAllocatedAmount = 0m } };
 
             project.Subscriptions = new List<Subscription>() { subscription };
             project.Organizations = new List<Organization>() { organization };
@@ -176,6 +176,12 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             transactionLog.BeneficiaryIsOffPlatform.Should().Be(false);
 
             card.Funds.First().Amount.Should().Be(10);
+
+            // CRCL-2606 : un versement manuel débite l'enveloppe et livre immédiatement, sans passer par
+            // CreateTransaction. L'effet net sur la réservation est donc nul et la colonne ne bouge PAS.
+            // Ne pas "corriger" ça en ajoutant un += ici : il n'y aurait aucun décrément pour l'annuler.
+            var localSubscriptionBeneficiary = DbContext.SubscriptionBeneficiaries.First();
+            localSubscriptionBeneficiary.RemainingAllocatedAmount.Should().Be(0m);
         }
 
         [Fact]

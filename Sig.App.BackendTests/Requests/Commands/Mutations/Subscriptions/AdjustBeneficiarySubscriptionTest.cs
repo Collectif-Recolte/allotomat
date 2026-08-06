@@ -221,9 +221,11 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             DbContext.BudgetAllowances.Add(budgetAllowance2);
             DbContext.BudgetAllowances.Add(budgetAllowance3);
 
-            subscription1.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription1, BeneficiaryType = beneficiaryType1, BudgetAllowance = budgetAllowance1 } };
-            subscription2.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription2, BeneficiaryType = beneficiaryType1, BudgetAllowance = budgetAllowance2 } };
-            subscription3.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription3, BeneficiaryType = beneficiaryType1, BudgetAllowance = budgetAllowance3 } };
+            // Réservation connue et à zéro : c'est le cas « la paire est suivie », par opposition au
+            // null d'une ligne antérieure à la migration, couvert par un test dédié plus bas.
+            subscription1.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription1, BeneficiaryType = beneficiaryType1, BudgetAllowance = budgetAllowance1, RemainingAllocatedAmount = 0m } };
+            subscription2.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription2, BeneficiaryType = beneficiaryType1, BudgetAllowance = budgetAllowance2, RemainingAllocatedAmount = 0m } };
+            subscription3.Beneficiaries = new List<SubscriptionBeneficiary>() { new SubscriptionBeneficiary() { Beneficiary = beneficiary, Subscription = subscription3, BeneficiaryType = beneficiaryType1, BudgetAllowance = budgetAllowance3, RemainingAllocatedAmount = 0m } };
 
             card = new Card()
             {
@@ -277,6 +279,36 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
             var localSubscriptionBeneficiary = localBeneficiary.Subscriptions.First(x => x.SubscriptionId == subscription1.Id);
             localSubscriptionBeneficiary.BudgetAllowance.AvailableFund.Should().Be(480);
             localSubscriptionBeneficiary.BeneficiaryTypeId.Should().Be(beneficiaryType2.Id);
+            // CRCL-2606 : négation exacte du mouvement d'enveloppe. Le nouveau type coûte 60 de plus par
+            // versement (110 au lieu de 50) sur 2 versements, donc l'enveloppe passe de 600 à 480 et la
+            // réservation monte de 120 (elle partait de 0).
+            localSubscriptionBeneficiary.RemainingAllocatedAmount.Should().Be(120);
+        }
+
+        [Fact]
+        public async Task AdjustBeneficiarySubscriptionKeepsTheReservationUnknownOnAPreMigrationRow()
+        {
+            // CRCL-2606 — Ligne antérieure à la migration : l'enveloppe est ajustée normalement, mais le
+            // solde reste null plutôt que de devenir 0 + delta, ce qui serait une affirmation fausse.
+            beneficiary.BeneficiaryType = beneficiaryType2;
+            beneficiary.Subscriptions.First(x => x.SubscriptionId == subscription1.Id).RemainingAllocatedAmount = null;
+            DbContext.SaveChanges();
+
+            var input = new AdjustBeneficiarySubscription.Input()
+            {
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionIds = new List<Id>() { subscription1.GetIdentifier() }
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var localBeneficiary = await DbContext.Beneficiaries
+                .Include(x => x.Subscriptions).ThenInclude(x => x.BudgetAllowance)
+                .FirstAsync();
+
+            var localSubscriptionBeneficiary = localBeneficiary.Subscriptions.First(x => x.SubscriptionId == subscription1.Id);
+            localSubscriptionBeneficiary.BudgetAllowance.AvailableFund.Should().Be(480);
+            localSubscriptionBeneficiary.RemainingAllocatedAmount.Should().BeNull();
         }
 
         [Fact]

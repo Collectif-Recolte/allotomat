@@ -10,6 +10,7 @@ using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Organizations;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
+using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
@@ -114,7 +115,19 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
                 if (subscription.IsSubscriptionPaymentBasedCardUsage)
                 {
-                    paymentRemaining = Math.Min(subscription.MaxNumberOfPayments.Value, paymentRemaining);
+                    // Le max est un quota sur toute la vie de l'abonnement, pas un solde disponible à
+                    // partir d'aujourd'hui : ce qui a déjà été livré n'est plus à réserver. Sans ça,
+                    // réattribuer un participant qui a un historique re-réserve ses versements reçus.
+                    var rawTransactionCount = await db.Transactions
+                        .OfType<SubscriptionAddingFundTransaction>()
+                        .Where(x => x.BeneficiaryId == beneficiary.Id && x.SubscriptionType.SubscriptionId == subscription.Id)
+                        .CountAsync(cancellationToken);
+
+                    var paymentsMade = SubscriptionHelper.GetNumberOfPaymentsMade(
+                        rawTransactionCount, subscription.GetNumberOfPaymentTypes(beneficiary.BeneficiaryTypeId));
+
+                    var calendarRemaining = await subscription.GetCardPaymentRemainingAsync(db, clock, cancellationToken);
+                    paymentRemaining = Math.Max(0, Math.Min(calendarRemaining, subscription.MaxNumberOfPayments.Value - paymentsMade));
                 }
 
                 if (subscription.EndDate < today)
@@ -124,7 +137,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                         BeneficiaryId = beneficiary.Id,
                         SubscriptionId = subscription.Id,
                         BudgetAllowanceId = budgetAllowance.Id,
-                        BeneficiaryType = beneficiary.BeneficiaryType
+                        BeneficiaryType = beneficiary.BeneficiaryType,
+                        RemainingAllocatedAmount = 0m
                     });
 
                     logger.LogInformation($"[Mutation] AssignSubscriptionsToBeneficiary - Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} added to subscription {subscription.Name}");
@@ -141,7 +155,8 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                             BeneficiaryId = beneficiary.Id,
                             SubscriptionId = subscription.Id,
                             BudgetAllowanceId = budgetAllowance.Id,
-                            BeneficiaryType = beneficiary.BeneficiaryType
+                            BeneficiaryType = beneficiary.BeneficiaryType,
+                            RemainingAllocatedAmount = amount
                         });
 
                         budgetAllowance.AvailableFund -= amount;
