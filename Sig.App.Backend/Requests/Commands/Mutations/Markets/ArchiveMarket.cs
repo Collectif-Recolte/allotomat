@@ -39,6 +39,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             var market = await db.Markets
                 .Include(x => x.CashRegisters)
                 .Include(x => x.Projects)
+                .Include(x => x.MarketGroups)
                 .FirstOrDefaultAsync(x => x.Id == marketId, cancellationToken);
 
             if (market == null)
@@ -61,6 +62,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Markets
             }
 
             db.ProjectMarkets.RemoveRange(market.Projects);
+            db.MarketGroupMarkets.RemoveRange(market.MarketGroups);
 
             foreach (var cashRegister in market.CashRegisters)
             {

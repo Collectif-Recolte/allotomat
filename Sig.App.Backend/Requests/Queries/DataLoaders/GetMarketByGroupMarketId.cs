@@ -22,7 +22,7 @@ namespace Sig.App.Backend.Requests.Queries.DataLoaders
         {
             var results = await db.MarketGroupMarkets
                 .Include(x => x.Market)
-                .Where(x => request.Ids.Contains(x.MarketGroupId))
+                .Where(x => request.Ids.Contains(x.MarketGroupId) && !x.Market.IsArchived)
                 .ToListAsync(cancellationToken);
 
             return results.ToLookup(x => x.MarketGroupId, x => new MarketGraphType(x.Market));

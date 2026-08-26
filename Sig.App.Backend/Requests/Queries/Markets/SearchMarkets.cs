@@ -43,6 +43,11 @@ namespace Sig.App.Backend.Requests.Queries.Markets
                 query = db.Markets;
             }
 
+            if (request.ProjectId.HasValue || request.MarketGroupId.HasValue)
+            {
+                query = query.Where(x => !x.IsArchived);
+            }
+
             if (request.SearchText.IsSet() && !string.IsNullOrEmpty(request.SearchText.Value))
             {
                 var managersQuery = db.UserClaims
