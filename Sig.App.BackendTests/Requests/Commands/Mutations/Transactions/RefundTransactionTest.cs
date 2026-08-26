@@ -731,6 +731,32 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             transactionLog.BeneficiaryLastname.Should().Be(beneficiary.Lastname);
             transactionLog.OrganizationId.Should().Be(organization.Id);
             transactionLog.ProjectId.Should().Be(project.Id);
+            transactionLog.SubscriptionId.Should().Be(subscription.Id);
+            transactionLog.SubscriptionName.Should().Be(subscription.Name);
+        }
+
+        [Fact]
+        public async Task CreateRefundTransactionWithPaymentTransactionAddingFundLinksCopiesSubscription()
+        {
+            var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
+            {
+                InitialTransactionId = initialPaymentTransaction2.GetIdentifier(),
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
+                Password = "Abcd1234!!"
+            };
+            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
+            {
+                Amount = 20,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var transactionLog = await DbContext.TransactionLogs.FirstAsync();
+
+            transactionLog.Discriminator.Should().Be(TransactionLogDiscriminator.RefundPaymentTransactionLog);
+            transactionLog.SubscriptionId.Should().Be(subscription.Id);
+            transactionLog.SubscriptionName.Should().Be(subscription.Name);
         }
     }
 }
