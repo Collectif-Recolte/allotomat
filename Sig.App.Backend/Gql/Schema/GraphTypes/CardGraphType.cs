@@ -4,6 +4,8 @@ using MediatR;
 using NodaTime;
 using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Transactions;
+using Sig.App.Backend.DbModel.Entities.ProductGroups;
+using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Bases;
@@ -138,6 +140,21 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         {
             var funds = await ctx.DataLoader.LoadSubscriptionCardFunds(Id.LongIdentifierForType<Card>()).GetResultAsync();
             return funds.Sum(x => x.Amount);
+        }
+
+        /// <summary>
+        /// Le montant qu'un retrait peut réellement enlever de cette carte pour un abonnement et un
+        /// groupe de produits donnés. Distinct de TotalFund et du solde du groupe de produits, qui
+        /// agrègent tous les abonnements. (CRCL-2659)
+        /// </summary>
+        public async Task<decimal> RemovableFund([Inject] IMediator mediator, Id subscriptionId, Id productGroupId)
+        {
+            return await mediator.Send(new GetRemovableFund.Query
+            {
+                CardId = card.Id,
+                SubscriptionId = subscriptionId.LongIdentifierForType<Subscription>(),
+                ProductGroupId = productGroupId.LongIdentifierForType<ProductGroup>()
+            });
         }
 
         public async Task<FundGraphType> LoyaltyFund(IAppUserContext ctx)

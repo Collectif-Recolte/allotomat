@@ -11,7 +11,9 @@
 		"manually-add-fund-success-notification": "{name} has received {amount} on their card. The funds will expire on {expirationDate}.",
     "select-product-group-label": "Product group",
     "available-fund-cant-be-less-than-zero-error-notification": "The card balance cannot be negative.",
+    "subscription-dont-have-enought-fund-to-remove-error-notification": "The selected subscription only has {amount} available on this card for this product group.",
     "card-current-balance": "Current balance: {amount}",
+    "removable-fund-for-subscription": "Removable for this subscription and product group: {amount}",
     "select-subscription-description": "Subscriptions that have expired or that are not assigned to the participant are not available for manual fund transfers.",
     "select-expiration-date-label": "Expiration date",
     "first-day-of-the-month": "payment on the 1st day of the month",
@@ -29,7 +31,9 @@
 		"manually-add-fund-success-notification": "{name} a reçu {amount} sur sa carte. Les fonds vont expirer le {expirationDate}.",
     "select-product-group-label": "Groupe de produits",
     "available-fund-cant-be-less-than-zero-error-notification": "Le solde de la carte ne peut pas être négatif.",
+    "subscription-dont-have-enought-fund-to-remove-error-notification": "La période d'abonnement sélectionnée n'a que {amount} de disponible sur cette carte pour ce groupe de produits.",
     "card-current-balance": "Solde actuel: {amount}",
+    "removable-fund-for-subscription": "Retirable pour cette période d'abonnement et ce groupe de produits: {amount}",
     "select-subscription-description": "Les abonnements qui ont expiré ou qui ne sont pas assignés au ou à la participant·e ne sont pas disponibles pour le transfert manuel de fonds.",
     "select-expiration-date-label": "Date d'expiration",
     "first-day-of-the-month": "versement le 1er jour du mois",
@@ -85,7 +89,8 @@
               :disabled="productGroupOptions.length === 0"
               :label="t('select-product-group-label')"
               :options="productGroupOptions"
-              :errors="fieldErrors" />
+              :errors="fieldErrors"
+              @input="onProductGroupSelected" />
           </Field>
         </PfFormSection>
         <Field v-slot="{ field, errors: fieldErrors }" name="amount">
@@ -93,9 +98,9 @@
             id="amount"
             v-bind="field"
             :label="t('amount-label')"
+            :description="removableFundDescription"
             :errors="fieldErrors"
-            input-type="number"
-            min="0">
+            input-type="number">
             <template #trailingIcon>
               <UiDollarSign :errors="fieldErrors" />
             </template>
@@ -138,12 +143,21 @@ const { addSuccess } = useNotificationsStore();
 const { currentOrganization } = useOrganizationStore();
 
 const selectedSubscription = ref("");
+const selectedProductGroup = ref("");
 
 // Configure les messages en lien avec les erreurs graphql susceptibles d'être lancées par ce composant
 useGraphQLErrorMessages({
   // Ce code est lancé quand le montant est plus petit que 0
   AVAILABLE_FUND_CANT_BE_LESS_THAN_ZERO: () => {
     return t("available-fund-cant-be-less-than-zero-error-notification");
+  },
+  // Ce code est lancé quand on essaie de retirer plus que ce que la période d'abonnement
+  // sélectionnée a versé sur la carte pour ce groupe de produits. Le solde du groupe de
+  // produits peut être plus élevé s'il a été alimenté par plusieurs abonnements.
+  SUBSCRIPTION_DONT_HAVE_ENOUGHT_FUND_TO_REMOVE: () => {
+    return t("subscription-dont-have-enought-fund-to-remove-error-notification", {
+      amount: getMoneyFormat(removableFund.value)
+    });
   }
 });
 
@@ -178,6 +192,41 @@ const { result: resultBeneficiary } = useQuery(
   }
 );
 const beneficiary = useResult(resultBeneficiary);
+
+// Ce que la période d'abonnement sélectionnée a réellement versé sur cette carte pour ce groupe
+// de produits, et donc le maximum qu'un retrait peut enlever. Le solde du groupe de produits peut
+// être plus élevé quand plusieurs abonnements l'ont alimenté. (CRCL-2659)
+const { result: resultRemovableFund } = useQuery(
+  gql`
+    query BeneficiaryRemovableFund($id: ID!, $subscriptionId: ID!, $productGroupId: ID!) {
+      beneficiary(id: $id) {
+        id
+        card {
+          id
+          removableFund(subscriptionId: $subscriptionId, productGroupId: $productGroupId)
+        }
+      }
+    }
+  `,
+  () => ({
+    id: route.params.beneficiaryId,
+    subscriptionId: selectedSubscription.value,
+    productGroupId: selectedProductGroup.value
+  }),
+  () => ({
+    enabled: selectedSubscription.value !== "" && selectedProductGroup.value !== ""
+  })
+);
+
+const removableFund = computed(() => resultRemovableFund.value?.beneficiary?.card?.removableFund ?? 0);
+
+// Affiché comme description du champ Montant : c'est la contrainte sur cette saisie, pas une
+// information sur la carte. Vide tant que les deux listes ne sont pas choisies.
+const removableFundDescription = computed(() =>
+  selectedSubscription.value === "" || selectedProductGroup.value === ""
+    ? ""
+    : t("removable-fund-for-subscription", { amount: getMoneyFormat(removableFund.value) })
+);
 
 const { result: resultOrganization, loading } = useQuery(
   gql`
@@ -326,6 +375,13 @@ async function onSubmit({ amount, expirationDate, subscription, productGroup }) 
 
 function onSubscriptionSelected(e) {
   selectedSubscription.value = e;
+  // Les groupes de produits offerts dépendent de l'abonnement : celui déjà choisi peut ne plus
+  // être valide, et le montant retirable ne serait plus celui affiché.
+  selectedProductGroup.value = "";
+}
+
+function onProductGroupSelected(e) {
+  selectedProductGroup.value = e;
 }
 
 const validationSchema = computed(() =>
@@ -348,7 +404,7 @@ const validationSchema = computed(() =>
         return string().label(t("amount-label")).required();
       }
 
-      return number().label(t("amount-label")).required().max(maxBudgetAllowance.value);
+      return number().label(t("amount-label")).required().max(maxBudgetAllowance.value).min(-removableFund.value);
     })
   })
 );

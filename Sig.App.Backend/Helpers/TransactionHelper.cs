@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Transactions;
+using Sig.App.Backend.DbModel.Enums;
 
 namespace Sig.App.Backend.Helpers;
 
@@ -26,6 +27,26 @@ public static class TransactionHelper
                 return saftSubscriptionTypes.First(y => y.Id == saft.SubscriptionTypeId).SubscriptionId;
             return -1;
         });
+    }
+
+    /// <summary>
+    /// Les transactions dans lesquelles un retrait de fonds peut piger, pour une combinaison
+    /// bénéficiaire / groupe de produits / abonnement donnée. Source de vérité unique : la mutation
+    /// <c>CreateManuallyAddingFundTransaction</c> et la requête <c>GetRemovableFund</c> passent toutes
+    /// les deux par ici, pour qu'un montant affiché soit toujours un montant retirable.
+    /// Triées par date d'expiration, donc les fonds qui expirent le plus tôt partent en premier.
+    /// </summary>
+    public static IOrderedQueryable<AddingFundTransaction> RemovableFundTransactions(AppDbContext db, long beneficiaryId, long productGroupId, long subscriptionId)
+    {
+        return db.Transactions
+            .OfType<AddingFundTransaction>()
+            .Where(x => x.BeneficiaryId == beneficiaryId &&
+                        x.ProductGroupId == productGroupId &&
+                        x.Status == FundTransactionStatus.Actived &&
+                        x.AvailableFund > 0 &&
+                        ((x is SubscriptionAddingFundTransaction && (x as SubscriptionAddingFundTransaction).SubscriptionType.SubscriptionId == subscriptionId) ||
+                        (x is ManuallyAddingFundTransaction && (x as ManuallyAddingFundTransaction).SubscriptionId == subscriptionId)))
+            .OrderBy(x => x.ExpirationDate);
     }
 
     public static DateTime? GetNearestExpirationDate(IList<Transaction> transactions)

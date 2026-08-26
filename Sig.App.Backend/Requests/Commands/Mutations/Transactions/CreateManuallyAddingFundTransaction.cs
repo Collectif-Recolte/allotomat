@@ -163,31 +163,29 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 var affectedNegativeFundTransactions = new List<AddingFundTransaction>();
                 if (request.Amount < 0)
                 {
-                    var afts = await db.Transactions
-                        .OfType<AddingFundTransaction>()
-                        .Where(x => x.BeneficiaryId == beneficiaryId &&
-                                    x.ProductGroupId == productGroupId &&
-                                    x.Status == FundTransactionStatus.Actived &&
-                                    ((x is SubscriptionAddingFundTransaction && (x as SubscriptionAddingFundTransaction).SubscriptionType.SubscriptionId == subscriptionId) ||
-                                    (x is ManuallyAddingFundTransaction && (x as ManuallyAddingFundTransaction).SubscriptionId == subscriptionId)))
-                        .OrderBy(x => x.ExpirationDate)
-                        .ToListAsync();
+                    var afts = await TransactionHelper
+                        .RemovableFundTransactions(db, beneficiaryId, productGroupId, subscriptionId)
+                        .ToListAsync(cancellationToken);
 
                     var negatifAmount = request.Amount;
-                    var i = 0;
-                    do
+                    foreach (var aft in afts)
                     {
-                        var aft = afts.ElementAt(i);
-                        if (aft.AvailableFund > 0)
-                        {
-                            var amountToRemove = Math.Min(-negatifAmount, aft.AvailableFund);
-                            aft.AvailableFund -= amountToRemove;
-                            negatifAmount += amountToRemove;
-                            affectedNegativeFundTransactions.Add(aft);
-                        }
-                        i++;
+                        var amountToRemove = Math.Min(-negatifAmount, aft.AvailableFund);
+                        aft.AvailableFund -= amountToRemove;
+                        negatifAmount += amountToRemove;
+                        affectedNegativeFundTransactions.Add(aft);
+
+                        if (negatifAmount == 0) break;
                     }
-                    while (negatifAmount < 0 || i > afts.Count());
+
+                    // Le solde de la carte (fund.Amount) agrège tous les abonnements du groupe de produits,
+                    // alors qu'on ne peut retirer que ce que l'abonnement sélectionné y a versé. Sans cette
+                    // validation, un retrait autorisé plus haut n'a rien dans quoi piger. (CRCL-2659)
+                    if (negatifAmount < 0)
+                    {
+                        logger.LogWarning("[Mutation] CreateManuallyAddingFundTransaction - SubscriptionDontHaveEnoughtFundToRemove");
+                        throw new SubscriptionDontHaveEnoughtFundToRemove();
+                    }
                 }
 
                 transaction = new ManuallyAddingFundTransaction()
@@ -197,7 +195,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     Beneficiary = beneficiary,
                     OrganizationId = beneficiary.OrganizationId,
                     Amount = request.Amount,
-                    AvailableFund = request.Amount,
+                    // Un retrait a déjà décrémenté fund.Amount et les AvailableFund positifs ci-dessus.
+                    // Lui donner un AvailableFund négatif comptabiliserait le retrait une deuxième fois et
+                    // briserait l'invariant fund.Amount == somme des AvailableFund actifs. (CRCL-2659)
+                    AvailableFund = request.Amount < 0 ? 0 : request.Amount,
                     CreatedAtUtc = today,
                     ExpirationDate = request.ExpirationDate.AtMidnight().InUtc().ToDateTimeUtc(),
                     Subscription = subscription,
@@ -306,6 +307,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
         public class SubscriptionExpiredException : RequestValidationException { }
         public class SubscriptionDontHaveBudgetAllowance : RequestValidationException { }
         public class SubscriptionDontHaveEnoughtAvailableAmount : RequestValidationException { }
+        public class SubscriptionDontHaveEnoughtFundToRemove : RequestValidationException { }
         public class ProductGroupNotFoundException : RequestValidationException { }
         public class ProductGroupNotFoundInSubscriptionException : RequestValidationException { }
     }
