@@ -50,7 +50,7 @@
     :title="t('title')"
     :has-footer="false"
     :return-route="{ name: URL_BENEFICIARY_ADMIN }">
-    <Form v-slot="{ isSubmitting, errors: formErrors }" :validation-schema="validationSchema" @submit="onSubmit">
+    <Form v-slot="{ isSubmitting, errors: formErrors, setFieldValue }" :validation-schema="validationSchema" @submit="onSubmit">
       <PfForm
         has-footer
         can-cancel
@@ -71,7 +71,7 @@
               :options="subscriptionOptions"
               :description="t('select-subscription-description')"
               :errors="fieldErrors"
-              @input="onSubscriptionSelected" />
+              @input="(e) => onSubscriptionSelected(e, setFieldValue)" />
           </Field>
           <Field v-slot="{ field, errors: fieldErrors }" name="expirationDate">
             <PfFormInputSelect
@@ -373,11 +373,13 @@ async function onSubmit({ amount, expirationDate, subscription, productGroup }) 
   );
 }
 
-function onSubscriptionSelected(e) {
+function onSubscriptionSelected(e, setFieldValue) {
   selectedSubscription.value = e;
   // Les groupes de produits offerts dépendent de l'abonnement : celui déjà choisi peut ne plus
-  // être valide, et le montant retirable ne serait plus celui affiché.
+  // en faire partie, et le montant retirable ne serait plus celui affiché. On vide le champ
+  // soumis en plus de la ref, sinon le formulaire enverrait encore l'ancien groupe de produits.
   selectedProductGroup.value = "";
+  setFieldValue("productGroup", "");
 }
 
 function onProductGroupSelected(e) {
@@ -404,7 +406,17 @@ const validationSchema = computed(() =>
         return string().label(t("amount-label")).required();
       }
 
-      return number().label(t("amount-label")).required().max(maxBudgetAllowance.value).min(-removableFund.value);
+      const schema = number().label(t("amount-label")).required().max(maxBudgetAllowance.value);
+
+      // Hors plateforme, aucune période d'abonnement n'est sélectionnée : le retrait n'est pas
+      // borné par le pool d'un abonnement mais par le solde du groupe de produits, que le backend
+      // valide déjà (AVAILABLE_FUND_CANT_BE_LESS_THAN_ZERO). Appliquer min(-removableFund), qui
+      // vaut 0 dans ce mode, refuserait tout retrait hors plateforme.
+      if (project.value?.administrationSubscriptionsOffPlatform) {
+        return schema;
+      }
+
+      return schema.min(-removableFund.value);
     })
   })
 );
