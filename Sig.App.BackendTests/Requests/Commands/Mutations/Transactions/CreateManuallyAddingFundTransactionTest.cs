@@ -594,6 +594,9 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             transaction.AffectedNegativeFundTransactions.Should().HaveCount(2);
             transaction.Amount.Should().Be(-8);
+            // Le retrait est déjà reflété dans les AvailableFund des transactions positives ci-dessus ;
+            // un AvailableFund négatif ici le compterait une deuxième fois. (CRCL-2659)
+            transaction.AvailableFund.Should().Be(0);
             var saft1Locale = await DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().Where(x => x.Amount == 25).FirstAsync();
             saft1Locale.AvailableFund.Should().Be(0);
             var saft2Locale = await DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().Where(x => x.Amount == 5).LastAsync();
@@ -601,6 +604,219 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
 
             var localFund = await DbContext.Funds.FirstAsync();
             localFund.Amount.Should().Be(2);
+        }
+
+        [Fact]
+        public async Task ThrowsIfSubscriptionDontHaveEnoughtFundToRemove()
+        {
+            // Le cas de CRCL-2659 : le groupe de produits a 36 $ sur la carte, mais réparti sur deux
+            // abonnements. Retirer 36 $ via l'abonnement qui n'en a versé que 12 doit être refusé
+            // proprement, et non planter sur un débordement de la liste des transactions.
+            var subscription2 = AddSecondSubscriptionOnSameProductGroup();
+            AddFundOnProductGroup(36);
+
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            for (var i = 0; i < 4; i++) AddSubscriptionFund(subscription, 6, today.AddDays(i));
+            AddSubscriptionFund(subscription2, 12, today.AddDays(10));
+            DbContext.SaveChanges();
+
+            var input = new CreateManuallyAddingFundTransaction.Input()
+            {
+                Amount = -36,
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription2.GetIdentifier(),
+                ProductGroupId = productGroup.GetIdentifier()
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<CreateManuallyAddingFundTransaction.SubscriptionDontHaveEnoughtFundToRemove>();
+        }
+
+        [Fact]
+        public async Task CreateNegatifTransactionBoundedToItsSubscription()
+        {
+            var subscription2 = AddSecondSubscriptionOnSameProductGroup();
+            var fund = AddFundOnProductGroup(36);
+
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            var subscription1Transactions = new List<SubscriptionAddingFundTransaction>();
+            for (var i = 0; i < 4; i++) subscription1Transactions.Add(AddSubscriptionFund(subscription, 6, today.AddDays(i)));
+            var subscription2Transaction = AddSubscriptionFund(subscription2, 12, today.AddDays(10));
+            DbContext.SaveChanges();
+
+            var input = new CreateManuallyAddingFundTransaction.Input()
+            {
+                Amount = -12,
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription2.GetIdentifier(),
+                ProductGroupId = productGroup.GetIdentifier()
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            fund.Amount.Should().Be(24);
+            subscription2Transaction.AvailableFund.Should().Be(0);
+            subscription1Transactions.Should().OnlyContain(x => x.AvailableFund == 6);
+
+            var transaction = await DbContext.Transactions.OfType<ManuallyAddingFundTransaction>().LastAsync();
+            transaction.Amount.Should().Be(-12);
+            transaction.AvailableFund.Should().Be(0);
+        }
+
+        [Fact]
+        public async Task ThrowsIfNoActiveFundToRemove()
+        {
+            // Le solde du groupe de produits vient entièrement de l'autre abonnement : le pool de
+            // l'abonnement sélectionné est vide. L'ancienne boucle do/while plantait dès la première
+            // itération sur une liste vide.
+            var subscription2 = AddSecondSubscriptionOnSameProductGroup();
+            AddFundOnProductGroup(10);
+            AddSubscriptionFund(subscription, 10, Clock.GetCurrentInstant().ToDateTimeUtc());
+            DbContext.SaveChanges();
+
+            var input = new CreateManuallyAddingFundTransaction.Input()
+            {
+                Amount = -5,
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription2.GetIdentifier(),
+                ProductGroupId = productGroup.GetIdentifier()
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<CreateManuallyAddingFundTransaction.SubscriptionDontHaveEnoughtFundToRemove>();
+        }
+
+        [Fact]
+        public async Task CreateTwoNegatifTransactionsInARow()
+        {
+            var fund = AddFundOnProductGroup(10);
+            AddSubscriptionFund(subscription, 10, Clock.GetCurrentInstant().ToDateTimeUtc());
+            DbContext.SaveChanges();
+
+            await handler.Handle(NegatifInput(-4), CancellationToken.None);
+            await handler.Handle(NegatifInput(-6), CancellationToken.None);
+
+            fund.Amount.Should().Be(0);
+            (await SumOfActiveAvailableFund()).Should().Be(0);
+        }
+
+        [Fact]
+        public async Task NegatifTransactionKeepsFundInSyncWithAvailableFund()
+        {
+            // L'invariant que RefreshCardBalance considère comme la vérité :
+            // fund.Amount == somme des AvailableFund des transactions actives du groupe de produits.
+            var fund = AddFundOnProductGroup(10);
+            AddSubscriptionFund(subscription, 10, Clock.GetCurrentInstant().ToDateTimeUtc());
+            DbContext.SaveChanges();
+
+            await handler.Handle(NegatifInput(-4), CancellationToken.None);
+
+            fund.Amount.Should().Be(6);
+            (await SumOfActiveAvailableFund()).Should().Be(fund.Amount);
+        }
+
+        private CreateManuallyAddingFundTransaction.Input NegatifInput(decimal amount)
+        {
+            return new CreateManuallyAddingFundTransaction.Input()
+            {
+                Amount = amount,
+                BeneficiaryId = beneficiary.GetIdentifier(),
+                SubscriptionId = subscription.GetIdentifier(),
+                ProductGroupId = productGroup.GetIdentifier()
+            };
+        }
+
+        private async Task<decimal> SumOfActiveAvailableFund()
+        {
+            return await DbContext.Transactions
+                .OfType<AddingFundTransaction>()
+                .Where(x => x.CardId == card.Id &&
+                            x.ProductGroupId == productGroup.Id &&
+                            x.Status == FundTransactionStatus.Actived)
+                .SumAsync(x => x.AvailableFund);
+        }
+
+        private Fund AddFundOnProductGroup(decimal amount)
+        {
+            var fund = new Fund()
+            {
+                Amount = amount,
+                ProductGroupId = productGroup.Id
+            };
+
+            card.Funds.Add(fund);
+            DbContext.Funds.Add(fund);
+
+            return fund;
+        }
+
+        private SubscriptionAddingFundTransaction AddSubscriptionFund(Subscription onSubscription, decimal amount, DateTime expirationDate)
+        {
+            var transaction = new SubscriptionAddingFundTransaction()
+            {
+                Amount = amount,
+                AvailableFund = amount,
+                Beneficiary = beneficiary,
+                Card = card,
+                CreatedAtUtc = Clock.GetCurrentInstant().ToDateTimeUtc(),
+                ExpirationDate = expirationDate,
+                Organization = organization,
+                ProductGroup = productGroup,
+                Status = FundTransactionStatus.Actived,
+                SubscriptionType = onSubscription.Types.First(x => x.ProductGroup == productGroup)
+            };
+
+            card.Transactions.Add(transaction);
+            DbContext.Transactions.Add(transaction);
+
+            return transaction;
+        }
+
+        private Subscription AddSecondSubscriptionOnSameProductGroup()
+        {
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+
+            var subscription2 = new Subscription()
+            {
+                Name = "Subscription 2",
+                Project = project,
+                Types = new List<SubscriptionType>()
+                {
+                    new SubscriptionType()
+                    {
+                        Amount = 12,
+                        ProductGroup = productGroup
+                    }
+                },
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth,
+                EndDate = new DateTime(today.Year, today.Month, 1).AddMonths(1),
+                StartDate = new DateTime(today.Year, today.Month, 1),
+                FundsExpirationDate = new DateTime(today.Year, today.Month, 1).AddMonths(1),
+                IsFundsAccumulable = true
+            };
+
+            var budgetAllowance2 = new BudgetAllowance()
+            {
+                AvailableFund = 100,
+                Organization = organization,
+                Subscription = subscription2,
+                OriginalFund = 100
+            };
+
+            project.Subscriptions.Add(subscription2);
+            beneficiary.Subscriptions.Add(new SubscriptionBeneficiary()
+            {
+                Beneficiary = beneficiary,
+                Subscription = subscription2,
+                BeneficiaryType = beneficiary.BeneficiaryType,
+                BudgetAllowance = budgetAllowance2
+            });
+
+            DbContext.Subscriptions.Add(subscription2);
+            DbContext.BudgetAllowances.Add(budgetAllowance2);
+            DbContext.SaveChanges();
+
+            return subscription2;
         }
     }
 }
