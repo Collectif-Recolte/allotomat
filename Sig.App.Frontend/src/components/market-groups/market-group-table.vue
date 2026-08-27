@@ -20,7 +20,7 @@
 </i18n>
 
 <template>
-  <UiTable v-if="props.marketGroups" :items="props.marketGroups" :cols="cols">
+  <UiTable v-if="props.marketGroups" :items="sortedMarketGroups" :cols="cols">
     <template #default="slotProps">
       <td class="py-3">
         {{ getMarketGroupName(slotProps.item) }}
@@ -57,6 +57,8 @@ const props = defineProps({
   urlNameMarketGroupArchive: { type: String, default: "" },
   canEdit: Boolean
 });
+
+const sortedMarketGroups = computed(() => [...(props.marketGroups ?? [])].sort((a, b) => a.name.localeCompare(b.name)));
 
 const cols = computed(() => {
   return props.canEdit || props.urlNameMarketGroupArchive

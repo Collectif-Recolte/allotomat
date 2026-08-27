@@ -1,3 +1,16 @@
+<i18n>
+{
+  "en": {
+    "show-password": "Show password",
+    "hide-password": "Hide password"
+  },
+  "fr": {
+    "show-password": "Afficher le mot de passe",
+    "hide-password": "Masquer le mot de passe"
+  }
+}
+</i18n>
+
 <template>
   <FormField
     :id="id"
@@ -29,7 +42,7 @@
       <input
         :id="id"
         :value="value"
-        :type="inputType"
+        :type="resolvedInputType"
         :inputmode="inputMode"
         :name="name"
         :autocomplete="autocomplete"
@@ -56,7 +69,21 @@
         @keypress="$emit('keypress', $event)" />
       <slot name="trailingIcon">
         <div
-          v-if="hasTrailingIcon"
+          v-if="showPasswordToggle"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center"
+          :class="hasErrorState ? 'text-red-600' : 'text-primary-700'">
+          <button
+            type="button"
+            class="flex items-center justify-center p-1 rounded focus:outline-none focus:ring-2 focus:ring-secondary-500 disabled:opacity-50"
+            :aria-label="passwordToggleLabel"
+            :aria-pressed="isPasswordVisible"
+            :disabled="disabled"
+            @click="isPasswordVisible = !isPasswordVisible">
+            <PfIcon class="h-5 w-5" :icon="passwordToggleIcon" aria-hidden="true" />
+          </button>
+        </div>
+        <div
+          v-else-if="trailingIcon"
           class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
           :class="hasErrorState ? 'text-red-600' : 'text-primary-700'">
           <PfIcon class="h-5 w-5" :icon="trailingIcon" aria-hidden="true" />
@@ -67,7 +94,11 @@
 </template>
 
 <script>
+import { useI18n } from "vue-i18n";
+
 import FormField, { commonFieldProps } from "../field/index";
+import ICON_EYE from "@/lib/icons/eye.json";
+import ICON_EYE_OFF from "@/lib/icons/eye-off.json";
 
 export default {
   components: {
@@ -125,12 +156,36 @@ export default {
     isLarge: Boolean
   },
   emits: ["input", "keypress"],
+  setup() {
+    const { t } = useI18n();
+    return { t };
+  },
+  data() {
+    return {
+      isPasswordVisible: false
+    };
+  },
   computed: {
     hasLeadingIcon() {
       return this.leadingIcon || this.$slots.leadingIcon;
     },
+    showPasswordToggle() {
+      return this.inputType === "password" && !this.trailingIcon && !this.$slots.trailingIcon;
+    },
     hasTrailingIcon() {
-      return this.trailingIcon || this.$slots.trailingIcon;
+      return this.trailingIcon || this.$slots.trailingIcon || this.showPasswordToggle;
+    },
+    resolvedInputType() {
+      if (this.inputType === "password" && this.isPasswordVisible) {
+        return "text";
+      }
+      return this.inputType;
+    },
+    passwordToggleIcon() {
+      return this.isPasswordVisible ? ICON_EYE_OFF : ICON_EYE;
+    },
+    passwordToggleLabel() {
+      return this.isPasswordVisible ? this.t("hide-password") : this.t("show-password");
     }
   }
 };
