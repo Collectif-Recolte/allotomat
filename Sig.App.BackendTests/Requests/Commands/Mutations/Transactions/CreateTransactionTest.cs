@@ -728,6 +728,97 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         }
 
         [Fact]
+        public async Task CreateTransactionDoesNotDoubleDeductWhenAddingFundTransactionsPoolIsEmpty()
+        {
+            SetupRequestHandler(new VerifyCardCanBeUsedInMarket(DbContext));
+
+            // Emptying the debitable pool for productGroup without touching the loyalty fund: fund.Amount
+            // still shows a balance (40), but neither ManuallyAddingFundTransaction has anything left to draw from.
+            ((AddingFundTransaction)initialTransaction1).AvailableFund = 0;
+            ((AddingFundTransaction)initialTransaction3).AvailableFund = 0;
+            DbContext.SaveChanges();
+
+            var input = new CreateTransaction.Input()
+            {
+                MarketId = market.GetIdentifier(),
+                Transactions = new List<CreateTransaction.TransactionInput>(),
+                CardId = card.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
+            };
+            input.Transactions.Add(new CreateTransaction.TransactionInput()
+            {
+                Amount = 15,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            await handler.Handle(input, CancellationToken.None);
+
+            card.Funds.First(x => x.ProductGroupId == productGroup.Id).Amount.Should().Be(25);
+            card.Funds.First(x => x.ProductGroup.Name == ProductGroupType.LOYALTY).Amount.Should().Be(20);
+
+            var transactionLog = await DbContext.TransactionLogs.Include(x => x.TransactionLogProductGroups).FirstAsync();
+            var loggedProductGroup = transactionLog.TransactionLogProductGroups.First();
+            loggedProductGroup.ProductGroupId.Should().Be(productGroup.Id);
+            loggedProductGroup.Amount.Should().Be(15);
+        }
+
+        [Fact]
+        public async Task CreateTransactionSucceedsWhenCardHasNoLoyaltyFundAndAddingFundTransactionsPoolIsEmpty()
+        {
+            SetupRequestHandler(new VerifyCardCanBeUsedInMarket(DbContext));
+
+            var localBeneficiary = new Beneficiary()
+            {
+                Firstname = "Jane",
+                Lastname = "Roe",
+                Organization = organization,
+                BeneficiaryType = beneficiary.BeneficiaryType
+            };
+
+            // No loyalty fund at all, and no adding-fund transaction, so the debitable pool is empty.
+            var localCard = new Card()
+            {
+                Funds = new List<Fund>(),
+                Transactions = new List<Transaction>(),
+                Status = CardStatus.Assigned,
+                Project = project,
+                Beneficiary = localBeneficiary,
+                CardNumber = "9999-8888-7777-6666"
+            };
+
+            localCard.Funds.Add(new Fund()
+            {
+                Amount = 100,
+                Card = localCard,
+                ProductGroup = productGroup
+            });
+
+            localBeneficiary.Organization = organization;
+            localBeneficiary.Card = localCard;
+
+            DbContext.Beneficiaries.Add(localBeneficiary);
+            DbContext.Cards.Add(localCard);
+            DbContext.SaveChanges();
+
+            var input = new CreateTransaction.Input()
+            {
+                MarketId = market.GetIdentifier(),
+                Transactions = new List<CreateTransaction.TransactionInput>(),
+                CardId = localCard.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
+            };
+            input.Transactions.Add(new CreateTransaction.TransactionInput()
+            {
+                Amount = 40,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            await handler.Handle(input, CancellationToken.None);
+
+            localCard.Funds.First(x => x.ProductGroupId == productGroup.Id).Amount.Should().Be(60);
+        }
+
+        [Fact]
         public async Task CreateTransactionCreatesTransactionLogWithCorrectFields()
         {
             SetupRequestHandler(new VerifyCardCanBeUsedInMarket(DbContext));

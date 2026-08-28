@@ -262,6 +262,12 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                         AddAmountToTransactionLog(transaction, card, market, null, productGroup, fundToRemove);
                         loyaltyFundToRemove -= fundToRemove;
                     }
+                    else
+                    {
+                        // loyaltyFundToRemove must stay in sync with the unconditional fund.Amount debit below.
+                        AddAmountToTransactionLog(transaction, card, market, null, productGroup, fundToRemove);
+                        loyaltyFundToRemove -= fundToRemove;
+                    }
 
                     transactionByProductGroups.Add(new PaymentTransactionProductGroup()
                     {
