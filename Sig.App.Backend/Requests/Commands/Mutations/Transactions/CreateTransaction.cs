@@ -198,9 +198,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                     var fundToRemove = Math.Min(fund.Amount, amount);
                     
+                    var tempAmount = amount;
+
                     if (addingFundTransactions.Any())
                     {
-                        var tempAmount = amount;
 
                         var addingFundTransactionsBySubscriptionId =
                             await TransactionHelper.GroupAddingFundTransactionsBySubscriptionId(db,
@@ -256,17 +257,19 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                             }
                         }
                     }
-                    else if (card.Project.AdministrationSubscriptionsOffPlatform)
+
+                    // fund.Amount is debited by fundToRemove below whatever the pool held, so whatever the
+                    // pool could not cover has to leave loyaltyFundToRemove as well. Without this the
+                    // uncovered part is charged a second time against the loyalty balance further down, and
+                    // the card loses more than the purchase. This is the normal state of a card whose two
+                    // counters have drifted apart, not an edge case: an empty pool is only its extreme.
+                    // No subscription is passed because the pool is what maps an amount to a subscription,
+                    // and this part is precisely what no active deposit backs.
+                    var uncoveredByPool = fundToRemove - (amount - tempAmount);
+                    if (uncoveredByPool > 0)
                     {
-                        // Beneficiary is off platform
-                        AddAmountToTransactionLog(transaction, card, market, null, productGroup, fundToRemove);
-                        loyaltyFundToRemove -= fundToRemove;
-                    }
-                    else
-                    {
-                        // loyaltyFundToRemove must stay in sync with the unconditional fund.Amount debit below.
-                        AddAmountToTransactionLog(transaction, card, market, null, productGroup, fundToRemove);
-                        loyaltyFundToRemove -= fundToRemove;
+                        AddAmountToTransactionLog(transaction, card, market, null, productGroup, uncoveredByPool);
+                        loyaltyFundToRemove -= uncoveredByPool;
                     }
 
                     transactionByProductGroups.Add(new PaymentTransactionProductGroup()

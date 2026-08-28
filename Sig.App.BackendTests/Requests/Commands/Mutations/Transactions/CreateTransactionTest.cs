@@ -763,6 +763,46 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         }
 
         [Fact]
+        public async Task CreateTransactionDoesNotDoubleDeductWhenAddingFundTransactionsPoolOnlyCoversPartOfThePurchase()
+        {
+            SetupRequestHandler(new VerifyCardCanBeUsedInMarket(DbContext));
+
+            // The drifted state that actually exists in production: fund.Amount still shows 40 for the
+            // product group, but the active deposits behind it only add up to 10. A 30 purchase is fully
+            // covered by the product group, so the loyalty balance must not be touched at all.
+            ((AddingFundTransaction)initialTransaction1).AvailableFund = 10;
+            ((AddingFundTransaction)initialTransaction3).AvailableFund = 0;
+            DbContext.SaveChanges();
+
+            var input = new CreateTransaction.Input()
+            {
+                MarketId = market.GetIdentifier(),
+                Transactions = new List<CreateTransaction.TransactionInput>(),
+                CardId = card.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
+            };
+            input.Transactions.Add(new CreateTransaction.TransactionInput()
+            {
+                Amount = 30,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            await handler.Handle(input, CancellationToken.None);
+
+            card.Funds.First(x => x.ProductGroupId == productGroup.Id).Amount.Should().Be(10);
+            card.Funds.First(x => x.ProductGroup.Name == ProductGroupType.LOYALTY).Amount.Should().Be(20);
+
+            // The whole 30 is logged against the product group: 10 traced back to its deposit, 20 that no
+            // active deposit backs. A short log here would understate what the market is owed. The two
+            // parts land in separate logs because AddAmountToTransactionLog keys them by subscription,
+            // and the uncovered part belongs to none, so the assertion sums across logs.
+            var transactionLogs = await DbContext.TransactionLogs.Include(x => x.TransactionLogProductGroups).ToListAsync();
+            transactionLogs.SelectMany(x => x.TransactionLogProductGroups)
+                .Where(x => x.ProductGroupId == productGroup.Id).Sum(x => x.Amount).Should().Be(30);
+            transactionLogs.Sum(x => x.TotalAmount).Should().Be(30);
+        }
+
+        [Fact]
         public async Task CreateTransactionSucceedsWhenCardHasNoLoyaltyFundAndAddingFundTransactionsPoolIsEmpty()
         {
             SetupRequestHandler(new VerifyCardCanBeUsedInMarket(DbContext));
