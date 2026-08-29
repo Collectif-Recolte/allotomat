@@ -203,6 +203,14 @@ namespace Sig.App.Backend
 
             if (environment.IsProduction())
                 services.AddTransient<IDataSeeder, ProdDataSeeder>();
+            else if (environment.IsDevelopment() && !string.IsNullOrWhiteSpace(configuration["VolumeSeed:Scale"]))
+                // Opt-in only: set the VolumeSeed:Scale configuration key (environment variable
+                // VolumeSeed__Scale) to generate a dataset shaped after production instead of the
+                // handful of rows DevDataSeeder produces. Absent, behavior is unchanged. Explicitly
+                // requiring Development (not just "not Production") keeps a UAT, QA or Staging
+                // environment from ever running this seeder, even if the key were set there by
+                // mistake or copied from a shared configuration group.
+                services.AddTransient<IDataSeeder, VolumeDataSeeder>();
             else
                 services.AddTransient<IDataSeeder, DevDataSeeder>();
 
