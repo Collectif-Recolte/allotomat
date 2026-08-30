@@ -7,6 +7,7 @@ using Sig.App.Backend.DataSeeders;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Transactions;
+using Sig.App.Backend.DbModel.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,9 +58,9 @@ namespace Sig.App.BackendTests.DataSeeders
         // to zero without leaving that band, while a band tight enough to catch that would be far
         // too strict for the 46% types. +/-50% keeps every type's realized share tied to its own
         // target, and also covers the seeder's redirect of a ledger-empty payment/expiration draw
-        // into a manually-added-fund transaction, which currently shifts that share a few points
-        // above its 2.34% target. A distribution flattened toward one type, or missing one
-        // entirely, still falls well outside this band.
+        // into a subscription-adding-fund transaction, which shifts that share up by a few points.
+        // A distribution flattened toward one type, or missing one entirely, still falls well
+        // outside this band.
         private const decimal ShareRelativeTolerance = 0.5m;
 
         private static void ShareShouldBeNear(int count, int total, decimal targetShare, string transactionKind)
@@ -197,6 +198,43 @@ namespace Sig.App.BackendTests.DataSeeders
             ShareShouldBeNear(expire, total, ExpireShareTarget, "expirations");
             ShareShouldBeNear(manual, total, ManualShareTarget, "manual adding-fund");
             ShareShouldBeNear(loyalty, total, LoyaltyShareTarget, "loyalty adding-fund");
+        }
+
+        // Distinct from the distribution test above, which tolerates a +/-50% band per type and
+        // would not notice a transaction created under one CLR type while its TransactionLog is
+        // written under another discriminator: a ledger-empty Payment/ExpireFund redirect that
+        // forgets to update its own "kind" does exactly that, creating a ManuallyAddingFundTransaction
+        // while still logging it as the original Payment or ExpireFund kind. Pairing each entity
+        // type with its own log discriminator, with no tolerance, catches that mismatch directly.
+        [Fact]
+        public async Task Seed_AtASufficientScale_CreatesTheSameTransactionTypeItLogs()
+        {
+            var seeder = CreateSeeder(scale: "0.1");
+
+            await seeder.Seed();
+
+            var paymentCount = await DbContext.Transactions.OfType<PaymentTransaction>().CountAsync();
+            var subscriptionCount = await DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().CountAsync();
+            var expireCount = await DbContext.Transactions.OfType<ExpireFundTransaction>().CountAsync();
+            var manualCount = await DbContext.Transactions.OfType<ManuallyAddingFundTransaction>().CountAsync();
+            var loyaltyCount = await DbContext.Transactions.OfType<LoyaltyAddingFundTransaction>().CountAsync();
+
+            var paymentLogCount = await DbContext.TransactionLogs.CountAsync(x => x.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog);
+            var subscriptionLogCount = await DbContext.TransactionLogs.CountAsync(x => x.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog);
+            var expireLogCount = await DbContext.TransactionLogs.CountAsync(x => x.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog);
+            var manualLogCount = await DbContext.TransactionLogs.CountAsync(x => x.Discriminator == TransactionLogDiscriminator.ManuallyAddingFundTransactionLog);
+            var loyaltyLogCount = await DbContext.TransactionLogs.CountAsync(x => x.Discriminator == TransactionLogDiscriminator.LoyaltyAddingFundTransactionLog);
+
+            paymentCount.Should().Be(paymentLogCount,
+                "every PaymentTransaction row must be announced by a PaymentTransactionLog, not some other kind");
+            subscriptionCount.Should().Be(subscriptionLogCount,
+                "every SubscriptionAddingFundTransaction row must be announced by a SubscriptionAddingFundTransactionLog, not some other kind");
+            expireCount.Should().Be(expireLogCount,
+                "every ExpireFundTransaction row must be announced by an ExpireFundTransactionLog, not some other kind");
+            manualCount.Should().Be(manualLogCount,
+                "every ManuallyAddingFundTransaction row must be announced by a ManuallyAddingFundTransactionLog, not some other kind");
+            loyaltyCount.Should().Be(loyaltyLogCount,
+                "every LoyaltyAddingFundTransaction row must be announced by a LoyaltyAddingFundTransactionLog, not some other kind");
         }
 
         [Fact]

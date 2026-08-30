@@ -529,8 +529,13 @@ public class VolumeDataSeeder : IDataSeeder
         // existing funding on this same card to draw from.
         var ordered = slots.OrderBy(ExecutionPhase).ToArray();
 
-        foreach (var kind in ordered)
+        foreach (var scheduledKind in ordered)
         {
+            // Mutable copy: a ledger-empty Payment/ExpireFund redirects into the adding-fund case
+            // below by reassigning this local before the goto, so the transaction actually created
+            // and the log written for it agree on the same kind. A foreach iteration variable
+            // cannot be reassigned, which is why this is a separate local rather than "kind" itself.
+            var kind = scheduledKind;
             eventTime = eventTime.AddDays(random.Next(1, 4));
             if (eventTime > now) eventTime = now;
 
@@ -593,7 +598,11 @@ public class VolumeDataSeeder : IDataSeeder
                 case TransactionKind.ExpireFund:
                 {
                     var entry = ledger.FirstOrDefault(e => e.AvailableFund > 0);
-                    if (entry == null) goto case TransactionKind.SubscriptionAddingFund;
+                    if (entry == null)
+                    {
+                        kind = TransactionKind.SubscriptionAddingFund;
+                        goto case TransactionKind.SubscriptionAddingFund;
+                    }
 
                     var remaining = entry.AvailableFund;
                     var expireTx = new ExpireFundTransaction {
@@ -623,7 +632,11 @@ public class VolumeDataSeeder : IDataSeeder
                 case TransactionKind.Payment:
                 {
                     var entry = ledger.FirstOrDefault(e => e.AvailableFund > 0);
-                    if (entry == null) goto case TransactionKind.SubscriptionAddingFund;
+                    if (entry == null)
+                    {
+                        kind = TransactionKind.SubscriptionAddingFund;
+                        goto case TransactionKind.SubscriptionAddingFund;
+                    }
 
                     var amount = Math.Min(RandomAmount(5, 50), entry.AvailableFund);
                     var paymentTx = new PaymentTransaction {
