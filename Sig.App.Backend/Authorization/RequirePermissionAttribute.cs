@@ -35,7 +35,6 @@ namespace Sig.App.Backend.Authorization
         private PermissionService permissionService;
         private UserManager<AppUser> userManager;
         private AppDbContext db;
-        private bool hasPermission;
 
         public RequirePermissionAttribute(params object[] permissions)
         {
@@ -51,6 +50,11 @@ namespace Sig.App.Backend.Authorization
             var appUserContext = ((IAppUserContext)context.UserContext);
 
             var currentUser = await userManager.FindByIdAsync(appUserContext.CurrentUser.GetUserId());
+
+            // Variable locale à l'appel: cet attribut est construit une seule fois avec le schéma
+            // (moteur GraphQL en singleton de processus), donc un champ d'instance resterait à vrai
+            // pour tous les appels suivants dès qu'un premier appelant autorisé l'aurait franchi.
+            var hasPermission = false;
 
             if (currentUser?.Status == DbModel.Enums.UserStatus.Actived)
             {
