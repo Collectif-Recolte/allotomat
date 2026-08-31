@@ -411,6 +411,7 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
+        [RequirePermission(GlobalPermission.ManageTransactions)]
         public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, Id[] markets, Id[] marketGroups, string[] transactionTypes, string[] giftCardTransactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
         {
             return await mediator.Send(new GenerateTransactionsReport.Input()
@@ -432,8 +433,19 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        public static async Task<string> GenerateTransactionsReportForMarket(this GqlQuery _, Id marketId, DateTime startDate, DateTime endDate, string timeZoneId, Language language, [Inject] IMediator mediator)
+        // GenerateTransactionsReportForMarket prend son marketId comme argument scalaire nommé
+        // "marketId", pas "id": RequirePermissionAttribute n'extrait le MarketId que d'un argument
+        // "id" ou d'un objet "input", donc [RequirePermission(MarketPermission...)] ne verrait jamais
+        // ce marché ici. La garde se fait donc manuellement avec le marketId déjà disponible dans la
+        // méthode, ce qui vérifie au passage que l'appelant gère bien CE marché précis.
+        public static async Task<string> GenerateTransactionsReportForMarket(this GqlQuery _, IAppUserContext ctx, Id marketId, DateTime startDate, DateTime endDate, string timeZoneId, Language language, [Inject] IMediator mediator, [Inject] PermissionService permissionService)
         {
+            var marketPermissions = await permissionService.GetMarketPermissions(ctx.CurrentUser, marketId.IdentifierForType<Market>());
+            if (!marketPermissions.Contains(MarketPermission.ManageMarket))
+            {
+                throw new UnauthorizedAccessException();
+            }
+
             return await mediator.Send(new GenerateTransactionsReportForMarket.Input()
             {
                 MarketId = marketId,
