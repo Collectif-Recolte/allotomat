@@ -79,7 +79,7 @@ namespace Sig.App.Backend.Requests.Queries.Markets
             {
                 case MarketSort.Default:
                     return query
-                        .SortBy(x => x.Id, order);
+                        .SortBy(x => x.Name, order);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
