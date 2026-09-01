@@ -309,6 +309,7 @@ namespace Sig.App.Backend
             SendMonthlyCardBalanceReport.RegisterJob(configuration);
             BackfillSubscriptionBeneficiaryAllocation.RegisterJob(configuration);
             VerifyBudgetAllowanceReservations.RegisterJob(configuration);
+            RepairEndedSubscriptionReservations.RegisterJob(configuration);
         }
 
         private void ConfigureDbContext(DbContextOptionsBuilder options)
