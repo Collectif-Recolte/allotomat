@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
@@ -25,10 +24,11 @@ namespace Sig.App.Backend.Requests.Queries.Markets
 
         public async Task<MarketAmountOwedPagination<MarketAmountOwedGraphType>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var marketGroup = db.MarketGroups.Include(x => x.CashRegisters).First(x => x.Id == request.MarketGroupId);
-            var cashRegistersInMarketGroup = marketGroup.CashRegisters.Select(x => x.CashRegisterId);
-
-            IQueryable <TransactionLog> query = db.TransactionLogs.Where(x => x.MarketId != null && cashRegistersInMarketGroup.Contains(x.CashRegisterId.Value) && marketGroup.ProjectId == x.ProjectId && x.CreatedAtUtc >= request.StartDate && x.CreatedAtUtc <= request.EndDate);
+            IQueryable<TransactionLog> query = db.TransactionLogs.Where(x =>
+                x.MarketId != null
+                && x.MarketGroupId == request.MarketGroupId
+                && x.CreatedAtUtc >= request.StartDate
+                && x.CreatedAtUtc <= request.EndDate);
 
             if (request.MarketGroups != null && request.MarketGroups.Any())
             {
@@ -39,6 +39,7 @@ namespace Sig.App.Backend.Requests.Queries.Markets
             var markets = db.Markets.Where(x => transactions.Select(x => x.Key).Contains(x.Id)).ToList();
 
             return await MarketAmountOwedPagination.For(transactions.Select(x => {
+                var market = markets.First(y => y.Id == x.Key);
                 var transactionByCashRegister = x.Select(x => x).Where(x => x.CashRegisterId.HasValue).GroupBy(x => x.CashRegisterId.Value);
                 var amountByCashRegister = transactionByCashRegister.Select(x =>
                 {
@@ -51,8 +52,8 @@ namespace Sig.App.Backend.Requests.Queries.Markets
                     };
                 });
 
-                return new MarketAmountOwedGraphType { Market = new MarketGraphType(markets.First(y => y.Id == x.Key)), Amount = x.Sum(t => t.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog ? t.TotalAmount : -t.TotalAmount), AmountByCashRegister = amountByCashRegister };
-            }), request.Page);
+                return new MarketAmountOwedGraphType { Market = new MarketGraphType(market), Amount = x.Sum(t => t.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog ? t.TotalAmount : -t.TotalAmount), AmountByCashRegister = amountByCashRegister };
+            }).OrderBy(x => (string)x.Market.Name), request.Page);
         }
 
         public class Query : IRequest<MarketAmountOwedPagination<MarketAmountOwedGraphType>>

@@ -179,7 +179,7 @@ const subscriptionActiveFiltersCount = computed(() => {
 
 const availableMarketGroups = computed(() => {
   if (!props.availableMarketGroups || props.availableMarketGroups?.length <= 0) return [];
-  return props.availableMarketGroups.map((x) => ({ value: x.id, label: x.name }));
+  return props.availableMarketGroups.map((x) => ({ value: x.id, label: x.name })).sort((a, b) => a.label.localeCompare(b.label));
 });
 
 const availableOrganizations = computed(() => {

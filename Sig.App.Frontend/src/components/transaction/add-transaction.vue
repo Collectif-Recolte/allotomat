@@ -3,7 +3,7 @@
 {
 	"en": {
 		"amount-label": "{productGroupName}",
-    "amount-after-label": "Balance: {amountAvailable}",
+    "amount-after-label": "<span class='align-top mr-1'>Balance: </span><span class='text-3xl'>{amountAvailable}</span>",
     "confirmation-amount-label": "{productGroupName}",
     "amount-validation-label": "Amount",
 		"amount-placeholder": "Ex. {amount}",
@@ -14,6 +14,7 @@
 		"create-transaction": "Pay",
 		"title": "Transaction",
     "title-confirm": "Confirmation",
+    "verify-before-confirm": "Please verify before confirming:",
     "amount-charged": "The card will be charged ",
     "confirm": "Confirm",
     "edit": "Revise",
@@ -37,7 +38,7 @@
 	},
 	"fr": {
 		"amount-label": "{productGroupName}",
-    "amount-after-label": "Solde: {amountAvailable}",
+    "amount-after-label": "<span class='align-top mr-1'>Solde: </span><span class='text-3xl'>{amountAvailable}</span>",
     "confirmation-amount-label": "{productGroupName}",
     "amount-validation-label": "Solde",
 		"amount-placeholder": "Ex. {amount}",
@@ -48,6 +49,7 @@
 		"create-transaction": "Payer",
 		"title": "Transaction",
     "title-confirm": "Confirmation",
+    "verify-before-confirm": "Veuillez vérifier avant de confirmer :",
     "amount-charged": "La carte sera débitée de ",
     "confirm": "Confirmer",
     "edit": "Réviser",
@@ -176,6 +178,9 @@
         :processing="isSubmitting"
         @cancel="prevStep">
         <PfFormSection>
+          <p class="text-h3 font-bold text-primary-700 mb-0">
+            {{ t("verify-before-confirm") }}
+          </p>
           <p class="text-h1 font-bold text-primary-700 mb-0">
             {{ t("amount-charged") }}
             <!-- eslint-disable-next-line  @intlify/vue-i18n/no-raw-text -->
