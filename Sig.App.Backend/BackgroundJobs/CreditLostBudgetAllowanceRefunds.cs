@@ -61,19 +61,23 @@ namespace Sig.App.Backend.BackgroundJobs
         /// empêche d'être crédités. Pour les créditer, il faut passer le drapeau à false — donc un
         /// changement de code, donc une relecture.
         /// </summary>
+        // Les noms doivent être ceux de la base, au caractère près : la correspondance est exacte, pas
+        // approximative. Le ticket les abrège (« CR Transition Society - Rose Harbour »), la base ne les
+        // abrège pas - une abréviation ici se solde par un SkippedEnvelopeNotFound et un remboursement
+        // jamais rendu. Vérifiés contre la production le 2026-09-01.
         public static readonly IReadOnlyList<Correction> ReviewedCorrections = new List<Correction>
         {
             new("Mid-Island Pensioners & Hobbyist Assoc", "FMNCP 2026", 1080m),
-            new("CR Transition Society - Rose Harbour", "FMNCP 2026", 864m),
+            new("Campbell River and North Island Transition Society- Rose Harbour", "FMNCP 2026", 864m),
             new("Fernie Citizens Housing Society", "FMNCP 2026", 756m),
-            new("CR Transition Society - Women's Centre", "FMNCP 2026", 756m),
+            new("Campbell River and North Island Transition Society- Women's Centre", "FMNCP 2026", 756m),
             new("Fernie Family Housing Society", "FMNCP 2026", 648m),
-            new("Fernie Womens Resource - Bellies to Babies", "FMNCP 2026", 648m),
+            new("Fernie Womens Resource Centre- Bellies to Babies", "FMNCP 2026", 648m),
             new("Tobacco Plains Indian Band", "FMNCP 2026", 216m),
             new("Elk Valley Family Society", "FMNCP 2026", 108m),
 
             new("Family Education & Support Centre", "Haney Winter 2024", 1890.99m, RequiresConfirmation: true),
-            new("Cumberland", "FMNCP 2023", 1215m, RequiresConfirmation: true)
+            new("Cumberland Community Schools Society", "FMNCP 2023", 1215m, RequiresConfirmation: true)
         };
 
         private readonly AppDbContext db;
