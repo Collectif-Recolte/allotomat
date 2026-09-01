@@ -310,6 +310,7 @@ namespace Sig.App.Backend
             BackfillSubscriptionBeneficiaryAllocation.RegisterJob(configuration);
             VerifyBudgetAllowanceReservations.RegisterJob(configuration);
             RepairEndedSubscriptionReservations.RegisterJob(configuration);
+            CreditLostBudgetAllowanceRefunds.RegisterJob(configuration);
         }
 
         private void ConfigureDbContext(DbContextOptionsBuilder options)
