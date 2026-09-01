@@ -130,6 +130,54 @@ namespace Sig.App.BackendTests.Extensions
         }
 
         [Fact]
+        public async Task CreditIntoAnAlreadyOverdrawnEnvelope_IsNotRefused()
+        {
+            // Les enveloppes à découvert existent en production — VerifyBudgetAllowanceReservations
+            // les compte. Un remboursement doit y entrer même s'il ne suffit pas à les ramener à zéro :
+            // refuser bloquerait le retrait du participant sans jamais lui rendre son argent.
+            var (setup, envelopeToDrain) = await ReadEnvelopeAsync();
+            envelopeToDrain.AvailableFund = -50m;
+            await setup.SaveChangesAsync();
+
+            var (context, envelope) = await ReadEnvelopeAsync();
+            envelope.AvailableFund += 30m;
+            await context.SaveChangesWithBudgetAllowanceRetryAsync(CancellationToken.None);
+
+            (await PersistedFundAsync()).Should().Be(-20m);
+        }
+
+        [Fact]
+        public async Task ConcurrentMoves_KeepOriginalFundAndAvailableFundInStep()
+        {
+            // MoveBudgetAllowance et EditBudgetAllowance déplacent OriginalFund du même delta que
+            // AvailableFund. Si le rebase n'en corrigeait qu'un, « OriginalFund - AvailableFund »
+            // — l'engagement qu'audite VerifyBudgetAllowanceReservations — deviendrait faux en
+            // silence, alors qu'avant le correctif les deux se perdaient ensemble.
+            var (contextA, envelopeA) = await ReadEnvelopeAsync();
+            var (contextB, envelopeB) = await ReadEnvelopeAsync();
+
+            envelopeA.AvailableFund -= 100m;
+            envelopeA.OriginalFund -= 100m;
+            await contextA.SaveChangesWithBudgetAllowanceRetryAsync(CancellationToken.None);
+
+            envelopeB.AvailableFund -= 250m;
+            envelopeB.OriginalFund -= 250m;
+            await contextB.SaveChangesWithBudgetAllowanceRetryAsync(CancellationToken.None);
+
+            var verify = CreateDbContext();
+            var persisted = await verify.BudgetAllowances.AsNoTracking()
+                .Where(x => x.Id == budgetAllowance.Id)
+                .Select(x => new { x.AvailableFund, x.OriginalFund }).SingleAsync();
+
+            persisted.AvailableFund.Should().Be(650m);
+            persisted.OriginalFund.Should().Be(650m);
+
+            // Le seul invariant qui compte vraiment : les deux montants ont encaissé les mêmes
+            // mouvements, donc l'engagement reste exact.
+            (persisted.OriginalFund - persisted.AvailableFund).Should().Be(0m);
+        }
+
+        [Fact]
         public async Task ConflictOnAnotherEntity_IsNotSwallowed()
         {
             // Le joint ne sait rebaser que des mouvements d'enveloppe. Un conflit portant sur autre

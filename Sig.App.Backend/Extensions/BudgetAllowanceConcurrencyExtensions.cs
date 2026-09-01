@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Sig.App.Backend.Plugins.MediatR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -29,9 +30,9 @@ namespace Sig.App.Backend.Extensions
     /// <list type="number">
     ///   <item>
     ///     <description>
-    ///     <b>Rebaser le delta juste avant d'écrire.</b> Ce qu'un appelant exprime en écrivant
+    ///     <b>Rebaser le mouvement juste avant d'écrire.</b> Ce qu'un appelant exprime en écrivant
     ///     <c>+= 216</c> n'est pas « l'enveloppe vaut 216 », c'est « ajoute 216 à ce qu'elle vaut ».
-    ///     Le delta (valeur voulue − valeur lue) reste donc valide quoi qu'ait fait un écrivain
+    ///     Le mouvement (valeur voulue − valeur lue) reste donc valide quoi qu'ait fait un écrivain
     ///     concurrent ; il suffit de le réappliquer sur le solde réellement en base, relu au dernier
     ///     moment. C'est l'équivalent, au niveau du change tracker, de l'incrément atomique
     ///     <c>SET AvailableFund += @delta</c>, mais sans quitter le SaveChanges qui écrit aussi le
@@ -51,11 +52,24 @@ namespace Sig.App.Backend.Extensions
     /// </list>
     ///
     /// <para>
-    /// Un rebase ne peut pas amener l'enveloppe sous zéro : l'opération concurrente a peut-être
-    /// consommé les fonds sur lesquels le débit avait été autorisé. Dans ce cas l'opération est
-    /// refusée (<see cref="BudgetAllowanceInsufficientFundException"/>) plutôt que réappliquée à
-    /// l'aveugle. Cette règle est la généralisation fidèle des gardes déjà écrites site par site :
-    /// toutes vérifient, sous une forme ou une autre, que le solde reste positif après le mouvement.
+    /// <b>Les deux montants de l'enveloppe sont rebasés ensemble</b>, et c'est essentiel :
+    /// <c>MoveBudgetAllowance</c> et <c>EditBudgetAllowance</c> déplacent <c>OriginalFund</c> du même
+    /// delta que <c>AvailableFund</c>. Ne rebaser que le solde disponible ferait diverger
+    /// <c>OriginalFund − AvailableFund</c> — l'engagement de l'enveloppe, précisément ce
+    /// qu'audite <see cref="BackgroundJobs.VerifyBudgetAllowanceReservations"/> — alors qu'avant ce
+    /// correctif les deux se perdaient ensemble et restaient au moins cohérents entre eux. Un
+    /// correctif partiel serait donc pire que pas de correctif du tout sur ce point.
+    /// </para>
+    ///
+    /// <para>
+    /// <b>Seul un débit peut être refusé.</b> Si l'opération concurrente a consommé les fonds sur
+    /// lesquels un débit avait été autorisé, le rejouer mettrait l'enveloppe à découvert : on refuse
+    /// (<see cref="BudgetAllowanceInsufficientFundException"/>), ce qui est la généralisation fidèle
+    /// des gardes écrites site par site. Un crédit, lui, n'est jamais refusé — <b>même sur une
+    /// enveloppe déjà à découvert</b>. Ces enveloppes existent en production (c'est ce que compte
+    /// <c>VerifyBudgetAllowanceReservations.NegativeAvailableFundEnvelopes</c>) et leur refuser un
+    /// remboursement bloquerait le retrait d'un participant sans jamais lui rendre son argent :
+    /// exactement les chemins que ce ticket existe pour protéger.
     /// </para>
     /// </summary>
     public static class BudgetAllowanceConcurrencyExtensions
@@ -67,11 +81,12 @@ namespace Sig.App.Backend.Extensions
         /// </summary>
         public const int MaxAttempts = 5;
 
-        private const string AvailableFundPropertyName = nameof(BudgetAllowance.AvailableFund);
+        private const string AvailableFundName = nameof(BudgetAllowance.AvailableFund);
+        private const string OriginalFundName = nameof(BudgetAllowance.OriginalFund);
 
         /// <summary>
         /// <see cref="DbContext.SaveChangesAsync(CancellationToken)"/> pour toute opération qui
-        /// déplace des fonds d'enveloppe : rebase les deltas sur le solde en base juste avant
+        /// déplace des fonds d'enveloppe : rebase les mouvements sur les montants en base juste avant
         /// d'écrire, puis rejoue les conflits de concurrence résiduels. Tout conflit qui ne porte pas
         /// sur une enveloppe est relancé tel quel.
         /// </summary>
@@ -95,16 +110,16 @@ namespace Sig.App.Backend.Extensions
         }
 
         /// <summary>
-        /// Relit le solde réellement en base de chaque enveloppe sur le point d'être écrite, et y
-        /// réapplique le delta voulu. La lecture est délibérément <c>AsNoTracking</c> et projetée :
-        /// une requête suivie renverrait l'instance déjà en mémoire — donc la valeur périmée que l'on
-        /// cherche justement à corriger.
+        /// Relit les montants réellement en base de chaque enveloppe sur le point d'être écrite, et y
+        /// réapplique les mouvements voulus. La lecture est délibérément <c>AsNoTracking</c> et
+        /// projetée : une requête suivie renverrait l'instance déjà en mémoire — donc les valeurs
+        /// périmées que l'on cherche justement à corriger.
         /// </summary>
         private static async Task RebaseOnPersistedFundsAsync(AppDbContext db, CancellationToken cancellationToken)
         {
             var entries = db.ChangeTracker.Entries<BudgetAllowance>()
                 .Where(x => x.State == EntityState.Modified)
-                .Where(x => x.Property(AvailableFundPropertyName).IsModified)
+                .Where(x => x.Property(AvailableFundName).IsModified || x.Property(OriginalFundName).IsModified)
                 .ToList();
 
             if (entries.Count == 0) return;
@@ -112,18 +127,22 @@ namespace Sig.App.Backend.Extensions
             var ids = entries.Select(x => x.Entity.Id).ToList();
             var persistedFunds = await db.BudgetAllowances.AsNoTracking()
                 .Where(x => ids.Contains(x.Id))
-                .Select(x => new { x.Id, x.AvailableFund })
-                .ToDictionaryAsync(x => x.Id, x => x.AvailableFund, cancellationToken);
+                .Select(x => new { x.Id, x.AvailableFund, x.OriginalFund })
+                .ToDictionaryAsync(x => x.Id, x => new PersistedFunds(x.AvailableFund, x.OriginalFund), cancellationToken);
+
+            var plan = new List<PlannedRebase>();
 
             foreach (var entry in entries)
             {
                 if (!persistedFunds.TryGetValue(entry.Entity.Id, out var persisted)) continue;
-                RebaseAvailableFund(entry.Property(AvailableFundPropertyName), persisted);
+                PlanRebase(entry, persisted, plan);
             }
+
+            Apply(plan);
         }
 
         /// <summary>
-        /// Rebase chaque enveloppe en conflit sur sa valeur en base. Renvoie <c>false</c> dès qu'un
+        /// Rebase chaque enveloppe en conflit sur ses montants en base. Renvoie <c>false</c> dès qu'un
         /// conflit n'est pas rebasable, pour que l'appelant relance l'exception d'origine plutôt que
         /// d'inventer un résultat.
         /// </summary>
@@ -132,61 +151,101 @@ namespace Sig.App.Backend.Extensions
         {
             if (exception.Entries.Count == 0) return false;
 
-            var conflicts = new List<(PropertyEntry Property, decimal Persisted)>();
+            var plan = new List<PlannedRebase>();
 
             foreach (var entry in exception.Entries)
             {
                 // Un conflit sur une autre entité, ou sur une enveloppe supprimée entre-temps, n'a pas
-                // de delta à réappliquer : on ne sait pas le résoudre sans risquer d'écraser autre chose.
+                // de mouvement à réappliquer : on ne sait pas le résoudre sans risquer d'écraser autre
+                // chose.
                 if (entry.Entity is not BudgetAllowance) return false;
                 if (entry.State != EntityState.Modified) return false;
 
                 var databaseValues = await entry.GetDatabaseValuesAsync(cancellationToken);
                 if (databaseValues == null) return false;
 
-                conflicts.Add((entry.Property(AvailableFundPropertyName),
-                    (decimal)databaseValues[AvailableFundPropertyName]));
+                var persisted = new PersistedFunds(
+                    (decimal)databaseValues[AvailableFundName],
+                    (decimal)databaseValues[OriginalFundName]);
+
+                PlanRebase(entry, persisted, plan, exception);
             }
 
-            // Rien n'est modifié tant qu'on n'est pas certain de savoir résoudre tous les conflits :
-            // un rebase partiel laisserait le change tracker dans un état ni d'avant ni d'après.
-            foreach (var (property, persisted) in conflicts)
-            {
-                RebaseAvailableFund(property, persisted);
-            }
-
+            Apply(plan);
             return true;
         }
 
-        private static void RebaseAvailableFund(PropertyEntry availableFund, decimal persisted)
+        /// <summary>
+        /// Calcule — sans rien modifier — les valeurs rebasées d'une enveloppe, et refuse ici, avant
+        /// toute mutation, un débit que les fonds en base ne couvrent plus. Planifier d'abord et
+        /// appliquer ensuite est ce qui rend le rebase tout-ou-rien : un refus sur la deuxième
+        /// enveloppe d'un lot ne peut pas laisser la première à moitié rebasée.
+        /// </summary>
+        private static void PlanRebase(
+            EntityEntry entry, PersistedFunds persisted, List<PlannedRebase> plan,
+            DbUpdateConcurrencyException conflict = null)
         {
-            var wanted = (decimal)availableFund.CurrentValue;
-            var read = (decimal)availableFund.OriginalValue;
-            var movement = wanted - read;
+            var available = PlanProperty(entry.Property(AvailableFundName), persisted.AvailableFund);
+            var original = PlanProperty(entry.Property(OriginalFundName), persisted.OriginalFund);
 
-            var rebased = persisted + movement;
-
-            if (rebased < 0m)
+            // Un crédit passe toujours, y compris sur une enveloppe déjà à découvert : voir la note de
+            // classe. Seul un débit que le solde en base ne couvre plus est refusé.
+            if (available.Movement < 0m && available.Rebased < 0m)
             {
                 throw new BudgetAllowanceInsufficientFundException(
-                    $"Le mouvement d'enveloppe ne peut pas être appliqué : le solde en base ({persisted}) " +
-                    $"ne couvre plus le débit de {-movement} autorisé sur la valeur lue ({read}).");
+                    $"Le mouvement d'enveloppe ne peut pas être appliqué : le solde en base " +
+                    $"({persisted.AvailableFund}) ne couvre plus le débit de {-available.Movement} " +
+                    $"autorisé sur la valeur lue ({available.Read}).",
+                    conflict);
             }
 
-            // La valeur lue devient celle de la base : le « WHERE AvailableFund = ... » du SaveChanges
-            // vise l'état réel, et le delta est réappliqué par-dessus.
-            availableFund.OriginalValue = persisted;
-            availableFund.CurrentValue = rebased;
+            plan.Add(available);
+            plan.Add(original);
         }
+
+        private static PlannedRebase PlanProperty(PropertyEntry property, decimal persisted)
+        {
+            var read = (decimal)property.OriginalValue;
+            var movement = (decimal)property.CurrentValue - read;
+
+            return new PlannedRebase(property, read, movement, persisted, persisted + movement);
+        }
+
+        private static void Apply(List<PlannedRebase> plan)
+        {
+            foreach (var rebase in plan)
+            {
+                // La valeur lue devient celle de la base : le « WHERE AvailableFund = ... » du
+                // SaveChanges vise l'état réel, et le mouvement est réappliqué par-dessus.
+                rebase.Property.OriginalValue = rebase.Persisted;
+                rebase.Property.CurrentValue = rebase.Rebased;
+            }
+        }
+
+        private readonly record struct PersistedFunds(decimal AvailableFund, decimal OriginalFund);
+
+        private readonly record struct PlannedRebase(
+            PropertyEntry Property, decimal Read, decimal Movement, decimal Persisted, decimal Rebased);
     }
 
     /// <summary>
     /// Un débit d'enveloppe autorisé sur un solde qu'une opération concurrente a depuis consommé.
-    /// Refuser est le seul comportement sûr : appliquer le delta quand même mettrait l'enveloppe à
-    /// découvert, ce qu'aucune garde du domaine n'autorise.
+    /// Refuser est le seul comportement sûr : appliquer le mouvement quand même mettrait l'enveloppe à
+    /// découvert, ce qu'aucune garde du domaine n'autorise. Un crédit n'emprunte jamais ce chemin.
     /// </summary>
     public class BudgetAllowanceInsufficientFundException : RequestValidationException
     {
-        public BudgetAllowanceInsufficientFundException(string message) : base(message) { }
+        public BudgetAllowanceInsufficientFundException(string message, Exception innerException = null)
+            : base(message)
+        {
+            ConcurrencyConflict = innerException;
+        }
+
+        /// <summary>
+        /// Le conflit de concurrence à l'origine du refus, quand il y en a un — la course elle-même
+        /// est le diagnostic utile, et <see cref="RequestValidationException"/> n'expose pas
+        /// d'inner exception.
+        /// </summary>
+        public Exception ConcurrencyConflict { get; }
     }
 }
