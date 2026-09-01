@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -59,6 +60,23 @@ namespace Sig.App.BackendTests.Authorization
 
             var unauthorizedResult = await ExecuteAsync(sharedEngine, UsersQuery, merchant);
             AssertRefused(unauthorizedResult);
+        }
+
+        // FILETS-38: aucun champ d'instance de la classe ne porte d'état propre à un appel. L'attribut
+        // est construit une seule fois avec le schéma (moteur GraphQL en singleton de processus), donc
+        // tout champ d'instance non readonly serait relu après un await par une requête concurrente et
+        // porterait l'état (service, contexte EF) d'un appel qui n'est pas le sien. Contrairement à la
+        // course ci-dessus, ce défaut n'exige pas d'entrelacement réel: un champ non readonly suffit à
+        // le constituer, donc une inspection structurelle par réflexion le détecte de façon fiable.
+        [Fact]
+        public void RequirePermissionAttribute_HasNoInstanceFieldsCarryingPerCallState()
+        {
+            var mutableInstanceFields = typeof(RequirePermissionAttribute)
+                .GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
+                .Where(f => !f.IsInitOnly)
+                .Select(f => f.Name);
+
+            mutableInstanceFields.Should().BeEmpty();
         }
 
         private void SetupMediatorForUsers()
