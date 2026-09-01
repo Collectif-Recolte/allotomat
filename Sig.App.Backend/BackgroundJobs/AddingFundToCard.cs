@@ -228,7 +228,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 Moments = monthlyPaymentMoment
             });
 
-            await db.SaveChangesAsync();
+            await db.SaveChangesWithBudgetAllowanceRetryAsync();
         }
 
         public async Task AddFundToSpecificBeneficiary(Id beneficiaryId, BeneficiaryType beneficiaryType, Id subscriptionId, InitiatedBy initiatedBy = null)
@@ -251,7 +251,7 @@ namespace Sig.App.Backend.BackgroundJobs
             if (subscriptionBeneficiary == null) return;
 
             await AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, initiatedBy);
-            await db.SaveChangesAsync();
+            await db.SaveChangesWithBudgetAllowanceRetryAsync();
         }
 
         public async Task AddFundToExistingSubscriptionBeneficiary(SubscriptionBeneficiary subscriptionBeneficiary, InitiatedBy initiatedBy = null)

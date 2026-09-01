@@ -180,7 +180,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 }
             }
 
-            await db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesWithBudgetAllowanceRetryAsync(cancellationToken);
 
             return new Payload()
             {

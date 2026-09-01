@@ -90,7 +90,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
             subscriptionBeneficiary.AdjustAllocation(totalCost, logger);
             subscriptionBeneficiary.MaxNumberOfPaymentsOverride = request.MaxNumberOfPayments;
 
-            await db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesWithBudgetAllowanceRetryAsync(cancellationToken);
 
             logger.LogInformation($"[Mutation] ChangeBeneficiarySubscriptionMaxNumberOfPayments - MaxNumberOfPaymentsOverride set to {request.MaxNumberOfPayments} for beneficiary {beneficiaryId} in subscription {subscriptionId}");
 

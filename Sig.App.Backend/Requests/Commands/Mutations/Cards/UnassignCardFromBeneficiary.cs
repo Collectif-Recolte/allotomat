@@ -181,7 +181,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Cards
             beneficiary.CardId = null;
             card.Beneficiary = null;
 
-            await db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesWithBudgetAllowanceRetryAsync(cancellationToken);
 
             logger.LogInformation($"[Mutation] UnassignCardFromBeneficiary - Card ({card.Id}) unassign from {beneficiary.Firstname} {beneficiary.Lastname} ({beneficiary.Id})");
 
