@@ -411,6 +411,9 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
+        // ManageTransactions is the same guard as the transactionLogs field this report exports, and it
+        // is a role-wide permission: it does not verify that the requested projectId belongs to the
+        // caller. Project scoping is enforced on the data, in TransactionLogQueryFilters.
         [RequirePermission(GlobalPermission.ManageTransactions)]
         public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, Id[] markets, Id[] marketGroups, string[] transactionTypes, string[] giftCardTransactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
         {

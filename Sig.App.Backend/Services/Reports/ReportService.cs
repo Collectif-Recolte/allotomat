@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.DbModel;
 using Sig.App.Backend.Helpers;
 using System;
@@ -95,6 +95,17 @@ namespace Sig.App.Backend.Services.Reports
             var canManageOrganizations = globalPermissions.Contains(GlobalPermission.ManageOrganizations);
             string organizationManagerClaimValue = null;
 
+            // A project manager holds ManageOrganizations, so no organization filter applies to them:
+            // their scope is the project itself, read from the claim rather than from the request.
+            string projectManagerClaimValue = null;
+            if (ctx.CurrentUser.IsUserType(UserType.ProjectManager))
+            {
+                projectManagerClaimValue = ctx.CurrentUser.Claims
+                    .Where(x => x.Type == AppClaimTypes.ProjectManagerOf)
+                    .Select(x => x.Value)
+                    .FirstOrDefault();
+            }
+
             if (!canManageOrganizations)
             {
                 var user = await db.Users.Where(c => c.Id == ctx.CurrentUserId).FirstAsync();
@@ -104,6 +115,7 @@ namespace Sig.App.Backend.Services.Reports
 
             query = query
                 .FilterByOrganizationScope(canManageOrganizations, organizationManagerClaimValue, request.Organizations)
+                .FilterByProjectScope(projectManagerClaimValue)
                 .FilterByCriteria(request, currentUserCanSeeAllBeneficiaryInfo);
 
             var transactions = await query.OrderByDescending(x => x.CreatedAtUtc).ToListAsync();

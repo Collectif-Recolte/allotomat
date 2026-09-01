@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using GraphQL.Conventions;
@@ -37,6 +37,34 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             }
 
             return query;
+        }
+
+        /// <summary>
+        /// Restricts the query to the project a project manager owns. ManageTransactions is a role-wide
+        /// permission, so the guard on the field cannot tell whether the requested project is the
+        /// caller's: without this filter a project manager reading another project's id would receive
+        /// its transactions. A manager owns exactly one project (AddManagerToProject refuses a second
+        /// claim), so a single value is enough.
+        /// </summary>
+        /// <param name="projectManagerClaimValue">The caller's ProjectManagerOf claim, or null when the
+        /// caller is not a project manager and is scoped by other means.</param>
+        public static IQueryable<TransactionLog> FilterByProjectScope(
+            this IQueryable<TransactionLog> query,
+            string projectManagerClaimValue)
+        {
+            if (projectManagerClaimValue == null)
+            {
+                return query;
+            }
+
+            // Parsed outside the query so the comparison stays on the indexed column rather than on a
+            // CONVERT of it. An unparsable claim yields nothing rather than everything.
+            if (!long.TryParse(projectManagerClaimValue, out var projectId))
+            {
+                return query.Where(x => false);
+            }
+
+            return query.Where(x => x.ProjectId == projectId);
         }
 
         public static IQueryable<TransactionLog> FilterByCriteria(
