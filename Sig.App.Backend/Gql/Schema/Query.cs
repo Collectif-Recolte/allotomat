@@ -433,13 +433,21 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
-        // GenerateTransactionsReportForMarket prend son marketId comme argument scalaire nommé
-        // "marketId", pas "id": RequirePermissionAttribute n'extrait le MarketId que d'un argument
-        // "id" ou d'un objet "input", donc [RequirePermission(MarketPermission...)] ne verrait jamais
-        // ce marché ici. La garde se fait donc manuellement avec le marketId déjà disponible dans la
-        // méthode, ce qui vérifie au passage que l'appelant gère bien CE marché précis.
-        public static async Task<string> GenerateTransactionsReportForMarket(this GqlQuery _, IAppUserContext ctx, Id marketId, DateTime startDate, DateTime endDate, string timeZoneId, Language language, [Inject] IMediator mediator, [Inject] PermissionService permissionService)
+        // GenerateTransactionsReportForMarket takes its market id as a scalar argument named
+        // "marketId", not "id": RequirePermissionAttribute only extracts a MarketId from an argument
+        // named "id" or an "input" object, so [RequirePermission(MarketPermission...)] would never
+        // see this market here. The guard is therefore manual, using the marketId already available
+        // in the method, which also verifies that the caller manages THIS specific market. It checks
+        // account status before permissions, in the same order as RequirePermissionAttribute, so a
+        // disabled account is refused here just as it would be on any field guarded by the attribute.
+        public static async Task<string> GenerateTransactionsReportForMarket(this GqlQuery _, IAppUserContext ctx, Id marketId, DateTime startDate, DateTime endDate, string timeZoneId, Language language, [Inject] IMediator mediator, [Inject] PermissionService permissionService, [Inject] UserManager<AppUser> userManager)
         {
+            var currentUser = await userManager.FindByIdAsync(ctx.CurrentUser.GetUserId());
+            if (currentUser?.Status != UserStatus.Actived)
+            {
+                throw new UnauthorizedAccessException();
+            }
+
             var marketPermissions = await permissionService.GetMarketPermissions(ctx.CurrentUser, marketId.IdentifierForType<Market>());
             if (!marketPermissions.Contains(MarketPermission.ManageMarket))
             {

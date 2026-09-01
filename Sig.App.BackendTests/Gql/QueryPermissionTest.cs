@@ -24,19 +24,17 @@ using Sig.App.Backend.Services.Permission;
 
 namespace Sig.App.BackendTests.Gql
 {
-    // [RequirePermission] est un filtre d'exécution GraphQL.Conventions: il ne s'exécute que dans le
-    // pipeline de résolution du schéma, jamais dans le handler. La seule façon de prouver qu'il bloque
-    // un appel est donc de router une vraie requête à travers le moteur GraphQL réel, pas d'appeler le
-    // handler MediatR directement.
+    // [RequirePermission] is a GraphQL.Conventions execution filter: it only runs inside the schema's
+    // resolution pipeline, never in the handler. The only way to prove it blocks a call is therefore
+    // to route a real query through the actual GraphQL engine, not to call the MediatR handler directly.
     //
-    // Le moteur est partagé entre les appels d'une même méthode de test, jamais reconstruit à chaque
-    // exécution: FILETS-32 documente un champ d'instance de RequirePermissionAttribute qui n'est
-    // jamais réinitialisé, ce qui n'existe que sur le moteur singleton que Startup.cs enregistre en
-    // production. Reconstruire un moteur neuf par appel masquerait ce défaut et ne prouverait la garde
-    // que dans une configuration que la production n'utilise jamais. Pour GenerateTransactionsReport,
-    // qui passe par cet attribut, l'appel refusé est donc exécuté avant l'appel accepté sur le MÊME
-    // moteur: un appel accepté fige ce champ à vrai pour tous les suivants, donc l'ordre inverse
-    // masquerait un refus qui devrait avoir lieu.
+    // The engine is shared between calls within a single test method, never rebuilt per call: FILETS-32
+    // documents an instance field on RequirePermissionAttribute that is never reset, which only exists
+    // on the singleton engine that Startup.cs registers in production. Rebuilding a fresh engine per
+    // call would hide that defect and would only prove the guard in a configuration production never
+    // uses. For GenerateTransactionsReport, which goes through that attribute, the refused call therefore
+    // runs before the accepted call on the SAME engine: an accepted call pins that field to true for
+    // every subsequent call, so the reverse order would hide a refusal that should occur.
     public class QueryPermissionTest : TestBase
     {
         private const string GenerateTransactionsReportQuery = @"
@@ -59,10 +57,10 @@ namespace Sig.App.BackendTests.Gql
               )
             }";
 
-        // Id.New<Market>(1), soit "Market:1" encodé. GraphQL.Conventions encode le nom du type C#
-        // avec sa casse d'origine (majuscule): un identifiant "market:1" en minuscule, comme en
-        // portait la version précédente de ce test, ne correspond à aucun type et échoue au décodage
-        // avant même d'atteindre la garde, ce qu'un ArgumentException aurait dû trahir.
+        // Id.New<Market>(1), i.e. "Market:1" encoded. GraphQL.Conventions encodes the C# type name
+        // with its original casing (uppercase): a lowercase "market:1" identifier, as an earlier
+        // version of this test used, matches no type and fails decoding before the guard is even
+        // reached, which an ArgumentException should have exposed.
         private const string GenerateTransactionsReportForMarketOwnMarketQuery = @"
             query {
               generateTransactionsReportForMarket(
@@ -74,7 +72,7 @@ namespace Sig.App.BackendTests.Gql
               )
             }";
 
-        // Id.New<Market>(2), distinct du marché géré par le commerçant des tests ci-dessous
+        // Id.New<Market>(2), distinct from the market managed by the merchant in the tests below
         private const string GenerateTransactionsReportForMarketOtherMarketQuery = @"
             query {
               generateTransactionsReportForMarket(
@@ -86,9 +84,9 @@ namespace Sig.App.BackendTests.Gql
               )
             }";
 
-        // AUDIT-01/FILETS-30: GenerateTransactionsReport n'exposait aucune garde et n'importe quel
-        // compte authentifié pouvait l'appeler. La garde exigée est GlobalPermission.ManageTransactions,
-        // la même que l'écran TransactionLogs qu'il reproduit.
+        // AUDIT-01/FILETS-30: GenerateTransactionsReport exposed no guard and any authenticated
+        // account could call it. The required guard is GlobalPermission.ManageTransactions, the same
+        // one as the TransactionLogs screen it reproduces.
         [Fact]
         public async Task GenerateTransactionsReport_RequiresManageTransactions()
         {
@@ -105,8 +103,8 @@ namespace Sig.App.BackendTests.Gql
             AssertSucceeded(accepted);
         }
 
-        // FILETS-30: GenerateTransactionsReportForMarket n'exposait aucune garde. Un commerçant doit
-        // pouvoir exporter le rapport de SON marché (bouton "Exporter un rapport" du commerçant).
+        // FILETS-30: GenerateTransactionsReportForMarket exposed no guard. A merchant must be able to
+        // export the report of THEIR OWN market ("Exporter un rapport" button in the merchant screen).
         [Fact]
         public async Task GenerateTransactionsReportForMarket_MerchantIsAcceptedOnOwnMarket()
         {
@@ -119,9 +117,8 @@ namespace Sig.App.BackendTests.Gql
             AssertSucceeded(result);
         }
 
-        // FILETS-30: sans garde, rien ne vérifiait que le marché demandé est bien celui du commerçant
-        // appelant. Un commerçant gestionnaire du marché 1 ne doit pas pouvoir exporter le rapport du
-        // marché 2.
+        // FILETS-30: without a guard, nothing verified that the requested market is the caller's own.
+        // A merchant managing market 1 must not be able to export the report of market 2.
         [Fact]
         public async Task GenerateTransactionsReportForMarket_MerchantIsRefusedOnOtherMarket()
         {
@@ -130,6 +127,23 @@ namespace Sig.App.BackendTests.Gql
             SetupMediatorForMarketReport();
 
             var result = await ExecuteAsync(BuildEngine(), GenerateTransactionsReportForMarketOtherMarketQuery, merchant);
+
+            AssertRefused(result);
+        }
+
+        // FILETS-30: the manual guard checked market permissions but not account status, unlike
+        // RequirePermissionAttribute which refuses a user whose Status is not UserStatus.Actived before
+        // even looking at permissions. A disabled account managing its own market must still be refused.
+        [Fact]
+        public async Task GenerateTransactionsReportForMarket_DisabledMerchantIsRefusedOnOwnMarket()
+        {
+            var merchant = AddUser("merchant@example.com", UserType.Merchant, claims: new[] { new Claim(AppClaimTypes.MarketManagerOf, "1") });
+            merchant.Status = UserStatus.Disabled;
+            await DbContext.SaveChangesAsync();
+
+            SetupMediatorForMarketReport();
+
+            var result = await ExecuteAsync(BuildEngine(), GenerateTransactionsReportForMarketOwnMarketQuery, merchant);
 
             AssertRefused(result);
         }
@@ -181,10 +195,9 @@ namespace Sig.App.BackendTests.Gql
 
         private static void AssertSucceeded(ExecutionResult result)
         {
-            // Exige l'absence de toute erreur, pas seulement d'UnauthorizedAccessException: une
-            // version antérieure de cette assertion laissait passer un ArgumentException levé par un
-            // autre bug (identifiant de marché mal encodé dans la requête de test) en le confondant
-            // avec un succès.
+            // Requires the absence of any error, not just of UnauthorizedAccessException: an earlier
+            // version of this assertion let an ArgumentException raised by an unrelated bug (a market
+            // id badly encoded in the test query) slip through as a success.
             result.Errors.Should().BeNullOrEmpty();
         }
 
@@ -196,9 +209,9 @@ namespace Sig.App.BackendTests.Gql
 
         private static GraphQLEngine BuildEngine()
         {
-            // GraphQLEngineFactory.Create() reflète les classes [ApplyPolicy]/[AnnotatePolicy] du schéma
-            // au moment du build, ce qui exige un IAuthorizationPolicyProvider déjà en place (voir
-            // Startup.cs, qui fait la même chose avant d'appeler GraphQLEngineFactory.Create()).
+            // GraphQLEngineFactory.Create() reflects the schema's [ApplyPolicy]/[AnnotatePolicy]
+            // classes at build time, which requires an IAuthorizationPolicyProvider already in place
+            // (see Startup.cs, which does the same thing before calling GraphQLEngineFactory.Create()).
             var authServices = new ServiceCollection();
             authServices.AddLogging();
             authServices.AddAuthorization();
@@ -208,10 +221,10 @@ namespace Sig.App.BackendTests.Gql
             return GraphQLEngineFactory.Create();
         }
 
-        // IDependencyInjector minimal résolvant directement dans un IServiceProvider à plat. Volontairement
-        // distinct de Sig.App.Backend.Plugins.GraphQL.DependencyInjector: ScopedFieldResolver ne crée un
-        // scope par champ que pour ce type précis, et les requêtes testées ici n'ont besoin d'aucune
-        // isolation de scope entre champs.
+        // Minimal IDependencyInjector resolving directly against a flat IServiceProvider. Deliberately
+        // distinct from Sig.App.Backend.Plugins.GraphQL.DependencyInjector: ScopedFieldResolver only
+        // creates a per-field scope for that exact type, and the queries tested here need no scope
+        // isolation between fields.
         private sealed class FlatDependencyInjector : IDependencyInjector
         {
             private readonly IServiceProvider services;
