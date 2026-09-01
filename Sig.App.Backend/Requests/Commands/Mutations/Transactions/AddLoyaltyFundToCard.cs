@@ -139,7 +139,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             logger.LogInformation($"[Mutation] AddLoyaltyFundToCard - Adding loyalty fund {request.Amount} to ({request.CardId}) card");
 
-            await db.SaveChangesAsync();
+            await db.SaveChangesWithFundRetryAsync();
 
             return new Payload()
             {

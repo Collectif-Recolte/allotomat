@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -339,6 +339,9 @@ namespace Sig.App.Backend.DbModel
 
             Configure<AddingFundTransaction>(_ =>
             {
+                // CRCL-2669 - Same rule for the deposit counter a purchase is allocated to (see Fund).
+                _.Property(x => x.AvailableFund).IsConcurrencyToken();
+
                 _.HasMany(x => x.PaymentTransactionAddingFundTransactions)
                     .WithOne(x => x.AddingFundTransaction)
                     .OnDelete(DeleteBehavior.NoAction);
@@ -365,7 +368,7 @@ namespace Sig.App.Backend.DbModel
                 // CRCL-2677 - AvailableFund est son propre jeton de concurrence: chaque UPDATE porte
                 // « WHERE AvailableFund = <valeur lue> », donc deux mouvements d'enveloppe concurrents
                 // ne peuvent plus s'écraser silencieusement. Le perdant lève un
-                // DbUpdateConcurrencyException, rejoué par SaveChangesWithBudgetAllowanceRetryAsync.
+                // DbUpdateConcurrencyException, rejoué par SaveChangesWithFundRetryAsync.
                 _.Property(x => x.AvailableFund).IsConcurrencyToken();
 
                 _.HasOne(x => x.Organization)
@@ -396,6 +399,13 @@ namespace Sig.App.Backend.DbModel
 
             Configure<Fund>(_ =>
             {
+                // CRCL-2669 - Amount is its own concurrency token: the UPDATE carries
+                // "WHERE Amount = <value read>", so a stale write (the deposit job holding its
+                // snapshot for a whole run, two purchases reading the same balance) can no longer
+                // erase a concurrent movement. The loser raises a DbUpdateConcurrencyException,
+                // rebased and replayed by SaveChangesWithFundRetryAsync.
+                _.Property(x => x.Amount).IsConcurrencyToken();
+
                 _.HasOne(x => x.Card)
                     .WithMany(x => x.Funds)
                     .HasForeignKey(x => x.CardId);

@@ -65,6 +65,14 @@ namespace Sig.App.Backend.BackgroundJobs
                 });
         }
 
+        // CRCL-2669 - On August 1st 2026 this job was triggered twice by hand, eleven seconds
+        // apart, after the scheduled run had timed out. The AddingFundToCardRuns guard below only
+        // sees runs that have already committed, so both executions went through, each holding a
+        // stale snapshot of every card's Funds and overwriting the purchases made in between. The
+        // distributed lock makes a second execution wait for the first, then return through that
+        // same guard. The timeout is far above the measured duration of a run (about eight
+        // minutes on 22k deposits); past it Hangfire fails the waiting job and retries it later.
+        [DisableConcurrentExecution(timeoutInSeconds: 60 * 60)]
         public async Task Run(string name, SubscriptionMonthlyPaymentMoment[] monthlyPaymentMoment)
         {
             var today = clock
@@ -228,7 +236,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 Moments = monthlyPaymentMoment
             });
 
-            await db.SaveChangesWithBudgetAllowanceRetryAsync();
+            await db.SaveChangesWithFundRetryAsync();
         }
 
         public async Task AddFundToSpecificBeneficiary(Id beneficiaryId, BeneficiaryType beneficiaryType, Id subscriptionId, InitiatedBy initiatedBy = null)
@@ -251,7 +259,7 @@ namespace Sig.App.Backend.BackgroundJobs
             if (subscriptionBeneficiary == null) return;
 
             await AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, initiatedBy);
-            await db.SaveChangesWithBudgetAllowanceRetryAsync();
+            await db.SaveChangesWithFundRetryAsync();
         }
 
         public async Task AddFundToExistingSubscriptionBeneficiary(SubscriptionBeneficiary subscriptionBeneficiary, InitiatedBy initiatedBy = null)

@@ -55,7 +55,38 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             transactionLogs = new List<TransactionLog>();
         }
 
+        /// <summary>
+        /// Attempts at planning a purchase before giving up. One retry is what a genuine race needs;
+        /// a card that conflicts three times in a row is being hammered, and looping would hide it.
+        /// </summary>
+        public const int MaxPlanningAttempts = 3;
+
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
+        {
+            for (var attempt = 1; ; attempt++)
+            {
+                try
+                {
+                    return await HandleAttempt(request, cancellationToken);
+                }
+                catch (CardFundInsufficientException exception) when (attempt < MaxPlanningAttempts)
+                {
+                    // CRCL-2669 - A purchase is planned against a snapshot: which deposit slices it
+                    // consumes, and by how much. When a concurrent write (another purchase, the
+                    // deposit job) consumed one of those slices in the meantime, the rebased debit
+                    // would go below zero and SaveChangesWithFundRetryAsync refuses it. That refusal
+                    // does not mean the card is short of money: it means the plan is stale. So the
+                    // plan is redone from fresh data, from scratch, and only the fresh plan's own
+                    // guard may say NotEnoughtFund. Clearing the tracker is what makes the next
+                    // attempt re-read: a tracked query would hand back the same stale instances.
+                    logger.LogWarning($"[Mutation] CreateTransaction - Allocation invalidated by a concurrent write, re-planning on fresh data (attempt {attempt} of {MaxPlanningAttempts}): {exception.Message}");
+                    db.ChangeTracker.Clear();
+                    transactionLogs = new List<TransactionLog>();
+                }
+            }
+        }
+
+        private async Task<Payload> HandleAttempt(Input request, CancellationToken cancellationToken)
         {
             logger.LogInformation($"[Mutation] CreateTransaction({request.CardId}, {request.CardNumber}, {request.Transactions})");
             long cardId = -1;
@@ -336,7 +367,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             transaction.TransactionByProductGroups = transactionByProductGroups;
             card.Transactions.Add(transaction);
             db.TransactionLogs.AddRange(transactionLogs);
-            await db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesWithFundRetryAsync(cancellationToken);
 
             var cardName = beneficiary != null ? $"{card.Beneficiary.Firstname} {card.Beneficiary.Lastname}" : card.Id.ToString();
             logger.LogInformation($"[Mutation] CreateTransaction - Transaction between {cardName} with ({market.Name}) or an amount of a total {request.Transactions.Sum(x => x.Amount)} for product group(s) {request.Transactions.Select(x => x.ProductGroupId)}");

@@ -92,7 +92,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 }
             }
 
-            await db.SaveChangesWithBudgetAllowanceRetryAsync(cancellationToken);
+            await db.SaveChangesWithFundRetryAsync(cancellationToken);
             return new Payload() { Beneficiary = new BeneficiaryGraphType(beneficiary, beneficiary.Organization?.Project?.BeneficiariesAreAnonymous ?? true) };
         }
 

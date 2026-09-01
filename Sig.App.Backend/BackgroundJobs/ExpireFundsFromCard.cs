@@ -143,7 +143,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 transaction.Status = FundTransactionStatus.Expired;
             }
 
-            await db.SaveChangesWithBudgetAllowanceRetryAsync();
+            await db.SaveChangesWithFundRetryAsync();
         }
     }
 }

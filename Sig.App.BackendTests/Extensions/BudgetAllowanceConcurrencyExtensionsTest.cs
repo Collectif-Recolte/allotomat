@@ -82,12 +82,12 @@ namespace Sig.App.BackendTests.Extensions
             var (contextB, envelopeB) = await ReadEnvelopeAsync();
 
             envelopeA.AvailableFund += 216m;
-            await contextA.SaveChangesWithBudgetAllowanceRetryAsync(CancellationToken.None);
+            await contextA.SaveChangesWithFundRetryAsync(CancellationToken.None);
 
             // B a lu 1000 avant l'écriture de A. Sans rebase, il écrirait 1216 et effacerait le crédit
             // de A ; avec rebase, il ajoute son propre 216 à ce qui est réellement en base.
             envelopeB.AvailableFund += 216m;
-            await contextB.SaveChangesWithBudgetAllowanceRetryAsync(CancellationToken.None);
+            await contextB.SaveChangesWithFundRetryAsync(CancellationToken.None);
 
             (await PersistedFundAsync()).Should().Be(1432m);
         }
@@ -99,10 +99,10 @@ namespace Sig.App.BackendTests.Extensions
             var (contextB, envelopeB) = await ReadEnvelopeAsync();
 
             envelopeA.AvailableFund += 216m;
-            await contextA.SaveChangesWithBudgetAllowanceRetryAsync(CancellationToken.None);
+            await contextA.SaveChangesWithFundRetryAsync(CancellationToken.None);
 
             envelopeB.AvailableFund -= 300m;
-            await contextB.SaveChangesWithBudgetAllowanceRetryAsync(CancellationToken.None);
+            await contextB.SaveChangesWithFundRetryAsync(CancellationToken.None);
 
             // Le rebase porte sur le mouvement, pas sur le total : 1000 + 216 - 300.
             (await PersistedFundAsync()).Should().Be(916m);
@@ -117,10 +117,10 @@ namespace Sig.App.BackendTests.Extensions
             // A vide l'enveloppe. B avait autorisé son débit sur les mêmes 1000 $ : les fonds sur
             // lesquels sa garde s'appuyait n'existent plus.
             envelopeA.AvailableFund -= 1000m;
-            await contextA.SaveChangesWithBudgetAllowanceRetryAsync(CancellationToken.None);
+            await contextA.SaveChangesWithFundRetryAsync(CancellationToken.None);
 
             envelopeB.AvailableFund -= 600m;
-            Func<Task> secondDebit = () => contextB.SaveChangesWithBudgetAllowanceRetryAsync(CancellationToken.None);
+            Func<Task> secondDebit = () => contextB.SaveChangesWithFundRetryAsync(CancellationToken.None);
 
             await secondDebit.Should().ThrowAsync<BudgetAllowanceInsufficientFundException>();
 
@@ -141,7 +141,7 @@ namespace Sig.App.BackendTests.Extensions
 
             var (context, envelope) = await ReadEnvelopeAsync();
             envelope.AvailableFund += 30m;
-            await context.SaveChangesWithBudgetAllowanceRetryAsync(CancellationToken.None);
+            await context.SaveChangesWithFundRetryAsync(CancellationToken.None);
 
             (await PersistedFundAsync()).Should().Be(-20m);
         }
@@ -158,11 +158,11 @@ namespace Sig.App.BackendTests.Extensions
 
             envelopeA.AvailableFund -= 100m;
             envelopeA.OriginalFund -= 100m;
-            await contextA.SaveChangesWithBudgetAllowanceRetryAsync(CancellationToken.None);
+            await contextA.SaveChangesWithFundRetryAsync(CancellationToken.None);
 
             envelopeB.AvailableFund -= 250m;
             envelopeB.OriginalFund -= 250m;
-            await contextB.SaveChangesWithBudgetAllowanceRetryAsync(CancellationToken.None);
+            await contextB.SaveChangesWithFundRetryAsync(CancellationToken.None);
 
             var verify = CreateDbContext();
             var persisted = await verify.BudgetAllowances.AsNoTracking()
@@ -193,7 +193,7 @@ namespace Sig.App.BackendTests.Extensions
 
             // L'enveloppe que B veut créditer n'existe plus : il n'y a aucun solde sur lequel rebaser.
             envelopeB.AvailableFund += 216m;
-            Func<Task> creditOnDeletedEnvelope = () => contextB.SaveChangesWithBudgetAllowanceRetryAsync(CancellationToken.None);
+            Func<Task> creditOnDeletedEnvelope = () => contextB.SaveChangesWithFundRetryAsync(CancellationToken.None);
 
             await creditOnDeletedEnvelope.Should().ThrowAsync<DbUpdateConcurrencyException>();
         }

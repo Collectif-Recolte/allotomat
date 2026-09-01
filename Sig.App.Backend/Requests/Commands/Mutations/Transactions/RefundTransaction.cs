@@ -240,7 +240,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             initialTransaction.RefundTransactions.Add(refundTransaction);
             db.TransactionLogs.AddRange(transactionLogs);
 
-            await db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesWithFundRetryAsync(cancellationToken);
 
             logger.LogInformation($"[Mutation] RefundTransaction - Transaction refund between {cardName} with ({market.Name}) for an amount of {request.Transactions.Sum(x => x.Amount)} for product group(s) {request.Transactions.Select(x => x.ProductGroupId)}");
 
