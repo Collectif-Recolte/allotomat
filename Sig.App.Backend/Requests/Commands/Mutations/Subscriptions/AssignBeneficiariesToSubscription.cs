@@ -141,7 +141,11 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             logger.LogInformation($"[Mutation] AssignBeneficiariesToSubscription - Beneficiary count that fit the search ({beneficiaries.Length})");
 
-            if (subscription.EndDate < today)
+            // CRCL-2675 : comparaison en DATE, comme la fenêtre du job (AddingFundToCard.Run). EndDate
+            // est stocké à minuit : en timestamp, une assignation faite le jour même de la date de fin
+            // basculait dans la branche « abonnement terminé » et ne réservait rien, alors que le run
+            // du jour livre encore un versement à cette paire.
+            if (subscription.EndDate.Date < today.Date)
             {
                 beneficiariesWhoGetSubscriptions = beneficiaries.Length;
                 foreach (var beneficiary in beneficiaries)

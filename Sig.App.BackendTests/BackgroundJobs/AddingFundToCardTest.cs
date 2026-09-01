@@ -195,6 +195,75 @@ namespace Sig.App.BackendTests.BackgroundJobs
         }
 
         [Fact]
+        public async Task AddFundWhenThePaymentDayIsTheSubscriptionEndDate()
+        {
+            // CRCL-2675 — Le job tourne à 08:00 UTC, EndDate est stocké à minuit. Comparée en
+            // timestamp, la fenêtre du job excluait l'abonnement le jour même de sa date de fin,
+            // alors que la réservation faite à l'assignation compte ce versement (comparaison
+            // calendaire). Le montant restait réservé, jamais livré, jamais remboursé.
+            var endDate = subscription.EndDate;
+            Clock.Reset(Instant.FromUtc(endDate.Year, endDate.Month, endDate.Day, 8, 0));
+
+            subscriptionBeneficiary.RemainingAllocatedAmount = 25m;
+            DbContext.SaveChanges();
+
+            var budgetAllowance = DbContext.BudgetAllowances.First();
+            var availableFundsInitially = budgetAllowance.AvailableFund;
+
+            await job.Run("AddFundWhenThePaymentDayIsTheSubscriptionEndDate", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            var card = DbContext.Cards.Include(x => x.Funds).First();
+            card.Funds.First().Amount.Should().Be(45);
+
+            budgetAllowance = DbContext.BudgetAllowances.First();
+            (budgetAllowance.AvailableFund - availableFundsInitially).Should().Be(0);
+
+            // La réservation du dernier versement est consommée par la livraison.
+            DbContext.SubscriptionBeneficiaries.First().RemainingAllocatedAmount.Should().Be(0m);
+        }
+
+        [Fact]
+        public async Task RefundBudgetAllowanceWhenThePaymentDayIsTheSubscriptionEndDateAndParticipantHasNoCard()
+        {
+            // CRCL-2675 — Même jour, sans carte : le dernier versement doit être remboursé à
+            // l'enveloppe plutôt que de rester immobilisé.
+            var endDate = subscription.EndDate;
+            Clock.Reset(Instant.FromUtc(endDate.Year, endDate.Month, endDate.Day, 8, 0));
+
+            beneficiary.Card = null;
+            beneficiary.CardId = null;
+            subscriptionBeneficiary.RemainingAllocatedAmount = 25m;
+
+            var budgetAllowance = DbContext.BudgetAllowances.First();
+            var availableFundsInitially = budgetAllowance.AvailableFund;
+
+            DbContext.SaveChanges();
+
+            await job.Run("RefundBudgetAllowanceWhenThePaymentDayIsTheSubscriptionEndDateAndParticipantHasNoCard", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            budgetAllowance = DbContext.BudgetAllowances.First();
+            (budgetAllowance.AvailableFund - availableFundsInitially).Should().Be(25);
+
+            DbContext.SubscriptionBeneficiaries.First().RemainingAllocatedAmount.Should().Be(0m);
+        }
+
+        [Fact]
+        public async Task DontAddFundTheDayAfterTheSubscriptionEndDate()
+        {
+            // Garde-fou du correctif CRCL-2675 : la fenêtre reste fermée dès le lendemain de EndDate.
+            var paymentDay = subscription.EndDate;
+            subscription.EndDate = paymentDay.AddDays(-1);
+            DbContext.SaveChanges();
+
+            Clock.Reset(Instant.FromUtc(paymentDay.Year, paymentDay.Month, paymentDay.Day, 8, 0));
+
+            await job.Run("DontAddFundTheDayAfterTheSubscriptionEndDate", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            var card = DbContext.Cards.Include(x => x.Funds).First();
+            card.Funds.First().Amount.Should().Be(20);
+        }
+
+        [Fact]
         public async Task DontAddFundWithWrongMoment()
         {
             var today = Clock.GetCurrentInstant().ToDateTimeUtc();
