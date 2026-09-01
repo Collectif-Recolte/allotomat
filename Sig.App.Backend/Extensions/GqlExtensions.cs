@@ -25,17 +25,19 @@ namespace Sig.App.Backend.Extensions
             return rawId;
         }
 
-        public static object GetInputValue(this IResolutionContext ctx)
+        /// <param name="argumentName">Name of the argument carrying the scoped id, when it is neither
+        /// "input" nor "id". Left null, the historical lookup order is unchanged.</param>
+        public static object GetInputValue(this IResolutionContext ctx, string argumentName = null)
         {
-            var input = ctx.GetArgument("input");
+            // The named argument is looked up first, then the historical fallbacks, so the callers
+            // that pass no name keep resolving exactly what they resolved before.
+            var input = argumentName != null ? ctx.GetArgument(argumentName) : null;
+
+            input ??= ctx.GetArgument("input");
+            input ??= ctx.GetArgument("id");
+
             if (input == null)
-            {
-                var id = ctx.GetArgument("id");
-                if (id == null)
-                    return null;
-                else
-                    input = id;
-            }
+                return null;
 
             var inputType = input.GetType();
             if (inputType.IsGenericType && inputType.GetGenericTypeDefinition() == typeof(NonNull<>))

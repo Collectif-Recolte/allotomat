@@ -42,12 +42,20 @@ namespace Sig.App.Backend.Authorization
             this.permissions = permissions;
         }
 
+        /// <summary>
+        /// Name of the GraphQL argument carrying the scoped id, when it is neither "input" nor "id"
+        /// (for instance "marketId"). Left unset, the attribute keeps its historical behaviour.
+        /// Init-only: the attribute instance is shared across concurrent requests, so this carries
+        /// declaration-time configuration and never per-call state.
+        /// </summary>
+        public string ArgumentName { get; init; }
+
         public override async Task<object> Execute(IResolutionContext context, FieldResolutionDelegate next)
         {
             permissionService = context.DependencyInjector.Resolve<PermissionService>();
             userManager = context.DependencyInjector.Resolve<UserManager<AppUser>>();
             db = context.DependencyInjector.Resolve<AppDbContext>();
-            var input = context.GetInputValue();
+            var input = context.GetInputValue(ArgumentName);
             var appUserContext = ((IAppUserContext)context.UserContext);
 
             var currentUser = await userManager.FindByIdAsync(appUserContext.CurrentUser.GetUserId());
