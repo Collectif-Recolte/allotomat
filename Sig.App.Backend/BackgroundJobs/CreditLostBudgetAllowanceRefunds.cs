@@ -7,6 +7,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowanceLogs;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -153,11 +154,13 @@ namespace Sig.App.Backend.BackgroundJobs
                 // Enregistré enveloppe par enveloppe, et non en un seul SaveChanges à la fin, pour deux
                 // raisons.
                 //
-                // D'abord la concurrence : ce job crédite lui-même par lire-modifier-écrire, et tant que
-                // CRCL-2677 n'a pas posé de jeton sur BudgetAllowances, tout remboursement qui s'insère
-                // entre la lecture et l'écriture est écrasé sans bruit. Écrire tout de suite réduit cette
-                // fenêtre à une enveloppe au lieu du run entier - le balayage des réservations négatives,
-                // qui est long, se retrouve hors de la fenêtre.
+                // D'abord la concurrence : ce job crédite lui-même par lire-modifier-écrire. Depuis
+                // CRCL-2677, AvailableFund est un jeton, donc un remboursement qui s'insère entre la
+                // lecture et l'écriture ne peut plus être écrasé sans bruit - mais un SaveChanges nu
+                // lèverait au lieu de rebaser, et ferait tomber la correction. Le joint rebase le
+                // mouvement sur la valeur en base, et un crédit n'est jamais refusé. Écrire tout de
+                // suite garde en plus la fenêtre à une enveloppe au lieu du run entier - le balayage
+                // des réservations négatives, qui est long, se retrouve hors de la fenêtre.
                 //
                 // Ensuite la reprise : le crédit et sa trace partent dans le même SaveChanges, donc une
                 // interruption en cours de route laisse un état cohérent et le relancer reprend là où il
@@ -165,7 +168,16 @@ namespace Sig.App.Backend.BackgroundJobs
                 // sont indépendantes.
                 if (!dryRun && line.Outcome == Outcome.Credited)
                 {
-                    await db.SaveChangesAsync();
+                    await db.SaveChangesWithFundRetryAsync();
+
+                    // Relu après coup : le joint a pu rebaser le crédit sur une valeur en base
+                    // différente de celle qui a servi à décider. Un rapport de réparation doit dire ce
+                    // qui est en base, pas ce qui était prévu.
+                    var envelopeId = line.BudgetAllowanceId.Value;
+                    line.AvailableFundAfter = await db.BudgetAllowances.AsNoTracking()
+                        .Where(x => x.Id == envelopeId)
+                        .Select(x => x.AvailableFund)
+                        .SingleAsync();
                 }
             }
 
@@ -176,7 +188,7 @@ namespace Sig.App.Backend.BackgroundJobs
 
             if (!dryRun && negativeReservations.Count > 0)
             {
-                await db.SaveChangesAsync();
+                await db.SaveChangesWithFundRetryAsync();
             }
 
             var report = new Report

@@ -567,6 +567,36 @@ namespace Sig.App.BackendTests.BackgroundJobs
             report.Envelopes.Last().Reserved.Should().Be(50);
         }
 
+        [Fact]
+        public async Task ReleasesOnTopOfAConcurrentEnvelopeMovementInsteadOfDroppingTheWholeRun()
+        {
+            // L'enveloppe est déjà suivie par le contexte du job, donc la requête du job rend
+            // l'instance en mémoire et non la valeur fraîche : c'est exactement l'instantané périmé
+            // que tient un run réel. Un autre contexte crédite l'enveloppe entre-temps.
+            using (var concurrent = CreateDbContext())
+            {
+                var concurrentEnvelope = await concurrent.BudgetAllowances.FindAsync(budgetAllowance.Id);
+                concurrentEnvelope.AvailableFund += 30;
+                await concurrent.SaveChangesAsync();
+            }
+
+            var report = await job.Run(RepairEndedSubscriptionReservations.RepairMode.Release, dryRun: false);
+
+            // Le relâchement s'ajoute au mouvement concurrent au lieu de l'écraser. Le point du test
+            // est surtout ailleurs : l'application est tout-ou-rien, donc un SaveChanges nu ferait
+            // lever le run ENTIER sur le jeton de AvailableFund, et aucune paire ne serait réparée.
+            report.Released.Should().HaveCount(1);
+            report.TotalReleased.Should().Be(50);
+            (await ReloadEnvelopeAsync()).AvailableFund.Should().Be(80);
+            subscriptionBeneficiary.RemainingAllocatedAmount.Should().Be(0);
+        }
+
+        private async Task<BudgetAllowance> ReloadEnvelopeAsync()
+        {
+            var context = CreateDbContext();
+            return await context.BudgetAllowances.FindAsync(budgetAllowance.Id);
+        }
+
         private decimal CardFund() =>
             DbContext.Funds.Where(x => x.CardId == card.Id).Sum(x => x.Amount);
     }

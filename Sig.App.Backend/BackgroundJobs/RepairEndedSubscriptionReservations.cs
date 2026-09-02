@@ -8,6 +8,7 @@ using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Helpers;
 using System;
 using System.Collections.Generic;
@@ -45,13 +46,13 @@ namespace Sig.App.Backend.BackgroundJobs
     /// Les deux modes sont en dry run par défaut. Le dry run n'écrit rien du tout, pas même en mémoire :
     /// il calcule la décision par paire et produit le rapport par enveloppe à présenter avant d'appliquer.
     ///
-    /// L'application est volontairement tout-ou-rien : un seul <c>SaveChangesAsync</c> à la fin, aucune
-    /// sauvegarde intermédiaire, et rien n'intercepte les exceptions. Une paire qui explose laisse donc la
-    /// base exactement dans son état d'origine, ce qui est la bonne propriété quand on déplace de l'argent :
-    /// l'alternative, une réparation à moitié appliquée, se raconte mal et s'audite encore plus mal. Le job
-    /// est idempotent - la population est définie par <c>RemainingAllocatedAmount &gt; 0</c>, qu'une
-    /// réparation réussie remet à zéro - donc le relancer après avoir corrigé la donnée fautive reprend
-    /// simplement ce qui reste.
+    /// L'application est volontairement tout-ou-rien : un seul <c>SaveChangesWithFundRetryAsync</c> à la
+    /// fin, aucune sauvegarde intermédiaire, et rien n'intercepte les exceptions. Une paire qui explose
+    /// laisse donc la base exactement dans son état d'origine, ce qui est la bonne propriété quand on
+    /// déplace de l'argent : l'alternative, une réparation à moitié appliquée, se raconte mal et
+    /// s'audite encore plus mal. Le job est idempotent - la population est définie par
+    /// <c>RemainingAllocatedAmount &gt; 0</c>, qu'une réparation réussie remet à zéro - donc le
+    /// relancer après avoir corrigé la donnée fautive reprend simplement ce qui reste.
     /// </summary>
     public class RepairEndedSubscriptionReservations
     {
@@ -155,7 +156,12 @@ namespace Sig.App.Backend.BackgroundJobs
                 return report;
             }
 
-            await db.SaveChangesAsync();
+            // Le joint, et non un SaveChanges nu : le mode Release remonte AvailableFund, qui est un
+            // jeton de concurrence depuis CRCL-2677. Un mouvement d'enveloppe concurrent ferait lever
+            // un SaveChanges nu, et le tout-ou-rien annoncé plus haut ferait alors tomber le run entier
+            // plutôt qu'une paire. Le joint rebase le relâchement sur la valeur en base ; c'est un
+            // crédit, donc il n'est jamais refusé.
+            await db.SaveChangesWithFundRetryAsync();
             logger.LogInformation($"RepairEndedSubscriptionReservations :: appliqué - {report.Delivered.Count} versement(s) pour {report.TotalDelivered}, {report.Released.Count} relâchement(s) pour {report.TotalReleased}.");
 
             return report;
