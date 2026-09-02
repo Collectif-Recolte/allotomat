@@ -803,7 +803,7 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         }
 
         [Fact]
-        public async Task CreateTransactionSucceedsWhenCardHasNoLoyaltyFundAndAddingFundTransactionsPoolIsEmpty()
+        public async Task CreateTransactionRefusesWhenNeitherDepositsNorLoyaltyCoverThePurchase()
         {
             SetupRequestHandler(new VerifyCardCanBeUsedInMarket(DbContext));
 
@@ -815,7 +815,8 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 BeneficiaryType = beneficiary.BeneficiaryType
             };
 
-            // No loyalty fund at all, and no adding-fund transaction, so the debitable pool is empty.
+            // No loyalty fund at all, and no adding-fund transaction, so nothing is spendable: the 100
+            // showing on the product group is a counter gap, not money the card can pay with.
             var localCard = new Card()
             {
                 Funds = new List<Fund>(),
@@ -853,9 +854,15 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
                 ProductGroupId = productGroup.GetIdentifier()
             });
 
-            await handler.Handle(input, CancellationToken.None);
+            var act = async () => await handler.Handle(input, CancellationToken.None);
 
-            localCard.Funds.First(x => x.ProductGroupId == productGroup.Id).Amount.Should().Be(60);
+            await act.Should().ThrowAsync<CreateTransaction.NotEnoughtFundException>();
+
+            // The refusal lands after the in-memory debit, like the one guarding the loyalty pool does,
+            // so what it protects is the save, not the tracked entity: assert on the store.
+            var persistedFund = await DbContext.Funds.AsNoTracking()
+                .FirstAsync(x => x.CardId == localCard.Id && x.ProductGroupId == productGroup.Id);
+            persistedFund.Amount.Should().Be(100);
         }
 
         [Fact]

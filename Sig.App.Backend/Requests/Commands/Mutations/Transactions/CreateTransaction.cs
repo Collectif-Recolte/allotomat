@@ -151,6 +151,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             var transactionByProductGroups = new List<PaymentTransactionProductGroup>();
             decimal loyaltyFundToRemove = request.Transactions.Sum(x => x.Amount);
 
+            // The loop over the loyalty deposits below only draws when the card carries a loyalty
+            // fund, so without one there is nothing spendable there.
+            var loyaltyAvailable = card.Funds.Any(x => x.ProductGroup.Name == ProductGroupType.LOYALTY)
+                ? loyaltyFundTransactions.Sum(x => x.AvailableFund)
+                : 0m;
+            decimal unbackedTotal = 0;
+
             var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
             var transaction = new PaymentTransaction()
             {
@@ -270,6 +277,10 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     {
                         AddAmountToTransactionLog(transaction, card, market, null, productGroup, uncoveredByPool);
                         loyaltyFundToRemove -= uncoveredByPool;
+
+                        // Off-platform administration has always debited the fund with no deposit behind
+                        // it: that part is backed by a program decision, not by drifted counters.
+                        if (!card.Project.AdministrationSubscriptionsOffPlatform) unbackedTotal += uncoveredByPool;
                     }
 
                     transactionByProductGroups.Add(new PaymentTransactionProductGroup()
@@ -281,6 +292,16 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                     fund.Amount -= fundToRemove;
                 }
+            }
+
+            // What the pool does not back is not a means of payment: it is the gap between the product
+            // group counter and the deposits that carry it, and closing that gap is a program decision.
+            // A purchase that neither the deposits nor the loyalty balance cover therefore stays refused.
+            // The calculation above only changes how the debit is split, never whether it is allowed.
+            if (unbackedTotal > 0 && loyaltyFundToRemove + unbackedTotal > loyaltyAvailable)
+            {
+                logger.LogWarning("[Mutation] CreateTransaction - NotEnoughtFundException");
+                throw new NotEnoughtFundException();
             }
 
             if (loyaltyFundToRemove > 0)
