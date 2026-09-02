@@ -138,6 +138,40 @@ namespace Sig.App.BackendTests.BackgroundJobs
             DbContext.BudgetAllowanceLogs.Should().HaveCount(1);
         }
 
+        /// <summary>
+        /// <c>AvailableFund</c> est un jeton de concurrence depuis CRCL-2677 : un mouvement d'enveloppe
+        /// ordinaire (versement, retrait, ajustement) qui se glisse entre le chargement de l'enveloppe
+        /// et l'écriture du crédit ferait échouer un <c>SaveChanges</c> brut — et sur un job d'argent
+        /// lancé à la main, l'exception remonterait avant le rapport, laissant l'opérateur sans même la
+        /// liste des enveloppes déjà créditées. Le crédit doit se rebaser sur le solde réel, par le même
+        /// chemin que tous les autres mouvements d'enveloppe.
+        /// </summary>
+        [Fact]
+        public async Task CreditSurvivesAnEnvelopeMovementMadeWhileTheJobWasRunning()
+        {
+            var envelope = AddEnvelope(originalFund: 8208, availableFund: 500);
+            DbContext.SaveChanges();
+
+            // Le DbContext du job a déjà sa photographie de l'enveloppe (AvailableFund = 500). Un autre
+            // écrivain la débite entre-temps : la base dit 300, le job croit encore 500.
+            using (var other = CreateDbContext())
+            {
+                var concurrent = await other.BudgetAllowances.FindAsync(envelope.Id);
+                concurrent.AvailableFund -= 200m;
+                await other.SaveChangesAsync();
+            }
+
+            var report = await job.Run(Corrections(1080m), dryRun: false);
+
+            report.Corrections.Single().Outcome.Should()
+                .Be(CreditLostBudgetAllowanceRefunds.Outcome.Credited);
+            report.TotalCredited.Should().Be(1080m);
+
+            // 300 après le débit concurrent + 1 080 crédités : aucun des deux n'a écrasé l'autre.
+            (await ReloadAsync(envelope)).AvailableFund.Should().Be(1380m);
+            DbContext.BudgetAllowanceLogs.Should().HaveCount(1);
+        }
+
         [Fact]
         public async Task RecalculatesTheEnvelopeAsAControlOnTheReviewedAmount()
         {

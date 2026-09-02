@@ -7,6 +7,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.BudgetAllowanceLogs;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,11 +42,15 @@ namespace Sig.App.Backend.BackgroundJobs
     /// Deuxième volet, indépendant du premier : les réservations négatives des paires vivantes sont
     /// remises à 0. Voir <see cref="NormalizeNegativeReservationsAsync"/>.
     ///
-    /// <b>À lancer après le déploiement de CRCL-2677</b>, pour deux raisons. Sans le correctif, la cause
-    /// tourne toujours et rouvrirait l'écart derrière le job. Et ce job crédite lui-même par
-    /// lire-modifier-écrire : tant que <c>BudgetAllowances</c> n'a pas de jeton de concurrence, un retrait
-    /// simultané peut écraser le crédit sans rien dire. Avec le jeton, le même conflit fait échouer le
-    /// <c>SaveChanges</c> — rien n'est appliqué et ça se voit, ce qui est le bon comportement ici.
+    /// <b>À lancer après le déploiement de CRCL-2677</b> : sans le correctif, la cause tourne toujours
+    /// et rouvrirait l'écart derrière le job. Le crédit lui-même passe par
+    /// <see cref="BudgetAllowanceConcurrencyExtensions.SaveChangesWithBudgetAllowanceRetryAsync"/>,
+    /// comme tout mouvement d'enveloppe depuis CRCL-2677. <c>AvailableFund</c> étant devenu un jeton de
+    /// concurrence, un <c>SaveChanges</c> brut ferait avorter le job dès qu'un mouvement ordinaire s'est
+    /// glissé entre le chargement de l'enveloppe et l'écriture — sur un job d'argent lancé à la main,
+    /// l'exception remonterait avant <see cref="LogReport"/> et l'opérateur perdrait jusqu'au rapport
+    /// des enveloppes déjà créditées. Le rebase réapplique le crédit sur le solde réel, et un crédit
+    /// n'est jamais refusé.
     /// </summary>
     public class CreditLostBudgetAllowanceRefunds
     {
@@ -150,22 +155,19 @@ namespace Sig.App.Backend.BackgroundJobs
                 var line = await BuildLineAsync(correction, dryRun);
                 lines.Add(line);
 
-                // Enregistré enveloppe par enveloppe, et non en un seul SaveChanges à la fin, pour deux
-                // raisons.
-                //
-                // D'abord la concurrence : ce job crédite lui-même par lire-modifier-écrire, et tant que
-                // CRCL-2677 n'a pas posé de jeton sur BudgetAllowances, tout remboursement qui s'insère
-                // entre la lecture et l'écriture est écrasé sans bruit. Écrire tout de suite réduit cette
-                // fenêtre à une enveloppe au lieu du run entier - le balayage des réservations négatives,
-                // qui est long, se retrouve hors de la fenêtre.
-                //
-                // Ensuite la reprise : le crédit et sa trace partent dans le même SaveChanges, donc une
+                // Enregistré enveloppe par enveloppe, et non en un seul SaveChanges à la fin, pour la
+                // reprise : le crédit et sa trace partent dans le même SaveChanges, donc une
                 // interruption en cours de route laisse un état cohérent et le relancer reprend là où il
                 // s'est arrêté. L'atomicité du run entier n'aurait rien apporté ici : les corrections
                 // sont indépendantes.
+                //
+                // Le rebase (voir la note de classe) est ce qui rend cette écriture sûre sous
+                // concurrence : le mouvement voulu est réappliqué sur le solde réellement en base juste
+                // avant l'UPDATE. Une enveloppe qui bouge pendant le run ne fait donc plus ni perdre le
+                // crédit en silence, ni avorter le job.
                 if (!dryRun && line.Outcome == Outcome.Credited)
                 {
-                    await db.SaveChangesAsync();
+                    await db.SaveChangesWithBudgetAllowanceRetryAsync();
                 }
             }
 
@@ -174,6 +176,9 @@ namespace Sig.App.Backend.BackgroundJobs
             // Normaliser d'abord fausserait silencieusement le contrôle de chaque enveloppe.
             var negativeReservations = await NormalizeNegativeReservationsAsync(dryRun);
 
+            // SaveChanges brut, à dessein : ce volet n'écrit que RemainingAllocatedAmount sur les paires.
+            // Les enveloppes que la requête ramène par Include restent Unmodified, donc aucun UPDATE ne
+            // porte le « WHERE AvailableFund = ... » et le rebase n'aurait rien à réappliquer.
             if (!dryRun && negativeReservations.Count > 0)
             {
                 await db.SaveChangesAsync();
