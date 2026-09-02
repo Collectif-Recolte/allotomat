@@ -252,6 +252,35 @@ namespace Sig.App.BackendTests.BackgroundJobs
             (await DbContext.Transactions.OfType<SubscriptionAddingFundTransaction>().CountAsync()).Should().Be(0);
         }
 
+        /// <summary>
+        /// Le run entier tient dans un seul SaveChanges, et <c>AvailableFund</c> est un jeton de
+        /// concurrence : un mouvement d'enveloppe ordinaire (retrait, ajustement, versement) qui se
+        /// glisse entre le chargement des candidats et l'écriture finale ferait échouer tout le run
+        /// avec un <c>DbUpdateConcurrencyException</c>. Le crédit doit se rebaser sur le solde réel,
+        /// par le même chemin que toutes les autres mutations d'enveloppe (CRCL-2677).
+        /// </summary>
+        [Fact]
+        public async Task ReleaseSurvivesAnEnvelopeMovementMadeWhileTheJobWasRunning()
+        {
+            // Le DbContext du job a déjà sa photographie de l'enveloppe (AvailableFund = 0). Un autre
+            // écrivain la bouge entre-temps : la base dit 100, le job croit encore 0.
+            await using (var other = CreateDbContext())
+            {
+                var envelope = await other.BudgetAllowances.SingleAsync(x => x.Id == budgetAllowance.Id);
+                envelope.AvailableFund += 100;
+                await other.SaveChangesAsync();
+            }
+
+            var report = await job.Run(RepairEndedSubscriptionReservations.RepairMode.Release, dryRun: false);
+
+            report.Released.Should().HaveCount(1);
+            subscriptionBeneficiary.RemainingAllocatedAmount.Should().Be(0);
+
+            // 100 du mouvement concurrent + 50 relâchés : aucun des deux n'a écrasé l'autre.
+            await using var fresh = CreateDbContext();
+            (await fresh.BudgetAllowances.SingleAsync(x => x.Id == budgetAllowance.Id)).AvailableFund.Should().Be(150);
+        }
+
         [Fact]
         public async Task LogsTheReleaseSoTheReportsStayConsistent()
         {

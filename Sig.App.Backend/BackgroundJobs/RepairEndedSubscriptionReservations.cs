@@ -8,6 +8,7 @@ using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Helpers;
 using System;
 using System.Collections.Generic;
@@ -45,13 +46,15 @@ namespace Sig.App.Backend.BackgroundJobs
     /// Les deux modes sont en dry run par défaut. Le dry run n'écrit rien du tout, pas même en mémoire :
     /// il calcule la décision par paire et produit le rapport par enveloppe à présenter avant d'appliquer.
     ///
-    /// L'application est volontairement tout-ou-rien : un seul <c>SaveChangesAsync</c> à la fin, aucune
-    /// sauvegarde intermédiaire, et rien n'intercepte les exceptions. Une paire qui explose laisse donc la
-    /// base exactement dans son état d'origine, ce qui est la bonne propriété quand on déplace de l'argent :
-    /// l'alternative, une réparation à moitié appliquée, se raconte mal et s'audite encore plus mal. Le job
-    /// est idempotent - la population est définie par <c>RemainingAllocatedAmount &gt; 0</c>, qu'une
-    /// réparation réussie remet à zéro - donc le relancer après avoir corrigé la donnée fautive reprend
-    /// simplement ce qui reste.
+    /// L'application est volontairement tout-ou-rien : un seul <c>SaveChanges</c> à la fin (par
+    /// <see cref="BudgetAllowanceConcurrencyExtensions.SaveChangesWithBudgetAllowanceRetryAsync"/>,
+    /// puisque les deux modes créditent des enveloppes), aucune sauvegarde intermédiaire, et rien
+    /// n'intercepte les exceptions. Une paire qui explose laisse donc la base exactement dans son état
+    /// d'origine, ce qui est la bonne propriété quand on déplace de l'argent : l'alternative, une
+    /// réparation à moitié appliquée, se raconte mal et s'audite encore plus mal. Le job est idempotent -
+    /// la population est définie par <c>RemainingAllocatedAmount &gt; 0</c>, qu'une réparation réussie
+    /// remet à zéro - donc le relancer après avoir corrigé la donnée fautive reprend simplement ce qui
+    /// reste.
     /// </summary>
     public class RepairEndedSubscriptionReservations
     {
@@ -100,6 +103,17 @@ namespace Sig.App.Backend.BackgroundJobs
                 x => x.Run(RepairMode.Release, false), Cron.Never(), options);
         }
 
+        /// <summary>
+        /// <see cref="DisableConcurrentExecutionAttribute"/> est indispensable, pas décoratif :
+        /// l'idempotence repose sur <c>RemainingAllocatedAmount &gt; 0</c> tel que LU en base, et cette
+        /// colonne n'a pas de jeton de concurrence. Deux exécutions Apply qui se chevauchent
+        /// sélectionnent donc les mêmes paires et livrent (ou relâchent) chacune le même argent : deux
+        /// jeux de transactions et de journaux, pour une seule réservation. Or le tableau de bord
+        /// Hangfire laisse cliquer « Trigger now » deux fois, et le serveur a plusieurs workers. Le
+        /// verrou est pris sur la méthode, donc partagé par les quatre entrées : un Deliver et un
+        /// Release ne peuvent pas non plus se marcher dessus.
+        /// </summary>
+        [DisableConcurrentExecution(timeoutInSeconds: 30 * 60)]
         public async Task<Report> Run(RepairMode mode, bool dryRun = true)
         {
             logger.LogInformation($"RepairEndedSubscriptionReservations :: start (mode: {mode}, dryRun: {dryRun})");
@@ -155,7 +169,12 @@ namespace Sig.App.Backend.BackgroundJobs
                 return report;
             }
 
-            await db.SaveChangesAsync();
+            // Release crédite l'enveloppe, et Deliver aussi pour un participant sans carte. AvailableFund
+            // étant un jeton de concurrence, un SaveChanges brut ferait échouer tout le run dès qu'un
+            // mouvement d'enveloppe ordinaire s'est glissé entre le chargement des candidats et
+            // l'écriture. Le rebase réapplique nos crédits sur le solde réel ; un crédit n'est jamais
+            // refusé, donc le tout-ou-rien du run est préservé.
+            await db.SaveChangesWithBudgetAllowanceRetryAsync();
             logger.LogInformation($"RepairEndedSubscriptionReservations :: appliqué - {report.Delivered.Count} versement(s) pour {report.TotalDelivered}, {report.Released.Count} relâchement(s) pour {report.TotalReleased}.");
 
             return report;
