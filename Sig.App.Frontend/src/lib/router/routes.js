@@ -14,7 +14,6 @@ import {
   GLOBAL_MANAGE_CARDS,
   GLOBAL_CREATE_TRANSACTION,
   GLOBAL_MANAGE_TRANSACTIONS,
-  GLOBAL_MANAGE_BUDGET_ALLOWANCE,
   GLOBAL_MANAGE_PRODUCT_GROUP,
   GLOBAL_REFUND_TRANSACTION,
   GLOBAL_MANAGE_MARKET_GROUPS,
@@ -620,8 +619,7 @@ export default [
     path: "/budget-allowance-report",
     component: () => import("@/views/report/BudgetAllowanceReport.vue"),
     meta: {
-      // Le rapport n'existe qu'au niveau du programme (Project.budgetAllowanceReport).
-      claim: GLOBAL_MANAGE_BUDGET_ALLOWANCE
+      claim: GLOBAL_MANAGE_TRANSACTIONS
     }
   },
   {

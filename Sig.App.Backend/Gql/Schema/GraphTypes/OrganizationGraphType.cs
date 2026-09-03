@@ -118,6 +118,24 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return ctx.DataLoader.LoadOrganizationBudgetAllowanceTotal(Id.LongIdentifierForType<Organization>());
         }
 
+        public async Task<Pagination<BudgetAllowanceLogGraphType>> BudgetAllowanceReport([Inject] IMediator mediator, int page, int limit, DateTime startDate, DateTime endDate,
+            [Description("If specified, only transactions with one of those subscription are returned.")] Id[] withSpecificSubscriptions = null)
+        {
+            var results = await mediator.Send(new SearchOrganizationBudgetAllowanceReport.Query
+            {
+                OrganizationId = organization.Id,
+                Page = new Page(page, limit),
+                StartDate = startDate,
+                EndDate = endDate,
+                Subscriptions = withSpecificSubscriptions?.Select(y => y.LongIdentifierForType<Subscription>())
+            });
+
+            return results.Map(x =>
+            {
+                return new BudgetAllowanceLogGraphType(x);
+            });
+        }
+
         public async Task<SubscriptionEndReportPagination<SubscriptionEndReportGraphType>> SubscriptionEndReport([Inject] IMediator mediator, int page, int limit, DateTime startDate, DateTime endDate,
             [Description("If specified, only transactions with one of those subscription are returned.")] Id[] withSpecificSubscriptions = null)
         {

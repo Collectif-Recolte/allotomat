@@ -13,7 +13,7 @@
 
 <template>
   <RouterView v-slot="{ Component }">
-    <AppShell :loading="loadingProjects" class="markets-list-vue">
+    <AppShell :loading="loadingProjects || loadingOrganizations" class="markets-list-vue">
       <template #title>
         <Title :title="t('title')">
           <template #subpagesCta>
@@ -64,7 +64,7 @@ import { useAuthStore } from "@/lib/store/auth";
 import { usePageTitle } from "@/lib/helpers/page-title";
 
 import { URL_BUDGET_ALLOWANCE_REPORT } from "@/lib/consts/urls";
-import { USER_TYPE_PROJECTMANAGER } from "@/lib/consts/enums";
+import { USER_TYPE_PROJECTMANAGER, USER_TYPE_ORGANIZATIONMANAGER } from "@/lib/consts/enums";
 
 const { userType } = storeToRefs(useAuthStore());
 const route = useRoute();
@@ -197,6 +197,58 @@ const project = useResult(resultProjects, null, (data) => {
   return data.projects[0];
 });
 
+const { result: resultOrganizations, loading: loadingOrganizations } = useQuery(
+  gql`
+    query Organizations($page: Int!, $dateFrom: DateTime!, $dateTo: DateTime!, $subscriptions: [ID!]!) {
+      organizations {
+        id
+        name
+        budgetAllowances {
+          id
+          subscription {
+            id
+            name
+          }
+        }
+        budgetAllowanceReport(
+          page: $page
+          limit: 30
+          startDate: $dateFrom
+          endDate: $dateTo
+          withSpecificSubscriptions: $subscriptions
+        ) {
+          totalCount
+          totalPages
+          items {
+            id
+            discriminator
+            createdAt
+            amount
+            organizationName
+            subscriptionName
+            targetOrganizationName
+            targetSubscriptionName
+          }
+        }
+      }
+    }
+  `,
+  budgetAllowanceReportVariables,
+  () => ({
+    enabled: userType.value === USER_TYPE_ORGANIZATIONMANAGER
+  })
+);
+
+const organization = useResult(resultOrganizations, null, (data) => {
+  hasAppliedDefaultDates.value = true;
+
+  updateUrl();
+
+  availableSubscriptions.value = data.organizations[0].budgetAllowances.map((x) => x.subscription);
+
+  return data.organizations[0];
+});
+
 function setDateFrom(reconciliationReportDate) {
   switch (reconciliationReportDate) {
     case "ONE_MONTH": {
@@ -219,7 +271,11 @@ function setDateFrom(reconciliationReportDate) {
 }
 
 const budgetAllowanceReport = computed(() => {
-  return project.value ? project.value.budgetAllowanceReport : null;
+  return project.value
+    ? project.value.budgetAllowanceReport
+    : organization.value
+    ? organization.value.budgetAllowanceReport
+    : null;
 });
 
 function updateUrl() {

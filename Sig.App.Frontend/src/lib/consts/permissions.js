@@ -10,7 +10,6 @@ export const GLOBAL_MANAGE_SUBSCRIPTIONS = "ManageSubscriptions";
 export const GLOBAL_MANAGE_CATEGORIES = "ManageCategories";
 export const GLOBAL_MANAGE_CARDS = "ManageCards";
 export const GLOBAL_MANAGE_TRANSACTIONS = "ManageTransactions";
-export const GLOBAL_MANAGE_BUDGET_ALLOWANCE = "ManageBudgetAllowance";
 export const GLOBAL_CREATE_TRANSACTION = "CreateTransaction";
 export const GLOBAL_MANAGE_ORGANIZATION_MANAGERS = "ManageOrganizationManagers";
 export const GLOBAL_MANAGE_PRODUCT_GROUP = "ManageProductGroup";
