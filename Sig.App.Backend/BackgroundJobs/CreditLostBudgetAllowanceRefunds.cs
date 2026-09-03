@@ -39,8 +39,9 @@ namespace Sig.App.Backend.BackgroundJobs
     /// jamais du recalcul. Le recalcul est reporté à côté, comme contrôle : voir
     /// <see cref="CorrectionLine.ComputedShortfall"/> pour ce qu'il vaut et ce qu'il ne vaut pas.
     ///
-    /// Deuxième volet, indépendant du premier : les réservations négatives des paires vivantes sont
-    /// remises à 0. Voir <see cref="NormalizeNegativeReservationsAsync"/>.
+    /// Deuxième volet, indépendant du premier : les réservations négatives sont signalées sur toute la
+    /// plateforme, et remises à 0 sur les seules enveloppes du périmètre de ce ticket.
+    /// Voir <see cref="NormalizeNegativeReservationsAsync"/>.
     ///
     /// <b>À lancer après le déploiement de CRCL-2677</b> : sans le correctif, la cause tourne toujours
     /// et rouvrirait l'écart derrière le job. Le crédit lui-même passe par
@@ -174,12 +175,21 @@ namespace Sig.App.Backend.BackgroundJobs
             // Après les corrections, jamais avant : le recalcul de contrôle lit les réservations, et les
             // valeurs négatives font partie de la somme qui le rend juste (voir ComputedShortfall).
             // Normaliser d'abord fausserait silencieusement le contrôle de chaque enveloppe.
-            var negativeReservations = await NormalizeNegativeReservationsAsync(dryRun);
+            //
+            // La portée d'écriture est celle du ticket : les enveloppes que la table de corrections a
+            // résolues, et elles seules. Les corrections sautées comptent - une enveloppe en attente de
+            // confirmation reste dans le mandat. La détection, elle, reste globale : voir la note de
+            // NormalizeNegativeReservationsAsync.
+            var scope = lines.Where(x => x.BudgetAllowanceId.HasValue)
+                             .Select(x => x.BudgetAllowanceId.Value)
+                             .ToHashSet();
+
+            var negativeReservations = await NormalizeNegativeReservationsAsync(dryRun, scope);
 
             // SaveChanges brut, à dessein : ce volet n'écrit que RemainingAllocatedAmount sur les paires.
             // Les enveloppes que la requête ramène par Include restent Unmodified, donc aucun UPDATE ne
             // porte le « WHERE AvailableFund = ... » et le rebase n'aurait rien à réappliquer.
-            if (!dryRun && negativeReservations.Count > 0)
+            if (!dryRun && negativeReservations.Any(x => x.Normalized))
             {
                 await db.SaveChangesAsync();
             }
@@ -358,7 +368,16 @@ namespace Sig.App.Backend.BackgroundJobs
         }
 
         /// <summary>
-        /// Remet à 0 les réservations négatives des paires vivantes.
+        /// Signale les réservations négatives de toute la plateforme, et remet à 0 celles qui tombent
+        /// dans le périmètre de ce ticket.
+        ///
+        /// <b>La détection est globale, l'écriture ne l'est pas.</b> Le radar doit couvrir toute la
+        /// plateforme : c'est comme ça que les -175 $ de « Trousses 2026-2027 » ont été trouvés
+        /// (CRCL-2681), sur un programme que ce ticket n'a jamais enquêté. Mais remettre à 0 une paire
+        /// hors périmètre serait écrire sur des données qu'on ne comprend pas, sans trace persistée,
+        /// depuis un job dont le nom ne dit rien de ce programme-là. Pire : tant que la cause tourne, la
+        /// valeur revient - celle de CRCL-2681 se recreuse à chaque échéance de versement. Les lignes
+        /// hors périmètre sortent donc au rapport avec <c>Normalized</c> à false, et rien n'est écrit.
         ///
         /// Une réservation négative veut dire qu'il a été livré plus que réservé. La valeur n'a pas de
         /// sens - on n'a jamais réservé moins que rien - et elle fausse toutes les sommes d'audit par
@@ -375,7 +394,12 @@ namespace Sig.App.Backend.BackgroundJobs
         /// C'est le bon point de départ, puisque la sur-livraison a déjà eu lieu et que l'enveloppe n'en
         /// a jamais été débitée.
         /// </summary>
-        private async Task<List<NegativeReservationLine>> NormalizeNegativeReservationsAsync(bool dryRun)
+        /// <param name="scope">
+        /// Les enveloppes que la table de corrections a résolues. Seules les paires qui s'y rattachent
+        /// sont remises à 0 ; les autres sont signalées et laissées intactes.
+        /// </param>
+        private async Task<List<NegativeReservationLine>> NormalizeNegativeReservationsAsync(
+            bool dryRun, IReadOnlySet<long> scope)
         {
             var pairs = await db.SubscriptionBeneficiaries
                 .Include(x => x.BudgetAllowance).ThenInclude(x => x.Organization)
@@ -387,6 +411,9 @@ namespace Sig.App.Backend.BackgroundJobs
 
             foreach (var pair in pairs)
             {
+                var inScope = pair.BudgetAllowanceId.HasValue
+                              && scope.Contains(pair.BudgetAllowanceId.Value);
+
                 lines.Add(new NegativeReservationLine
                 {
                     BeneficiaryId = pair.BeneficiaryId,
@@ -394,10 +421,14 @@ namespace Sig.App.Backend.BackgroundJobs
                     BudgetAllowanceId = pair.BudgetAllowanceId,
                     OrganizationName = pair.BudgetAllowance?.Organization?.Name,
                     SubscriptionName = pair.BudgetAllowance?.Subscription?.Name,
-                    RemainingAllocatedAmount = pair.RemainingAllocatedAmount.Value
+                    RemainingAllocatedAmount = pair.RemainingAllocatedAmount.Value,
+                    Normalized = inScope,
+                    Note = inScope
+                        ? null
+                        : "hors du périmètre de ce ticket - signalée seulement, voir CRCL-2681"
                 });
 
-                if (!dryRun)
+                if (!dryRun && inScope)
                 {
                     pair.RemainingAllocatedAmount = 0m;
                 }
@@ -414,11 +445,18 @@ namespace Sig.App.Backend.BackgroundJobs
             var credited = report.DryRun ? "à créditer" : "créditée(s)";
             var normalized = report.DryRun ? "à remettre à 0" : "remise(s) à 0";
 
+            // Les hors-périmètre ont leur propre phrase : les noyer dans le total laisserait croire que
+            // le job y a touché.
+            var outOfScope = report.OutOfScopeReservations.Count == 0
+                ? "."
+                : $", et {report.OutOfScopeReservations.Count} hors périmètre signalée(s) mais NON " +
+                  $"modifiée(s) ({report.TotalNegativeReservationOutOfScope} $) - voir CRCL-2681.";
+
             logger.LogInformation(
                 $"CreditLostBudgetAllowanceRefunds :: {mode} - {report.CreditedCorrections.Count} enveloppe(s) " +
                 $"{credited} pour {report.TotalCredited} $, {report.SkippedCorrections.Count} sautée(s), " +
-                $"{report.NegativeReservations.Count} réservation(s) négative(s) {normalized} " +
-                $"({report.TotalNegativeReservation} $).");
+                $"{report.NormalizedReservations.Count} réservation(s) négative(s) {normalized} " +
+                $"({report.TotalNegativeReservation} $)" + outOfScope);
 
             logger.LogInformation(
                 "CreditLostBudgetAllowanceRefunds :: corrections (CSV) - " +
@@ -455,16 +493,19 @@ namespace Sig.App.Backend.BackgroundJobs
 
             if (report.NegativeReservations.Count > 0)
             {
+                // Deux colonnes de plus que le strict nécessaire : sans elles, rien dans ce CSV ne
+                // distingue une ligne remise à 0 d'une ligne seulement signalée.
                 logger.LogWarning(
                     "CreditLostBudgetAllowanceRefunds :: réservations négatives (CSV) - " +
-                    "BeneficiaireId;AbonnementId;EnveloppeId;Organisation;Abonnement;Reservation");
+                    "BeneficiaireId;AbonnementId;EnveloppeId;Organisation;Abonnement;Reservation;" +
+                    "RemiseAZero;Note");
 
                 foreach (var line in report.NegativeReservations)
                 {
                     logger.LogWarning(
                         $"CreditLostBudgetAllowanceRefunds :: {line.BeneficiaryId};{line.SubscriptionId};" +
                         $"{line.BudgetAllowanceId};{Csv(line.OrganizationName)};{Csv(line.SubscriptionName)};" +
-                        $"{line.RemainingAllocatedAmount}");
+                        $"{line.RemainingAllocatedAmount};{line.Normalized};{Csv(line.Note)}");
                 }
             }
 
@@ -523,8 +564,22 @@ namespace Sig.App.Backend.BackgroundJobs
             public IReadOnlyList<CorrectionLine> MismatchedCorrections =>
                 Corrections.Where(x => x.Outcome == Outcome.Credited && !x.MatchesReviewedAmount).ToList();
 
+            /// <summary>Les réservations que le job a réellement remises à 0.</summary>
+            public IReadOnlyList<NegativeReservationLine> NormalizedReservations =>
+                NegativeReservations.Where(x => x.Normalized).ToList();
+
+            /// <summary>
+            /// Les réservations négatives vues ailleurs sur la plateforme et laissées intactes. À
+            /// enquêter dans leur propre ticket, pas à corriger ici - voir CRCL-2681.
+            /// </summary>
+            public IReadOnlyList<NegativeReservationLine> OutOfScopeReservations =>
+                NegativeReservations.Where(x => !x.Normalized).ToList();
+
             public decimal TotalCredited => CreditedCorrections.Sum(x => x.Credit);
-            public decimal TotalNegativeReservation => NegativeReservations.Sum(x => x.RemainingAllocatedAmount);
+            public decimal TotalNegativeReservation =>
+                NormalizedReservations.Sum(x => x.RemainingAllocatedAmount);
+            public decimal TotalNegativeReservationOutOfScope =>
+                OutOfScopeReservations.Sum(x => x.RemainingAllocatedAmount);
         }
 
         public class CorrectionLine
@@ -596,6 +651,15 @@ namespace Sig.App.Backend.BackgroundJobs
             public string OrganizationName { get; init; }
             public string SubscriptionName { get; init; }
             public decimal RemainingAllocatedAmount { get; init; }
+
+            /// <summary>
+            /// <c>true</c> si le job a remis cette réservation à 0. <c>false</c> pour une paire vue hors
+            /// du périmètre du ticket : elle est signalée, jamais écrite.
+            /// </summary>
+            public bool Normalized { get; init; }
+
+            /// <summary>Renseignée seulement quand la ligne n'a pas été normalisée, pour dire pourquoi.</summary>
+            public string Note { get; init; }
         }
     }
 }
