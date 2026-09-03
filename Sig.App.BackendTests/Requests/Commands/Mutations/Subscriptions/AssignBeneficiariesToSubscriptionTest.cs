@@ -496,6 +496,32 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Subscriptions
         }
 
         [Fact]
+        public async Task AssigningOnTheEndDateBeforeTheFundJobReservesTheLastPayment()
+        {
+            // CRCL-2675 : le job livre le versement qui tombe le jour même de EndDate. Une assignation
+            // faite ce jour-là, avant le run de 08:00 UTC, doit donc réserver ce versement. Comparé en
+            // timestamp, EndDate (minuit) était déjà « passé » : on tombait dans la branche abonnement
+            // terminé, réservation 0, et la livraison du jour consommait une réservation inexistante.
+            var lastPaymentDay = new DateTime(subscription1.StartDate.Year, subscription1.StartDate.Month, 1).AddMonths(1);
+            subscription1.EndDate = lastPaymentDay;
+            DbContext.SaveChanges();
+
+            Clock.Reset(Instant.FromUtc(lastPaymentDay.Year, lastPaymentDay.Month, lastPaymentDay.Day, 3, 0));
+
+            var input = new AssignBeneficiariesToSubscription.Input()
+            {
+                OrganizationId = organization.GetIdentifier(),
+                SubscriptionId = subscription1.GetIdentifier(),
+                Beneficiaries = [beneficiary1.GetIdentifier()]
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            DbContext.SubscriptionBeneficiaries.Single().RemainingAllocatedAmount.Should().Be(50m);
+            DbContext.BudgetAllowances.First(x => x.SubscriptionId == subscription1.Id).AvailableFund.Should().Be(650);
+        }
+
+        [Fact]
         public async Task BulkAssignSizesEachBeneficiaryReservationIndependently()
         {
             // CRCL-2606 — Deux défauts en un seul test, tous deux dans le dimensionnement de la

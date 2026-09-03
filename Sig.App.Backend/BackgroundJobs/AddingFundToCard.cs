@@ -112,6 +112,14 @@ namespace Sig.App.Backend.BackgroundJobs
                 }
             }
 
+            // CRCL-2675 : la fenêtre du job se compare en DATE, jamais en timestamp. StartDate et
+            // EndDate sont stockés à minuit UTC alors que le run tombe à 08:00 UTC : avec
+            // `EndDate >= today`, un abonnement dont le dernier versement tombe le jour même de sa
+            // date de fin était exclu de son propre run. La réservation faite à l'assignation, elle,
+            // compte ce versement (calcul calendaire, cf. SubscriptionHelper.GetTotalPayment) - le
+            // montant restait donc réservé dans l'enveloppe, jamais livré, jamais remboursé.
+            var todayDate = today.Date;
+
             var activeSubscriptions = await db.Subscriptions
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary).ThenInclude(x => x.Card).ThenInclude(x => x.Funds)
                 .Include(x => x.Beneficiaries).ThenInclude(x => x.Beneficiary).ThenInclude(x => x.Organization).ThenInclude(x => x.Project)
@@ -119,7 +127,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 .AsSplitQuery()
                 .Include(x => x.BudgetAllowances)
                 .Include(x => x.Types).ThenInclude(x => x.ProductGroup)
-                .Where(x => x.StartDate <= today && x.EndDate >= today && monthlyPaymentMoment.Contains(x.MonthlyPaymentMoment)).ToListAsync();
+                .Where(x => x.StartDate <= todayDate && x.EndDate >= todayDate && monthlyPaymentMoment.Contains(x.MonthlyPaymentMoment)).ToListAsync();
 
             var cardUsageStats = await LoadCardUsageStats(activeSubscriptions);
 
@@ -137,7 +145,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 .Include(x => x.Organization).ThenInclude(x => x.Project)
                 .OfType<OffPlatformBeneficiary>()
                 .Where(x => x.IsActive)
-                .Where(x => x.StartDate <= today && x.EndDate >= today && monthlyPaymentMoment.Contains(x.MonthlyPaymentMoment.Value))
+                .Where(x => x.StartDate <= todayDate && x.EndDate >= todayDate && monthlyPaymentMoment.Contains(x.MonthlyPaymentMoment.Value))
                 .ToListAsync();
 
             foreach (var beneficiary in activeBeneficiaries)
@@ -220,7 +228,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 Moments = monthlyPaymentMoment
             });
 
-            await db.SaveChangesAsync();
+            await db.SaveChangesWithBudgetAllowanceRetryAsync();
         }
 
         public async Task AddFundToSpecificBeneficiary(Id beneficiaryId, BeneficiaryType beneficiaryType, Id subscriptionId, InitiatedBy initiatedBy = null)
@@ -243,7 +251,7 @@ namespace Sig.App.Backend.BackgroundJobs
             if (subscriptionBeneficiary == null) return;
 
             await AddFundToExistingSubscriptionBeneficiary(subscriptionBeneficiary, initiatedBy);
-            await db.SaveChangesAsync();
+            await db.SaveChangesWithBudgetAllowanceRetryAsync();
         }
 
         public async Task AddFundToExistingSubscriptionBeneficiary(SubscriptionBeneficiary subscriptionBeneficiary, InitiatedBy initiatedBy = null)

@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Sig.App.Backend.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -142,7 +143,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 transaction.Status = FundTransactionStatus.Expired;
             }
 
-            await db.SaveChangesAsync();
+            await db.SaveChangesWithBudgetAllowanceRetryAsync();
         }
     }
 }
