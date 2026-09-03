@@ -77,7 +77,7 @@
         :router-link="{ name: $consts.urls.URL_SUBSCRIPTION_END_REPORT }"
         :label="t('subscription-end-report')" />
       <SecondaryMenuItem
-        v-if="manageProjectManagers || manageOrganizationManagers"
+        v-if="manageBudgetAllowance"
         :router-link="{ name: $consts.urls.URL_BUDGET_ALLOWANCE_REPORT }"
         :label="t('budget-allowance-report')" />
       <SecondaryMenuItem
@@ -116,7 +116,8 @@ import {
   GLOBAL_MANAGE_BENEFICIARIES,
   GLOBAL_MANAGE_SPECIFIC_MARKET_GROUP,
   GLOBAL_MANAGE_SPECIFIC_MARKET,
-  GLOBAL_MANAGE_MARKETGROUP_MANAGERS
+  GLOBAL_MANAGE_MARKETGROUP_MANAGERS,
+  GLOBAL_MANAGE_BUDGET_ALLOWANCE
 } from "@/lib/consts/permissions";
 import { LANG_EN } from "@/lib/consts/langs";
 import {
@@ -158,6 +159,10 @@ const manageMarketGroupManagers = computed(() => {
 
 const manageCards = computed(() => {
   return getGlobalPermissions.value.includes(GLOBAL_MANAGE_CARDS);
+});
+
+const manageBudgetAllowance = computed(() => {
+  return getGlobalPermissions.value.includes(GLOBAL_MANAGE_BUDGET_ALLOWANCE);
 });
 
 const manageProgram = computed(() => {

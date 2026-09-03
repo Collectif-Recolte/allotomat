@@ -35,18 +35,20 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
             var transactionLogs = await query.AsNoTracking().ToListAsync();
             var transactionLogsGroupBy = transactionLogs.GroupBy(x => x.OrganizationId);
             var organizations = await db.Organizations.Where(x => transactionLogsGroupBy.Select(x => x.Key).Contains(x.Id)).AsNoTracking().ToListAsync();
+            var subscriptionIds = transactionLogs.Select(x => x.SubscriptionId).Distinct();
+            var subscriptions = await db.Subscriptions.Where(x => subscriptionIds.Any(y => y == x.Id)).AsNoTracking().ToListAsync();
 
-            var result = SubscriptionEndReportPagination.For(transactionLogsGroupBy.Select(x =>
+            var items = transactionLogsGroupBy.Select(x =>
             {
                 var transactionBySubscription = x.Select(x => x).Where(x => x.SubscriptionId.HasValue).GroupBy(x => x.SubscriptionId.Value);
                 var reportBySubscription = transactionBySubscription.Select(y =>
                 {
-                    var subscription = db.Subscriptions.AsNoTracking().FirstOrDefault(z => z.Id == y.Key);
+                    var subscription = subscriptions.FirstOrDefault(z => z.Id == y.Key);
                     var transactions = y.ToList();
 
                     return new SubscriptionEndTransactionGraphType()
                     {
-                        Subscription = new SubscriptionGraphType(subscription),
+                        Subscription = subscription != null ? new SubscriptionGraphType(subscription) : null,
                         TotalPurchases = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).Count(),
                         CardsWithFunds = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.ManuallyAddingFundTransactionLog || z.Discriminator == TransactionLogDiscriminator.SubscriptionAddingFundTransactionLog).DistinctBy(z => z.CardNumber).Count(),
                         CardsUsedForPurchases = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).DistinctBy(z => z.CardNumber).Count(),
@@ -55,10 +57,12 @@ namespace Sig.App.Backend.Requests.Queries.Organizations
                         TotalPurchaseValue = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog).Sum(z => z.TotalAmount) - transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.RefundPaymentTransactionLog).Sum(z => z.TotalAmount),
                         TotalExpiredAmount = transactions.Where(z => z.Discriminator == TransactionLogDiscriminator.ExpireFundTransactionLog).Sum(z => z.TotalAmount)
                     };
-                });
+                }).ToList();
 
                 return new SubscriptionEndReportGraphType { Organization = new OrganizationGraphType(organizations.First(y => y.Id == x.Key)), SubscriptionEndTransactions = reportBySubscription };
-            }), request.Page);
+            }).ToList();
+
+            var result = SubscriptionEndReportPagination.For(items, request.Page);
 
             result.Total = new SubscriptionEndReportTotalGraphType()
             {
