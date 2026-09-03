@@ -498,6 +498,25 @@ namespace Sig.App.Backend.BackgroundJobs
         {
             var subscription = subscriptionBeneficiary.Subscription;
             var beneficiary = subscriptionBeneficiary.Beneficiary;
+            var totalAmount = subscriptionTypes.Sum(x => x.Amount);
+
+            // CRCL-2681 — On ne relâche jamais plus que ce qui est réservé. Un participant sans carte
+            // sur un abonnement usage-based plafonné repasse ici à chaque échéance, même une fois son
+            // plafond de versements atteint : sans ce garde-fou le job recrédite l'enveloppe d'un
+            // versement qu'elle n'a jamais retenu et creuse la réservation sous zéro, indéfiniment
+            // tant que l'abonnement court.
+            //
+            // Le remboursement est tout ou rien : rembourser partiellement crédite quand même
+            // l'enveloppe de la différence. Une réservation null (ligne pas encore reconstruite par
+            // BackfillSubscriptionBeneficiaryAllocation) veut dire « montant inconnu », pas zéro : on
+            // laisse passer, comme AdjustAllocation qui ignore alors le delta.
+            if (subscriptionBeneficiary.RemainingAllocatedAmount.HasValue &&
+                subscriptionBeneficiary.RemainingAllocatedAmount.Value < totalAmount)
+            {
+                logger.LogWarning($"[CRCL-2681] Remboursement de {totalAmount} refusé pour bénéficiaire {beneficiary.Id} / abonnement {subscription.Id} : réservation restante ({subscriptionBeneficiary.RemainingAllocatedAmount.Value}) insuffisante.");
+                return;
+            }
+
             var budgetAllowance = subscription.BudgetAllowances.First(x => x.OrganizationId == beneficiary.OrganizationId);
 
             // We refund the budget allowance
@@ -516,13 +535,13 @@ namespace Sig.App.Backend.BackgroundJobs
                 });
             }
 
-            ConsumeAllocation(subscriptionBeneficiary, subscriptionTypes.Sum(x => x.Amount));
+            ConsumeAllocation(subscriptionBeneficiary, totalAmount);
 
             db.TransactionLogs.Add(new TransactionLog()
             {
                 Discriminator = TransactionLogDiscriminator.RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog,
                 CreatedAtUtc = clock.GetCurrentInstant().ToDateTimeUtc(),
-                TotalAmount = subscriptionTypes.Sum(x => x.Amount),
+                TotalAmount = totalAmount,
                 BeneficiaryId = beneficiary.Id,
                 BeneficiaryID1 = beneficiary.ID1,
                 BeneficiaryID2 = beneficiary.ID2,
