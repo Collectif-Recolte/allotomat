@@ -37,6 +37,14 @@ namespace Sig.App.Backend.Authorization
             this.permissions = permissions;
         }
 
+        /// <summary>
+        /// Name of the GraphQL argument carrying the scoped id, when it is neither "input" nor "id"
+        /// (for instance "marketId"). Left unset, the attribute keeps its historical behaviour.
+        /// Init-only: the attribute instance is shared across concurrent requests, so this carries
+        /// declaration-time configuration and never per-call state.
+        /// </summary>
+        public string ArgumentName { get; init; }
+
         // Dépendances résolues pour un seul appel de Execute. Cet attribut est construit une seule fois
         // avec le schéma (moteur GraphQL en singleton de processus) et ses instances sont partagées
         // entre requêtes concurrentes: un champ d'instance porterait le PermissionService ou le
@@ -61,7 +69,7 @@ namespace Sig.App.Backend.Authorization
             var userManager = context.DependencyInjector.Resolve<UserManager<AppUser>>();
             var db = context.DependencyInjector.Resolve<AppDbContext>();
             var callContext = new CallContext(permissionService, db);
-            var input = context.GetInputValue();
+            var input = context.GetInputValue(ArgumentName);
             var appUserContext = ((IAppUserContext)context.UserContext);
 
             var currentUser = await userManager.FindByIdAsync(appUserContext.CurrentUser.GetUserId());
