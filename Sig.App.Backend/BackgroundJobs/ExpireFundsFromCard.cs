@@ -88,10 +88,14 @@ namespace Sig.App.Backend.BackgroundJobs
                     if (transaction is SubscriptionAddingFundTransaction saft)
                         subscription = saftSubscriptionTypes.FirstOrDefault(x => x.Id == saft.SubscriptionTypeId)?.Subscription;
 
-                    // The envelope credit below only applies to subscriptions, so a subscription resolved here
-                    // is expected to carry a budget allowance for the beneficiary's organization. When it does
-                    // not, the transaction is skipped rather than expired without refunding the envelope: the
-                    // refund line has to stay inside the same guard as the debit it balances.
+                    // Expiring a payment is three moves that only count together: take the amount off the card
+                    // total, give it back to the organization's envelope, mark the payment expired. The envelope
+                    // move only applies when a subscription was resolved above, and the previous code took the
+                    // allowance with `First` - a missing one threw mid-loop and, since the job saves once at the
+                    // very end, rolled back the whole night, for every program. Bailing out here comes before the
+                    // first of the three moves: the payment is left strictly intact (`continue` skips the
+                    // AvailableFund and Status writes below) and stays repairable, and the rest of the pass
+                    // expires normally.
                     BudgetAllowance budgetAllowance = null;
                     if (subscription != null)
                     {
