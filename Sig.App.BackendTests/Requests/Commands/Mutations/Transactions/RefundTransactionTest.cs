@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
 using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
@@ -848,6 +849,77 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             transactionLog.Discriminator.Should().Be(TransactionLogDiscriminator.RefundPaymentTransactionLog);
             transactionLog.SubscriptionId.Should().Be(subscription.Id);
             transactionLog.SubscriptionName.Should().Be(subscription.Name);
+        }
+
+        // CRCL-2669 - Le plafond de remboursement est lu au début du handler et consommé
+        // (RefundAmount += demandé) à la fin. Deux remboursements du même paiement - deux employés,
+        // ou un double clic - passaient donc tous les deux le contrôle. Et depuis que les crédits de
+        // carte sont rebasés au lieu de s'écraser, l'argent était rendu DEUX FOIS pendant que le
+        // compteur n'en enregistrait qu'un : le paiement restait remboursable.
+        [Fact]
+        public async Task TwoRefundsOfTheSamePaymentReadingTheSameCap_OnlyTheFirstIsApplied()
+        {
+            var contextA = CreateDbContext();
+            var contextB = CreateDbContext();
+
+            // Les deux lectures d'abord : chaque contexte tient son instantané du paiement, avec
+            // RefundAmount à 0, avant que l'un des deux n'écrive.
+            await ReadPaymentAsync(contextA);
+            await ReadPaymentAsync(contextB);
+
+            await BuildHandler(contextA).Handle(BuildFullRefundInput(), CancellationToken.None);
+
+            // B a autorisé son remboursement sur un plafond que A vient de consommer. Replanifié sur
+            // des données fraîches, le plafond tranche pour de vrai : il ne reste rien à rendre.
+            Func<Task> second = () => BuildHandler(contextB).Handle(BuildFullRefundInput(), CancellationToken.None);
+            await second.Should().ThrowAsync<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.TooMuchRefundException>();
+
+            var verify = CreateDbContext();
+
+            // Les 20 $ ne sont rendus qu'une fois. Avant : 60, les deux crédits rebasés l'un sur
+            // l'autre.
+            var productGroupFund = await verify.Funds.AsNoTracking()
+                .Where(x => x.CardId == card.Id && x.ProductGroupId == productGroup.Id).Select(x => x.Amount).SingleAsync();
+            productGroupFund.Should().Be(40);
+
+            // Et le compteur dit la vérité : le paiement est intégralement remboursé, donc plus
+            // remboursable. Avant : 20 lui aussi, mais en face de 40 $ réellement rendus.
+            var cap = await verify.PaymentTransactionProductGroups.AsNoTracking()
+                .Where(x => x.PaymentTransactionId == initialPaymentTransaction2.Id && x.ProductGroupId == productGroup.Id)
+                .Select(x => new { x.Amount, x.RefundAmount }).SingleAsync();
+            cap.RefundAmount.Should().Be(20);
+            cap.RefundAmount.Should().Be(cap.Amount);
+        }
+
+        private async Task ReadPaymentAsync(AppDbContext context) =>
+            await context.Transactions.OfType<PaymentTransaction>()
+                .Include(x => x.Card).ThenInclude(x => x.Funds)
+                .Include(x => x.TransactionByProductGroups)
+                .Include(x => x.PaymentTransactionAddingFundTransactions).ThenInclude(x => x.AddingFundTransaction)
+                .Include(x => x.Transactions)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(x => x.Id == initialPaymentTransaction2.Id);
+
+        private Backend.Requests.Commands.Mutations.Transactions.RefundTransaction BuildHandler(AppDbContext context) =>
+            new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction(
+                NullLogger<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction>.Instance,
+                context, mailer.Object, Clock, HttpContextAccessor, UserManager);
+
+        private Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input BuildFullRefundInput()
+        {
+            var input = new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
+            {
+                InitialTransactionId = initialPaymentTransaction2.GetIdentifier(),
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>(),
+                Password = "Abcd1234!!"
+            };
+            input.Transactions.Add(new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
+            {
+                Amount = 20,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            return input;
         }
     }
 }

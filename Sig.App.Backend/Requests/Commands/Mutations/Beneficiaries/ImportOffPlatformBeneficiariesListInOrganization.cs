@@ -310,7 +310,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Beneficiaries
                 }
             }
 
-            await db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesWithFundRetryAsync(cancellationToken);
 
             return new Payload
             {

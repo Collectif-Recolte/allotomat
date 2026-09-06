@@ -8,6 +8,7 @@ using Sig.App.Backend.DbModel;
 using Sig.App.Backend.DbModel.Entities.Cards;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
+using Sig.App.Backend.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,7 +71,7 @@ namespace Sig.App.Backend.BackgroundJobs
                 }
             }
 
-            await db.SaveChangesAsync();
+            await db.SaveChangesWithFundRetryAsync();
         }
     }
 }

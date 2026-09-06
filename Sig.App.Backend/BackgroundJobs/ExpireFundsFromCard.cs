@@ -181,7 +181,7 @@ namespace Sig.App.Backend.BackgroundJobs
                     "available fund and status left untouched");
             }
 
-            await db.SaveChangesWithBudgetAllowanceRetryAsync();
+            await db.SaveChangesWithFundRetryAsync();
         }
     }
 }

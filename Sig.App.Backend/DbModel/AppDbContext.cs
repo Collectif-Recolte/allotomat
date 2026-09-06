@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -337,8 +337,34 @@ namespace Sig.App.Backend.DbModel
                         j => j.HasOne<PaymentTransaction>().WithMany().OnDelete(DeleteBehavior.ClientCascade));
             });
 
+            Configure<PaymentTransactionProductGroup>(_ =>
+            {
+                // CRCL-2669 - RefundAmount is not a balance, it is the CAP that authorizes the next
+                // refund: RefundTransaction refuses a refund when "Amount - RefundAmount < asked".
+                // The check reads it, the write does "RefundAmount += asked", and nothing separated
+                // the two - so two refunds of the same payment both passed the check and the second
+                // overwrote the first counter, leaving the payment under-marked and refundable again.
+                // Making it a token turns that race into a DbUpdateConcurrencyException, which
+                // RefundTransaction re-plans on fresh data (the cap then sees the first refund).
+                //
+                // This matters more since the card credits are rebased instead of lost: both refunds
+                // used to fight over Fund.Amount and one silently disappeared, which accidentally
+                // hid the duplication. Now both credits land, so the cap has to be right.
+                _.Property(x => x.RefundAmount).IsConcurrencyToken();
+            });
+
+            Configure<PaymentTransactionAddingFundTransaction>(_ =>
+            {
+                // CRCL-2669 - Same cap, per deposit slice: the refund loop allocates what it gives
+                // back against "Amount - RefundAmount" of each slice it consumed.
+                _.Property(x => x.RefundAmount).IsConcurrencyToken();
+            });
+
             Configure<AddingFundTransaction>(_ =>
             {
+                // CRCL-2669 - Same rule for the deposit counter a purchase is allocated to (see Fund).
+                _.Property(x => x.AvailableFund).IsConcurrencyToken();
+
                 _.HasMany(x => x.PaymentTransactionAddingFundTransactions)
                     .WithOne(x => x.AddingFundTransaction)
                     .OnDelete(DeleteBehavior.NoAction);
@@ -365,7 +391,7 @@ namespace Sig.App.Backend.DbModel
                 // CRCL-2677 - AvailableFund est son propre jeton de concurrence: chaque UPDATE porte
                 // « WHERE AvailableFund = <valeur lue> », donc deux mouvements d'enveloppe concurrents
                 // ne peuvent plus s'écraser silencieusement. Le perdant lève un
-                // DbUpdateConcurrencyException, rejoué par SaveChangesWithBudgetAllowanceRetryAsync.
+                // DbUpdateConcurrencyException, rejoué par SaveChangesWithFundRetryAsync.
                 _.Property(x => x.AvailableFund).IsConcurrencyToken();
 
                 _.HasOne(x => x.Organization)
@@ -396,6 +422,13 @@ namespace Sig.App.Backend.DbModel
 
             Configure<Fund>(_ =>
             {
+                // CRCL-2669 - Amount is its own concurrency token: the UPDATE carries
+                // "WHERE Amount = <value read>", so a stale write (the deposit job holding its
+                // snapshot for a whole run, two purchases reading the same balance) can no longer
+                // erase a concurrent movement. The loser raises a DbUpdateConcurrencyException,
+                // rebased and replayed by SaveChangesWithFundRetryAsync.
+                _.Property(x => x.Amount).IsConcurrencyToken();
+
                 _.HasOne(x => x.Card)
                     .WithMany(x => x.Funds)
                     .HasForeignKey(x => x.CardId);
