@@ -5,6 +5,10 @@
         CreateBudgetAllowanceLog,
         EditBudgetAllowanceLog,
         MoveBudgetAllowanceLog,
-        DeleteBudgetAllowanceLog
+        DeleteBudgetAllowanceLog,
+
+        // CRCL-2678 : crédit correctif d'un remboursement journalisé mais perdu sous concurrence.
+        // Écrit uniquement par CreditLostBudgetAllowanceRefunds.
+        CreditLostRefundBudgetAllowanceLog
     }
 }

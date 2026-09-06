@@ -421,7 +421,7 @@ public class DevDataSeeder : IDataSeeder
         beneficiary1.Subscriptions.Add(subscriptionBeneficiary);
         organization.Beneficiaries.Add(beneficiary1);
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesWithBudgetAllowanceRetryAsync();
     }
 
     private async Task SeedDevCards()

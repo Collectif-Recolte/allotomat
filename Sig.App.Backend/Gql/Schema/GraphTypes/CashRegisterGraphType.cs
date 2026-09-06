@@ -1,7 +1,10 @@
 using GraphQL.Conventions;
 using GraphQL.DataLoader;
+using Microsoft.AspNetCore.Identity;
+using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.DbModel.Entities.Markets;
+using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Extensions;
 using Sig.App.Backend.Gql.Interfaces;
 using Sig.App.Backend.Services.Permission;
@@ -26,8 +29,17 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             this.cashRegister = cashRegister;
         }
 
-        public async Task<string> KioskPassword(IAppUserContext ctx, [Inject] PermissionService permissionService)
+        // FILETS-36: this manual guard skipped the account status check that RequirePermissionAttribute
+        // does before looking at permissions, so a disabled account managing this market could still
+        // read the kiosk password.
+        public async Task<string> KioskPassword(IAppUserContext ctx, [Inject] PermissionService permissionService, [Inject] UserManager<AppUser> userManager)
         {
+            var currentUser = await userManager.FindByIdAsync(ctx.CurrentUser.GetUserId());
+            if (currentUser?.Status != UserStatus.Actived)
+            {
+                return null;
+            }
+
             var marketPermissions = await permissionService.GetMarketPermissions(
                 ctx.CurrentUser,
                 cashRegister.MarketId.ToString());
@@ -40,8 +52,15 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
             return cashRegister.KioskPassword;
         }
 
-        public async Task<string> KioskAccessToken(IAppUserContext ctx, [Inject] PermissionService permissionService)
+        // FILETS-36: same defect as KioskPassword, on the sibling resolver.
+        public async Task<string> KioskAccessToken(IAppUserContext ctx, [Inject] PermissionService permissionService, [Inject] UserManager<AppUser> userManager)
         {
+            var currentUser = await userManager.FindByIdAsync(ctx.CurrentUser.GetUserId());
+            if (currentUser?.Status != UserStatus.Actived)
+            {
+                return null;
+            }
+
             var marketPermissions = await permissionService.GetMarketPermissions(
                 ctx.CurrentUser,
                 cashRegister.MarketId.ToString());

@@ -362,6 +362,12 @@ namespace Sig.App.Backend.DbModel
 
             Configure<BudgetAllowance>(_ =>
             {
+                // CRCL-2677 - AvailableFund est son propre jeton de concurrence: chaque UPDATE porte
+                // « WHERE AvailableFund = <valeur lue> », donc deux mouvements d'enveloppe concurrents
+                // ne peuvent plus s'écraser silencieusement. Le perdant lève un
+                // DbUpdateConcurrencyException, rejoué par SaveChangesWithBudgetAllowanceRetryAsync.
+                _.Property(x => x.AvailableFund).IsConcurrencyToken();
+
                 _.HasOne(x => x.Organization)
                     .WithMany(x => x.BudgetAllowances)
                     .HasForeignKey(x => x.OrganizationId);

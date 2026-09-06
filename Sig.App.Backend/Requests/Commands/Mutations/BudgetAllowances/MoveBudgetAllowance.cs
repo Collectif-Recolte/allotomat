@@ -64,7 +64,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances
             var log = await budgetAllowanceLogFactory.CreateLog(BudgetAllowanceLogDiscriminator.MoveBudgetAllowanceLog, request.Amount, initialBudgetAllowance, targetBudgetAllowance);
             db.BudgetAllowanceLogs.Add(log);
 
-            await db.SaveChangesAsync();
+            await db.SaveChangesWithBudgetAllowanceRetryAsync();
 
             logger.LogInformation($"[Mutation] MoveBudgetAllowance - Budget allowance move from {initialBudgetAllowance.Id} to {targetBudgetAllowance.Id} ({request.Amount})");
 
