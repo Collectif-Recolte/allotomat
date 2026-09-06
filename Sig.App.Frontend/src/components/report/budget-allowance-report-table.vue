@@ -9,6 +9,7 @@
       "edit-budget-allowance-transaction": "Edit budget envelope",
       "move-budget-allowance-transaction": "Move budget envelope",
       "create-budget-allowance-transaction": "Create budget envelope",
+      "credit-lost-refund-budget-allowance-transaction": "Corrective credit: lost refund",
       "target-budget-allowance-name": "Recipient envelope"
     },
     "fr": {
@@ -20,6 +21,7 @@
       "edit-budget-allowance-transaction": "Modification d'une enveloppe",
       "move-budget-allowance-transaction": "Transfert d'une enveloppe",
       "create-budget-allowance-transaction": "Création d'une enveloppe",
+      "credit-lost-refund-budget-allowance-transaction": "Crédit correctif : remboursement perdu",
       "target-budget-allowance-name": "Enveloppe destinataire"
     }
   }
@@ -93,6 +95,8 @@ function getBudgetAllowanceLogDescription(budgetAllowanceLog) {
       return t("move-budget-allowance-transaction");
     case "CREATE_BUDGET_ALLOWANCE_LOG":
       return t("create-budget-allowance-transaction");
+    case "CREDIT_LOST_REFUND_BUDGET_ALLOWANCE_LOG":
+      return t("credit-lost-refund-budget-allowance-transaction");
   }
 }
 

@@ -141,10 +141,13 @@ namespace Sig.App.Backend.Helpers
 
             // CRCL-2577: between 00:00 UTC and the AddingFundToCard run on a payment day,
             // the calendar already excludes today's payment, but the job has not delivered it yet.
+            // CRCL-2675: comparaison en DATE. today porte l'heure du run, StartDate et EndDate sont
+            // à minuit : en timestamp, le versement du jour même de EndDate n'était jamais compté
+            // alors que le job le livre bel et bien ce jour-là.
             if (!todaysFundJobCompleted
                 && IsMonthlyPaymentDay(subscription.MonthlyPaymentMoment, today)
-                && today >= subscription.StartDate
-                && today <= subscription.EndDate)
+                && today.Date >= subscription.StartDate.Date
+                && today.Date <= subscription.EndDate.Date)
             {
                 cardPaymentRemaining++;
             }

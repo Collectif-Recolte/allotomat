@@ -28,13 +28,15 @@ namespace Sig.App.BackendTests.Gql
     // resolution pipeline, never in the handler. The only way to prove it blocks a call is therefore
     // to route a real query through the actual GraphQL engine, not to call the MediatR handler directly.
     //
-    // The engine is shared between calls within a single test method, never rebuilt per call: FILETS-32
-    // documents an instance field on RequirePermissionAttribute that is never reset, which only exists
-    // on the singleton engine that Startup.cs registers in production. Rebuilding a fresh engine per
-    // call would hide that defect and would only prove the guard in a configuration production never
-    // uses. For GenerateTransactionsReport, which goes through that attribute, the refused call therefore
-    // runs before the accepted call on the SAME engine: an accepted call pins that field to true for
-    // every subsequent call, so the reverse order would hide a refusal that should occur.
+    // The engine is shared between calls within a single test method, never rebuilt per call, and it
+    // stays that way now that !5436 has landed. FILETS-32 was a `private bool hasPermission` on
+    // RequirePermissionAttribute that was never reset: once any call was accepted, the singleton engine
+    // that Startup.cs registers in production answered "allowed" for every later call. !5436 moved that
+    // state into locals, so the field is gone — but the only configuration in which it was ever visible
+    // is the shared engine, so rebuilding one per call here would give up the net that catches the next
+    // instance field somebody adds. For GenerateTransactionsReport the refused call therefore still runs
+    // before the accepted call on the SAME engine: under FILETS-32 the reverse order hid the refusal,
+    // and keeping this order is what makes the test fail again if that state ever comes back.
     public class QueryPermissionTest : TestBase
     {
         private const string GenerateTransactionsReportQuery = @"

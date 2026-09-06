@@ -355,6 +355,42 @@ namespace Sig.App.BackendTests.Helpers
         }
 
         [Fact]
+        public void GetPaymentRemaining_LastPaymentDayIsTheEndDate_CountsTodayBeforeTheFundJob()
+        {
+            // CRCL-2675 — 08:00 UTC le jour de la date de fin, avant le passage du job. EndDate est
+            // stocké à minuit : comparé en timestamp il était déjà « passé » et le dernier versement
+            // disparaissait du calendrier, alors que le job le livre le jour même.
+            Clock.Reset(Instant.FromUtc(2026, 9, 1, 8, 0));
+
+            var subscription = new Subscription
+            {
+                StartDate = new DateTime(2026, 8, 15),
+                EndDate = new DateTime(2026, 9, 1),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth,
+                IsSubscriptionPaymentBasedCardUsage = false
+            };
+
+            subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: false).Should().Be(1);
+            subscription.GetPaymentRemaining(Clock, todaysFundJobCompleted: true).Should().Be(0);
+        }
+
+        [Fact]
+        public void GetTotalPayment_CountsThePaymentFallingOnTheEndDate()
+        {
+            // CRCL-2675 — Le total réservé à l'assignation compte le versement du jour de EndDate
+            // (15 août + 1er sept). C'est l'invariant que la fenêtre du job doit respecter.
+            var subscription = new Subscription
+            {
+                StartDate = new DateTime(2026, 8, 15),
+                EndDate = new DateTime(2026, 9, 1),
+                MonthlyPaymentMoment = SubscriptionMonthlyPaymentMoment.FirstAndFifteenthDayOfTheMonth,
+                IsSubscriptionPaymentBasedCardUsage = false
+            };
+
+            subscription.GetTotalPayment().Should().Be(2);
+        }
+
+        [Fact]
         public void GetPaymentRemaining_FifteenthDay_PaymentDayBeforeFundJob_IncludesToday()
         {
             Clock.Reset(Instant.FromUtc(2025, 6, 15, 6, 0));

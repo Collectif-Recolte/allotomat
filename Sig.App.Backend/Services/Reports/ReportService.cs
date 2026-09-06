@@ -210,6 +210,8 @@ namespace Sig.App.Backend.Services.Reports
                     return $"Remboursement d'enveloppe : Désassignation de carte / Envelope refund: Card unassigned";
                 case TransactionLogDiscriminator.AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog:
                     return $"Retrait d'enveloppe : Attribution d'abonnement / Envelope withdrawal: Subscription assigned";
+                case TransactionLogDiscriminator.ReleaseBudgetAllowanceFromEndedSubscriptionTransactionLog:
+                    return $"Remboursement d'enveloppe : Fin d'abonnement / Envelope refund: Subscription ended";
                 case TransactionLogDiscriminator.TransferFundTransactionLog:
                     return "Remplacement de carte / Card replacement";
                 default:
@@ -223,7 +225,8 @@ namespace Sig.App.Backend.Services.Reports
                 transactionLog.Discriminator == TransactionLogDiscriminator.PaymentTransactionLog ||
                 transactionLog.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromUnassignedCardTransactionLog ||
                 transactionLog.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromRemovedBeneficiaryFromSubscriptionTransactionLog ||
-                transactionLog.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog)
+                transactionLog.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog ||
+                transactionLog.Discriminator == TransactionLogDiscriminator.ReleaseBudgetAllowanceFromEndedSubscriptionTransactionLog)
             {
                 return -transactionLog.TotalAmount;
             }

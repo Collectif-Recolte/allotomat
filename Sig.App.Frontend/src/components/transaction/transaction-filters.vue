@@ -22,6 +22,7 @@
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Envelope refund: Subscription unassigned",
     "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Envelope refund: Card unassigned",
     "transaction-log-type-allocate-budget-allowance-from-subscription-assignment": "Envelope withdrawal: Subscription assigned",
+    "transaction-log-type-release-budget-allowance-from-ended-subscription": "Envelope refund: Subscription ended",
     "transaction-log-type-transfer": "Card replacement",
     "market": "Merchants",
     "cash-register": "Cash Registers",
@@ -51,6 +52,7 @@
     "transaction-log-type-refund-budget-allowance-from-removed-beneficiary-from-subscription": "Remboursement d'enveloppe : Désattribution d'abonnement",
     "transaction-log-type-refund-budget-allowance-from-unassigned-card": "Remboursement d'enveloppe : Désassignation de carte",
     "transaction-log-type-allocate-budget-allowance-from-subscription-assignment": "Retrait d'enveloppe : attribution d'abonnement",
+    "transaction-log-type-release-budget-allowance-from-ended-subscription": "Remboursement d'enveloppe : Fin d'abonnement",
     "transaction-log-type-transfer": "Remplacement de carte",
     "market": "Commerces",
     "cash-register": "Caisses",
@@ -421,6 +423,10 @@ const availableTransactionTypes = computed(() => {
     {
       value: "AllocateBudgetAllowanceFromSubscriptionAssignmentTransactionLog",
       label: t("transaction-log-type-allocate-budget-allowance-from-subscription-assignment")
+    },
+    {
+      value: "ReleaseBudgetAllowanceFromEndedSubscriptionTransactionLog",
+      label: t("transaction-log-type-release-budget-allowance-from-ended-subscription")
     },
     { value: "TransferFundTransactionLog", label: t("transaction-log-type-transfer") },
   ];

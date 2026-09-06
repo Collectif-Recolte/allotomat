@@ -268,7 +268,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             logger.LogInformation($"[Mutation] CreateManuallyAddingFundTransaction - Adding manual fund {request.Amount} to ({beneficiary.Id}) card for product group {productGroupId}");
 
-            await db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesWithBudgetAllowanceRetryAsync(cancellationToken);
 
             if (!isOffPlatformBeneficiary)
             {

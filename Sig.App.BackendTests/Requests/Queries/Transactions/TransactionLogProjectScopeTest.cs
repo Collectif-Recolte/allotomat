@@ -56,7 +56,7 @@ namespace Sig.App.BackendTests.Requests.Queries.Transactions
             DbContext.SaveChanges();
 
             projectManager = AddUser("manager@example.com", UserType.ProjectManager,
-                claims: new Claim(AppClaimTypes.ProjectManagerOf, ownProject.Id.ToString()));
+                claims: new[] { new Claim(AppClaimTypes.ProjectManagerOf, ownProject.Id.ToString()) });
             SetLoggedInUser(projectManager);
         }
 

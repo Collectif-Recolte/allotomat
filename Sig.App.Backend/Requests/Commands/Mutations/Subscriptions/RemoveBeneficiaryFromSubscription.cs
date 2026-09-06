@@ -138,7 +138,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
                 TransactionInitiatorEmail = currentUser?.Email
             });
             
-            await db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesWithBudgetAllowanceRetryAsync(cancellationToken);
 
             logger.LogInformation($"[Mutation] RemoveBeneficiaryFromSubscription - Beneficiary {beneficiary.Firstname} {beneficiary.Lastname} remove from subscription {subscription.Name}");
         }

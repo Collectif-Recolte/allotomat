@@ -32,11 +32,6 @@ namespace Sig.App.Backend.Authorization
     {
         private readonly object[] permissions;
 
-        private PermissionService permissionService;
-        private UserManager<AppUser> userManager;
-        private AppDbContext db;
-        private bool hasPermission;
-
         public RequirePermissionAttribute(params object[] permissions)
         {
             this.permissions = permissions;
@@ -50,21 +45,42 @@ namespace Sig.App.Backend.Authorization
         /// </summary>
         public string ArgumentName { get; init; }
 
+        // Dépendances résolues pour un seul appel de Execute. Cet attribut est construit une seule fois
+        // avec le schéma (moteur GraphQL en singleton de processus) et ses instances sont partagées
+        // entre requêtes concurrentes: un champ d'instance porterait le PermissionService ou le
+        // AppDbContext d'un autre appel après un await, y compris un DbContext déjà rendu au pool.
+        // Regroupé pour éviter de dupliquer les deux paramètres sur chaque méthode Has*Permission et
+        // Get*IdFromInput qui en a besoin.
+        private sealed class CallContext
+        {
+            public PermissionService PermissionService { get; }
+            public AppDbContext Db { get; }
+
+            public CallContext(PermissionService permissionService, AppDbContext db)
+            {
+                PermissionService = permissionService;
+                Db = db;
+            }
+        }
+
         public override async Task<object> Execute(IResolutionContext context, FieldResolutionDelegate next)
         {
-            permissionService = context.DependencyInjector.Resolve<PermissionService>();
-            userManager = context.DependencyInjector.Resolve<UserManager<AppUser>>();
-            db = context.DependencyInjector.Resolve<AppDbContext>();
+            var permissionService = context.DependencyInjector.Resolve<PermissionService>();
+            var userManager = context.DependencyInjector.Resolve<UserManager<AppUser>>();
+            var db = context.DependencyInjector.Resolve<AppDbContext>();
+            var callContext = new CallContext(permissionService, db);
             var input = context.GetInputValue(ArgumentName);
             var appUserContext = ((IAppUserContext)context.UserContext);
 
             var currentUser = await userManager.FindByIdAsync(appUserContext.CurrentUser.GetUserId());
 
+            var hasPermission = false;
+
             if (currentUser?.Status == DbModel.Enums.UserStatus.Actived)
             {
                 foreach (var permission in permissions)
                 {
-                    if (await HasPermission(appUserContext.CurrentUser, permission, input))
+                    if (await HasPermission(appUserContext.CurrentUser, permission, input, callContext))
                     {
                         hasPermission = true;
                         break;
@@ -78,92 +94,92 @@ namespace Sig.App.Backend.Authorization
             return await base.Execute(context, next);
         }
 
-        private async Task<bool> HasPermission(ClaimsPrincipal claimsPrincipal, object permission, object input)
+        private async Task<bool> HasPermission(ClaimsPrincipal claimsPrincipal, object permission, object input, CallContext callContext)
         {
             if (permission is GlobalPermission gp)
-                return await HasGlobalPermission(claimsPrincipal, gp);
+                return await HasGlobalPermission(claimsPrincipal, gp, callContext);
             if (permission is ProjectPermission pp)
-                return await HasProjectPermission(claimsPrincipal, pp, input);
+                return await HasProjectPermission(claimsPrincipal, pp, input, callContext);
             if (permission is MarketPermission mp)
-                return await HasMarketPermission(claimsPrincipal, mp, input);
+                return await HasMarketPermission(claimsPrincipal, mp, input, callContext);
             if (permission is OrganizationPermission op)
-                return await HasOrganizationPermission(claimsPrincipal, op, input);
+                return await HasOrganizationPermission(claimsPrincipal, op, input, callContext);
             if (permission is BeneficiaryPermission bp)
-                return await HasBeneficiaryPermissions(claimsPrincipal, bp, input);
+                return await HasBeneficiaryPermissions(claimsPrincipal, bp, input, callContext);
             if (permission is SubscriptionPermission sp)
-                return await HasSubscriptionPermissions(claimsPrincipal, sp, input);
+                return await HasSubscriptionPermissions(claimsPrincipal, sp, input, callContext);
             if (permission is BeneficiaryTypePermission btp)
-                return await HasBeneficiaryTypePermissions(claimsPrincipal, btp, input);
+                return await HasBeneficiaryTypePermissions(claimsPrincipal, btp, input, callContext);
             if (permission is CardPermission cp)
-                return await HasCardPermissions(claimsPrincipal, cp, input);
+                return await HasCardPermissions(claimsPrincipal, cp, input, callContext);
             if (permission is MarketGroupPermission mgp)
-                return await HasMarketGroupPermissions(claimsPrincipal, mgp, input);
+                return await HasMarketGroupPermissions(claimsPrincipal, mgp, input, callContext);
             return false;
         }
 
-        private async Task<bool> HasGlobalPermission(ClaimsPrincipal claimsPrincipal, GlobalPermission permission)
+        private async Task<bool> HasGlobalPermission(ClaimsPrincipal claimsPrincipal, GlobalPermission permission, CallContext callContext)
         {
-            var globalPermissions = await permissionService.GetGlobalPermissions(claimsPrincipal);
+            var globalPermissions = await callContext.PermissionService.GetGlobalPermissions(claimsPrincipal);
             return globalPermissions.Contains(permission);
         }
 
-        private async Task<bool> HasProjectPermission(ClaimsPrincipal claimsPrincipal, ProjectPermission permission, object input)
+        private async Task<bool> HasProjectPermission(ClaimsPrincipal claimsPrincipal, ProjectPermission permission, object input, CallContext callContext)
         {
-            var id = await GetProjectIdFromInput(input);
-            var projectPermissions = await permissionService.GetProjectPermissions(claimsPrincipal, id);
+            var id = await GetProjectIdFromInput(input, callContext.Db);
+            var projectPermissions = await callContext.PermissionService.GetProjectPermissions(claimsPrincipal, id);
             return projectPermissions.Contains(permission);
         }
 
-        private async Task<bool> HasMarketPermission(ClaimsPrincipal claimsPrincipal, MarketPermission permission, object input)
+        private async Task<bool> HasMarketPermission(ClaimsPrincipal claimsPrincipal, MarketPermission permission, object input, CallContext callContext)
         {
-            var id = await GetMarketIdFromInput(input);
-            var marketPermissions = await permissionService.GetMarketPermissions(claimsPrincipal, id);
+            var id = await GetMarketIdFromInput(input, callContext.Db);
+            var marketPermissions = await callContext.PermissionService.GetMarketPermissions(claimsPrincipal, id);
             return marketPermissions.Contains(permission);
         }
 
-        private async Task<bool> HasOrganizationPermission(ClaimsPrincipal claimsPrincipal, OrganizationPermission permission, object input)
+        private async Task<bool> HasOrganizationPermission(ClaimsPrincipal claimsPrincipal, OrganizationPermission permission, object input, CallContext callContext)
         {
-            var id = await GetOrganizationIdFromInput(input);
-            var organizationPermissions = await permissionService.GetOrganizationPermissions(claimsPrincipal, id);
+            var id = await GetOrganizationIdFromInput(input, callContext.Db);
+            var organizationPermissions = await callContext.PermissionService.GetOrganizationPermissions(claimsPrincipal, id);
             return organizationPermissions.Contains(permission);
         }
 
-        private async Task<bool> HasBeneficiaryPermissions(ClaimsPrincipal claimsPrincipal, BeneficiaryPermission permission, object input)
+        private async Task<bool> HasBeneficiaryPermissions(ClaimsPrincipal claimsPrincipal, BeneficiaryPermission permission, object input, CallContext callContext)
         {
-            var id = await GetBeneficiaryIdFromInput(input);
-            var beneficiaryPermissions = await permissionService.GetBeneficiaryPermissions(claimsPrincipal, id);
+            var id = await GetBeneficiaryIdFromInput(input, callContext.Db);
+            var beneficiaryPermissions = await callContext.PermissionService.GetBeneficiaryPermissions(claimsPrincipal, id);
             return beneficiaryPermissions.Contains(permission);
         }
 
-        private async Task<bool> HasSubscriptionPermissions(ClaimsPrincipal claimsPrincipal, SubscriptionPermission permission, object input)
+        private async Task<bool> HasSubscriptionPermissions(ClaimsPrincipal claimsPrincipal, SubscriptionPermission permission, object input, CallContext callContext)
         {
             var id = GetSubscriptionIdFromInput(input);
-            var subscriptionPermissions = await permissionService.GetSubscriptionPermissions(claimsPrincipal, id);
+            var subscriptionPermissions = await callContext.PermissionService.GetSubscriptionPermissions(claimsPrincipal, id);
             return subscriptionPermissions.Contains(permission);
         }
 
-        private async Task<bool> HasBeneficiaryTypePermissions(ClaimsPrincipal claimsPrincipal, BeneficiaryTypePermission permission, object input)
+        private async Task<bool> HasBeneficiaryTypePermissions(ClaimsPrincipal claimsPrincipal, BeneficiaryTypePermission permission, object input, CallContext callContext)
         {
             var id = GetBeneficiaryTypeIdFromInput(input);
-            var beneficiaryTypePermissions = await permissionService.GetBeneficiaryTypePermissions(claimsPrincipal, id);
+            var beneficiaryTypePermissions = await callContext.PermissionService.GetBeneficiaryTypePermissions(claimsPrincipal, id);
             return beneficiaryTypePermissions.Contains(permission);
         }
 
-        private async Task<bool> HasCardPermissions(ClaimsPrincipal claimsPrincipal, CardPermission permission, object input)
+        private async Task<bool> HasCardPermissions(ClaimsPrincipal claimsPrincipal, CardPermission permission, object input, CallContext callContext)
         {
             var id = GetCardIdFromInput(input);
-            var cardPermissions = await permissionService.GetCardPermissions(claimsPrincipal, id);
+            var cardPermissions = await callContext.PermissionService.GetCardPermissions(claimsPrincipal, id);
             return cardPermissions.Contains(permission);
         }
 
-        private async Task<bool> HasMarketGroupPermissions(ClaimsPrincipal claimsPrincipal, MarketGroupPermission permission, object input)
+        private async Task<bool> HasMarketGroupPermissions(ClaimsPrincipal claimsPrincipal, MarketGroupPermission permission, object input, CallContext callContext)
         {
             var id = GetMarketGroupIdFromInput(input);
-            var marketGroupPermissions = await permissionService.GetMarketGroupPermissions(claimsPrincipal, id);
+            var marketGroupPermissions = await callContext.PermissionService.GetMarketGroupPermissions(claimsPrincipal, id);
             return marketGroupPermissions.Contains(permission);
         }
 
-        private async Task<string> GetProjectIdFromInput(object input)
+        private async Task<string> GetProjectIdFromInput(object input, AppDbContext db)
         {
             if (input is HaveProjectId hpi)
             {
@@ -203,7 +219,7 @@ namespace Sig.App.Backend.Authorization
             return null;
         }
 
-        private async Task<string> GetMarketIdFromInput(object input)
+        private async Task<string> GetMarketIdFromInput(object input, AppDbContext db)
         {
             if (input is HaveInitialTransactionId hiti)
             {
@@ -250,7 +266,7 @@ namespace Sig.App.Backend.Authorization
             return null;
         }
 
-        private async Task<string> GetOrganizationIdFromInput(object input)
+        private async Task<string> GetOrganizationIdFromInput(object input, AppDbContext db)
         {
             if (input is HaveOrganizationId hoi)
             {
@@ -284,7 +300,7 @@ namespace Sig.App.Backend.Authorization
             return null;
         }
 
-        private async Task<string> GetBeneficiaryIdFromInput(object input)
+        private async Task<string> GetBeneficiaryIdFromInput(object input, AppDbContext db)
         {
             if (input is HaveBeneficiaryId hbi)
             {
