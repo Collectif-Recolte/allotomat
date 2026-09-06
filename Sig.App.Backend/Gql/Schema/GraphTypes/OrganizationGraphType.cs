@@ -132,7 +132,7 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
             return results.Map(x =>
             {
-                return new BudgetAllowanceLogGraphType(x);
+                return new BudgetAllowanceLogGraphType(x, organization.Id);
             });
         }
 

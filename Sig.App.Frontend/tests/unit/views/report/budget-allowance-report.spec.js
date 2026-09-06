@@ -39,6 +39,7 @@ const typeDefs = `
     subscriptionName: String
     targetOrganizationName: String
     targetSubscriptionName: String
+    isIncomingTransfer: Boolean
   }
   type BudgetAllowanceReport {
     totalCount: Int!
@@ -98,7 +99,8 @@ const organization = {
         organizationName: "Penticton SD67",
         subscriptionName: "Feeding Futures 2026",
         targetOrganizationName: null,
-        targetSubscriptionName: null
+        targetSubscriptionName: null,
+        isIncomingTransfer: false
       }
     ]
   }

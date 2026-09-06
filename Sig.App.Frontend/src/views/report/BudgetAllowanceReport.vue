@@ -170,6 +170,7 @@ const { result: resultProjects, loading: loadingProjects } = useQuery(
             subscriptionName
             targetOrganizationName
             targetSubscriptionName
+            isIncomingTransfer
           }
         }
       }
@@ -228,6 +229,7 @@ const { result: resultOrganizations, loading: loadingOrganizations } = useQuery(
             subscriptionName
             targetOrganizationName
             targetSubscriptionName
+            isIncomingTransfer
           }
         }
       }
