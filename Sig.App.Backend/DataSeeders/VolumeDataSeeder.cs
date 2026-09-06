@@ -34,9 +34,11 @@ namespace Sig.App.Backend.DataSeeders;
 /// proportions and the shape of the card/transaction relations are.
 ///
 /// Refuses to run outside a Development environment, and refuses to run against a database that
-/// already carries VolumeSeed data, complete or partial (for instance from an interrupted run): a
-/// seed this large has plenty of opportunity to be interrupted, and resuming it correctly would
-/// take more machinery than the problem is worth, so it asks for a clean database instead. Also
+/// already carries any project at all: its own data, complete or partial (for instance from an
+/// interrupted run), the rows DevDataSeeder produces, or anything a developer put there. A seed
+/// this large has plenty of opportunity to be interrupted, and resuming it correctly would take
+/// more machinery than the problem is worth; appending it to an existing dataset would give a
+/// mixed database whose volumes no longer mean anything. So it asks for a clean database. Also
 /// inert unless the VolumeSeed:Scale configuration key (environment variable VolumeSeed__Scale) is
 /// set to a positive number: 1 targets the full production volume, 0.1 a tenth of it for a quick
 /// pass. Startup only wires this seeder in place of DevDataSeeder under the same conditions; the
@@ -58,8 +60,8 @@ public class VolumeDataSeeder : IDataSeeder
     private const int MaxProjects = 8;
     private const int ParticipantBatchSize = 500;
 
-    // Marks a dataset this seeder already produced, so a second run can refuse cleanly instead of
-    // duplicating everything.
+    // Names the projects this seeder creates, so a dataset is recognizable as its work at a
+    // glance. It is not what the empty-database guard tests: that one refuses any project.
     private const string SeedMarkerPrefix = "VolumeSeed - Programme ";
 
     private enum TransactionKind
@@ -124,12 +126,18 @@ public class VolumeDataSeeder : IDataSeeder
             return;
         }
 
-        if (await db.Projects.AnyAsync(x => x.Name.StartsWith(SeedMarkerPrefix)))
+        // Any project at all, not only one carrying the VolumeSeed marker: the marker alone would
+        // let this seeder append its dataset on top of DevDataSeeder's rows ("SeedDev - Programme
+        // 1"), or on top of anything else a developer already had, which is exactly the mixed
+        // database the measurements this seeder exists to produce cannot be read from. Every
+        // dataset here is rooted in a Project, including the single row an interrupted run of this
+        // very seeder leaves behind, so this one check covers both cases.
+        if (await db.Projects.AnyAsync())
         {
             throw new NonEmptyDatabaseException(
-                "[VolumeDataSeeder] Refusing to seed: this database already carries VolumeSeed data, complete or " +
-                "partial (for instance from an interrupted run). Restore a clean database before running the " +
-                "volume seeder again.");
+                "[VolumeDataSeeder] Refusing to seed: this database already carries data (a VolumeSeed dataset, " +
+                "complete or partial from an interrupted run, the regular development seed, or your own rows). " +
+                "Restore a clean database before running the volume seeder.");
         }
 
         logger.LogInformation($"[VolumeDataSeeder] Seed(scale: {scale})");
@@ -737,9 +745,10 @@ public class VolumeDataSeeder : IDataSeeder
             $"Transactions: {stats.Transactions} [{breakdown}], TransactionLogs: {stats.TransactionLogs}");
     }
 
-    // Thrown instead of silently skipping when the database already carries VolumeSeed data,
-    // complete or partial: a marker saved before the rest of the dataset exists (the first project
-    // created) would otherwise let an interrupted run look finished on the next restart.
+    // Thrown instead of silently skipping when the database is not empty: a marker saved before
+    // the rest of the dataset exists (the first project created) would otherwise let an
+    // interrupted run look finished on the next restart, and a silent skip on a database that
+    // already holds other data would hide the fact that no volume dataset was produced.
     public class NonEmptyDatabaseException : Exception
     {
         public NonEmptyDatabaseException(string message) : base(message) { }

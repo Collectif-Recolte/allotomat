@@ -9,6 +9,7 @@ using Sig.App.Backend.DbModel.Entities.Projects;
 using Sig.App.Backend.DbModel.Entities.Transactions;
 using Sig.App.Backend.DbModel.Enums;
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,6 +30,12 @@ namespace Sig.App.BackendTests.DataSeeders
         private const int BaselineSubscriptions = 109;
         private const int BaselineBudgetAllowances = 567;
         private const int MaxProjects = 8;
+
+        // The seeder parses VolumeSeed:Scale with InvariantCulture, so the configuration value a
+        // test feeds it has to be written the same way. decimal.ToString() follows the machine's
+        // culture instead: on a French-locale developer machine 0.05m renders as "0,05", the parse
+        // fails, and the seeder skips silently, so the test fails there and only there.
+        private static string Config(decimal scale) => scale.ToString(CultureInfo.InvariantCulture);
 
         private static int Expected(int baseline, decimal scale) =>
             Math.Max(1, (int)Math.Round(baseline * scale, MidpointRounding.AwayFromZero));
@@ -135,7 +142,7 @@ namespace Sig.App.BackendTests.DataSeeders
         public async Task Seed_WithScaleConfigured_ScalesEveryEntityByThatFactor()
         {
             const decimal scale = 0.05m;
-            var seeder = CreateSeeder(scale.ToString());
+            var seeder = CreateSeeder(Config(scale));
 
             await seeder.Seed();
 
@@ -159,13 +166,13 @@ namespace Sig.App.BackendTests.DataSeeders
             // Two entirely separate databases: TestBase's shared DbContext would make the second
             // Seed() see the first run's data and refuse as an already-seeded dataset.
             using var fullDbContext = CreateIndependentDbContext();
-            var fullSeeder = CreateSeeder(fullScale.ToString(), fullDbContext);
+            var fullSeeder = CreateSeeder(Config(fullScale), fullDbContext);
             await fullSeeder.Seed();
             var fullTransactionCount = await fullDbContext.Transactions.CountAsync();
             var fullFundCount = await fullDbContext.Funds.CountAsync();
 
             using var tenthDbContext = CreateIndependentDbContext();
-            var tenthSeeder = CreateSeeder(tenthScale.ToString(), tenthDbContext);
+            var tenthSeeder = CreateSeeder(Config(tenthScale), tenthDbContext);
             await tenthSeeder.Seed();
             var tenthTransactionCount = await tenthDbContext.Transactions.CountAsync();
             var tenthFundCount = await tenthDbContext.Funds.CountAsync();
@@ -354,6 +361,23 @@ namespace Sig.App.BackendTests.DataSeeders
             var seeder = CreateSeeder(scale: "0.01");
 
             await F(() => seeder.Seed()).Should().ThrowAsync<VolumeDataSeeder.NonEmptyDatabaseException>();
+        }
+
+        [Fact]
+        public async Task Seed_WhenDatabaseCarriesTheRegularDevelopmentSeed_RefusesAndThrows()
+        {
+            // The realistic case: a developer runs the app once normally, DevDataSeeder fills the
+            // database, then they set VolumeSeed:Scale and restart. A guard keyed on this seeder's
+            // own project name would not recognize "SeedDev - Programme 1" and would append the
+            // volume dataset on top of it, giving a mixed database whose measured volumes mean
+            // nothing.
+            DbContext.Projects.Add(new Project { Name = "SeedDev - Programme 1" });
+            await DbContext.SaveChangesAsync();
+
+            var seeder = CreateSeeder(scale: "0.01");
+
+            await F(() => seeder.Seed()).Should().ThrowAsync<VolumeDataSeeder.NonEmptyDatabaseException>();
+            (await DbContext.Projects.CountAsync()).Should().Be(1, "the refusal must leave the existing database untouched");
             (await DbContext.Organizations.CountAsync()).Should().Be(0);
         }
     }
