@@ -258,8 +258,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                     if (amountToRefund > 0)
                     {
-                        logger.LogWarning("[Mutation] RefundTransaction - TooMuchRefundException");
-                        throw new TooMuchRefundException();
+                        // What the deposit pool did not back returns to the product group fund, which is
+                        // where the purchase took it from. A purchase can legitimately be paid partly from
+                        // an amount no active deposit covers, so reaching this point is not an error.
+                        // Refunding more than was paid is already impossible: the guard above bounds the
+                        // refund by the purchased amount on this product group.
+                        fund.Amount += amountToRefund;
+                        refundTransactionProductGroup.AmountRefunded += amountToRefund;
                     }
                 }
                 else
@@ -270,7 +275,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                         cancellationToken);
 
                     var addingFundTransaction = initialTransaction.Transactions.Where(x => x.ProductGroupId == productGroupId).FirstOrDefault();
-                    if (addingFundTransaction.Status == FundTransactionStatus.Actived)
+                    if (addingFundTransaction == null)
+                    {
+                        // No deposit backs this purchase at all. The money left the product group fund,
+                        // so that is where it returns; there is no deposit to credit back.
+                        fund.Amount += refund.Amount;
+                        refundTransactionProductGroup.AmountRefunded += refund.Amount;
+                    }
+                    else if (addingFundTransaction.Status == FundTransactionStatus.Actived)
                     {
                         addingFundTransaction.AvailableFund += refund.Amount;
                         fund.Amount += refund.Amount;

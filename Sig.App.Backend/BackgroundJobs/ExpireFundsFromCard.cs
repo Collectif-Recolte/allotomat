@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
+using Sig.App.Backend.DbModel.Entities.BudgetAllowances;
 using Sig.App.Backend.DbModel.Entities.Subscriptions;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.Helpers;
@@ -65,82 +66,119 @@ namespace Sig.App.Backend.BackgroundJobs
                 .Where(x => transactions.OfType<SubscriptionAddingFundTransaction>().Select(x => x.SubscriptionTypeId)
                     .Contains(x.Id)).ToListAsync();
 
+            var skippedTransactionCount = 0;
+
             foreach (var transaction in transactions)
             {
                 if (transaction.AvailableFund > 0)
                 {
                     var transactionProductGroupId = (transaction as IHaveProductGroup).ProductGroupId;
                     var fund = transaction.Card.Funds.FirstOrDefault(x => x.ProductGroupId == transactionProductGroupId);
-                    if (fund != null)
+                    if (fund == null)
                     {
-                        Subscription subscription = null;
-                        if (transaction is ManuallyAddingFundTransaction maft)
-                            subscription = maftSubscriptions.FirstOrDefault(x => x.Id == maft.SubscriptionId);
-                        if (transaction is SubscriptionAddingFundTransaction saft)
-                            subscription = saftSubscriptionTypes.FirstOrDefault(x => x.Id == saft.SubscriptionTypeId)?.Subscription;
-                        fund.Amount -= transaction.AvailableFund;
-
-                        if (subscription != null)
-                        {
-                            var budgetAllowance = subscription.BudgetAllowances.First(x => x.Organization == transaction.Beneficiary.Organization);
-                            budgetAllowance.AvailableFund += transaction.AvailableFund;
-                        }
-
-                        var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
-
-                        var transactionLogProductGroups = new List<TransactionLogProductGroup>()
-                        {
-                            new()
-                            {
-                                Amount = transaction.AvailableFund,
-                                ProductGroupId = transaction.ProductGroupId,
-                                ProductGroupName = transaction.ProductGroup.Name
-                            }
-                        };
-
-                        db.TransactionLogs.Add(new TransactionLog()
-                        {
-                            Discriminator = TransactionLogDiscriminator.ExpireFundTransactionLog,
-                            TransactionUniqueId = transactionUniqueId,
-                            CreatedAtUtc = today,
-                            TotalAmount = transaction.AvailableFund,
-                            CardProgramCardId = transaction.Card.ProgramCardId,
-                            CardNumber = transaction.Card.CardNumber,
-                            BeneficiaryId = transaction.BeneficiaryId,
-                            BeneficiaryID1 = transaction.Beneficiary.ID1,
-                            BeneficiaryID2 = transaction.Beneficiary.ID2,
-                            BeneficiaryFirstname = transaction.Beneficiary.Firstname,
-                            BeneficiaryLastname = transaction.Beneficiary.Lastname,
-                            BeneficiaryEmail = transaction.Beneficiary.Email,
-                            BeneficiaryPhone = transaction.Beneficiary.Phone,
-                            BeneficiaryIsOffPlatform = transaction.Beneficiary is OffPlatformBeneficiary,
-                            BeneficiaryTypeId = transaction.Beneficiary.BeneficiaryTypeId,
-                            OrganizationId = transaction.Beneficiary.OrganizationId,
-                            OrganizationName = transaction.Beneficiary.Organization.Name,
-                            SubscriptionId = subscription?.Id,
-                            SubscriptionName = subscription?.Name,
-                            ProjectId = transaction.Beneficiary.Organization.ProjectId,
-                            ProjectName = transaction.Beneficiary.Organization.Project.Name,
-                            TransactionLogProductGroups = transactionLogProductGroups
-                        });
-
-                        var expireFundTransaction = new ExpireFundTransaction()
-                        {
-                            TransactionUniqueId = transactionUniqueId,
-                            Amount = transaction.AvailableFund,
-                            Card = transaction.Card,
-                            CreatedAtUtc = today,
-                            ProductGroupId = transactionProductGroupId,
-                            ExpiredSubscription = subscription,
-                            OrganizationId = transaction.OrganizationId,
-                        };
-                        transaction.Card.Transactions.Add(expireFundTransaction);
-                        transaction.ExpireFundTransaction = expireFundTransaction;
+                        skippedTransactionCount++;
+                        logger.LogWarning($"ExpireFundsFromCard :: skipping transaction {transaction.Id} - " +
+                            $"card {transaction.Card.ProgramCardId} ({transaction.Card.CardNumber}) has no Funds line " +
+                            $"for product group {transactionProductGroupId}");
+                        continue;
                     }
+
+                    Subscription subscription = null;
+                    if (transaction is ManuallyAddingFundTransaction maft)
+                        subscription = maftSubscriptions.FirstOrDefault(x => x.Id == maft.SubscriptionId);
+                    if (transaction is SubscriptionAddingFundTransaction saft)
+                        subscription = saftSubscriptionTypes.FirstOrDefault(x => x.Id == saft.SubscriptionTypeId)?.Subscription;
+
+                    // Expiring a payment is three moves that only count together: take the amount off the card
+                    // total, give it back to the organization's envelope, mark the payment expired. The envelope
+                    // move only applies when a subscription was resolved above, and the previous code took the
+                    // allowance with `First` - a missing one threw mid-loop and, since the job saves once at the
+                    // very end, rolled back the whole night, for every program. Bailing out here comes before the
+                    // first of the three moves: the payment is left strictly intact (`continue` skips the
+                    // AvailableFund and Status writes below) and stays repairable, and the rest of the pass
+                    // expires normally.
+                    BudgetAllowance budgetAllowance = null;
+                    if (subscription != null)
+                    {
+                        budgetAllowance = subscription.BudgetAllowances.FirstOrDefault(x => x.OrganizationId == transaction.Beneficiary.OrganizationId);
+                        if (budgetAllowance == null)
+                        {
+                            skippedTransactionCount++;
+                            logger.LogWarning($"ExpireFundsFromCard :: skipping transaction {transaction.Id} - " +
+                                $"card {transaction.Card.ProgramCardId} ({transaction.Card.CardNumber}) has no budget allowance " +
+                                $"for organization {transaction.Beneficiary.OrganizationId} on subscription {subscription.Id}, " +
+                                $"product group {transactionProductGroupId}");
+                            continue;
+                        }
+                    }
+
+                    fund.Amount -= transaction.AvailableFund;
+
+                    if (budgetAllowance != null)
+                    {
+                        budgetAllowance.AvailableFund += transaction.AvailableFund;
+                    }
+
+                    var transactionUniqueId = TransactionHelper.CreateTransactionUniqueId();
+
+                    var transactionLogProductGroups = new List<TransactionLogProductGroup>()
+                    {
+                        new()
+                        {
+                            Amount = transaction.AvailableFund,
+                            ProductGroupId = transaction.ProductGroupId,
+                            ProductGroupName = transaction.ProductGroup.Name
+                        }
+                    };
+
+                    db.TransactionLogs.Add(new TransactionLog()
+                    {
+                        Discriminator = TransactionLogDiscriminator.ExpireFundTransactionLog,
+                        TransactionUniqueId = transactionUniqueId,
+                        CreatedAtUtc = today,
+                        TotalAmount = transaction.AvailableFund,
+                        CardProgramCardId = transaction.Card.ProgramCardId,
+                        CardNumber = transaction.Card.CardNumber,
+                        BeneficiaryId = transaction.BeneficiaryId,
+                        BeneficiaryID1 = transaction.Beneficiary.ID1,
+                        BeneficiaryID2 = transaction.Beneficiary.ID2,
+                        BeneficiaryFirstname = transaction.Beneficiary.Firstname,
+                        BeneficiaryLastname = transaction.Beneficiary.Lastname,
+                        BeneficiaryEmail = transaction.Beneficiary.Email,
+                        BeneficiaryPhone = transaction.Beneficiary.Phone,
+                        BeneficiaryIsOffPlatform = transaction.Beneficiary is OffPlatformBeneficiary,
+                        BeneficiaryTypeId = transaction.Beneficiary.BeneficiaryTypeId,
+                        OrganizationId = transaction.Beneficiary.OrganizationId,
+                        OrganizationName = transaction.Beneficiary.Organization.Name,
+                        SubscriptionId = subscription?.Id,
+                        SubscriptionName = subscription?.Name,
+                        ProjectId = transaction.Beneficiary.Organization.ProjectId,
+                        ProjectName = transaction.Beneficiary.Organization.Project.Name,
+                        TransactionLogProductGroups = transactionLogProductGroups
+                    });
+
+                    var expireFundTransaction = new ExpireFundTransaction()
+                    {
+                        TransactionUniqueId = transactionUniqueId,
+                        Amount = transaction.AvailableFund,
+                        Card = transaction.Card,
+                        CreatedAtUtc = today,
+                        ProductGroupId = transactionProductGroupId,
+                        ExpiredSubscription = subscription,
+                        OrganizationId = transaction.OrganizationId,
+                    };
+                    transaction.Card.Transactions.Add(expireFundTransaction);
+                    transaction.ExpireFundTransaction = expireFundTransaction;
                 }
 
                 transaction.AvailableFund = 0;
                 transaction.Status = FundTransactionStatus.Expired;
+            }
+
+            if (skippedTransactionCount > 0)
+            {
+                logger.LogWarning($"ExpireFundsFromCard :: {skippedTransactionCount} transaction(s) skipped this run, " +
+                    "available fund and status left untouched");
             }
 
             await db.SaveChangesWithFundRetryAsync();

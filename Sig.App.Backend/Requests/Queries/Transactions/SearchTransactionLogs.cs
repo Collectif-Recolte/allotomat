@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using MediatR;
 using System.Linq;
 using System.Threading;
@@ -20,6 +20,7 @@ using Sig.App.Backend.Constants;
 using Sig.App.Backend.DbModel.Entities.TransactionLogs;
 using Sig.App.Backend.DbModel.Enums;
 using Sig.App.Backend.Gql.Bases;
+using Sig.App.Backend.Extensions;
 
 namespace Sig.App.Backend.Requests.Queries.Transactions
 {
@@ -51,6 +52,17 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
             var canManageOrganizations = globalPermissions.Contains(GlobalPermission.ManageOrganizations);
             string organizationManagerClaimValue = null;
 
+            // A project manager holds ManageOrganizations, so no organization filter applies to them:
+            // their scope is the project itself, read from the claim rather than from the request.
+            string projectManagerClaimValue = null;
+            if (ctx.CurrentUser.IsUserType(UserType.ProjectManager))
+            {
+                projectManagerClaimValue = ctx.CurrentUser.Claims
+                    .Where(x => x.Type == AppClaimTypes.ProjectManagerOf)
+                    .Select(x => x.Value)
+                    .FirstOrDefault();
+            }
+
             if (!canManageOrganizations)
             {
                 var user = await db.Users.Where(c => c.Id == ctx.CurrentUserId).FirstAsync(cancellationToken: cancellationToken);
@@ -60,6 +72,7 @@ namespace Sig.App.Backend.Requests.Queries.Transactions
 
             query = query
                 .FilterByOrganizationScope(canManageOrganizations, organizationManagerClaimValue, request.Organizations)
+                .FilterByProjectScope(projectManagerClaimValue)
                 .FilterByCriteria(request, currentUserCanSeeAllBeneficiaryInfo);
 
             var sorted = Sort(query, TransactionLogSort.Default, SortOrder.Desc);

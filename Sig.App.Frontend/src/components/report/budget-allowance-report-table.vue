@@ -103,8 +103,10 @@ function getBudgetAllowanceLogDescription(budgetAllowanceLog) {
 function getBudgetAllowanceLogAmount(budgetAllowanceLog) {
   var amount = budgetAllowanceLog.amount;
 
+  // Un transfert retire le montant de l'enveloppe source : il ne s'inverse donc que du côté source.
+  // Pour le groupe destinataire, la même ligne décrit une entrée dans son enveloppe.
   const invertedTypes = ["DELETE_BUDGET_ALLOWANCE_LOG", "MOVE_BUDGET_ALLOWANCE_LOG"];
-  if (invertedTypes.includes(budgetAllowanceLog.discriminator)) {
+  if (invertedTypes.includes(budgetAllowanceLog.discriminator) && !budgetAllowanceLog.isIncomingTransfer) {
     amount *= -1;
   }
 

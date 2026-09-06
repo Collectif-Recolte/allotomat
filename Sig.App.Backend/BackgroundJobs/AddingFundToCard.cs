@@ -410,18 +410,16 @@ namespace Sig.App.Backend.BackgroundJobs
             }
             else
             {
-                if (subscription.IsSubscriptionPaymentBasedCardUsage)
-                {
-                    var maxNumberOfPayments = subscriptionBeneficiary.GetEffectiveMaxNumberOfPayments();
-                    if (maxNumberOfPayments >= subscriptionBeneficiary.GetPaymentRemaining(clock, todaysFundJobCompleted: true))
-                    {
-                        RefundBudgetAllowance(subscriptionBeneficiary, subscriptionTypes);
-                    }
-                }
-                else
-                {
-                    RefundBudgetAllowance(subscriptionBeneficiary, subscriptionTypes);
-                }
+                // CRCL-2681 — Aucun plafond de versements n'est contrôlé ici, et il ne peut pas l'être :
+                // le chemin avec carte compare `maxNumberOfPayments - paymentsMade` au restant, mais
+                // `paymentsMade` se compte sur l'historique de la carte. Sans carte il n'y a aucune
+                // SubscriptionAddingFundTransaction à compter, donc rien à soustraire. La condition qui
+                // vivait ici comparait `max` à `GetPaymentRemaining`, déjà borné à `max` pour un
+                // abonnement usage-based (SubscriptionHelper.GetPaymentRemaining) : toujours vraie, donc
+                // sans effet. C'est la réservation restante qui tient ce rôle, vérifiée dans
+                // RefundBudgetAllowance — on ne relâche que ce qui est effectivement réservé, ce qui ne
+                // dépend d'aucun compte de versements.
+                RefundBudgetAllowance(subscriptionBeneficiary, subscriptionTypes);
             }
         }
 
@@ -506,6 +504,46 @@ namespace Sig.App.Backend.BackgroundJobs
         {
             var subscription = subscriptionBeneficiary.Subscription;
             var beneficiary = subscriptionBeneficiary.Beneficiary;
+            var totalAmount = subscriptionTypes.Sum(x => x.Amount);
+
+            // CRCL-2681 — On ne relâche jamais plus que ce qui est réservé. Un participant sans carte
+            // sur un abonnement usage-based plafonné repasse ici à chaque échéance, même une fois son
+            // plafond de versements atteint : sans ce garde-fou le job recrédite l'enveloppe d'un
+            // versement qu'elle n'a jamais retenu et creuse la réservation sous zéro, indéfiniment
+            // tant que l'abonnement court.
+            //
+            // Le remboursement est tout ou rien. Rembourser la réservation restante plutôt que le
+            // versement complet garderait l'enveloppe juste au total, mais on ne saurait pas ventiler
+            // ce reliquat entre les groupes de produits de TransactionLogProductGroups : chaque ligne
+            // du journal porte le montant d'un SubscriptionType, et découper un montant partiel entre
+            // eux serait arbitraire. Un demi-versement ne veut rien dire non plus côté abonnement.
+            //
+            // Une réservation null (ligne pas encore reconstruite par
+            // BackfillSubscriptionBeneficiaryAllocation) veut dire « montant inconnu », pas zéro : on
+            // laisse passer, comme AdjustAllocation qui ignore alors le delta.
+            if (subscriptionBeneficiary.RemainingAllocatedAmount.HasValue &&
+                subscriptionBeneficiary.RemainingAllocatedAmount.Value < totalAmount)
+            {
+                var remaining = subscriptionBeneficiary.RemainingAllocatedAmount.Value;
+                var message = $"[CRCL-2681] Remboursement de {totalAmount} refusé pour bénéficiaire {beneficiary.Id} / abonnement {subscription.Id} : réservation restante ({remaining}) insuffisante.";
+
+                // Une réservation à zéro ou positive mais trop courte est l'état normal d'une paire qui
+                // a épuisé son plafond : le job repassera ici à chaque échéance tant que l'abonnement
+                // court, sans que rien ne cloche. Seule une réservation négative signale une dérive
+                // réelle — une livraison passée supérieure à ce qui était réservé — et mérite qu'on la
+                // remarque.
+                if (remaining < 0)
+                {
+                    logger.LogWarning(message);
+                }
+                else
+                {
+                    logger.LogInformation(message);
+                }
+
+                return;
+            }
+
             var budgetAllowance = subscription.BudgetAllowances.First(x => x.OrganizationId == beneficiary.OrganizationId);
 
             // We refund the budget allowance
@@ -524,13 +562,13 @@ namespace Sig.App.Backend.BackgroundJobs
                 });
             }
 
-            ConsumeAllocation(subscriptionBeneficiary, subscriptionTypes.Sum(x => x.Amount));
+            ConsumeAllocation(subscriptionBeneficiary, totalAmount);
 
             db.TransactionLogs.Add(new TransactionLog()
             {
                 Discriminator = TransactionLogDiscriminator.RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog,
                 CreatedAtUtc = clock.GetCurrentInstant().ToDateTimeUtc(),
-                TotalAmount = subscriptionTypes.Sum(x => x.Amount),
+                TotalAmount = totalAmount,
                 BeneficiaryId = beneficiary.Id,
                 BeneficiaryID1 = beneficiary.ID1,
                 BeneficiaryID2 = beneficiary.ID2,

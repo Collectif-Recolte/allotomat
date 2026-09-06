@@ -46,13 +46,15 @@ namespace Sig.App.Backend.BackgroundJobs
     /// Les deux modes sont en dry run par défaut. Le dry run n'écrit rien du tout, pas même en mémoire :
     /// il calcule la décision par paire et produit le rapport par enveloppe à présenter avant d'appliquer.
     ///
-    /// L'application est volontairement tout-ou-rien : un seul <c>SaveChangesWithFundRetryAsync</c> à la
-    /// fin, aucune sauvegarde intermédiaire, et rien n'intercepte les exceptions. Une paire qui explose
-    /// laisse donc la base exactement dans son état d'origine, ce qui est la bonne propriété quand on
-    /// déplace de l'argent : l'alternative, une réparation à moitié appliquée, se raconte mal et
-    /// s'audite encore plus mal. Le job est idempotent - la population est définie par
-    /// <c>RemainingAllocatedAmount &gt; 0</c>, qu'une réparation réussie remet à zéro - donc le
-    /// relancer après avoir corrigé la donnée fautive reprend simplement ce qui reste.
+    /// L'application est volontairement tout-ou-rien : un seul <c>SaveChanges</c> à la fin (par
+    /// <see cref="FundConcurrencyExtensions.SaveChangesWithFundRetryAsync"/>, puisque les deux modes
+    /// créditent des enveloppes), aucune sauvegarde intermédiaire, et rien n'intercepte les
+    /// exceptions. Une paire qui explose laisse donc la base exactement dans son état d'origine, ce
+    /// qui est la bonne propriété quand on déplace de l'argent : l'alternative, une réparation à
+    /// moitié appliquée, se raconte mal et s'audite encore plus mal. Le job est idempotent - la
+    /// population est définie par <c>RemainingAllocatedAmount &gt; 0</c>, qu'une réparation réussie
+    /// remet à zéro - donc le relancer après avoir corrigé la donnée fautive reprend simplement ce
+    /// qui reste.
     /// </summary>
     public class RepairEndedSubscriptionReservations
     {
@@ -102,17 +104,21 @@ namespace Sig.App.Backend.BackgroundJobs
         }
 
         /// <summary>
-        /// CRCL-2669 - Sérialiser les exécutions est indispensable, pas décoratif. La population est
-        /// lue au début du run (<c>RemainingAllocatedAmount &gt; 0</c>) et n'est remise à zéro qu'au
-        /// <c>SaveChanges</c> final : deux exécutions qui se chevauchent lisent donc les mêmes paires
-        /// avant que l'une ait écrit, et <c>RemainingAllocatedAmount</c> n'est pas un jeton de
-        /// concurrence - rien ne les arrête. Depuis le joint c'est pire, pas mieux : les deux
-        /// mouvements sont des crédits, qu'il rebase l'un sur l'autre au lieu d'en perdre un, donc
-        /// l'enveloppe est relâchée deux fois (mode Release) ou le versement livré deux fois (mode
-        /// Deliver). L'idempotence annoncée plus haut vaut entre deux runs successifs, pas entre deux
-        /// runs simultanés - et le tableau de bord Hangfire laisse parfaitement cliquer « Trigger
-        /// now » deux fois. Même timeout que <see cref="CreditLostBudgetAllowanceRefunds"/>, l'autre
-        /// réparation manuelle de cette pile.
+        /// <see cref="DisableConcurrentExecutionAttribute"/> est indispensable, pas décoratif :
+        /// l'idempotence repose sur <c>RemainingAllocatedAmount &gt; 0</c> tel que LU en base, et cette
+        /// colonne n'a pas de jeton de concurrence. Deux exécutions Apply qui se chevauchent
+        /// sélectionnent donc les mêmes paires et livrent (ou relâchent) chacune le même argent : deux
+        /// jeux de transactions et de journaux, pour une seule réservation. Or le tableau de bord
+        /// Hangfire laisse cliquer « Trigger now » deux fois, et le serveur a plusieurs workers. Le
+        /// verrou est pris sur la méthode, donc partagé par les quatre entrées : un Deliver et un
+        /// Release ne peuvent pas non plus se marcher dessus.
+        ///
+        /// CRCL-2669 - Le joint aggrave ce cas au lieu de l'amortir, ce qui rend le verrou d'autant
+        /// moins décoratif : les deux mouvements sont des crédits, qu'il rebase l'un sur l'autre au
+        /// lieu d'en perdre un, donc l'argent est réellement rendu deux fois là où l'ancien écrasement
+        /// en perdait un et masquait la duplication. L'idempotence annoncée plus haut vaut entre deux
+        /// runs successifs, pas entre deux runs simultanés. Même timeout que
+        /// <see cref="CreditLostBudgetAllowanceRefunds"/>, l'autre réparation manuelle de cette pile.
         /// </summary>
         [DisableConcurrentExecution(timeoutInSeconds: 30 * 60)]
         public async Task<Report> Run(RepairMode mode, bool dryRun = true)
@@ -170,11 +176,12 @@ namespace Sig.App.Backend.BackgroundJobs
                 return report;
             }
 
-            // Le joint, et non un SaveChanges nu : le mode Release remonte AvailableFund, qui est un
-            // jeton de concurrence depuis CRCL-2677. Un mouvement d'enveloppe concurrent ferait lever
-            // un SaveChanges nu, et le tout-ou-rien annoncé plus haut ferait alors tomber le run entier
-            // plutôt qu'une paire. Le joint rebase le relâchement sur la valeur en base ; c'est un
-            // crédit, donc il n'est jamais refusé.
+            // Release crédite l'enveloppe, et Deliver aussi pour un participant sans carte. AvailableFund
+            // étant un jeton de concurrence, un SaveChanges brut ferait échouer tout le run dès qu'un
+            // mouvement d'enveloppe ordinaire s'est glissé entre le chargement des candidats et
+            // l'écriture, et le tout-ou-rien annoncé plus haut ferait tomber le run entier plutôt
+            // qu'une paire. Le rebase réapplique nos crédits sur le solde réel ; un crédit n'est jamais
+            // refusé, donc le tout-ou-rien du run est préservé.
             await db.SaveChangesWithFundRetryAsync();
             logger.LogInformation($"RepairEndedSubscriptionReservations :: appliqué - {report.Delivered.Count} versement(s) pour {report.TotalDelivered}, {report.Released.Count} relâchement(s) pour {report.TotalReleased}.");
 

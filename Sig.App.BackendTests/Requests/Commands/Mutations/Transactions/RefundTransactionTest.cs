@@ -616,6 +616,97 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             loyaltyFund.Amount.Should().Be(30);
         }
 
+        // Since the loyalty double-charge fix, a purchase can legitimately be paid partly, or entirely,
+        // from an amount no active deposit backs. These two pin that such a purchase stays refundable:
+        // before, a partial pool threw TooMuchRefundException and an empty one dereferenced null.
+        [Fact]
+        public async Task RefundsThePartNoDepositBacks()
+        {
+            var purchase = AddPurchaseBackedBy(10m, backedAmount: 4m);
+
+            await handler.Handle(RefundOf(purchase, 10m), CancellationToken.None);
+
+            var productGroupFund = await DbContext.Funds.FirstAsync(x => x.ProductGroupId == productGroup.Id);
+            productGroupFund.Amount.Should().Be(30);
+        }
+
+        [Fact]
+        public async Task RefundsAPurchaseNoDepositBacksAtAll()
+        {
+            var purchase = AddPurchaseBackedBy(10m, backedAmount: null);
+
+            await handler.Handle(RefundOf(purchase, 10m), CancellationToken.None);
+
+            var productGroupFund = await DbContext.Funds.FirstAsync(x => x.ProductGroupId == productGroup.Id);
+            productGroupFund.Amount.Should().Be(30);
+        }
+
+        [Fact]
+        public async Task StillRefusesToRefundMoreThanWasPaid()
+        {
+            var purchase = AddPurchaseBackedBy(10m, backedAmount: null);
+
+            var act = async () => await handler.Handle(RefundOf(purchase, 11m), CancellationToken.None);
+
+            await act.Should().ThrowAsync<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.TooMuchRefundException>();
+        }
+
+        /// <param name="backedAmount">Amount an active deposit backs, or null for a purchase backed by none.</param>
+        private PaymentTransaction AddPurchaseBackedBy(decimal amount, decimal? backedAmount)
+        {
+            var purchase = new PaymentTransaction()
+            {
+                Amount = amount,
+                Card = card,
+                Beneficiary = beneficiary,
+                Market = market,
+                Organization = organization,
+                CashRegister = cashRegister,
+                TransactionUniqueId = "unbackedPurchase",
+                TransactionByProductGroups = new List<PaymentTransactionProductGroup>()
+                {
+                    new PaymentTransactionProductGroup() { Amount = amount, ProductGroup = productGroup }
+                }
+            };
+
+            if (backedAmount.HasValue)
+            {
+                purchase.Transactions = new List<AddingFundTransaction>() { initialTransaction3 };
+                purchase.PaymentTransactionAddingFundTransactions = new List<PaymentTransactionAddingFundTransaction>()
+                {
+                    new PaymentTransactionAddingFundTransaction()
+                    {
+                        AddingFundTransaction = initialTransaction3,
+                        PaymentTransaction = purchase,
+                        Amount = backedAmount.Value
+                    }
+                };
+            }
+
+            DbContext.Transactions.Add(purchase);
+            DbContext.SaveChanges();
+
+            return purchase;
+        }
+
+        private Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input RefundOf(
+            PaymentTransaction purchase, decimal amount)
+        {
+            return new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.Input()
+            {
+                InitialTransactionId = purchase.GetIdentifier(),
+                Password = "Abcd1234!!",
+                Transactions = new List<Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput>()
+                {
+                    new Backend.Requests.Commands.Mutations.Transactions.RefundTransaction.RefundTransactionsInput()
+                    {
+                        Amount = amount,
+                        ProductGroupId = productGroup.GetIdentifier()
+                    }
+                }
+            };
+        }
+
         [Fact]
         public async Task ThrowsIfInitialTransactionNotFound()
         {

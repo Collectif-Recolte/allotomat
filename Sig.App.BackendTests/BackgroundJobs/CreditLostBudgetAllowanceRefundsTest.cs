@@ -138,6 +138,40 @@ namespace Sig.App.BackendTests.BackgroundJobs
             DbContext.BudgetAllowanceLogs.Should().HaveCount(1);
         }
 
+        /// <summary>
+        /// <c>AvailableFund</c> est un jeton de concurrence depuis CRCL-2677 : un mouvement d'enveloppe
+        /// ordinaire (versement, retrait, ajustement) qui se glisse entre le chargement de l'enveloppe
+        /// et l'écriture du crédit ferait échouer un <c>SaveChanges</c> brut — et sur un job d'argent
+        /// lancé à la main, l'exception remonterait avant le rapport, laissant l'opérateur sans même la
+        /// liste des enveloppes déjà créditées. Le crédit doit se rebaser sur le solde réel, par le même
+        /// chemin que tous les autres mouvements d'enveloppe.
+        /// </summary>
+        [Fact]
+        public async Task CreditSurvivesAnEnvelopeMovementMadeWhileTheJobWasRunning()
+        {
+            var envelope = AddEnvelope(originalFund: 8208, availableFund: 500);
+            DbContext.SaveChanges();
+
+            // Le DbContext du job a déjà sa photographie de l'enveloppe (AvailableFund = 500). Un autre
+            // écrivain la débite entre-temps : la base dit 300, le job croit encore 500.
+            using (var other = CreateDbContext())
+            {
+                var concurrent = await other.BudgetAllowances.FindAsync(envelope.Id);
+                concurrent.AvailableFund -= 200m;
+                await other.SaveChangesAsync();
+            }
+
+            var report = await job.Run(Corrections(1080m), dryRun: false);
+
+            report.Corrections.Single().Outcome.Should()
+                .Be(CreditLostBudgetAllowanceRefunds.Outcome.Credited);
+            report.TotalCredited.Should().Be(1080m);
+
+            // 300 après le débit concurrent + 1 080 crédités : aucun des deux n'a écrasé l'autre.
+            (await ReloadAsync(envelope)).AvailableFund.Should().Be(1380m);
+            DbContext.BudgetAllowanceLogs.Should().HaveCount(1);
+        }
+
         [Fact]
         public async Task RecalculatesTheEnvelopeAsAControlOnTheReviewedAmount()
         {
@@ -328,16 +362,24 @@ namespace Sig.App.BackendTests.BackgroundJobs
             // Une réservation négative veut dire qu'il a été livré plus que réservé. Le retrait
             // plafonne déjà son remboursement à 0, donc remettre la paire à 0 ne change aucun
             // versement ; ça enlève seulement une valeur qui n'a pas de sens des sommes d'audit.
-            // L'enveloppe ne bouge pas : la sur-livraison est un fait passé, pas une dette à percevoir.
+            // L'enveloppe ne bouge pas de ce fait : la sur-livraison est un fait passé, pas une dette
+            // à percevoir. Elle ne bouge ici que du crédit correctif lui-même.
             var envelope = AddEnvelope(originalFund: 8208, availableFund: 1080);
             AddPair(remainingAllocatedAmount: -648m);
             AddPair(remainingAllocatedAmount: -54m);
             AddPair(remainingAllocatedAmount: 216m);
             DbContext.SaveChanges();
 
-            var report = await job.Run(Array.Empty<CreditLostBudgetAllowanceRefunds.Correction>(), dryRun: false);
+            var corrections = new[]
+            {
+                new CreditLostBudgetAllowanceRefunds.Correction(OrganizationName, SubscriptionName, 1080m)
+            };
+
+            var report = await job.Run(corrections, dryRun: false);
 
             report.NegativeReservations.Should().HaveCount(2);
+            report.NormalizedReservations.Should().HaveCount(2);
+            report.OutOfScopeReservations.Should().BeEmpty();
             report.TotalNegativeReservation.Should().Be(-702m);
 
             var pairs = DbContext.SubscriptionBeneficiaries.ToList();
@@ -345,7 +387,66 @@ namespace Sig.App.BackendTests.BackgroundJobs
             pairs.Should().NotContain(x => x.RemainingAllocatedAmount < 0m);
             pairs.Should().Contain(x => x.RemainingAllocatedAmount == 216m);
 
-            (await ReloadAsync(envelope)).AvailableFund.Should().Be(1080m);
+            // 1080 de départ + 1080 de crédit : la normalisation n'a rien ajouté au mouvement.
+            (await ReloadAsync(envelope)).AvailableFund.Should().Be(2160m);
+        }
+
+        [Fact]
+        public async Task ReportsNegativeReservationsOutsideThePerimeterWithoutTouchingThem()
+        {
+            // Le radar est global, l'écriture ne l'est pas. Une réservation négative sur une enveloppe
+            // que la table de corrections ne nomme pas appartient à une autre enquête (CRCL-2681) : la
+            // signaler oui, l'écrire non - on ne comprend pas ce programme-là, et tant que sa cause
+            // tourne la valeur reviendrait de toute façon.
+            AddEnvelope(originalFund: 8208, availableFund: 1080);
+            AddPair(remainingAllocatedAmount: -648m);
+
+            var otherEnvelope = AddEnvelopeForOtherOrganization(availableFund: 500m);
+            AddPairOn(otherEnvelope, remainingAllocatedAmount: -175m);
+            DbContext.SaveChanges();
+
+            var corrections = new[]
+            {
+                new CreditLostBudgetAllowanceRefunds.Correction(OrganizationName, SubscriptionName, 1080m)
+            };
+
+            var report = await job.Run(corrections, dryRun: false);
+
+            report.NegativeReservations.Should().HaveCount(2);
+
+            report.NormalizedReservations.Should().ContainSingle()
+                .Which.RemainingAllocatedAmount.Should().Be(-648m);
+            report.TotalNegativeReservation.Should().Be(-648m);
+
+            var untouched = report.OutOfScopeReservations.Should().ContainSingle().Subject;
+            untouched.RemainingAllocatedAmount.Should().Be(-175m);
+            untouched.Normalized.Should().BeFalse();
+            untouched.Note.Should().NotBeNullOrEmpty();
+            report.TotalNegativeReservationOutOfScope.Should().Be(-175m);
+
+            // Ce qui compte vraiment : la valeur hors périmètre est encore là, en base.
+            DbContext.SubscriptionBeneficiaries
+                .Should().Contain(x => x.RemainingAllocatedAmount == -175m);
+
+            (await ReloadAsync(otherEnvelope)).AvailableFund.Should().Be(500m);
+        }
+
+        [Fact]
+        public async Task WithoutCorrectionsNothingIsNormalized()
+        {
+            // Sans correction, le job n'a aucun périmètre : il ne peut que regarder.
+            AddEnvelope(originalFund: 8208, availableFund: 1080);
+            AddPair(remainingAllocatedAmount: -648m);
+            DbContext.SaveChanges();
+
+            var report = await job.Run(Array.Empty<CreditLostBudgetAllowanceRefunds.Correction>(), dryRun: false);
+
+            report.NegativeReservations.Should().ContainSingle();
+            report.NormalizedReservations.Should().BeEmpty();
+            report.OutOfScopeReservations.Should().ContainSingle();
+            report.TotalNegativeReservation.Should().Be(0m);
+
+            DbContext.SubscriptionBeneficiaries.Single().RemainingAllocatedAmount.Should().Be(-648m);
         }
 
         [Fact]
@@ -442,6 +543,52 @@ namespace Sig.App.BackendTests.BackgroundJobs
                 Firstname = "John",
                 Lastname = "Doe",
                 Organization = organization,
+                BeneficiaryType = beneficiaryType,
+                Subscriptions = new List<SubscriptionBeneficiary>()
+            };
+            DbContext.Beneficiaries.Add(beneficiary);
+
+            DbContext.SubscriptionBeneficiaries.Add(new SubscriptionBeneficiary()
+            {
+                Beneficiary = beneficiary,
+                Subscription = subscription,
+                BeneficiaryType = beneficiaryType,
+                BudgetAllowance = envelope,
+                RemainingAllocatedAmount = remainingAllocatedAmount
+            });
+        }
+
+        /// <summary>
+        /// Une enveloppe d'un autre programme, que la table de corrections ne nomme pas : c'est elle
+        /// qui tient le rôle de « Trousses 2026-2027 » dans les tests de périmètre.
+        /// </summary>
+        private BudgetAllowance AddEnvelopeForOtherOrganization(decimal availableFund)
+        {
+            var otherOrganization = new Organization()
+            {
+                Name = "Trousses Manger dans le Centre-Sud",
+                Project = project
+            };
+            DbContext.Organizations.Add(otherOrganization);
+
+            var envelope = new BudgetAllowance()
+            {
+                OriginalFund = 51572.31m,
+                AvailableFund = availableFund,
+                Organization = otherOrganization,
+                Subscription = subscription
+            };
+            DbContext.BudgetAllowances.Add(envelope);
+            return envelope;
+        }
+
+        private void AddPairOn(BudgetAllowance envelope, decimal? remainingAllocatedAmount)
+        {
+            var beneficiary = new Beneficiary()
+            {
+                Firstname = "Franca",
+                Lastname = "Carduci",
+                Organization = envelope.Organization,
                 BeneficiaryType = beneficiaryType,
                 Subscriptions = new List<SubscriptionBeneficiary>()
             };
