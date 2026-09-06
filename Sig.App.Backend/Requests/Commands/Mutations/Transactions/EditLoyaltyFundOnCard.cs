@@ -37,7 +37,48 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             this.httpContextAccessor = httpContextAccessor;
         }
 
+        /// <summary>
+        /// Tentatives avant d'abandonner. Même raison que <c>CreateTransaction</c> : une vraie course
+        /// se règle en un rejeu, une carte qui échoue trois fois de suite est martelée et boucler
+        /// masquerait le problème.
+        /// </summary>
+        public const int MaxPlanningAttempts = 3;
+
+        /// <summary>
+        /// CRCL-2669 - Cette mutation fixe un solde ABSOLU (« mets la carte-cadeau à 50 »), elle ne
+        /// déplace pas un montant. Elle ne peut donc pas passer par
+        /// <c>SaveChangesWithFundRetryAsync</c> : le joint lit toute écriture comme un mouvement
+        /// (voulu − lu) et la rejoue sur la valeur en base. Un achat de 30 qui s'insère entre la
+        /// lecture (100) et l'écriture (50) ferait rebaser −50 sur 70, soit 20, alors que la
+        /// transaction et le journal enregistrés annoncent 50 : le solde et le grand livre ne
+        /// diraient plus la même chose.
+        ///
+        /// Le <c>SaveChanges</c> est donc nu, et c'est le jeton de concurrence sur <c>Fund.Amount</c>
+        /// qui fait le travail : le « WHERE Amount = &lt;valeur lue&gt; » ne trouve pas sa ligne, EF
+        /// lève, et l'édition est REPLANIFIÉE sur des données fraîches - le montant demandé est
+        /// réappliqué tel quel, et le mouvement journalisé est recalculé depuis le solde réel.
+        /// L'achat concurrent n'est ni effacé ni compté deux fois, et l'intention de l'admin est
+        /// respectée : la carte vaut ce qu'il a demandé.
+        /// </summary>
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
+        {
+            for (var attempt = 1; ; attempt++)
+            {
+                try
+                {
+                    return await HandleAttempt(request, cancellationToken);
+                }
+                catch (DbUpdateConcurrencyException exception) when (attempt < MaxPlanningAttempts)
+                {
+                    // Vider le suivi est ce qui force la relecture : une requête suivie rendrait la
+                    // même instance périmée, et la tentative suivante reposerait sur le même solde.
+                    logger.LogWarning($"[Mutation] EditLoyaltyFundOnCard - Solde modifié par une écriture concurrente, réédition sur des données fraîches (tentative {attempt} de {MaxPlanningAttempts}) : {exception.Message}");
+                    db.ChangeTracker.Clear();
+                }
+            }
+        }
+
+        private async Task<Payload> HandleAttempt(Input request, CancellationToken cancellationToken)
         {
             logger.LogInformation($"[Mutation] EditLoyaltyFundOnCard({request.CardId}, {request.Amount})");
 
@@ -150,7 +191,9 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
             logger.LogInformation($"[Mutation] EditLoyaltyFundOnCard - Edit loyalty fund {request.Amount} to ({request.CardId}) card");
 
-            await db.SaveChangesWithFundRetryAsync();
+            // Nu, et non le joint : voir la note sur Handle. Le jeton sur Fund.Amount transforme une
+            // écriture concurrente en DbUpdateConcurrencyException, que la boucle replanifie.
+            await db.SaveChangesAsync(cancellationToken);
 
             return new Payload()
             {

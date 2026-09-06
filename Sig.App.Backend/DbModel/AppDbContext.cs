@@ -337,6 +337,29 @@ namespace Sig.App.Backend.DbModel
                         j => j.HasOne<PaymentTransaction>().WithMany().OnDelete(DeleteBehavior.ClientCascade));
             });
 
+            Configure<PaymentTransactionProductGroup>(_ =>
+            {
+                // CRCL-2669 - RefundAmount is not a balance, it is the CAP that authorizes the next
+                // refund: RefundTransaction refuses a refund when "Amount - RefundAmount < asked".
+                // The check reads it, the write does "RefundAmount += asked", and nothing separated
+                // the two - so two refunds of the same payment both passed the check and the second
+                // overwrote the first counter, leaving the payment under-marked and refundable again.
+                // Making it a token turns that race into a DbUpdateConcurrencyException, which
+                // RefundTransaction re-plans on fresh data (the cap then sees the first refund).
+                //
+                // This matters more since the card credits are rebased instead of lost: both refunds
+                // used to fight over Fund.Amount and one silently disappeared, which accidentally
+                // hid the duplication. Now both credits land, so the cap has to be right.
+                _.Property(x => x.RefundAmount).IsConcurrencyToken();
+            });
+
+            Configure<PaymentTransactionAddingFundTransaction>(_ =>
+            {
+                // CRCL-2669 - Same cap, per deposit slice: the refund loop allocates what it gives
+                // back against "Amount - RefundAmount" of each slice it consumed.
+                _.Property(x => x.RefundAmount).IsConcurrencyToken();
+            });
+
             Configure<AddingFundTransaction>(_ =>
             {
                 // CRCL-2669 - Same rule for the deposit counter a purchase is allocated to (see Fund).

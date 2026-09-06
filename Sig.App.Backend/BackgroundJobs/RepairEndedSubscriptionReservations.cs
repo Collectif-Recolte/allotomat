@@ -101,6 +101,20 @@ namespace Sig.App.Backend.BackgroundJobs
                 x => x.Run(RepairMode.Release, false), Cron.Never(), options);
         }
 
+        /// <summary>
+        /// CRCL-2669 - Sérialiser les exécutions est indispensable, pas décoratif. La population est
+        /// lue au début du run (<c>RemainingAllocatedAmount &gt; 0</c>) et n'est remise à zéro qu'au
+        /// <c>SaveChanges</c> final : deux exécutions qui se chevauchent lisent donc les mêmes paires
+        /// avant que l'une ait écrit, et <c>RemainingAllocatedAmount</c> n'est pas un jeton de
+        /// concurrence - rien ne les arrête. Depuis le joint c'est pire, pas mieux : les deux
+        /// mouvements sont des crédits, qu'il rebase l'un sur l'autre au lieu d'en perdre un, donc
+        /// l'enveloppe est relâchée deux fois (mode Release) ou le versement livré deux fois (mode
+        /// Deliver). L'idempotence annoncée plus haut vaut entre deux runs successifs, pas entre deux
+        /// runs simultanés - et le tableau de bord Hangfire laisse parfaitement cliquer « Trigger
+        /// now » deux fois. Même timeout que <see cref="CreditLostBudgetAllowanceRefunds"/>, l'autre
+        /// réparation manuelle de cette pile.
+        /// </summary>
+        [DisableConcurrentExecution(timeoutInSeconds: 30 * 60)]
         public async Task<Report> Run(RepairMode mode, bool dryRun = true)
         {
             logger.LogInformation($"RepairEndedSubscriptionReservations :: start (mode: {mode}, dryRun: {dryRun})");

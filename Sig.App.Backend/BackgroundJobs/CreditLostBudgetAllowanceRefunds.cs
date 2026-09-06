@@ -277,6 +277,33 @@ namespace Sig.App.Backend.BackgroundJobs
 
             if (dryRun) return line;
 
+            // CRCL-2669 - Le plafond est retranché sur la valeur EN BASE, relue ici et pas au début de
+            // la ligne. Le contrôle ci-dessus décide sur ce qu'a lu BuildLineAsync ; le joint, lui,
+            // rejouera le crédit sur la valeur en base et ne refuse jamais un crédit. Sans cette
+            // relecture, un remboursement concurrent arrivé entre la lecture et l'écriture ferait
+            // dépasser OriginalFund exactement l'invariant que le contrôle existe pour tenir, et
+            // l'enveloppe contiendrait plus que ce qui lui a été confié.
+            //
+            // Ça resserre la fenêtre à celle du jeton, ça ne la ferme pas : entre cette relecture et
+            // l'UPDATE, une écriture concurrente lève, et le joint rebase le crédit sans repasser par
+            // ce contrôle. Le rapport le dira (AvailableFundAfter est relu après le save) et le job
+            // est relançable. Un verrou pour fermer ces quelques millisecondes coûterait plus cher
+            // qu'il ne rapporte sur un job en Cron.Never().
+            var persistedAvailableFund = await db.BudgetAllowances.AsNoTracking()
+                .Where(x => x.Id == envelope.Id)
+                .Select(x => x.AvailableFund)
+                .SingleAsync();
+
+            if (persistedAvailableFund + correction.ExpectedCredit > envelope.OriginalFund)
+            {
+                line.Outcome = Outcome.SkippedWouldExceedOriginalFund;
+                line.Note = $"Écarté au moment d'écrire : le disponible en base ({persistedAvailableFund}) " +
+                    $"a changé depuis la lecture ({line.AvailableFundBefore}), et le crédit de " +
+                    $"{correction.ExpectedCredit} dépasserait {envelope.OriginalFund}.";
+                line.AvailableFundAfter = persistedAvailableFund;
+                return line;
+            }
+
             envelope.AvailableFund += correction.ExpectedCredit;
 
             db.BudgetAllowanceLogs.Add(new BudgetAllowanceLog

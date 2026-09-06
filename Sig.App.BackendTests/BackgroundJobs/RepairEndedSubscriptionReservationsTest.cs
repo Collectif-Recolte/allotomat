@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.BackgroundJobs;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
@@ -13,6 +14,7 @@ using Sig.App.Backend.DbModel.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -589,6 +591,21 @@ namespace Sig.App.BackendTests.BackgroundJobs
             report.TotalReleased.Should().Be(50);
             (await ReloadEnvelopeAsync()).AvailableFund.Should().Be(80);
             subscriptionBeneficiary.RemainingAllocatedAmount.Should().Be(0);
+        }
+
+        // CRCL-2669 - Même piège que le job de versement du 1er août : la population est lue au début
+        // du run et n'est remise à zéro qu'au SaveChanges final, RemainingAllocatedAmount n'est pas un
+        // jeton, et le tableau de bord Hangfire laisse cliquer « Trigger now » deux fois. Deux runs qui
+        // se chevauchent réparent donc les mêmes paires - et depuis le joint les deux crédits sont
+        // rebasés l'un sur l'autre au lieu de s'écraser, donc l'argent est rendu deux fois.
+        [Fact]
+        public void Run_IsGuardedAgainstConcurrentExecution()
+        {
+            var run = typeof(RepairEndedSubscriptionReservations).GetMethod(nameof(RepairEndedSubscriptionReservations.Run));
+
+            run.Should().NotBeNull();
+            run.GetCustomAttribute<DisableConcurrentExecutionAttribute>().Should().NotBeNull(
+                "two overlapping runs of this manual repair release or deliver the same reservations twice");
         }
 
         private async Task<BudgetAllowance> ReloadEnvelopeAsync()
