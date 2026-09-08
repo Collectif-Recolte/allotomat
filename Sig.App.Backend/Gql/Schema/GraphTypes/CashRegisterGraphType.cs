@@ -1,7 +1,5 @@
-using GraphQL.Conventions;
+﻿using GraphQL.Conventions;
 using GraphQL.DataLoader;
-using Microsoft.AspNetCore.Identity;
-using Sig.App.Backend.DbModel.Entities;
 using Sig.App.Backend.DbModel.Entities.CashRegisters;
 using Sig.App.Backend.DbModel.Entities.Markets;
 using Sig.App.Backend.DbModel.Enums;
@@ -31,20 +29,19 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
 
         // FILETS-36: this manual guard skipped the account status check that RequirePermissionAttribute
         // does before looking at permissions, so a disabled account managing this market could still
-        // read the kiosk password.
-        public async Task<string> KioskPassword(IAppUserContext ctx, [Inject] PermissionService permissionService, [Inject] UserManager<AppUser> userManager)
+        // read the kiosk password. Query.CashRegister ne porte aucun RequirePermission: cette garde est
+        // le seul contrôle de statut sur ce chemin.
+        //
+        // CRCL-2692: le statut se lit par le DataLoader, jamais par un service injecté dans le résolveur.
+        // Les champs d'une query sont résolus en parallèle, et ScopedFieldResolver échange l'injecteur de
+        // dépendances sur un créneau partagé par toute l'exécution: deux résolveurs concurrents peuvent
+        // donc se retrouver sur le même AppDbContext. Un UserManager injecté ici suffisait à casser
+        // l'écran Caisses dès la première caisse, puisque KioskPassword et KioskAccessToken se résolvent
+        // en même temps. Le DataLoader crée son propre scope par lot (Gql/DataLoader.cs) et déduplique
+        // par clé: une seule lecture de l'utilisateur par requête, quel que soit le nombre de caisses.
+        public async Task<string> KioskPassword(IAppUserContext ctx, [Inject] PermissionService permissionService)
         {
-            var currentUser = await userManager.FindByIdAsync(ctx.CurrentUser.GetUserId());
-            if (currentUser?.Status != UserStatus.Actived)
-            {
-                return null;
-            }
-
-            var marketPermissions = await permissionService.GetMarketPermissions(
-                ctx.CurrentUser,
-                cashRegister.MarketId.ToString());
-
-            if (!marketPermissions.Contains(MarketPermission.ManageCashRegister))
+            if (!await CurrentUserCanReadKioskCredentials(ctx, permissionService))
             {
                 return null;
             }
@@ -53,19 +50,9 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         }
 
         // FILETS-36: same defect as KioskPassword, on the sibling resolver.
-        public async Task<string> KioskAccessToken(IAppUserContext ctx, [Inject] PermissionService permissionService, [Inject] UserManager<AppUser> userManager)
+        public async Task<string> KioskAccessToken(IAppUserContext ctx, [Inject] PermissionService permissionService)
         {
-            var currentUser = await userManager.FindByIdAsync(ctx.CurrentUser.GetUserId());
-            if (currentUser?.Status != UserStatus.Actived)
-            {
-                return null;
-            }
-
-            var marketPermissions = await permissionService.GetMarketPermissions(
-                ctx.CurrentUser,
-                cashRegister.MarketId.ToString());
-
-            if (!marketPermissions.Contains(MarketPermission.ManageCashRegister))
+            if (!await CurrentUserCanReadKioskCredentials(ctx, permissionService))
             {
                 return null;
             }
@@ -81,6 +68,21 @@ namespace Sig.App.Backend.Gql.Schema.GraphTypes
         public IDataLoaderResult<IEnumerable<MarketGroupGraphType>> MarketGroups(IAppUserContext ctx)
         {
             return ctx.DataLoader.LoadCashRegisterMarketGroups(Id.LongIdentifierForType<CashRegister>());
+        }
+
+        private async Task<bool> CurrentUserCanReadKioskCredentials(IAppUserContext ctx, PermissionService permissionService)
+        {
+            var currentUser = await ctx.DataLoader.LoadUser(ctx.CurrentUserId).GetResultAsync();
+            if (currentUser?.Status != UserStatus.Actived)
+            {
+                return false;
+            }
+
+            var marketPermissions = await permissionService.GetMarketPermissions(
+                ctx.CurrentUser,
+                cashRegister.MarketId.ToString());
+
+            return marketPermissions.Contains(MarketPermission.ManageCashRegister);
         }
     }
 }
