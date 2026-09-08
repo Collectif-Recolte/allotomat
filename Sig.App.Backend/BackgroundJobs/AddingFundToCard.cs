@@ -544,7 +544,12 @@ namespace Sig.App.Backend.BackgroundJobs
                 return;
             }
 
-            var budgetAllowance = subscription.BudgetAllowances.First(x => x.OrganizationId == beneficiary.OrganizationId);
+            // On rembourse l'enveloppe que la paire a effectivement débitée à l'assignation, désignée par
+            // son propre FK, plutôt que d'en rechoisir une par organisation : rien n'impose l'unicité de
+            // (SubscriptionId, OrganizationId) sur BudgetAllowances, et deux enveloppes rendraient la
+            // recherche par organisation arbitraire. Le FK est renseigné à chaque site de création d'une
+            // SubscriptionBeneficiary (AssignBeneficiariesToSubscription, AssignSubscriptionsToBeneficiary).
+            var budgetAllowance = subscription.BudgetAllowances.First(x => x.Id == subscriptionBeneficiary.BudgetAllowanceId);
 
             // We refund the budget allowance
             var transactionLogProductGroups = new List<TransactionLogProductGroup>();
