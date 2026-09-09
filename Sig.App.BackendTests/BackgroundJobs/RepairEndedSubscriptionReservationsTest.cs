@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Sig.App.Backend.BackgroundJobs;
 using Sig.App.Backend.DbModel.Entities.Beneficiaries;
@@ -13,6 +14,7 @@ using Sig.App.Backend.DbModel.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -594,6 +596,51 @@ namespace Sig.App.BackendTests.BackgroundJobs
             report.Envelopes.First().Reserved.Should().Be(100);
             report.Envelopes.First().ToRelease.Should().Be(100);
             report.Envelopes.Last().Reserved.Should().Be(50);
+        }
+
+        [Fact]
+        public async Task ReleasesOnTopOfAConcurrentEnvelopeMovementInsteadOfDroppingTheWholeRun()
+        {
+            // L'enveloppe est déjà suivie par le contexte du job, donc la requête du job rend
+            // l'instance en mémoire et non la valeur fraîche : c'est exactement l'instantané périmé
+            // que tient un run réel. Un autre contexte crédite l'enveloppe entre-temps.
+            using (var concurrent = CreateDbContext())
+            {
+                var concurrentEnvelope = await concurrent.BudgetAllowances.FindAsync(budgetAllowance.Id);
+                concurrentEnvelope.AvailableFund += 30;
+                await concurrent.SaveChangesAsync();
+            }
+
+            var report = await job.Run(RepairEndedSubscriptionReservations.RepairMode.Release, dryRun: false);
+
+            // Le relâchement s'ajoute au mouvement concurrent au lieu de l'écraser. Le point du test
+            // est surtout ailleurs : l'application est tout-ou-rien, donc un SaveChanges nu ferait
+            // lever le run ENTIER sur le jeton de AvailableFund, et aucune paire ne serait réparée.
+            report.Released.Should().HaveCount(1);
+            report.TotalReleased.Should().Be(50);
+            (await ReloadEnvelopeAsync()).AvailableFund.Should().Be(80);
+            subscriptionBeneficiary.RemainingAllocatedAmount.Should().Be(0);
+        }
+
+        // CRCL-2669 - Même piège que le job de versement du 1er août : la population est lue au début
+        // du run et n'est remise à zéro qu'au SaveChanges final, RemainingAllocatedAmount n'est pas un
+        // jeton, et le tableau de bord Hangfire laisse cliquer « Trigger now » deux fois. Deux runs qui
+        // se chevauchent réparent donc les mêmes paires - et depuis le joint les deux crédits sont
+        // rebasés l'un sur l'autre au lieu de s'écraser, donc l'argent est rendu deux fois.
+        [Fact]
+        public void Run_IsGuardedAgainstConcurrentExecution()
+        {
+            var run = typeof(RepairEndedSubscriptionReservations).GetMethod(nameof(RepairEndedSubscriptionReservations.Run));
+
+            run.Should().NotBeNull();
+            run.GetCustomAttribute<DisableConcurrentExecutionAttribute>().Should().NotBeNull(
+                "two overlapping runs of this manual repair release or deliver the same reservations twice");
+        }
+
+        private async Task<BudgetAllowance> ReloadEnvelopeAsync()
+        {
+            var context = CreateDbContext();
+            return await context.BudgetAllowances.FindAsync(budgetAllowance.Id);
         }
 
         private decimal CardFund() =>

@@ -53,7 +53,48 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             transactionLogs = new List<TransactionLog>();
         }
 
+        /// <summary>
+        /// Tentatives avant d'abandonner, même raison que <c>CreateTransaction</c> : une vraie course
+        /// se règle en un rejeu, trois échecs de suite cachent autre chose.
+        /// </summary>
+        public const int MaxPlanningAttempts = 3;
+
+        /// <summary>
+        /// CRCL-2669 - Le plafond de remboursement (<c>Amount - RefundAmount &lt; demandé</c>) est lu
+        /// au début, et l'écriture qui le consomme (<c>RefundAmount += demandé</c>) part à la fin.
+        /// Deux remboursements du même paiement - deux employés, ou un double clic sur le bouton -
+        /// passaient donc tous les deux le contrôle, et le second écrasait le compteur du premier :
+        /// le paiement restait remboursable alors qu'il avait déjà tout rendu.
+        ///
+        /// Le compteur est maintenant un jeton (voir <c>AppDbContext</c>), donc le perdant lève au
+        /// lieu d'écraser, et le remboursement est REPLANIFIÉ sur des données fraîches : le plafond
+        /// voit alors le premier remboursement et tranche pour de vrai - il passe s'il reste de la
+        /// place, il lève <c>TooMuchRefundException</c> sinon.
+        ///
+        /// Sans ça, le joint aggravait le cas au lieu de le corriger : les deux crédits de carte sont
+        /// rebasés l'un sur l'autre au lieu de s'écraser, donc l'argent était bel et bien rendu deux
+        /// fois, là où l'ancien écrasement en perdait un et masquait la duplication.
+        /// </summary>
         public async Task<Payload> Handle(Input request, CancellationToken cancellationToken)
+        {
+            for (var attempt = 1; ; attempt++)
+            {
+                try
+                {
+                    return await HandleAttempt(request, cancellationToken);
+                }
+                catch (DbUpdateConcurrencyException exception) when (attempt < MaxPlanningAttempts)
+                {
+                    // Vider le suivi force la relecture : une requête suivie rendrait le paiement
+                    // déjà en mémoire, avec le RefundAmount périmé qui a causé le conflit.
+                    logger.LogWarning($"[Mutation] RefundTransaction - Plafond de remboursement modifié par une écriture concurrente, replanification sur des données fraîches (tentative {attempt} de {MaxPlanningAttempts}) : {exception.Message}");
+                    db.ChangeTracker.Clear();
+                    transactionLogs = new List<TransactionLog>();
+                }
+            }
+        }
+
+        private async Task<Payload> HandleAttempt(Input request, CancellationToken cancellationToken)
         {
             logger.LogInformation($"[Mutation] RefundTransaction({request.InitialTransactionId}, {request.Transactions})");
             today = clock
@@ -163,7 +204,17 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                     throw new ProductGroupNotFoundException();
                 }
 
-                if (paymentTransactionProductGroup.Amount - paymentTransactionProductGroup.RefundAmount < refund.Amount)
+                // CRCL-2669 - Le plafond se contrôle sur la valeur EN BASE, et non sur celle qu'a lue
+                // le handler : entre les deux, un autre remboursement du même paiement a pu la
+                // consommer - deux employés, ou un double clic sur le bouton. Relire ici refuse tout
+                // de suite, au lieu de tout préparer pour se faire arrêter par le jeton au moment
+                // d'écrire. Le jeton reste le filet pour la fenêtre qui suit cette relecture.
+                var persistedRefundAmount = await db.PaymentTransactionProductGroups.AsNoTracking()
+                    .Where(x => x.Id == paymentTransactionProductGroup.Id)
+                    .Select(x => x.RefundAmount)
+                    .SingleAsync(cancellationToken);
+
+                if (paymentTransactionProductGroup.Amount - persistedRefundAmount < refund.Amount)
                 {
                     logger.LogWarning("[Mutation] RefundTransaction - TooMuchRefundException");
                     throw new TooMuchRefundException();
@@ -207,8 +258,13 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
 
                     if (amountToRefund > 0)
                     {
-                        logger.LogWarning("[Mutation] RefundTransaction - TooMuchRefundException");
-                        throw new TooMuchRefundException();
+                        // What the deposit pool did not back returns to the product group fund, which is
+                        // where the purchase took it from. A purchase can legitimately be paid partly from
+                        // an amount no active deposit covers, so reaching this point is not an error.
+                        // Refunding more than was paid is already impossible: the guard above bounds the
+                        // refund by the purchased amount on this product group.
+                        fund.Amount += amountToRefund;
+                        refundTransactionProductGroup.AmountRefunded += amountToRefund;
                     }
                 }
                 else
@@ -219,7 +275,14 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                         cancellationToken);
 
                     var addingFundTransaction = initialTransaction.Transactions.Where(x => x.ProductGroupId == productGroupId).FirstOrDefault();
-                    if (addingFundTransaction.Status == FundTransactionStatus.Actived)
+                    if (addingFundTransaction == null)
+                    {
+                        // No deposit backs this purchase at all. The money left the product group fund,
+                        // so that is where it returns; there is no deposit to credit back.
+                        fund.Amount += refund.Amount;
+                        refundTransactionProductGroup.AmountRefunded += refund.Amount;
+                    }
+                    else if (addingFundTransaction.Status == FundTransactionStatus.Actived)
                     {
                         addingFundTransaction.AvailableFund += refund.Amount;
                         fund.Amount += refund.Amount;
@@ -240,7 +303,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
             initialTransaction.RefundTransactions.Add(refundTransaction);
             db.TransactionLogs.AddRange(transactionLogs);
 
-            await db.SaveChangesAsync(cancellationToken);
+            await db.SaveChangesWithFundRetryAsync(cancellationToken);
 
             logger.LogInformation($"[Mutation] RefundTransaction - Transaction refund between {cardName} with ({market.Name}) for an amount of {request.Transactions.Sum(x => x.Amount)} for product group(s) {request.Transactions.Select(x => x.ProductGroupId)}");
 

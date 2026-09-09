@@ -633,6 +633,67 @@ namespace Sig.App.BackendTests.BackgroundJobs
             });
         }
 
+        [Fact]
+        public async Task CreditsOnTopOfAConcurrentEnvelopeMovementInsteadOfFailingTheCorrection()
+        {
+            var envelope = AddEnvelope(originalFund: 8208, availableFund: 0);
+            DbContext.SaveChanges();
+
+            // L'enveloppe est déjà suivie par le contexte du job, donc la requête du job rend
+            // l'instance en mémoire et non la valeur fraîche : c'est exactement l'instantané périmé
+            // que tient un run réel. Un autre contexte crédite l'enveloppe entre-temps.
+            using (var concurrent = CreateDbContext())
+            {
+                var concurrentEnvelope = await concurrent.BudgetAllowances.FindAsync(envelope.Id);
+                concurrentEnvelope.AvailableFund += 300m;
+                await concurrent.SaveChangesAsync();
+            }
+
+            var report = await job.Run(Corrections(1080m), dryRun: false);
+
+            // Le crédit se rebase sur la valeur en base au lieu de l'écraser, et sans faire lever la
+            // correction : AvailableFund est un jeton de concurrence depuis CRCL-2677, donc un
+            // SaveChanges nu ferait tomber ce run au lieu de rejouer.
+            var line = report.Corrections.Single();
+            line.Outcome.Should().Be(CreditLostBudgetAllowanceRefunds.Outcome.Credited);
+            (await ReloadAsync(envelope)).AvailableFund.Should().Be(1380m);
+
+            // Et le rapport annonce ce qui est en base, pas ce qui avait été prévu sur la lecture.
+            line.AvailableFundAfter.Should().Be(1380m);
+        }
+
+        // CRCL-2669 - L'autre moitié du test ci-dessus. Le joint rebase le crédit sur la valeur en
+        // base et ne refuse JAMAIS un crédit : le plafond « une enveloppe ne peut pas contenir plus
+        // que ce qui lui a été confié » ne tenait donc que sur la valeur lue au moment de décider. Un
+        // mouvement concurrent entre la décision et l'écriture le faisait sauter en silence.
+        [Fact]
+        public async Task RefusesToPushAnEnvelopeAboveItsOriginalBudget_EvenWhenTheOverflowArrivesConcurrently()
+        {
+            var envelope = AddEnvelope(originalFund: 8208, availableFund: 7000);
+            DbContext.SaveChanges();
+
+            // Sur la valeur lue, 7000 + 1080 = 8080 : le contrôle passe. Un crédit concurrent de 500
+            // arrive ensuite, et le vrai total deviendrait 8580 - au-dessus des 8208 confiés.
+            using (var concurrent = CreateDbContext())
+            {
+                var concurrentEnvelope = await concurrent.BudgetAllowances.FindAsync(envelope.Id);
+                concurrentEnvelope.AvailableFund += 500m;
+                await concurrent.SaveChangesAsync();
+            }
+
+            var report = await job.Run(Corrections(1080m), dryRun: false);
+
+            // Écartée au moment d'écrire, pas créditée. Avant : Credited, et l'enveloppe finissait à
+            // 8580 en base, au-dessus de son OriginalFund.
+            var line = report.Corrections.Single();
+            line.Outcome.Should().Be(CreditLostBudgetAllowanceRefunds.Outcome.SkippedWouldExceedOriginalFund);
+            report.TotalCredited.Should().Be(0m);
+
+            // L'argent du tiers n'est pas touché non plus : on n'écrit rien du tout.
+            (await ReloadAsync(envelope)).AvailableFund.Should().Be(7500m);
+            DbContext.BudgetAllowanceLogs.Should().BeEmpty();
+        }
+
         private async Task<BudgetAllowance> ReloadAsync(BudgetAllowance envelope)
         {
             var context = CreateDbContext();

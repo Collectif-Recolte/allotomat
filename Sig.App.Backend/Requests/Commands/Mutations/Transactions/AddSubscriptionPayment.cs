@@ -150,7 +150,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 TransactionInitiatorLastname = currentUser?.Profile.LastName
             });
 
-            await db.SaveChangesWithBudgetAllowanceRetryAsync(cancellationToken);
+            await db.SaveChangesWithFundRetryAsync(cancellationToken);
 
             return new Payload()
             {

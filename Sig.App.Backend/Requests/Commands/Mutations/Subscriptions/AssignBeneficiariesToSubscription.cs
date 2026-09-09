@@ -279,7 +279,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Subscriptions
 
             logger.LogInformation($"[Mutation] AssignBeneficiariesToSubscription - Beneficiary who get a subscriptions ({beneficiariesWhoGetSubscriptions})");
 
-            await db.SaveChangesWithBudgetAllowanceRetryAsync(cancellationToken);
+            await db.SaveChangesWithFundRetryAsync(cancellationToken);
 
             return new Payload()
             {

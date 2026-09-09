@@ -669,5 +669,132 @@ namespace Sig.App.BackendTests.BackgroundJobs
             var card = DbContext.Cards.Include(x => x.Funds).First();
             card.Funds.First().Amount.Should().Be(20);
         }
+
+        [Fact]
+        public async Task DontRefundBudgetAllowanceWhenParticipantHasNoCardAndAllocationIsExhausted()
+        {
+            // CRCL-2681 — Participant sans carte sur un abonnement usage-based plafonné : une fois le
+            // plafond atteint, la réservation est à zéro. Le job repassait à chaque échéance,
+            // recréditait l'enveloppe et redécrémentait la réservation, la creusant indéfiniment.
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
+
+            beneficiary.Card = null;
+            beneficiary.CardId = null;
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 1;
+            subscriptionBeneficiary.RemainingAllocatedAmount = 0m;
+
+            DbContext.SaveChanges();
+
+            var budgetAllowance = DbContext.BudgetAllowances.First();
+            var availableFundsInitially = budgetAllowance.AvailableFund;
+
+            await job.Run("DontRefundBudgetAllowanceWhenParticipantHasNoCardAndAllocationIsExhausted", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            budgetAllowance = DbContext.BudgetAllowances.First();
+            (budgetAllowance.AvailableFund - availableFundsInitially).Should().Be(0);
+
+            DbContext.SubscriptionBeneficiaries.First().RemainingAllocatedAmount.Should().Be(0m);
+
+            DbContext.TransactionLogs
+                .Count(x => x.Discriminator == TransactionLogDiscriminator.RefundBudgetAllowanceFromNoCardWhenAddingFundTransactionLog)
+                .Should().Be(0);
+        }
+
+        [Fact]
+        public async Task DontRefundBudgetAllowanceWhenParticipantHasNoCardAndAllocationCantCoverTheWholePayment()
+        {
+            // CRCL-2681 — Rembourser 25 alors que 10 seulement sont réservés crédite l'enveloppe de 15
+            // qu'elle n'a jamais retenus. Le remboursement est tout ou rien : on refuse en bloc.
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
+
+            beneficiary.Card = null;
+            beneficiary.CardId = null;
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 1;
+            subscriptionBeneficiary.RemainingAllocatedAmount = 10m;
+
+            DbContext.SaveChanges();
+
+            var budgetAllowance = DbContext.BudgetAllowances.First();
+            var availableFundsInitially = budgetAllowance.AvailableFund;
+
+            await job.Run("DontRefundBudgetAllowanceWhenParticipantHasNoCardAndAllocationCantCoverTheWholePayment", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            budgetAllowance = DbContext.BudgetAllowances.First();
+            (budgetAllowance.AvailableFund - availableFundsInitially).Should().Be(0);
+
+            DbContext.SubscriptionBeneficiaries.First().RemainingAllocatedAmount.Should().Be(10m);
+        }
+
+        [Fact]
+        public async Task RefundBudgetAllowanceWhenParticipantHasNoCardAndReservationIsStillUnknown()
+        {
+            // CRCL-2681 — Le garde-fou ne doit pas fermer le chemin légitime. Sur une ligne antérieure
+            // à la migration (réservation null), on ignore ce qui est réservé : l'enveloppe bouge quand
+            // même, comme avant, et la réservation reste inconnue.
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
+
+            beneficiary.Card = null;
+            beneficiary.CardId = null;
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 1;
+            subscriptionBeneficiary.RemainingAllocatedAmount = null;
+
+            DbContext.SaveChanges();
+
+            var budgetAllowance = DbContext.BudgetAllowances.First();
+            var availableFundsInitially = budgetAllowance.AvailableFund;
+
+            await job.Run("RefundBudgetAllowanceWhenParticipantHasNoCardAndReservationIsStillUnknown", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            budgetAllowance = DbContext.BudgetAllowances.First();
+            (budgetAllowance.AvailableFund - availableFundsInitially).Should().Be(25);
+
+            DbContext.SubscriptionBeneficiaries.First().RemainingAllocatedAmount.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task DontRefundBudgetAllowanceWhenParticipantMissAPaymentAndAllocationIsExhausted()
+        {
+            // CRCL-2681 — Le garde-fou vit dans RefundBudgetAllowance, donc il couvre aussi le chemin
+            // avec carte. Il y est normalement redondant (le plafond est déjà vérifié plus haut), mais
+            // si la réservation a dérivé, relâcher un versement qui n'est plus réservé creuserait la
+            // même dette. Même règle des deux côtés : on ne relâche pas ce qu'on ne détient pas.
+            var today = Clock.GetCurrentInstant().ToDateTimeUtc();
+            Clock.Reset(Instant.FromUtc(today.Year, today.Month, 1, 0, 0));
+
+            subscription.IsSubscriptionPaymentBasedCardUsage = true;
+            subscription.MaxNumberOfPayments = 2;
+            subscriptionBeneficiary.RemainingAllocatedAmount = 0m;
+
+            beneficiary.Card.Transactions.Add(new SubscriptionAddingFundTransaction()
+            {
+                TransactionUniqueId = TransactionHelper.CreateTransactionUniqueId(),
+                Amount = 1,
+                Card = beneficiary.Card,
+                Beneficiary = beneficiary,
+                OrganizationId = beneficiary.OrganizationId,
+                CreatedAtUtc = today,
+                ExpirationDate = today.AddMonths(1),
+                SubscriptionType = subscription.Types.First(),
+                AvailableFund = 1,
+            });
+
+            DbContext.SaveChanges();
+
+            var budgetAllowance = DbContext.BudgetAllowances.First();
+            var availableFundsInitially = budgetAllowance.AvailableFund;
+
+            await job.Run("DontRefundBudgetAllowanceWhenParticipantMissAPaymentAndAllocationIsExhausted", new SubscriptionMonthlyPaymentMoment[1] { SubscriptionMonthlyPaymentMoment.FirstDayOfTheMonth });
+
+            budgetAllowance = DbContext.BudgetAllowances.First();
+            (budgetAllowance.AvailableFund - availableFundsInitially).Should().Be(0);
+
+            DbContext.SubscriptionBeneficiaries.First().RemainingAllocatedAmount.Should().Be(0m);
+        }
     }
 }

@@ -177,6 +177,47 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
             transactionLog.ProjectId.Should().Be(project.Id);
         }
 
+        // CRCL-2669 - Cette mutation fixe un solde ABSOLU. Passée au joint, elle était relue comme un
+        // mouvement (voulu - lu) et rejouée sur la valeur en base : un achat concurrent faisait
+        // atterrir la carte ailleurs que là où l'admin l'avait demandée, pendant que la transaction
+        // et le journal enregistraient le montant demandé. Le solde et le grand livre se
+        // contredisaient. L'édition est maintenant replanifiée sur des données fraîches.
+        [Fact]
+        public async Task EditOnAStaleBalance_IsRePlannedOnFreshData_AndTheLedgerMatchesTheCard()
+        {
+            // Le contexte de l'admin lit la carte pendant qu'elle vaut encore 10.
+            var stale = CreateDbContext();
+            await stale.Cards.Include(x => x.Funds).ThenInclude(x => x.ProductGroup).FirstAsync(x => x.Id == card.Id);
+
+            // Un achat de 3 est commis entre-temps, depuis un autre contexte.
+            var purchase = CreateDbContext();
+            var purchasedFund = await purchase.Funds.FirstAsync(x => x.CardId == card.Id);
+            purchasedFund.Amount -= 3;
+            await purchase.SaveChangesAsync();
+
+            var staleHandler = new EditLoyaltyFundOnCard(NullLogger<EditLoyaltyFundOnCard>.Instance, stale, Clock, HttpContextAccessor);
+            await staleHandler.Handle(
+                new EditLoyaltyFundOnCard.Input() { CardId = card.GetIdentifier(), Amount = 4 },
+                CancellationToken.None);
+
+            var verify = CreateDbContext();
+            var persisted = await verify.Funds.AsNoTracking().Where(x => x.CardId == card.Id).Select(x => x.Amount).SingleAsync();
+
+            // L'admin a demandé 4, la carte vaut 4. Avant : 1, le joint ayant rejoué -6 sur 7.
+            persisted.Should().Be(4);
+
+            // Et le mouvement enregistré est celui qui a vraiment eu lieu, 7 -> 4. Avant : -6, un
+            // mouvement que la carte n'a jamais fait.
+            var transaction = await verify.Transactions.OfType<LoyaltyEditFundTransaction>()
+                .AsNoTracking().OrderBy(x => x.Id).LastAsync();
+            transaction.AvailableFund.Should().Be(4);
+            transaction.Amount.Should().Be(-3);
+
+            var transactionLog = await verify.TransactionLogs.AsNoTracking()
+                .FirstAsync(x => x.TransactionUniqueId == transaction.TransactionUniqueId);
+            transactionLog.TotalAmount.Should().Be(transaction.Amount);
+        }
+
         [Fact]
         public async Task ThrowsIfLoyaltyFundCantBeNegativeException()
         {

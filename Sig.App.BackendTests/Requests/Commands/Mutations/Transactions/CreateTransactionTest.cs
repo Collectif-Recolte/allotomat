@@ -728,6 +728,144 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.Transactions
         }
 
         [Fact]
+        public async Task CreateTransactionDoesNotDoubleDeductWhenAddingFundTransactionsPoolIsEmpty()
+        {
+            SetupRequestHandler(new VerifyCardCanBeUsedInMarket(DbContext));
+
+            // Emptying the debitable pool for productGroup without touching the loyalty fund: fund.Amount
+            // still shows a balance (40), but neither ManuallyAddingFundTransaction has anything left to draw from.
+            ((AddingFundTransaction)initialTransaction1).AvailableFund = 0;
+            ((AddingFundTransaction)initialTransaction3).AvailableFund = 0;
+            DbContext.SaveChanges();
+
+            var input = new CreateTransaction.Input()
+            {
+                MarketId = market.GetIdentifier(),
+                Transactions = new List<CreateTransaction.TransactionInput>(),
+                CardId = card.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
+            };
+            input.Transactions.Add(new CreateTransaction.TransactionInput()
+            {
+                Amount = 15,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            await handler.Handle(input, CancellationToken.None);
+
+            card.Funds.First(x => x.ProductGroupId == productGroup.Id).Amount.Should().Be(25);
+            card.Funds.First(x => x.ProductGroup.Name == ProductGroupType.LOYALTY).Amount.Should().Be(20);
+
+            var transactionLog = await DbContext.TransactionLogs.Include(x => x.TransactionLogProductGroups).FirstAsync();
+            var loggedProductGroup = transactionLog.TransactionLogProductGroups.First();
+            loggedProductGroup.ProductGroupId.Should().Be(productGroup.Id);
+            loggedProductGroup.Amount.Should().Be(15);
+        }
+
+        [Fact]
+        public async Task CreateTransactionDoesNotDoubleDeductWhenAddingFundTransactionsPoolOnlyCoversPartOfThePurchase()
+        {
+            SetupRequestHandler(new VerifyCardCanBeUsedInMarket(DbContext));
+
+            // The drifted state that actually exists in production: fund.Amount still shows 40 for the
+            // product group, but the active deposits behind it only add up to 10. A 30 purchase is fully
+            // covered by the product group, so the loyalty balance must not be touched at all.
+            ((AddingFundTransaction)initialTransaction1).AvailableFund = 10;
+            ((AddingFundTransaction)initialTransaction3).AvailableFund = 0;
+            DbContext.SaveChanges();
+
+            var input = new CreateTransaction.Input()
+            {
+                MarketId = market.GetIdentifier(),
+                Transactions = new List<CreateTransaction.TransactionInput>(),
+                CardId = card.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
+            };
+            input.Transactions.Add(new CreateTransaction.TransactionInput()
+            {
+                Amount = 30,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            await handler.Handle(input, CancellationToken.None);
+
+            card.Funds.First(x => x.ProductGroupId == productGroup.Id).Amount.Should().Be(10);
+            card.Funds.First(x => x.ProductGroup.Name == ProductGroupType.LOYALTY).Amount.Should().Be(20);
+
+            // The whole 30 is logged against the product group: 10 traced back to its deposit, 20 that no
+            // active deposit backs. A short log here would understate what the market is owed. The two
+            // parts land in separate logs because AddAmountToTransactionLog keys them by subscription,
+            // and the uncovered part belongs to none, so the assertion sums across logs.
+            var transactionLogs = await DbContext.TransactionLogs.Include(x => x.TransactionLogProductGroups).ToListAsync();
+            transactionLogs.SelectMany(x => x.TransactionLogProductGroups)
+                .Where(x => x.ProductGroupId == productGroup.Id).Sum(x => x.Amount).Should().Be(30);
+            transactionLogs.Sum(x => x.TotalAmount).Should().Be(30);
+        }
+
+        [Fact]
+        public async Task CreateTransactionRefusesWhenNeitherDepositsNorLoyaltyCoverThePurchase()
+        {
+            SetupRequestHandler(new VerifyCardCanBeUsedInMarket(DbContext));
+
+            var localBeneficiary = new Beneficiary()
+            {
+                Firstname = "Jane",
+                Lastname = "Roe",
+                Organization = organization,
+                BeneficiaryType = beneficiary.BeneficiaryType
+            };
+
+            // No loyalty fund at all, and no adding-fund transaction, so nothing is spendable: the 100
+            // showing on the product group is a counter gap, not money the card can pay with.
+            var localCard = new Card()
+            {
+                Funds = new List<Fund>(),
+                Transactions = new List<Transaction>(),
+                Status = CardStatus.Assigned,
+                Project = project,
+                Beneficiary = localBeneficiary,
+                CardNumber = "9999-8888-7777-6666"
+            };
+
+            localCard.Funds.Add(new Fund()
+            {
+                Amount = 100,
+                Card = localCard,
+                ProductGroup = productGroup
+            });
+
+            localBeneficiary.Organization = organization;
+            localBeneficiary.Card = localCard;
+
+            DbContext.Beneficiaries.Add(localBeneficiary);
+            DbContext.Cards.Add(localCard);
+            DbContext.SaveChanges();
+
+            var input = new CreateTransaction.Input()
+            {
+                MarketId = market.GetIdentifier(),
+                Transactions = new List<CreateTransaction.TransactionInput>(),
+                CardId = localCard.GetIdentifier(),
+                CashRegisterId = cashRegister.GetIdentifier()
+            };
+            input.Transactions.Add(new CreateTransaction.TransactionInput()
+            {
+                Amount = 40,
+                ProductGroupId = productGroup.GetIdentifier()
+            });
+
+            var act = async () => await handler.Handle(input, CancellationToken.None);
+
+            await act.Should().ThrowAsync<CreateTransaction.NotEnoughtFundException>();
+
+            // The refusal lands after the in-memory debit, like the one guarding the loyalty pool does,
+            // so what it protects is the save, not the tracked entity: assert on the store.
+            var persistedFund = await DbContext.Funds.AsNoTracking()
+                .FirstAsync(x => x.CardId == localCard.Id && x.ProductGroupId == productGroup.Id);
+            persistedFund.Amount.Should().Be(100);
+        }
+
+        [Fact]
         public async Task CreateTransactionCreatesTransactionLogWithCorrectFields()
         {
             SetupRequestHandler(new VerifyCardCanBeUsedInMarket(DbContext));
