@@ -13,6 +13,7 @@ using Sig.App.Backend.Plugins.BudgetAllowances;
 using Sig.App.Backend.Requests.Commands.Mutations.BudgetAllowances;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -119,6 +120,85 @@ namespace Sig.App.BackendTests.Requests.Commands.Mutations.BudgetAllowances
 
             await F(() => handler.Handle(input, CancellationToken.None))
                 .Should().ThrowAsync<EditBudgetAllowance.BudgetAllowanceNotFoundException>();
+        }
+
+        // CRCL-2669 - Ces deux tests fixent ce que devient une réduction d'enveloppe sous écriture
+        // concurrente, parce que la question a été posée en revue (PR 5480) : le garde
+        // « AvailableFund < budgetDifference » n'est pas réévalué après le rebasage, donc la
+        // réduction pourrait-elle passer alors qu'elle aurait dû être refusée ?
+        //
+        // Non, et pour une raison qui tient aux deux montants : le joint rebase AvailableFund ET
+        // OriginalFund du MÊME delta, et ce delta (budgetDifference) ne dépend que d'OriginalFund et
+        // du montant demandé - deux valeurs qu'un mouvement d'enveloppe concurrent ne touche pas. Un
+        // crédit concurrent donne donc exactement l'état qu'aurait produit une lecture fraîche, et un
+        // débit concurrent qui rendrait la réduction impossible est refusé par le joint lui-même,
+        // AvailableFund étant sa propriété refusable.
+        [Fact]
+        public async Task ReducingAnEnvelopeWhileACreditLands_GivesTheSameStateAsIfBothHadBeenSeen()
+        {
+            // 25 confiés, 20 disponibles, donc 5 engagés. Un remboursement de 3 arrive pendant que
+            // l'admin réduit l'enveloppe à 10, sur sa lecture à 20.
+            using (var concurrent = CreateDbContext())
+            {
+                var concurrentEnvelope = await concurrent.BudgetAllowances.FindAsync(budgetAllowance.Id);
+                concurrentEnvelope.AvailableFund += 3;
+                await concurrent.SaveChangesAsync();
+            }
+
+            var input = new EditBudgetAllowance.Input()
+            {
+                BudgetAllowanceId = budgetAllowance.GetIdentifier(),
+                Amount = 10
+            };
+
+            await handler.Handle(input, CancellationToken.None);
+
+            var verify = CreateDbContext();
+            var persisted = await verify.BudgetAllowances.AsNoTracking()
+                .Where(x => x.Id == budgetAllowance.Id)
+                .Select(x => new { x.AvailableFund, x.OriginalFund })
+                .SingleAsync();
+
+            // Sur données fraîches : 23 disponibles, réduction de 15, donc 8 - le même résultat.
+            // Le remboursement concurrent est conservé au lieu d'être écrasé.
+            persisted.OriginalFund.Should().Be(10);
+            persisted.AvailableFund.Should().Be(8);
+
+            // Et l'engagement audité par VerifyBudgetAllowanceReservations reste positif.
+            persisted.AvailableFund.Should().BeLessThanOrEqualTo(persisted.OriginalFund);
+        }
+
+        [Fact]
+        public async Task ReducingAnEnvelopeWhoseFundsWereReservedConcurrently_IsRefusedRatherThanOverdrawn()
+        {
+            // Le sens qui compte vraiment : un débit concurrent emporte de quoi rendre la réduction
+            // impossible. Le garde initial l'avait autorisée sur 20 disponibles ; il n'en reste que 2.
+            using (var concurrent = CreateDbContext())
+            {
+                var concurrentEnvelope = await concurrent.BudgetAllowances.FindAsync(budgetAllowance.Id);
+                concurrentEnvelope.AvailableFund -= 18;
+                await concurrent.SaveChangesAsync();
+            }
+
+            var input = new EditBudgetAllowance.Input()
+            {
+                BudgetAllowanceId = budgetAllowance.GetIdentifier(),
+                Amount = 10
+            };
+
+            await F(() => handler.Handle(input, CancellationToken.None))
+                .Should().ThrowAsync<BudgetAllowanceInsufficientFundException>();
+
+            // Refusé avant toute mutation : l'enveloppe est exactement dans l'état où le mouvement
+            // concurrent l'a laissée.
+            var verify = CreateDbContext();
+            var persisted = await verify.BudgetAllowances.AsNoTracking()
+                .Where(x => x.Id == budgetAllowance.Id)
+                .Select(x => new { x.AvailableFund, x.OriginalFund })
+                .SingleAsync();
+
+            persisted.AvailableFund.Should().Be(2);
+            persisted.OriginalFund.Should().Be(25);
         }
 
         [Fact]

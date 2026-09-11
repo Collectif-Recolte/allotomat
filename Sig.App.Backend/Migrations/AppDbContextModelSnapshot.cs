@@ -602,6 +602,7 @@ namespace Sig.App.Backend.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("Amount")
+                        .IsConcurrencyToken()
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<long?>("CardId")
@@ -1169,6 +1170,7 @@ namespace Sig.App.Backend.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<decimal>("RefundAmount")
+                        .IsConcurrencyToken()
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -1198,6 +1200,7 @@ namespace Sig.App.Backend.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<decimal>("RefundAmount")
+                        .IsConcurrencyToken()
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -1313,6 +1316,7 @@ namespace Sig.App.Backend.Migrations
                     b.HasBaseType("Sig.App.Backend.DbModel.Entities.Transactions.Transaction");
 
                     b.Property<decimal>("AvailableFund")
+                        .IsConcurrencyToken()
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("ExpirationDate")

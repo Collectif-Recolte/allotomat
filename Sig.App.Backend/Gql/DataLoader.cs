@@ -27,7 +27,9 @@ namespace Sig.App.Backend.Gql
             this.scopeFactory = scopeFactory;
         }
 
-        public IDataLoaderResult<UserGraphType> LoadUser(string id) =>
+        // CRCL-2692: virtual pour que les tests des gardes qui lisent le statut du compte appelant
+        // puissent simuler le chargement sans monter un ServiceProvider complet.
+        public virtual IDataLoaderResult<UserGraphType> LoadUser(string id) =>
             LoadOne<GetUsersByIds.Query, UserGraphType, string>(id);
 
         public IDataLoaderResult<ProjectGraphType> LoadProject(long projectId) =>

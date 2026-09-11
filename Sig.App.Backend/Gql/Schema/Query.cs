@@ -1,4 +1,4 @@
-using GraphQL.Conventions;
+﻿using GraphQL.Conventions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -411,6 +411,10 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
+        // ManageTransactions is the same guard as the transactionLogs field this report exports, and it
+        // is a role-wide permission: it does not verify that the requested projectId belongs to the
+        // caller. Project scoping is enforced on the data, in TransactionLogQueryFilters.
+        [RequirePermission(GlobalPermission.ManageTransactions)]
         public static async Task<string> GenerateTransactionsReport(this GqlQuery _, Id projectId, DateTime startDate, DateTime endDate, Id[] organizations, Id[] subscriptions, bool? withoutSubscription, Id[] categories, Id[] markets, Id[] marketGroups, string[] transactionTypes, string[] giftCardTransactionTypes, string searchText, string timeZoneId, Language language, [Inject] IMediator mediator)
         {
             return await mediator.Send(new GenerateTransactionsReport.Input()
@@ -432,6 +436,9 @@ namespace Sig.App.Backend.Gql.Schema
             });
         }
 
+        // The market id arrives as a scalar argument named "marketId", so the attribute is told where
+        // to find it. ManageMarket verifies the caller manages THIS market.
+        [RequirePermission(MarketPermission.ManageMarket, ArgumentName = "marketId")]
         public static async Task<string> GenerateTransactionsReportForMarket(this GqlQuery _, Id marketId, DateTime startDate, DateTime endDate, string timeZoneId, Language language, [Inject] IMediator mediator)
         {
             return await mediator.Send(new GenerateTransactionsReportForMarket.Input()

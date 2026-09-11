@@ -154,7 +154,7 @@ namespace Sig.App.Backend.Requests.Commands.Mutations.Transactions
                 });
             }
 
-            await db.SaveChangesWithBudgetAllowanceRetryAsync(cancellationToken);
+            await db.SaveChangesWithFundRetryAsync(cancellationToken);
 
             return new Payload()
             {

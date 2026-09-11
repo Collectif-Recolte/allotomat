@@ -45,7 +45,7 @@ namespace Sig.App.Backend.BackgroundJobs
     ///
     /// <b>À lancer après le déploiement de CRCL-2677</b> : sans le correctif, la cause tourne toujours
     /// et rouvrirait l'écart derrière le job. Le crédit lui-même passe par
-    /// <see cref="BudgetAllowanceConcurrencyExtensions.SaveChangesWithBudgetAllowanceRetryAsync"/>,
+    /// <see cref="FundConcurrencyExtensions.SaveChangesWithFundRetryAsync"/>,
     /// comme tout mouvement d'enveloppe depuis CRCL-2677. <c>AvailableFund</c> étant devenu un jeton de
     /// concurrence, un <c>SaveChanges</c> brut ferait avorter le job dès qu'un mouvement ordinaire s'est
     /// glissé entre le chargement de l'enveloppe et l'écriture — sur un job d'argent lancé à la main,
@@ -165,10 +165,21 @@ namespace Sig.App.Backend.BackgroundJobs
                 // Le rebase (voir la note de classe) est ce qui rend cette écriture sûre sous
                 // concurrence : le mouvement voulu est réappliqué sur le solde réellement en base juste
                 // avant l'UPDATE. Une enveloppe qui bouge pendant le run ne fait donc plus ni perdre le
-                // crédit en silence, ni avorter le job.
+                // crédit en silence, ni avorter le job. Écrire tout de suite garde en plus la fenêtre à
+                // une enveloppe au lieu du run entier - le balayage des réservations négatives, qui est
+                // long, se retrouve hors de la fenêtre.
                 if (!dryRun && line.Outcome == Outcome.Credited)
                 {
-                    await db.SaveChangesWithBudgetAllowanceRetryAsync();
+                    await db.SaveChangesWithFundRetryAsync();
+
+                    // Relu après coup : le joint a pu rebaser le crédit sur une valeur en base
+                    // différente de celle qui a servi à décider. Un rapport de réparation doit dire ce
+                    // qui est en base, pas ce qui était prévu.
+                    var envelopeId = line.BudgetAllowanceId.Value;
+                    line.AvailableFundAfter = await db.BudgetAllowances.AsNoTracking()
+                        .Where(x => x.Id == envelopeId)
+                        .Select(x => x.AvailableFund)
+                        .SingleAsync();
                 }
             }
 
@@ -191,7 +202,7 @@ namespace Sig.App.Backend.BackgroundJobs
             // porte le « WHERE AvailableFund = ... » et le rebase n'aurait rien à réappliquer.
             if (!dryRun && negativeReservations.Any(x => x.Normalized))
             {
-                await db.SaveChangesAsync();
+                await db.SaveChangesWithFundRetryAsync();
             }
 
             var report = new Report
@@ -279,6 +290,33 @@ namespace Sig.App.Backend.BackgroundJobs
             line.AvailableFundAfter = envelope.AvailableFund + correction.ExpectedCredit;
 
             if (dryRun) return line;
+
+            // CRCL-2669 - Le plafond est retranché sur la valeur EN BASE, relue ici et pas au début de
+            // la ligne. Le contrôle ci-dessus décide sur ce qu'a lu BuildLineAsync ; le joint, lui,
+            // rejouera le crédit sur la valeur en base et ne refuse jamais un crédit. Sans cette
+            // relecture, un remboursement concurrent arrivé entre la lecture et l'écriture ferait
+            // dépasser OriginalFund exactement l'invariant que le contrôle existe pour tenir, et
+            // l'enveloppe contiendrait plus que ce qui lui a été confié.
+            //
+            // Ça resserre la fenêtre à celle du jeton, ça ne la ferme pas : entre cette relecture et
+            // l'UPDATE, une écriture concurrente lève, et le joint rebase le crédit sans repasser par
+            // ce contrôle. Le rapport le dira (AvailableFundAfter est relu après le save) et le job
+            // est relançable. Un verrou pour fermer ces quelques millisecondes coûterait plus cher
+            // qu'il ne rapporte sur un job en Cron.Never().
+            var persistedAvailableFund = await db.BudgetAllowances.AsNoTracking()
+                .Where(x => x.Id == envelope.Id)
+                .Select(x => x.AvailableFund)
+                .SingleAsync();
+
+            if (persistedAvailableFund + correction.ExpectedCredit > envelope.OriginalFund)
+            {
+                line.Outcome = Outcome.SkippedWouldExceedOriginalFund;
+                line.Note = $"Écarté au moment d'écrire : le disponible en base ({persistedAvailableFund}) " +
+                    $"a changé depuis la lecture ({line.AvailableFundBefore}), et le crédit de " +
+                    $"{correction.ExpectedCredit} dépasserait {envelope.OriginalFund}.";
+                line.AvailableFundAfter = persistedAvailableFund;
+                return line;
+            }
 
             envelope.AvailableFund += correction.ExpectedCredit;
 
